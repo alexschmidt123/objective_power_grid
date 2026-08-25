@@ -58,9 +58,9 @@ def build_sir_context(
     if ensure_bank and not sir_bank_is_complete(data_dir):
         raise FileNotFoundError(
             f"SIR databank missing or incomplete at {data_dir}. "
-            "SIR training/evaluation is databank-only and will not simulate "
-            "trajectories on the fly. Restore the complete databank before "
-            "running the experiment."
+            "Run ./scripts/data_generation.sh --config configs/sir_ode.yaml "
+            "before direct training/evaluation, or use run.sh/sweep_run.sh to "
+            "generate it automatically."
         )
 
     bank = load_sir_bank(data_dir)

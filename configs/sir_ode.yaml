@@ -21,9 +21,9 @@ N: 1
 
 data:
   dataset_dir: data/sir_ode
-  # Experiments are databank-only. Missing files are a hard error; the
-  # train/evaluate pipeline never runs the ODE simulator on the fly.
-  generate_if_missing: false
+  # run.sh/sweep_run.sh call generate-data before training. A fresh clone
+  # therefore builds this deterministic ODE bank once and later runs reuse it.
+  generate_if_missing: true
 
 observation:
   # Scalar infected count I(τ) at the chosen time (not an IEEE trajectory length).

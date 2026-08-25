@@ -344,13 +344,20 @@ def cmd_generate_data(args: argparse.Namespace) -> None:
         print(f"[generate-data] SIR ODE dataset_dir={data_dir}")
         if force:
             raise SystemExit(
-                "SIR experiments are databank-only: --force regeneration is "
-                "disabled. Reuse the existing data/sir_ode bank."
+                "Refusing --force for the SIR ODE bank. Remove the bank "
+                "explicitly only when a full deterministic regeneration is intended."
             )
-        if not sir_bank_is_complete(data_dir):
+        complete = sir_bank_is_complete(data_dir)
+        if not complete and not generate_if_missing_flag(cfg):
             raise SystemExit(
                 f"SIR databank missing or incomplete at {data_dir}. "
-                "The experiment pipeline will not simulate trajectories on the fly."
+                "Set data.generate_if_missing: true in the YAML so generate-data "
+                "can build the deterministic ODE bank."
+            )
+        if not complete:
+            print(
+                f"[generate-data] SIR bank missing or incomplete at {data_dir}; "
+                "generating deterministic ODE trajectories."
             )
         rep = generate_sir_bank(
             cfg, smoke=args.smoke, force=False
