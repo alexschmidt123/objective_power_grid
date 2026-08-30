@@ -1,0 +1,483 @@
+\documentclass[journal]{IEEEtran}
+
+% Overleaf-ready manuscript framework for objective-driven BOED in power grids.
+% Replace every blue [TODO: ...] item before submission.
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{siunitx}
+
+\newcommand{\todo}[1]{\textcolor{blue}{[TODO: #1]}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Dkl}{D_{\mathrm{KL}}}
+\newcommand{\mocu}{\mathrm{MOCU}}
+\newcommand{\ocu}{\mathrm{OCU}}
+
+\title{Objective-Driven Sequential Bayesian Experimental Design\\
+for Safe Learning and Control of Power-Grid Dynamics}
+\author{\todo{Author names and affiliations}%
+\thanks{\todo{Funding, corresponding author, and institutional acknowledgments.}}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Learning uncertain dynamic parameters is important for reliable power-grid
+operation. Existing experimental-design studies commonly maximize information
+gain, although greater parameter information does not necessarily improve a
+downstream control decision. This paper formulates power-grid probing as an
+objective-driven sequential Bayesian experimental-design problem. Each
+experiment selects a disturbance location and duration, observes the resulting
+frequency response, updates uncertainty over machine-specific dynamic
+parameters, and chooses a safety-aware control action. Expected information
+gain (EIG) and mean objective cost of uncertainty (MOCU) are studied as distinct
+design objectives. Fixed, random, myopic, deep adaptive design (DAD),
+reinforcement-learning sequential Bayesian optimal experimental design
+(RL-sBOED), and Step-DAD policies are evaluated under a common held-out
+protocol. A nonlinear susceptible--infected--recovered (SIR) model is used to
+validate the BOED implementations, while IEEE 9-bus and IEEE 14-bus systems
+evaluate control-oriented design, adaptivity, non-myopic planning, safety, and
+computational cost. \todo{Insert final quantitative results after all seeds and
+validity checks are complete.} The results establish \todo{insert the final
+evidence-supported practical conclusion}.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Bayesian experimental design, power-system dynamics, adaptive experiment
+design, mean objective cost of uncertainty, information gain, safe control.
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:introduction}
+\IEEEPARstart{I}{ncreasing} penetration of inverter-based resources makes
+power-system dynamic parameters more uncertain and potentially time varying.
+Reliable estimates of inertia, damping, and related dynamic quantities are
+important for frequency-security assessment and control selection.
+\todo{Add citations on low-inertia grids and dynamic-parameter uncertainty.}
+
+Active probing provides an opportunity to learn these quantities by applying a
+controlled disturbance and measuring the resulting frequency response. Such an
+experiment raises several design questions: where should the disturbance be
+applied, how long should it last, and should later experiments depend on earlier
+observations? A fixed sequence cannot respond to the realized system, whereas
+an adaptive policy can use the accumulating observation history.
+
+Most Bayesian experimental-design formulations value an experiment through
+expected information gain. EIG is appropriate for parameter identification,
+but information that reduces total parameter uncertainty is not necessarily
+the information most relevant to a downstream control decision. Different
+parameter values can imply the same control action, while small uncertainty in
+a decision-sensitive direction can materially change the required safe
+control. This distinction motivates objective-driven experimental design.
+
+This work formulates power-grid probing as a sequential Bayesian experimental-
+design problem over discrete disturbance buses and durations. In addition to
+EIG, we consider a safety-aware MOCU objective that values an experiment by the
+expected reduction in the opportunity cost of the final control decision. The
+framework therefore connects physical probing, Bayesian posterior inference,
+and operational control within one evaluation protocol.
+
+The main contributions are as follows:
+\begin{itemize}
+    \item We formulate power-grid dynamic probing as sequential BOED over
+    disturbance locations and durations.
+    \item We define a control-oriented design objective based on safety-aware
+    MOCU, connecting observations to a downstream safe control decision.
+    \item We adapt and compare random, fixed, myopic, DAD, RL-sBOED, and
+    Step-DAD under common banks, posterior inference, held-out systems, and
+    evaluation noise.
+    \item We investigate objective choice, adaptivity, non-myopic behavior,
+    safety, horizon, observation noise, computational cost, and scalability on
+    an SIR benchmark and IEEE power-grid systems.
+\end{itemize}
+\todo{Add a one-paragraph roadmap after the manuscript sections stabilize.}
+
+\section{Related Work}
+\label{sec:related}
+\subsection{Bayesian Experimental Design}
+Introduce Bayesian optimal experimental design, expected utility, posterior
+inference, and EIG. Explain single-stage versus sequential design.
+\todo{Add foundational BOED and EIG citations.}
+
+\subsection{Adaptive and Non-Myopic BOED}
+Discuss fixed/open-loop, myopic, and non-myopic policies. Introduce DAD as a
+fully amortized policy, RL-sBOED as a stepwise reinforcement-learning approach,
+and Step-DAD as semi-amortized online refinement initialized from DAD.
+\todo{Cite the original papers and state precisely which parts are adapted.}
+
+\subsection{Objective-Driven Design and MOCU}
+Explain why task-specific uncertainty can be more useful than global parameter
+uncertainty. Review MOCU and related goal-oriented design criteria.
+\todo{Add MOCU and objective-driven BOED citations.}
+
+\subsection{Power-Grid Identification and Active Probing}
+Review dynamic-parameter estimation, active probing, perturbation placement,
+PMU measurements, Bayesian uncertainty, and safe frequency control. End by
+identifying the gap addressed here: adaptive and non-myopic, control-oriented
+BOED over discrete bus-duration actions.
+
+\section{Problem Formulation}
+\label{sec:problem}
+\subsection{Power-System Dynamics and Uncertainty}
+For each retained dynamic machine $i$, consider
+\begin{align}
+    \dot{\delta}_i(t) &= \omega_i(t), \\
+    M_i\dot{\omega}_i(t)
+    &= P_{m,i}-P_{e,i}(\boldsymbol{\delta}(t))
+       -K_i\omega_i(t)+p_i(t;d).
+\end{align}
+Here, $\delta_i$ and $\omega_i$ are rotor-angle and frequency deviations,
+$M_i$ is inertia, $K_i$ is a machine-specific damping or response coefficient,
+and $p_i(t;d)$ is the designed probe. Define
+\begin{equation}
+    \boldsymbol{\theta}=(M_1,\ldots,M_G,K_1,\ldots,K_G).
+\end{equation}
+For IEEE14, dynamic machines are retained only at buses 1, 2, 3, 6, and 8;
+therefore, the uncertain vector is 10-dimensional. Non-dynamic buses are not
+assigned artificial $M_i$ or $K_i$. \todo{State and justify all prior ranges.}
+
+\subsection{Experimental Action Space}
+At step $t$,
+\begin{equation}
+    d_t=(b_t,\tau_t)\in\mathcal D,
+\end{equation}
+where $b_t$ is the disturbance bus and $\tau_t$ is its duration. With six
+durations and $B$ buses, $|\mathcal D|=6B$. IEEE9 therefore has 54 actions and
+IEEE14 has 84. \todo{List the frozen, independently audited duration sets.}
+
+\subsection{Observation and Posterior Update}
+\begin{equation}
+    \mathbf y_t=h(\boldsymbol{\theta},d_t)+\boldsymbol{\epsilon}_t,
+    \qquad \boldsymbol{\epsilon}_t\sim
+    \mathcal N(\mathbf 0,\sigma^2\mathbf I).
+\end{equation}
+The main power-grid protocol retains $N_{\mathrm{obs}}=5$ evenly spaced
+frequency-response samples. Define
+\begin{equation}
+    h_t=\{(d_1,\mathbf y_1),\ldots,(d_t,\mathbf y_t)\}.
+\end{equation}
+Then
+\begin{equation}
+    p(\boldsymbol{\theta}\mid h_t)\propto
+    p(\mathbf y_t\mid\boldsymbol{\theta},d_t)
+    p(\boldsymbol{\theta}\mid h_{t-1}).
+\end{equation}
+
+\subsection{Sequential Design Policy}
+\begin{equation}
+    d_t=\pi_t(h_{t-1}),\qquad t=1,\ldots,T.
+\end{equation}
+A policy is adaptive if later actions vary with observations. It is non-myopic
+if it accounts for effects on multiple future decisions rather than optimizing
+only the next immediate gain.
+
+\section{Design Objectives}
+\label{sec:objectives}
+\subsection{Expected Information Gain}
+\begin{equation}
+\operatorname{EIG}(d\mid h)=\E_{\mathbf y\mid d,h}
+\left[\Dkl\!\left(p(\boldsymbol{\theta}\mid h,d,\mathbf y)
+\,\|\,p(\boldsymbol{\theta}\mid h)\right)\right].
+\end{equation}
+EIG values parameter learning and does not directly encode the final control
+decision. Higher EIG is better.
+
+\subsection{Safety-Aware Control Decision}
+Let $u\in\mathcal U$ denote a control magnitude and
+$C(u,\boldsymbol{\theta})$ its safety-aware cost. Define
+\begin{align}
+u^*(\boldsymbol{\theta})
+&=\arg\min_{u\in\mathcal U}C(u,\boldsymbol{\theta}),\\
+u^*(h_t)
+&=\arg\min_{u\in\mathcal U}\E_{\boldsymbol{\theta}\mid h_t}
+[C(u,\boldsymbol{\theta})].
+\end{align}
+\todo{State the frequency-security constraint, control grid, safety quantile,
+and penalties exactly as implemented.}
+
+\subsection{MOCU Objective}
+\begin{align}
+\ocu(\boldsymbol{\theta},h_t)
+&=C(u^*(h_t),\boldsymbol{\theta})
+-C(u^*(\boldsymbol{\theta}),\boldsymbol{\theta}),\\
+\mocu(h_t)
+&=\E_{\boldsymbol{\theta}\mid h_t}
+[\ocu(\boldsymbol{\theta},h_t)].
+\end{align}
+Lower MOCU is better. MOCU equal to zero means posterior uncertainty creates no
+regret relative to the clairvoyant control. The central objective is
+\begin{equation}
+\pi^*=\arg\min_{\pi}\E_{\pi}[\mocu(h_T)].
+\label{eq:main-objective}
+\end{equation}
+
+\section{Compared Design Methods}
+\label{sec:methods}
+\begin{table}[t]
+\caption{Roles of Compared Methods}
+\label{tab:methods}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Method & Adaptive & Non-myopic & Learned \\
+\midrule
+Random & No & No & No \\
+Fixed & No & Open-loop & No \\
+Myopic & Yes & No & No \\
+DAD & Yes & Yes & Yes \\
+RL-sBOED & Yes & Yes & Yes \\
+Step-DAD & Yes & Yes & DAD + refine \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Random Design}
+Random selects feasible actions without using the history and is averaged over
+repeated random sequences.
+
+\subsection{Fixed Open-Loop Design}
+Fixed chooses the complete sequence before observing data,
+\begin{equation}
+d_{1:T}^{\mathrm{fixed}}=\arg\min_{d_{1:T}}\E[\mocu(h_T)].
+\end{equation}
+The same sequence is used for every system. Observations update the posterior
+and final control but cannot alter later experiments. ``Fixed MOCU'' is the
+same terminal metric achieved by the fixed policy, not a separate objective.
+
+\subsection{Myopic Design}
+Myopic recomputes the best immediate action after each observation but does not
+explicitly value later design opportunities.
+
+\subsection{Deep Adaptive Design}
+DAD trains a history-conditioned policy offline, making online selection fast.
+\todo{Describe policy inputs, architecture, estimator, training objective, and
+fidelity to the original paper.}
+
+\subsection{RL-sBOED}
+RL-sBOED trains a history-conditioned sequential policy with stepwise rewards.
+\todo{Describe the telescoping reward, optimizer, and discrete-action changes.}
+
+\subsection{Step-DAD}
+Step-DAD initializes from DAD and performs limited history-specific online
+refinement. It trades online time for a possible reduction in DAD's amortization
+gap. Report DAD offline training, refinement, and total cost separately.
+\todo{Include only after matched experiments pass validation.}
+
+\section{Experimental Protocol}
+\label{sec:protocol}
+\subsection{SIR ODE Benchmark}
+The nonlinear SIR benchmark validates the EIG implementation in a simpler
+setting. Its action is an observation time and its scalar response is infected
+population $I(t)$. SIR is a validation benchmark, not the application novelty.
+
+\subsection{IEEE Test Systems}
+\begin{table*}[t]
+\caption{System and Experimental-Design Configuration}
+\label{tab:systems}
+\centering
+\begin{tabular}{lcccccc}
+\toprule
+System & Physical buses & Dynamic buses & Latent dim. & Actions & $N_{\mathrm{obs}}$ & $\sigma$ \\
+\midrule
+SIR ODE & -- & -- & \todo{2} & \todo{100 times} & 1 & \todo{value} \\
+IEEE9 & 9 & 3 & 6 & 54 & 5 & 0.005 \\
+IEEE14 & 14 & 5 & 10 & 84 & 5 & 0.005 \\
+IEEE30 & 30 & \todo{} & \todo{} & \todo{} & 5 & 0.005 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Method-Independent Duration Audit}
+Before training, duration subsets are screened for positive adaptive and
+non-myopic value, at least two meaningful duration branches, and limited branch
+dominance. The audit must use exactly the same MOCU, safety quantile, control
+grid, observation count, and noise as training and evaluation. Durations are
+not selected to make a particular method win.
+
+\subsection{Training and Held-Out Evaluation}
+Use training seeds 101, 202, and 303. All methods share the physical bank, prior
+support, held-out systems, observation-noise seed, and terminal metric. Learned
+policies use deterministic argmax actions during evaluation. A method is valid
+only if held-out safety meets the frozen threshold. \todo{State held-out sample
+count, replicates, hardware, software, and stopping rules.}
+
+\section{Results}
+\label{sec:results}
+\subsection{Implementation Validation on SIR}
+\todo{Insert SIR EIG-versus-horizon results with mean, standard deviation,
+paired comparisons, adaptive sequences, and runtime.}
+
+\subsection{Effect of Objective Choice on IEEE9}
+\todo{Compare EIG-driven and MOCU-driven experiments. Explain whether greater
+EIG implies lower downstream MOCU.}
+
+\subsection{Adaptive and Non-Myopic Performance}
+Table~\ref{tab:mocu-main} is the primary table. Report mean and sample standard
+deviation over three independent training seeds. Lower values are better. Do
+not bold values until safety and statistical checks are complete.
+
+\begin{table*}[t]
+\caption{Terminal Safety-Aware MOCU (Mean $\pm$ Standard Deviation)}
+\label{tab:mocu-main}
+\centering
+\begin{tabular}{lccccc}
+\toprule
+Method & $T=3$ & $T=4$ & $T=5$ & $T=6$ & $T=7$ \\
+\midrule
+Random & \todo{} & \todo{} & \todo{} & \todo{} & \todo{} \\
+Fixed & \todo{} & \todo{} & \todo{} & \todo{} & \todo{} \\
+Myopic & \todo{} & \todo{} & \todo{} & \todo{} & \todo{} \\
+DAD & \todo{} & \todo{} & \todo{} & \todo{} & \todo{} \\
+RL-sBOED & \todo{} & \todo{} & \todo{} & \todo{} & \todo{} \\
+Step-DAD & \todo{optional} & \todo{optional} & \todo{optional} & \todo{optional} & \todo{optional} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Adaptivity Diagnostics}
+Report unique sequences, sequence entropy, meaningful posterior-dependent
+branches, and dominant branch share. A nominally adaptive policy producing one
+sequence is operationally open-loop and is not evidence of adaptation.
+
+\begin{table}[t]
+\caption{Adaptivity Diagnostics at a Representative Horizon}
+\label{tab:adaptivity}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Method & Unique seq. & Seq. entropy & Dominant share \\
+\midrule
+Fixed & 1 & 0 & 1.00 \\
+Myopic & \todo{} & \todo{} & \todo{} \\
+DAD & \todo{} & \todo{} & \todo{} \\
+RL-sBOED & \todo{} & \todo{} & \todo{} \\
+Step-DAD & \todo{} & \todo{} & \todo{} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Safety and Control Performance}
+Report mean MOCU, mean selected control, under-control frequency, and safety
+rate. Methods below the safety threshold receive no rank.
+
+\subsection{Computational Cost}
+Separate bank generation, offline training, and online action selection. For
+Step-DAD, also report posterior fitting and policy refinement.
+
+\begin{table}[t]
+\caption{Computational-Cost Template}
+\label{tab:runtime}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Method & Offline train & Online/action & Deployment total \\
+\midrule
+Fixed & \todo{} & \todo{} & \todo{} \\
+Myopic & -- & \todo{} & \todo{} \\
+DAD & \todo{} & \todo{} & \todo{} \\
+RL-sBOED & \todo{} & \todo{} & \todo{} \\
+Step-DAD & \todo{DAD} & \todo{refine} & \todo{} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Scalability}
+Compare IEEE9, IEEE14, and, if completed, IEEE30 using latent dimension, action
+count, bank size, training and online time, safety, and terminal MOCU.
+
+\subsection{Robustness and Ablations}
+Use a prespecified study of observation noise or observation count. Avoid
+changing multiple factors simultaneously. \todo{Specify the frozen matrix.}
+
+\section{Statistical Analysis}
+\label{sec:statistics}
+For $S=3$ training seeds, report
+\begin{align}
+\bar{x}&=\frac{1}{S}\sum_{s=1}^{S}x_s,\\
+s_x&=\sqrt{\frac{1}{S-1}\sum_{s=1}^{S}(x_s-\bar{x})^2}.
+\end{align}
+On common held-out systems, compute paired differences
+\begin{equation}
+\Delta_i=\mocu_{A,i}-\mocu_{B,i}.
+\end{equation}
+For MOCU, $\Delta_i<0$ favors $A$. Report the paired mean, 95\% confidence
+interval, and win fraction. Separate training-seed variability from held-out
+system variability. Use ``statistically significant'' only after a defined
+test.
+
+\section{Discussion}
+\label{sec:discussion}
+Organize the discussion around these questions:
+\begin{enumerate}
+    \item When does observation-dependent adaptation improve control?
+    \item When is a strong fixed design competitive?
+    \item When does non-myopic planning outperform myopic selection?
+    \item Does EIG improvement translate to lower MOCU?
+    \item Does increasing $T$ cause information or decision saturation?
+    \item Is extra online computation justified by improvement?
+    \item How do action count and latent dimension affect scalability?
+\end{enumerate}
+A negative result is informative. For example, a competitive fixed design can
+indicate limited posterior-dependent decision branching.
+
+\section{Limitations and Future Work}
+\label{sec:limitations}
+The study uses simulated IEEE systems, prescribed priors, Gaussian noise, fixed
+probe amplitude, discrete actions, and a simplified downstream control. Three
+training seeds provide a limited estimate of optimizer variability. Future work
+should consider larger systems, correlated and time-varying priors, multiple
+amplitudes, PMU channel selection, higher-fidelity constraints, and real or
+hardware-in-the-loop validation.
+
+\section{Conclusion}
+\label{sec:conclusion}
+This paper formulated power-grid probing as objective-driven sequential BOED
+over disturbance buses and durations. The framework connected Bayesian
+learning to safety-aware control through terminal MOCU and compared fixed,
+myopic, adaptive, and non-myopic policies under a common protocol.
+\todo{Insert only final three-seed findings, including cases where fixed or
+myopic remained competitive.} These findings clarify \todo{state when adaptive
+objective-driven probing is practically worthwhile}.
+
+\appendices
+\section{Reproducibility Checklist}
+\begin{itemize}
+    \item Frozen YAML configuration for every reported experiment.
+    \item Physical-bank and control-bank hashes.
+    \item Train, validation, test, and evaluation-noise seeds.
+    \item Duration-audit settings and gates.
+    \item Policy architecture and optimizer settings.
+    \item Hardware and software versions.
+    \item Per-seed summaries and paired held-out rollouts.
+    \item Exact commands for every table and figure.
+\end{itemize}
+
+\section{Suggested Figure Plan}
+\begin{enumerate}
+    \item Prior $\rightarrow$ probe $\rightarrow$ observation $\rightarrow$
+    posterior $\rightarrow$ control workflow.
+    \item IEEE bus-duration action-space illustration.
+    \item EIG versus horizon on SIR and IEEE9.
+    \item MOCU versus horizon on IEEE9 and IEEE14.
+    \item Safety rate versus horizon.
+    \item Observation-conditioned branching examples.
+    \item Offline and online runtime comparison.
+    \item Performance and cost versus system size.
+\end{enumerate}
+
+\section*{Acknowledgment}
+\todo{Add funding, computing resources, and individual contributions.}
+
+% Replace this placeholder with a verified references.bib before submission.
+\begin{thebibliography}{1}
+\bibitem{placeholder}
+\todo{Add verified references for BOED, DAD, RL-sBOED, Step-DAD, MOCU,
+power-grid probing, and dynamic-parameter estimation.}
+\end{thebibliography}
+
+\end{document}

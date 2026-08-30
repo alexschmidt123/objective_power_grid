@@ -1,20 +1,26 @@
-# IEEE14 objective sBOED (publication defaults).
+# IEEE14 vector-EIG sBOED configuration.
 # Topology: MATPOWER case14 / UW PSTCA IEEE 14-bus (20 branches).
-#   bash run.sh --config configs/ieee14.yaml --experiment_type objective_based --force
+#   bash run.sh --config configs/ieee14_eig.yaml --experiment_type eig_based
 
 system:
   name: ieee14
 
+# Five retained dynamic machines; the physical network still has 14 buses.
 N: 5
 
 data:
-  dataset_dir: data/ieee14
+  dataset_dir: data/ieee14_eig
+  # run.sh and sweep_run.sh reuse this bank when complete and generate it when absent.
   generate_if_missing: true
 
 observation:
-  # Manuscript: scalar max-|ROCOF| (uses max_abs_rocof_*.npy)
-  N_obs: 0
   sampling: uniform
+  objective_based:
+    N_obs: 0
+    noise_sigma: 0.005
+  eig_based:
+    N_obs: 5
+    noise_sigma: 0.01
 
 oracle:
   tolerance: 1.0e-4
@@ -30,9 +36,14 @@ swing_equation:
   coupling_strength: 1.0
   damping: 0.0
   base_power: 1.0
+  # theta=(M1,M2,M3,M6,M8,K1,K2,K3,K6,K8); all ten coordinates
+  # are sampled independently. Nominal M=(2H)/(2*pi*60), using the
+  # IEEE14 dynamic-machine 2H values [8,13,10,10,10] s, with +/-30% bounds.
   latent_model: machinewise_mk
   M_lower_nodes: [0.014854460, 0.024138498, 0.018568076, 0.018568076, 0.018568076]
   M_upper_nodes: [0.027586856, 0.044828642, 0.034483236, 0.034483236, 0.034483236]
+  # Independent machine-specific K coordinates (same uninformative support;
+  # there is no shared/global K parameter).
   K_lower_nodes: [0.05, 0.05, 0.05, 0.05, 0.05]
   K_upper_nodes: [0.50, 0.50, 0.50, 0.50, 0.50]
   use_node_specific_damping: true
@@ -43,6 +54,7 @@ swing_equation:
   # Derive the effective baseline injection from B and theta0 so every reset
   # probe starts at an exact equilibrium of the reduced lossless model.
   enforce_initial_equilibrium: true
+  # Six durations x all 14 physical locations = 84 one-step designs.
   probe_buses: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
   probe_amplitudes: [0.05]
   probe_durations: [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
@@ -60,7 +72,13 @@ prior:
 experiment:
   # Horizon T is set by CLI ``--T`` (run.sh default 5). This field is a fallback only.
   step_number: 5
-  methods: [dad, rl_sboed, myopic, fixed, random]
+  methods: [dad, rl_sboed, moe_sboed, myopic, fixed, random]
+  experiment_type: eig_based
+
+evaluation:
+  eig_test_systems: 128
+  eig_fixed_calibration_seed: 104729
+  eig_random_replicates: 32
 
 control:
   # Fixed across every horizon: 99% posterior safety target.  Evaluation still
@@ -102,6 +120,7 @@ bank_quality:
 
 training:
   device: auto
+  policy_hidden: 256
   # Nested so MOCU knobs never collide with an eig_based block if one is added.
   objective_based:
     updates: 1000
@@ -141,6 +160,30 @@ training:
     moe_low_ess_threshold: 0.4
     moe_residual_scale_coefficient: 0.01
     moe_logit_scale_target: 3.5
+  eig_based:
+    eig_epochs: 200
+    eig_steps_per_epoch: 512
+    batch_size: 256
+    learning_rate: 0.0003
+    entropy_coef: 0.05
+    eig_validation_systems: 128
+    eig_bc_trajectories: 96
+    eig_bc_lookahead: two_step
+    eig_bc_temperature: 0.5
+    eig_bc_fantasies: 12
+    eig_rl_use_ppo: true
+    eig_moe_ppo_epochs: 4
+    eig_moe_ppo_clip: 0.2
+    eig_moe_critic_lr: 0.001
+    eig_moe_cf_coefficient: 0.0
+    eig_moe_cf_anneal_fraction: 0.0
+    eig_moe_cf_floor_fraction: 0.0
+    eig_moe_cf_rollouts_per_batch: 0
+    eig_moe_freeze_base_after_bc: false
+    eig_moe_leave_base_coefficient: 0.0
+    eig_moe_leave_base_margin: 0.5
+    eig_moe_branching_coefficient: 0.15
+    eig_moe_low_ess_residual_coefficient: 0.10
 
 control_safety_calibration:
   # Do not recalibrate by T: that changes the definition of u_ctrl and makes

@@ -242,9 +242,9 @@ for cfg in "${CFG_ARR[@]}"; do
        for NOISE_SIGMA in "${SIGMA_ARR[@]}"; do
         for SEED in "${SEED_ARR[@]}"; do
         extra=()
-        # Only forward explicit --force. Do not infer a missing bank from
-        # data/<yaml-stem>: IEEE-9 lives at data/ieee9_duration_bus, and
-        # generate-data refuses --force on existing physical banks.
+        # run.sh checks the YAML dataset_dir for every cell. The first cell
+        # generates a missing bank when generate_if_missing=true; later cells
+        # reuse it. Only forward an explicit --force request.
         if [[ -n "$FORCE" ]]; then
             extra=(--force)
         fi

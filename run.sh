@@ -316,6 +316,9 @@ fi
 # resume at a stale offset and execute `--N_obs` as a command.
 run_pipeline() {
     local cmd=()
+    # This step is intentionally unconditional: generate-data validates and
+    # reuses a complete bank, or creates it when data.generate_if_missing=true.
+    # Therefore a fresh checkout needs no separate bank-generation command.
     cmd=(
         ./scripts/data_generation.sh --config "$CONFIG"
         "${TYPE_ARGS[@]}" "${T_ARGS[@]}" "${OBS_ARGS[@]}" "${EXP_ARGS[@]}"

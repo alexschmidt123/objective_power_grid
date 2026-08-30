@@ -95,6 +95,21 @@ def generate_ieee14_coupling_matrix(coupling_strength: float = 1.0) -> np.ndarra
     return coupling_strength * coupling
 
 
+def ieee14_physical_input_map() -> np.ndarray:
+    """Map injections at physical buses 1..14 onto machines 1,2,3,6,8."""
+    branches = [
+        (0, 1, .05917), (0, 4, .22304), (1, 2, .19797),
+        (1, 3, .17632), (1, 4, .17388), (2, 3, .17103),
+        (3, 4, .04211), (3, 6, .20912), (3, 8, .55618),
+        (4, 5, .25202), (5, 10, .19890), (5, 11, .25581),
+        (5, 12, .13027), (6, 7, .17615), (6, 8, .11001),
+        (8, 9, .08450), (8, 13, .27038), (9, 10, .19207),
+        (11, 12, .19988), (12, 13, .34802),
+    ]
+    _, input_map = _kron_reduction(14, branches, [0, 1, 2, 5, 7])
+    return input_map
+
+
 def generate_ieee9_coupling_matrix(coupling_strength: float = 1.0) -> np.ndarray:
     """WSCC-9 lossless network reduced to generator/IBR buses 1, 2, 3."""
     branches = [
@@ -589,13 +604,18 @@ def _build_system_params(config_swing: dict[str, Any] | None = None) -> dict[str
         cfg.get("enforce_initial_equilibrium", False)
     )
     topology = str(cfg.get("topology", ""))
-    if topology == "ieee9":
-        params["physical_input_map"] = ieee9_physical_input_map()
+    if topology in {"ieee9", "ieee14"}:
+        if topology == "ieee9":
+            params["physical_input_map"] = ieee9_physical_input_map()
+            retained = [1, 2, 3]
+        else:
+            params["physical_input_map"] = ieee14_physical_input_map()
+            retained = [1, 2, 3, 6, 8]
         physical_obs = int(cfg.get("observation_bus", 1))
-        retained = [1, 2, 3]
         if physical_obs not in retained:
             raise ValueError(
-                "IEEE9 observation_bus must be a dynamic PMU bus in [1,2,3]"
+                f"{topology.upper()} observation_bus must be a retained dynamic "
+                f"PMU bus in {retained}"
             )
         params["observation_bus_reduced"] = retained.index(physical_obs)
     else:

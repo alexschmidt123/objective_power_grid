@@ -428,6 +428,180 @@ def generate_if_missing_flag(cfg: SBOEDConfig) -> bool:
     return bool(data_sec.get("generate_if_missing", False))
 
 
+def configured_reuse_bank_dir(
+    cfg: SBOEDConfig, project_root: Path | None = None
+) -> Path | None:
+    """Return an explicitly configured compatible superset-bank path."""
+    raw = dict(cfg.raw.get("data") or {}).get("reuse_bank_dir")
+    if raw is None or not str(raw).strip():
+        return None
+    path = Path(str(raw))
+    if not path.is_absolute():
+        path = (project_root or repo_root()) / path
+    return path.resolve()
+
+
+def _design_key(row: Any) -> tuple[float, int, float]:
+    values = list(row)
+    if len(values) != 3:
+        raise ValueError(f"invalid catalog design row: {row!r}")
+    return (round(float(values[0]), 10), int(values[1]), round(float(values[2]), 10))
+
+
+def _copy_action_subset_array(
+    source: Path, target: Path, action_ids: np.ndarray, *, chunk_theta: int = 16
+) -> list[int]:
+    src = np.load(source, mmap_mode="r")
+    if src.ndim != 3:
+        raise ValueError(f"expected theta x action x time array at {source}, got {src.shape}")
+    out = np.lib.format.open_memmap(
+        target,
+        mode="w+",
+        dtype=src.dtype,
+        shape=(src.shape[0], len(action_ids), src.shape[2]),
+    )
+    for start in range(0, src.shape[0], int(chunk_theta)):
+        stop = min(start + int(chunk_theta), src.shape[0])
+        # Slice theta first so NumPy preserves theta x selected-action x time.
+        out[start:stop] = np.asarray(src[start:stop])[:, action_ids, :]
+    out.flush()
+    return [int(src.shape[0]), int(len(action_ids)), int(src.shape[2])]
+
+
+def materialize_bank_subset_from_reuse_source(
+    cfg: SBOEDConfig,
+    *,
+    project_root: Path | None = None,
+) -> dict[str, Any] | None:
+    """Create the configured target bank by selecting actions from a superset bank.
+
+    This path performs no physical simulation. It is deliberately opt-in through
+    ``data.reuse_bank_dir`` so banks from different physics cannot be selected by
+    an unsafe directory-name guess.
+    """
+    root = project_root or repo_root()
+    source = configured_reuse_bank_dir(cfg, root)
+    if source is None:
+        return None
+    target = resolve_dataset_dir(cfg, root)
+    if source == target:
+        return None
+    if not bank_is_complete(source):
+        raise RuntimeError(f"Configured reuse bank is incomplete: {source}")
+    if target.exists() and any(target.rglob("*")):
+        raise RuntimeError(
+            f"Cannot materialize subset into non-empty target {target}. "
+            "Choose a new data.dataset_dir or clear the incomplete target explicitly."
+        )
+
+    source_catalog_path = source / "meta" / "catalog.json"
+    source_doc = json.loads(source_catalog_path.read_text(encoding="utf-8"))
+    source_designs = list(source_doc.get("designs") or [])
+    source_lookup = {_design_key(row): i for i, row in enumerate(source_designs)}
+    requested_designs = [list(design.as_tuple()) for design in build_catalog(cfg)]
+    missing = [row for row in requested_designs if _design_key(row) not in source_lookup]
+    if missing:
+        raise RuntimeError(
+            f"Reuse bank {source} does not contain {len(missing)} requested actions; "
+            f"first missing={missing[0]!r}"
+        )
+    action_ids = np.asarray(
+        [source_lookup[_design_key(row)] for row in requested_designs], dtype=np.int64
+    )
+    if len(np.unique(action_ids)) != len(action_ids):
+        raise RuntimeError("Requested subset maps multiple actions to one source column")
+
+    source_meta = yaml.safe_load(
+        (source / "meta" / "bank.yaml").read_text(encoding="utf-8")
+    ) or {}
+    if str(source_meta.get("system")) != system_name_from_cfg(cfg):
+        raise RuntimeError(
+            f"Reuse bank system={source_meta.get('system')!r} does not match "
+            f"config system={system_name_from_cfg(cfg)!r}"
+        )
+    expected_counts = {
+        "train": int(cfg.theta_sample_size("train")),
+        "test": int(cfg.theta_sample_size("test")),
+    }
+    for split, expected in expected_counts.items():
+        theta = np.load(source / split / "theta_M.npy", mmap_mode="r")
+        if int(theta.shape[0]) != expected:
+            raise RuntimeError(
+                f"Reuse bank {split} theta count {theta.shape[0]} != expected {expected}"
+            )
+
+    started = time.time()
+    (target / "meta").mkdir(parents=True, exist_ok=False)
+    (target / "train").mkdir()
+    (target / "test").mkdir()
+    shapes: dict[str, list[int]] = {}
+    try:
+        for split in ("train", "test"):
+            shapes[split] = _copy_action_subset_array(
+                source / split / "delta_f.npy",
+                target / split / "delta_f.npy",
+                action_ids,
+            )
+            rocof = np.load(source / split / "max_rocof.npy", mmap_mode="r")
+            np.save(target / split / "max_rocof.npy", np.asarray(rocof[:, action_ids]))
+            for name in ("theta_M.npy", "theta_K.npy", PSI_STAR_NAME):
+                shutil.copy2(source / split / name, target / split / name)
+        target_catalog = dict(source_doc)
+        target_catalog.update(
+            {
+                "designs": requested_designs,
+                "n_actions": len(requested_designs),
+                "amplitudes": sorted({float(row[0]) for row in requested_designs}),
+                "buses": sorted({int(row[1]) for row in requested_designs}),
+                "durations_s": sorted({float(row[2]) for row in requested_designs}),
+                "subset_of": str(source.relative_to(root)),
+                "source_action_ids": action_ids.tolist(),
+            }
+        )
+        (target / "meta" / "catalog.json").write_text(
+            json.dumps(target_catalog, indent=2) + "\n", encoding="utf-8"
+        )
+        target_meta = dict(source_meta)
+        target_meta.update(
+            {
+                "dataset_name": target.name,
+                "n_actions": len(requested_designs),
+                "observation_shape": shapes["train"],
+                "bank_shape_train": shapes["train"],
+                "bank_shape_test": shapes["test"],
+                "subset_of": str(source.relative_to(root)),
+                "source_action_ids": action_ids.tolist(),
+                "subset_created_at_utc": datetime.now(timezone.utc).isoformat(),
+                "subset_elapsed_seconds": float(time.time() - started),
+                "data_complete": True,
+            }
+        )
+        write_bank_yaml(target, target_meta)
+    except Exception:
+        clear_physical_bank(target)
+        raise
+    elapsed = float(time.time() - started)
+    print(
+        f"Reused larger physical bank → {source}\n"
+        f"  selected {len(action_ids)}/{len(source_designs)} actions into {target} "
+        f"without CUDA simulation ({elapsed:.1f}s)"
+    )
+    return {
+        "data_dir": str(target),
+        "path": str(target),
+        "reused": True,
+        "reused_from": str(source),
+        "subset_action_ids": action_ids.tolist(),
+        "n_actions": len(action_ids),
+        "train_theta_count": shapes["train"][0],
+        "test_theta_count": shapes["test"][0],
+        "bank_shape_train": shapes["train"],
+        "bank_shape_test": shapes["test"],
+        "N_sim": shapes["train"][2],
+        "elapsed_seconds": elapsed,
+    }
+
+
 def generate_full_delta_f_bank(
     system: str,
     *,
@@ -481,6 +655,14 @@ def generate_physical_bank(
             "smoke_requested": bool(smoke),
             "bank_quality": quality,
         }
+
+    subset_rep = materialize_bank_subset_from_reuse_source(
+        cfg, project_root=root
+    )
+    if subset_rep is not None:
+        quality = validate_physical_bank_quality(path, cfg, smoke=smoke)
+        subset_rep["bank_quality"] = quality
+        return subset_rep
 
     from src.banks.control_u import generate_control_bank_for_split
     from src.control.cuda_control import CudaControlEngine

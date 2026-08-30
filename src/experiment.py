@@ -212,6 +212,7 @@ def _run_record_extra(
 
 
 VECTOR_EIG_METHOD_MAP = {
+    "step_dad": "step_dad",
     "dad": "dad_eig",
     "rl_sboed": "rl_sboed_eig",
     "moe_sboed": "moe_sboed",
@@ -417,10 +418,19 @@ def cmd_generate_data(args: argparse.Namespace) -> None:
                     "backfilling under {data_dir}."
                 )
         elif generate_if_missing_flag(cfg):
-            print(
-                f"[generate-data] bank missing or incomplete at {data_dir}; "
-                "running CUDA generation (this can take a long time)."
-            )
+            from src.banks.power_grid import configured_reuse_bank_dir
+
+            reuse_source = configured_reuse_bank_dir(cfg)
+            if reuse_source is not None:
+                print(
+                    f"[generate-data] target bank missing at {data_dir}; "
+                    f"selecting configured actions from larger bank {reuse_source}."
+                )
+            else:
+                print(
+                    f"[generate-data] bank missing or incomplete at {data_dir}; "
+                    "running CUDA generation (this can take a long time)."
+                )
         else:
             raise SystemExit(
                 f"Physical databank missing or incomplete at {data_dir}. "
@@ -883,10 +893,10 @@ def cmd_step_dad(args: argparse.Namespace) -> None:
             refinement_steps=int(args.refinement_steps),
             fantasy_rollouts=int(args.fantasy_rollouts),
             learning_rate=float(args.learning_rate),
-            refine_from_step=int(args.refine_from_step),
-            seed=int(args.seed),
-            device=str(args.device),
+            refine_from_step=args.refine_from_step,
         ),
+        seed=int(args.seed),
+        device=str(args.device),
         skip_cuda_safety=bool(args.smoke),
     )
     print(json.dumps(report, indent=2))
@@ -1112,7 +1122,10 @@ def build_parser() -> argparse.ArgumentParser:
     sdad.add_argument("--refinement-steps", type=int, default=4)
     sdad.add_argument("--fantasy-rollouts", type=int, default=16)
     sdad.add_argument("--learning-rate", type=float, default=3e-4)
-    sdad.add_argument("--refine-from-step", type=int, default=1)
+    sdad.add_argument(
+        "--refine-from-step", type=int, default=None,
+        help="0-based refinement step; default is the midpoint",
+    )
     sdad.add_argument("--seed", type=int, default=101)
     sdad.add_argument("--device", default="auto", help="cpu|auto|cuda")
     sdad.add_argument("--smoke", action="store_true")

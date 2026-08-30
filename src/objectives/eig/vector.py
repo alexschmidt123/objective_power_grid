@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import copy
 import json
 import math
 import time
@@ -67,6 +68,7 @@ METHODS = (
     "dad_eig",
     "rl_sboed_eig",
     "moe_sboed",
+    "step_dad",
     "myopic_delta_h",
     "random",
     "fixed_open_loop",
@@ -1346,6 +1348,10 @@ def _paired_eig_rows(
             float(row["terminal_eig"])
         )
     comparisons = (
+        ("step_dad", "fixed_open_loop"),
+        ("step_dad", "myopic_delta_h"),
+        ("step_dad", "random"),
+        ("step_dad", "dad_eig"),
         ("dad_eig", "fixed_open_loop"),
         ("dad_eig", "myopic_delta_h"),
         ("dad_eig", "random"),
@@ -1485,6 +1491,153 @@ def _rollout(
     }
 
 
+def _step_dad_eig_config(ctx: ExperimentContext, smoke: bool) -> dict[str, Any]:
+    raw = dict(ctx.cfg.training_for("eig_based") or {})
+    refine = raw.get("eig_step_dad_refine_from_step")
+    return {
+        "updates": 2 if smoke else int(raw.get("eig_step_dad_refinement_steps", 64)),
+        "fantasies": 4 if smoke else int(raw.get("eig_step_dad_fantasy_rollouts", 16)),
+        "learning_rate": float(raw.get("eig_step_dad_learning_rate", 1.0e-4)),
+        "entropy": float(raw.get("eig_step_dad_entropy_coefficient", 1.0e-3)),
+        "refine_at": (
+            max(1, int(ctx.horizon) // 2) if refine is None else int(refine)
+        ),
+    }
+
+
+def _refine_step_dad_eig(
+    ctx: ExperimentContext,
+    engine: VectorEIGEngine,
+    base: AdaptiveExperimentPolicy,
+    *,
+    actions: list[int],
+    observations: list[np.ndarray],
+    log_w: torch.Tensor,
+    config: dict[str, Any],
+    seed: int,
+) -> tuple[AdaptiveExperimentPolicy, float]:
+    """Original Step-DAD infer--refine update with discrete REINFORCE."""
+    policy = copy.deepcopy(base).to(engine.device)
+    policy.train()
+    optimizer = torch.optim.Adam(
+        policy.parameters(), lr=float(config["learning_rate"])
+    )
+    rng = np.random.default_rng(int(seed))
+    started = time.perf_counter()
+    posterior = torch.softmax(log_w, dim=-1).detach().cpu().numpy()
+    initial_h = float(engine.entropy(log_w).detach())
+    for _ in range(int(config["updates"])):
+        rewards: list[float] = []
+        log_probs: list[torch.Tensor] = []
+        entropies: list[torch.Tensor] = []
+        for _fantasy in range(int(config["fantasies"])):
+            particle = int(rng.choice(len(posterior), p=posterior))
+            fa = list(actions)
+            fy = [np.asarray(y).copy() for y in observations]
+            fw = log_w.detach().clone()
+            lp: list[torch.Tensor] = []
+            ent: list[torch.Tensor] = []
+            for step in range(len(fa), int(ctx.horizon)):
+                tensors = _policy_tensors(
+                    ctx, fa, fy, fw, step=step, device=engine.device
+                )
+                dist = policy.distribution(*tensors)
+                action_t = dist.sample()
+                action = int(action_t.item())
+                lp.append(dist.log_prob(action_t).reshape(()))
+                ent.append(dist.entropy().reshape(()))
+                clean = engine.centres[particle, action].detach().cpu().numpy()
+                y = clean + float(ctx.sigma_y) * rng.normal(size=clean.shape)
+                fa.append(action)
+                fy.append(np.asarray(y, dtype=np.float32))
+                fw = engine.update(
+                    fw,
+                    action,
+                    torch.as_tensor(y, dtype=torch.float32, device=engine.device),
+                )
+            rewards.append(initial_h - float(engine.entropy(fw).detach()))
+            log_probs.append(torch.stack(lp).sum())
+            entropies.append(torch.stack(ent).sum())
+        reward_t = torch.as_tensor(
+            rewards, dtype=torch.float32, device=engine.device
+        )
+        advantage = (reward_t - reward_t.mean()) / reward_t.std(
+            unbiased=False
+        ).clamp_min(1e-6)
+        loss = -(torch.stack(log_probs) * advantage.detach()).mean()
+        loss = loss - float(config["entropy"]) * torch.stack(entropies).mean()
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(policy.parameters(), 1.0)
+        optimizer.step()
+    policy.eval()
+    return policy, float(time.perf_counter() - started)
+
+
+def _rollout_step_dad_eig(
+    ctx: ExperimentContext,
+    engine: VectorEIGEngine,
+    system: dict[str, Any],
+    *,
+    rollout_id: int,
+    base: AdaptiveExperimentPolicy,
+    config: dict[str, Any],
+    eval_seed: int,
+) -> dict[str, Any]:
+    actions: list[int] = []
+    observations: list[np.ndarray] = []
+    log_w = engine.log_p0.clone()
+    h0 = float(engine.entropy(log_w))
+    step_eig: list[float] = []
+    policy = base
+    refined = False
+    refine_at = min(max(int(config["refine_at"]), 1), max(ctx.horizon - 1, 1))
+    refinement_seconds = 0.0
+    for step in range(ctx.horizon):
+        if not refined and step == refine_at:
+            policy, refinement_seconds = _refine_step_dad_eig(
+                ctx,
+                engine,
+                base,
+                actions=actions,
+                observations=observations,
+                log_w=log_w,
+                config=config,
+                seed=int(eval_seed) + 100_003 * rollout_id,
+            )
+            refined = True
+        tensors = _policy_tensors(
+            ctx, actions, observations, log_w, step=step, device=engine.device
+        )
+        with torch.no_grad():
+            action = int(torch.argmax(policy(*tensors), dim=-1).item())
+        y_np = _observe(
+            system,
+            action,
+            sigma=ctx.sigma_y,
+            rollout_id=rollout_id,
+            step=step,
+            eval_seed=eval_seed,
+        )
+        before = float(engine.entropy(log_w))
+        log_w = engine.update(
+            log_w, action, torch.as_tensor(y_np, device=engine.device)
+        )
+        step_eig.append(before - float(engine.entropy(log_w)))
+        actions.append(action)
+        observations.append(y_np)
+    return {
+        "sequence": actions,
+        "terminal_eig": h0 - float(engine.entropy(log_w)),
+        "step_eig": step_eig,
+        "router_trace": [],
+        "step_dad_refine_at": int(refine_at),
+        "step_dad_refinement_seconds": float(refinement_seconds),
+        "step_dad_refinement_updates": int(config["updates"]),
+        "step_dad_fantasy_rollouts": int(config["updates"] * config["fantasies"]),
+    }
+
+
 _VECTOR_CHECKPOINTS = {
     "dad_eig": "dad_eig.pth",
     "rl_sboed_eig": "rl_sboed_eig.pth",
@@ -1529,7 +1682,7 @@ def evaluate_vector_eig(
         raise ValueError("No vector-EIG methods left to evaluate")
     dad = (
         _load_policy(ctx, "dad_eig", device)
-        if "dad_eig" in selected_methods
+        if "dad_eig" in selected_methods or "step_dad" in selected_methods
         else None
     )
     rl = (
@@ -1574,6 +1727,15 @@ def evaluate_vector_eig(
                 weights_only=False,
             )
             training_seconds[method_name] = float(payload.get("elapsed_seconds", 0.0))
+    if "step_dad" in selected_methods:
+        dad_payload = torch.load(
+            model_dir(ctx.out_dir) / "dad_eig.pth",
+            map_location="cpu",
+            weights_only=False,
+        )
+        training_seconds["step_dad"] = float(
+            dad_payload.get("elapsed_seconds", 0.0)
+        )
     moe_step0_action: int | None = None
     if "moe_sboed" in selected_methods:
         moe_payload = torch.load(
@@ -1626,26 +1788,39 @@ def evaluate_vector_eig(
         random_replicates = int(evaluation.get("eig_random_replicates", 32))
         replicates = (8 if smoke else random_replicates) if method == "random" else 1
         rows = []
+        step_dad_config = _step_dad_eig_config(ctx, smoke)
         for i in range(n):
             for replicate in range(replicates):
                 rollout_id = i * replicates + replicate
-                row = _rollout(
-                    ctx,
-                    engine,
-                    ctx.test_systems[i],
-                    rollout_id=rollout_id,
-                    method=method,
-                    dad=policy
-                    if method
-                    not in {"random", "fixed_open_loop", "myopic_delta_h"}
-                    else None,
-                    fixed_sequence=fixed,
-                    n_fantasies=4 if smoke else 16,
-                    moe_step0_action=(
-                        moe_step0_action if method == "moe_sboed" else None
-                    ),
-                    eval_seed=eval_seed,
-                )
+                if method == "step_dad":
+                    assert dad is not None
+                    row = _rollout_step_dad_eig(
+                        ctx,
+                        engine,
+                        ctx.test_systems[i],
+                        rollout_id=rollout_id,
+                        base=dad,
+                        config=step_dad_config,
+                        eval_seed=eval_seed,
+                    )
+                else:
+                    row = _rollout(
+                        ctx,
+                        engine,
+                        ctx.test_systems[i],
+                        rollout_id=rollout_id,
+                        method=method,
+                        dad=policy
+                        if method
+                        not in {"random", "fixed_open_loop", "myopic_delta_h"}
+                        else None,
+                        fixed_sequence=fixed,
+                        n_fantasies=4 if smoke else 16,
+                        moe_step0_action=(
+                            moe_step0_action if method == "moe_sboed" else None
+                        ),
+                        eval_seed=eval_seed,
+                    )
                 row["theta_id"] = i
                 row["design_replicate"] = replicate
                 rows.append(row)

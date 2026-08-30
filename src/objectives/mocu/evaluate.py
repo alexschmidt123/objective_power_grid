@@ -612,6 +612,9 @@ def run_full_evaluation(
     offline_seconds["MoE-sBOED"] = float(
         (training_results.get("moe_sboed") or {}).get("elapsed_seconds", 0.0)
     )
+    # Step-DAD inherits the fully amortized DAD checkpoint, then performs
+    # instance-specific refinement online (Hedman et al., 2025).
+    offline_seconds["Step-DAD"] = offline_seconds["DAD"]
     # Use every strict held-out system exactly once.  The previous hard cap of
     # 64 discarded half of IEEE9's 128-system test bank and widened paired CIs.
     n = 4 if smoke else len(ctx.test_systems)
@@ -637,6 +640,21 @@ def run_full_evaluation(
             method_rows = evaluate_myopic(ctx, n, eval_seed=eval_seed)
         elif key == "moe_sboed":
             method_rows = evaluate_moe_sboed(ctx, n, eval_seed=eval_seed)
+        elif key == "step_dad":
+            from src.objectives.mocu.step_dad import (
+                config_from_context,
+                evaluate_step_dad,
+            )
+
+            method_rows, step_meta = evaluate_step_dad(
+                ctx,
+                n,
+                eval_seed=eval_seed,
+                config=config_from_context(ctx, smoke=smoke),
+                device_name="auto",
+            )
+            for row in method_rows:
+                row.update({f"step_dad_{k}": v for k, v in step_meta.items()})
         elif key in ("dad", "rl_sboed", "matched_dense"):
             method_rows = evaluate_policy_method(
                 ctx,
