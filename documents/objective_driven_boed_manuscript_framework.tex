@@ -23,10 +23,11 @@ machine-specific parameters. We distinguish parameter-oriented expected
 information gain (EIG) from objective-driven mean objective cost of uncertainty
 (MOCU) for a downstream safety-aware control decision. Random, fixed, myopic,
 deep adaptive design (DAD), and reinforcement-learning sequential Bayesian
-optimal experimental design (RL-sBOED) are evaluated under common simulation
-banks and held-out protocols. A susceptible--infected--recovered (SIR) model
-provides an implementation benchmark; IEEE 9-bus and IEEE 14-bus systems assess
-the power-grid application. \todo{Add final quantitative findings.}
+optimal experimental design (RL-sBOED), and Step-DAD are evaluated under common
+simulation banks and held-out protocols. A susceptible--infected--recovered (SIR) model
+provides an implementation benchmark; IEEE 9-bus, IEEE 14-bus, and IEEE 30-bus
+systems assess the power-grid application and scalability. \todo{Add final
+quantitative findings.}
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -49,13 +50,15 @@ The contributions are:
 \begin{itemize}
   \item sequential bus--duration BOED for uncertain power-grid dynamics;
   \item a safety-aware MOCU objective linking probing to terminal control;
-  \item a matched comparison of random, fixed, myopic, DAD, and RL-sBOED; and
-  \item SIR, IEEE9, and IEEE14 studies of objective choice, adaptation, horizon,
-  and scalability.
+  \item a matched comparison of random, fixed, myopic, DAD, RL-sBOED, and
+  Step-DAD; and
+  \item SIR, IEEE9, IEEE14, and IEEE30 studies of objective choice, adaptation,
+  horizon, and scalability.
 \end{itemize}
 
 \section{Related Work}
-Summarize BOED and EIG, adaptive and non-myopic design, DAD, RL-sBOED, MOCU,
+Summarize BOED and EIG, adaptive and non-myopic design, DAD, RL-sBOED,
+Step-DAD, MOCU,
 and power-grid dynamic identification. End with the gap: objective-driven
 sequential design over power-grid probing buses and durations.
 \todo{Add verified references.}
@@ -130,6 +133,7 @@ Fixed & No & Open-loop & No\\
 Myopic & Yes & No & No\\
 DAD & Yes & Yes & Yes\\
 RL-sBOED & Yes & Yes & Yes\\
+Step-DAD & Yes & Yes & Semi-amortized\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -137,6 +141,10 @@ Random ignores observations. Fixed selects an open-loop sequence. Myopic
 optimizes immediate expected utility after each observation. DAD learns an
 amortized history-conditioned policy offline. RL-sBOED learns a sequential
 policy with stepwise rewards. \todo{Give reproducible implementation details.}
+Step-DAD starts from an amortized DAD policy and performs limited
+history-specific online refinement. Report its offline DAD training cost,
+online refinement cost, and action-selection cost separately.
+\todo{Describe the implementation and deviations from the original paper.}
 
 \section{Experimental Setup}
 
@@ -155,6 +163,14 @@ IEEE14 has 14 physical probe buses, five dynamic machines, and ten uncertain
 $M_i/K_i$ coordinates. Six durations give 84 actions. The MOCU workflow,
 methods, noise, horizons, and seeds match IEEE9; only IEEE-system physics and
 machine parameters differ. \todo{Insert the validated durations.}
+
+\subsection{IEEE30 MOCU Scalability Study}
+IEEE30 extends the same objective-driven MOCU protocol to a larger network.
+Use machine-specific uncertain parameters only for its dynamic machines, allow
+probing at all configured physical buses, and retain the same methods, noise,
+horizons, seeds, terminal objective, and held-out evaluation rules used for
+IEEE9 and IEEE14. \todo{Insert the verified dynamic-machine mapping, prior
+ranges, action count, bank size, and audited six-duration combination.}
 
 \subsection{Duration Selection and Evaluation}
 Select six durations before policy training using a method-independent search
@@ -186,6 +202,7 @@ Fixed & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
 Myopic & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
 DAD & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
 RL-sBOED & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
+Step-DAD & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -193,17 +210,22 @@ RL-sBOED & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
 \subsection{IEEE14 MOCU Results}
 \todo{Report the same methods and metrics as IEEE9.}
 
+\subsection{IEEE30 MOCU Results}
+\todo{Report the same methods and metrics as IEEE9 and IEEE14, emphasizing
+scalability in action count, latent dimension, training time, and online time.}
+
 \subsection{Computational Cost}
-\todo{Separate bank generation, offline training, and online selection time.}
+\todo{Separate bank generation, offline training, online selection, and
+Step-DAD history-specific refinement time.}
 
 \section{Discussion}
 Discuss when adaptation and non-myopic planning improve the downstream
 objective, why Fixed can be competitive, why EIG and MOCU can disagree, and how
 horizon and system size affect performance. Limitations include simulated
 Kron-reduced networks, prescribed priors, fixed probe amplitude, discrete
-actions, simplified terminal control, and three training seeds. The IEEE14
-machine-specific $K_i$ allocation is a modeling assumption, not a published
-physical value.
+actions, simplified terminal control, and three training seeds. Machine-specific
+$K_i$ allocations introduced for the larger IEEE systems are modeling
+assumptions unless directly supported by a cited dynamic-data source.
 
 \section{Conclusion}
 This paper formulates power-grid probing as sequential BOED and connects
@@ -215,7 +237,7 @@ conclusions supported by completed three-seed results.}
 
 \begin{thebibliography}{1}
 \bibitem{placeholder}\todo{Add verified references for BOED, DAD, RL-sBOED,
-MOCU, and power-grid dynamic identification.}
+Step-DAD, MOCU, and power-grid dynamic identification.}
 \end{thebibliography}
 
 \end{document}
