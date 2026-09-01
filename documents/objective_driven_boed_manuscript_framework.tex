@@ -67,70 +67,42 @@ sequential design over power-grid probing buses and durations.
 \label{sec:problem}
 
 \subsection{Dynamic Model and Uncertain Parameters}
-Let $\mathcal N=\{1,\ldots,N\}$ be the set of all physical buses. Partition it
-as
+Let $\mathcal N=\{1,\ldots,N\}$ contain all physical buses and let
+$\mathcal M\subset\mathcal N$ contain only the buses with dynamic machines.
+Every bus in $\mathcal N$ can be probed, but $M_i$ and $K_i$ exist only for
+$i\in\mathcal M$. In the notation of the NREL probing model, the bus-level
+frequency response is
 \begin{equation}
-\mathcal N=\mathcal N_{\mathrm d}\cup\mathcal N_{\ell},
-\qquad
-\mathcal N_{\mathrm d}\cap\mathcal N_{\ell}=\varnothing,
-\label{eq:bus-partition}
-\end{equation}
-where $\mathcal N_{\mathrm d}=\{d_1,\ldots,d_{N_{\mathrm d}}\}$ contains the
-$N_{\mathrm d}$ dynamic-machine buses and $\mathcal N_{\ell}$ contains the
-non-dynamic buses. A physical bus belongs to the probe space whether or not it
-belongs to $\mathcal N_{\mathrm d}$. Dynamic states and machine parameters,
-however, exist only at buses in $\mathcal N_{\mathrm d}$.
-
-Indexing the reduced dynamic machines by $r=1,\ldots,N_{\mathrm d}$, the
-general reduced swing model is
-\begin{align}
-\dot{\delta}_r(s)&=\omega_r(s),\label{eq:swing-angle}\\
-M_r\dot{\omega}_r(s)&=P_{m,r}
-\notag\\[-0.4em]
-&\quad-\sum_{q=1}^{N_{\mathrm d}}B^{\mathrm{red}}_{rq}
-\sin\!\left(\delta_r(s)-\delta_q(s)\right)
-\notag\\[-0.2em]
-&\quad-\left(\frac{K_r}{2\pi}+D_r\right)\omega_r(s)+v_r(s),
+\begin{aligned}
+M_i\frac{d\Delta\omega_i(s)}{ds}
+&=-\Delta P_{e,i}(s)\\
+&\quad-\left(\frac{K_i}{2\pi}+D_i\right)\Delta\omega_i(s)
++u_i(s),\quad i\in\mathcal M.
+\end{aligned}
 \label{eq:swing-frequency}
-\end{align}
-where $B^{\mathrm{red}}$ is the Kron-reduced coupling matrix and $v_r(s)$ is
-the external input received by dynamic machine $r$. The uncertain parameter is
+\end{equation}
+where $\Delta P_{e,i}$ includes the electrical-power exchange with the rest of
+the network. The external input is written explicitly as
+\begin{equation}
+u_i(s)=a_{ib}u_{\mathrm{probe}}(s;\tau)
++a_{iq}u_{\mathrm{cont}}(s)
++a_{ic}u_{\mathrm{ctrl}}h_{\mathrm{ctrl}}(s).
+\label{eq:general-input}
+\end{equation}
+Here, $b$, $q$, and $c$ are respectively the probe, contingency, and control
+locations; $a_{ij}$ maps an injection at physical bus $j$ to dynamic machine
+$i$; and $h_{\mathrm{ctrl}}$ is the configured control profile.
+
+The unknown parameter vector is therefore
 \begin{equation}
 \boldsymbol{\theta}
-=\bigl(M_1,\ldots,M_{N_{\mathrm d}},
-K_1,\ldots,K_{N_{\mathrm d}}\bigr)\in\Theta,
+=\bigl((M_i,K_i):i\in\mathcal M\bigr)\in\Theta,
 \qquad \boldsymbol{\theta}\sim p_0(\boldsymbol{\theta}).
 \label{eq:theta-prior}
 \end{equation}
-Thus, there are $N$ possible physical probe locations but only
-$N_{\mathrm d}$ pairs $(M_r,K_r)$. In particular, no $M$ or $K$ is assigned
-to a bus in $\mathcal N_{\ell}$. For IEEE9, $(N,N_{\mathrm d})=(9,3)$; for
-IEEE14, $(N,N_{\mathrm d})=(14,5)$.
-
-To show explicitly how all $N$ buses enter the reduced model, partition the
-full-network susceptance Laplacian according to~\eqref{eq:bus-partition}:
-\begin{equation}
-L=
-\begin{bmatrix}
-L_{\mathrm{dd}}&L_{\mathrm{d\ell}}\\
-L_{\mathrm{\ell d}}&L_{\mathrm{\ell\ell}}
-\end{bmatrix}.
-\end{equation}
-Let $\mathbf c_b\in\mathbb R^{N_{\mathrm d}}$ map an injection at physical
-bus $b$ to the dynamic-machine equations. The simulator uses
-\begin{equation}
-\mathbf c_b=
-\begin{cases}
-\mathbf e_r,
-& b=d_r\in\mathcal N_{\mathrm d},\\[0.3em]
--L_{\mathrm{d\ell}}L_{\mathrm{\ell\ell}}^{-1}\mathbf e_q,
-& b=\ell_q\in\mathcal N_{\ell},
-\end{cases}
-\label{eq:physical-input-map}
-\end{equation}
-where $\mathbf e_r$ and $\mathbf e_q$ select a dynamic or non-dynamic bus
-within its respective partition. Equation~\eqref{eq:physical-input-map} is
-the key distinction between probing a machine bus and probing a load bus.
+IEEE9 has $N=9$ probe buses and three $(M_i,K_i)$ pairs. IEEE14 has $N=14$
+probe buses and five $(M_i,K_i)$ pairs. No artificial $M_i$ or $K_i$ is
+assigned to a non-dynamic bus.
 
 \subsection{Bus--Duration Probe Space}
 A diagnostic action is
@@ -141,7 +113,7 @@ A diagnostic action is
 where $b_t$ may be any of the $N$ physical buses and $\tau_t$ is the pulse
 duration. The amplitude $A$ is fixed across actions. The injected Hann pulse is
 \begin{equation}
-P_{\mathrm{probe}}(s;\tau_t)
+u_{\mathrm{probe}}(s;\tau_t)
 =
 \begin{cases}
 \displaystyle\frac{A}{2}
@@ -151,46 +123,27 @@ P_{\mathrm{probe}}(s;\tau_t)
 \end{cases}
 \label{eq:hann-probe}
 \end{equation}
-During a diagnostic experiment, $u_{\mathrm{ctrl}}=0$ and the input vector in
-~\eqref{eq:swing-frequency} is
+The probe and terminal control are evaluated in separate simulations. During
+a probe test,
 \begin{equation}
-\mathbf v^{\,p}(s;b_t,\tau_t)
-=\mathbf c_{b_t}P_{\mathrm{probe}}(s;\tau_t).
-\label{eq:general-probe-input}
+u_i(s)=a_{ib_t}u_{\mathrm{probe}}(s;\tau_t),
+\qquad u_{\mathrm{ctrl}}=u_{\mathrm{cont}}=0.
+\label{eq:probe-test-input}
 \end{equation}
-Consequently, a probe at dynamic bus $b_t=d_r$ gives
-\begin{equation}
-\mathbf v^{\,p}(s;d_r,\tau_t)
-=\mathbf e_rP_{\mathrm{probe}}(s;\tau_t),
-\label{eq:dynamic-bus-probe}
-\end{equation}
-whereas a probe at non-dynamic bus $b_t=\ell_q$ gives
-\begin{equation}
-\mathbf v^{\,p}(s;\ell_q,\tau_t)
-=-L_{\mathrm{d\ell}}L_{\mathrm{\ell\ell}}^{-1}\mathbf e_q
-P_{\mathrm{probe}}(s;\tau_t).
-\label{eq:load-bus-probe}
-\end{equation}
-Thus, a load-bus probe affects the dynamic machines through the network map;
-it does not require a fictitious load-bus swing equation.
+If $b_t$ is a dynamic-machine bus, $a_{ib_t}=1$ for that machine and zero for
+the others. If $b_t$ is a non-dynamic bus, the network reduction supplies the
+coefficients $a_{ib_t}$, so the load-bus injection is distributed among the
+dynamic machines. The load bus itself is not assigned a swing equation.
 
-The terminal-control simulation is separate from the probe simulation. The
-probe is set to zero, a configured contingency is applied at dynamic index
-$r_c$, and supplementary active-power control is applied at dynamic index
-$r_u$:
+During terminal-control evaluation, the probe is absent and
 \begin{equation}
-\begin{aligned}
-\mathbf v^{\,c}(s;u_{\mathrm{ctrl}})
-&=\mathbf e_{r_c}P_{\mathrm{cont}}(s)
-+\mathbf e_{r_u}u_{\mathrm{ctrl}}h_{\mathrm{ctrl}}(s),\\
-&\hspace{5.5em}P_{\mathrm{probe}}=0.
-\end{aligned}
+u_i(s)=a_{iq}u_{\mathrm{cont}}(s)
++a_{ic}u_{\mathrm{ctrl}}h_{\mathrm{ctrl}}(s),
+\qquad u_{\mathrm{probe}}=0.
 \label{eq:terminal-control-input}
 \end{equation}
-where $h_{\mathrm{ctrl}}$ is the configured step, Hann, or ramp profile.
-Equations~\eqref{eq:general-probe-input}--\eqref{eq:terminal-control-input}
-therefore cover the general probe, dynamic-bus probe, non-dynamic-bus probe,
-and operational-control cases without assigning dynamics to load buses.
+This separation matches the implementation: diagnostic probing updates the
+belief, whereas $u_{\mathrm{ctrl}}$ is selected and evaluated afterward.
 
 With six durations, IEEE9 has
 $9\times6=54$ actions and IEEE14 has $14\times6=84$ actions. Exact action
