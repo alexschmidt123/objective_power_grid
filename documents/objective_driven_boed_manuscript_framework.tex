@@ -66,47 +66,55 @@ sequential design over power-grid probing buses and durations.
 \section{Problem Formulation}
 \label{sec:problem}
 
-\subsection{Dynamic Model and Uncertain Parameters}
-Let $\mathcal N=\{1,\ldots,N\}$ contain all physical buses and let
-$\mathcal M\subset\mathcal N$ contain only the buses with dynamic machines.
-Every bus in $\mathcal N$ can be probed, but $M_i$ and $K_i$ exist only for
-$i\in\mathcal M$. Collecting the dynamic-machine quantities into vectors, the
-frequency-response model is
+\subsection{Power-Grid Model}
+Let $\mathcal N=\{1,\ldots,N\}$ denote all physical buses, and let
+$\mathcal M\subset\mathcal N$ denote the buses containing dynamic machines.
+The frequency response of those machines is modeled by
 \begin{equation}
-\mathbf M\frac{d\Delta\boldsymbol{\omega}(s)}{ds}
+\mathbf M\dot{\boldsymbol{\omega}}(s)
 =-\Delta\mathbf P_e(s)
 -\left(\frac{\mathbf K}{2\pi}+\mathbf D\right)
-\Delta\boldsymbol{\omega}(s)+\mathbf u(s).
+\boldsymbol{\omega}(s)+\mathbf u(s),
 \label{eq:swing-frequency}
 \end{equation}
-Here, $\mathbf M$, $\mathbf K$, and $\mathbf D$ are diagonal matrices for the
-dynamic machines, $\Delta\mathbf P_e$ contains their network electrical-power
-changes, and $\mathbf u$ is the mapped external power injection. Let
-$\mathbf a(b)$ denote the vector that maps an injection at any physical bus
-$b\in\mathcal N$ to the dynamic-machine equations.
+following the inertia--frequency-response model in~\cite{peng2024probing}.
+The vectors $\boldsymbol{\omega}$ and $\Delta\mathbf P_e$ contain angular-
+frequency deviations and network electrical-power changes at the dynamic
+machines. The diagonal matrices $\mathbf M$, $\mathbf K$, and $\mathbf D$
+contain inertia, fast frequency-response, and damping coefficients,
+respectively, and $\mathbf u$ is an external active-power injection.
 
-The unknown parameter vector is therefore
+Only the machine-specific coefficients are uncertain:
 \begin{equation}
 \boldsymbol{\theta}
-=\bigl(\mathbf M,\mathbf K\bigr)\in\Theta,
+=\bigl((M_i,K_i):i\in\mathcal M\bigr)\in\Theta,
 \qquad \boldsymbol{\theta}\sim p_0(\boldsymbol{\theta}).
 \label{eq:theta-prior}
 \end{equation}
-IEEE9 has $N=9$ probe buses and three $(M_i,K_i)$ pairs. IEEE14 has $N=14$
-probe buses and five $(M_i,K_i)$ pairs. No artificial $M_i$ or $K_i$ is
-assigned to a non-dynamic bus.
+Thus, every physical bus is an admissible probe location, whereas $M_i$ and
+$K_i$ are defined only for $i\in\mathcal M$. The IEEE9 and IEEE14 models have,
+respectively, $(N,|\mathcal M|)=(9,3)$ and $(14,5)$; their static network data
+follow the standard IEEE test cases distributed with
+MATPOWER~\cite{zimmerman2011matpower}.
 
-\subsection{Bus--Duration Probe Space}
-A diagnostic action is
+Let $\mathbf a(b)$ map a scalar injection at physical bus $b\in\mathcal N$ to
+the dynamic-machine equations. At a machine bus, the injection enters that
+machine directly. At a non-machine bus, Kron reduction distributes the
+injection among the dynamic machines. A non-machine bus therefore remains a
+valid probe location without being assigned artificial dynamic states,
+$M_i$, or $K_i$.
+
+\subsection{Sequential Probe Design}
+At stage $t$, the design is a bus--duration pair
 \begin{equation}
 \xi_t=(b_t,\tau_t)\in\Xi=\mathcal N\times\mathcal T,
 \label{eq:probe-action}
 \end{equation}
-where $b_t$ may be any of the $N$ physical buses and $\tau_t$ is the pulse
-duration. The amplitude $A$ is fixed across actions. The injected Hann pulse is
+where $\mathcal T$ is the six-duration catalog and the amplitude $A$ is fixed.
+The probing signal is the Hann pulse used for controlled frequency excitation
+in~\cite{peng2024probing}:
 \begin{equation}
-u_{\mathrm{probe}}(s;\tau_t)
-=
+u_{\mathrm p}(s;\tau_t)=
 \begin{cases}
 \displaystyle\frac{A}{2}
 \left[1-\cos\!\left(\frac{2\pi s}{\tau_t}\right)\right],
@@ -115,173 +123,175 @@ u_{\mathrm{probe}}(s;\tau_t)
 \end{cases}
 \label{eq:hann-probe}
 \end{equation}
-The probe and terminal control are evaluated in separate simulations. During
-a probe test,
+During a probe simulation,
 \begin{equation}
-\mathbf u(s)=\mathbf a(b_t)u_{\mathrm{probe}}(s;\tau_t),
-\qquad u_{\mathrm{ctrl}}=u_{\mathrm{cont}}=0.
+\mathbf u(s)=\mathbf a(b_t)u_{\mathrm p}(s;\tau_t),
+\qquad u_{\mathrm{ctrl}}=0,
 \label{eq:probe-test-input}
 \end{equation}
-If $b_t$ is a dynamic-machine bus, $\mathbf a(b_t)$ injects the probe directly
-at that machine. If $b_t$ is a non-dynamic bus, $\mathbf a(b_t)$ distributes
-the injection among the dynamic machines through the network reduction. The
-load bus itself is not assigned a swing equation.
+and the system is reset to its configured equilibrium before the next probe.
+IEEE9 and IEEE14 contain $9\times6=54$ and $14\times6=84$ actions,
+respectively. Exact repetition of a bus--duration pair is disallowed within a
+rollout.
 
-During terminal-control evaluation, the probe is absent and
+After $t$ probes, the realized history is
 \begin{equation}
-\mathbf u(s)=\mathbf a(b_c)u_{\mathrm{cont}}(s)
-+\mathbf a(b_u)u_{\mathrm{ctrl}}h_{\mathrm{ctrl}}(s),
-\qquad u_{\mathrm{probe}}=0.
-\label{eq:terminal-control-input}
+h_t=\bigl((\xi_1,\mathbf y_1),\ldots,(\xi_t,\mathbf y_t)\bigr).
+\label{eq:history}
 \end{equation}
-Here, $b_c$ and $b_u$ are the configured contingency and control locations,
-and $h_{\mathrm{ctrl}}$ is the configured control profile.
-This separation matches the implementation: diagnostic probing updates the
-belief, whereas $u_{\mathrm{ctrl}}$ is selected and evaluated afterward.
-
-With six durations, IEEE9 has
-$9\times6=54$ actions and IEEE14 has $14\times6=84$ actions. Exact action
-repetition is prohibited within one $T$-step rollout.
-
-The complete experimental history before stage $t$ is
+An adaptive policy selects
 \begin{equation}
-h_{t-1}=\bigl((\xi_1,\mathbf y_1),\ldots,
-(\xi_{t-1},\mathbf y_{t-1})\bigr),
-\end{equation}
-and an adaptive policy selects
-\begin{equation}
-\xi_t\sim\pi_t(\cdot\mid h_{t-1}),\qquad t=1,\ldots,T.
+\xi_t\sim\pi_t(\,\cdot\mid h_{t-1}),\qquad t=1,\ldots,T,
 \label{eq:policy}
 \end{equation}
-The common horizon $T$ is a fixed probe budget, not a term in the operational
-cost. A Fixed policy chooses $\xi_{1:T}$ before observing data; an adaptive
-policy may change later actions as a function of the realized history.
+subject to the no-repetition constraint. This is the standard adaptive
+formulation of sequential BOED~\cite{foster2021dad}. The horizon $T$ is the
+probe budget. A fixed design selects its entire sequence before any data are
+observed; an adaptive design may change later actions in response to the
+realized observations.
 
-\subsection{Observation and Belief Update}
-Let $\Delta f_o(s;\boldsymbol{\theta},\xi_t)=\omega_o(s)/(2\pi)$ denote the
-frequency deviation at the fixed observation bus. At prespecified indices
-$q_1,\ldots,q_{N_{\mathrm{obs}}}$, the clean observation is
+\subsection{Observation Model and Bayesian Update}
+Let $o\in\mathcal M$ be the fixed PMU bus and
+$\Delta f_o(s)=\omega_o(s)/(2\pi)$ its frequency deviation. For sampling set
+$\mathcal S=\{s_1,\ldots,s_{N_{\mathrm{obs}}}\}$, the simulator output is
 \begin{equation}
-\mathbf g(\boldsymbol{\theta},\xi_t)=
-\left[\Delta f_o(s_{q_1}),\ldots,
-\Delta f_o(s_{q_{N_{\mathrm{obs}}}})\right]^{\!\top}.
+\mathbf g(\boldsymbol{\theta},\xi_t)
+=\bigl[\Delta f_o(s;\boldsymbol{\theta},\xi_t)\bigr]_{s\in\mathcal S}.
+\label{eq:forward-observation}
 \end{equation}
-The measured vector satisfies
+The measured response is
 \begin{equation}
 \mathbf y_t=\mathbf g(\boldsymbol{\theta}^{\star},\xi_t)
-+\boldsymbol{\epsilon}_t,qquad
-\boldsymbol{\epsilon}_t\sim
-\mathcal N(\mathbf0,\sigma_y^2\mathbf I).
++\boldsymbol{\epsilon}_t,\qquad
+\boldsymbol{\epsilon}_t\sim\mathcal N(\mathbf 0,\sigma_y^2\mathbf I).
 \label{eq:observation}
 \end{equation}
-The principal power-grid experiments use $N_{\mathrm{obs}}=5$. Conditional
-independence across reset-to-equilibrium probes gives
+The main power-grid experiments use $N_{\mathrm{obs}}=5$. Because every probe
+starts from equilibrium, the responses are conditionally independent given
+$\boldsymbol{\theta}$ and the selected designs:
 \begin{equation}
 p(\boldsymbol{\theta}\mid h_t)\propto p_0(\boldsymbol{\theta})
 \prod_{k=1}^{t}p(\mathbf y_k\mid\boldsymbol{\theta},\xi_k).
 \label{eq:posterior}
 \end{equation}
-For particles $\{\boldsymbol{\theta}^{(n)},w_n^{(0)}\}_{n=1}^{N}$, the
-implemented update is
+The implementation represents this posterior with $N_{\mathrm p}$ particles
+$\{\boldsymbol{\theta}^{(n)},w_n^{(t)}\}_{n=1}^{N_{\mathrm p}}$. Their weights
+are updated by
 \begin{equation}
-w_n^{(t)}=
-\frac{w_n^{(t-1)}p(\mathbf y_t\mid\boldsymbol{\theta}^{(n)},\xi_t)}
-{\sum_{m=1}^{N}w_m^{(t-1)}
-p(\mathbf y_t\mid\boldsymbol{\theta}^{(m)},\xi_t)}.
+w_n^{(t)}
+=\frac{w_n^{(t-1)}
+p(\mathbf y_t\mid\boldsymbol{\theta}^{(n)},\xi_t)}
+{\displaystyle\sum_{j=1}^{N_{\mathrm p}}w_j^{(t-1)}
+p(\mathbf y_t\mid\boldsymbol{\theta}^{(j)},\xi_t)}.
 \label{eq:particle-update}
 \end{equation}
 
-\subsection{Parameter-Oriented Objective}
-For EIG experiments, the terminal utility of policy $\pi$ is
+\subsection{Parameter-Oriented Design Objective}
+Let $H_T$ denote the random terminal history induced by policy $\pi$. For the
+parameter-learning experiments, the policy maximizes
 \begin{equation}
-J_{\mathrm{EIG}}(\pi)=
-\E_{\boldsymbol{\theta}^{\star},H_T\mid\pi}
-\left[D_{\mathrm{KL}}\!\left(
-p(\boldsymbol{\theta}\mid H_T)\Vert p_0(\boldsymbol{\theta})
-\right)\right],
+J_{\mathrm{EIG}}(\pi)
+=\E_{H_T\mid\pi}\!\left[
+D_{\mathrm{KL}}\!\left(
+p(\boldsymbol{\theta}\mid H_T)
+\Vert p_0(\boldsymbol{\theta})\right)\right].
 \label{eq:policy-eig}
 \end{equation}
-which is maximized. EIG measures parameter learning and does not directly
-encode the downstream control decision.
+This is the expected information gain used in sequential BOED
+\cite{foster2021dad,blau2022rlsboed}. It rewards posterior learning about
+$\boldsymbol{\theta}$ but does not directly encode the quality of the
+downstream control decision.
 
-\subsection{Terminal Safety Requirement}
-Probe simulations and terminal-control simulations are separate. During a
-probe, the terminal control is zero; during terminal evaluation, the probe is
-zero. For parameter $\boldsymbol{\theta}$ and candidate supplementary active
-power injection $u\in\mathcal U$, let $r(\boldsymbol{\theta},u)$ be maximum
-absolute ROCOF and $f_{\min}(\boldsymbol{\theta},u)$ be minimum frequency
-deviation under the fixed contingency. Safety is
+\subsection{Terminal Control and Safety}
+Diagnostic probing and terminal-control evaluation are separate simulations.
+In the latter, the probe is zero and
+\begin{equation}
+\mathbf u(s)=\mathbf a(b_c)u_{\mathrm c}(s)
++\mathbf a(b_u)u\,h_{\mathrm{ctrl}}(s),
+\qquad u_{\mathrm p}=0,
+\label{eq:terminal-control-input}
+\end{equation}
+where $u_{\mathrm c}$ is the fixed contingency, $u\in\mathcal U$ is a candidate
+supplementary control magnitude, and $b_c$ and $b_u$ are their configured
+locations.
+
+For parameter $\boldsymbol{\theta}$ and control $u$, let
+$r(\boldsymbol{\theta},u)$ be the maximum absolute rate of change of frequency
+(ROCOF), and let $f_{\min}(\boldsymbol{\theta},u)$ be the minimum frequency
+deviation. A control is safe when
 \begin{equation}
 \mathsf{Safe}(\boldsymbol{\theta},u)
-\iff r(\boldsymbol{\theta},u)\le r_{\max}
-\;\wedge\;
+\iff
+r(\boldsymbol{\theta},u)\le r_{\max}
+\ \text{and}\
 f_{\min}(\boldsymbol{\theta},u)\ge\underline f.
 \label{eq:safety}
 \end{equation}
-The model-specific minimum safe control, computed offline on the ordered grid
-$\mathcal U$, is
+For the ordered admissible grid $\mathcal U$, define the required control
 \begin{equation}
 U(\boldsymbol{\theta})=
 \min\{u\in\mathcal U:\mathsf{Safe}(\boldsymbol{\theta},u)\}.
 \label{eq:required-control}
 \end{equation}
-The bank stores $U_n=U(\boldsymbol{\theta}^{(n)})$ for every particle.
+The retained parameter support is required to contain a safe candidate. The
+offline bank stores $U_n=U(\boldsymbol{\theta}^{(n)})$ for each particle.
 
-Given posterior weights $\mathbf w^{(T)}$, the deployed control is the
-posterior $(1-\alpha)$ quantile of $U$, plus margin $m$, rounded upward to the
-admissible grid:
+Given terminal weights $\mathbf w^{(T)}$, the deployed control is
 \begin{equation}
-u_T=\operatorname{ceil}_{\mathcal U}\!\left[
-Q_{1-\alpha}\!\left(U\mid\mathbf w^{(T)}\right)+m\right].
+u_T=
+\left\lceil
+Q_{1-\alpha}\!\left(U\mid\mathbf w^{(T)}\right)+m
+\right\rceil_{\mathcal U}.
 \label{eq:posterior-control}
 \end{equation}
-Here $Q_q$ is the smallest value whose weighted empirical cumulative
-probability is at least $q$. The principal MOCU experiments use
-$\alpha=0.05$, $m=0$, and therefore target 95\% posterior safety.
+Here $Q_q$ is the weighted empirical $q$-quantile, $m$ is a safety margin, and
+$\lceil\cdot\rceil_{\mathcal U}$ rounds upward to the control grid. The main
+MOCU experiments use $\alpha=0.05$ and $m=0$, corresponding to a 95\%
+posterior-safety target.
 
-\subsection{Safety-Aware OCU and MOCU}
-For a system requiring control $U$, define the realized cost
+\subsection{Objective-Driven Design Objective}
+MOCU measures the expected performance loss caused by uncertainty relative to
+model-specific operation~\cite{yoon2013mocu}. For a system requiring control
+$U$, define the safety-aware operational cost
 \begin{equation}
 L(u,U)=u+\lambda(U-u)_+
-+\kappa\mathbf1\{U>u\},
++\kappa\mathbf{1}\{U>u\},
 \label{eq:realized-cost}
 \end{equation}
-where $(x)_+=\max(x,0)$, $\lambda$ penalizes under-control magnitude, and
-$\kappa$ optionally penalizes a safety violation. The model-specific optimum
-has cost $L(U,U)=U$. Hence
+where $(x)_+=\max(x,0)$, $\lambda$ penalizes control shortfall, and $\kappa$
+optionally adds a discrete safety-violation penalty. Since the model-specific
+decision is $u=U$, its cost is $L(U,U)=U$. The objective cost of uncertainty
+for particle $n$ is
 \begin{equation}
-\operatorname{OCU}(\boldsymbol{\theta},h_T)
-=L(u_T,U(\boldsymbol{\theta}))-U(\boldsymbol{\theta}),
+\ocu_n(h_T)=L(u_T,U_n)-U_n,
 \label{eq:ocu}
 \end{equation}
-and belief MOCU is
+and the posterior MOCU is
 \begin{equation}
-\operatorname{MOCU}(h_T)=
-\sum_{n=1}^{N}w_n^{(T)}
-\left[L(u_T,U_n)-U_n\right].
+\mocu(h_T)=
+\sum_{n=1}^{N_{\mathrm p}}w_n^{(T)}
+\bigl[L(u_T,U_n)-U_n\bigr].
 \label{eq:belief-mocu}
 \end{equation}
-The implementation uses $\lambda=1/\alpha=20$ and $\kappa=0$. This Bayes-loss
-alignment makes the minimizer of expected~\eqref{eq:realized-cost} the
-$(1-\alpha)$ quantile used in~\eqref{eq:posterior-control}; the terminal rule
-and reported loss therefore optimize the same decision problem.
+This is a frequency-safety specialization of MOCU-based uncertainty
+quantification and experimental design
+\cite{yoon2013mocu,chen2023objectiveoed}.
 
-Finally, the objective-driven sequential design problem is
+The implementation sets $\lambda=1/\alpha=20$ and $\kappa=0$. Under this loss,
+the Bayes-optimal continuous decision is the $(1-\alpha)$ quantile of $U$;
+rounding it upward gives~\eqref{eq:posterior-control}. Thus, the deployed
+control and the reported MOCU solve the same terminal decision problem.
+
+The objective-driven policy is
 \begin{equation}
-\begin{aligned}
-\pi_{\mathrm{MOCU}}^{\star}
-&=\arg\min_{\pi}
-\E_{\boldsymbol{\theta}^{\star},H_T\mid\pi}
- \left[\operatorname{MOCU}(H_T)\right],\\
-&\hspace{4.5em}\text{subject to } |H_T|=T.
-\end{aligned}
+\pi_{\mathrm{MOCU}}^\star
+=\arg\min_{\pi}\;
+\E_{H_T\mid\pi}\!\left[\mocu(H_T)\right],
+\qquad |H_T|=T.
 \label{eq:policy-mocu}
 \end{equation}
-The expectation includes the unknown true system, observation noise, and any
-policy randomization. Lower terminal MOCU is better. This objective values only
-information that improves the downstream control decision; two posteriors may
-have different parameter entropy but identical MOCU if they imply the same
-control-relevant distribution of $U$.
+Lower terminal MOCU is better. Unlike EIG, this objective values parameter
+learning only when it improves the downstream control decision.
 
 \section{Compared Design Methods}
 \begin{table}[t]
@@ -397,9 +407,7 @@ conclusions supported by completed three-seed results.}
 \section*{Acknowledgment}
 \todo{Add funding and computing resources.}
 
-\begin{thebibliography}{1}
-\bibitem{placeholder}\todo{Add verified references for BOED, DAD, RL-sBOED,
-Step-DAD, MOCU, and power-grid dynamic identification.}
-\end{thebibliography}
+\bibliographystyle{IEEEtran}
+\bibliography{objective_driven_boed_refs}
 
 \end{document}
