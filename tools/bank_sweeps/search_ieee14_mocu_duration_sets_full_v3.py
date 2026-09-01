@@ -140,6 +140,10 @@ def main():
     p.add_argument("--min-duration-branches", type=int, default=2)
     p.add_argument("--max-dominance", type=float, default=0.75)
     p.add_argument(
+        "--continue-after-first-pass", action="store_true",
+        help="Validate every finalist instead of stopping at the first candidate that passes all gates",
+    )
+    p.add_argument(
         "--allow-same-first-duration", action="store_true",
         help="Do not require the non-myopic and myopic first durations to differ in every seed",
     )
@@ -156,7 +160,7 @@ def main():
     folder = make_experiment_dir_name("ieee14_mocu_duration_fullgrid_audit", "objective_based", 2, n_obs=args.n_obs, noise_sigma=args.noise_sigma)
     out = ROOT / "experiments" / folder; diag = out / "diagnostics"; diag.mkdir(parents=True, exist_ok=True)
     started = time.time(); rng = np.random.default_rng(args.search_seed)
-    run = {"system":"ieee14", "physical_bus_count":n_buses, "dynamic_machine_buses":[1,2,3,6,8], "latent_dimension":10, "study_type":"MOCU_full_281_duration_global_local_audit_v2", "objective":"safety_aware_mocu_identical_to_training_evaluation", "undercontrol_penalty":args.undercontrol_penalty, "violation_penalty":args.violation_penalty, "duration_grid_s":[.20,3.00,.01], "n_duration_options":281, "combination_space":math.comb(281,6), "choose":6, "action_space_per_candidate":6*n_buses, "global_samples":args.global_samples, "global_exact":args.global_exact, "local_parents":args.local_parents, "local_exact":args.local_exact, "finalists":args.finalists, "audit_seeds":list(seeds), "N_obs":args.n_obs, "noise_sigma":args.noise_sigma, "support_size":len(U), "status":"running"}
+    run = {"system":"ieee14", "physical_bus_count":n_buses, "dynamic_machine_buses":[1,2,3,6,8], "latent_dimension":10, "study_type":"MOCU_full_281_duration_global_local_audit_v2", "objective":"safety_aware_mocu_identical_to_training_evaluation", "undercontrol_penalty":args.undercontrol_penalty, "violation_penalty":args.violation_penalty, "duration_grid_s":[.20,3.00,.01], "n_duration_options":281, "combination_space":math.comb(281,6), "choose":6, "action_space_per_candidate":6*n_buses, "global_samples":args.global_samples, "global_exact":args.global_exact, "local_parents":args.local_parents, "local_exact":args.local_exact, "finalists":args.finalists, "stop_on_first_pass":not args.continue_after_first_pass, "audit_seeds":list(seeds), "N_obs":args.n_obs, "noise_sigma":args.noise_sigma, "support_size":len(U), "status":"running"}
     (out/"run_config.json").write_text(json.dumps(run,indent=2)+"\n")
     print(f"MOCU full grid=281, C(281,6)={math.comb(281,6):,}; reusing {bank}", flush=True)
     info, distance = proxy_scores(centres, 281, n_buses)
@@ -226,6 +230,9 @@ def main():
         row=exact_audit(tuple(prior["indices"]),durations=durations,centres=centres,U=U,n_buses=n_buses,sigma=args.noise_sigma,seeds=seeds,outer=24,inner=16,alpha=args.alpha,margin=args.margin,u_grid=u_grid,min_branch_share=.10,max_dominance=args.max_dominance,min_adaptive_advantage=args.min_adaptive_advantage,min_mean_branch_value=args.min_mean_branch_value,min_duration_branches=args.min_duration_branches,require_first_duration_differs=not args.allow_same_first_duration)
         row["proxy_score"]=proxy_value(tuple(prior["indices"]),info,distance); row.pop("indices",None); final.append(row)
         print(f"strict {i}/{len(finalists)} {row['durations_s']} pass={row['passes_gates']}",flush=True)
+        if row["passes_gates"] and not args.continue_after_first_pass:
+            print("desired combination found; stopping strict validation early", flush=True)
+            break
     for row in low: row.pop("indices",None)
     final.sort(key=lambda r:(r["passes_gates"],min(r["adaptive_gap_lcb95"],r["nonmyopic_gap_lcb95"],r["mean_branch_value_lcb95"])),reverse=True)
     passing=[r for r in final if r["passes_gates"]]

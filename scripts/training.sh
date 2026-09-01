@@ -2,10 +2,10 @@
 # Train method(s) into a stamped experiment folder (logs live under that folder).
 #
 # Usage:
-#   ./scripts/training.sh --config configs/ieee9.yaml --method dad --T 5
-#   ./scripts/training.sh --config configs/ieee9.yaml --method dad,rl_sboed
-#   ./scripts/training.sh --config configs/ieee9.yaml --method all --seed 101
-#   ./scripts/training.sh --config configs/ieee9.yaml --method myopic,fixed
+#   ./scripts/training.sh --config configs/ieee9_mocu.yaml --method dad --T 5
+#   ./scripts/training.sh --config configs/ieee9_mocu.yaml --method dad,rl_sboed
+#   ./scripts/training.sh --config configs/ieee9_mocu.yaml --method all --seed 101
+#   ./scripts/training.sh --config configs/ieee9_mocu.yaml --method myopic,fixed
 #     → no-op (eval-only methods)
 set -euo pipefail
 # shellcheck source=../run.sh
@@ -25,7 +25,8 @@ usage() {
     echo "Usage: $0 --config <config.yaml> [--method <methods>|all] [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based] [--exp-dir <path>] [--smoke]" >&2
     echo "" >&2
     echo "  --method  optional comma-separated trainers (default: all trainable in config)" >&2
-    echo "            trainable: dad, rl_sboed, moe_sboed, matched_dense" >&2
+    echo "            default trainable: dad, rl_sboed" >&2
+    echo "            moe_sboed remains available only when explicitly requested" >&2
     echo "            skipped automatically: myopic, fixed, random, step_dad (eval-only)" >&2
 }
 

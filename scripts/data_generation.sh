@@ -2,9 +2,9 @@
 # Generate / reuse observation banks and bind them to a stamped result folder.
 #
 # Usage:
-#   ./scripts/data_generation.sh --config configs/ieee9.yaml
-#   ./scripts/data_generation.sh --config configs/ieee9.yaml --T 8
-#   ./scripts/data_generation.sh --config configs/ieee9.yaml --experiment_type eig_based
+#   ./scripts/data_generation.sh --config configs/ieee9_mocu.yaml
+#   ./scripts/data_generation.sh --config configs/ieee9_mocu.yaml --T 8
+#   ./scripts/data_generation.sh --config configs/ieee9_eig.yaml --experiment_type eig_based
 
 set -euo pipefail
 # shellcheck source=../run.sh
@@ -56,4 +56,28 @@ if [[ -n "$METHOD" && "${METHOD,,}" != "all" ]]; then
 fi
 [[ -n "$FORCE" ]] && ARGS+=("$FORCE")
 [[ -n "$SMOKE" ]] && ARGS+=("$SMOKE")
-exec python3 -m src.experiment "${ARGS[@]}"
+
+# Core YAMLs point to a reusable full-duration bank and a six-duration subset.
+# Each layer is idempotent: complete full banks, subsets, and MOCU extensions
+# are validated and skipped rather than regenerated.
+FULL_ARGS=(--config "$CONFIG")
+[[ -n "$SMOKE" ]] && FULL_ARGS+=(--smoke)
+python3 tools/ensure_full_physical_bank.py "${FULL_ARGS[@]}"
+
+# Generates/reuses the required physical sub-bank.  When missing, its columns
+# are copied from the full bank without rerunning physical simulation.
+python3 -m src.experiment "${ARGS[@]}"
+
+if [[ "$EXPERIMENT_TYPE" == "objective_based" ]]; then
+    MOCU_DIR="$(python3 -c '
+import sys, yaml
+from pathlib import Path
+raw = yaml.safe_load(Path(sys.argv[1]).read_text()) or {}
+print(str((raw.get("data") or {}).get("mocu_dataset_dir") or ""))
+' "$CONFIG")"
+    if [[ -n "$MOCU_DIR" ]]; then
+        MOCU_ARGS=(--config "$CONFIG" --output "$MOCU_DIR")
+        [[ -n "$FORCE" ]] && MOCU_ARGS+=(--force)
+        python3 tools/regenerate_mocu_bank.py "${MOCU_ARGS[@]}"
+    fi
+fi

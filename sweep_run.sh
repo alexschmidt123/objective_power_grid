@@ -2,13 +2,13 @@
 # Sweep run.sh over configs and/or horizons (sequential calls to run.sh).
 #
 # Same T, multiple configs:
-#   bash sweep_run.sh --configs ieee9,ieee14 --T 8
+#   bash sweep_run.sh --configs ieee9_mocu,ieee14_mocu --T 8
 #
 # Same config, multiple T:
-#   bash sweep_run.sh --configs ieee9 --T 4,5,8
+#   bash sweep_run.sh --configs ieee9_mocu --T 4,5,8
 #
 # Cartesian product (every config × every T × seed):
-#   bash sweep_run.sh --configs ieee9 --T 3,4,5 --seed 101,202,303
+#   bash sweep_run.sh --configs ieee9_mocu --T 3,4,5 --seed 101,202,303
 #
 # After a T sweep (at least two --T values), writes one stamped plots folder
 # per (config, type, N_obs, sigma) group:
@@ -18,7 +18,7 @@
 #   metric.md, time.md, metric_vs_T.png, time_vs_T.md, meta.json
 #
 # Rebuild plots from existing T-sweep result dirs (no train/eval):
-#   bash sweep_run.sh --configs ieee9 --experiment_type eig_based \
+#   bash sweep_run.sh --configs ieee9_eig --experiment_type eig_based \
 #     --T 3,4,5 --N_obs 10 --noise_sigma 0.005 --seed 101,202,303 --plots-only
 #
 set -euo pipefail
@@ -28,7 +28,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=run.sh
 source "$ROOT/run.sh"
 
-CONFIGS="ieee9,ieee14"
+CONFIGS="ieee9_mocu,ieee14_mocu"
 TS="$DEFAULT_STEP_NUMBER"
 N_OBS_VALUES="$DEFAULT_N_OBS"
 N_OBS_SET=0
@@ -43,14 +43,14 @@ EXPERIMENT_TYPE="$EXPERIMENT_TYPE_DEFAULT"
 PLOTS_ONLY=0
 
 usage() {
-    echo "Usage: $0 [--configs ieee9,ieee14] [--T 5|4,8] [--N_obs 0|120] [--noise_sigma 0.005|0.001,0.005] [--seed 101,202,303] [--experiment_type objective_based|eig_based] [--method <methods>] [--force] [--bank-structure-audit] [--smoke] [--plots-only]" >&2
+    echo "Usage: $0 [--configs ieee9_mocu,ieee14_mocu] [--T 5|4,8] [--N_obs 0|120] [--noise_sigma 0.005|0.001,0.005] [--seed 101,202,303] [--experiment_type objective_based|eig_based] [--method <methods>] [--force] [--bank-structure-audit] [--smoke] [--plots-only]" >&2
     echo "" >&2
     echo "  --method    optional comma-separated evaluate/train subset (default: yaml methods)" >&2
     echo "              e.g. --method dad,rl_sboed,myopic  (no MoE; skips MoE training)" >&2
     echo "  --seed      one training seed or comma-separated list (default: ${DEFAULT_SEEDS})" >&2
     echo "  --seeds     alias for --seed" >&2
-    echo "  --configs   comma-separated config stems or paths under configs/ (default: ieee9,ieee14)" >&2
-    echo "              IEEE-5 catalogs are retired; use ieee9, ieee14, or sir_ode" >&2
+    echo "  --configs   comma-separated core config stems (default: ieee9_mocu,ieee14_mocu)" >&2
+    echo "              available: sir_ode, ieee9_eig, ieee9_mocu, ieee14_mocu" >&2
     echo "  --systems   alias for --configs" >&2
     echo "  --config    alias for --configs (also accepts full yaml paths)" >&2
     echo "  --T         one horizon or comma-separated list (default: ${DEFAULT_STEP_NUMBER})" >&2
@@ -61,9 +61,9 @@ usage() {
     echo "  --plots-only  write stamped plots from existing matching result dirs (no train/eval)" >&2
     echo "" >&2
     echo "Examples:" >&2
-    echo "  $0 --configs ieee9,ieee14 --T 8         # same T, multiple yaml" >&2
-    echo "  $0 --configs ieee9 --T 4,5,8            # same yaml, multiple T" >&2
-    echo "  $0 --configs ieee9,ieee14 --T 4,8       # product of both" >&2
+    echo "  $0 --configs ieee9_mocu,ieee14_mocu --T 8  # same T, multiple yaml" >&2
+    echo "  $0 --configs ieee9_mocu --T 4,5,8          # same yaml, multiple T" >&2
+    echo "  $0 --configs ieee9_mocu,ieee14_mocu --T 4,8 # product of both" >&2
     echo "  $0 --configs sir_ode --T 4,5 --experiment_type eig_based" >&2
 }
 

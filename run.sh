@@ -1,11 +1,11 @@
 #!/bin/bash
 # Full experiment: call core scripts in order.
 #
-#   bash run.sh --config configs/ieee9.yaml
-#   bash run.sh --config configs/ieee9.yaml --T 8
-#   bash run.sh --config configs/ieee9.yaml --experiment_type eig_based
+#   bash run.sh --config configs/ieee9_mocu.yaml
+#   bash run.sh --config configs/ieee9_mocu.yaml --T 8
+#   bash run.sh --config configs/ieee9_eig.yaml --experiment_type eig_based
 #   bash run.sh --config configs/sir_ode.yaml
-#   bash run.sh --config configs/ieee9.yaml --method dad --force
+#   bash run.sh --config configs/ieee9_mocu.yaml --method dad --force
 #
 # Result folder (allocated once, reused for all steps):
 #   experiments/date_time_configname_Uctrl|EIG_Tnum_NobsN_sigmaX
@@ -178,8 +178,8 @@ usage() {
     echo "  --bank-structure-audit  run Myopic-trap / redundancy audit after data gen; fail if not ready" >&2
     echo "Result folders: date_time_configname_Uctrl|EIG_Tnum_NobsN_sigmaX" >&2
     echo "Examples:" >&2
-    echo "  bash run.sh --config configs/ieee9.yaml" >&2
-    echo "  bash run.sh --config configs/ieee9.yaml --T 8 --seed 101" >&2
+    echo "  bash run.sh --config configs/ieee9_mocu.yaml" >&2
+    echo "  bash run.sh --config configs/ieee9_mocu.yaml --T 8 --seed 101" >&2
     echo "  bash run.sh --config configs/sir_ode.yaml" >&2
 }
 

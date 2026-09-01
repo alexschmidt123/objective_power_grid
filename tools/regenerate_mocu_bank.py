@@ -169,18 +169,28 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Refresh psi_star and OCU tables without touching the EIG probe bank"
     )
-    parser.add_argument("--config", default="configs/ieee9.yaml")
+    parser.add_argument("--config", default="configs/ieee9_mocu.yaml")
     parser.add_argument("--batch-size", type=int, default=512)
     parser.add_argument(
         "--output",
-        default="data/ieee9_mocu_duration_bus",
+        default=None,
         help="Separate MOCU-bank directory (probe arrays remain in the EIG bank)",
+    )
+    parser.add_argument(
+        "--force", action="store_true",
+        help="Regenerate even when a complete matching control bank exists",
     )
     args = parser.parse_args()
 
     cfg = load_config_for_run(args.config, _ROOT, step_number=3)
     probe_data_dir = resolve_dataset_dir(cfg, _ROOT)
-    data_dir = (_ROOT / args.output).resolve()
+    output = args.output or (cfg.raw.get("data") or {}).get("mocu_dataset_dir")
+    if not output:
+        raise RuntimeError("No --output and no data.mocu_dataset_dir in config")
+    data_dir = Path(str(output))
+    if not data_dir.is_absolute():
+        data_dir = _ROOT / data_dir
+    data_dir = data_dir.resolve()
     (data_dir / "meta").mkdir(parents=True, exist_ok=True)
     for split in ("train", "test"):
         (data_dir / split).mkdir(parents=True, exist_ok=True)
@@ -190,6 +200,28 @@ def main() -> None:
     event = float(train_cfg.get("violation_penalty", 0.0))
     spec_doc = _canonical_spec(spec, under=under, event=event)
     spec_hash = _digest(spec_doc)
+
+    required = [
+        *(data_dir / split / name for split in ("train", "test") for name in (
+            "theta_M.npy", "theta_K.npy", "psi_star.npy", "control_safe.npy",
+            "control_rocof.npy", "control_nadir.npy", "ocu_table.npy",
+        )),
+        data_dir / "meta" / "control_bank.yaml",
+    ]
+    meta_path = data_dir / "meta" / "control_bank.yaml"
+    existing_meta = (
+        yaml.safe_load(meta_path.read_text(encoding="utf-8")) or {}
+        if meta_path.is_file() else {}
+    )
+    if (
+        not args.force
+        and all(path.is_file() for path in required)
+        and existing_meta.get("control_spec_sha256") == spec_hash
+        and Path(str(existing_meta.get("source_probe_bank", ""))).resolve()
+        == probe_data_dir.resolve()
+    ):
+        print(f"[mocu-bank] complete and matched -> {data_dir}; skipping generation")
+        return
 
     sim = build_simulator(cfg)
     sim.T_obs_sec = float(spec.T_obs_sec)
@@ -300,7 +332,6 @@ def main() -> None:
         },
         "splits": reports,
     }
-    meta_path = data_dir / "meta" / "control_bank.yaml"
     tmp_meta = meta_path.with_name(meta_path.name + ".tmp")
     with tmp_meta.open("w", encoding="utf-8") as f:
         yaml.safe_dump(metadata, f, sort_keys=False)

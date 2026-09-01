@@ -1,13 +1,8 @@
 # IEEE 14-bus dense-duration shared MOCU/EIG bank.
 # Duration grid: 0.20..3.00 s inclusive at 0.01 s spacing (281 values).
 #
-# WSCC/IEEE 9-bus: shared physics bank; MOCU (objective_based) and EIG
-# (eig_based) are independent experiment types with separate training blocks.
-#
-# The physical 9-bus lossless network is Kron-reduced onto its three dynamic
-# generator buses (physical buses 1, 2, 3).  In this reduced ODE, indices
-# [0,1,2] map to physical buses [1,2,3]. Every probe is a separate experiment
-# starting from equilibrium.
+# The physical 14-bus network is Kron-reduced onto dynamic-machine buses
+# 1, 2, 3, 6, and 8. Every probe starts from equilibrium.
 
 system:
   name: ieee14
@@ -17,10 +12,10 @@ N: 5
 
 data:
   # Relative to the clone root, so both workstations share the same layout.
-  dataset_dir: data/ieee14_duration_dense_0p01
+  dataset_dir: data/ieee14_duration_dense_machinewise_k_0p01
   # Separate terminal-control/OCU extension.  Row n is tied to row n of the
   # shared EIG probe bank; delta_f is referenced, not duplicated.
-  mocu_dataset_dir: data/ieee14_mocu_duration_dense_0p01
+  mocu_dataset_dir: data/ieee14_mocu_duration_dense_machinewise_k_0p01
   # If the bank already exists, generate-data reuses it. If it is missing
   # (fresh clone), generate-data builds it with CUDA.
   generate_if_missing: true
@@ -55,17 +50,17 @@ swing_equation:
   coupling_strength: 1.0
   damping: 0.0
 
-  # Six-dimensional latent state on the three physical generator buses:
-  # theta=(M_1,M_2,M_3,K_1,K_2,K_3). Each coordinate is sampled independently.
-  # Nominal inertia uses H=[23.64,6.40,3.01] s and M=2H/(2*pi*60);
-  # the bounds are +/-30% around each machine's nominal M.
+  # Ten-dimensional latent state on dynamic-machine buses 1, 2, 3, 6, 8:
+  # theta=(M_1,M_2,M_3,M_6,M_8,K_1,K_2,K_3,K_6,K_8).
+  # Nominal 2H=[8,13,10,10,10] s and M=2H/(2*pi*60); M bounds are +/-30%.
   latent_model: machinewise_mk
   M_lower_nodes: [0.014854460, 0.024138498, 0.018568076, 0.018568076, 0.018568076]
   M_upper_nodes: [0.027586856, 0.044828642, 0.034483236, 0.034483236, 0.034483236]
-  # Preserve the established IEEE9 fast-response scale and nominal spatial
-  # participation, but make K_1, K_2, and K_3 independent latent coordinates.
-  K_lower_nodes: [0.05, 0.05, 0.05, 0.05, 0.05]
-  K_upper_nodes: [0.50, 0.50, 0.50, 0.50, 0.50]
+  # Preserve IEEE9's total fast-response range [0.05,0.50], allocated by the
+  # IEEE14 nominal inertia participation [8,13,10,10,10]/51. Each K_i remains
+  # an independently sampled, machine-specific latent coordinate.
+  K_lower_nodes: [0.0078431373, 0.0127450980, 0.0098039216, 0.0098039216, 0.0098039216]
+  K_upper_nodes: [0.0784313725, 0.1274509804, 0.0980392157, 0.0980392157, 0.0980392157]
   use_node_specific_damping: true
   D_nodes: [0.002122066, 0.003448357, 0.002652582, 0.002652582, 0.002652582]
 
@@ -75,8 +70,8 @@ swing_equation:
   omega0_nodes: [0.0, 0.0, 0.0, 0.0, 0.0]
   enforce_initial_equilibrium: true
 
-  # Fixed-amplitude, discrete-duration design at all 9 physical buses.
-  # Code indices 0..8 map to physical bus numbers 1..9.
+  # Fixed-amplitude, discrete-duration design at all 14 physical buses.
+  # Code indices 0..13 map to physical bus numbers 1..14.
   probe_buses: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
   probe_amplitudes: [0.05]
   probe_durations: [
@@ -139,6 +134,7 @@ control:
   T_obs_sec: 10.0
   ode_dt: 0.00625
   fs_hz: 40.0
+  # Reduced index 0 is physical machine bus 1 for both the contingency and control.
   contingency: {bus: 0, magnitude: -0.45, units: pu}
   profile: {bus: 0, t_start: 0.0, duration: 10.0, shape: step, units: pu}
   # Dense grid around the active U band (~0.33–0.40 continuous oracle). Coarse
@@ -168,7 +164,7 @@ bank_quality:
   min_u_positive_frac: 0.50
   min_u_q95: 0.05
   # Dense u grid + this contingency: U∈[~0.34,0.41], Q95−mean≈0.025.
-  min_u_headroom: 0.02
+  min_u_headroom: 0.015
   min_max_abs_corr_rocof_u: 0.05
 
 # Evaluation-only settings shared by every IEEE9 EIG seed.  In particular,

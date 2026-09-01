@@ -2,9 +2,9 @@
 # Evaluate methods into a stamped result folder.
 #
 # Usage:
-#   ./scripts/evaluation.sh --config configs/ieee9.yaml --T 8
-#   ./scripts/evaluation.sh --config configs/ieee9.yaml --method dad,random
-#   ./scripts/evaluation.sh --config configs/ieee9.yaml --exp-dir experiments/...
+#   ./scripts/evaluation.sh --config configs/ieee9_mocu.yaml --T 8
+#   ./scripts/evaluation.sh --config configs/ieee9_mocu.yaml --method dad,random
+#   ./scripts/evaluation.sh --config configs/ieee9_mocu.yaml --exp-dir experiments/...
 
 set -euo pipefail
 # shellcheck source=../run.sh
@@ -23,7 +23,7 @@ SEED="$DEFAULT_SEED"
 usage() {
     echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based] [--method <methods>] [--exp-dir <path>] [--smoke]" >&2
     echo "" >&2
-    echo "  --method  optional comma-separated list (default: experiment.methods in yaml)" >&2
+    echo "  --method  optional comma-separated list (default excludes moe_sboed)" >&2
 }
 
 while [[ $# -gt 0 ]]; do
