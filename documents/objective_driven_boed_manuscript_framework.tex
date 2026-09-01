@@ -67,12 +67,16 @@ sequential design over power-grid probing buses and durations.
 \label{sec:problem}
 
 \subsection{Dynamic Model and Uncertain Parameters}
-Let $G$ be the number of retained dynamic machines. For machine $i$,
+Let $N_b$ be the number of physical buses and let
+$\mathcal G\subseteq\{1,\ldots,N_b\}$ denote the buses containing retained
+dynamic machines, with $G=|\mathcal G|$. For each dynamic-machine bus
+$i\in\mathcal G$,
 \begin{align}
 \dot{\delta}_i(s)&=\omega_i(s),\label{eq:swing-angle}\\
 M_i\dot{\omega}_i(s)&=P_{m,i}
 \notag\\[-0.4em]
-&\quad-\sum_{j=1}^{G}B_{ij}\sin\!\left(\delta_i(s)-\delta_j(s)\right)
+&\quad-\sum_{j\in\mathcal G}B_{ij}
+\sin\!\left(\delta_i(s)-\delta_j(s)\right)
 \notag\\[-0.2em]
 &\quad-\left(\frac{K_i}{2\pi}+D_i\right)\omega_i(s)+p_i(s).
 \label{eq:swing-frequency}
@@ -82,15 +86,16 @@ $M_i$ is inertia, $K_i$ is a fast frequency-response coefficient, $D_i$ is
 known damping, and $B$ is the Kron-reduced network coupling matrix. The
 machine-specific uncertain parameter is
 \begin{equation}
-\boldsymbol{\theta}=(M_1,\ldots,M_G,K_1,\ldots,K_G)\in\Theta,
+\boldsymbol{\theta}=\bigl((M_i,K_i):i\in\mathcal G\bigr)\in\Theta,
 \qquad \boldsymbol{\theta}\sim p_0(\boldsymbol{\theta}).
 \label{eq:theta-prior}
 \end{equation}
-Only dynamic machines receive $M_i$ and $K_i$; load-only buses do not receive
-artificial dynamic parameters. A probe at a non-machine bus is mapped to the
-retained machines through the same Kron reduction. Each probe starts from the
-configured equilibrium, so physical trajectories from different experiments
-are conditionally independent given $\boldsymbol{\theta}$ and the designs.
+Thus, only buses in $\mathcal G$ have inertia $M_i$ and response coefficient
+$K_i$; load-only buses are not assigned artificial $M_i$ or $K_i$ values.
+This restriction concerns the uncertain parameters, not the available probe
+locations. Each probe starts from the configured equilibrium, so physical
+trajectories from different experiments are conditionally independent given
+$\boldsymbol{\theta}$ and the designs.
 
 \subsection{Bus--Duration Probe Space}
 A diagnostic action is
@@ -98,16 +103,20 @@ A diagnostic action is
 \xi_t=(b_t,\tau_t)\in\Xi=\mathcal B\times\mathcal T,
 \label{eq:probe-action}
 \end{equation}
-where $b_t$ is a physical probing bus and $\tau_t$ is a pulse duration. The
-amplitude $A$ is fixed across actions. For $0\le s\le\tau_t$, the injected
-Hann pulse is
+where $\mathcal B=\{1,\ldots,N_b\}$ contains \emph{every physical bus},
+$b_t$ is the selected probe location, and $\tau_t$ is a pulse duration.
+Consequently, both dynamic-machine and non-machine buses are valid probe
+locations. The amplitude $A$ is fixed across actions. For
+$0\le s\le\tau_t$, the injected Hann pulse is
 \begin{equation}
 P_{\mathrm{probe}}(s;\xi_t)
 =\frac{A}{2}\left[1-\cos\!\left(\frac{2\pi s}{\tau_t}\right)\right],
 \label{eq:hann-probe}
 \end{equation}
-and it is zero afterward. Its physical-bus injection is mapped into $p_i(s)$
-in~\eqref{eq:swing-frequency}. With six durations, IEEE9 has
+and it is zero afterward. Network reduction maps an injection at any physical
+bus $b_t\in\mathcal B$ into the machine forcing terms $p_i(s)$ in
+~\eqref{eq:swing-frequency}; it does not create $M_i$ or $K_i$ parameters at
+that bus. With six durations, IEEE9 has
 $9\times6=54$ actions and IEEE14 has $14\times6=84$ actions. Exact action
 repetition is prohibited within one $T$-step rollout.
 
