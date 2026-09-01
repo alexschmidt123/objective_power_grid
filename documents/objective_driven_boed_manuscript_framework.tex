@@ -70,33 +70,25 @@ sequential design over power-grid probing buses and durations.
 Let $\mathcal N=\{1,\ldots,N\}$ contain all physical buses and let
 $\mathcal M\subset\mathcal N$ contain only the buses with dynamic machines.
 Every bus in $\mathcal N$ can be probed, but $M_i$ and $K_i$ exist only for
-$i\in\mathcal M$. In the notation of the NREL probing model, the bus-level
-frequency response is
+$i\in\mathcal M$. Collecting the dynamic-machine quantities into vectors, the
+frequency-response model is
 \begin{equation}
-\begin{aligned}
-M_i\frac{d\Delta\omega_i(s)}{ds}
-&=-\Delta P_{e,i}(s)\\
-&\quad-\left(\frac{K_i}{2\pi}+D_i\right)\Delta\omega_i(s)
-+u_i(s),\quad i\in\mathcal M.
-\end{aligned}
+\mathbf M\frac{d\Delta\boldsymbol{\omega}(s)}{ds}
+=-\Delta\mathbf P_e(s)
+-\left(\frac{\mathbf K}{2\pi}+\mathbf D\right)
+\Delta\boldsymbol{\omega}(s)+\mathbf u(s).
 \label{eq:swing-frequency}
 \end{equation}
-where $\Delta P_{e,i}$ includes the electrical-power exchange with the rest of
-the network. The external input is written explicitly as
-\begin{equation}
-u_i(s)=a_{ib}u_{\mathrm{probe}}(s;\tau)
-+a_{iq}u_{\mathrm{cont}}(s)
-+a_{ic}u_{\mathrm{ctrl}}h_{\mathrm{ctrl}}(s).
-\label{eq:general-input}
-\end{equation}
-Here, $b$, $q$, and $c$ are respectively the probe, contingency, and control
-locations; $a_{ij}$ maps an injection at physical bus $j$ to dynamic machine
-$i$; and $h_{\mathrm{ctrl}}$ is the configured control profile.
+Here, $\mathbf M$, $\mathbf K$, and $\mathbf D$ are diagonal matrices for the
+dynamic machines, $\Delta\mathbf P_e$ contains their network electrical-power
+changes, and $\mathbf u$ is the mapped external power injection. Let
+$\mathbf a(b)$ denote the vector that maps an injection at any physical bus
+$b\in\mathcal N$ to the dynamic-machine equations.
 
 The unknown parameter vector is therefore
 \begin{equation}
 \boldsymbol{\theta}
-=\bigl((M_i,K_i):i\in\mathcal M\bigr)\in\Theta,
+=\bigl(\mathbf M,\mathbf K\bigr)\in\Theta,
 \qquad \boldsymbol{\theta}\sim p_0(\boldsymbol{\theta}).
 \label{eq:theta-prior}
 \end{equation}
@@ -126,22 +118,24 @@ u_{\mathrm{probe}}(s;\tau_t)
 The probe and terminal control are evaluated in separate simulations. During
 a probe test,
 \begin{equation}
-u_i(s)=a_{ib_t}u_{\mathrm{probe}}(s;\tau_t),
+\mathbf u(s)=\mathbf a(b_t)u_{\mathrm{probe}}(s;\tau_t),
 \qquad u_{\mathrm{ctrl}}=u_{\mathrm{cont}}=0.
 \label{eq:probe-test-input}
 \end{equation}
-If $b_t$ is a dynamic-machine bus, $a_{ib_t}=1$ for that machine and zero for
-the others. If $b_t$ is a non-dynamic bus, the network reduction supplies the
-coefficients $a_{ib_t}$, so the load-bus injection is distributed among the
-dynamic machines. The load bus itself is not assigned a swing equation.
+If $b_t$ is a dynamic-machine bus, $\mathbf a(b_t)$ injects the probe directly
+at that machine. If $b_t$ is a non-dynamic bus, $\mathbf a(b_t)$ distributes
+the injection among the dynamic machines through the network reduction. The
+load bus itself is not assigned a swing equation.
 
 During terminal-control evaluation, the probe is absent and
 \begin{equation}
-u_i(s)=a_{iq}u_{\mathrm{cont}}(s)
-+a_{ic}u_{\mathrm{ctrl}}h_{\mathrm{ctrl}}(s),
+\mathbf u(s)=\mathbf a(b_c)u_{\mathrm{cont}}(s)
++\mathbf a(b_u)u_{\mathrm{ctrl}}h_{\mathrm{ctrl}}(s),
 \qquad u_{\mathrm{probe}}=0.
 \label{eq:terminal-control-input}
 \end{equation}
+Here, $b_c$ and $b_u$ are the configured contingency and control locations,
+and $h_{\mathrm{ctrl}}$ is the configured control profile.
 This separation matches the implementation: diagnostic probing updates the
 belief, whereas $u_{\mathrm{ctrl}}$ is selected and evaluated afterward.
 
