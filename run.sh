@@ -57,6 +57,7 @@ DEFAULT_SEED=101
 # Publication training RNGs (sweep cartesian axis). Bank θ uses yaml
 # train_seed/test_seed; this is the policy-training seed only.
 DEFAULT_SEEDS="101,202,303"
+DEFAULT_EVAL_SEEDS="1001,1002,1003,1004,1005"
 
 validate_experiment_type() {
     local t="${1,,}"
@@ -164,13 +165,15 @@ N_OBS_SET=0
 NOISE_SIGMA="$DEFAULT_NOISE_SIGMA"
 NOISE_SIGMA_SET=0
 SEED="$DEFAULT_SEED"
+EVAL_SEEDS="$DEFAULT_EVAL_SEEDS"
 
 usage() {
-    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based] [--method <methods>] [--exp-dir <path>] [--force] [--bank-structure-audit] [--smoke]" >&2
+    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seeds <csv>] [--experiment_type objective_based|eig_based] [--method <methods>] [--exp-dir <path>] [--force] [--bank-structure-audit] [--smoke]" >&2
     echo "" >&2
     echo "  --method  optional; comma-separated list (default: experiment.methods in yaml)" >&2
     echo "            e.g. --method dad,random  (skips training when all selected are baselines)" >&2
     echo "  --seed    training RNG seed (default: ${DEFAULT_SEED}; sweep uses ${DEFAULT_SEEDS})" >&2
+    echo "  --eval-seeds independent evaluation RNG seeds (default: ${DEFAULT_EVAL_SEEDS})" >&2
     echo "  --T       probe horizon (default: ${DEFAULT_STEP_NUMBER})" >&2
     echo "  --N_obs   IEEE trajectory samples; 0 = scalar max-ROCOF (ignored for SIR ODE)" >&2
     echo "  --noise_sigma observation noise std (IEEE default: ${DEFAULT_NOISE_SIGMA}; SIR uses YAML)" >&2
@@ -191,6 +194,7 @@ while [[ $# -gt 0 ]]; do
         --N_obs|--n-obs|--n_obs) N_OBS="$2"; N_OBS_SET=1; shift 2 ;;
         --noise_sigma|--noise-sigma) NOISE_SIGMA="$2"; NOISE_SIGMA_SET=1; shift 2 ;;
         --seed|--seeds) SEED="$2"; shift 2 ;;
+        --eval-seeds|--eval_seeds) EVAL_SEEDS="$2"; shift 2 ;;
         --experiment_type|--experiment-type)
             EXPERIMENT_TYPE="$(validate_experiment_type "$2")" || exit 1
             EXPERIMENT_TYPE_SET=1
@@ -237,6 +241,11 @@ fi
 [[ "$T" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid --T: $T (positive integer required)" >&2; exit 1; }
 [[ "$N_OBS" =~ ^[0-9]+$ ]] || { echo "Invalid --N_obs: $N_OBS (non-negative integer required)" >&2; exit 1; }
 [[ "$SEED" =~ ^[0-9]+$ ]] || { echo "Invalid --seed: $SEED (non-negative integer required)" >&2; exit 1; }
+IFS=',' read -r -a EVAL_SEED_ARR <<< "$EVAL_SEEDS"
+for eval_seed in "${EVAL_SEED_ARR[@]}"; do
+    [[ "$eval_seed" =~ ^[0-9]+$ ]] || { echo "Invalid evaluation seed: $eval_seed" >&2; exit 1; }
+done
+[[ ${#EVAL_SEED_ARR[@]} -gt 0 ]] || { echo "At least one evaluation seed is required" >&2; exit 1; }
 
 # SIR ODE: EIG-only; design=time, observe infected count. Ignore IEEE N_obs.
 IS_SIR_FLAG="$(python3 -c '
@@ -354,14 +363,35 @@ run_pipeline() {
         echo "[run.sh] skipping training.sh (no offline trainers in selection)"
     fi
 
-    cmd=(
-        ./scripts/evaluation.sh --config "$CONFIG"
-        "${TYPE_ARGS[@]}" "${T_ARGS[@]}" "${OBS_ARGS[@]}" "${EXP_ARGS[@]}"
-        --seed "$SEED"
-    )
-    [[ -n "$METHOD_FILTER" ]] && cmd+=(--method "$METHOD_FILTER")
-    [[ -n "$SMOKE" ]] && cmd+=("$SMOKE")
-    "${cmd[@]}"
+    local eval_seed eval_dest
+    mkdir -p "$EXP_DIR/evaluations"
+    for eval_seed in "${EVAL_SEED_ARR[@]}"; do
+        echo "=== crossed evaluation train_seed=$SEED eval_seed=$eval_seed ==="
+        cmd=(
+            ./scripts/evaluation.sh --config "$CONFIG"
+            "${TYPE_ARGS[@]}" "${T_ARGS[@]}" "${OBS_ARGS[@]}" "${EXP_ARGS[@]}"
+            --seed "$SEED" --eval-seed "$eval_seed"
+        )
+        [[ -n "$METHOD_FILTER" ]] && cmd+=(--method "$METHOD_FILTER")
+        [[ -n "$SMOKE" ]] && cmd+=("$SMOKE")
+        "${cmd[@]}"
+        eval_dest="$EXP_DIR/evaluations/seed_${eval_seed}"
+        mkdir -p "$eval_dest"
+        rm -rf "$eval_dest/eval"
+        mv "$EXP_DIR/eval" "$eval_dest/eval"
+        [[ -f "$EXP_DIR/summary.md" ]] && cp "$EXP_DIR/summary.md" "$eval_dest/summary.md"
+        cp "$EXP_DIR/run_config.json" "$eval_dest/run_config.json"
+    done
+    python3 - "$EXP_DIR" "$SEED" "$EVAL_SEEDS" <<'PY'
+import json, sys
+from pathlib import Path
+p=Path(sys.argv[1])/"evaluation_manifest.json"
+p.write_text(json.dumps({"protocol":"crossed_publication_protocol_v1",
+ "training_seed":int(sys.argv[2]),
+ "evaluation_seeds":[int(x) for x in sys.argv[3].split(",")],
+ "model_scope":"local_to_this_run_folder",
+ "shared_models_across_run_folders":False},indent=2)+"\n")
+PY
 
     echo ""
     printf "Done config=%s type=%s T=%s.\n" "$CONFIG" "$EXPERIMENT_TYPE" "$T"

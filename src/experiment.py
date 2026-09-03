@@ -268,13 +268,19 @@ def _evaluate_run_identity(
         if run_doc.get("seed", getattr(args, "seed", None)) is not None
         else GLOBAL_SEED
     )
-    eval_seed = resolve_eval_seed(exp_dir, getattr(args, "seed", None))
+    explicit_eval_seed = getattr(args, "eval_seed", None)
+    eval_seed = (
+        int(explicit_eval_seed)
+        if explicit_eval_seed is not None
+        else resolve_eval_seed(exp_dir, getattr(args, "seed", None))
+    )
     if exp_type == "objective_based":
         # Training seeds measure optimizer variability.  Evaluation noise must
         # remain fixed across those seeds or the reported variance conflates two
         # unrelated sources.  This also supplies common random numbers across T.
         evaluation = dict(cfg.raw.get("evaluation") or {})
-        eval_seed = int(evaluation.get("objective_eval_seed", eval_seed))
+        if explicit_eval_seed is None:
+            eval_seed = int(evaluation.get("objective_eval_seed", eval_seed))
     if args.method:
         method_keys = methods_from_args(cfg, args.method)
     else:
@@ -754,7 +760,7 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
             extra=_run_record_extra(
                 args,
                 methods=list(method_keys),
-                seed=eval_seed,
+                seed=int(identity["train_seed"]),
                 eval_seed=eval_seed,
                 observation_model=(
                     "continuous_duration_max_rocof"
@@ -1075,6 +1081,15 @@ def build_parser() -> argparse.ArgumentParser:
     _add_T(ev)
     _add_observation_overrides(ev)
     _add_seed(ev)
+    ev.add_argument(
+        "--eval-seed",
+        type=int,
+        default=None,
+        help=(
+            "Independent evaluation/noise seed. When supplied, it overrides "
+            "evaluation.objective_eval_seed without changing the training seed."
+        ),
+    )
     ev.add_argument("--smoke", action="store_true")
     ev.set_defaults(func=cmd_evaluate)
 

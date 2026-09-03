@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Search the 281-duration IEEE14 bank for six-duration MOCU spaces.
+"""Diversity-first search of the 281-duration IEEE14 bank for MOCU spaces.
 
 This is a method-independent structural audit.  It reuses the dense physical
 bank, searches reproducibly (not exhaustively) over C(281, 6), and ranks sets
@@ -62,12 +62,12 @@ def load_support(bank_dir: Path, action_ids: np.ndarray, n_obs: int,
 
 
 def audit_one(key, *, durations, centres, U, n_buses, sigma, seed, outer, inner,
-              alpha, margin, u_grid, min_branch_share):
+              alpha, margin, u_grid, min_branch_share, top_k=12):
     ids = np.concatenate([np.arange(i*n_buses, (i+1)*n_buses) for i in key])
     Y = np.transpose(centres[ids], (1, 0, 2))
     result = screen_t2_adaptive_room(
         Y=Y, U=U, sigma=sigma, alpha=alpha, margin=margin, u_grid=u_grid,
-        n_outer=outer, n_inner=inner, top_k=min(12, len(ids)), seed=seed,
+        n_outer=outer, n_inner=inner, top_k=min(int(top_k), len(ids)), seed=seed,
     )
     masses = result.get("second_action_mass", {})
     duration_mass = np.zeros(6, dtype=np.float64)
@@ -89,11 +89,13 @@ def audit_one(key, *, durations, centres, U, n_buses, sigma, seed, outer, inner,
 def exact_audit(key, *, durations, centres, U, n_buses, sigma, seeds, outer, inner,
                 alpha, margin, u_grid, min_branch_share, max_dominance,
                 min_adaptive_advantage=.0, min_mean_branch_value=.0,
-                min_duration_branches=2, require_first_duration_differs=True):
+                min_duration_branches=2, require_first_duration_differs=True,
+                top_k=12):
     rows = [audit_one(
         key, durations=durations, centres=centres, U=U, n_buses=n_buses,
         sigma=sigma, seed=s, outer=outer, inner=inner, alpha=alpha,
         margin=margin, u_grid=u_grid, min_branch_share=min_branch_share,
+        top_k=top_k,
     ) for s in seeds]
     ad_mean, ad_lcb = mean_lcb([r["adaptive_gap"] for r in rows])
     nm_mean, nm_lcb = mean_lcb([r["nonmyopic_gap"] for r in rows])
@@ -139,6 +141,7 @@ def main():
     p.add_argument("--min-mean-branch-value", type=float, default=0.0)
     p.add_argument("--min-duration-branches", type=int, default=2)
     p.add_argument("--max-dominance", type=float, default=0.75)
+    p.add_argument("--strict-top-k", type=int, default=84)
     p.add_argument(
         "--continue-after-first-pass", action="store_true",
         help="Validate every finalist instead of stopping at the first candidate that passes all gates",
@@ -167,6 +170,9 @@ def main():
     candidates=set()
     for _ in range(args.global_samples): candidates.add(candidate_key(rng.choice(281,6,replace=False)))
     for offset in range(281): candidates.add(candidate_key(np.r_[offset, rng.choice(np.delete(np.arange(281),offset),5,replace=False)]))
+    # Always carry the strongest candidate from the preceding diversity audit
+    # into high-budget validation; the larger search still remains global.
+    candidates.add(candidate_key([8, 12, 17, 20, 27, 36]))
     proxy_order=sorted(candidates,key=lambda k:proxy_value(k,info,distance),reverse=True)
     # Split the exact budget between proxy-strong and uniform candidates.  A
     # pure response-dissimilarity proxy over-selected tightly packed long
@@ -184,7 +190,22 @@ def main():
             row["proxy_score"]=proxy_value(key,info,distance); low.append(row)
             if i%20==0 or i==len(keys): print(f"{label} exact {i}/{len(keys)}",flush=True)
     score(global_keys,"global")
-    low.sort(key=lambda r:min(r["adaptive_gap_mean"],r["nonmyopic_gap_mean"],r["mean_branch_value_mean"]),reverse=True)
+    def diversity_key(r):
+        """Prefer genuine duration branching before small noisy MOCU gains."""
+        structural = (
+            r["min_meaningful_duration_branches"] >= args.min_duration_branches
+            and r["max_dominant_duration_branch_share"] <= args.max_dominance
+        )
+        return (
+            int(structural),
+            r["min_meaningful_duration_branches"],
+            -r["max_dominant_duration_branch_share"],
+            r["lookahead_duration_differs_all_seeds"],
+            min(r["adaptive_gap_mean"], r["nonmyopic_gap_mean"],
+                r["mean_branch_value_mean"]),
+        )
+
+    low.sort(key=diversity_key, reverse=True)
     local=set()
     for parent in low[:args.local_parents]:
         base=tuple(parent["indices"])
@@ -204,17 +225,15 @@ def main():
     for row in low:
         key=tuple(row["indices"]); value=min(row["adaptive_gap_mean"],row["nonmyopic_gap_mean"],row["mean_branch_value_mean"])
         if key not in best or value>best[key][0]: best[key]=(value,row)
-    # Build a multi-objective finalist slate instead of filling it with many
-    # near-identical proxy neighbors.  Round-robin ranks retain candidates that
-    # are strongest in adaptive value, non-myopic value, branch value, or
-    # duration branching, plus balanced candidates.
+    # Diversity is the primary finalist criterion. MOCU rankings provide the
+    # remaining candidates only after structurally promising spaces are kept.
     rows=[x[1] for x in best.values()]
     rankings=[
+        sorted(rows,key=diversity_key,reverse=True),
         sorted(rows,key=lambda r:min(r["adaptive_gap_mean"],r["nonmyopic_gap_mean"],r["mean_branch_value_mean"]),reverse=True),
         sorted(rows,key=lambda r:r["adaptive_gap_mean"],reverse=True),
         sorted(rows,key=lambda r:r["nonmyopic_gap_mean"],reverse=True),
         sorted(rows,key=lambda r:r["mean_branch_value_mean"],reverse=True),
-        sorted(rows,key=lambda r:(r["min_meaningful_duration_branches"],-r["max_dominant_duration_branch_share"]),reverse=True),
     ]
     finalists=[]; seen=set(); depth=0
     while len(finalists)<args.finalists and depth<max(map(len,rankings)):
@@ -227,7 +246,7 @@ def main():
         depth+=1
     final=[]
     for i,prior in enumerate(finalists,1):
-        row=exact_audit(tuple(prior["indices"]),durations=durations,centres=centres,U=U,n_buses=n_buses,sigma=args.noise_sigma,seeds=seeds,outer=24,inner=16,alpha=args.alpha,margin=args.margin,u_grid=u_grid,min_branch_share=.10,max_dominance=args.max_dominance,min_adaptive_advantage=args.min_adaptive_advantage,min_mean_branch_value=args.min_mean_branch_value,min_duration_branches=args.min_duration_branches,require_first_duration_differs=not args.allow_same_first_duration)
+        row=exact_audit(tuple(prior["indices"]),durations=durations,centres=centres,U=U,n_buses=n_buses,sigma=args.noise_sigma,seeds=seeds,outer=24,inner=16,alpha=args.alpha,margin=args.margin,u_grid=u_grid,min_branch_share=.10,max_dominance=args.max_dominance,min_adaptive_advantage=args.min_adaptive_advantage,min_mean_branch_value=args.min_mean_branch_value,min_duration_branches=args.min_duration_branches,require_first_duration_differs=not args.allow_same_first_duration,top_k=args.strict_top_k)
         row["proxy_score"]=proxy_value(tuple(prior["indices"]),info,distance); row.pop("indices",None); final.append(row)
         print(f"strict {i}/{len(finalists)} {row['durations_s']} pass={row['passes_gates']}",flush=True)
         if row["passes_gates"] and not args.continue_after_first_pass:

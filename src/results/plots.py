@@ -30,6 +30,7 @@ from src.layout import (
 POSTER_METHOD_ORDER = (
     "DAD",
     "RL-SBOED",
+    "Step-DAD",
     "Myopic",
     "Fixed",
     "Random",
@@ -45,6 +46,8 @@ _METHOD_LABELS = {
     "rl_sboed_eig": "RL-SBOED",
     "RL-sBOED": "RL-SBOED",
     "RL-SBOED": "RL-SBOED",
+    "step_dad": "Step-DAD",
+    "Step-DAD": "Step-DAD",
     "myopic": "Myopic",
     "myopic_delta_h": "Myopic",
     "Myopic": "Myopic",
@@ -134,16 +137,36 @@ def _metric_value(row: dict[str, Any], *, eig: bool) -> float | None:
 
 
 def _load_summary_rows(exp_dir: Path, *, eig: bool) -> list[dict[str, Any]]:
-    eval_dir = exp_dir / "eval"
-    path = (
-        eval_dir / "terminal_eig_summary.csv"
-        if eig
-        else eval_dir / "summary.csv"
-    )
-    if not path.is_file():
-        return []
-    with path.open(encoding="utf-8", newline="") as handle:
-        return list(csv.DictReader(handle))
+    filename = "terminal_eig_summary.csv" if eig else "summary.csv"
+    paths = [exp_dir / "eval" / filename]
+    crossed = sorted((exp_dir / "evaluations").glob(f"seed_*/eval/{filename}"))
+    if crossed:
+        paths = crossed
+    rows: list[dict[str, Any]] = []
+    for path in paths:
+        if path.is_file():
+            with path.open(encoding="utf-8", newline="") as handle:
+                rows.extend(csv.DictReader(handle))
+    if len(paths) <= 1:
+        return rows
+    # One run folder owns one trained model. Collapse its evaluation seeds
+    # before the outer collector computes variation across training seeds.
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        grouped[str(row.get("method") or row.get("Method"))].append(row)
+    collapsed: list[dict[str, Any]] = []
+    for method, group in grouped.items():
+        row = dict(group[0])
+        for key in ("terminal_eig_mean", "mean_eig", "ΔH", "mean_mocu", "mean_gap",
+                    "online_seconds_per_rollout", "seconds_per_rollout"):
+            values=[]
+            for item in group:
+                try: values.append(float(item[key]))
+                except (KeyError, TypeError, ValueError): pass
+            if values: row[key] = sum(values) / len(values)
+        row["method"] = method
+        collapsed.append(row)
+    return collapsed
 
 
 def _rel_to_root(path: Path, root: Path) -> str:
@@ -346,18 +369,22 @@ _EIG_PAIRED_COMPARISONS = (
 
 def _paired_eig_differences(exp_dir: Path) -> dict[str, list[float]]:
     """Recover per-theta paired differences from the compact rollout artifact."""
-    path = exp_dir / "eval" / "vector_eig_results.json"
-    if not path.is_file():
-        return {}
-    raw = json.loads(path.read_text(encoding="utf-8"))
+    paths = [exp_dir / "eval" / "vector_eig_results.json"]
+    crossed = sorted((exp_dir / "evaluations").glob("seed_*/eval/vector_eig_results.json"))
+    if crossed:
+        paths = crossed
     grouped: dict[str, dict[int, list[float]]] = defaultdict(
         lambda: defaultdict(list)
     )
-    for row in raw.get("rollouts", []):
-        method = str(row.get("method", ""))
-        if not method or row.get("theta_id") is None:
+    for path in paths:
+        if not path.is_file():
             continue
-        grouped[method][int(row["theta_id"])].append(float(row["terminal_eig"]))
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        for row in raw.get("rollouts", []):
+            method = str(row.get("method", ""))
+            if not method or row.get("theta_id") is None:
+                continue
+            grouped[method][int(row["theta_id"])].append(float(row["terminal_eig"]))
     output: dict[str, list[float]] = {}
     for left, right in _EIG_PAIRED_COMPARISONS:
         if left not in grouped or right not in grouped:
@@ -447,7 +474,11 @@ def _write_text(path: Path, lines: list[str]) -> None:
 def _mean_cell(values: list[float], *, digits: int) -> str:
     if not values:
         return "—"
-    return f"{sum(values) / len(values):.{digits}f}"
+    mean = sum(values) / len(values)
+    std = _sample_std(values)
+    if len(values) < 2 or not math.isfinite(std):
+        return f"{mean:.{digits}f} (n={len(values)}; SD unavailable)"
+    return f"{mean:.{digits}f} ± {std:.{digits}f}"
 
 
 def _plot_metric_errorbars(
@@ -539,7 +570,7 @@ def write_sweep_plot_bundle(
     metric_name = "terminal EIG" if eig else "MOCU"
     better = "higher better" if eig else "lower better"
     title_metric = f"Mean {metric_name} ± std (n = {n_seeds} seeds) ({better})"
-    title_time = f"Mean time consumption (n = {n_seeds} seeds)"
+    title_time = f"Time consumption: mean ± sample SD (n = {n_seeds} seeds)"
 
     headers_metric = ["Method"] + [f"T={t}" for t in horizons]
     rows_metric: list[list[str]] = []
@@ -555,16 +586,17 @@ def write_sweep_plot_bundle(
             row.append(_fmt_pm(mean, _sample_std(values), n))
         rows_metric.append(row)
 
-    headers_time = ["Method"]
-    for t in horizons:
-        headers_time.extend([f"T={t} Offline (s)", f"T={t} Online (s/rollout)"])
-    rows_time: list[list[str]] = []
+    headers_time = ["Method"] + [f"T={t}" for t in horizons]
+    rows_offline: list[list[str]] = []
+    rows_online: list[list[str]] = []
     for method in methods:
-        row = [method]
+        offline_row = [method]
+        online_row = [method]
         for t in horizons:
-            row.append(_mean_cell(offline.get(method, {}).get(t, []), digits=2))
-            row.append(_mean_cell(online.get(method, {}).get(t, []), digits=6))
-        rows_time.append(row)
+            offline_row.append(_mean_cell(offline.get(method, {}).get(t, []), digits=2))
+            online_row.append(_mean_cell(online.get(method, {}).get(t, []), digits=6))
+        rows_offline.append(offline_row)
+        rows_online.append(online_row)
 
     headers_vs = ["T"] + methods
     rows_off: list[list[str]] = []
@@ -621,7 +653,18 @@ def write_sweep_plot_bundle(
     _write_text(metric_path, metric_lines)
     _write_text(
         time_path,
-        [f"# {title_time}", ""] + _md_table(headers_time, rows_time) + [""],
+        [
+            f"# {title_time}",
+            "",
+            "## Offline time (seconds)",
+            "",
+            *_md_table(headers_time, rows_offline),
+            "",
+            "## Online time (seconds per rollout)",
+            "",
+            *_md_table(headers_time, rows_online),
+            "",
+        ],
     )
     _write_text(
         time_vs_path,

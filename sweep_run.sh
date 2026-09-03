@@ -35,6 +35,7 @@ N_OBS_SET=0
 NOISE_SIGMAS="$DEFAULT_NOISE_SIGMA"
 NOISE_SIGMA_SET=0
 SEEDS="$DEFAULT_SEEDS"
+EVAL_SEEDS="$DEFAULT_EVAL_SEEDS"
 FORCE=""
 METHOD=""
 SMOKE=""
@@ -43,12 +44,13 @@ EXPERIMENT_TYPE="$EXPERIMENT_TYPE_DEFAULT"
 PLOTS_ONLY=0
 
 usage() {
-    echo "Usage: $0 [--configs ieee9_mocu,ieee14_mocu] [--T 5|4,8] [--N_obs 0|120] [--noise_sigma 0.005|0.001,0.005] [--seed 101,202,303] [--experiment_type objective_based|eig_based] [--method <methods>] [--force] [--bank-structure-audit] [--smoke] [--plots-only]" >&2
+    echo "Usage: $0 [--configs ieee9_mocu,ieee14_mocu] [--T 5|4,8] [--N_obs 0|120] [--noise_sigma 0.005|0.001,0.005] [--seed 101,202,303] [--eval-seeds 1001,1002,1003,1004,1005] [--experiment_type objective_based|eig_based] [--method <methods>] [--force] [--bank-structure-audit] [--smoke] [--plots-only]" >&2
     echo "" >&2
     echo "  --method    optional comma-separated evaluate/train subset (default: yaml methods)" >&2
     echo "              e.g. --method dad,rl_sboed,myopic  (no MoE; skips MoE training)" >&2
     echo "  --seed      one training seed or comma-separated list (default: ${DEFAULT_SEEDS})" >&2
     echo "  --seeds     alias for --seed" >&2
+    echo "  --eval-seeds evaluation seeds used inside every independent run.sh folder (default: ${DEFAULT_EVAL_SEEDS})" >&2
     echo "  --configs   comma-separated core config stems (default: ieee9_mocu,ieee14_mocu)" >&2
     echo "              available: sir_ode, ieee9_eig, ieee9_mocu, ieee14_mocu" >&2
     echo "  --systems   alias for --configs" >&2
@@ -92,6 +94,7 @@ while [[ $# -gt 0 ]]; do
         --N_obs|--n-obs|--n_obs) N_OBS_VALUES="$2"; N_OBS_SET=1; shift 2 ;;
         --noise_sigma|--noise-sigma) NOISE_SIGMAS="$2"; NOISE_SIGMA_SET=1; shift 2 ;;
         --seeds|--seed) SEEDS="$2"; shift 2 ;;
+        --eval-seeds|--eval_seeds) EVAL_SEEDS="$2"; shift 2 ;;
         --method|-method|-m) METHOD="$2"; shift 2 ;;
         --experiment_type|--experiment-type)
             EXPERIMENT_TYPE="$(validate_experiment_type "$2")" || exit 1
@@ -249,7 +252,7 @@ for cfg in "${CFG_ARR[@]}"; do
             extra=(--force)
         fi
         echo "--- $cfg --T $T --N_obs $N_OBS --noise_sigma $NOISE_SIGMA --seed $SEED ${extra[*]:-} ---"
-        ARGS=(--config "$cfg" --experiment_type "$EXPERIMENT_TYPE" -T "$T" --N_obs "$N_OBS" --noise_sigma "$NOISE_SIGMA" --seed "$SEED")
+        ARGS=(--config "$cfg" --experiment_type "$EXPERIMENT_TYPE" -T "$T" --N_obs "$N_OBS" --noise_sigma "$NOISE_SIGMA" --seed "$SEED" --eval-seeds "$EVAL_SEEDS")
         [[ -n "$METHOD" ]] && ARGS+=(--method "$METHOD")
         [[ -n "$BANK_STRUCTURE_AUDIT" ]] && ARGS+=(--bank-structure-audit)
         cell_log="$(mktemp)"
