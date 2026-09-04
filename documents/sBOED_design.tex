@@ -27,8 +27,8 @@ Let
 \theta=(\mathbf M,\mathbf K)\in\Theta
 \]
 denote the uncertain inertia and fast frequency-response parameters of an
-IEEE test-system dynamic model. The study considers the IEEE 5-, 9-, and
-14-bus systems; the network model and uncertainty distribution are fixed
+IEEE test-system dynamic model. The study considers the IEEE 9- and 14-bus
+systems; the network model and uncertainty distribution are fixed
 within each comparison. The experiment consists of a fixed number \(T\) of
 sequential probe tests. At probe step \(t\), an adaptive policy \(\pi\) selects
 \[
@@ -222,16 +222,16 @@ f_i^{\,p}(s;\theta,\xi_t)-f_i^{\,p}(0;\theta,\xi_t).
 \]
 The simulator produces \(N_{\mathrm{sim}}\) time samples on the current probe
 window. In the primary continuous-duration experiments the method-visible
-observation is a fixed uniform subsample of the frequency-deviation trajectory
-at the probe bus. With \(N_{\mathrm{obs}}=24\) and indices
-\(q_1,\ldots,q_{24}\),
+observation is a fixed subsample of the frequency-deviation trajectory at the
+probe bus. For configurable observation dimension \(N_{\mathrm{obs}}\)
+and sampling indices \(q_1,\ldots,q_{N_{\mathrm{obs}}}\),
 \[
 \boxed{
 \mathbf y_{\mathrm{clean}}(\theta,\xi_t)
 =
 \left[
 \Delta f_b^{\,p}(s_{q_1};\theta,\xi_t),\ldots,
-\Delta f_b^{\,p}(s_{q_{24}};\theta,\xi_t)
+\Delta f_b^{\,p}(s_{q_{N_{\mathrm{obs}}}};\theta,\xi_t)
 \right]^{\!\top},
 }
 \label{eq:y_clean}
@@ -247,7 +247,8 @@ and the measured vector is
 \qquad
 \boldsymbol\epsilon_t
 \sim
-\mathcal N\!\left(\mathbf 0,\sigma_y^2\mathbf I_{24}\right).
+\mathcal N\!\left(\mathbf 0,
+\sigma_y^2\mathbf I_{N_{\mathrm{obs}}}\right).
 }
 \label{eq:y_obs}
 \]
@@ -265,7 +266,7 @@ p(\mathbf y_{\mathrm{obs},t}\mid\theta,\xi_t)
 \left(
 \mathbf y_{\mathrm{obs},t};
 \mathbf y_{\mathrm{clean}}(\theta,\xi_t),
-\sigma_y^2\mathbf I_{24}
+\sigma_y^2\mathbf I_{N_{\mathrm{obs}}}
 \right).
 \]
 Because independent probes reset to the common equilibrium and observation
