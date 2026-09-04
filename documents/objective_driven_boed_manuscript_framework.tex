@@ -260,8 +260,7 @@ u_T=u_{\mathrm{ctrl}}(h_T)
 \end{equation}
 This is the hardest model-specific optimum remaining on the numerical
 posterior support. A posterior-quantile controller is distinct from this Yoon
-IBR baseline. A chance constraint is, however, part of the proposed risk-aware
-decision in Eq.~\eqref{eq:risk-aware-control}.
+IBR baseline and is not used in the primary formulation below.
 
 \subsection{Yoon IBR--MOCU Baseline}
 MOCU measures the expected performance loss caused by uncertainty relative to
@@ -292,74 +291,94 @@ of an off-support true system. This baseline measures excess injection after
 imposing hard safety; it cannot grade the posterior probability or severity of
 unsafe off-support outcomes and is not the proposed primary objective.
 
-\subsection{Risk-Aware Multi-Objective MOCU Specialization}
-For a model $\boldsymbol\theta$ and terminal injection $u$, define normalized
-stability loss
+\subsection{Risk-Aware Multi-Objective MOCU}
+We now specialize the general MOCU construction of Yoon et
+al.~\cite{yoon2013mocu,yoon2021multimocu} to the grid-control objective.  For
+each model $\boldsymbol\theta$ and admissible injection $u\in\mathcal U$, define
+the dimensionless objective components
 \begin{align}
-S(\boldsymbol\theta,u)
-={}&w_f\left[\frac{\underline f-f_{\min}(\boldsymbol\theta,u)}{s_f}\right]_+
-+w_r\left[\frac{r(\boldsymbol\theta,u)-r_{\max}}{s_r}\right]_+ \notag\\
-&+w_t\left[\frac{t_{\mathrm{set}}(\boldsymbol\theta,u)-\bar t_{\mathrm{set}}}{s_t}\right]_+,
-\label{eq:stability-loss}
+\ell_c(u)&=\frac{C_u(u)}{C_{\mathrm{ref}}},
+\label{eq:cost-component}\\
+\ell_0(\boldsymbol\theta,u)
+&=\mathbf 1\{\neg\mathsf{Safe}(\boldsymbol\theta,u)\},
+\label{eq:failure-component}\\
+\ell_f(\boldsymbol\theta,u)
+&=\left[\frac{\underline f-f_{\min}(\boldsymbol\theta,u)}{s_f}\right]_+,
+\label{eq:nadir-component}\\
+\ell_r(\boldsymbol\theta,u)
+&=\left[\frac{r(\boldsymbol\theta,u)-r_{\max}}{s_r}\right]_+,
+\label{eq:rocof-component}\\
+\ell_t(\boldsymbol\theta,u)
+&=\left[\frac{t_{\mathrm{set}}(\boldsymbol\theta,u)
+-\bar t_{\mathrm{set}}}{s_t}\right]_+,
+\label{eq:settling-component}
 \end{align}
-where $[x]_+=\max(x,0)$ and the scales make the terms dimensionless. The
-Following Yoon's general and multi-objective MOCU
-formulations~\cite{yoon2013mocu,yoon2021multimocu}, define the model-dependent
-operational cost
-\begin{equation}
-\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda)=
-\lambda_c\widetilde C_u(u)
-+\lambda_0\mathbf 1\{S(\boldsymbol\theta,u)>0\}
-+\lambda_s S(\boldsymbol\theta,u).
-\label{eq:risk-loss}
-\end{equation}
-Here $\widetilde C_u$ is a normalized monetary or resource cost, potentially
-nonlinear. The nonnegative weight vector $\boldsymbol\lambda=(\lambda_c,
-\lambda_0,\lambda_s)$ is specified before method comparison. This is exactly
-the combined operational-cost construction of multi-objective MOCU, not a new
-definition of MOCU. The IBR practical command and model-specific optimum are
-\begin{equation}
-u_{\mathrm{ctrl}}(b;\boldsymbol\lambda)
-=\arg\min_{u\in\mathcal U}
-\E_{\boldsymbol\theta\sim b}
-[\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda)],
-\qquad
-u_{\boldsymbol\theta}^*(\boldsymbol\lambda)
-=\arg\min_{u\in\mathcal U}
-\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda).
-\label{eq:risk-aware-control}
-\end{equation}
-Substitution into Yoon's definition gives the risk-aware power-grid MOCU
-\begin{equation}
-\mocu_{\boldsymbol\lambda}(b)=
-\E_{\boldsymbol\theta\sim b}\!\left[
-\xi_{\boldsymbol\theta}(u_{\mathrm{ctrl}}(b;\boldsymbol\lambda);\boldsymbol\lambda)
--\xi_{\boldsymbol\theta}(u_{\boldsymbol\theta}^*(\boldsymbol\lambda);\boldsymbol\lambda)
-\right].
-\label{eq:risk-aware-mocu}
-\end{equation}
-It is the additional economic and stability-risk cost caused by uncertainty;
-raw $u_{\mathrm{ctrl}}$ alone is not a cost-of-uncertainty measure. The primary
-$\boldsymbol\lambda$ is fixed from operational requirements, and a declared
-weight sensitivity analysis reports the cost--risk frontier. CVaR is reported
-only as a secondary tail-risk diagnostic and is not inserted into the primary
-MOCU definition. Safety probability, violation severity, injection cost, and
-$u_{\mathrm{ctrl}}$ are reported separately so a scalar score cannot hide a
-safety--cost tradeoff.
+where $[z]_+=\max(z,0)$.  The reference cost $C_{\mathrm{ref}}$ and positive
+scales $s_f,s_r,s_t$ remove physical units; they are fixed independently of the
+compared design policies.
 
-The objective-driven policy is
+For a prespecified nonnegative preference vector
+$\boldsymbol\lambda=(\lambda_c,\lambda_0,\lambda_f,\lambda_r,\lambda_t)$,
+the model-dependent operational cost is
+\begin{equation}
+\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda)
+=\lambda_c\ell_c(u)+\lambda_0\ell_0(\boldsymbol\theta,u)
++\lambda_f\ell_f(\boldsymbol\theta,u)
++\lambda_r\ell_r(\boldsymbol\theta,u)
++\lambda_t\ell_t(\boldsymbol\theta,u).
+\label{eq:multiobjective-cost}
+\end{equation}
+Equation~\eqref{eq:multiobjective-cost} is a direct application of published
+multi-objective MOCU; it is not a new definition of MOCU.  The model-specific
+and posterior IBR controls are, respectively,
+\begin{align}
+u_{\boldsymbol\theta}^*(\boldsymbol\lambda)
+&=\arg\min_{u\in\mathcal U}
+\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda),
+\label{eq:model-specific-control}\\
+u_{\mathrm{ctrl}}(b;\boldsymbol\lambda)
+&=\arg\min_{u\in\mathcal U}
+\E_{\boldsymbol\theta\sim b}
+[\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda)].
+\label{eq:risk-aware-control}
+\end{align}
+Thus $u_{\mathrm{ctrl}}$ is the physical action selected under uncertainty; it
+is not itself the uncertainty metric.
+
+The objective cost of uncertainty for model $\boldsymbol\theta$ and its
+posterior mean are
+\begin{align}
+\ocu_{\boldsymbol\lambda}(\boldsymbol\theta,b)
+&=\xi_{\boldsymbol\theta}
+(u_{\mathrm{ctrl}}(b;\boldsymbol\lambda);\boldsymbol\lambda)
+-\xi_{\boldsymbol\theta}
+(u_{\boldsymbol\theta}^*(\boldsymbol\lambda);\boldsymbol\lambda),
+\label{eq:risk-aware-ocu}\\
+\mocu_{\boldsymbol\lambda}(b)
+&=\E_{\boldsymbol\theta\sim b}
+[\ocu_{\boldsymbol\lambda}(\boldsymbol\theta,b)]\ge0.
+\label{eq:risk-aware-mocu}
+\end{align}
+Nonnegativity follows from the model-specific optimality of
+$u_{\boldsymbol\theta}^*$.  This MOCU measures the additional injection and
+stability cost attributable to uncertainty.
+
+The sequential design objective is
 \begin{equation}
 \pi_{\mathrm{MOCU}}^\star
-=\arg\min_{\pi}\;
+=\arg\min_{\pi}
 \E_{H_T\mid\pi}\!\left[
-\mocu_{\boldsymbol\lambda}\bigl(p(\boldsymbol\theta\mid H_T)\bigr)\right],
+\mocu_{\boldsymbol\lambda}
+\bigl(p(\boldsymbol\theta\mid H_T)\bigr)\right],
 \qquad |H_T|=T.
 \label{eq:policy-mocu}
 \end{equation}
-Equivalently, probing maximizes expected prior-to-terminal MOCU reduction.
-Lower terminal MOCU is better. Unlike EIG, this goal-oriented BOED objective
-values parameter learning only when it improves the downstream cost--risk
-decision.
+Equivalently, the policy maximizes expected prior-to-terminal MOCU reduction.
+The primary $\boldsymbol\lambda$ and all normalization constants are fixed
+before method comparison.  We additionally report every cost component,
+$u_{\mathrm{ctrl}}$, held-out safety, and a prespecified weight-sensitivity
+frontier.  CVaR is a secondary diagnostic rather than part of the primary MOCU
+definition.
 
 \section{Compared Design Methods}
 \begin{table}[t]

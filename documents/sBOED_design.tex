@@ -666,70 +666,61 @@ The system operator does not require accurate values of \(M_i/K_i\) for their
 own sake. The operational goal is a sufficiently safe and steady response at
 the lowest reasonable intervention cost. Raw \(u_{\mathrm{ctrl}}\) is only an
 action magnitude; it is neither monetary cost nor a measure of posterior
-instability risk. Define the dimensionless stability loss
+instability risk. Following Yoon's multi-objective MOCU
+construction~\cite{yoon2021multi}, define the dimensionless component costs
+\begin{align}
+\ell_c(u)&=C_u(u)/C_{\mathrm{ref}},\\
+\ell_0(\theta,u)&=\mathbf 1\{\neg\mathrm{safe}(\theta,u)\},\\
+\ell_f(\theta,u)&=
+\left[(f_{\min}-f_{\mathrm{nadir}}(\theta,u))/s_f\right]_+,\\
+\ell_r(\theta,u)&=
+\left[(r_{\mathrm{ctrl}}(\theta,u)-r_{\max})/s_r\right]_+,\\
+\ell_t(\theta,u)&=
+\left[(t_{\mathrm{set}}(\theta,u)-t_{\mathrm{set}}^{\max})/s_t\right]_+,
+\end{align}
+where \([z]_+=\max(z,0)\). The reference quantities remove physical units and
+are fixed before method comparison. The combined operational cost is
 \[
 \boxed{
-S_\theta(u)=
-w_f\left[\frac{f_{\min}-f_{\mathrm{nadir}}(\theta,u)}{s_f}\right]_+
-+w_r\left[\frac{r_{\mathrm{ctrl}}(\theta,u)-r_{\max}}{s_r}\right]_+
-+w_t\left[\frac{t_{\mathrm{set}}(\theta,u)-t_{\mathrm{set}}^{\max}}{s_t}\right]_+,
-}
-\label{eq:stability_risk}
-\]
-where \([x]_+=\max(x,0)\), and fixed scales \(s_f,s_r,s_t\) prevent unit
-choice from implicitly determining the risk weights. Other declared stability
-standards, such as damping ratio or integrated frequency deviation, may be
-added before evaluation but not selected after observing method performance.
-
-Let \(\widetilde C_u(u)\) be the normalized monetary, reserve, energy, or
-actuator-use cost of injection. Following Yoon's multi-objective MOCU
-construction~\cite{yoon2021multi}, define the combined modelwise operational cost
-\[
-\boxed{
-\xi_\theta(u;\boldsymbol\lambda)
-=\lambda_c\widetilde C_u(u)
-+\lambda_0\mathbf 1\{S_\theta(u)>0\}
-+\lambda_s S_\theta(u).
+\xi_\theta(u;\boldsymbol\lambda)=
+\lambda_c\ell_c(u)+\lambda_0\ell_0(\theta,u)
++\lambda_f\ell_f(\theta,u)+\lambda_r\ell_r(\theta,u)
++\lambda_t\ell_t(\theta,u).
 }
 \label{eq:risk_aware_loss}
 \]
-The binary objective prices failure to meet a standard and the continuous
-objective prices its severity. The nonnegative weight vector
-\(\boldsymbol\lambda=(\lambda_c,\lambda_0,\lambda_s)\) is specified from
-operational requirements before method comparison. This is an application of
-the published multi-objective MOCU cost construction, not a new uncertainty
-measure. Under posterior \(b\), the IBR practical command is
+The binary component represents failure to meet a standard, while the
+continuous components represent violation severity. The nonnegative preference
+vector \(\boldsymbol\lambda\) is specified from operational requirements. This
+is an application of published multi-objective MOCU, not a new uncertainty
+measure.
+
+For known \(\theta\), the model-specific action is
+\[
+u_\theta^*(\boldsymbol\lambda)=
+\arg\min_{u\in\mathcal S}\xi_\theta(u;\boldsymbol\lambda).
+\]
+Under posterior \(b\), Yoon's IBR construction gives the practical action
 \[
 \boxed{
 u_{\mathrm{ctrl}}(b;\boldsymbol\lambda)=
 \arg\min_{u\in\mathcal S}
-\mathbb E_{\theta\sim b}
-[\xi_\theta(u;\boldsymbol\lambda)].
+\mathbb E_{\theta\sim b}[\xi_\theta(u;\boldsymbol\lambda)].
 }
 \label{eq:risk_aware_u_ctrl}
 \]
-For known \(\theta\), the model-specific optimal action under the same cost is
-\[
-u_\theta^*(\boldsymbol\lambda)
-=\arg\min_{u\in\mathcal S}\xi_\theta(u;\boldsymbol\lambda).
-\]
-Substitution into Yoon's original MOCU definition yields the primary
-risk-aware power-grid MOCU
-\[
-\boxed{
-\operatorname{MOCU}_{\boldsymbol\lambda}(b)=
-\mathbb E_{\theta\sim b}\left[
-\xi_\theta\!\left(u_{\mathrm{ctrl}}(b;\boldsymbol\lambda);
-\boldsymbol\lambda\right)
--\xi_\theta\!\left(u_\theta^*(\boldsymbol\lambda);
-\boldsymbol\lambda\right)
-\right].
-}
+The associated OCU and MOCU are
+\begin{align}
+\operatorname{OCU}_{\boldsymbol\lambda}(\theta,b)
+&=\xi_\theta(u_{\mathrm{ctrl}}(b;\boldsymbol\lambda);\boldsymbol\lambda)
+-\xi_\theta(u_\theta^*(\boldsymbol\lambda);\boldsymbol\lambda),\\
+\operatorname{MOCU}_{\boldsymbol\lambda}(b)
+&=\mathbb E_{\theta\sim b}
+[\operatorname{OCU}_{\boldsymbol\lambda}(\theta,b)]\ge0.
 \label{eq:risk_aware_mocu}
-\]
-This is the expected additional injection and stability-risk cost caused by
-not knowing the true model. The corresponding goal-oriented experimental
-design objective is
+\end{align}
+The inequality follows from model-specific optimality. The corresponding
+goal-oriented experimental-design objective is
 \[
 \boxed{
 \pi^*=\arg\min_\pi
@@ -741,11 +732,10 @@ design objective is
 \label{eq:risk_aware_mocu_policy}
 \]
 Equivalently, it maximizes expected prior-to-terminal MOCU reduction. The
-hard-safety reduction in Eq.~\eqref{eq:belief_mocu_ibr} remains a named special
-case of the same theory. The primary \(\boldsymbol\lambda\) is fixed before
-evaluation, and prespecified weight sensitivity reports the cost--risk
-frontier. CVaR is a secondary tail-risk diagnostic, not part of the primary
-MOCU definition.
+hard-safety reduction in Eq.~\eqref{eq:belief_mocu_ibr} is a named special case
+of the same theory. The primary \(\boldsymbol\lambda\) is fixed before
+evaluation; prespecified weight sensitivity reports the cost--risk frontier.
+CVaR is a secondary diagnostic rather than part of the primary MOCU definition.
 
 Every result table reports terminal MOCU together with expected injection
 cost, \(u_{\mathrm{ctrl}}\), held-out safety probability, frequency-nadir,
