@@ -29,6 +29,7 @@ class StepDADConfig:
     learning_rate: float = 1.0e-4
     refine_from_step: int | None = None
     entropy_coefficient: float = 1.0e-3
+    kl_coefficient: float = 1.0
 
 
 def config_from_context(ctx: ExperimentContext, *, smoke: bool = False) -> StepDADConfig:
@@ -40,6 +41,7 @@ def config_from_context(ctx: ExperimentContext, *, smoke: bool = False) -> StepD
         learning_rate=float(raw.get("step_dad_learning_rate", 1.0e-4)),
         refine_from_step=None if refine is None else int(refine),
         entropy_coefficient=float(raw.get("step_dad_entropy_coefficient", 1.0e-3)),
+        kl_coefficient=float(raw.get("step_dad_kl_coefficient", 1.0)),
     )
 
 
@@ -73,6 +75,7 @@ def refine_policy(
         returns: list[float] = []
         log_prob_sums: list[torch.Tensor] = []
         entropy_sums: list[torch.Tensor] = []
+        divergences: list[torch.Tensor] = []
         for _fantasy in range(int(config.fantasy_rollouts)):
             particle = int(rng.choice(len(posterior), p=posterior))
             fa = list(actions)
@@ -86,6 +89,11 @@ def refine_policy(
                     step=step, device=device,
                 )
                 dist = policy.distribution(*tensors[:-1], tensors[-1])
+                with torch.no_grad():
+                    base_dist = base_policy.distribution(*tensors[:-1], tensors[-1])
+                divergences.append(
+                    torch.distributions.kl_divergence(base_dist, dist).mean()
+                )
                 action_t = dist.sample()
                 action = int(action_t.item())
                 lps.append(dist.log_prob(action_t).reshape(()))
@@ -105,11 +113,53 @@ def refine_policy(
         advantage = (reward - reward.mean()) / reward.std(unbiased=False).clamp_min(1e-6)
         loss = -(torch.stack(log_prob_sums) * advantage.detach()).mean()
         loss = loss - float(config.entropy_coefficient) * torch.stack(entropy_sums).mean()
+        # Conservative policy-space refinement around the untouched DAD base.
+        loss = loss + float(config.kl_coefficient) * torch.stack(divergences).mean()
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(policy.parameters(), 1.0)
         optimizer.step()
         last_utility = float(reward.mean().detach())
+
+    # Independent paired validation under the current posterior.  The same
+    # particles and observation noise are used for base and refined policies.
+    validation_rng = np.random.default_rng(int(seed) + 9_999_991)
+    validation_cases = []
+    for _ in range(max(8, int(config.fantasy_rollouts))):
+        particle = int(validation_rng.choice(len(posterior), p=posterior))
+        noises = [
+            validation_rng.normal(size=ctx.obs_dim)
+            for _ in range(len(actions), int(ctx.horizon))
+        ]
+        validation_cases.append((particle, noises))
+
+    def validation_utility(candidate: torch.nn.Module) -> float:
+        values: list[float] = []
+        candidate.eval()
+        for particle, noises in validation_cases:
+            fa = list(actions)
+            fy = [np.asarray(y).copy() for y in observations]
+            fw = np.asarray(log_w, dtype=np.float64).copy()
+            for offset, step in enumerate(range(len(fa), int(ctx.horizon))):
+                tensors = _tensors_from_state(
+                    ctx, actions=fa, observations=fy, log_w=fw,
+                    step=step, device=device,
+                )
+                with torch.no_grad():
+                    action = int(candidate(*tensors[:-1], tensors[-1]).argmax(-1).item())
+                clean = np.asarray(ctx.centres_support[action, particle], dtype=np.float64)
+                y = clean + float(ctx.sigma_y) * noises[offset]
+                fa.append(action)
+                fy.append(y)
+                fw = update_posterior_vector(ctx, fw, action, y)
+            values.append(-float(posterior_mocu(ctx, fw)))
+        return float(np.mean(values))
+
+    refined_utility = validation_utility(policy)
+    base_utility = validation_utility(base_policy)
+    accepted = bool(refined_utility > base_utility)
+    if not accepted:
+        policy = base_policy
 
     policy.eval()
     return policy, {
@@ -117,6 +167,9 @@ def refine_policy(
         "updates": int(config.refinement_steps),
         "fantasy_rollouts": int(config.refinement_steps * config.fantasy_rollouts),
         "mean_final_training_utility": last_utility,
+        "validation_base_utility": base_utility,
+        "validation_refined_utility": refined_utility,
+        "refinement_accepted": accepted,
     }
 
 
@@ -176,6 +229,7 @@ def evaluate_step_dad(
             "y_obs": str([np.asarray(y).tolist() for y in observations]),
             "ess_by_step": " ".join(f"{x:.4f}" for x in ess),
             "u_ctrl": float(control_from_log_weights(ctx, log_w).u_ctrl),
+            "posterior_mocu": float(posterior_mocu(ctx, log_w)),
             "step_dad_refine_at": int(refine_at),
         })
     return rows, {
@@ -185,7 +239,7 @@ def evaluate_step_dad(
         "fantasy_rollouts_per_update": int(cfg.fantasy_rollouts),
         "refinement_seconds": float(refine_seconds),
         "refinement_fantasy_rollouts": int(refine_fantasies),
-        "objective": "negative terminal safety-aware MOCU",
+        "objective": "negative terminal posterior Yoon MOCU",
         "gradient_estimator": "REINFORCE for discrete designs",
     }
 
