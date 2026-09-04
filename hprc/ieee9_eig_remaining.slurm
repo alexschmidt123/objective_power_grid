@@ -35,16 +35,23 @@ CELLS=(
 )
 read -r T SEED <<< "${CELLS[$SLURM_ARRAY_TASK_ID]}"
 
-# Avoid second-resolution result-folder collisions for equal horizons.
-sleep "$((SLURM_ARRAY_TASK_ID * 3))"
+RUNTIME=/scratch/user/g.lin/objective_power_grid_runtime
+CAMPAIGN=ieee9_eig_pub_20260904
+EXP_DIR="$RUNTIME/experiments/${CAMPAIGN}_task${SLURM_ARRAY_TASK_ID}_T${T}_seed${SEED}"
+MANIFEST="$RUNTIME/manifests/${CAMPAIGN}_task${SLURM_ARRAY_TASK_ID}.path"
+
+test ! -e "$EXP_DIR"
+mkdir -p "$RUNTIME/manifests"
+printf '%s\n' "$EXP_DIR" > "$MANIFEST"
 echo "job=$SLURM_JOB_ID task=$SLURM_ARRAY_TASK_ID host=$(hostname) T=$T seed=$SEED"
 nvidia-smi
 
-bash sweep_run.sh \
-  --configs configs/ieee9_eig_hprc.yaml \
+bash run.sh \
+  --config configs/ieee9_eig_hprc.yaml \
   --experiment_type eig_based \
   --T "$T" \
   --N_obs 5 \
   --noise_sigma 0.01 \
   --seed "$SEED" \
-  --eval-seeds 1001,1002,1003,1004,1005
+  --eval-seeds 1001,1002,1003,1004,1005 \
+  --exp-dir "$EXP_DIR"

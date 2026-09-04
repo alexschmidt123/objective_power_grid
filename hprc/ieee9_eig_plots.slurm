@@ -19,12 +19,19 @@ cd "$ROOT"
 export PATH="$ENV_DIR/bin:$PATH"
 export PYTHONPATH="$ROOT"
 
-bash sweep_run.sh \
-  --configs configs/ieee9_eig_hprc.yaml \
-  --experiment_type eig_based \
-  --T 3,4,5 \
-  --N_obs 5 \
-  --noise_sigma 0.01 \
-  --seed 101,202,303 \
-  --eval-seeds 1001,1002,1003,1004,1005 \
-  --plots-only
+RUNTIME=/scratch/user/g.lin/objective_power_grid_runtime
+CAMPAIGN=ieee9_eig_pub_20260904
+FIRST="$RUNTIME/experiments/09042026_025439_ieee9_eig_hprc_EIG_T3_Nobs5_sigma0p01"
+ARGS=(
+  python -m src.results.plots
+  --stamp "$(date +%m%d%Y_%H%M%S)"
+  --experiment-type eig_based
+  --T 3,4,5
+  --exp-dir "$FIRST"
+)
+for task in {0..7}; do
+  manifest="$RUNTIME/manifests/${CAMPAIGN}_task${task}.path"
+  test -s "$manifest"
+  ARGS+=(--exp-dir "$(<"$manifest")")
+done
+"${ARGS[@]}"
