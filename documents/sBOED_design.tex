@@ -227,21 +227,21 @@ probe bus. For configurable observation dimension \(N_{\mathrm{obs}}\)
 and sampling indices \(q_1,\ldots,q_{N_{\mathrm{obs}}}\),
 \[
 \boxed{
-\mathbf y_{\mathrm{clean}}(\theta,\xi_t)
+\mathbf y(\theta,\xi_t)
 =
 \left[
 \Delta f_b^{\,p}(s_{q_1};\theta,\xi_t),\ldots,
 \Delta f_b^{\,p}(s_{q_{N_{\mathrm{obs}}}};\theta,\xi_t)
 \right]^{\!\top},
 }
-\label{eq:y_clean}
+\label{eq:noise_free_response}
 \]
 and the measured vector is
 \[
 \boxed{
-\mathbf y_{\mathrm{obs},t}
+\mathbf y_t
 =
-\mathbf y_{\mathrm{clean}}(\theta^\star,\xi_t)
+\mathbf y(\theta^\star,\xi_t)
 +
 \boldsymbol\epsilon_t,
 \qquad
@@ -250,7 +250,7 @@ and the measured vector is
 \mathcal N\!\left(\mathbf 0,
 \sigma_y^2\mathbf I_{N_{\mathrm{obs}}}\right).
 }
-\label{eq:y_obs}
+\label{eq:observation}
 \]
 The physical bank retains the full clean \(\Delta f\) trajectory and scalar
 maximum absolute ROCOF. Thus \(N_{\mathrm{obs}}\) and \(\sigma_y\) can be selected
@@ -260,12 +260,12 @@ by a validation-only information-saturation audit without regenerating physics.
 
 The likelihood for probe \(t\) under the sampled-trajectory observation is
 \[
-p(\mathbf y_{\mathrm{obs},t}\mid\theta,\xi_t)
+p(\mathbf y_t\mid\theta,\xi_t)
 =
 \mathcal N
 \left(
-\mathbf y_{\mathrm{obs},t};
-\mathbf y_{\mathrm{clean}}(\theta,\xi_t),
+\mathbf y_t;
+\mathbf y(\theta,\xi_t),
 \sigma_y^2\mathbf I_{N_{\mathrm{obs}}}
 \right).
 \]
@@ -278,13 +278,13 @@ p(\theta\mid h_T)
 \frac{
 p_0(\theta)
 \displaystyle\prod_{t=1}^{T}
-p(\mathbf y_{\mathrm{obs},t}\mid\theta,\xi_t)
+p(\mathbf y_t\mid\theta,\xi_t)
 }{
 \displaystyle
 \int_{\Theta}
 p_0(\vartheta)
 \prod_{t=1}^{T}
-p(\mathbf y_{\mathrm{obs},t}\mid\vartheta,\xi_t)
+p(\mathbf y_t\mid\vartheta,\xi_t)
 \,d\vartheta
 }.
 }
@@ -312,12 +312,12 @@ w_n^{(t)}
 =
 \frac{
 w_n^{(t-1)}
-p(\mathbf y_{\mathrm{obs},t}\mid\theta^{(n)},\xi_t)
+p(\mathbf y_t\mid\theta^{(n)},\xi_t)
 }{
 \displaystyle
 \sum_{m=1}^{N}
 w_m^{(t-1)}
-p(\mathbf y_{\mathrm{obs},t}\mid\theta^{(m)},\xi_t)
+p(\mathbf y_t\mid\theta^{(m)},\xi_t)
 }.
 }
 \label{eq:weight_update}
@@ -327,7 +327,7 @@ For the parameter-learning track, the utility of policy $\pi$ is the mutual
 information between the latent grid parameters and the terminal history,
 \[
 \boxed{
-J_{\mathrm{EIG}}(\pi)
+\operatorname{EIG}(\pi)
 =I(\theta;H_T\mid\pi)
 =\mathbb E_{H_T\mid\pi}\left[
 D_{\mathrm{KL}}\bigl(p(\theta\mid H_T)\,\|\,p_0(\theta)\bigr)
@@ -417,25 +417,21 @@ Symbol & Meaning \\
 \paragraph{Hard-safety reference cost.}
 The operational cost of applying magnitude \(u\) when the true parameter is
 \(\theta\) is
-\[
-\boxed{
+\begin{align}
 C_\theta(u)
-=
-\begin{cases}
+&=\begin{cases}
 u, & \mathrm{safe}(\theta,u),\\
 +\infty, & \text{otherwise},
-\end{cases}
-\qquad
+\end{cases}\\
 \mathrm{safe}(\theta,u)
-\iff
-\max_{c\in\mathcal C}
-r_{\mathrm{ctrl}}(\theta,c,u)\le r_{\max}
-\;\wedge\;
-\min_{c\in\mathcal C}
-f_{\mathrm{nadir}}(\theta,c,u)\ge f_{\min}.
-}
+&\iff
+\begin{cases}
+r_{\mathrm{ctrl}}(\theta,c,u)\le r_{\max},\\
+f_{\mathrm{nadir}}(\theta,c,u)\ge f_{\min},
+\end{cases}
+\quad \forall c\in\mathcal C.
 \label{eq:yoon_cost}
-\]
+\end{align}
 Thus a safe operator costs its magnitude, and any unsafe operator is forbidden.
 This is retained as the Yoon IBR reference model; it is not the proposed
 primary operational loss because it cannot grade posterior probability or
@@ -647,19 +643,14 @@ process,
 \]
 which is the mean excess support cost paid because \(\theta\) is uncertain.
 Lower MOCU is better. In summary:
-\[
+\begin{align}
 \operatorname{OCU}(\theta,h_T)
-=
-C_\theta(\psi^\star)-C_\theta(\psi_\theta^\star),
-\qquad
+&=C_\theta(\psi^\star)-C_\theta(\psi_\theta^\star),\\
 \operatorname{MOCU}(h_T)
-=
-\mathbb E\bigl[\operatorname{OCU}(\theta,h_T)\mid h_T\bigr],
-\qquad
+&=\mathbb E[\operatorname{OCU}(\theta,h_T)\mid h_T],\\
 \operatorname{MOCU}(\pi)
-=
-\mathbb E\bigl[\operatorname{MOCU}(H_T)\mid\pi\bigr].
-\]
+&=\mathbb E[\operatorname{MOCU}(H_T)\mid\pi].
+\end{align}
 
 \subsubsection{Primary risk-aware multi-objective specialization}
 
@@ -867,7 +858,7 @@ improvement is estimated. Table~\ref{tab:methods} summarizes their defining logi
 \centering
 \caption{Probe-selection methods in the control-oriented study.}
 \label{tab:methods}
-\begin{tabular}{llll}
+\begin{tabular}{@{}llp{3.1cm}p{4.0cm}@{}}
 \toprule
 Method & Adaptive & Horizon used in selection & Role \\
 \midrule

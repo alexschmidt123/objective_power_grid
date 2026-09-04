@@ -165,17 +165,17 @@ observed; an adaptive design may change later actions in response to the
 realized observations.
 
 \subsubsection{Observation model and Bayesian update}
-Let $o\in\mathcal M$ be the fixed PMU bus and
-$\Delta f_o(s)=\omega_o(s)/(2\pi)$ its frequency deviation. For sampling set
-$\mathcal S=\{s_1,\ldots,s_{N_{\mathrm{obs}}}\}$, the simulator output is
+Let $o\in\mathcal M$ be the monitored PMU bus and
+$\Delta f_o(s)=\omega_o(s)/(2\pi)$ its frequency deviation. At prescribed
+sampling times $s_1,\ldots,s_{N_{\mathrm{obs}}}$, define the noise-free response
 \begin{equation}
-\mathbf g(\boldsymbol{\theta},\xi_t)
-=\bigl[\Delta f_o(s;\boldsymbol{\theta},\xi_t)\bigr]_{s\in\mathcal S}.
+\mathbf y(\boldsymbol{\theta},\xi_t)
+=\bigl[\Delta f_o(s_j;\boldsymbol{\theta},\xi_t)\bigr]_{j=1}^{N_{\mathrm{obs}}}.
 \label{eq:forward-observation}
 \end{equation}
 The measured response is
 \begin{equation}
-\mathbf y_t=\mathbf g(\boldsymbol{\theta}^{\star},\xi_t)
+\mathbf y_t=\mathbf y(\boldsymbol{\theta}^{\star},\xi_t)
 +\boldsymbol{\epsilon}_t,\qquad
 \boldsymbol{\epsilon}_t\sim\mathcal N(\mathbf 0,\sigma_y^2\mathbf I).
 \label{eq:observation}
@@ -205,7 +205,7 @@ p(\mathbf y_t\mid\boldsymbol{\theta}^{(j)},\xi_t)}.
 Let $H_T$ denote the random terminal history induced by policy $\pi$. For the
 parameter-learning experiments, the policy maximizes
 \begin{equation}
-J_{\mathrm{EIG}}(\pi)
+\operatorname{EIG}(\pi)
 =\E_{H_T\mid\pi}\!\left[
 D_{\mathrm{KL}}\!\left(
 p(\boldsymbol{\theta}\mid H_T)
@@ -218,28 +218,23 @@ $\boldsymbol{\theta}$ but does not directly encode the quality of the
 downstream control decision.
 
 \subsection{Practical Control and Safety Conditions}
-Diagnostic probing and terminal-control evaluation are separate simulations.
-In the latter, the probe is zero and
-\begin{equation}
-\mathbf u(s)=\mathbf a(b_c)u_{\mathrm c}(s)
-+\mathbf a(b_u)u\,h_{\mathrm{ctrl}}(s),
-\qquad u_{\mathrm p}=0,
-\label{eq:terminal-control-input}
-\end{equation}
-where $u_{\mathrm c}$ is the fixed contingency, $u\in\mathcal U$ is a candidate
-supplementary control magnitude, and $b_c$ and $b_u$ are their configured
-locations.
-
-For parameter $\boldsymbol{\theta}$ and control $u$, let
-$r(\boldsymbol{\theta},u)$ be the maximum absolute rate of change of frequency
-(ROCOF), and let $f_{\min}(\boldsymbol{\theta},u)$ be the minimum frequency
-deviation. A control is safe when
+Diagnostic probing and terminal control are evaluated in separate simulations.
+After the final probe, the operator selects a supplementary-injection magnitude
+$u\in\mathcal U$. Its location, activation time, and temporal profile are fixed.
+For model $\boldsymbol\theta$, contingency $c\in\mathcal C$, and magnitude $u$,
+the terminal simulator returns frequency nadir
+$f_{\mathrm{nad}}(\boldsymbol\theta,c,u)$, maximum absolute ROCOF
+$r(\boldsymbol\theta,c,u)$, and settling time
+$t_{\mathrm{set}}(\boldsymbol\theta,c,u)$. The intervention is safe for all
+credible contingencies when
 \begin{equation}
 \mathsf{Safe}(\boldsymbol{\theta},u)
 \iff
-r(\boldsymbol{\theta},u)\le r_{\max}
-\ \text{and}\
-f_{\min}(\boldsymbol{\theta},u)\ge\underline f.
+\begin{cases}
+f_{\mathrm{nad}}(\boldsymbol\theta,c,u)\ge f_{\mathrm{lim}},\\
+r(\boldsymbol\theta,c,u)\le r_{\mathrm{lim}},
+\end{cases}
+\quad \text{for every }c\in\mathcal C.
 \label{eq:safety}
 \end{equation}
 For the ordered admissible grid $\mathcal U$, define the minimum safe magnitude
@@ -253,11 +248,10 @@ The retained parameter support is required to contain a safe candidate. The
 offline bank stores $U_n=U(\boldsymbol{\theta}^{(n)})$ for each particle, as
 well as the component costs introduced below for every candidate $u$.
 
-\subsection{MOCU Based on Control Cost and Safety Risk}
-We now specialize the general MOCU construction of Yoon et
-al.~\cite{yoon2013mocu,yoon2021multimocu} to the grid-control objective.  For
-each model $\boldsymbol\theta$ and admissible injection $u\in\mathcal U$, define
-the dimensionless objective components
+\subsection{Control-Oriented MOCU}
+We first define the operational loss and then apply the standard OCU/MOCU
+construction~\cite{yoon2013mocu,yoon2021multimocu}. For a model
+$\boldsymbol\theta$ and control $u$, define the dimensionless losses
 \begin{align}
 \ell_c(u)&=\frac{C_u(u)}{C_{\mathrm{ref}}},
 \label{eq:cost-component}\\
@@ -265,14 +259,16 @@ the dimensionless objective components
 &=\mathbf 1\{\neg\mathsf{Safe}(\boldsymbol\theta,u)\},
 \label{eq:failure-component}\\
 \ell_f(\boldsymbol\theta,u)
-&=\left[\frac{\underline f-f_{\min}(\boldsymbol\theta,u)}{s_f}\right]_+,
+&=\max_{c\in\mathcal C}
+\left[\frac{f_{\mathrm{lim}}-f_{\mathrm{nad}}(\boldsymbol\theta,c,u)}{s_f}\right]_+,
 \label{eq:nadir-component}\\
 \ell_r(\boldsymbol\theta,u)
-&=\left[\frac{r(\boldsymbol\theta,u)-r_{\max}}{s_r}\right]_+,
+&=\max_{c\in\mathcal C}
+\left[\frac{r(\boldsymbol\theta,c,u)-r_{\mathrm{lim}}}{s_r}\right]_+,
 \label{eq:rocof-component}\\
 \ell_t(\boldsymbol\theta,u)
-&=\left[\frac{t_{\mathrm{set}}(\boldsymbol\theta,u)
--\bar t_{\mathrm{set}}}{s_t}\right]_+,
+&=\max_{c\in\mathcal C}
+\left[\frac{t_{\mathrm{set}}(\boldsymbol\theta,c,u)-t_{\mathrm{lim}}}{s_t}\right]_+.
 \label{eq:settling-component}
 \end{align}
 where $[z]_+=\max(z,0)$.  The reference cost $C_{\mathrm{ref}}$ and positive
@@ -281,54 +277,48 @@ compared design policies.
 
 For a prespecified nonnegative preference vector
 $\boldsymbol\lambda=(\lambda_c,\lambda_0,\lambda_f,\lambda_r,\lambda_t)$,
-the model-dependent operational cost is
+the operational loss is
 \begin{equation}
-\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda)
+L(\boldsymbol\theta,u)
 =\lambda_c\ell_c(u)+\lambda_0\ell_0(\boldsymbol\theta,u)
-+\lambda_f\ell_f(\boldsymbol\theta,u)
-+\lambda_r\ell_r(\boldsymbol\theta,u)
-+\lambda_t\ell_t(\boldsymbol\theta,u).
++\sum_{q\in\{f,r,t\}}\lambda_q\ell_q(\boldsymbol\theta,u).
 \label{eq:multiobjective-cost}
 \end{equation}
-Equation~\eqref{eq:multiobjective-cost} is a direct application of published
-multi-objective MOCU; it is not a new definition of MOCU.  The model-specific
-and posterior IBR controls are, respectively,
+Here $\lambda_0$ penalizes any standards failure, whereas the remaining safety
+terms grade its severity. The model-specific optimum and the Bayesian control
+under belief $b$ are
 \begin{align}
-u_{\boldsymbol\theta}^*(\boldsymbol\lambda)
-&=\arg\min_{u\in\mathcal U}
-\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda),
+u^*(\boldsymbol\theta)
+&=\arg\min_{u\in\mathcal U}L(\boldsymbol\theta,u),
 \label{eq:model-specific-control}\\
-u_{\mathrm{ctrl}}(b;\boldsymbol\lambda)
+u^*(b)
 &=\arg\min_{u\in\mathcal U}
-\E_{\boldsymbol\theta\sim b}
-[\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda)].
+\E_{\boldsymbol\theta\sim b}[L(\boldsymbol\theta,u)].
 \label{eq:risk-aware-control}
 \end{align}
-Thus $u_{\mathrm{ctrl}}$ is the physical action selected under uncertainty; it
-is not itself the uncertainty metric.
+The practical terminal command is $u_{\mathrm{ctrl}}=u^*(b)$. Thus
+$u_{\mathrm{ctrl}}$ is an action, not a measure of uncertainty.
 
 The objective cost of uncertainty for model $\boldsymbol\theta$ and its
 posterior mean are
 \begin{align}
-\ocu_{\boldsymbol\lambda}(\boldsymbol\theta,b)
-&=\xi_{\boldsymbol\theta}
-(u_{\mathrm{ctrl}}(b;\boldsymbol\lambda);\boldsymbol\lambda)
--\xi_{\boldsymbol\theta}
-(u_{\boldsymbol\theta}^*(\boldsymbol\lambda);\boldsymbol\lambda),
+\operatorname{OCU}(\boldsymbol\theta,b)
+&=L(\boldsymbol\theta,u^*(b))
+-L(\boldsymbol\theta,u^*(\boldsymbol\theta)),
 \label{eq:risk-aware-ocu}\\
-\mocu_{\boldsymbol\lambda}(b)
+\operatorname{MOCU}(b)
 &=\E_{\boldsymbol\theta\sim b}
-[\ocu_{\boldsymbol\lambda}(\boldsymbol\theta,b)]\ge0.
+[\operatorname{OCU}(\boldsymbol\theta,b)]\ge0.
 \label{eq:risk-aware-mocu}
 \end{align}
 Nonnegativity follows from the model-specific optimality of
-$u_{\boldsymbol\theta}^*$.  This MOCU measures the additional injection and
+$u^*(\boldsymbol\theta)$. This MOCU measures the additional operational
 stability cost attributable to uncertainty.
 
 \paragraph{Hard-safety special case.}
 The previous implementation is recovered by choosing
 \begin{equation}
-\xi_{\boldsymbol\theta}^{\mathrm{hard}}(u)=
+L_{\mathrm{hard}}(\boldsymbol\theta,u)=
 \begin{cases}
 u, & \mathsf{Safe}(\boldsymbol\theta,u),\\
 +\infty, & \text{otherwise}.
@@ -338,26 +328,24 @@ u, & \mathsf{Safe}(\boldsymbol\theta,u),\\
 For particle weights $w_n^{(T)}$ and numerical support
 $\mathcal I_T=\{n:w_n^{(T)}>10^{-12}\}$, Eqs.~\eqref{eq:model-specific-control}
 and~\eqref{eq:risk-aware-control} reduce to
-\begin{equation}
-u_{\mathrm{ctrl}}^{\mathrm{hard}}(h_T)=
-\max_{n\in\mathcal I_T}U_n,
-\qquad
-\mocu^{\mathrm{hard}}(h_T)=
-u_{\mathrm{ctrl}}^{\mathrm{hard}}(h_T)
+\begin{align}
+u_{\mathrm{hard}}^*(h_T)
+&=\max_{n\in\mathcal I_T}U_n,\\
+\operatorname{MOCU}_{\mathrm{hard}}(h_T)
+&=u_{\mathrm{hard}}^*(h_T)
 -\sum_{n=1}^{N_{\mathrm p}}w_n^{(T)}U_n.
 \label{eq:belief-mocu}
-\end{equation}
+\end{align}
 This identity is a special consequence of infinite unsafe cost and linear
 injection cost; it is not the general definition of MOCU.
 
 The sequential design objective is
 \begin{equation}
-\pi_{\mathrm{MOCU}}^\star
-=\arg\min_{\pi}
+\pi^*_{\mathrm{MOCU}}
+=\arg\min_{\pi}\;
 \E_{H_T\mid\pi}\!\left[
-\mocu_{\boldsymbol\lambda}
-\bigl(p(\boldsymbol\theta\mid H_T)\bigr)\right],
-\qquad |H_T|=T.
+\operatorname{MOCU}\!\left(p(\boldsymbol\theta\mid H_T)\right)
+\right].
 \label{eq:policy-mocu}
 \end{equation}
 Equivalently, the policy maximizes expected prior-to-terminal MOCU reduction.
