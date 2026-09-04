@@ -19,6 +19,7 @@ from src.objectives.mocu.context import (
     method_display_name,
     observe_compressed,
     posterior_ess,
+    posterior_mocu,
     terminal_u_ctrl,
     update_posterior_vector,
 )
@@ -32,7 +33,6 @@ from src.control.oracle_u_ctrl import (
     check_oracle_consistency,
     load_or_compute_oracle_cache,
 )
-from src.objectives.mocu.rewards import safety_aware_control_cost
 
 MIN_VALID_SAFETY_RATE = 0.95
 
@@ -114,6 +114,7 @@ def _rollout_baseline(
         "y_obs": observations,
         "ess_by_step": ess_path,
         "u_ctrl": u_ctrl,
+        "posterior_mocu": float(posterior_mocu(ctx, log_w)),
         "theta_id": theta_id,
         "rollout_id": rollout_id,
     }
@@ -295,6 +296,7 @@ def evaluate_policy_method(
                 "y_obs": json.dumps(y_list),
                 "ess_by_step": " ".join(f"{x:.4f}" for x in ess),
                 "u_ctrl": float(traj["terminal_u_ctrl"]),
+                "posterior_mocu": float(posterior_mocu(ctx, log_w)),
             }
         )
     return rows
@@ -308,6 +310,7 @@ def _flat(out: dict[str, Any]) -> dict[str, Any]:
         "y_obs": json.dumps(out["y_obs"]),
         "ess_by_step": " ".join(f"{x:.4f}" for x in out["ess_by_step"]),
         "u_ctrl": float(out["u_ctrl"]),
+        "posterior_mocu": float(out["posterior_mocu"]),
         "eval_mode": "baseline",
         "base_method": None,
     }
@@ -348,15 +351,6 @@ def attach_oracle(
         u_opt = float(opt["u_ctrl_opt"])
         u_ctrl = float(row["u_ctrl"])
         gap = u_ctrl - u_opt
-        safety_aware_ocu = (
-            safety_aware_control_cost(
-                u_ctrl,
-                u_opt,
-                undercontrol_penalty=ctx.undercontrol_penalty,
-                violation_penalty=ctx.violation_penalty,
-            )
-            - u_opt
-        )
         method_safe = False
         if not skip_cuda_safety:
             M = np.asarray(ctx.M_test[tid], dtype=np.float64)
@@ -380,14 +374,10 @@ def attach_oracle(
                 **row,
                 "u_ctrl_opt": u_opt,
                 "control_gap": gap,
-                # Primary realized operational cost of uncertainty. Unsafe
-                # under-control is penalized and can never masquerade as gain.
-                "ocu": float(safety_aware_ocu),
-                # Retained physical diagnostic; may be negative when unsafe.
+                # Held-out perfect-information comparison; this is not belief MOCU.
+                "realized_control_gap": gap,
                 "raw_control_gap": gap,
                 "control_shortfall": max(u_opt - u_ctrl, 0.0),
-                "undercontrol_penalty": float(ctx.undercontrol_penalty),
-                "violation_penalty": float(ctx.violation_penalty),
                 "method_safe": int(method_safe),
                 "oracle_feasible": int(bool(opt.get("feasible", True))),
                 "oracle_message": opt.get("message", ""),
@@ -403,7 +393,6 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
         return {"method": method, "n": 0}
     u = np.asarray([float(r["u_ctrl"]) for r in sub], dtype=np.float64)
     gaps = np.asarray([float(r["control_gap"]) for r in sub], dtype=np.float64)
-    ocu = np.asarray([float(r["ocu"]) for r in sub], dtype=np.float64)
     excess = np.maximum(gaps, 0.0)
     safe = np.asarray([int(r["method_safe"]) for r in sub], dtype=np.float64)
     opts = np.asarray([float(r["u_ctrl_opt"]) for r in sub], dtype=np.float64)
@@ -424,20 +413,20 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
     safety_rate = float(safe.mean())
     # Cluster repeated stochastic-design draws by physical system.  Treating
     # every Random seed as an independent test system would understate the CI.
-    ocu_by_theta: dict[int, list[float]] = {}
+    mocu_by_theta: dict[int, list[float]] = {}
     for row in sub:
-        ocu_by_theta.setdefault(int(row["theta_id"]), []).append(
-            float(row["ocu"])
+        mocu_by_theta.setdefault(int(row["theta_id"]), []).append(
+            float(row["posterior_mocu"])
         )
-    clustered_ocu = np.asarray(
-        [np.mean(values) for values in ocu_by_theta.values()], dtype=np.float64
+    clustered_mocu = np.asarray(
+        [np.mean(values) for values in mocu_by_theta.values()], dtype=np.float64
     )
-    mocu_ci = paired_bootstrap_ci(clustered_ocu)
+    mocu_ci = paired_bootstrap_ci(clustered_mocu)
     return {
         "method": method,
         "base_method": base,
         "eval_mode": eval_mode,
-        "n": len(ocu_by_theta),
+        "n": len(mocu_by_theta),
         "n_design_replicates": len(sub),
         "mean_u_ctrl": float(u.mean()),
         "median_u_ctrl": float(np.median(u)),
@@ -446,9 +435,9 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
         # Raw mean(u_ctrl - u_opt); negative ⇒ under-control (often unsafe).
         "mean_gap": float(gaps.mean()),
         "median_gap": float(np.median(gaps)),
-        # Final objective: safety-aware realized OCU on common held-out models.
-        "mean_mocu": float(clustered_ocu.mean()),
-        "median_mocu": float(np.median(clustered_ocu)),
+        # Primary objective: terminal posterior Yoon belief MOCU.
+        "mean_mocu": float(clustered_mocu.mean()),
+        "median_mocu": float(np.median(clustered_mocu)),
         "mocu_ci95_low": float(mocu_ci["ci95_low"]),
         "mocu_ci95_high": float(mocu_ci["ci95_high"]),
         # Overshoot only; under-control does not improve this score.
@@ -456,11 +445,9 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
         "under_control_rate": float(under.mean()),
         "mean_shortfall": float(np.maximum(-gaps, 0.0).mean()),
         "mocu_cost_definition": (
-            "u + undercontrol_penalty*(u_required-u)_+ + "
-            "violation_penalty*1[unsafe] - u_required"
+            "u_ctrl - posterior_mean(u_optimal), robust_rule=ibr_max"
         ),
-        "undercontrol_penalty": float(sub[0]["undercontrol_penalty"]),
-        "violation_penalty": float(sub[0]["violation_penalty"]),
+        "mean_realized_control_gap": float(gaps.mean()),
         "gap_ci95_low": float(np.percentile(gaps, 2.5)),
         "gap_ci95_high": float(np.percentile(gaps, 97.5)),
         "safety_rate": safety_rate,
@@ -766,7 +753,9 @@ def run_full_evaluation(
     for r in enriched:
         grouped.setdefault(r["method"], {})
         tid = int(r["theta_id"])
-        grouped[r["method"]].setdefault(tid, []).append(float(r["ocu"]))
+        grouped[r["method"]].setdefault(tid, []).append(
+            float(r["posterior_mocu"])
+        )
     by_method = {
         method: {
             tid: float(np.mean(values)) for tid, values in per_theta.items()
@@ -823,8 +812,8 @@ def run_full_evaluation(
             "hybrid calibration, and oracle/safety evaluation are reported separately."
         ),
         "mocu_definition": (
-            "mean held-out Bayes regret: u_ctrl + lambda*(u_required-u_ctrl)_+ "
-            "+ rho*1[u_required>u_ctrl] - u_required"
+            "mean terminal posterior Yoon MOCU: "
+            "u_ctrl - posterior_mean(u_optimal)"
         ),
         "ranking_rule": (
             "safety_rate >= 0.95 required; valid methods ranked by mean_mocu asc"

@@ -31,7 +31,7 @@ from src.control.u_req import ControlSpec
 from src.domains.swing.design import build_simulator
 
 
-def _canonical_spec(spec: ControlSpec, *, under: float, event: float) -> dict[str, Any]:
+def _canonical_spec(spec: ControlSpec) -> dict[str, Any]:
     return {
         "control_model": "supplementary_active_power_injection",
         "alpha": float(spec.alpha),
@@ -56,8 +56,6 @@ def _canonical_spec(spec: ControlSpec, *, under: float, event: float) -> dict[st
         "T_obs_sec": float(spec.T_obs_sec),
         "ode_dt": float(spec.ode_dt),
         "fs_hz": float(spec.fs_hz),
-        "undercontrol_penalty": float(under),
-        "violation_penalty": float(event),
     }
 
 
@@ -111,8 +109,14 @@ def _simulate_metrics_torch(
     n_steps = int(math.ceil(float(spec.T_obs_sec) / dt))
     prof = spec.profile
     cont = spec.contingency
-    out_rocof = np.empty(len(u_mags), dtype=np.float64)
-    out_nadir = np.empty(len(u_mags), dtype=np.float64)
+    n_theta = int(len(M_rows))
+    n_u = int(len(u_mags))
+    n_total = n_theta * n_u
+    out_rocof = np.empty(n_total, dtype=np.float64)
+    out_nadir = np.empty(n_total, dtype=np.float64)
+    M_all = torch.as_tensor(M_rows, dtype=dtype, device=device)
+    K_all = torch.as_tensor(K_rows, dtype=dtype, device=device)
+    U_all = torch.as_tensor(u_mags, dtype=dtype, device=device)
 
     def profile_value(t: float, U: Any) -> Any:
         if prof.duration <= 0.0 or t < prof.t_start or t > prof.t_start + prof.duration:
@@ -124,11 +128,14 @@ def _simulate_metrics_torch(
             return U * 0.5 * (1.0 - math.cos(2.0 * math.pi * tau))
         return U * tau
 
-    for start in range(0, len(u_mags), int(batch_size)):
-        end = min(len(u_mags), start + int(batch_size))
-        M = torch.as_tensor(M_rows[start:end], dtype=dtype, device=device)
-        K = torch.as_tensor(K_rows[start:end], dtype=dtype, device=device)
-        U = torch.as_tensor(u_mags[start:end], dtype=dtype, device=device)
+    for start in range(0, n_total, int(batch_size)):
+        end = min(n_total, start + int(batch_size))
+        flat = torch.arange(start, end, dtype=torch.long, device=device)
+        theta_index = torch.div(flat, n_u, rounding_mode="floor")
+        control_index = torch.remainder(flat, n_u)
+        M = M_all[theta_index]
+        K = K_all[theta_index]
+        U = U_all[control_index]
         theta = theta0.expand(end - start, -1).clone()
         omega = omega0.expand(end - start, -1).clone()
         previous = omega.clone()
@@ -195,16 +202,13 @@ def main() -> None:
     for split in ("train", "test"):
         (data_dir / split).mkdir(parents=True, exist_ok=True)
     spec = ControlSpec.from_cfg(cfg)
-    train_cfg = dict((cfg.raw.get("training") or {}).get("objective_based") or {})
-    under = float(train_cfg.get("undercontrol_penalty", 10.0))
-    event = float(train_cfg.get("violation_penalty", 0.0))
-    spec_doc = _canonical_spec(spec, under=under, event=event)
+    spec_doc = _canonical_spec(spec)
     spec_hash = _digest(spec_doc)
 
     required = [
         *(data_dir / split / name for split in ("train", "test") for name in (
             "theta_M.npy", "theta_K.npy", "psi_star.npy", "control_safe.npy",
-            "control_rocof.npy", "control_nadir.npy", "ocu_table.npy",
+            "control_rocof.npy", "control_nadir.npy",
         )),
         data_dir / "meta" / "control_bank.yaml",
     ]
@@ -248,12 +252,9 @@ def main() -> None:
 
         n, n_nodes = M.shape
         n_u = int(candidates.size)
-        M_big = np.repeat(M, n_u, axis=0)
-        K_big = np.repeat(K, n_u, axis=0)
-        u_big = np.tile(candidates, n)
         print(f"[{split}] {n} theta x {n_u} controls = {n*n_u} control simulations")
         rocof, nadir = _simulate_metrics_torch(
-            sim, spec, M_big, K_big, u_big, batch_size=int(args.batch_size)
+            sim, spec, M, K, candidates, batch_size=int(args.batch_size)
         )
         rocof = rocof.reshape(n, n_u)
         nadir = nadir.reshape(n, n_u)
@@ -262,30 +263,31 @@ def main() -> None:
         )
         feasible = safe.any(axis=1)
         monotone = ~np.any(safe[:, :-1] & ~safe[:, 1:], axis=1)
-        if not feasible.all() or not safe[:, -1].all() or not monotone.all():
+        uncontrolled_safe = safe[:, 0] if abs(float(candidates[0])) <= 1e-12 else None
+        if (
+            not feasible.all()
+            or not safe[:, -1].all()
+            or not monotone.all()
+            or uncontrolled_safe is None
+            or uncontrolled_safe.any()
+        ):
             raise RuntimeError(
                 f"{split}: invalid control bank: infeasible={int((~feasible).sum())}, "
                 f"u_max_unsafe={int((~safe[:, -1]).sum())}, "
-                f"nonmonotone={int((~monotone).sum())}"
+                f"nonmonotone={int((~monotone).sum())}, "
+                f"u_zero_missing={int(uncontrolled_safe is None)}, "
+                f"u_zero_safe={int(uncontrolled_safe.sum()) if uncontrolled_safe is not None else -1}"
             )
 
         first_safe = np.argmax(safe, axis=1)
         psi_star = candidates[first_safe]
-        shortfall = np.maximum(psi_star[:, None] - candidates[None, :], 0.0)
-        ocu = (
-            candidates[None, :]
-            + under * shortfall
-            + event * (shortfall > 0.0)
-            - psi_star[:, None]
-        )
-
         _atomic_save(split_dir / "psi_star.npy", psi_star.astype(np.float64))
+        _atomic_save(split_dir / "u_optimal.npy", psi_star.astype(np.float64))
         _atomic_save(split_dir / "theta_M.npy", M.astype(np.float64))
         _atomic_save(split_dir / "theta_K.npy", K.astype(np.float64))
         _atomic_save(split_dir / "control_safe.npy", safe.astype(np.bool_))
         _atomic_save(split_dir / "control_rocof.npy", rocof.astype(np.float64))
         _atomic_save(split_dir / "control_nadir.npy", nadir.astype(np.float64))
-        _atomic_save(split_dir / "ocu_table.npy", ocu.astype(np.float64))
 
         reports[split] = {
             "n_theta": int(n),
@@ -293,7 +295,6 @@ def main() -> None:
             "n_control_candidates": int(n_u),
             "n_control_simulations": int(n * n_u),
             "psi_star_shape": [int(x) for x in psi_star.shape],
-            "ocu_table_shape": [int(x) for x in ocu.shape],
             "psi_star_min": float(psi_star.min()),
             "psi_star_max": float(psi_star.max()),
             "psi_star_mean": float(psi_star.mean()),
@@ -307,7 +308,7 @@ def main() -> None:
         }
 
     metadata = {
-        "schema": "mocu_control_extension_v1",
+        "schema": "mocu_control_extension_v2",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "source_probe_bank": str(probe_data_dir.resolve()),
         "observation_storage": (
@@ -316,19 +317,16 @@ def main() -> None:
         ),
         "source_relationship": (
             "row n shares the identical theta across theta_M, theta_K, delta_f, "
-            "psi_star, control tables, and OCU table"
+            "u_optimal and control tables"
         ),
         "control_spec_sha256": spec_hash,
         "control_spec": spec_doc,
         "definitions": {
-            "psi_star[n]": "smallest safe candidate control for theta_n",
+            "psi_star[n]": "u_optimal: smallest safe candidate control for theta_n",
+            "u_optimal[n]": "smallest safe candidate control for theta_n",
             "control_safe[n,j]": "physical safety of candidate u_j for theta_n",
             "control_rocof[n,j]": "maximum absolute ROCOF [Hz/s] over control horizon",
             "control_nadir[n,j]": "minimum frequency deviation [Hz] over control horizon",
-            "ocu_table[n,j]": (
-                "realized safety-aware OCU for theta_n if candidate u_j is deployed; "
-                "belief MOCU is a posterior-weighted average and is not one scalar per theta"
-            ),
         },
         "splits": reports,
     }

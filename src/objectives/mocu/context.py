@@ -21,6 +21,8 @@ from src.banks.power_grid import (
 )
 from src.control.posterior_ctrl import (
     batch_u_ctrl,
+    belief_mocu,
+    ibr_max_u_ctrl,
     log_prior_uniform_discrete,
     normalize_log_weights,
     posterior_control_decision,
@@ -423,7 +425,7 @@ def _score_fixed_subset(
     noise_replicas: int = 1,
     max_theta: int | None = None,
 ) -> float:
-    """Mean terminal safety-aware posterior MOCU for a Fixed probe subset."""
+    """Mean terminal Yoon posterior MOCU for a Fixed probe subset."""
     subset = tuple(sorted(int(a) for a in subset))
     n_theta, _n_actions, obs_dim = centres_by_theta.shape
     n_use = n_theta if max_theta is None else min(n_theta, int(max_theta))
@@ -447,18 +449,8 @@ def _score_fixed_subset(
                     y, centres_by_theta[:, act, :], sigma_y
                 )
             w = normalize_log_weights(log_w)
-            u_ctrl = posterior_safe_u_ctrl(
-                U_support, w, alpha, margin=margin, u_grid=u_grid
-            )
-            scores.append(
-                safety_aware_mocu_from_weights(
-                    U_support,
-                    w,
-                    u_ctrl,
-                    undercontrol_penalty=undercontrol_penalty,
-                    violation_penalty=violation_penalty,
-                )
-            )
+            u_ctrl = ibr_max_u_ctrl(U_support, w)
+            scores.append(belief_mocu(U_support, w, u_ctrl))
     return float(np.mean(scores))
 
 
@@ -835,7 +827,6 @@ def build_context_from_config(
         required = [
             *(mocu_dir / split / name for split in ("train", "test") for name in (
                 "theta_M.npy", "theta_K.npy", "psi_star.npy", "control_safe.npy",
-                "ocu_table.npy",
             )),
             mocu_dir / "meta" / "control_bank.yaml",
         ]
@@ -857,21 +848,27 @@ def build_context_from_config(
                 raise RuntimeError(
                     f"{split}: MOCU theta rows do not exactly match the EIG probe bank"
                 )
-        bank["U_train"] = np.load(mocu_dir / "train" / "psi_star.npy")
-        bank["U_test"] = np.load(mocu_dir / "test" / "psi_star.npy")
+        train_u = mocu_dir / "train" / "u_optimal.npy"
+        test_u = mocu_dir / "test" / "u_optimal.npy"
+        bank["U_train"] = np.load(
+            train_u if train_u.is_file() else mocu_dir / "train" / "psi_star.npy"
+        )
+        bank["U_test"] = np.load(
+            test_u if test_u.is_file() else mocu_dir / "test" / "psi_star.npy"
+        )
         bank["psi_star_train"] = bank["U_train"]
         bank["psi_star_test"] = bank["U_test"]
         control_safe_full = np.load(mocu_dir / "train" / "control_safe.npy")
         control_safe_test = np.load(mocu_dir / "test" / "control_safe.npy")
-        ocu_table_full = np.load(mocu_dir / "train" / "ocu_table.npy")
-        ocu_table_test = np.load(mocu_dir / "test" / "ocu_table.npy")
+        ocu_table_full = None
+        ocu_table_test = None
         n_u = len(ControlSpec.from_cfg(cfg).u_candidates)
         expected_train = (len(bank["U_train"]), n_u)
         expected_test = (len(bank["U_test"]), n_u)
-        if control_safe_full.shape != expected_train or ocu_table_full.shape != expected_train:
-            raise RuntimeError("train MOCU control/OCU table shape mismatch")
-        if control_safe_test.shape != expected_test or ocu_table_test.shape != expected_test:
-            raise RuntimeError("test MOCU control/OCU table shape mismatch")
+        if control_safe_full.shape != expected_train:
+            raise RuntimeError("train MOCU control-safety table shape mismatch")
+        if control_safe_test.shape != expected_test:
+            raise RuntimeError("test MOCU control-safety table shape mismatch")
         print(f"[mocu-bank] separate control bank -> {mocu_dir}")
     n_sim = int(bank["meta"]["N_sim"])
     n_obs = validate_n_obs(resolve_n_obs(cfg), n_sim)
@@ -1354,24 +1351,13 @@ def expected_mocu_after_action_vector(
     quad = np.sum(resid * resid, axis=-1) / s2
     log_L = -0.5 * d * math.log(2.0 * math.pi * s2) - 0.5 * quad
     log_w_h = log_w[None, :] + log_L
-    u_ctrl = batch_u_ctrl(
-        U,
-        log_w_h,
-        alpha=alpha,
-        margin=margin,
-        u_grid=u_grid,
-        snap_up=True,
-    )
     shifted = log_w_h - np.max(log_w_h, axis=-1, keepdims=True)
     weights = np.exp(shifted)
     weights /= np.clip(weights.sum(axis=-1, keepdims=True), 1e-300, None)
-    shortfall = np.maximum(U[None, :] - u_ctrl[:, None], 0.0)
-    realized_cost = (
-        u_ctrl[:, None]
-        + float(undercontrol_penalty) * shortfall
-        + float(violation_penalty) * (shortfall > 0.0)
-    )
-    regret = realized_cost - U[None, :]
+    active = weights > 1.0e-12
+    active |= (~active.any(axis=-1, keepdims=True)) & (weights > 0.0)
+    u_ctrl = np.max(np.where(active, U[None, :], -np.inf), axis=-1)
+    regret = u_ctrl[:, None] - U[None, :]
     return float(np.mean(np.sum(weights * regret, axis=-1)))
 
 
