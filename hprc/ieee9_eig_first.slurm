@@ -10,6 +10,7 @@
 
 set -euo pipefail
 
+source /etc/profile
 module purge
 module load GCCcore/12.2.0
 module load Python/3.10.8
