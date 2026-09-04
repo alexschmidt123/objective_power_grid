@@ -13,6 +13,7 @@ Power-Grid Dynamic Learning and Control}
 \thanks{\todo{Funding and corresponding-author information.}}}
 
 \begin{document}
+\bstctlcite{BSTcontrol}
 \maketitle
 
 \begin{abstract}
@@ -248,72 +249,85 @@ The retained parameter support is required to contain a safe candidate. The
 offline bank stores $U_n=U(\boldsymbol{\theta}^{(n)})$ for each particle, as
 well as the component costs introduced below for every candidate $u$.
 
-\subsection{Control-Oriented MOCU}
-We first define the operational loss and then apply the standard OCU/MOCU
-construction~\cite{yoon2013mocu,yoon2021multimocu}. For a model
-$\boldsymbol\theta$ and control $u$, define the dimensionless losses
-\begin{align}
-\ell_c(u)&=\frac{C_u(u)}{C_{\mathrm{ref}}},
-\label{eq:cost-component}\\
-\ell_0(\boldsymbol\theta,u)
-&=\mathbf 1\{\neg\mathsf{Safe}(\boldsymbol\theta,u)\},
-\label{eq:failure-component}\\
-\ell_f(\boldsymbol\theta,u)
-&=\max_{c\in\mathcal C}
-\left[\frac{f_{\mathrm{lim}}-f_{\mathrm{nad}}(\boldsymbol\theta,c,u)}{s_f}\right]_+,
-\label{eq:nadir-component}\\
-\ell_r(\boldsymbol\theta,u)
-&=\max_{c\in\mathcal C}
-\left[\frac{r(\boldsymbol\theta,c,u)-r_{\mathrm{lim}}}{s_r}\right]_+,
-\label{eq:rocof-component}\\
-\ell_t(\boldsymbol\theta,u)
-&=\max_{c\in\mathcal C}
-\left[\frac{t_{\mathrm{set}}(\boldsymbol\theta,c,u)-t_{\mathrm{lim}}}{s_t}\right]_+.
-\label{eq:settling-component}
-\end{align}
-where $[z]_+=\max(z,0)$.  The reference cost $C_{\mathrm{ref}}$ and positive
-scales $s_f,s_r,s_t$ remove physical units; they are fixed independently of the
-compared design policies.
+\subsection{Control--Safety MOCU}
+The downstream decision has two objectives: small supplementary-power use and
+a safe frequency response.  We use the two-objective extension of Yoon's
+OCU/MOCU construction~\cite{yoon2013mocu,yoon2021multimocu}; we do not assign a
+separate tunable penalty to every diagnostic.
 
-For a prespecified nonnegative preference vector
-$\boldsymbol\lambda=(\lambda_c,\lambda_0,\lambda_f,\lambda_r,\lambda_t)$,
-the operational loss is
+Let the normalized control cost be
 \begin{equation}
-L(\boldsymbol\theta,u)
-=\lambda_c\ell_c(u)+\lambda_0\ell_0(\boldsymbol\theta,u)
-+\sum_{q\in\{f,r,t\}}\lambda_q\ell_q(\boldsymbol\theta,u).
-\label{eq:multiobjective-cost}
+C(u)=u/u_{\max},
+\label{eq:control-cost}
 \end{equation}
-Here $\lambda_0$ penalizes any standards failure, whereas the remaining safety
-terms grade its severity. The model-specific optimum and the Bayesian control
-under belief $b$ are
+and define safety risk by the largest normalized violation of either operating
+limit,
 \begin{align}
-u^*(\boldsymbol\theta)
-&=\arg\min_{u\in\mathcal U}L(\boldsymbol\theta,u),
+V_f(\boldsymbol\theta,c,u)
+&=\left[
+\frac{f_{\mathrm{lim}}-f_{\mathrm{nad}}(\boldsymbol\theta,c,u)}
+{\Delta f_{\mathrm{ref}}}
+\right]_+,\\
+V_r(\boldsymbol\theta,c,u)
+&=\left[
+\frac{r(\boldsymbol\theta,c,u)-r_{\mathrm{lim}}}
+{\Delta r_{\mathrm{ref}}}
+\right]_+,\\
+R(\boldsymbol\theta,u)
+&=\max_{c\in\mathcal C}\max\{V_f(\boldsymbol\theta,c,u),
+V_r(\boldsymbol\theta,c,u)\}.
+\label{eq:safety-risk}
+\end{align}
+where $[x]_+=\max(x,0)$. The fixed positive reference scales only remove
+physical units. Equivalently, define the safe control set
+\begin{equation}
+\mathcal U_{\mathrm{safe}}(\boldsymbol\theta)
+=\{u\in\mathcal U:R(\boldsymbol\theta,u)=0\}.
+\label{eq:safe-control-set}
+\end{equation}
+
+For a control--safety preference $\alpha\in[0,1]$, Yoon's scalarized
+operational cost is
+\begin{equation}
+L_\alpha(\boldsymbol\theta,u)
+=\alpha C(u)+(1-\alpha)R(\boldsymbol\theta,u).
+\label{eq:control-safety-cost}
+\end{equation}
+The model-specific and Bayesian actions are
+\begin{align}
+u^*_{\boldsymbol\theta}(\alpha)
+&=\arg\min_{u\in\mathcal U}L_\alpha(\boldsymbol\theta,u),
 \label{eq:model-specific-control}\\
-u^*(b)
+u_{\mathrm{ctrl}}(b,\alpha)
 &=\arg\min_{u\in\mathcal U}
-\E_{\boldsymbol\theta\sim b}[L(\boldsymbol\theta,u)].
+\E_{\boldsymbol\theta\sim b}[L_\alpha(\boldsymbol\theta,u)].
 \label{eq:risk-aware-control}
 \end{align}
-The practical terminal command is $u_{\mathrm{ctrl}}=u^*(b)$. Thus
-$u_{\mathrm{ctrl}}$ is an action, not a measure of uncertainty.
+Thus $u_{\mathrm{ctrl}}$ is the practical terminal action, not a measure of
+uncertainty.
 
-The objective cost of uncertainty for model $\boldsymbol\theta$ and its
-posterior mean are
-\begin{align}
-\operatorname{OCU}(\boldsymbol\theta,b)
-&=L(\boldsymbol\theta,u^*(b))
--L(\boldsymbol\theta,u^*(\boldsymbol\theta)),
-\label{eq:risk-aware-ocu}\\
-\operatorname{MOCU}(b)
-&=\E_{\boldsymbol\theta\sim b}
-[\operatorname{OCU}(\boldsymbol\theta,b)]\ge0.
+For fixed $\alpha$, ordinary MOCU is
+\begin{equation}
+\operatorname{MOCU}_\alpha(b)
+=\E_{\boldsymbol\theta\sim b}\!\left[
+L_\alpha\!\left(\boldsymbol\theta,u_{\mathrm{ctrl}}(b,\alpha)\right)
+-L_\alpha\!\left(\boldsymbol\theta,u^*_{\boldsymbol\theta}(\alpha)\right)
+\right]\ge0.
+\label{eq:mocu-alpha}
+\end{equation}
+Following Yoon et al., the two-objective MOCU averages over a declared
+preference distribution,
+\begin{equation}
+\boxed{
+\operatorname{MOCU}_{\mathrm{CS}}(b)
+=\int_0^1\operatorname{MOCU}_\alpha(b)p(\alpha)\,d\alpha .
+}
 \label{eq:risk-aware-mocu}
-\end{align}
-Nonnegativity follows from the model-specific optimality of
-$u^*(\boldsymbol\theta)$. This MOCU measures the additional operational
-stability cost attributable to uncertainty.
+\end{equation}
+The reference analysis uses $p(\alpha)=1$ when no external preference
+information is available. This is Yoon's uniform two-objective construction,
+not an unexplained fixed weight. The control--safety frontier, control cost,
+and safety risk are reported alongside the aggregate value.
 
 \paragraph{Hard-safety special case.}
 The previous implementation is recovered by choosing
@@ -344,16 +358,14 @@ The sequential design objective is
 \pi^*_{\mathrm{MOCU}}
 =\arg\min_{\pi}\;
 \E_{H_T\mid\pi}\!\left[
-\operatorname{MOCU}\!\left(p(\boldsymbol\theta\mid H_T)\right)
+\operatorname{MOCU}_{\mathrm{CS}}\!\left(p(\boldsymbol\theta\mid H_T)\right)
 \right].
 \label{eq:policy-mocu}
 \end{equation}
 Equivalently, the policy maximizes expected prior-to-terminal MOCU reduction.
-The primary $\boldsymbol\lambda$ and all normalization constants are fixed
-before method comparison.  We additionally report every cost component,
-$u_{\mathrm{ctrl}}$, held-out safety, and a prespecified weight-sensitivity
-frontier.  CVaR is a secondary diagnostic rather than part of the primary MOCU
-definition.
+All normalization constants and the preference distribution are fixed before
+method comparison. We additionally report $u_{\mathrm{ctrl}}$, $C(u)$,
+$R(\boldsymbol\theta,u)$, held-out safety, and the control--safety frontier.
 
 \section{Compared Design Methods}
 \begin{table}[t]

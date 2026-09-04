@@ -84,7 +84,7 @@ The presentation follows the causal workflow used by the implementation:
   \item specify reset-to-equilibrium probe actions and noisy observations;
   \item update the posterior and define parameter EIG;
   \item define terminal $u_{\mathrm{ctrl}}$ and the frequency-security criteria;
-  \item construct risk-aware multi-objective MOCU from the same control and
+  \item construct control--safety multi-objective MOCU from the same control and
   safety quantities; and
   \item optimize and evaluate sequential probe-selection policies.
 \end{enumerate}
@@ -547,7 +547,7 @@ w_n^{(T)}
 may be reported as a softer alternative. It is a robust decision rule but is
 \emph{not} identical to Yoon's IBR operator unless \(\alpha=0\) on the
 finite support. Reference Yoon OCU/MOCU claims use~\eqref{eq:u_ctrl}; the
-primary risk-aware decision instead uses~\eqref{eq:risk_aware_u_ctrl}.
+primary control--safety decision instead uses~\eqref{eq:bayes_control_alpha}.
 
 \subsubsection{Hard-safety OCU}
 
@@ -652,88 +652,109 @@ Lower MOCU is better. In summary:
 &=\mathbb E[\operatorname{MOCU}(H_T)\mid\pi].
 \end{align}
 
-\subsubsection{Primary risk-aware multi-objective specialization}
+\subsubsection{Control--safety multi-objective MOCU}
 
-The system operator does not require accurate values of \(M_i/K_i\) for their
-own sake. The operational goal is a sufficiently safe and steady response at
-the lowest reasonable intervention cost. Raw \(u_{\mathrm{ctrl}}\) is only an
-action magnitude; it is neither monetary cost nor a measure of posterior
-instability risk. Following Yoon's multi-objective MOCU
-construction~\cite{yoon2021multi}, define the dimensionless component costs
-\begin{align}
-\ell_c(u)&=C_u(u)/C_{\mathrm{ref}},\\
-\ell_0(\theta,u)&=\mathbf 1\{\neg\mathrm{safe}(\theta,u)\},\\
-\ell_f(\theta,u)&=
-\left[(f_{\min}-f_{\mathrm{nadir}}(\theta,u))/s_f\right]_+,\\
-\ell_r(\theta,u)&=
-\left[(r_{\mathrm{ctrl}}(\theta,u)-r_{\max})/s_r\right]_+,\\
-\ell_t(\theta,u)&=
-\left[(t_{\mathrm{set}}(\theta,u)-t_{\mathrm{set}}^{\max})/s_t\right]_+,
-\end{align}
-where \([z]_+=\max(z,0)\). The reference quantities remove physical units and
-are fixed before method comparison. The combined operational cost is
+The operational problem has two objectives: use as little supplementary power
+as possible and avoid an unsafe frequency response.  We therefore retain only
+these two objectives.  Define the normalized control cost
+\begin{equation}
+C(u)=\frac{u}{u_{\max}},
+\label{eq:normalized_control_cost}
+\end{equation}
+and the normalized safety risk
+\begin{equation}
+R(\theta,u)=
+\max_{c\in\mathcal C}
+\left\{
+\left[\frac{f_{\min}-f_{\mathrm{nadir}}(\theta,c,u)}{\Delta f_{\mathrm{ref}}}\right]_+,
+\left[\frac{r_{\mathrm{ctrl}}(\theta,c,u)-r_{\max}}{\Delta r_{\mathrm{ref}}}\right]_+
+\right\},
+\label{eq:safety_risk}
+\end{equation}
+where \([x]_+=\max(x,0)\).  The positive constants
+\(\Delta f_{\mathrm{ref}}\) and \(\Delta r_{\mathrm{ref}}\) are fixed engineering
+normalizations, not fitted method parameters.  This definition gives the
+useful equivalence
 \[
-\boxed{
-\xi_\theta(u;\boldsymbol\lambda)=
-\lambda_c\ell_c(u)+\lambda_0\ell_0(\theta,u)
-+\lambda_f\ell_f(\theta,u)+\lambda_r\ell_r(\theta,u)
-+\lambda_t\ell_t(\theta,u).
-}
-\label{eq:risk_aware_loss}
+R(\theta,u)=0
+\quad\Longleftrightarrow\quad
+u\in\mathcal U_{\mathrm{safe}}(\theta),
 \]
-The binary component represents failure to meet a standard, while the
-continuous components represent violation severity. The nonnegative preference
-vector \(\boldsymbol\lambda\) is specified from operational requirements. This
-is an application of published multi-objective MOCU, not a new uncertainty
-measure.
+where
+\begin{equation}
+\mathcal U_{\mathrm{safe}}(\theta)
+=\left\{u\in\mathcal S:
+f_{\mathrm{nadir}}(\theta,c,u)\ge f_{\min},\;
+r_{\mathrm{ctrl}}(\theta,c,u)\le r_{\max}
+\text{ for all }c\in\mathcal C\right\}.
+\label{eq:safe_control_set}
+\end{equation}
 
-For known \(\theta\), the model-specific action is
-\[
-u_\theta^*(\boldsymbol\lambda)=
-\arg\min_{u\in\mathcal S}\xi_\theta(u;\boldsymbol\lambda).
-\]
-Under posterior \(b\), Yoon's IBR construction gives the practical action
-\[
-\boxed{
-u_{\mathrm{ctrl}}(b;\boldsymbol\lambda)=
-\arg\min_{u\in\mathcal S}
-\mathbb E_{\theta\sim b}[\xi_\theta(u;\boldsymbol\lambda)].
-}
-\label{eq:risk_aware_u_ctrl}
-\]
-The associated OCU and MOCU are
+We apply the two-objective construction of Yoon
+et al.~\cite{yoon2021multi}, rather than introducing a separate penalty for
+every engineering diagnostic.  For a preference value \(\alpha\in[0,1]\), the
+operational cost is
+\begin{equation}
+L_\alpha(\theta,u)
+=\alpha C(u)+(1-\alpha)R(\theta,u).
+\label{eq:control_safety_cost}
+\end{equation}
+For known \(\theta\) and for posterior belief \(b\), respectively, define
 \begin{align}
-\operatorname{OCU}_{\boldsymbol\lambda}(\theta,b)
-&=\xi_\theta(u_{\mathrm{ctrl}}(b;\boldsymbol\lambda);\boldsymbol\lambda)
--\xi_\theta(u_\theta^*(\boldsymbol\lambda);\boldsymbol\lambda),\\
-\operatorname{MOCU}_{\boldsymbol\lambda}(b)
-&=\mathbb E_{\theta\sim b}
-[\operatorname{OCU}_{\boldsymbol\lambda}(\theta,b)]\ge0.
-\label{eq:risk_aware_mocu}
+u_\theta^*(\alpha)
+&=\arg\min_{u\in\mathcal S}L_\alpha(\theta,u),
+\label{eq:model_specific_control_alpha}\\
+u_{\mathrm{ctrl}}(b,\alpha)
+&=\arg\min_{u\in\mathcal S}
+\mathbb E_{\theta\sim b}[L_\alpha(\theta,u)].
+\label{eq:bayes_control_alpha}
 \end{align}
-The inequality follows from model-specific optimality. The corresponding
-goal-oriented experimental-design objective is
-\[
+Thus \(u_{\mathrm{ctrl}}\) remains the practical action applied to the grid; it
+is not itself MOCU.
+
+For fixed \(\alpha\), the ordinary Yoon MOCU is the expected regret of the
+Bayesian action relative to the model-specific action,
+\begin{equation}
+\operatorname{MOCU}_\alpha(b)
+=\mathbb E_{\theta\sim b}
+\left[
+L_\alpha\!\left(\theta,u_{\mathrm{ctrl}}(b,\alpha)\right)
+-L_\alpha\!\left(\theta,u_\theta^*(\alpha)\right)
+\right]\ge0.
+\label{eq:control_safety_mocu_alpha}
+\end{equation}
+Following Yoon et al., the multi-objective MOCU averages this quantity over a
+declared distribution of operational preferences,
+\begin{equation}
+\boxed{
+\operatorname{MOCU}_{\mathrm{CS}}(b)
+=\int_0^1 \operatorname{MOCU}_\alpha(b)\,p(\alpha)\,d\alpha .
+}
+\label{eq:control_safety_mocu}
+\end{equation}
+If no preference information is available, the reference analysis uses the
+uniform distribution \(p(\alpha)=1\), exactly as suggested for the
+two-objective case by Yoon et al.  This avoids claiming that one unexplained
+weight vector represents the operator's preferences.  Results additionally
+report \(C(u_{\mathrm{ctrl}})\), safety risk \(R\), and the full
+control--safety frontier over \(\alpha\).
+
+The sequential design objective is
+\begin{equation}
 \boxed{
 \pi^*=\arg\min_\pi
-\mathbb E_{H_T\mid\pi}\left[
-\operatorname{MOCU}_{\boldsymbol\lambda}
+\mathbb E_{H_T\mid\pi}\!\left[
+\operatorname{MOCU}_{\mathrm{CS}}
 \bigl(p(\theta\mid H_T)\bigr)
 \right].
 }
-\label{eq:risk_aware_mocu_policy}
-\]
-Equivalently, it maximizes expected prior-to-terminal MOCU reduction. The
-hard-safety reduction in Eq.~\eqref{eq:belief_mocu_ibr} is a named special case
-of the same theory. The primary \(\boldsymbol\lambda\) is fixed before
-evaluation; prespecified weight sensitivity reports the cost--risk frontier.
-CVaR is a secondary diagnostic rather than part of the primary MOCU definition.
-
-Every result table reports terminal MOCU together with expected injection
-cost, \(u_{\mathrm{ctrl}}\), held-out safety probability, frequency-nadir,
-ROCOF, and settling-time violations, and CVaR of stability loss. No method is
-declared superior from aggregate MOCU alone when its safety components violate
-the declared operating standard.
+\label{eq:control_safety_mocu_policy}
+\end{equation}
+The hard-safety MOCU in Eq.~\eqref{eq:belief_mocu_ibr} remains a limiting
+reference formulation.  Equation~\eqref{eq:control_safety_mocu}, rather than an
+ad hoc sum of five penalties, is the primary improved MOCU: its MOCU structure
+comes directly from Yoon's OCU/MOCU theory, and its two application-specific
+objectives are the quantities that matter operationally in this study.
 
 
 
@@ -783,16 +804,17 @@ p(\theta\mid h_T)
 =
 u_{\mathrm{ctrl}}(h_T).
 \]
-The primary common objective is expected terminal risk-aware multi-objective
+The primary common objective is expected terminal control--safety
+multi-objective
 MOCU,
 \[
 \boxed{
-J_{\mathrm{MOCU},\boldsymbol\lambda}(\pi)
+J_{\mathrm{MOCU}}(\pi)
 =\mathbb E_{H_T\mid\pi}\!\left[
-\operatorname{MOCU}_{\boldsymbol\lambda}
+\operatorname{MOCU}_{\mathrm{CS}}
 \bigl(p(\theta\mid H_T)\bigr)\right],
 \qquad
-\pi^\star=\arg\min_{\pi}J_{\mathrm{MOCU},\boldsymbol\lambda}(\pi),
+\pi^\star=\arg\min_{\pi}J_{\mathrm{MOCU}}(\pi),
 }
 \label{eq:policy_objective}
 \]
@@ -812,8 +834,8 @@ designs that shrink control-relevant posterior mass---especially mass on large
 \(\psi_n^\star\)---reduce MOCU. Minimizing expected terminal \(\psi^\star\) alone is
 related but not identical to minimizing reference belief MOCU, because the
 posterior mean of model-specific optima also depends on \(\pi\). The primary
-scientific endpoint is the risk-aware specialization in
-Eq.~\eqref{eq:risk_aware_mocu}; the hard-safety special case and raw control
+scientific endpoint is the control--safety specialization in
+Eq.~\eqref{eq:control_safety_mocu}; the hard-safety special case and raw control
 magnitude are secondary endpoints.
 
 True-system safety remains an important evaluation diagnostic:
@@ -1357,27 +1379,27 @@ paired across methods to reduce Monte Carlo variance. Training, validation,
 calibration, and final test systems are mutually disjoint; final test outcomes
 are not used for model selection or hyperparameter tuning. For each rollout,
 the method produces a history \(H_T\), the common posterior update yields
-\(w_{1:N}^{(T)}\), and the risk-aware rule~\eqref{eq:risk_aware_u_ctrl}
+\(w_{1:N}^{(T)}\), and the control--safety rule~\eqref{eq:bayes_control_alpha}
 produces the terminal action. The selected \(u_{\mathrm{ctrl}}(H_T)\) is evaluated on the true
 parameter \(\theta^\star\), not on a posterior mean or on a particle selected
 with knowledge of \(\theta^\star\).
 
-The primary comparison metric is empirical risk-aware multi-objective MOCU
+The primary comparison metric is empirical control--safety multi-objective MOCU
 averaged over held-out
 rollouts,
 \[
 \boxed{
-\widehat{\operatorname{MOCU}}_{m,\boldsymbol\lambda}
+\widehat{\operatorname{MOCU}}_{m,\mathrm{CS}}
 =
 \frac{1}{B_{\mathrm{test}}}
 \sum_{b=1}^{B_{\mathrm{test}}}
-\operatorname{MOCU}_{\boldsymbol\lambda}\!\left(
+\operatorname{MOCU}_{\mathrm{CS}}\!\left(
 p(\theta\mid H_T^{(b)})\right),
 \qquad
 m\in\mathcal M,
 }
 \]
-which estimates~\eqref{eq:risk_aware_mocu}. The hard-safety special case in
+which estimates~\eqref{eq:control_safety_mocu}. The hard-safety special case in
 Eq.~\eqref{eq:belief_mocu_ibr} and the realized
 true-system regret
 \[
@@ -1610,7 +1632,7 @@ across these shifts reduces held-out MOCU.
 
 All methods use the same \(\theta\) distribution, probe-response bank,
 observation noise, posterior update, terminal control rule, and paired
-held-out systems. The primary endpoint is mean risk-aware multi-objective MOCU
+held-out systems. The primary endpoint is mean control--safety multi-objective MOCU
 among methods satisfying
 the prespecified safety requirement. A full-horizon advantage is claimed only
 when it is reproduced across training seeds, its paired confidence interval
