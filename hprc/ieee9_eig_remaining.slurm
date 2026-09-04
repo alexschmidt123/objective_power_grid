@@ -37,7 +37,10 @@ read -r T SEED <<< "${CELLS[$SLURM_ARRAY_TASK_ID]}"
 
 RUNTIME=/scratch/user/g.lin/objective_power_grid_runtime
 CAMPAIGN=ieee9_eig_pub_20260904
-EXP_DIR="$RUNTIME/experiments/${CAMPAIGN}_task${SLURM_ARRAY_TASK_ID}_T${T}_seed${SEED}"
+STAMP=$(date +%m%d%Y_%H%M%S)
+# Keep each concurrent seed isolated while preserving the result-directory
+# schema enforced by src/layout.py.
+EXP_DIR="$RUNTIME/experiments/${STAMP}_ieee9_eig_hprc_seed${SEED}_EIG_T${T}_Nobs5_sigma0p01"
 MANIFEST="$RUNTIME/manifests/${CAMPAIGN}_task${SLURM_ARRAY_TASK_ID}.path"
 
 test ! -e "$EXP_DIR"
