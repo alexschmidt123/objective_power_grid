@@ -9,9 +9,8 @@
 #SBATCH --array=0-7
 #SBATCH --output=/scratch/user/g.lin/objective_power_grid_runtime/slurm/rest-%A-%a.out
 
-set -euo pipefail
-
 source /etc/profile
+set -euo pipefail
 module purge
 module load GCCcore/12.2.0
 module load Python/3.10.8
