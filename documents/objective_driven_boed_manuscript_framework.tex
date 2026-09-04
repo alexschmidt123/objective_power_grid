@@ -13,7 +13,6 @@ Power-Grid Dynamic Learning and Control}
 \thanks{\todo{Funding and corresponding-author information.}}}
 
 \begin{document}
-\bstctlcite{BSTcontrol}
 \maketitle
 
 \begin{abstract}
@@ -21,12 +20,10 @@ This paper studies sequential Bayesian experimental design for uncertain
 power-grid dynamics. At each stage, a policy selects a probing bus and duration,
 observes a noisy frequency response, and updates uncertainty over
 machine-specific parameters. We distinguish parameter-oriented expected
-information gain (EIG) from a goal-oriented specialization of Yoon's
-multi-objective mean objective cost of uncertainty (MOCU). The operational
-cost combines supplementary injection with the probability and severity of
-violating frequency-nadir, ROCOF, and settling requirements. The familiar
-hard-safety IBR expression is retained as a reference special case of the same
-MOCU theory.
+information gain (EIG) from Yoon's mean objective cost of uncertainty (MOCU).
+The terminal action is the minimum-cost control that is safe over the posterior
+support, and MOCU measures the expected excess control cost caused by model
+uncertainty.
 Random, fixed, myopic,
 deep adaptive design (DAD), and reinforcement-learning sequential Bayesian
 optimal experimental design (RL-sBOED), and Step-DAD are evaluated under common
@@ -55,8 +52,8 @@ experiment by its reduction of expected decision penalty.
 The contributions are:
 \begin{itemize}
   \item sequential bus--duration BOED for uncertain power-grid dynamics;
-  \item a power-grid specialization of Yoon multi-objective MOCU linking
-  probing to injection cost and posterior stability risk;
+  \item a power-grid specialization of Yoon MOCU linking probing to the excess
+  cost of a posterior-safe control;
   \item a matched comparison of random, fixed, myopic, DAD, RL-sBOED, and
   Step-DAD; and
   \item SIR, IEEE9, IEEE14, and IEEE30 studies of objective choice, adaptation,
@@ -238,134 +235,97 @@ r(\boldsymbol\theta,c,u)\le r_{\mathrm{lim}},
 \quad \text{for every }c\in\mathcal C.
 \label{eq:safety}
 \end{equation}
-For the ordered admissible grid $\mathcal U$, define the minimum safe magnitude
-used by the hard-safety reference case,
-\begin{equation}
-U(\boldsymbol{\theta})=
-\min\{u\in\mathcal U:\mathsf{Safe}(\boldsymbol{\theta},u)\}.
-\label{eq:required-control}
-\end{equation}
-The retained parameter support is required to contain a safe candidate. The
-offline bank stores $U_n=U(\boldsymbol{\theta}^{(n)})$ for each particle, as
-well as the component costs introduced below for every candidate $u$.
+The next section expresses these requirements as a feasible control set and
+defines the minimum safe action. The retained parameter support must contain a
+safe candidate for every particle.
 
-\subsection{Control--Safety MOCU}
-The downstream decision has two objectives: small supplementary-power use and
-a safe frequency response.  We use the two-objective extension of Yoon's
-OCU/MOCU construction~\cite{yoon2013mocu,yoon2021multimocu}; we do not assign a
-separate tunable penalty to every diagnostic.
+\subsection{Control-Oriented MOCU}
+Safety is imposed as an engineering feasibility requirement rather than as a
+weighted penalty. This yields one operational cost and follows the original
+OCU/MOCU definition of Yoon et al.~\cite{yoon2013mocu} directly.
 
-Let the normalized control cost be
+For each model, define the safe-control set
 \begin{equation}
-C(u)=u/u_{\max},
-\label{eq:control-cost}
-\end{equation}
-and define safety risk by the largest normalized violation of either operating
-limit,
-\begin{align}
-V_f(\boldsymbol\theta,c,u)
-&=\left[
-\frac{f_{\mathrm{lim}}-f_{\mathrm{nad}}(\boldsymbol\theta,c,u)}
-{\Delta f_{\mathrm{ref}}}
-\right]_+,\\
-V_r(\boldsymbol\theta,c,u)
-&=\left[
-\frac{r(\boldsymbol\theta,c,u)-r_{\mathrm{lim}}}
-{\Delta r_{\mathrm{ref}}}
-\right]_+,\\
-R(\boldsymbol\theta,u)
-&=\max_{c\in\mathcal C}\max\{V_f(\boldsymbol\theta,c,u),
-V_r(\boldsymbol\theta,c,u)\}.
-\label{eq:safety-risk}
-\end{align}
-where $[x]_+=\max(x,0)$. The fixed positive reference scales only remove
-physical units. Equivalently, define the safe control set
-\begin{equation}
-\mathcal U_{\mathrm{safe}}(\boldsymbol\theta)
-=\{u\in\mathcal U:R(\boldsymbol\theta,u)=0\}.
+\begin{split}
+\mathcal U_{\mathrm{safe}}(\boldsymbol\theta)=\{u\in\mathcal U:{}&
+f_{\mathrm{nad}}(\boldsymbol\theta,c,u)\ge f_{\mathrm{lim}},\\
+&r(\boldsymbol\theta,c,u)\le r_{\mathrm{lim}},
+\quad \forall c\in\mathcal C\}.
+\end{split}
 \label{eq:safe-control-set}
 \end{equation}
-
-For a control--safety preference $\alpha\in[0,1]$, Yoon's scalarized
-operational cost is
+The control grid is required to contain at least one safe action for every
+retained model. With increasing control cost \(C(u)\), the model-specific action
+is
 \begin{equation}
-L_\alpha(\boldsymbol\theta,u)
-=\alpha C(u)+(1-\alpha)R(\boldsymbol\theta,u).
-\label{eq:control-safety-cost}
+u_{\boldsymbol\theta}^*
+=\arg\min_{u\in\mathcal U_{\mathrm{safe}}(\boldsymbol\theta)}C(u).
+\label{eq:model-specific-control}
 \end{equation}
-The model-specific and Bayesian actions are
-\begin{align}
-u^*_{\boldsymbol\theta}(\alpha)
-&=\arg\min_{u\in\mathcal U}L_\alpha(\boldsymbol\theta,u),
-\label{eq:model-specific-control}\\
-u_{\mathrm{ctrl}}(b,\alpha)
-&=\arg\min_{u\in\mathcal U}
-\E_{\boldsymbol\theta\sim b}[L_\alpha(\boldsymbol\theta,u)].
-\label{eq:risk-aware-control}
-\end{align}
-Thus $u_{\mathrm{ctrl}}$ is the practical terminal action, not a measure of
-uncertainty.
 
-For fixed $\alpha$, ordinary MOCU is
+For posterior belief \(b\), define
 \begin{equation}
-\operatorname{MOCU}_\alpha(b)
-=\E_{\boldsymbol\theta\sim b}\!\left[
-L_\alpha\!\left(\boldsymbol\theta,u_{\mathrm{ctrl}}(b,\alpha)\right)
--L_\alpha\!\left(\boldsymbol\theta,u^*_{\boldsymbol\theta}(\alpha)\right)
-\right]\ge0.
-\label{eq:mocu-alpha}
+L(\boldsymbol\theta,u)=
+\begin{cases}
+C(u),&u\in\mathcal U_{\mathrm{safe}}(\boldsymbol\theta),\\
++\infty,&\text{otherwise}.
+\end{cases}
+\label{eq:operational-cost}
 \end{equation}
-Following Yoon et al., the two-objective MOCU averages over a declared
-preference distribution,
+Yoon's Bayesian robust action, which is the practical terminal command, is
 \begin{equation}
 \boxed{
-\operatorname{MOCU}_{\mathrm{CS}}(b)
-=\int_0^1\operatorname{MOCU}_\alpha(b)p(\alpha)\,d\alpha .
+u_{\mathrm{ctrl}}(b)
+=\arg\min_{u\in\mathcal U}
+\E_{\boldsymbol\theta\sim b}[L(\boldsymbol\theta,u)].
 }
-\label{eq:risk-aware-mocu}
+\label{eq:bayesian-control}
 \end{equation}
-The reference analysis uses $p(\alpha)=1$ when no external preference
-information is available. This is Yoon's uniform two-objective construction,
-not an unexplained fixed weight. The control--safety frontier, control cost,
-and safety risk are reported alongside the aggregate value.
-
-\paragraph{Hard-safety special case.}
-The previous implementation is recovered by choosing
+Under monotone safety this is the smallest action safe for every model in the
+posterior support:
 \begin{equation}
-L_{\mathrm{hard}}(\boldsymbol\theta,u)=
-\begin{cases}
-u, & \mathsf{Safe}(\boldsymbol\theta,u),\\
-+\infty, & \text{otherwise}.
-\end{cases}
-\label{eq:hard-safety-cost}
+u_{\mathrm{ctrl}}(b)
+=\max_{\boldsymbol\theta\in\operatorname{supp}(b)}
+u_{\boldsymbol\theta}^*.
+\label{eq:robust-control}
 \end{equation}
-For particle weights $w_n^{(T)}$ and numerical support
-$\mathcal I_T=\{n:w_n^{(T)}>10^{-12}\}$, Eqs.~\eqref{eq:model-specific-control}
-and~\eqref{eq:risk-aware-control} reduce to
+
+The corresponding objective cost of uncertainty and MOCU are
 \begin{align}
-u_{\mathrm{hard}}^*(h_T)
-&=\max_{n\in\mathcal I_T}U_n,\\
-\operatorname{MOCU}_{\mathrm{hard}}(h_T)
-&=u_{\mathrm{hard}}^*(h_T)
--\sum_{n=1}^{N_{\mathrm p}}w_n^{(T)}U_n.
+\operatorname{OCU}(\boldsymbol\theta,b)
+&=C\!\left(u_{\mathrm{ctrl}}(b)\right)-C(u_{\boldsymbol\theta}^*),\\
+\operatorname{MOCU}(b)
+&=C\!\left(u_{\mathrm{ctrl}}(b)\right)
+-\E_{\boldsymbol\theta\sim b}[C(u_{\boldsymbol\theta}^*)]\ge0.
 \label{eq:belief-mocu}
 \end{align}
-This identity is a special consequence of infinite unsafe cost and linear
-injection cost; it is not the general definition of MOCU.
+For the primary choice \(C(u)=u\), MOCU is measured directly in units of
+supplementary power.
+
+For particles with weights \(w_n\) and model-specific minimum safe controls
+\(u_n^*\), the corresponding particle approximation is
+\begin{align}
+\mathcal I(b)&=\{n:w_n>10^{-12}\},\\
+u_{\mathrm{ctrl}}(b)&=\max_{n\in\mathcal I(b)}u_n^*,\\
+\operatorname{MOCU}(b)
+&=u_{\mathrm{ctrl}}(b)-\sum_{n=1}^{N_{\mathrm p}}w_nu_n^*.
+\label{eq:particle-mocu}
+\end{align}
+Policy optimization and evaluation use these identical expressions, ensuring
+that both stages represent the same terminal decision problem.
 
 The sequential design objective is
 \begin{equation}
 \pi^*_{\mathrm{MOCU}}
-=\arg\min_{\pi}\;
-\E_{H_T\mid\pi}\!\left[
-\operatorname{MOCU}_{\mathrm{CS}}\!\left(p(\boldsymbol\theta\mid H_T)\right)
-\right].
+=\arg\min_\pi\E_{H_T\mid\pi}
+\left[\operatorname{MOCU}\!\left(p(\boldsymbol\theta\mid H_T)\right)\right].
 \label{eq:policy-mocu}
 \end{equation}
-Equivalently, the policy maximizes expected prior-to-terminal MOCU reduction.
-All normalization constants and the preference distribution are fixed before
-method comparison. We additionally report $u_{\mathrm{ctrl}}$, $C(u)$,
-$R(\boldsymbol\theta,u)$, held-out safety, and the control--safety frontier.
+MOCU measures uncertainty-induced excess control among posterior-safe actions.
+Held-out safety probability, nadir violations, and ROCOF violations are
+reported separately. A method that fails the declared safety requirement is not
+ranked. This avoids an unsupported numerical exchange rate between control
+effort and safety.
 
 \section{Compared Design Methods}
 \begin{table}[t]

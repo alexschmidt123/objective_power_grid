@@ -84,8 +84,7 @@ The presentation follows the causal workflow used by the implementation:
   \item specify reset-to-equilibrium probe actions and noisy observations;
   \item update the posterior and define parameter EIG;
   \item define terminal $u_{\mathrm{ctrl}}$ and the frequency-security criteria;
-  \item construct control--safety multi-objective MOCU from the same control and
-  safety quantities; and
+  \item construct control-oriented MOCU from the minimum safe control cost; and
   \item optimize and evaluate sequential probe-selection policies.
 \end{enumerate}
 This ordering separates the physical model, statistical experiment, and
@@ -376,387 +375,158 @@ f_{\mathrm{nadir}}(\theta,c,u)\ge f_{\min}
 \]
 where \(\mathcal S\subset[0,\infty)\) is the admissible support-magnitude set.
 
-\subsection{5. MOCU Based on Control Cost and Safety Risk}
+\subsection{5. Control-Oriented MOCU}
 
-We first state Yoon's hard-safety specialization, which is retained as a
-reference and implementation check, and then give the primary multi-objective
-cost. Both use the terminal simulations and safety quantities defined above.
+The terminal decision must satisfy the frequency-security requirements while
+using the least supplementary power. Safety is therefore treated as a
+feasibility requirement, not as an additional weighted penalty. This produces
+a single operational cost and permits direct use of the original OCU/MOCU
+construction of Yoon et al.~\cite{yoon2013}.
 
-\subsubsection{Operator family and hard-safety reference}
+\subsubsection{Safe control set}
 
-\paragraph{Operator family.}
-Following Yoon et al.~\cite{yoon2013}, admissible terminal interventions form a
-one-parameter operator family
-\[
-\boxed{
-\Psi
-=
-\bigl\{\psi_u:u\in\mathcal S\bigr\},
-}
-\label{eq:psi_family}
-\]
-where \(\psi_u\) denotes the constant supplementary injection of magnitude
-\(u\) with all other control attributes held fixed. Throughout, a symbol from
-the \(\psi\) family may be identified with its magnitude in \(\mathcal S\) when
-the mapping \(u\mapsto\psi_u\) is one-to-one. Notation is reserved as follows:
-\begin{center}
-\begin{tabular}{@{}ll@{}}
-\toprule
-Symbol & Meaning \\
-\midrule
-\(\xi_t\) & probe / experimental design at step \(t\) (not an operator) \\
-\(\psi_u\in\Psi\) & operator of magnitude \(u\in\mathcal S\) \\
-\(\psi_\theta^\star\) & model-specific optimal operator for fixed \(\theta\) \\
-\(\psi_n^\star=\psi_{\theta^{(n)}}^\star\) & same quantity for particle \(n\) (offline bank) \\
-\(\psi^\star(h_T)=\psi^{\mathrm{IBR}}(h_T)\) & robust operator under the terminal belief \\
-\(u_{\mathrm{ctrl}}(h_T)\) & swing-equation command equal to \(\psi^\star(h_T)\) \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\paragraph{Hard-safety reference cost.}
-The operational cost of applying magnitude \(u\) when the true parameter is
-\(\theta\) is
-\begin{align}
-C_\theta(u)
-&=\begin{cases}
-u, & \mathrm{safe}(\theta,u),\\
-+\infty, & \text{otherwise},
-\end{cases}\\
-\mathrm{safe}(\theta,u)
-&\iff
-\begin{cases}
-r_{\mathrm{ctrl}}(\theta,c,u)\le r_{\max},\\
-f_{\mathrm{nadir}}(\theta,c,u)\ge f_{\min},
-\end{cases}
-\quad \forall c\in\mathcal C.
-\label{eq:yoon_cost}
-\end{align}
-Thus a safe operator costs its magnitude, and any unsafe operator is forbidden.
-This is retained as the Yoon IBR reference model; it is not the proposed
-primary operational loss because it cannot grade posterior probability or
-severity of instability.
-
-\paragraph{Model-specific optimal operator.}
-For a known \(\theta\), the Yoon model-specific optimum is the cheapest safe
-member of \(\Psi\),
-\[
-\boxed{
-\psi_\theta^\star
-=
-\arg\min_{u\in\mathcal S}C_\theta(u)
-=
-\max_{c\in\mathcal C}u_{\mathrm{req}}(\theta,c),
-\qquad
-C_\theta\!\left(\psi_\theta^\star\right)=\psi_\theta^\star.
-}
-\label{eq:model_optimal_ops}
-\]
-The two expressions coincide: the smallest magnitude that is safe for every
-contingency in \(\mathcal C\) is exactly the minimizer of~\eqref{eq:yoon_cost}.
-(The engineering synonym \(u_{\mathrm{req}}(\theta):=\psi_\theta^\star\) is
-used only as shorthand.) The true-system value \(\psi_{\theta^\star}^\star\) is
-unknown because \(\theta^\star\) is unknown, but the map
-\(\theta\mapsto\psi_\theta^\star\) is computable offline. For every posterior
-particle,
-\[
-\psi_n^\star
-=
-\psi_{\theta^{(n)}}^\star
-=
-\max_{c\in\mathcal C}
-u_{\mathrm{req}}\left(\theta^{(n)},c\right)
-\]
-is stored in the operator-cost bank
-\[
-\{\psi_1^\star,\ldots,\psi_N^\star\}
-\]
-(on disk: \texttt{psi\_star.npy}). This bank is independent of the probe
-history; probes affect the terminal decision only through the posterior weights
-\(w_n^{(T)}\). The evaluation oracle may refine \(\psi_\theta^\star\)
-continuously inside the first unsafe--safe bracket; that continuous value is
-never available to a probe-selection policy.
-
-\subsubsection{Hard-safety IBR operator}
-
-The posterior over \(\theta\) induces a posterior over model-specific optima,
-\[
-\boxed{
-p(\psi_\theta^\star\mid h_T)
-\approx
-\sum_{n=1}^{N}
-w_n^{(T)}
-\delta_{\psi_n^\star}(\psi_\theta^\star).
-}
-\label{eq:control_posterior}
-\]
-Yoon's intrinsically Bayesian robust (IBR) operator is the member of \(\Psi\)
-that minimizes expected cost under this belief:
-\[
-\boxed{
-\psi^{\mathrm{IBR}}(h_T)
-=
-\arg\min_{u\in\mathcal S}
-\sum_{n=1}^{N}
-w_n^{(T)}
-C_{\theta^{(n)}}(u).
-}
-\label{eq:ibr}
-\]
-Under the hard-safety cost~\eqref{eq:yoon_cost} and finite particle support,
-any \(u\) that fails on a positive-weight particle has infinite expected cost.
-Hence~\eqref{eq:ibr} reduces to the hardest model-specific optimum on the
-posterior support,
-\[
-\boxed{
-\psi^\star(h_T)
-=
-\psi^{\mathrm{IBR}}(h_T)
-=
-\max_{n:\,w_n^{(T)}>\varepsilon_w}\psi_n^\star,
-\qquad \varepsilon_w=10^{-12}.
-}
-\label{eq:u_ctrl}
-\]
-The threshold defines numerical posterior support consistently in the CPU and
-GPU implementations; if no particle exceeds it, all strictly positive-weight
-particles are retained. In implementation, the scalar command written into the
-swing equation is
-\[
-u_{\mathrm{ctrl}}(h_T)=\psi^\star(h_T).
-\]
-After selection, safety for any candidate \(\theta\) is judged explicitly
-by~\eqref{eq:yoon_cost}. The symbol \(\psi^\star\) always denotes this
-belief-dependent robust operator; it must not be confused with the
-model-specific bank values \(\psi_n^\star\) or with the probe \(\xi_t\).
-
-\paragraph{Optional chance-constrained rule.}
-For engineering comparison only, a posterior quantile rule
-\[
-\psi^{(1-\alpha)}(h_T)
-=
-\min
-\left\{
-u\in\mathcal S:
-\sum_{n=1}^{N}
-w_n^{(T)}
-\mathbf 1\{\psi_n^\star\le u\}
-\ge 1-\alpha
-\right\}
-\]
-may be reported as a softer alternative. It is a robust decision rule but is
-\emph{not} identical to Yoon's IBR operator unless \(\alpha=0\) on the
-finite support. Reference Yoon OCU/MOCU claims use~\eqref{eq:u_ctrl}; the
-primary control--safety decision instead uses~\eqref{eq:bayes_control_alpha}.
-
-\subsubsection{Hard-safety OCU}
-
-OCU is defined for one model under a fixed robust operator, before any
-averaging. Given \(\psi^\star(h_T)\), the \emph{objective cost of uncertainty}
-for parameter \(\theta\) is the excess cost of using the robust operator instead
-of the model-specific optimum~\cite{yoon2013}:
-\[
-\boxed{
-\operatorname{OCU}(\theta,h_T)
-=
-C_\theta\!\left(\psi^\star(h_T)\right)
--
-C_\theta\!\left(\psi_\theta^\star\right).
-}
-\label{eq:ocu}
-\]
-Under the IBR rule~\eqref{eq:u_ctrl} and hard safety, every posterior particle
-with \(w_n^{(T)}>0\) is safe at \(\psi^\star(h_T)\), so
-\(C_{\theta^{(n)}}(\psi^\star)=\psi^\star(h_T)\) and
-\(C_{\theta^{(n)}}(\psi_n^\star)=\psi_n^\star\). Therefore
-\[
-\boxed{
-\operatorname{OCU}(\theta^{(n)},h_T)
-=
-\psi^\star(h_T)-\psi_n^\star
-\ge 0.
-}
-\label{eq:ocu_ibr}
-\]
-OCU vanishes only for particles whose own optimum coincides with the robust
-operator; particles that would have required a strictly smaller support pay a
-positive regret. The held-out realized OCU on the true system,
-\[
-\operatorname{OCU}(\theta^\star,H_T)
-=
-\psi^\star(H_T)-\psi_{\theta^\star}^\star,
-\]
-is reported as a diagnostic; under IBR it is nonnegative whenever
-\(\theta^\star\) lies in the protected particle support.
-
-\subsubsection{Hard-safety MOCU}
-
-MOCU is not a different cost concept: it is the expectation of OCU.
-\emph{Belief MOCU} is the posterior mean of~\eqref{eq:ocu},
-\[
-\boxed{
-\operatorname{MOCU}(h_T)
-=
-\mathbb E_{\theta\sim p(\theta\mid h_T)}
-\bigl[
-\operatorname{OCU}(\theta,h_T)
-\bigr]
-=
-\sum_{n=1}^{N}
-w_n^{(T)}
-\operatorname{OCU}(\theta^{(n)},h_T).
-}
-\label{eq:belief_mocu}
-\]
-Under IBR hard safety this reduces to
-\[
-\boxed{
-\operatorname{MOCU}(h_T)
-=
-\sum_{n=1}^{N}
-w_n^{(T)}
-\bigl(
-\psi^\star(h_T)-\psi_n^\star
-\bigr)
-=
-\psi^\star(h_T)
--
-\sum_{n=1}^{N}
-w_n^{(T)}\psi_n^\star.
-}
-\label{eq:belief_mocu_ibr}
-\]
-Thus belief MOCU equals the gap between the robust operator and the posterior
-mean of the model-specific optima. The sequential design objective is the
-\emph{policy MOCU}, i.e.\ the expected belief MOCU under the closed-loop probe
-process,
-\[
-\boxed{
-\operatorname{MOCU}(\pi)
-=
-\mathbb E_{\theta^\star,H_T\mid\pi}
-\bigl[
-\operatorname{MOCU}(H_T)
-\bigr],
-}
-\label{eq:mocu}
-\]
-which is the mean excess support cost paid because \(\theta\) is uncertain.
-Lower MOCU is better. In summary:
-\begin{align}
-\operatorname{OCU}(\theta,h_T)
-&=C_\theta(\psi^\star)-C_\theta(\psi_\theta^\star),\\
-\operatorname{MOCU}(h_T)
-&=\mathbb E[\operatorname{OCU}(\theta,h_T)\mid h_T],\\
-\operatorname{MOCU}(\pi)
-&=\mathbb E[\operatorname{MOCU}(H_T)\mid\pi].
-\end{align}
-
-\subsubsection{Control--safety multi-objective MOCU}
-
-The operational problem has two objectives: use as little supplementary power
-as possible and avoid an unsafe frequency response.  We therefore retain only
-these two objectives.  Define the normalized control cost
-\begin{equation}
-C(u)=\frac{u}{u_{\max}},
-\label{eq:normalized_control_cost}
-\end{equation}
-and the normalized safety risk
-\begin{equation}
-R(\theta,u)=
-\max_{c\in\mathcal C}
-\left\{
-\left[\frac{f_{\min}-f_{\mathrm{nadir}}(\theta,c,u)}{\Delta f_{\mathrm{ref}}}\right]_+,
-\left[\frac{r_{\mathrm{ctrl}}(\theta,c,u)-r_{\max}}{\Delta r_{\mathrm{ref}}}\right]_+
-\right\},
-\label{eq:safety_risk}
-\end{equation}
-where \([x]_+=\max(x,0)\).  The positive constants
-\(\Delta f_{\mathrm{ref}}\) and \(\Delta r_{\mathrm{ref}}\) are fixed engineering
-normalizations, not fitted method parameters.  This definition gives the
-useful equivalence
-\[
-R(\theta,u)=0
-\quad\Longleftrightarrow\quad
-u\in\mathcal U_{\mathrm{safe}}(\theta),
-\]
-where
+For model parameter \(\theta\), define
 \begin{equation}
 \mathcal U_{\mathrm{safe}}(\theta)
-=\left\{u\in\mathcal S:
-f_{\mathrm{nadir}}(\theta,c,u)\ge f_{\min},\;
-r_{\mathrm{ctrl}}(\theta,c,u)\le r_{\max}
-\text{ for all }c\in\mathcal C\right\}.
+=
+\left\{
+u\in\mathcal S:
+\begin{array}{ll}
+f_{\mathrm{nadir}}(\theta,c,u)\ge f_{\min}, & \forall c\in\mathcal C,\\
+r_{\mathrm{ctrl}}(\theta,c,u)\le r_{\max}, & \forall c\in\mathcal C
+\end{array}
+\right\}.
 \label{eq:safe_control_set}
 \end{equation}
+The admissible control grid \(\mathcal S=\{u^1<\cdots<u^{N_u}\}\), contingency
+set \(\mathcal C\), and limits \(f_{\min}\) and \(r_{\max}\) are common to all
+probe-selection methods. The configured grid is valid only if
+\(\mathcal U_{\mathrm{safe}}(\theta)\ne\varnothing\) for every retained model.
 
-We apply the two-objective construction of Yoon
-et al.~\cite{yoon2021multi}, rather than introducing a separate penalty for
-every engineering diagnostic.  For a preference value \(\alpha\in[0,1]\), the
-operational cost is
-\begin{equation}
-L_\alpha(\theta,u)
-=\alpha C(u)+(1-\alpha)R(\theta,u).
-\label{eq:control_safety_cost}
-\end{equation}
-For known \(\theta\) and for posterior belief \(b\), respectively, define
-\begin{align}
-u_\theta^*(\alpha)
-&=\arg\min_{u\in\mathcal S}L_\alpha(\theta,u),
-\label{eq:model_specific_control_alpha}\\
-u_{\mathrm{ctrl}}(b,\alpha)
-&=\arg\min_{u\in\mathcal S}
-\mathbb E_{\theta\sim b}[L_\alpha(\theta,u)].
-\label{eq:bayes_control_alpha}
-\end{align}
-Thus \(u_{\mathrm{ctrl}}\) remains the practical action applied to the grid; it
-is not itself MOCU.
+\subsubsection{Model-specific and Bayesian controls}
 
-For fixed \(\alpha\), the ordinary Yoon MOCU is the expected regret of the
-Bayesian action relative to the model-specific action,
+Let \(C(u)\) denote the cost of applying control magnitude \(u\). The primary
+experiments use \(C(u)=u\); a monetary cost may replace it if independently
+available. If \(\theta\) were known, the optimal action would be
 \begin{equation}
-\operatorname{MOCU}_\alpha(b)
-=\mathbb E_{\theta\sim b}
-\left[
-L_\alpha\!\left(\theta,u_{\mathrm{ctrl}}(b,\alpha)\right)
--L_\alpha\!\left(\theta,u_\theta^*(\alpha)\right)
-\right]\ge0.
-\label{eq:control_safety_mocu_alpha}
+u_\theta^*
+=\arg\min_{u\in\mathcal U_{\mathrm{safe}}(\theta)}C(u).
+\label{eq:model_specific_control}
 \end{equation}
-Following Yoon et al., the multi-objective MOCU averages this quantity over a
-declared distribution of operational preferences,
+Thus, for increasing \(C\), \(u_\theta^*\) is the minimum safe injection. It is
+computed in the terminal-control simulations and stored once for every
+particle; it is not inferred from a probe trajectory.
+
+Let \(b(\theta)=p(\theta\mid h_T)\) be the posterior after the final probe. The
+original Yoon intrinsically Bayesian robust action minimizes posterior expected
+operational cost. Equivalently, introduce the constrained cost
+\begin{equation}
+L(\theta,u)=
+\begin{cases}
+C(u), & u\in\mathcal U_{\mathrm{safe}}(\theta),\\
++\infty, & u\notin\mathcal U_{\mathrm{safe}}(\theta),
+\end{cases}
+\label{eq:operational_cost}
+\end{equation}
+and define the practical terminal action by
 \begin{equation}
 \boxed{
-\operatorname{MOCU}_{\mathrm{CS}}(b)
-=\int_0^1 \operatorname{MOCU}_\alpha(b)\,p(\alpha)\,d\alpha .
+u_{\mathrm{ctrl}}(b)
+=\arg\min_{u\in\mathcal S}
+\mathbb E_{\theta\sim b}[L(\theta,u)].
 }
-\label{eq:control_safety_mocu}
+\label{eq:u_ctrl}
 \end{equation}
-If no preference information is available, the reference analysis uses the
-uniform distribution \(p(\alpha)=1\), exactly as suggested for the
-two-objective case by Yoon et al.  This avoids claiming that one unexplained
-weight vector represents the operator's preferences.  Results additionally
-report \(C(u_{\mathrm{ctrl}})\), safety risk \(R\), and the full
-control--safety frontier over \(\alpha\).
+For monotone safety and increasing \(C\), this is the smallest action that is
+safe for every model in the posterior support,
+\begin{equation}
+u_{\mathrm{ctrl}}(b)
+=\max_{\theta\in\operatorname{supp}(b)}u_\theta^*.
+\label{eq:u_ctrl_support}
+\end{equation}
+Here \(u_{\mathrm{ctrl}}\) is the action applied to the grid, not a measure of
+uncertainty.
 
-The sequential design objective is
+\subsubsection{OCU and MOCU}
+
+For a particular model, the objective cost of uncertainty is the excess cost
+of using the Bayesian robust action instead of the action that would be chosen
+if that model were known:
+\begin{equation}
+\operatorname{OCU}(\theta,b)
+=L\!\left(\theta,u_{\mathrm{ctrl}}(b)\right)
+-L(\theta,u_\theta^*).
+\label{eq:ocu}
+\end{equation}
+Because \(u_{\mathrm{ctrl}}(b)\) is safe for every model in the posterior
+support, this becomes
+\begin{equation}
+\operatorname{OCU}(\theta,b)
+=C\!\left(u_{\mathrm{ctrl}}(b)\right)-C(u_\theta^*)\ge0.
+\label{eq:ocu_control}
+\end{equation}
+The mean objective cost of uncertainty is its posterior expectation,
+\begin{equation}
+\boxed{
+\operatorname{MOCU}(b)
+=C\!\left(u_{\mathrm{ctrl}}(b)\right)
+-\mathbb E_{\theta\sim b}[C(u_\theta^*)].
+}
+\label{eq:belief_mocu}
+\end{equation}
+For \(C(u)=u\), MOCU is the expected excess injection required solely because
+the true model is uncertain:
+\begin{equation}
+\operatorname{MOCU}(b)
+=u_{\mathrm{ctrl}}(b)-\mathbb E_{\theta\sim b}[u_\theta^*].
+\label{eq:belief_mocu_linear}
+\end{equation}
+
+\subsubsection{Particle approximation}
+
+For particles \(\{\theta^{(n)}\}_{n=1}^N\) with posterior weights \(w_n\), store
+\(u_n^*=u_{\theta^{(n)}}^*\). Numerical posterior support is
+\begin{equation}
+\mathcal I(b)=\{n:w_n>\varepsilon_w\},
+\qquad \varepsilon_w=10^{-12}.
+\end{equation}
+The particle approximation of the robust action and posterior MOCU is
+\begin{align}
+u_{\mathrm{ctrl}}(b)
+&=\max_{n\in\mathcal I(b)}u_n^*,
+\label{eq:particle_u_ctrl}\\
+\operatorname{MOCU}(b)
+&=C\!\left(u_{\mathrm{ctrl}}(b)\right)
+-\sum_{n=1}^Nw_n C(u_n^*).
+\label{eq:particle_mocu}
+\end{align}
+The weights are normalized in log space, so \(\mathcal I(b)\) is nonempty. The
+same posterior support, operational cost, contingency set, and safety limits
+define both policy optimization and evaluation. Consequently, the learning
+objective and the reported terminal MOCU represent the same decision problem.
+
+\subsubsection{Sequential design objective and safety reporting}
+
+The probe policy minimizes expected terminal MOCU,
 \begin{equation}
 \boxed{
 \pi^*=\arg\min_\pi
-\mathbb E_{H_T\mid\pi}\!\left[
-\operatorname{MOCU}_{\mathrm{CS}}
-\bigl(p(\theta\mid H_T)\bigr)
+\mathbb E_{H_T\mid\pi}
+\left[
+\operatorname{MOCU}\!\left(p(\theta\mid H_T)\right)
 \right].
 }
-\label{eq:control_safety_mocu_policy}
+\label{eq:mocu_policy}
 \end{equation}
-The hard-safety MOCU in Eq.~\eqref{eq:belief_mocu_ibr} remains a limiting
-reference formulation.  Equation~\eqref{eq:control_safety_mocu}, rather than an
-ad hoc sum of five penalties, is the primary improved MOCU: its MOCU structure
-comes directly from Yoon's OCU/MOCU theory, and its two application-specific
-objectives are the quantities that matter operationally in this study.
+Equivalently, it maximizes expected prior-to-terminal MOCU reduction.
 
-
+MOCU measures excess control cost among posterior-safe decisions; it does not
+replace out-of-sample validation of security. Accordingly, terminal
+\(u_{\mathrm{ctrl}}\), held-out safety probability, frequency-nadir violations,
+and ROCOF violations are reported separately. Methods that fail the
+prespecified held-out safety requirement are not ranked by MOCU. This separation
+avoids introducing an unsupported numerical exchange rate between control
+effort and safety.
 
 \subsection{6. Policy Optimization, Feasibility, and Evaluation}
 
@@ -804,14 +574,12 @@ p(\theta\mid h_T)
 =
 u_{\mathrm{ctrl}}(h_T).
 \]
-The primary common objective is expected terminal control--safety
-multi-objective
-MOCU,
+The primary common objective is expected terminal MOCU,
 \[
 \boxed{
 J_{\mathrm{MOCU}}(\pi)
 =\mathbb E_{H_T\mid\pi}\!\left[
-\operatorname{MOCU}_{\mathrm{CS}}
+\operatorname{MOCU}
 \bigl(p(\theta\mid H_T)\bigr)\right],
 \qquad
 \pi^\star=\arg\min_{\pi}J_{\mathrm{MOCU}}(\pi),
@@ -826,17 +594,16 @@ subject only to the fixed probe budget
 \label{eq:fixed_budget}
 \]
 The expectation is taken over the unknown true system, observation noise, and
-any randomization in the probe-selection method. The Yoon IBR baseline obeys
+any randomization in the probe-selection method. For linear control cost, the Yoon definition gives
 \[
-\operatorname{MOCU}(h_T)=\psi^\star(h_T)-\mathbb E[\psi_\theta^\star\mid h_T],
+\operatorname{MOCU}(h_T)=u_{\mathrm{ctrl}}(h_T)
+-\mathbb E[u_\theta^*\mid h_T].
 \]
-designs that shrink control-relevant posterior mass---especially mass on large
-\(\psi_n^\star\)---reduce MOCU. Minimizing expected terminal \(\psi^\star\) alone is
-related but not identical to minimizing reference belief MOCU, because the
-posterior mean of model-specific optima also depends on \(\pi\). The primary
-scientific endpoint is the control--safety specialization in
-Eq.~\eqref{eq:control_safety_mocu}; the hard-safety special case and raw control
-magnitude are secondary endpoints.
+Thus, designs that reduce posterior uncertainty about the minimum safe control
+reduce MOCU. Minimizing expected \(u_{\mathrm{ctrl}}\) alone is related but not
+identical to minimizing MOCU because the posterior mean of \(u_\theta^*\) also
+depends on the policy. Equation~\eqref{eq:belief_mocu} is the primary endpoint;
+raw control magnitude and held-out safety are reported separately.
 
 True-system safety remains an important evaluation diagnostic:
 \[
@@ -1379,31 +1146,27 @@ paired across methods to reduce Monte Carlo variance. Training, validation,
 calibration, and final test systems are mutually disjoint; final test outcomes
 are not used for model selection or hyperparameter tuning. For each rollout,
 the method produces a history \(H_T\), the common posterior update yields
-\(w_{1:N}^{(T)}\), and the control--safety rule~\eqref{eq:bayes_control_alpha}
+\(w_{1:N}^{(T)}\), and the robust rule~\eqref{eq:particle_u_ctrl}
 produces the terminal action. The selected \(u_{\mathrm{ctrl}}(H_T)\) is evaluated on the true
 parameter \(\theta^\star\), not on a posterior mean or on a particle selected
 with knowledge of \(\theta^\star\).
 
-The primary comparison metric is empirical control--safety multi-objective MOCU
-averaged over held-out
-rollouts,
+The primary comparison metric is empirical MOCU averaged over held-out rollouts,
 \[
 \boxed{
-\widehat{\operatorname{MOCU}}_{m,\mathrm{CS}}
+\widehat{\operatorname{MOCU}}_m
 =
 \frac{1}{B_{\mathrm{test}}}
 \sum_{b=1}^{B_{\mathrm{test}}}
-\operatorname{MOCU}_{\mathrm{CS}}\!\left(
+\operatorname{MOCU}\!\left(
 p(\theta\mid H_T^{(b)})\right),
 \qquad
 m\in\mathcal M,
 }
 \]
-which estimates~\eqref{eq:control_safety_mocu}. The hard-safety special case in
-Eq.~\eqref{eq:belief_mocu_ibr} and the realized
-true-system regret
+which estimates~\eqref{eq:belief_mocu}. The realized true-system excess control
 \[
-\psi^\star(H_T)-\psi_{\theta^\star}^\star
+u_{\mathrm{ctrl}}(H_T)-u_{\theta^\star}^*
 \]
 are reported as secondary diagnostics. Among methods that satisfy the
 prespecified safety requirement, lower MOCU is better. Mean terminal \(\psi^\star\)
@@ -1632,7 +1395,7 @@ across these shifts reduces held-out MOCU.
 
 All methods use the same \(\theta\) distribution, probe-response bank,
 observation noise, posterior update, terminal control rule, and paired
-held-out systems. The primary endpoint is mean control--safety multi-objective MOCU
+held-out systems. The primary endpoint is mean control-oriented MOCU
 among methods satisfying
 the prespecified safety requirement. A full-horizon advantage is claimed only
 when it is reproduced across training seeds, its paired confidence interval
@@ -1647,12 +1410,6 @@ B.-J. Yoon, X. Qian, and E.~R. Dougherty,
 \emph{IEEE Transactions on Signal Processing}, vol.~61, no.~9,
 pp.~2256--2266, May 2013,
 doi: 10.1109/TSP.2013.2251336.
-
-\bibitem{yoon2021multi}
-B.-J. Yoon, X. Qian, and E.~R. Dougherty,
-``Quantifying the multi-objective cost of uncertainty,''
-\emph{IEEE Access}, vol.~9, pp.~80351--80359, 2021,
-doi: 10.1109/ACCESS.2021.3085486.
 
 \bibitem{peng2024}
 J. Peng, J. Tan, P. Koralewicz, E. Mendiola, S. Dong, A. Hoke, and K. Horowitz,
