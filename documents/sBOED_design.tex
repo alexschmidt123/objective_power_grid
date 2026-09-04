@@ -413,7 +413,7 @@ Symbol & Meaning \\
 \end{tabular}
 \end{center}
 
-\paragraph{Hard-safety cost.}
+\paragraph{Hard-safety reference cost.}
 The operational cost of applying magnitude \(u\) when the true parameter is
 \(\theta\) is
 \[
@@ -436,6 +436,9 @@ f_{\mathrm{nadir}}(\theta,c,u)\ge f_{\min}.
 \label{eq:yoon_cost}
 \]
 Thus a safe operator costs its magnitude, and any unsafe operator is forbidden.
+This is retained as the Yoon IBR reference model; it is not the proposed
+primary operational loss because it cannot grade posterior probability or
+severity of instability.
 
 \paragraph{Model-specific optimal operator.}
 For a known \(\theta\), the Yoon model-specific optimum is the cheapest safe
@@ -513,11 +516,15 @@ posterior support,
 =
 \psi^{\mathrm{IBR}}(h_T)
 =
-\max_{n:\,w_n^{(T)}>0}\psi_n^\star.
+\max_{n:\,w_n^{(T)}>\varepsilon_w}\psi_n^\star,
+\qquad \varepsilon_w=10^{-12}.
 }
 \label{eq:u_ctrl}
 \]
-In implementation, the scalar command written into the swing equation is
+The threshold defines numerical posterior support consistently in the CPU and
+GPU implementations; if no particle exceeds it, all strictly positive-weight
+particles are retained. In implementation, the scalar command written into the
+swing equation is
 \[
 u_{\mathrm{ctrl}}(h_T)=\psi^\star(h_T).
 \]
@@ -542,7 +549,8 @@ w_n^{(T)}
 \]
 may be reported as a softer alternative. It is a robust decision rule but is
 \emph{not} identical to Yoon's IBR operator unless \(\alpha=0\) on the
-finite support. Primary OCU/MOCU claims use~\eqref{eq:u_ctrl}.
+finite support. Reference Yoon OCU/MOCU claims use~\eqref{eq:u_ctrl}; the
+primary risk-aware decision instead uses~\eqref{eq:risk_aware_u_ctrl}.
 
 \subsection{Objective Cost of Uncertainty (OCU)}
 
@@ -652,6 +660,99 @@ C_\theta(\psi^\star)-C_\theta(\psi_\theta^\star),
 \mathbb E\bigl[\operatorname{MOCU}(H_T)\mid\pi\bigr].
 \]
 
+\subsection{Primary Risk-Aware Multi-Objective MOCU Specialization}
+
+The system operator does not require accurate values of \(M_i/K_i\) for their
+own sake. The operational goal is a sufficiently safe and steady response at
+the lowest reasonable intervention cost. Raw \(u_{\mathrm{ctrl}}\) is only an
+action magnitude; it is neither monetary cost nor a measure of posterior
+instability risk. Define the dimensionless stability loss
+\[
+\boxed{
+S_\theta(u)=
+w_f\left[\frac{f_{\min}-f_{\mathrm{nadir}}(\theta,u)}{s_f}\right]_+
++w_r\left[\frac{r_{\mathrm{ctrl}}(\theta,u)-r_{\max}}{s_r}\right]_+
++w_t\left[\frac{t_{\mathrm{set}}(\theta,u)-t_{\mathrm{set}}^{\max}}{s_t}\right]_+,
+}
+\label{eq:stability_risk}
+\]
+where \([x]_+=\max(x,0)\), and fixed scales \(s_f,s_r,s_t\) prevent unit
+choice from implicitly determining the risk weights. Other declared stability
+standards, such as damping ratio or integrated frequency deviation, may be
+added before evaluation but not selected after observing method performance.
+
+Let \(\widetilde C_u(u)\) be the normalized monetary, reserve, energy, or
+actuator-use cost of injection. Following Yoon's multi-objective MOCU
+construction~\cite{yoon2021multi}, define the combined modelwise operational cost
+\[
+\boxed{
+\xi_\theta(u;\boldsymbol\lambda)
+=\lambda_c\widetilde C_u(u)
++\lambda_0\mathbf 1\{S_\theta(u)>0\}
++\lambda_s S_\theta(u).
+}
+\label{eq:risk_aware_loss}
+\]
+The binary objective prices failure to meet a standard and the continuous
+objective prices its severity. The nonnegative weight vector
+\(\boldsymbol\lambda=(\lambda_c,\lambda_0,\lambda_s)\) is specified from
+operational requirements before method comparison. This is an application of
+the published multi-objective MOCU cost construction, not a new uncertainty
+measure. Under posterior \(b\), the IBR practical command is
+\[
+\boxed{
+u_{\mathrm{ctrl}}(b;\boldsymbol\lambda)=
+\arg\min_{u\in\mathcal S}
+\mathbb E_{\theta\sim b}
+[\xi_\theta(u;\boldsymbol\lambda)].
+}
+\label{eq:risk_aware_u_ctrl}
+\]
+For known \(\theta\), the model-specific optimal action under the same cost is
+\[
+u_\theta^*(\boldsymbol\lambda)
+=\arg\min_{u\in\mathcal S}\xi_\theta(u;\boldsymbol\lambda).
+\]
+Substitution into Yoon's original MOCU definition yields the primary
+risk-aware power-grid MOCU
+\[
+\boxed{
+\operatorname{MOCU}_{\boldsymbol\lambda}(b)=
+\mathbb E_{\theta\sim b}\left[
+\xi_\theta\!\left(u_{\mathrm{ctrl}}(b;\boldsymbol\lambda);
+\boldsymbol\lambda\right)
+-\xi_\theta\!\left(u_\theta^*(\boldsymbol\lambda);
+\boldsymbol\lambda\right)
+\right].
+}
+\label{eq:risk_aware_mocu}
+\]
+This is the expected additional injection and stability-risk cost caused by
+not knowing the true model. The corresponding goal-oriented experimental
+design objective is
+\[
+\boxed{
+\pi^*=\arg\min_\pi
+\mathbb E_{H_T\mid\pi}\left[
+\operatorname{MOCU}_{\boldsymbol\lambda}
+\bigl(p(\theta\mid H_T)\bigr)
+\right].
+}
+\label{eq:risk_aware_mocu_policy}
+\]
+Equivalently, it maximizes expected prior-to-terminal MOCU reduction. The
+hard-safety reduction in Eq.~\eqref{eq:belief_mocu_ibr} remains a named special
+case of the same theory. The primary \(\boldsymbol\lambda\) is fixed before
+evaluation, and prespecified weight sensitivity reports the cost--risk
+frontier. CVaR is a secondary tail-risk diagnostic, not part of the primary
+MOCU definition.
+
+Every result table reports terminal MOCU together with expected injection
+cost, \(u_{\mathrm{ctrl}}\), held-out safety probability, frequency-nadir,
+ROCOF, and settling-time violations, and CVaR of stability loss. No method is
+declared superior from aggregate MOCU alone when its safety components violate
+the declared operating standard.
+
 
 
 \subsection{Diagnostic-Probe Feasibility and Terminal Safety}
@@ -698,16 +799,16 @@ p(\theta\mid h_T)
 =
 u_{\mathrm{ctrl}}(h_T).
 \]
-Because the IBR rule~\eqref{eq:u_ctrl} incorporates frequency-security
-requirements and Eq.~\eqref{eq:control_feasibility} guarantees a finite action
-on the operational set, the common objective is
+The primary common objective is expected terminal risk-aware multi-objective
+MOCU,
 \[
 \boxed{
-J_{\mathrm{MOCU}}(\pi)
-=
-\operatorname{MOCU}(\pi),
+J_{\mathrm{MOCU},\boldsymbol\lambda}(\pi)
+=\mathbb E_{H_T\mid\pi}\!\left[
+\operatorname{MOCU}_{\boldsymbol\lambda}
+\bigl(p(\theta\mid H_T)\bigr)\right],
 \qquad
-\pi^\star=\arg\min_{\pi}J_{\mathrm{MOCU}}(\pi),
+\pi^\star=\arg\min_{\pi}J_{\mathrm{MOCU},\boldsymbol\lambda}(\pi),
 }
 \label{eq:policy_objective}
 \]
@@ -719,15 +820,17 @@ subject only to the fixed probe budget
 \label{eq:fixed_budget}
 \]
 The expectation is taken over the unknown true system, observation noise, and
-any randomization in the probe-selection method. Under the IBR reduction
+any randomization in the probe-selection method. The Yoon IBR baseline obeys
 \[
 \operatorname{MOCU}(h_T)=\psi^\star(h_T)-\mathbb E[\psi_\theta^\star\mid h_T],
 \]
 designs that shrink control-relevant posterior mass---especially mass on large
 \(\psi_n^\star\)---reduce MOCU. Minimizing expected terminal \(\psi^\star\) alone is
-related but not identical to minimizing belief MOCU, because the posterior mean
-of model-specific optima also depends on \(\pi\). The scientific endpoint remains
-MOCU~\eqref{eq:mocu}, not raw control magnitude.
+related but not identical to minimizing reference belief MOCU, because the
+posterior mean of model-specific optima also depends on \(\pi\). The primary
+scientific endpoint is the risk-aware specialization in
+Eq.~\eqref{eq:risk_aware_mocu}; the hard-safety special case and raw control
+magnitude are secondary endpoints.
 
 True-system safety remains an important evaluation diagnostic:
 \[
@@ -822,7 +925,7 @@ J_{\mathrm{DAD}}(\phi)
 =
 \mathbb E_{\theta^\star,\epsilon_{1:T},H_T\mid\pi_{\phi}}
 \left[
-u_{\mathrm{ctrl}}(H_T)
+\operatorname{MOCU}(H_T)
 \right].
 }
 \label{eq:dad_objective}
@@ -848,25 +951,25 @@ reported as a diagnostic rather than silently changing the engineering objective
 
 Posterior weights are used to compute the terminal \(u_{\mathrm{ctrl}}(H_T)\), but they do not need to be explicit inputs to the deployed DAD policy. Online probe selection is based on the complete observed history.
 
-\subsubsection{RL-sBOED with Dense Control-Reduction Rewards}
+\subsubsection{RL-sBOED with Dense MOCU-Reduction Rewards}
 
 RL-sBOED uses the same history representation, action mask, policy class,
 posterior update, terminal rule, and optimization budget as DAD. Its purpose is
 to isolate the effect of temporal credit assignment. Let
-\(u_t=u_{\mathrm{ctrl}}(h_t)\) be the IBR control after step \(t\).
+\(m_t=\operatorname{MOCU}(h_t)\) be the belief MOCU after step \(t\).
 RL-sBOED uses the dense reward
 \[
 \boxed{
-r_t=u_{t-1}-u_t,\qquad t=1,\ldots,T.
+r_t=m_{t-1}-m_t,\qquad t=1,\ldots,T.
 }
 \label{eq:rl_sboed_reward}
 \]
 With undiscounted return,
 \[
-\sum_{t=1}^{T}r_t=u_0-u_T.
+\sum_{t=1}^{T}r_t=m_0-m_T.
 \]
-Because \(u_0\) is fixed by the common prior, maximizing expected return is
-equivalent to minimizing expected terminal \(u_T\). Thus, DAD and RL-sBOED
+Because \(m_0\) is fixed by the common prior, maximizing expected return is
+equivalent to minimizing expected terminal MOCU. Thus, DAD and RL-sBOED
 have the same population objective but different credit-assignment signals:
 DAD attributes the terminal outcome to the full trajectory, whereas RL-sBOED
 exposes the realized stepwise reductions. Any performance difference must
@@ -917,7 +1020,7 @@ Small posterior changes that eliminate or restore a high-\(U\) particle change
 both the IBR action and the probe ranking that best resolves control-relevant
 uncertainty. The optimal action partitions belief space into regions
 \begin{equation}
-\mathcal R_a=\left\{b:Q_t^\star(b,a)\le Q_t^\star(b,a'),\ 
+\mathcal R_a=\left\{b:Q_t^\star(b,a)\le Q_t^\star(b,a'),\
 \forall a'\in\mathcal A_t\right\}.
 \label{eq:moe_belief_regions}
 \end{equation}
@@ -1268,40 +1371,37 @@ paired across methods to reduce Monte Carlo variance. Training, validation,
 calibration, and final test systems are mutually disjoint; final test outcomes
 are not used for model selection or hyperparameter tuning. For each rollout,
 the method produces a history \(H_T\), the common posterior update yields
-\(w_{1:N}^{(T)}\), and the IBR rule~\eqref{eq:u_ctrl} produces the terminal
-action. The selected \(u_{\mathrm{ctrl}}(H_T)\) is evaluated on the true
+\(w_{1:N}^{(T)}\), and the risk-aware rule~\eqref{eq:risk_aware_u_ctrl}
+produces the terminal action. The selected \(u_{\mathrm{ctrl}}(H_T)\) is evaluated on the true
 parameter \(\theta^\star\), not on a posterior mean or on a particle selected
 with knowledge of \(\theta^\star\).
 
-The primary comparison metric is the empirical belief MOCU averaged over
-held-out rollouts,
+The primary comparison metric is empirical risk-aware multi-objective MOCU
+averaged over held-out
+rollouts,
 \[
 \boxed{
-\widehat{\operatorname{MOCU}}_m
+\widehat{\operatorname{MOCU}}_{m,\boldsymbol\lambda}
 =
 \frac{1}{B_{\mathrm{test}}}
 \sum_{b=1}^{B_{\mathrm{test}}}
-\left[
-\psi^{\star(b)}_m
--
-\sum_{n=1}^{N}
-w_{n,m}^{(T,b)}
-\psi_n^\star
-\right],
+\operatorname{MOCU}_{\boldsymbol\lambda}\!\left(
+p(\theta\mid H_T^{(b)})\right),
 \qquad
 m\in\mathcal M,
 }
 \]
-which estimates~\eqref{eq:mocu} under~\eqref{eq:belief_mocu}. The realized
+which estimates~\eqref{eq:risk_aware_mocu}. The hard-safety special case in
+Eq.~\eqref{eq:belief_mocu_ibr} and the realized
 true-system regret
 \[
 \psi^\star(H_T)-\psi_{\theta^\star}^\star
 \]
-is reported as a secondary diagnostic. Among methods that satisfy the 0.95
-safety requirement, lower MOCU is better. Mean terminal \(\psi^\star\)
+are reported as secondary diagnostics. Among methods that satisfy the
+prespecified safety requirement, lower MOCU is better. Mean terminal \(\psi^\star\)
 (equivalently \(u_{\mathrm{ctrl}}\)) remains a secondary physical-control
-metric. Under IBR hard safety, belief MOCU is nonnegative; no method is ranked
-unless it first satisfies the safety requirement.
+metric. No method is ranked unless it first satisfies the safety requirement;
+the MOCU components and cost--risk frontier accompany the scalar mean.
 
 The true-system safety rate
 \[
@@ -1524,7 +1624,8 @@ across these shifts reduces held-out MOCU.
 
 All methods use the same \(\theta\) distribution, probe-response bank,
 observation noise, posterior update, terminal control rule, and paired
-held-out systems. The primary endpoint is mean MOCU among methods satisfying
+held-out systems. The primary endpoint is mean risk-aware multi-objective MOCU
+among methods satisfying
 the prespecified safety requirement. A full-horizon advantage is claimed only
 when it is reproduced across training seeds, its paired confidence interval
 against Myopic lies below zero, and the learned deterministic policy exhibits
@@ -1538,6 +1639,12 @@ B.-J. Yoon, X. Qian, and E.~R. Dougherty,
 \emph{IEEE Transactions on Signal Processing}, vol.~61, no.~9,
 pp.~2256--2266, May 2013,
 doi: 10.1109/TSP.2013.2251336.
+
+\bibitem{yoon2021multi}
+B.-J. Yoon, X. Qian, and E.~R. Dougherty,
+``Quantifying the multi-objective cost of uncertainty,''
+\emph{IEEE Access}, vol.~9, pp.~80351--80359, 2021,
+doi: 10.1109/ACCESS.2021.3085486.
 
 \bibitem{peng2024}
 J. Peng, J. Tan, P. Koralewicz, E. Mendiola, S. Dong, A. Hoke, and K. Horowitz,

@@ -20,8 +20,13 @@ This paper studies sequential Bayesian experimental design for uncertain
 power-grid dynamics. At each stage, a policy selects a probing bus and duration,
 observes a noisy frequency response, and updates uncertainty over
 machine-specific parameters. We distinguish parameter-oriented expected
-information gain (EIG) from objective-driven mean objective cost of uncertainty
-(MOCU) for a downstream safety-aware control decision. Random, fixed, myopic,
+information gain (EIG) from a goal-oriented specialization of Yoon's
+multi-objective mean objective cost of uncertainty (MOCU). The operational
+cost combines supplementary injection with the probability and severity of
+violating frequency-nadir, ROCOF, and settling requirements. The familiar
+hard-safety IBR expression is retained as a reference special case of the same
+MOCU theory.
+Random, fixed, myopic,
 deep adaptive design (DAD), and reinforcement-learning sequential Bayesian
 optimal experimental design (RL-sBOED), and Step-DAD are evaluated under common
 simulation banks and held-out protocols. A susceptible--infected--recovered (SIR) model
@@ -49,7 +54,8 @@ experiment by its reduction of expected decision penalty.
 The contributions are:
 \begin{itemize}
   \item sequential bus--duration BOED for uncertain power-grid dynamics;
-  \item a safety-aware MOCU objective linking probing to terminal control;
+  \item a power-grid specialization of Yoon multi-objective MOCU linking
+  probing to injection cost and posterior stability risk;
   \item a matched comparison of random, fixed, myopic, DAD, RL-sBOED, and
   Step-DAD; and
   \item SIR, IEEE9, IEEE14, and IEEE30 studies of objective choice, adaptation,
@@ -236,62 +242,124 @@ U(\boldsymbol{\theta})=
 The retained parameter support is required to contain a safe candidate. The
 offline bank stores $U_n=U(\boldsymbol{\theta}^{(n)})$ for each particle.
 
-Given terminal weights $\mathbf w^{(T)}$, the deployed control is
+Given terminal weights $\mathbf w^{(T)}$, define the numerically active
+posterior support
 \begin{equation}
-u_T=
-\left\lceil
-Q_{1-\alpha}\!\left(U\mid\mathbf w^{(T)}\right)+m
-\right\rceil_{\mathcal U}.
+\mathcal I_T=\{n:w_n^{(T)}>\varepsilon_w\},
+\qquad \varepsilon_w=10^{-12}.
+\label{eq:active-support}
+\end{equation}
+If this set is empty because of numerical underflow, all particles with
+strictly positive normalized weight are retained. Yoon's IBR operator and the
+deployed practical control action are
+\begin{equation}
+u_T=u_{\mathrm{ctrl}}(h_T)
+=\psi^{\mathrm{IBR}}(h_T)
+=\max_{n\in\mathcal I_T}U_n.
 \label{eq:posterior-control}
 \end{equation}
-Here $Q_q$ is the weighted empirical $q$-quantile, $m$ is a safety margin, and
-$\lceil\cdot\rceil_{\mathcal U}$ rounds upward to the control grid. The main
-MOCU experiments use $\alpha=0.05$ and $m=0$, corresponding to a 95\%
-posterior-safety target.
+This is the hardest model-specific optimum remaining on the numerical
+posterior support. A posterior-quantile controller is distinct from this Yoon
+IBR baseline. A chance constraint is, however, part of the proposed risk-aware
+decision in Eq.~\eqref{eq:risk-aware-control}.
 
-\subsection{Objective-Driven Design Objective}
+\subsection{Yoon IBR--MOCU Baseline}
 MOCU measures the expected performance loss caused by uncertainty relative to
-model-specific operation~\cite{yoon2013mocu}. For a system requiring control
-$U$, define the safety-aware operational cost
+model-specific operation~\cite{yoon2013mocu}. For particle $n$, Yoon's
+objective cost of uncertainty under the hard-safety IBR operator is
 \begin{equation}
-L(u,U)=u+\lambda(U-u)_+
-+\kappa\mathbf{1}\{U>u\},
-\label{eq:realized-cost}
-\end{equation}
-where $(x)_+=\max(x,0)$, $\lambda$ penalizes control shortfall, and $\kappa$
-optionally adds a discrete safety-violation penalty. Since the model-specific
-decision is $u=U$, its cost is $L(U,U)=U$. The objective cost of uncertainty
-for particle $n$ is
-\begin{equation}
-\ocu_n(h_T)=L(u_T,U_n)-U_n,
+\ocu_n(h_T)
+=C_{\boldsymbol\theta^{(n)}}(u_T)
+-C_{\boldsymbol\theta^{(n)}}(U_n)
+=u_T-U_n\ge 0,
 \label{eq:ocu}
 \end{equation}
-and the posterior MOCU is
+for every particle in the active posterior support. The posterior belief MOCU
+is therefore
 \begin{equation}
 \mocu(h_T)=
 \sum_{n=1}^{N_{\mathrm p}}w_n^{(T)}
-\bigl[L(u_T,U_n)-U_n\bigr].
+\bigl(u_T-U_n\bigr)
+=u_T-\sum_{n=1}^{N_{\mathrm p}}w_n^{(T)}U_n.
 \label{eq:belief-mocu}
 \end{equation}
-This is a frequency-safety specialization of MOCU-based uncertainty
-quantification and experimental design
-\cite{yoon2013mocu,chen2023objectiveoed}.
+The same active-support rule and threshold are used by the CPU evaluator and
+GPU trainer. The action $u_T$ is the physical command applied in the terminal
+contingency simulation; MOCU is its posterior expected excess cost relative to
+model-specific operation. Physical safety on held-out systems is reported
+separately because a finite particle approximation cannot guarantee coverage
+of an off-support true system. This baseline measures excess injection after
+imposing hard safety; it cannot grade the posterior probability or severity of
+unsafe off-support outcomes and is not the proposed primary objective.
 
-The implementation sets $\lambda=1/\alpha=20$ and $\kappa=0$. Under this loss,
-the Bayes-optimal continuous decision is the $(1-\alpha)$ quantile of $U$;
-rounding it upward gives~\eqref{eq:posterior-control}. Thus, the deployed
-control and the reported MOCU solve the same terminal decision problem.
+\subsection{Risk-Aware Multi-Objective MOCU Specialization}
+For a model $\boldsymbol\theta$ and terminal injection $u$, define normalized
+stability loss
+\begin{align}
+S(\boldsymbol\theta,u)
+={}&w_f\left[\frac{\underline f-f_{\min}(\boldsymbol\theta,u)}{s_f}\right]_+
++w_r\left[\frac{r(\boldsymbol\theta,u)-r_{\max}}{s_r}\right]_+ \notag\\
+&+w_t\left[\frac{t_{\mathrm{set}}(\boldsymbol\theta,u)-\bar t_{\mathrm{set}}}{s_t}\right]_+,
+\label{eq:stability-loss}
+\end{align}
+where $[x]_+=\max(x,0)$ and the scales make the terms dimensionless. The
+Following Yoon's general and multi-objective MOCU
+formulations~\cite{yoon2013mocu,yoon2021multimocu}, define the model-dependent
+operational cost
+\begin{equation}
+\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda)=
+\lambda_c\widetilde C_u(u)
++\lambda_0\mathbf 1\{S(\boldsymbol\theta,u)>0\}
++\lambda_s S(\boldsymbol\theta,u).
+\label{eq:risk-loss}
+\end{equation}
+Here $\widetilde C_u$ is a normalized monetary or resource cost, potentially
+nonlinear. The nonnegative weight vector $\boldsymbol\lambda=(\lambda_c,
+\lambda_0,\lambda_s)$ is specified before method comparison. This is exactly
+the combined operational-cost construction of multi-objective MOCU, not a new
+definition of MOCU. The IBR practical command and model-specific optimum are
+\begin{equation}
+u_{\mathrm{ctrl}}(b;\boldsymbol\lambda)
+=\arg\min_{u\in\mathcal U}
+\E_{\boldsymbol\theta\sim b}
+[\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda)],
+\qquad
+u_{\boldsymbol\theta}^*(\boldsymbol\lambda)
+=\arg\min_{u\in\mathcal U}
+\xi_{\boldsymbol\theta}(u;\boldsymbol\lambda).
+\label{eq:risk-aware-control}
+\end{equation}
+Substitution into Yoon's definition gives the risk-aware power-grid MOCU
+\begin{equation}
+\mocu_{\boldsymbol\lambda}(b)=
+\E_{\boldsymbol\theta\sim b}\!\left[
+\xi_{\boldsymbol\theta}(u_{\mathrm{ctrl}}(b;\boldsymbol\lambda);\boldsymbol\lambda)
+-\xi_{\boldsymbol\theta}(u_{\boldsymbol\theta}^*(\boldsymbol\lambda);\boldsymbol\lambda)
+\right].
+\label{eq:risk-aware-mocu}
+\end{equation}
+It is the additional economic and stability-risk cost caused by uncertainty;
+raw $u_{\mathrm{ctrl}}$ alone is not a cost-of-uncertainty measure. The primary
+$\boldsymbol\lambda$ is fixed from operational requirements, and a declared
+weight sensitivity analysis reports the cost--risk frontier. CVaR is reported
+only as a secondary tail-risk diagnostic and is not inserted into the primary
+MOCU definition. Safety probability, violation severity, injection cost, and
+$u_{\mathrm{ctrl}}$ are reported separately so a scalar score cannot hide a
+safety--cost tradeoff.
 
 The objective-driven policy is
 \begin{equation}
 \pi_{\mathrm{MOCU}}^\star
 =\arg\min_{\pi}\;
-\E_{H_T\mid\pi}\!\left[\mocu(H_T)\right],
+\E_{H_T\mid\pi}\!\left[
+\mocu_{\boldsymbol\lambda}\bigl(p(\boldsymbol\theta\mid H_T)\bigr)\right],
 \qquad |H_T|=T.
 \label{eq:policy-mocu}
 \end{equation}
-Lower terminal MOCU is better. Unlike EIG, this objective values parameter
-learning only when it improves the downstream control decision.
+Equivalently, probing maximizes expected prior-to-terminal MOCU reduction.
+Lower terminal MOCU is better. Unlike EIG, this goal-oriented BOED objective
+values parameter learning only when it improves the downstream cost--risk
+decision.
 
 \section{Compared Design Methods}
 \begin{table}[t]
@@ -401,7 +469,7 @@ assumptions unless directly supported by a cited dynamic-data source.
 
 \section{Conclusion}
 This paper formulates power-grid probing as sequential BOED and connects
-learning to safety-aware terminal control through MOCU. \todo{State only final
+learning to Yoon IBR terminal control through MOCU. \todo{State only final
 conclusions supported by completed three-seed results.}
 
 \section*{Acknowledgment}
