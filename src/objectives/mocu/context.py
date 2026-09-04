@@ -1458,7 +1458,11 @@ def context_report_meta(ctx: ExperimentContext) -> dict[str, Any]:
         "n_theta_val": len(ctx.validation_systems),
         "n_theta_test": len(ctx.test_systems),
         "n_designs": ctx.n_actions,
-        "mocu_cost_definition": "u + lambda*shortfall + rho*unsafe - u_required",
+        "mocu_cost_definition": (
+            "u_ctrl - posterior_mean(u_optimal), robust_rule=ibr_max"
+            if str(ctx.robust_rule).lower() in {"ibr", "ibr_max", "max", "yoon_ibr"}
+            else "legacy quantile safety-aware regret"
+        ),
         "undercontrol_penalty": float(ctx.undercontrol_penalty),
         "violation_penalty": float(ctx.violation_penalty),
         **observation_report_fields(
