@@ -72,7 +72,15 @@ sequential design over power-grid probing buses and durations.
 \section{Problem Formulation}
 \label{sec:problem}
 
-\subsection{Power-Grid Model}
+The formulation follows the physical and decision-making workflow: (i) define
+the grid dynamics and latent parameter space; (ii) define the reset probing
+experiment, design space, observation model, and posterior; (iii) define EIG
+for parameter learning; (iv) define the practical terminal control and safety
+standards; and (v) construct MOCU from the same control cost and safety
+quantities. Policy optimization is introduced only after these objects are
+fixed.
+
+\subsection{Power-Grid Dynamics and Latent Parameter Space}
 Let $\mathcal N=\{1,\ldots,N\}$ denote all physical buses, and let
 $\mathcal M\subset\mathcal N$ denote the buses containing dynamic machines.
 The frequency response of those machines is modeled by
@@ -110,7 +118,7 @@ injection among the dynamic machines. A non-machine bus therefore remains a
 valid probe location without being assigned artificial dynamic states,
 $M_i$, or $K_i$.
 
-\subsection{Sequential Probe Design}
+\subsection{Reset Probe Experiment and Design Space}
 At stage $t$, the design is a bus--duration pair
 \begin{equation}
 \xi_t=(b_t,\tau_t)\in\Xi=\mathcal N\times\mathcal T,
@@ -156,7 +164,7 @@ probe budget. A fixed design selects its entire sequence before any data are
 observed; an adaptive design may change later actions in response to the
 realized observations.
 
-\subsection{Observation Model and Bayesian Update}
+\subsubsection{Observation model and Bayesian update}
 Let $o\in\mathcal M$ be the fixed PMU bus and
 $\Delta f_o(s)=\omega_o(s)/(2\pi)$ its frequency deviation. For sampling set
 $\mathcal S=\{s_1,\ldots,s_{N_{\mathrm{obs}}}\}$, the simulator output is
@@ -192,7 +200,7 @@ p(\mathbf y_t\mid\boldsymbol{\theta}^{(j)},\xi_t)}.
 \label{eq:particle-update}
 \end{equation}
 
-\subsection{Parameter-Oriented Design Objective}
+\subsection{Expected Information Gain}
 Let $H_T$ denote the random terminal history induced by policy $\pi$. For the
 parameter-learning experiments, the policy maximizes
 \begin{equation}
@@ -208,7 +216,7 @@ This is the expected information gain used in sequential BOED
 $\boldsymbol{\theta}$ but does not directly encode the quality of the
 downstream control decision.
 
-\subsection{Terminal Control and Safety}
+\subsection{Practical Control and Safety Conditions}
 Diagnostic probing and terminal-control evaluation are separate simulations.
 In the latter, the probe is zero and
 \begin{equation}
@@ -233,65 +241,18 @@ r(\boldsymbol{\theta},u)\le r_{\max}
 f_{\min}(\boldsymbol{\theta},u)\ge\underline f.
 \label{eq:safety}
 \end{equation}
-For the ordered admissible grid $\mathcal U$, define the required control
+For the ordered admissible grid $\mathcal U$, define the minimum safe magnitude
+used by the hard-safety reference case,
 \begin{equation}
 U(\boldsymbol{\theta})=
 \min\{u\in\mathcal U:\mathsf{Safe}(\boldsymbol{\theta},u)\}.
 \label{eq:required-control}
 \end{equation}
 The retained parameter support is required to contain a safe candidate. The
-offline bank stores $U_n=U(\boldsymbol{\theta}^{(n)})$ for each particle.
+offline bank stores $U_n=U(\boldsymbol{\theta}^{(n)})$ for each particle, as
+well as the component costs introduced below for every candidate $u$.
 
-Given terminal weights $\mathbf w^{(T)}$, define the numerically active
-posterior support
-\begin{equation}
-\mathcal I_T=\{n:w_n^{(T)}>\varepsilon_w\},
-\qquad \varepsilon_w=10^{-12}.
-\label{eq:active-support}
-\end{equation}
-If this set is empty because of numerical underflow, all particles with
-strictly positive normalized weight are retained. Yoon's IBR operator and the
-deployed practical control action are
-\begin{equation}
-u_T=u_{\mathrm{ctrl}}(h_T)
-=\psi^{\mathrm{IBR}}(h_T)
-=\max_{n\in\mathcal I_T}U_n.
-\label{eq:posterior-control}
-\end{equation}
-This is the hardest model-specific optimum remaining on the numerical
-posterior support. A posterior-quantile controller is distinct from this Yoon
-IBR baseline and is not used in the primary formulation below.
-
-\subsection{Yoon IBR--MOCU Baseline}
-MOCU measures the expected performance loss caused by uncertainty relative to
-model-specific operation~\cite{yoon2013mocu}. For particle $n$, Yoon's
-objective cost of uncertainty under the hard-safety IBR operator is
-\begin{equation}
-\ocu_n(h_T)
-=C_{\boldsymbol\theta^{(n)}}(u_T)
--C_{\boldsymbol\theta^{(n)}}(U_n)
-=u_T-U_n\ge 0,
-\label{eq:ocu}
-\end{equation}
-for every particle in the active posterior support. The posterior belief MOCU
-is therefore
-\begin{equation}
-\mocu(h_T)=
-\sum_{n=1}^{N_{\mathrm p}}w_n^{(T)}
-\bigl(u_T-U_n\bigr)
-=u_T-\sum_{n=1}^{N_{\mathrm p}}w_n^{(T)}U_n.
-\label{eq:belief-mocu}
-\end{equation}
-The same active-support rule and threshold are used by the CPU evaluator and
-GPU trainer. The action $u_T$ is the physical command applied in the terminal
-contingency simulation; MOCU is its posterior expected excess cost relative to
-model-specific operation. Physical safety on held-out systems is reported
-separately because a finite particle approximation cannot guarantee coverage
-of an off-support true system. This baseline measures excess injection after
-imposing hard safety; it cannot grade the posterior probability or severity of
-unsafe off-support outcomes and is not the proposed primary objective.
-
-\subsection{Risk-Aware Multi-Objective MOCU}
+\subsection{MOCU Based on Control Cost and Safety Risk}
 We now specialize the general MOCU construction of Yoon et
 al.~\cite{yoon2013mocu,yoon2021multimocu} to the grid-control objective.  For
 each model $\boldsymbol\theta$ and admissible injection $u\in\mathcal U$, define
@@ -362,6 +323,31 @@ posterior mean are
 Nonnegativity follows from the model-specific optimality of
 $u_{\boldsymbol\theta}^*$.  This MOCU measures the additional injection and
 stability cost attributable to uncertainty.
+
+\paragraph{Hard-safety special case.}
+The previous implementation is recovered by choosing
+\begin{equation}
+\xi_{\boldsymbol\theta}^{\mathrm{hard}}(u)=
+\begin{cases}
+u, & \mathsf{Safe}(\boldsymbol\theta,u),\\
++\infty, & \text{otherwise}.
+\end{cases}
+\label{eq:hard-safety-cost}
+\end{equation}
+For particle weights $w_n^{(T)}$ and numerical support
+$\mathcal I_T=\{n:w_n^{(T)}>10^{-12}\}$, Eqs.~\eqref{eq:model-specific-control}
+and~\eqref{eq:risk-aware-control} reduce to
+\begin{equation}
+u_{\mathrm{ctrl}}^{\mathrm{hard}}(h_T)=
+\max_{n\in\mathcal I_T}U_n,
+\qquad
+\mocu^{\mathrm{hard}}(h_T)=
+u_{\mathrm{ctrl}}^{\mathrm{hard}}(h_T)
+-\sum_{n=1}^{N_{\mathrm p}}w_n^{(T)}U_n.
+\label{eq:belief-mocu}
+\end{equation}
+This identity is a special consequence of infinite unsafe cost and linear
+injection cost; it is not the general definition of MOCU.
 
 The sequential design objective is
 \begin{equation}
