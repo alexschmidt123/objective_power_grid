@@ -405,15 +405,15 @@ probe-selection methods. The configured grid is valid only if
 
 \subsubsection{Model-specific and Bayesian controls}
 
-Let \(C(u)\) denote the cost of applying control magnitude \(u\). The primary
-experiments use \(C(u)=u\); a monetary cost may replace it if independently
+Let \(J(u)\) denote the cost of applying control magnitude \(u\). The primary
+experiments use \(J(u)=u\); a monetary cost may replace it if independently
 available. If \(\theta\) were known, the optimal action would be
 \begin{equation}
 u_\theta^*
-=\arg\min_{u\in\mathcal U_{\mathrm{safe}}(\theta)}C(u).
+=\arg\min_{u\in\mathcal U_{\mathrm{safe}}(\theta)}J(u).
 \label{eq:model_specific_control}
 \end{equation}
-Thus, for increasing \(C\), \(u_\theta^*\) is the minimum safe injection. It is
+Thus, for increasing \(J\), \(u_\theta^*\) is the minimum safe injection. It is
 computed in the terminal-control simulations and stored once for every
 particle; it is not inferred from a probe trajectory.
 
@@ -423,7 +423,7 @@ operational cost. Equivalently, introduce the constrained cost
 \begin{equation}
 L(\theta,u)=
 \begin{cases}
-C(u), & u\in\mathcal U_{\mathrm{safe}}(\theta),\\
+J(u), & u\in\mathcal U_{\mathrm{safe}}(\theta),\\
 +\infty, & u\notin\mathcal U_{\mathrm{safe}}(\theta),
 \end{cases}
 \label{eq:operational_cost}
@@ -437,7 +437,7 @@ u_{\mathrm{ctrl}}(b)
 }
 \label{eq:u_ctrl}
 \end{equation}
-For monotone safety and increasing \(C\), this is the smallest action that is
+For monotone safety and increasing \(J\), this is the smallest action that is
 safe for every model in the posterior support,
 \begin{equation}
 u_{\mathrm{ctrl}}(b)
@@ -462,19 +462,19 @@ Because \(u_{\mathrm{ctrl}}(b)\) is safe for every model in the posterior
 support, this becomes
 \begin{equation}
 \operatorname{OCU}(\theta,b)
-=C\!\left(u_{\mathrm{ctrl}}(b)\right)-C(u_\theta^*)\ge0.
+=J\!\left(u_{\mathrm{ctrl}}(b)\right)-J(u_\theta^*)\ge0.
 \label{eq:ocu_control}
 \end{equation}
 The mean objective cost of uncertainty is its posterior expectation,
 \begin{equation}
 \boxed{
 \operatorname{MOCU}(b)
-=C\!\left(u_{\mathrm{ctrl}}(b)\right)
--\mathbb E_{\theta\sim b}[C(u_\theta^*)].
+=J\!\left(u_{\mathrm{ctrl}}(b)\right)
+-\mathbb E_{\theta\sim b}[J(u_\theta^*)].
 }
 \label{eq:belief_mocu}
 \end{equation}
-For \(C(u)=u\), MOCU is the expected excess injection required solely because
+For \(J(u)=u\), MOCU is the expected excess injection required solely because
 the true model is uncertain:
 \begin{equation}
 \operatorname{MOCU}(b)
@@ -496,14 +496,15 @@ u_{\mathrm{ctrl}}(b)
 &=\max_{n\in\mathcal I(b)}u_n^*,
 \label{eq:particle_u_ctrl}\\
 \operatorname{MOCU}(b)
-&=C\!\left(u_{\mathrm{ctrl}}(b)\right)
--\sum_{n=1}^Nw_n C(u_n^*).
+&=J\!\left(u_{\mathrm{ctrl}}(b)\right)
+-\sum_{n=1}^{N} w_n J(u_n^*).
 \label{eq:particle_mocu}
 \end{align}
-The weights are normalized in log space, so \(\mathcal I(b)\) is nonempty. The
-same posterior support, operational cost, contingency set, and safety limits
-define both policy optimization and evaluation. Consequently, the learning
-objective and the reported terminal MOCU represent the same decision problem.
+The weights are normalized in log space, so \(\mathcal I(b)\) is nonempty.
+Scientific alignment requires the same posterior support, operational cost,
+contingency set, and safety limits in policy optimization and posterior
+evaluation. Under this requirement, both stages represent the same terminal
+decision problem.
 
 \subsubsection{Sequential design objective and safety reporting}
 

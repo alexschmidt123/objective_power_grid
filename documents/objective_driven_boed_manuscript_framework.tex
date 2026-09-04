@@ -255,11 +255,11 @@ f_{\mathrm{nad}}(\boldsymbol\theta,c,u)\ge f_{\mathrm{lim}},\\
 \label{eq:safe-control-set}
 \end{equation}
 The control grid is required to contain at least one safe action for every
-retained model. With increasing control cost \(C(u)\), the model-specific action
+retained model. With increasing control cost \(J(u)\), the model-specific action
 is
 \begin{equation}
 u_{\boldsymbol\theta}^*
-=\arg\min_{u\in\mathcal U_{\mathrm{safe}}(\boldsymbol\theta)}C(u).
+=\arg\min_{u\in\mathcal U_{\mathrm{safe}}(\boldsymbol\theta)}J(u).
 \label{eq:model-specific-control}
 \end{equation}
 
@@ -267,7 +267,7 @@ For posterior belief \(b\), define
 \begin{equation}
 L(\boldsymbol\theta,u)=
 \begin{cases}
-C(u),&u\in\mathcal U_{\mathrm{safe}}(\boldsymbol\theta),\\
+J(u),&u\in\mathcal U_{\mathrm{safe}}(\boldsymbol\theta),\\
 +\infty,&\text{otherwise}.
 \end{cases}
 \label{eq:operational-cost}
@@ -293,13 +293,13 @@ u_{\boldsymbol\theta}^*.
 The corresponding objective cost of uncertainty and MOCU are
 \begin{align}
 \operatorname{OCU}(\boldsymbol\theta,b)
-&=C\!\left(u_{\mathrm{ctrl}}(b)\right)-C(u_{\boldsymbol\theta}^*),\\
+&=J\!\left(u_{\mathrm{ctrl}}(b)\right)-J(u_{\boldsymbol\theta}^*),\\
 \operatorname{MOCU}(b)
-&=C\!\left(u_{\mathrm{ctrl}}(b)\right)
--\E_{\boldsymbol\theta\sim b}[C(u_{\boldsymbol\theta}^*)]\ge0.
+&=J\!\left(u_{\mathrm{ctrl}}(b)\right)
+-\E_{\boldsymbol\theta\sim b}[J(u_{\boldsymbol\theta}^*)]\ge0.
 \label{eq:belief-mocu}
 \end{align}
-For the primary choice \(C(u)=u\), MOCU is measured directly in units of
+For the primary choice \(J(u)=u\), MOCU is measured directly in units of
 supplementary power.
 
 For particles with weights \(w_n\) and model-specific minimum safe controls
@@ -308,11 +308,12 @@ For particles with weights \(w_n\) and model-specific minimum safe controls
 \mathcal I(b)&=\{n:w_n>10^{-12}\},\\
 u_{\mathrm{ctrl}}(b)&=\max_{n\in\mathcal I(b)}u_n^*,\\
 \operatorname{MOCU}(b)
-&=u_{\mathrm{ctrl}}(b)-\sum_{n=1}^{N_{\mathrm p}}w_nu_n^*.
+&=u_{\mathrm{ctrl}}(b)-\sum_{n=1}^{N_{\mathrm p}} w_n u_n^*.
 \label{eq:particle-mocu}
 \end{align}
-Policy optimization and evaluation use these identical expressions, ensuring
-that both stages represent the same terminal decision problem.
+Scientific alignment requires policy optimization and posterior evaluation to
+use these identical expressions, so that both stages represent the same
+terminal decision problem.
 
 The sequential design objective is
 \begin{equation}
