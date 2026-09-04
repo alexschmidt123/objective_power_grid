@@ -403,17 +403,53 @@ set \(\mathcal C\), and limits \(f_{\min}\) and \(r_{\max}\) are common to all
 probe-selection methods. The configured grid is valid only if
 \(\mathcal U_{\mathrm{safe}}(\theta)\ne\varnothing\) for every retained model.
 
+Algorithm~\ref{alg:mocu_bank} constructs the control bank without assuming that
+safety is monotone in the injection magnitude. Its simulation cost is
+\(N_\theta N_u N_c\); the model and control dimensions are independent and may
+therefore be distributed across compute nodes.
+
+\begin{algorithm}[htbp]
+\caption{Offline construction of the MOCU control bank}
+\label{alg:mocu_bank}
+\begin{algorithmic}[1]
+\Require Parameter samples \(\{\theta^{(n)}\}_{n=1}^{N_\theta}\), controls
+\(\mathcal S=\{u^1,\ldots,u^{N_u}\}\), contingencies \(\mathcal C\), cost
+\(J\), and safety limits \(f_{\min},r_{\max}\)
+\Ensure Safety matrix \(S\), terminal metrics \(F,R\), and controls
+\(\{u_{\mathrm{optimal}}^{(n)}\}_{n=1}^{N_\theta}\)
+\For{\(n=1,\ldots,N_\theta\)}
+  \For{\(j=1,\ldots,N_u\)}
+    \State \(S_{n,j}\gets 1\)
+    \ForAll{\(c\in\mathcal C\)}
+      \State Simulate the terminal response for \((\theta^{(n)},u^j,c)\)
+      \State \(F_{n,j,c}\gets f_{\mathrm{nadir}}(\theta^{(n)},c,u^j)\)
+      \State \(R_{n,j,c}\gets r_{\mathrm{ctrl}}(\theta^{(n)},c,u^j)\)
+      \If{\(F_{n,j,c}<f_{\min}\) or \(R_{n,j,c}>r_{\max}\)}
+        \State \(S_{n,j}\gets0\)
+      \EndIf
+    \EndFor
+  \EndFor
+  \If{\(S_{n,j}=0\) for every \(j\)}
+    \State Reject the control grid as infeasible
+  \EndIf
+  \State \(u_{\mathrm{optimal}}^{(n)}\gets
+  \arg\min_{u^j:S_{n,j}=1}J(u^j)\)
+\EndFor
+\State Store \(S,F,R,\{u_{\mathrm{optimal}}^{(n)}\}\) and model provenance
+\end{algorithmic}
+\end{algorithm}
+
 \subsubsection{Model-specific and Bayesian controls}
 
 Let \(J(u)\) denote the cost of applying control magnitude \(u\). The primary
 experiments use \(J(u)=u\); a monetary cost may replace it if independently
 available. If \(\theta\) were known, the optimal action would be
 \begin{equation}
-u_\theta^*
+u_{\mathrm{optimal}}(\theta)
 =\arg\min_{u\in\mathcal U_{\mathrm{safe}}(\theta)}J(u).
 \label{eq:model_specific_control}
 \end{equation}
-Thus, for increasing \(J\), \(u_\theta^*\) is the minimum safe injection. It is
+Thus, for increasing \(J\), \(u_{\mathrm{optimal}}(\theta)\) is the minimum safe injection. It is
 computed in the terminal-control simulations and stored once for every
 particle; it is not inferred from a probe trajectory.
 
@@ -441,7 +477,7 @@ For monotone safety and increasing \(J\), this is the smallest action that is
 safe for every model in the posterior support,
 \begin{equation}
 u_{\mathrm{ctrl}}(b)
-=\max_{\theta\in\operatorname{supp}(b)}u_\theta^*.
+=\max_{\theta\in\operatorname{supp}(b)}u_{\mathrm{optimal}}(\theta).
 \label{eq:u_ctrl_support}
 \end{equation}
 Here \(u_{\mathrm{ctrl}}\) is the action applied to the grid, not a measure of
@@ -455,14 +491,14 @@ if that model were known:
 \begin{equation}
 \operatorname{OCU}(\theta,b)
 =L\!\left(\theta,u_{\mathrm{ctrl}}(b)\right)
--L(\theta,u_\theta^*).
+-L(\theta,u_{\mathrm{optimal}}(\theta)).
 \label{eq:ocu}
 \end{equation}
 Because \(u_{\mathrm{ctrl}}(b)\) is safe for every model in the posterior
 support, this becomes
 \begin{equation}
 \operatorname{OCU}(\theta,b)
-=J\!\left(u_{\mathrm{ctrl}}(b)\right)-J(u_\theta^*)\ge0.
+=J\!\left(u_{\mathrm{ctrl}}(b)\right)-J(u_{\mathrm{optimal}}(\theta))\ge0.
 \label{eq:ocu_control}
 \end{equation}
 The mean objective cost of uncertainty is its posterior expectation,
@@ -470,7 +506,7 @@ The mean objective cost of uncertainty is its posterior expectation,
 \boxed{
 \operatorname{MOCU}(b)
 =J\!\left(u_{\mathrm{ctrl}}(b)\right)
--\mathbb E_{\theta\sim b}[J(u_\theta^*)].
+-\mathbb E_{\theta\sim b}[J(u_{\mathrm{optimal}}(\theta))].
 }
 \label{eq:belief_mocu}
 \end{equation}
@@ -478,14 +514,14 @@ For \(J(u)=u\), MOCU is the expected excess injection required solely because
 the true model is uncertain:
 \begin{equation}
 \operatorname{MOCU}(b)
-=u_{\mathrm{ctrl}}(b)-\mathbb E_{\theta\sim b}[u_\theta^*].
+=u_{\mathrm{ctrl}}(b)-\mathbb E_{\theta\sim b}[u_{\mathrm{optimal}}(\theta)].
 \label{eq:belief_mocu_linear}
 \end{equation}
 
 \subsubsection{Particle approximation}
 
-For particles \(\{\theta^{(n)}\}_{n=1}^N\) with posterior weights \(w_n\), store
-\(u_n^*=u_{\theta^{(n)}}^*\). Numerical posterior support is
+For particles \(\{\theta^{(n)}\}_{n=1}^N\) with posterior weights \(w_n\), let
+\(u_{\mathrm{optimal}}^{(n)}=u_{\mathrm{optimal}}(\theta^{(n)})\). Numerical posterior support is
 \begin{equation}
 \mathcal I(b)=\{n:w_n>\varepsilon_w\},
 \qquad \varepsilon_w=10^{-12}.
@@ -493,11 +529,11 @@ For particles \(\{\theta^{(n)}\}_{n=1}^N\) with posterior weights \(w_n\), store
 The particle approximation of the robust action and posterior MOCU is
 \begin{align}
 u_{\mathrm{ctrl}}(b)
-&=\max_{n\in\mathcal I(b)}u_n^*,
+&=\max_{n\in\mathcal I(b)}u_{\mathrm{optimal}}^{(n)},
 \label{eq:particle_u_ctrl}\\
 \operatorname{MOCU}(b)
 &=J\!\left(u_{\mathrm{ctrl}}(b)\right)
--\sum_{n=1}^{N} w_n J(u_n^*).
+-\sum_{n=1}^{N} w_n J(u_{\mathrm{optimal}}^{(n)}).
 \label{eq:particle_mocu}
 \end{align}
 The weights are normalized in log space, so \(\mathcal I(b)\) is nonempty.
@@ -598,11 +634,11 @@ The expectation is taken over the unknown true system, observation noise, and
 any randomization in the probe-selection method. For linear control cost, the Yoon definition gives
 \[
 \operatorname{MOCU}(h_T)=u_{\mathrm{ctrl}}(h_T)
--\mathbb E[u_\theta^*\mid h_T].
+-\mathbb E[u_{\mathrm{optimal}}\mid h_T].
 \]
 Thus, designs that reduce posterior uncertainty about the minimum safe control
 reduce MOCU. Minimizing expected \(u_{\mathrm{ctrl}}\) alone is related but not
-identical to minimizing MOCU because the posterior mean of \(u_\theta^*\) also
+identical to minimizing MOCU because the posterior mean of \(u_{\mathrm{optimal}}\) also
 depends on the policy. Equation~\eqref{eq:belief_mocu} is the primary endpoint;
 raw control magnitude and held-out safety are reported separately.
 
@@ -1285,23 +1321,18 @@ artifact.
 Algorithms~\ref{alg:banks}--\ref{alg:evaluation} summarize the complete implementation. The same posterior and terminal control routines are used by every method.
 
 \begin{algorithm}[htbp]
-\caption{Offline construction of shared probe and control banks}
+\caption{Offline construction of the shared probe-response bank}
 \label{alg:banks}
 \begin{algorithmic}[1]
-\Require Particles \(\{\theta^{(n)}\}_{n=1}^{N}\); probe set \(\Xi=\{\xi^a\}_{a=1}^{N_\xi}\); ordered support set \(\mathcal S=\{u^1<\cdots<u^{N_u}\}\); safety limits \(r_{\max}\), \(f_{\min}\)
-\Ensure Probe bank \(Y\), finite operator-cost bank \(\{\psi_n^\star\}\), and validated metadata
+\Require Particles \(\{\theta^{(n)}\}_{n=1}^{N}\) and probe set
+\(\Xi=\{\xi^a\}_{a=1}^{N_\xi}\)
+\Ensure Probe-response bank \(Y\) and validated metadata
 \For{\(n=1,\ldots,N\)}
     \For{\(a=1,\ldots,N_\xi\)}
         \State Reset the probe simulator to the common equilibrium \(x_0\)
         \State Set \(u_{\mathrm{ctrl}}\gets0\) and apply only probe \(\xi^a\)
         \State Store \(\mathbf Y_{n,a}\gets\mathbf y_{\mathrm{clean}}(\theta^{(n)},\xi^a)\)
     \EndFor
-    \State Reset the terminal control simulator and set \(P_{\mathrm{probe}}\gets0\)
-    \State Compute \(u_{\mathrm{req}}(\theta^{(n)},c)\) for every \(c\in\mathcal C\)
-    \State Store \(\psi_n^\star\gets\max_{c\in\mathcal C}u_{\mathrm{req}}(\theta^{(n)},c)\)
-    \If{no candidate control is safe}
-        \State Stop with a configuration error and enlarge \(\mathcal S\)
-    \EndIf
 \EndFor
 \State Validate particle identity, ordering, network, scenario, simulator version, and units
 \end{algorithmic}

@@ -258,7 +258,7 @@ The control grid is required to contain at least one safe action for every
 retained model. With increasing control cost \(J(u)\), the model-specific action
 is
 \begin{equation}
-u_{\boldsymbol\theta}^*
+u_{\mathrm{optimal}}(\boldsymbol\theta)
 =\arg\min_{u\in\mathcal U_{\mathrm{safe}}(\boldsymbol\theta)}J(u).
 \label{eq:model-specific-control}
 \end{equation}
@@ -286,29 +286,30 @@ posterior support:
 \begin{equation}
 u_{\mathrm{ctrl}}(b)
 =\max_{\boldsymbol\theta\in\operatorname{supp}(b)}
-u_{\boldsymbol\theta}^*.
+u_{\mathrm{optimal}}(\boldsymbol\theta).
 \label{eq:robust-control}
 \end{equation}
 
 The corresponding objective cost of uncertainty and MOCU are
 \begin{align}
 \operatorname{OCU}(\boldsymbol\theta,b)
-&=J\!\left(u_{\mathrm{ctrl}}(b)\right)-J(u_{\boldsymbol\theta}^*),\\
+&=J\!\left(u_{\mathrm{ctrl}}(b)\right)-J(u_{\mathrm{optimal}}(\boldsymbol\theta)),\\
 \operatorname{MOCU}(b)
 &=J\!\left(u_{\mathrm{ctrl}}(b)\right)
--\E_{\boldsymbol\theta\sim b}[J(u_{\boldsymbol\theta}^*)]\ge0.
+-\E_{\boldsymbol\theta\sim b}[J(u_{\mathrm{optimal}}(\boldsymbol\theta))]\ge0.
 \label{eq:belief-mocu}
 \end{align}
 For the primary choice \(J(u)=u\), MOCU is measured directly in units of
 supplementary power.
 
-For particles with weights \(w_n\) and model-specific minimum safe controls
-\(u_n^*\), the corresponding particle approximation is
+For particles with weights \(w_n\), let
+\(u_{\mathrm{optimal}}^{(n)}=u_{\mathrm{optimal}}(\boldsymbol\theta^{(n)})\).
+The corresponding particle approximation is
 \begin{align}
 \mathcal I(b)&=\{n:w_n>10^{-12}\},\\
-u_{\mathrm{ctrl}}(b)&=\max_{n\in\mathcal I(b)}u_n^*,\\
+u_{\mathrm{ctrl}}(b)&=\max_{n\in\mathcal I(b)}u_{\mathrm{optimal}}^{(n)},\\
 \operatorname{MOCU}(b)
-&=u_{\mathrm{ctrl}}(b)-\sum_{n=1}^{N_{\mathrm p}} w_n u_n^*.
+&=u_{\mathrm{ctrl}}(b)-\sum_{n=1}^{N_{\mathrm p}} w_n u_{\mathrm{optimal}}^{(n)}.
 \label{eq:particle-mocu}
 \end{align}
 Scientific alignment requires policy optimization and posterior evaluation to
