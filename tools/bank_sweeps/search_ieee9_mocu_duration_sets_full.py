@@ -23,7 +23,11 @@ if str(ROOT) not in sys.path:
 
 import src.banks.audit as bank_audit
 from src.banks.audit import screen_t2_adaptive_room
-from src.control.posterior_ctrl import normalize_log_weights, posterior_safe_u_ctrl
+from src.control.posterior_ctrl import (
+    belief_mocu,
+    ibr_max_u_ctrl,
+    normalize_log_weights,
+)
 from src.layout import make_experiment_dir_name
 from src.observations.likelihood import evenly_spaced_indices
 from tools.bank_sweeps.search_ieee9_eig_duration_sets_full import (
@@ -36,16 +40,14 @@ from tools.bank_sweeps.sweep_ieee9_eig_duration_sets import (
 
 def install_safety_aware_mocu_terminal(*, undercontrol_penalty: float,
                                        violation_penalty: float) -> None:
-    """Make the structural planner use the exact train/eval terminal cost."""
+    """Make the structural planner use the exact train/eval Yoon MOCU."""
     def terminal_loss(U, log_w, *, alpha, margin, grid):
         w = normalize_log_weights(log_w)
-        u = float(posterior_safe_u_ctrl(
-            U, w, alpha, margin=margin, u_grid=grid, snap_up=True,
-        ))
-        shortfall = np.maximum(np.asarray(U, dtype=np.float64) - u, 0.0)
-        realized = (u + float(undercontrol_penalty) * shortfall
-                    + float(violation_penalty) * (shortfall > 0.0))
-        return float(np.sum(w * (realized - np.asarray(U, dtype=np.float64))))
+        # Primary MOCU protocol: hard-safety Yoon IBR action and regret.
+        # The penalty arguments remain in the compatibility signature because
+        # the structural-audit helper passes them, but are intentionally unused.
+        u = float(ibr_max_u_ctrl(np.asarray(U, dtype=np.float64), w))
+        return float(belief_mocu(np.asarray(U, dtype=np.float64), w, u))
     # screen_t2_adaptive_room resolves this module global at runtime.
     bank_audit._terminal_u = terminal_loss
 
@@ -145,7 +147,7 @@ def main():
     folder = make_experiment_dir_name("ieee9_mocu_duration_fullgrid_audit", "objective_based", 2, n_obs=args.n_obs, noise_sigma=args.noise_sigma)
     out = ROOT / "experiments" / folder; diag = out / "diagnostics"; diag.mkdir(parents=True, exist_ok=True)
     started = time.time(); rng = np.random.default_rng(args.search_seed)
-    run = {"system":"ieee9", "study_type":"MOCU_full_281_duration_global_local_audit_v2", "objective":"safety_aware_mocu_identical_to_training_evaluation", "undercontrol_penalty":args.undercontrol_penalty, "violation_penalty":args.violation_penalty, "duration_grid_s":[.20,3.00,.01], "n_duration_options":281, "combination_space":math.comb(281,6), "choose":6, "global_samples":args.global_samples, "global_exact":args.global_exact, "local_parents":args.local_parents, "local_exact":args.local_exact, "finalists":args.finalists, "audit_seeds":list(seeds), "N_obs":args.n_obs, "noise_sigma":args.noise_sigma, "support_size":len(U), "status":"running"}
+    run = {"system":"ieee9", "study_type":"MOCU_full_281_duration_global_local_audit_v3", "objective":"Yoon IBR MOCU identical to training/evaluation", "duration_grid_s":[.20,3.00,.01], "n_duration_options":281, "combination_space":math.comb(281,6), "choose":6, "global_samples":args.global_samples, "global_exact":args.global_exact, "local_parents":args.local_parents, "local_exact":args.local_exact, "finalists":args.finalists, "audit_seeds":list(seeds), "N_obs":args.n_obs, "noise_sigma":args.noise_sigma, "support_size":len(U), "status":"running"}
     (out/"run_config.json").write_text(json.dumps(run,indent=2)+"\n")
     print(f"MOCU full grid=281, C(281,6)={math.comb(281,6):,}; reusing {bank}", flush=True)
     info, distance = proxy_scores(centres, 281, n_buses)
