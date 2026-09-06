@@ -150,3 +150,29 @@ The present evidence supports caution about assuming a DAD-family advantage.
 It does not establish that the problem has no adaptive/non-myopic space.
 The next scientific check is planning/Fixed budget convergence on screening
 systems, followed by fresh validation if experimental settings are changed.
+
+## Corrected IEEE9 duration-combination search
+
+`tools/audit_ieee9_duration_combos.py` reuses all 281 durations in
+`data/ieee9_duration_dense_0p01`, verifies exact latent-row identity and matching
+production observation curves, and gets required control from the production
+control extension rather than the historical dense bank's U array.
+The default search screens 32 reproducibly chosen six-duration sets, including
+the current baseline and an evenly spaced set, at T=3. It freezes the three
+best balanced combined/non-myopic candidates, retaining the baseline as well,
+then evaluates them at T=2,3,4,5 on the other validation half with larger
+planning budgets. Each phase uses seeds 101,202,303 and all 384 fit particles.
+This is a sampled exploratory search of C(281,6), not exhaustive optimization.
+
+Every screened candidate and every confirmation result is saved, alongside
+raw paired arrays and dense-observation/control/latent hashes. Confirmation
+reports both ordinary diagnostic intervals and Bonferroni-adjusted bootstrap
+intervals across all candidate/horizon/contrast comparisons. Selection on
+screening means can overfit; separate validation mitigates that, but the
+validation bank has already been used in earlier development. It therefore
+still cannot support a fresh confirmatory or publication claim.
+
+On Grace submit `sbatch hprc/ieee9_corrected_duration_audit.slurm`; it requests
+one A100, 4 CPUs, 32 GB and a 2-hour time limit. It first runs the audit
+regressions and objective-alignment check. No DAD training is launched and
+no production duration catalog is changed by this search.
