@@ -14,7 +14,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from src.layout import parse_result_dir_name
+from src.layout import load_run_config_doc, parse_result_dir_name
 
 TRAIN_SEEDS = (101, 202, 303)
 EVAL_SEEDS = (1001, 1002, 1003, 1004, 1005)
@@ -51,9 +51,13 @@ def _float(row: dict[str, Any], *keys: str) -> float:
 
 def _training_seed(exp_dir: Path) -> int:
     match = re.search(r"(?:^|_)seed(\d+)(?:_|$)", exp_dir.name)
-    if not match:
-        raise ValueError(f"training seed missing from result folder: {exp_dir}")
-    return int(match.group(1))
+    if match:
+        return int(match.group(1))
+    run_doc = load_run_config_doc(exp_dir)
+    raw = run_doc.get("seed")
+    if raw not in (None, ""):
+        return int(raw)
+    raise ValueError(f"training seed missing from result folder and run config: {exp_dir}")
 
 
 def _evaluation_seed(path: Path, row: dict[str, Any]) -> int:
