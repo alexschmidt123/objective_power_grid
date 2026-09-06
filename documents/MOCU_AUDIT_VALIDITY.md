@@ -59,3 +59,11 @@ decisions vary on the existing IEEE9/IEEE14 banks. They do not establish
 publication performance, 95% held-out physical safety, or an adaptive method's
 advantage over Fixed/Myopic. Existing maximum-rule trained models and result
 tables are not converted into finite-loss results by changing their labels.
+
+## Replacement adaptive/non-myopic audit
+
+Use `tools/audit_mocu_space.py` and see [MOCU_SPACE_AUDIT.md](MOCU_SPACE_AUDIT.md)
+for GPU batching, separate adaptation/planning comparisons, paired validation,
+protocol limitations and the September 6 development results. Its fast metric
+is candidate-grid bank regret; final continuous-oracle evaluation remains
+a separate requirement.
