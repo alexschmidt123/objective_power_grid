@@ -374,6 +374,10 @@ def attach_oracle(
                 **row,
                 "u_ctrl_opt": u_opt,
                 "control_gap": gap,
+                "ocu": (u_ctrl + ctx.undercontrol_penalty * max(u_opt - u_ctrl, 0.0)
+                        + ctx.violation_penalty * float(not method_safe) - u_opt),
+                "undercontrol_penalty": ctx.undercontrol_penalty,
+                "violation_penalty": ctx.violation_penalty,
                 # Held-out perfect-information comparison; this is not belief MOCU.
                 "realized_control_gap": gap,
                 "raw_control_gap": gap,
@@ -416,7 +420,7 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
     mocu_by_theta: dict[int, list[float]] = {}
     for row in sub:
         mocu_by_theta.setdefault(int(row["theta_id"]), []).append(
-            float(row["posterior_mocu"])
+            float(row["ocu"])
         )
     clustered_mocu = np.asarray(
         [np.mean(values) for values in mocu_by_theta.values()], dtype=np.float64
@@ -435,8 +439,11 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
         # Raw mean(u_ctrl - u_opt); negative ⇒ under-control (often unsafe).
         "mean_gap": float(gaps.mean()),
         "median_gap": float(np.median(gaps)),
-        # Primary objective: terminal posterior Yoon belief MOCU.
+        # Primary held-out estimator: realized operational regret, clustered by theta.
         "mean_mocu": float(clustered_mocu.mean()),
+        "mean_posterior_mocu": float(np.mean([float(r["posterior_mocu"]) for r in sub])),
+        "metric_schema": "realized_operational_regret_v2",
+        "decision_degenerate": bool(np.ptp(u) <= 1e-12),
         "median_mocu": float(np.median(clustered_mocu)),
         "mocu_ci95_low": float(mocu_ci["ci95_low"]),
         "mocu_ci95_high": float(mocu_ci["ci95_high"]),
@@ -445,7 +452,7 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
         "under_control_rate": float(under.mean()),
         "mean_shortfall": float(np.maximum(-gaps, 0.0).mean()),
         "mocu_cost_definition": (
-            "u_ctrl - posterior_mean(u_optimal), robust_rule=ibr_max"
+            "E_test[u + lambda*(U-u)_+ + rho*1[unsafe] - U]"
         ),
         "mean_realized_control_gap": float(gaps.mean()),
         "gap_ci95_low": float(np.percentile(gaps, 2.5)),
@@ -806,14 +813,16 @@ def run_full_evaluation(
             s["method"] for s in summaries if not bool(s.get("valid", 0))
         ],
         "primary_metric": "mean_mocu",
+        "metric_schema": "realized_operational_regret_v2",
+        "terminal_robust_rule": ctx.robust_rule,
         "runtime_by_method": runtime_by_method,
         "runtime_scope": (
             "Per-method online evaluation only; training, fixed-search preprocessing, "
             "hybrid calibration, and oracle/safety evaluation are reported separately."
         ),
         "mocu_definition": (
-            "mean terminal posterior Yoon MOCU: "
-            "u_ctrl - posterior_mean(u_optimal)"
+            "realized_operational_regret_v2: held-out mean of "
+            "u + lambda*(U-u)_+ + rho*1[unsafe] - U"
         ),
         "ranking_rule": (
             "safety_rate >= 0.95 required; valid methods ranked by mean_mocu asc"

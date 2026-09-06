@@ -9,7 +9,7 @@ from typing import Any
 import numpy as np
 import yaml
 
-ALL_METHODS = ["dad", "rl_sboed", "myopic", "fixed", "random"]
+ALL_METHODS = ["dad", "rl_sboed", "step_dad", "myopic", "fixed", "random"]
 
 # Human-readable labels for built-in MATPOWER-style feeders.
 IEEE_SYSTEM_LABELS: dict[str, str] = {

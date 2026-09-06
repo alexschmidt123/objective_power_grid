@@ -1,19 +1,9 @@
-"""Discrete-θ posterior and Yoon IBR terminal operator ψ*(h_T).
+"""Particle Bayes and explicit terminal decision rules.
 
-Particle Bayes (weights, entropy, prior) lives here — there is no separate
-inference package. Likelihood evaluations are ``src.observations.likelihood``.
-
-Yoon terminology (TSP 2013):
-  ψ_θ*  = model-specific optimal operator  (= min safe support for θ)
-  ψ*    = IBR robust operator
-  MOCU  = E[C_θ(ψ*) - C_θ(ψ_θ*)]
-
-Hard-safety IBR reduction used here:
-  ψ*(w) = max { ψ_{θ_n}* : w_n > 0 }
-
-On disk the bank of ψ_θ* values is ``psi_star.npy`` (legacy ``U.npy``
-migrated automatically). In memory, arrays may still be named ``U_support``
-as a temporary alias for ψ_n*.
+Finite-loss MOCU uses Q_(1-alpha)(U|history) for
+C(u,U)=u+(U-u)_+/alpha. The optional ibr_max rule instead takes the
+maximum over particles above a numerical weight cutoff. It approximates a
+hard-support safety assumption and may remain constant under Gaussian noise.
 """
 
 from __future__ import annotations
@@ -190,11 +180,11 @@ class TerminalControlRule:
     """
     Common terminal rule for all objective-based methods.
 
-    ``robust_rule="ibr_max"`` (Yoon IBR / primary MOCU definition):
+    ``robust_rule="ibr_max"`` (thresholded support maximum):
 
         u_ctrl = max { U_n : w_n > 0 }
 
-    ``robust_rule="quantile"`` (chance-constrained / legacy):
+    ``robust_rule="quantile"`` (finite-loss quantile):
 
         u_ctrl = Q_{1-α}(U|w) + margin   (optionally snap_up)
     """
@@ -283,6 +273,10 @@ def posterior_control_decision(
 ) -> ControlDecision:
     """Compute terminal control; primary ``u_ctrl`` follows ``robust_rule``."""
     rule = str(robust_rule or "quantile").strip().lower()
+    if rule not in {"quantile", "ibr", "ibr_max", "max", "yoon_ibr"}:
+        raise ValueError(f"Unsupported robust_rule={robust_rule!r}")
+    if rule == "quantile" and not 0.0 < float(alpha) < 1.0:
+        raise ValueError("Quantile decision requires 0 < alpha < 1")
     use_ibr = rule in {"ibr", "ibr_max", "max", "yoon_ibr"}
 
     if use_ibr:

@@ -59,7 +59,7 @@ class ControlSpec:
     u_candidates: tuple[float, ...]
     safety_margin: float = 0.0  # additive pu after quantile; snapped up to grid
     # "ibr_max" = Yoon IBR max{U_n:w_n>0}; "quantile" = Q_{1-α}+margin
-    robust_rule: str = "quantile"
+    robust_rule: str = "ibr_max"
     # When True, ψ* snaps Q+margin up onto u_candidates; False keeps continuous.
     snap_up: bool = True
     myopic_hypothetical: int = 16
@@ -152,12 +152,15 @@ class ControlSpec:
         fs = float(raw.get("fs_hz", sw.get("fs_hz", getattr(cfg, "fs_hz", 12.0))))
         ode_dt = float(raw.get("ode_dt", 1.0 / 160.0))
 
-        rule_raw = str(raw.get("robust_rule", "quantile")).strip().lower()
+        # The experiment must explicitly identify its terminal decision assumption.
+        rule_raw = str(raw.get("robust_rule", "ibr_max")).strip().lower()
         robust_rule = (
             "ibr_max"
             if rule_raw in {"ibr", "ibr_max", "max", "yoon_ibr"}
             else "quantile"
         )
+        if rule_raw not in {"ibr", "ibr_max", "max", "yoon_ibr", "quantile"}:
+            raise ValueError(f"Unsupported control.robust_rule={rule_raw!r}")
         return cls(
             alpha=float(raw.get("alpha", 0.05)),
             safety_margin=float(raw.get("safety_margin", raw.get("margin", 0.0))),

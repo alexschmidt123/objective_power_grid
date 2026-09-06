@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 import shutil
 import subprocess
@@ -87,6 +88,9 @@ def make_experiment_dir_name(
     name = str(config_name).strip()
     if not name or "/" in name or "\\" in name or " " in name:
         raise ValueError(f"Invalid config name for result folder: {config_name!r}")
+    # The following objective label already carries this information.  Strip
+    # only a terminal objective suffix and retain legacy parsing compatibility.
+    name = re.sub(r"_(?:eig|mocu)$", "", name, flags=re.IGNORECASE)
     if stamp is None:
         stamp = datetime.now().strftime("%m%d%Y_%H%M%S")
     if int(n_obs) < 0:
@@ -119,7 +123,7 @@ def make_plots_dir_name(
     noise_sigma: float = 0.005,
     sigma_token: str | None = None,
 ) -> str:
-    """Stamped sweep plot bundle: ``MMDDYYYY_HHMMSS_plots_<config>_EIG_T3-5_Nobs10_sigma0p005``."""
+    """Stamped visualization bundle with a non-duplicated system label."""
     et = str(experiment_type).strip().lower().replace("-", "_")
     if et not in EXPERIMENT_TYPES:
         raise ValueError(
@@ -127,25 +131,33 @@ def make_plots_dir_name(
             f"(allowed: {', '.join(EXPERIMENT_TYPES)})"
         )
     name = str(config_name).strip()
-    if not name or "/" in name or "\\" in name or " " in name or name.startswith("plots_"):
-        raise ValueError(f"Invalid config name for plots folder: {config_name!r}")
+    if not name or "/" in name or "\\" in name or " " in name:
+        raise ValueError(f"Invalid config name for visualization folder: {config_name!r}")
+    # Core config stems encode the objective for config lookup, while the
+    # following EIG/Uctrl token already records it in the folder identity.
+    system_name = re.sub(r"_(?:eig|mocu)$", "", name, flags=re.IGNORECASE)
     stamp_text = str(stamp).strip()
     if not re.fullmatch(r"\d{8}_\d{6}", stamp_text):
         raise ValueError(f"Invalid plots stamp {stamp!r}; expected MMDDYYYY_HHMMSS")
     if int(n_obs) < 0:
         raise ValueError(f"N_obs must be non-negative, got {n_obs}")
-    label = EXPERIMENT_FOLDER_LABELS[et]
+    # Visualization folders name the scientific objective. Individual result
+    # folders retain Uctrl for backward-compatible discovery.
+    label = "MOCU" if et == "objective_based" else "EIG"
     sigma = str(sigma_token).strip() if sigma_token else _folder_sigma(noise_sigma)
-    return (
-        f"{stamp_text}_plots_{name}_{label}_{horizon_token(horizons)}_"
-        f"Nobs{int(n_obs)}_sigma{sigma}"
+    prefix = (
+        f"{stamp_text}_visualization_{system_name}_{label}_"
+        f"{horizon_token(horizons)}_"
     )
+    if system_name.lower() in {"sir", "sir_ode"}:
+        return f"{prefix}sigma{sigma}"
+    return f"{prefix}Nobs{int(n_obs)}_sigma{sigma}"
 
 
 def parse_result_dir_name(name: str) -> dict[str, Any] | None:
     """Parse a result folder basename; return None if it does not match the rule."""
     basename = Path(str(name)).name
-    if "_plots_" in basename:
+    if "_plots_" in basename or "_visualization_" in basename:
         return None
     m = RESULT_DIR_RE.match(basename)
     if not m:
@@ -511,6 +523,44 @@ def write_run_config(
         "methods": stamped,
         **body,
     }
+    # Publication provenance for both clean and intentionally dirty working
+    # trees.  A commit hash alone is insufficient while experiments are being
+    # developed from reviewed but uncommitted changes.
+    try:
+        revision = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=repo_root(), check=True,
+            capture_output=True, text=True,
+        ).stdout.strip()
+        status = subprocess.run(
+            ["git", "status", "--porcelain"], cwd=repo_root(), check=True,
+            capture_output=True, text=True,
+        ).stdout
+        diff = subprocess.run(
+            ["git", "diff", "--binary", "HEAD"], cwd=repo_root(), check=True,
+            capture_output=True,
+        ).stdout
+        doc["source_provenance"] = {
+            "git_commit": revision,
+            "dirty": bool(status.strip()),
+            "git_status_sha256": hashlib.sha256(status.encode()).hexdigest(),
+            "git_diff_sha256": hashlib.sha256(diff).hexdigest(),
+        }
+    except (OSError, subprocess.SubprocessError):
+        doc["source_provenance"] = {"available": False}
+    source_files = {}
+    for folder in ("src", "tools", "scripts", "configs"):
+        for source in sorted((repo_root() / folder).rglob("*")):
+            if source.is_file() and source.suffix in {".py", ".sh", ".yaml", ".json"}:
+                source_files[str(source.relative_to(repo_root()))] = hashlib.sha256(source.read_bytes()).hexdigest()
+    for name in ("run.sh", "sweep_run.sh"):
+        source = repo_root() / name
+        if source.is_file():
+            source_files[name] = hashlib.sha256(source.read_bytes()).hexdigest()
+    doc["source_provenance"].update({
+        "available": True,
+        "source_tree_sha256": hashlib.sha256(json.dumps(source_files, sort_keys=True).encode()).hexdigest(),
+        "source_files_sha256": source_files,
+    })
     extra_doc.pop("experiment_type", None)
     extra_doc.pop("N_obs", None)
     extra_doc.pop("noise_sigma", None)

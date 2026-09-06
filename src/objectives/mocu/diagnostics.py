@@ -68,6 +68,7 @@ def select_myopic_action(
             noise=noise,
             undercontrol_penalty=ctx.undercontrol_penalty,
             violation_penalty=ctx.violation_penalty,
+            robust_rule=ctx.robust_rule, snap_up=ctx.snap_up,
         )
         if score < best_score - 1e-15 or (
             abs(score - best_score) <= 1e-15 and (best_a is None or a < best_a)
@@ -109,7 +110,7 @@ def diagnose_conditional_action_diversity(
                 device=torch_device,
             )
             with torch.no_grad():
-                action = int(policy(*tensors[:-1]).argmax(dim=-1).item())
+                action = int(policy(*tensors[:-1], tensors[-1]).argmax(dim=-1).item())
             y = observe_compressed(
                 system,
                 action,

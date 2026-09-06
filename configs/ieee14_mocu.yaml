@@ -105,13 +105,15 @@ prior:
 experiment:
   mode: duration_bus_reset
   step_number: 3
-  methods: [dad, rl_sboed, myopic, fixed, random]
+  methods: [dad, rl_sboed, step_dad, myopic, fixed, random]
   # Prefer CLI --experiment_type; default is overridden by run.sh / sweep_run.sh.
   experiment_type: objective_based
 
 # MOCU / objective_based only (ignored when stamping eig_based run_config).
 control:
-  # Match the required held-out safety threshold (1-alpha = 0.95). Safety is
+  # Finite-loss MOCU: Bayes action for C(u,U)=u+20*(U-u)_+.
+  robust_rule: quantile
+  # Posterior 95% quantile; held-out physical safety is a separate check. Safety is
   # still measured by the physical simulator; methods below 0.95 are invalid.
   alpha: 0.05
   enforce_bayes_loss_alignment: true
@@ -176,7 +178,7 @@ poster_eig_protocol:
   N_obs: 5
   noise_sigma: 0.01
   seeds: [101, 202, 303]
-  methods: [dad, rl_sboed, myopic, fixed, random]
+  methods: [dad, rl_sboed, step_dad, myopic, fixed, random]
   claim_scope: paired_terminal_eig
 
 # Independent MOCU pilot selected by the baseline structural screen. Promote to
@@ -190,7 +192,7 @@ poster_mocu_protocol:
   alpha: 0.05
   pilot_seed: 101
   seeds: [101, 202, 303]
-  methods: [dad, rl_sboed, myopic, fixed, random]
+  methods: [dad, rl_sboed, step_dad, myopic, fixed, random]
   minimum_safety_rate: 0.95
   promotion_gate: paired_advantage_and_non_degenerate_terminal_control
 

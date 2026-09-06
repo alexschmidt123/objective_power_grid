@@ -1499,6 +1499,7 @@ def _step_dad_eig_config(ctx: ExperimentContext, smoke: bool) -> dict[str, Any]:
         "fantasies": 4 if smoke else int(raw.get("eig_step_dad_fantasy_rollouts", 16)),
         "learning_rate": float(raw.get("eig_step_dad_learning_rate", 1.0e-4)),
         "entropy": float(raw.get("eig_step_dad_entropy_coefficient", 1.0e-3)),
+        "kl": float(raw.get("eig_step_dad_kl_coefficient", 1.0)),
         "refine_at": (
             max(1, int(ctx.horizon) // 2) if refine is None else int(refine)
         ),
@@ -1530,6 +1531,7 @@ def _refine_step_dad_eig(
         rewards: list[float] = []
         log_probs: list[torch.Tensor] = []
         entropies: list[torch.Tensor] = []
+        divergences: list[torch.Tensor] = []
         for _fantasy in range(int(config["fantasies"])):
             particle = int(rng.choice(len(posterior), p=posterior))
             fa = list(actions)
@@ -1542,6 +1544,11 @@ def _refine_step_dad_eig(
                     ctx, fa, fy, fw, step=step, device=engine.device
                 )
                 dist = policy.distribution(*tensors)
+                with torch.no_grad():
+                    base_dist = base.distribution(*tensors)
+                divergences.append(
+                    torch.distributions.kl_divergence(base_dist, dist).mean()
+                )
                 action_t = dist.sample()
                 action = int(action_t.item())
                 lp.append(dist.log_prob(action_t).reshape(()))
@@ -1566,10 +1573,52 @@ def _refine_step_dad_eig(
         ).clamp_min(1e-6)
         loss = -(torch.stack(log_probs) * advantage.detach()).mean()
         loss = loss - float(config["entropy"]) * torch.stack(entropies).mean()
+        # Keep test-time adaptation local to the trained DAD policy.  This is
+        # a policy-space trust region and does not compare numeric action IDs.
+        loss = loss + float(config["kl"]) * torch.stack(divergences).mean()
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(policy.parameters(), 1.0)
         optimizer.step()
+    # Validate on independent posterior fantasies with common random numbers.
+    # Refinement is accepted only when its deterministic deployment policy has
+    # higher estimated terminal EIG than the untouched DAD policy.
+    validation_rng = np.random.default_rng(int(seed) + 9_999_991)
+    validation_cases = []
+    for _ in range(max(8, int(config["fantasies"]))):
+        particle = int(validation_rng.choice(len(posterior), p=posterior))
+        noises = [
+            validation_rng.normal(size=engine.centres.shape[-1])
+            for _ in range(len(actions), int(ctx.horizon))
+        ]
+        validation_cases.append((particle, noises))
+
+    def validation_utility(candidate: AdaptiveExperimentPolicy) -> float:
+        values = []
+        candidate.eval()
+        for particle, noises in validation_cases:
+            fa = list(actions)
+            fy = [np.asarray(y).copy() for y in observations]
+            fw = log_w.detach().clone()
+            for offset, step in enumerate(range(len(fa), int(ctx.horizon))):
+                tensors = _policy_tensors(
+                    ctx, fa, fy, fw, step=step, device=engine.device
+                )
+                with torch.no_grad():
+                    action = int(candidate(*tensors).argmax(dim=-1).item())
+                clean = engine.centres[particle, action].detach().cpu().numpy()
+                y = clean + float(ctx.sigma_y) * noises[offset]
+                fa.append(action)
+                fy.append(np.asarray(y, dtype=np.float32))
+                fw = engine.update(
+                    fw, action,
+                    torch.as_tensor(y, dtype=torch.float32, device=engine.device),
+                )
+            values.append(initial_h - float(engine.entropy(fw).detach()))
+        return float(np.mean(values))
+
+    if validation_utility(policy) <= validation_utility(base):
+        return base, float(time.perf_counter() - started)
     policy.eval()
     return policy, float(time.perf_counter() - started)
 

@@ -10,12 +10,11 @@
 # Cartesian product (every config × every T × seed):
 #   bash sweep_run.sh --configs ieee9_mocu --T 3,4,5 --seed 101,202,303
 #
-# After a T sweep (at least two --T values), writes one stamped plots folder
+# After a T sweep (at least two --T values), writes one stamped visualization folder
 # per (config, type, N_obs, sigma) group:
-#   --T 3,4,5 → experiments/MMDDYYYY_HHMMSS_plots_ieee9_EIG_T3-5_Nobs10_sigma0p005
-# Single-T sweeps do not write a plots folder. date_time is this sweep's start
-# time. Each plots folder has exactly five files:
-#   metric.md, time.md, metric_vs_T.png, time_vs_T.md, meta.json
+#   --T 3,4,5 → experiments/MMDDYYYY_HHMMSS_visualization_ieee9_EIG_T3-5_Nobs10_sigma0p005
+# Single-T sweeps do not write a visualization folder. Each bundle has three
+# tables, three plots, and one meta.json provenance file.
 #
 # Rebuild plots from existing T-sweep result dirs (no train/eval):
 #   bash sweep_run.sh --configs ieee9_eig --experiment_type eig_based \
@@ -41,6 +40,7 @@ METHOD=""
 SMOKE=""
 BANK_STRUCTURE_AUDIT=""
 EXPERIMENT_TYPE="$EXPERIMENT_TYPE_DEFAULT"
+EXPERIMENT_TYPE_SET=0
 PLOTS_ONLY=0
 
 usage() {
@@ -98,6 +98,7 @@ while [[ $# -gt 0 ]]; do
         --method|-method|-m) METHOD="$2"; shift 2 ;;
         --experiment_type|--experiment-type)
             EXPERIMENT_TYPE="$(validate_experiment_type "$2")" || exit 1
+            EXPERIMENT_TYPE_SET=1
             shift 2
             ;;
         --force) FORCE="--force"; shift ;;
@@ -120,6 +121,19 @@ for item in "${_raw_cfgs[@]}"; do
     CFG_ARR+=("$(resolve_cfg "$item")")
 done
 [[ ${#CFG_ARR[@]} -gt 0 ]] || { echo "No configs given" >&2; usage; exit 1; }
+
+# With no explicit override, each YAML owns its objective. Resolve a lone
+# config now so its objective-specific observation defaults are read correctly.
+if [[ "$EXPERIMENT_TYPE_SET" -eq 0 && ${#CFG_ARR[@]} -eq 1 ]]; then
+    EXPERIMENT_TYPE="$(python3 -c '
+import sys, yaml
+from pathlib import Path
+raw = yaml.safe_load(Path(sys.argv[1]).read_text()) or {}
+value = str((raw.get("experiment") or {}).get("experiment_type") or "objective_based")
+print(value.strip().lower().replace("-", "_"))
+' "${CFG_ARR[0]}")"
+    EXPERIMENT_TYPE="$(validate_experiment_type "$EXPERIMENT_TYPE")" || exit 1
+fi
 
 # With one config, omitted observation arguments come from its active
 # objective-specific profile. Multi-config sweeps require explicit values to
@@ -199,8 +213,10 @@ write_sweep_plots() {
     local plot_args=(
         python3 -m src.results.plots
         --stamp "$SWEEP_STAMP"
-        --experiment-type "$EXPERIMENT_TYPE"
     )
+    if [[ "$EXPERIMENT_TYPE_SET" -eq 1 ]]; then
+        plot_args+=(--experiment-type "$EXPERIMENT_TYPE")
+    fi
     if [[ -n "$METHOD" ]]; then
         plot_args+=(--methods "$METHOD")
     fi
@@ -240,6 +256,17 @@ fi
 
 CELL_DIRS=()
 for cfg in "${CFG_ARR[@]}"; do
+    CFG_EXPERIMENT_TYPE="$EXPERIMENT_TYPE"
+    if [[ "$EXPERIMENT_TYPE_SET" -eq 0 ]]; then
+        CFG_EXPERIMENT_TYPE="$(python3 -c '
+import sys, yaml
+from pathlib import Path
+raw = yaml.safe_load(Path(sys.argv[1]).read_text()) or {}
+value = str((raw.get("experiment") or {}).get("experiment_type") or "objective_based")
+print(value.strip().lower().replace("-", "_"))
+' "$cfg")"
+        CFG_EXPERIMENT_TYPE="$(validate_experiment_type "$CFG_EXPERIMENT_TYPE")" || exit 1
+    fi
     for T in "${T_ARR[@]}"; do
       for N_OBS in "${NOBS_ARR[@]}"; do
        for NOISE_SIGMA in "${SIGMA_ARR[@]}"; do
@@ -252,7 +279,7 @@ for cfg in "${CFG_ARR[@]}"; do
             extra=(--force)
         fi
         echo "--- $cfg --T $T --N_obs $N_OBS --noise_sigma $NOISE_SIGMA --seed $SEED ${extra[*]:-} ---"
-        ARGS=(--config "$cfg" --experiment_type "$EXPERIMENT_TYPE" -T "$T" --N_obs "$N_OBS" --noise_sigma "$NOISE_SIGMA" --seed "$SEED" --eval-seeds "$EVAL_SEEDS")
+        ARGS=(--config "$cfg" --experiment_type "$CFG_EXPERIMENT_TYPE" -T "$T" --N_obs "$N_OBS" --noise_sigma "$NOISE_SIGMA" --seed "$SEED" --eval-seeds "$EVAL_SEEDS")
         [[ -n "$METHOD" ]] && ARGS+=(--method "$METHOD")
         [[ -n "$BANK_STRUCTURE_AUDIT" ]] && ARGS+=(--bank-structure-audit)
         cell_log="$(mktemp)"

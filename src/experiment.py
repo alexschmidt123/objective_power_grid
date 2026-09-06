@@ -94,16 +94,15 @@ def resolve_experiment_type(raw: str | None) -> ExperimentType:
 
 
 def _use_vector_eig_pipeline(cfg, exp_type: str, n_obs: int) -> bool:
-    """Physical-bank vector EIG (incl. continuous max-ROCOF with N_obs=0).
+    """Use the single complete EIG implementation for every EIG experiment.
 
-    Table-lookup EIG (``pipeline.run_evaluation``) is used only for classic
-    eig_based + N_obs=0 non-continuous IEEE configs.
+    The vector pipeline implements the full canonical method set, including
+    RL-sBOED and Step-DAD. Keeping a second table-only dispatcher caused the
+    available methods to depend on ``N_obs``. The arguments remain in this
+    helper to keep call sites explicit and backward compatible.
     """
-    if str(exp_type).lower().replace("-", "_") != "eig_based":
-        return False
-    if int(n_obs) > 0:
-        return True
-    return bool(getattr(cfg, "continuous_duration_mode", False))
+    del cfg, n_obs
+    return str(exp_type).lower().replace("-", "_") == "eig_based"
 
 
 def _add_experiment_type(parser: argparse.ArgumentParser) -> None:
@@ -209,6 +208,16 @@ def _run_record_extra(
     if seed is not None:
         extra["seed"] = int(seed)
     return extra
+
+
+def _vector_observation_model(ctx: Any) -> str:
+    """Canonical metadata label for the vector-EIG likelihood actually used."""
+    mode = str(getattr(ctx, "observation_mode", ""))
+    if mode.startswith("sir_"):
+        return "sir_infected_count_gaussian"
+    if int(ctx.n_obs) == 0:
+        return "continuous_duration_max_rocof"
+    return "sampled_delta_f_vector"
 
 
 VECTOR_EIG_METHOD_MAP = {
@@ -598,11 +607,7 @@ def cmd_train(args: argparse.Namespace) -> None:
                 args,
                 methods=train_record_methods,
                 seed=train_seed,
-                observation_model=(
-                    "continuous_duration_max_rocof"
-                    if int(ctx.n_obs) == 0
-                    else "sampled_delta_f_vector"
-                ),
+                observation_model=_vector_observation_model(ctx),
                 N_obs=ctx.n_obs,
             ),
         )
@@ -762,11 +767,7 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
                 methods=list(method_keys),
                 seed=int(identity["train_seed"]),
                 eval_seed=eval_seed,
-                observation_model=(
-                    "continuous_duration_max_rocof"
-                    if int(ctx.n_obs) == 0
-                    else "sampled_delta_f_vector"
-                ),
+                observation_model=_vector_observation_model(ctx),
                 N_obs=ctx.n_obs,
             ),
         )

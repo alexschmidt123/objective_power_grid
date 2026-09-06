@@ -39,10 +39,6 @@ def main() -> None:
     if not output.is_absolute():
         output = root / output
     output = output.resolve()
-    if bank_is_complete(output):
-        print(f"[full-bank] complete -> {output}; skipping generation")
-        return
-
     raw = copy.deepcopy(cfg.raw)
     full_data = dict(raw.get("data") or {})
     full_data["dataset_dir"] = str(output)
@@ -55,7 +51,7 @@ def main() -> None:
     raw["swing_equation"] = swing
     full_cfg = SBOEDConfig(raw=raw, config_path=Path(args.config).resolve())
     print(
-        f"[full-bank] missing -> {output}; generating 281 durations "
+        f"[full-bank] ensure and validate -> {output}; 281 durations "
         "from 0.20 to 3.00 s"
     )
     generate_physical_bank(full_cfg, project_root=root, smoke=args.smoke, force=False)

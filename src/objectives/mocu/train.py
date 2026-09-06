@@ -1027,6 +1027,7 @@ def _posterior_control_gpu(
     *,
     alpha: float,
     margin: float,
+    snap_up: bool = True,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Batched posterior weights and conservative control decision on-device."""
     weights = torch.softmax(log_w, dim=-1)
@@ -1037,6 +1038,8 @@ def _posterior_control_gpu(
         max=len(u_support) - 1
     )
     target = u_sorted[quantile_index] + float(margin)
+    if not snap_up:
+        return target, weights
     grid_index = torch.sum(
         u_grid[None, :] + 1e-12 < target[:, None], dim=-1
     ).clamp(max=len(u_grid) - 1)
@@ -1050,11 +1053,30 @@ def _posterior_mocu_gpu(
     *,
     alpha: float,
     margin: float,
+    snap_up: bool = True,
     undercontrol_penalty: float,
     violation_penalty: float,
+    robust_rule: str = "ibr_max",
+    weight_eps: float = 1.0e-12,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    weights = torch.softmax(log_w, dim=-1)
+    rule = str(robust_rule).strip().lower()
+    if rule in {"ibr", "ibr_max", "max", "yoon_ibr"}:
+        # Match posterior_ctrl.ibr_max_u_ctrl exactly: the practical action is
+        # the largest oracle action among posterior particles above weight_eps.
+        active = weights > float(weight_eps)
+        active = active | (~active.any(dim=-1, keepdim=True) & (weights > 0.0))
+        candidates = u_support[None, :].expand_as(weights).masked_fill(
+            ~active, -torch.inf
+        )
+        u_ctrl = candidates.max(dim=-1).values
+        # Yoon OCU under the hard-safety cost is psi* - psi_theta*.
+        regret = u_ctrl[:, None] - u_support[None, :]
+        return (weights * regret).sum(dim=-1), u_ctrl, weights
+    if rule != "quantile":
+        raise ValueError(f"Unsupported robust_rule={robust_rule!r}")
     u_ctrl, weights = _posterior_control_gpu(
-        log_w, u_support, u_grid, alpha=alpha, margin=margin
+        log_w, u_support, u_grid, alpha=alpha, margin=margin, snap_up=snap_up
     )
     shortfall = (u_support[None, :] - u_ctrl[:, None]).clamp_min(0.0)
     realized_cost = (
@@ -1200,6 +1222,7 @@ def _collect_batched_rollouts(
         margin=ctx.margin,
         undercontrol_penalty=config.undercontrol_penalty,
         violation_penalty=config.violation_penalty,
+        robust_rule=ctx.robust_rule, snap_up=ctx.snap_up,
     )
     mocu_by_step.append(mocu0)
     batch_index = torch.arange(batch, device=device)
@@ -1266,6 +1289,7 @@ def _collect_batched_rollouts(
                     margin=ctx.margin,
                     undercontrol_penalty=config.undercontrol_penalty,
                     violation_penalty=config.violation_penalty,
+                    robust_rule=ctx.robust_rule, snap_up=ctx.snap_up,
                 )
                 # Policy utilities are maximized, hence negative MOCU.
                 utilities = -cf_mocu.reshape(batch, chunk)
@@ -1368,6 +1392,7 @@ def _collect_batched_rollouts(
             margin=ctx.margin,
             undercontrol_penalty=config.undercontrol_penalty,
             violation_penalty=config.violation_penalty,
+            robust_rule=ctx.robust_rule, snap_up=ctx.snap_up,
         )
         mocu_by_step.append(mocu)
     mocu_path = torch.stack(mocu_by_step, dim=1)
@@ -1418,6 +1443,9 @@ def train_policy(
     training_block = ctx.cfg.training_for(
         getattr(ctx, "experiment_type", "objective_based")
     )
+    if not smoke:
+        from src.objectives.mocu.preflight import enforce_decision_preflight
+        enforce_decision_preflight(ctx)
     config = TrainConfig.from_cfg(training_block)
     if (
         abs(float(config.undercontrol_penalty) - float(ctx.undercontrol_penalty))

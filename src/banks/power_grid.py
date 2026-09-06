@@ -14,6 +14,8 @@ Legacy ``U.npy`` is auto-migrated on load.
 from __future__ import annotations
 
 import json
+import copy
+import hashlib
 import shutil
 import subprocess
 import time
@@ -26,6 +28,7 @@ import yaml
 
 from src.config import SYSTEM_CONFIGS, SBOEDConfig, load_config_for_run, repo_root
 from src.banks.paths import DATA_ROOT
+from src.banks.transaction import bank_lock, staged_bank, write_manifest
 from src.banks.quality import validate_physical_bank_quality
 from src.domains.swing.design import build_catalog, build_simulator
 from src.control.posterior_ctrl import sample_mk_prior
@@ -372,7 +375,7 @@ def sanitize_dataset_dir(path: Path) -> list[str]:
     migrate_flat_bank_to_neat(path)
     migrate_legacy_u_to_psi_star(path)
 
-    allowed_files = {Path(rel) for rel in NEAT_BANK_RELPATHS}
+    allowed_files = {Path(rel) for rel in NEAT_BANK_RELPATHS} | {Path("meta/completion.json")}
     # Keep legacy U.npy only until migrated; do not delete mid-migration.
     allowed_files |= {
         Path(f"train/{LEGACY_U_NAME}"),
@@ -554,7 +557,7 @@ def materialize_bank_subset_from_reuse_source(
                 "amplitudes": sorted({float(row[0]) for row in requested_designs}),
                 "buses": sorted({int(row[1]) for row in requested_designs}),
                 "durations_s": sorted({float(row[2]) for row in requested_designs}),
-                "subset_of": str(source.relative_to(root)),
+                "subset_of": str(source.resolve()),
                 "source_action_ids": action_ids.tolist(),
             }
         )
@@ -569,7 +572,7 @@ def materialize_bank_subset_from_reuse_source(
                 "observation_shape": shapes["train"],
                 "bank_shape_train": shapes["train"],
                 "bank_shape_test": shapes["test"],
-                "subset_of": str(source.relative_to(root)),
+                "subset_of": str(source.resolve()),
                 "source_action_ids": action_ids.tolist(),
                 "subset_created_at_utc": datetime.now(timezone.utc).isoformat(),
                 "subset_elapsed_seconds": float(time.time() - started),
@@ -619,7 +622,52 @@ def generate_full_delta_f_bank(
     )
 
 
-def generate_physical_bank(
+def physical_bank_fingerprint(cfg: SBOEDConfig, smoke: bool = False) -> str:
+    # Observation noise and learning settings do not change clean physics arrays.
+    control = dict(cfg.raw.get("control") or {})
+    control = {k: control[k] for k in (
+        "rocof_limit_hz_s", "delta_f_nadir_hz", "T_obs_sec", "ode_dt", "fs_hz",
+        "contingency", "profile", "u_candidates") if k in control}
+    document = {"schema": 1, "system": cfg.raw.get("system"), "N": cfg.N,
+        "swing": cfg.raw.get("swing_equation"), "control": control,
+        "generation": {k: cfg.data.get(k) for k in (
+            "theta_sample_size_train", "theta_sample_size_test", "train_seed", "test_seed")},
+        "smoke": bool(smoke)}
+    return hashlib.sha256(json.dumps(document, sort_keys=True).encode()).hexdigest()
+
+
+def generate_physical_bank(cfg: SBOEDConfig, *, project_root: Path | None = None,
+                           smoke: bool = False, force: bool = False) -> dict[str, Any]:
+    root = project_root or repo_root()
+    destination = resolve_dataset_dir(cfg, root).resolve()
+    fingerprint = physical_bank_fingerprint(cfg, smoke)
+    with bank_lock(destination):
+        manifest = destination / "meta" / "completion.json"
+        if bank_is_complete(destination) and not force:
+            if manifest.is_file():
+                record = json.loads(manifest.read_text())
+                if record.get("physics_sha256") != fingerprint:
+                    raise RuntimeError(f"Bank configuration mismatch at {destination}; "
+                                       "choose a new dataset directory or explicitly regenerate.")
+            else:
+                # Legacy banks remain usable after actual validation, but cannot
+                # honestly be assigned a verified historical physics fingerprint.
+                print(f"[bank] legacy bank without verified physics manifest: {destination}")
+            return _generate_physical_bank_unlocked(cfg, project_root=root, smoke=smoke)
+        with staged_bank(destination) as stage:
+            raw = copy.deepcopy(cfg.raw)
+            raw.setdefault("data", {})["dataset_dir"] = str(stage)
+            staged_cfg = SBOEDConfig(raw=raw, config_path=cfg.config_path)
+            report = _generate_physical_bank_unlocked(staged_cfg, project_root=root, smoke=smoke)
+            write_manifest(stage, {"schema": 1, "physics_sha256": fingerprint,
+                                   "validated": True, "smoke": smoke})
+        report["data_dir"] = str(destination)
+        if isinstance(report.get("bank_quality"), dict):
+            report["bank_quality"]["path"] = str(destination)
+        return report
+
+
+def _generate_physical_bank_unlocked(
     cfg: SBOEDConfig,
     *,
     project_root: Path | None = None,

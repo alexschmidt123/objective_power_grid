@@ -24,6 +24,7 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
+from src.banks.transaction import bank_lock, staged_bank, write_manifest
 from src.banks.power_grid import resolve_dataset_dir
 from src.config import load_config_for_run
 from src.control.cuda_control import CudaControlEngine
@@ -34,10 +35,6 @@ from src.domains.swing.design import build_simulator
 def _canonical_spec(spec: ControlSpec) -> dict[str, Any]:
     return {
         "control_model": "supplementary_active_power_injection",
-        "alpha": float(spec.alpha),
-        "robust_rule": str(spec.robust_rule),
-        "safety_margin": float(spec.safety_margin),
-        "snap_up": bool(spec.snap_up),
         "rocof_limit_hz_s": float(spec.rocof_limit_hz_s),
         "delta_f_nadir_hz": float(spec.delta_f_nadir_hz),
         "profile": {
@@ -198,9 +195,11 @@ def main() -> None:
     if not data_dir.is_absolute():
         data_dir = _ROOT / data_dir
     data_dir = data_dir.resolve()
-    (data_dir / "meta").mkdir(parents=True, exist_ok=True)
-    for split in ("train", "test"):
-        (data_dir / split).mkdir(parents=True, exist_ok=True)
+    with bank_lock(data_dir):
+        _ensure_control_bank(args, cfg, probe_data_dir, data_dir)
+
+
+def _ensure_control_bank(args, cfg, probe_data_dir, data_dir):
     spec = ControlSpec.from_cfg(cfg)
     spec_doc = _canonical_spec(spec)
     spec_hash = _digest(spec_doc)
@@ -220,122 +219,135 @@ def main() -> None:
     if (
         not args.force
         and all(path.is_file() for path in required)
-        and existing_meta.get("control_spec_sha256") == spec_hash
+        and _digest({k: v for k, v in existing_meta.get("control_spec", {}).items()
+                     if k not in {"alpha", "robust_rule", "safety_margin", "snap_up"}}) == spec_hash
+        and all(existing_meta.get("splits", {}).get(split, {}).get(name + "_sha256")
+                == _file_digest(probe_data_dir / split / (name + ".npy"))
+                for split in ("train", "test") for name in ("theta_M", "theta_K"))
         and Path(str(existing_meta.get("source_probe_bank", ""))).resolve()
         == probe_data_dir.resolve()
     ):
         print(f"[mocu-bank] complete and matched -> {data_dir}; skipping generation")
         return
 
-    sim = build_simulator(cfg)
-    sim.T_obs_sec = float(spec.T_obs_sec)
-    sim.ode_dt = float(spec.ode_dt)
-    sim.fs_hz = float(spec.fs_hz)
-    candidates = spec.u_grid()
-    reports: dict[str, Any] = {}
+    destination = data_dir
+    with staged_bank(destination) as stage:
+        data_dir = stage
+        (data_dir / "meta").mkdir()
+        for split in ("train", "test"):
+            (data_dir / split).mkdir()
+        meta_path = data_dir / "meta" / "control_bank.yaml"
+        sim = build_simulator(cfg)
+        sim.T_obs_sec = float(spec.T_obs_sec)
+        sim.ode_dt = float(spec.ode_dt)
+        sim.fs_hz = float(spec.fs_hz)
+        candidates = spec.u_grid()
+        reports: dict[str, Any] = {}
 
-    for split in ("train", "test"):
-        source_split_dir = probe_data_dir / split
-        split_dir = data_dir / split
-        m_path = source_split_dir / "theta_M.npy"
-        k_path = source_split_dir / "theta_K.npy"
-        probe_path = source_split_dir / "delta_f.npy"
-        M = np.asarray(np.load(m_path), dtype=np.float64)
-        K = np.asarray(np.load(k_path), dtype=np.float64)
-        if M.shape != K.shape or M.ndim != 2:
-            raise RuntimeError(f"{split}: incompatible theta shapes M={M.shape} K={K.shape}")
-        probe_shape = np.load(probe_path, mmap_mode="r").shape
-        if int(probe_shape[0]) != int(M.shape[0]):
-            raise RuntimeError(
-                f"{split}: theta/probe row mismatch {M.shape[0]} != {probe_shape[0]}"
+        for split in ("train", "test"):
+            source_split_dir = probe_data_dir / split
+            split_dir = data_dir / split
+            m_path = source_split_dir / "theta_M.npy"
+            k_path = source_split_dir / "theta_K.npy"
+            probe_path = source_split_dir / "delta_f.npy"
+            M = np.asarray(np.load(m_path), dtype=np.float64)
+            K = np.asarray(np.load(k_path), dtype=np.float64)
+            if M.shape != K.shape or M.ndim != 2:
+                raise RuntimeError(f"{split}: incompatible theta shapes M={M.shape} K={K.shape}")
+            probe_shape = np.load(probe_path, mmap_mode="r").shape
+            if int(probe_shape[0]) != int(M.shape[0]):
+                raise RuntimeError(
+                    f"{split}: theta/probe row mismatch {M.shape[0]} != {probe_shape[0]}"
+                )
+
+            n, n_nodes = M.shape
+            n_u = int(candidates.size)
+            print(f"[{split}] {n} theta x {n_u} controls = {n*n_u} control simulations")
+            rocof, nadir = _simulate_metrics_torch(
+                sim, spec, M, K, candidates, batch_size=int(args.batch_size)
             )
-
-        n, n_nodes = M.shape
-        n_u = int(candidates.size)
-        print(f"[{split}] {n} theta x {n_u} controls = {n*n_u} control simulations")
-        rocof, nadir = _simulate_metrics_torch(
-            sim, spec, M, K, candidates, batch_size=int(args.batch_size)
-        )
-        rocof = rocof.reshape(n, n_u)
-        nadir = nadir.reshape(n, n_u)
-        safe = (rocof <= spec.rocof_limit_hz_s) & (
-            nadir >= spec.delta_f_nadir_hz
-        )
-        feasible = safe.any(axis=1)
-        monotone = ~np.any(safe[:, :-1] & ~safe[:, 1:], axis=1)
-        uncontrolled_safe = safe[:, 0] if abs(float(candidates[0])) <= 1e-12 else None
-        if (
-            not feasible.all()
-            or not safe[:, -1].all()
-            or not monotone.all()
-            or uncontrolled_safe is None
-            or uncontrolled_safe.any()
-        ):
-            raise RuntimeError(
-                f"{split}: invalid control bank: infeasible={int((~feasible).sum())}, "
-                f"u_max_unsafe={int((~safe[:, -1]).sum())}, "
-                f"nonmonotone={int((~monotone).sum())}, "
-                f"u_zero_missing={int(uncontrolled_safe is None)}, "
-                f"u_zero_safe={int(uncontrolled_safe.sum()) if uncontrolled_safe is not None else -1}"
+            rocof = rocof.reshape(n, n_u)
+            nadir = nadir.reshape(n, n_u)
+            safe = (rocof <= spec.rocof_limit_hz_s) & (
+                nadir >= spec.delta_f_nadir_hz
             )
+            feasible = safe.any(axis=1)
+            monotone = ~np.any(safe[:, :-1] & ~safe[:, 1:], axis=1)
+            uncontrolled_safe = safe[:, 0] if abs(float(candidates[0])) <= 1e-12 else None
+            if (
+                not feasible.all()
+                or not safe[:, -1].all()
+                or not monotone.all()
+                or uncontrolled_safe is None
+                or uncontrolled_safe.any()
+            ):
+                raise RuntimeError(
+                    f"{split}: invalid control bank: infeasible={int((~feasible).sum())}, "
+                    f"u_max_unsafe={int((~safe[:, -1]).sum())}, "
+                    f"nonmonotone={int((~monotone).sum())}, "
+                    f"u_zero_missing={int(uncontrolled_safe is None)}, "
+                    f"u_zero_safe={int(uncontrolled_safe.sum()) if uncontrolled_safe is not None else -1}"
+                )
 
-        first_safe = np.argmax(safe, axis=1)
-        psi_star = candidates[first_safe]
-        _atomic_save(split_dir / "psi_star.npy", psi_star.astype(np.float64))
-        _atomic_save(split_dir / "u_optimal.npy", psi_star.astype(np.float64))
-        _atomic_save(split_dir / "theta_M.npy", M.astype(np.float64))
-        _atomic_save(split_dir / "theta_K.npy", K.astype(np.float64))
-        _atomic_save(split_dir / "control_safe.npy", safe.astype(np.bool_))
-        _atomic_save(split_dir / "control_rocof.npy", rocof.astype(np.float64))
-        _atomic_save(split_dir / "control_nadir.npy", nadir.astype(np.float64))
+            first_safe = np.argmax(safe, axis=1)
+            psi_star = candidates[first_safe]
+            _atomic_save(split_dir / "psi_star.npy", psi_star.astype(np.float64))
+            _atomic_save(split_dir / "u_optimal.npy", psi_star.astype(np.float64))
+            _atomic_save(split_dir / "theta_M.npy", M.astype(np.float64))
+            _atomic_save(split_dir / "theta_K.npy", K.astype(np.float64))
+            _atomic_save(split_dir / "control_safe.npy", safe.astype(np.bool_))
+            _atomic_save(split_dir / "control_rocof.npy", rocof.astype(np.float64))
+            _atomic_save(split_dir / "control_nadir.npy", nadir.astype(np.float64))
 
-        reports[split] = {
-            "n_theta": int(n),
-            "theta_dimension": int(2 * n_nodes),
-            "n_control_candidates": int(n_u),
-            "n_control_simulations": int(n * n_u),
-            "psi_star_shape": [int(x) for x in psi_star.shape],
-            "psi_star_min": float(psi_star.min()),
-            "psi_star_max": float(psi_star.max()),
-            "psi_star_mean": float(psi_star.mean()),
-            "psi_star_std": float(psi_star.std()),
-            "psi_star_unique": int(np.unique(psi_star).size),
-            "particle_safety_rate": float(safe[np.arange(n), first_safe].mean()),
-            "u_max_safety_rate": float(safe[:, -1].mean()),
-            "theta_M_sha256": _file_digest(m_path),
-            "theta_K_sha256": _file_digest(k_path),
-            "probe_delta_f_sha256": _file_digest(probe_path),
+            reports[split] = {
+                "n_theta": int(n),
+                "theta_dimension": int(2 * n_nodes),
+                "n_control_candidates": int(n_u),
+                "n_control_simulations": int(n * n_u),
+                "psi_star_shape": [int(x) for x in psi_star.shape],
+                "psi_star_min": float(psi_star.min()),
+                "psi_star_max": float(psi_star.max()),
+                "psi_star_mean": float(psi_star.mean()),
+                "psi_star_std": float(psi_star.std()),
+                "psi_star_unique": int(np.unique(psi_star).size),
+                "particle_safety_rate": float(safe[np.arange(n), first_safe].mean()),
+                "u_max_safety_rate": float(safe[:, -1].mean()),
+                "theta_M_sha256": _file_digest(m_path),
+                "theta_K_sha256": _file_digest(k_path),
+                "probe_delta_f_sha256": _file_digest(probe_path),
+            }
+
+        metadata = {
+            "schema": "mocu_control_extension_v2",
+            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+            "source_probe_bank": str(probe_data_dir.resolve()),
+            "observation_storage": (
+                "delta_f is not duplicated; use source_probe_bank/{split}/delta_f.npy "
+                "with identical row indices"
+            ),
+            "source_relationship": (
+                "row n shares the identical theta across theta_M, theta_K, delta_f, "
+                "u_optimal and control tables"
+            ),
+            "control_spec_sha256": spec_hash,
+            "control_spec": spec_doc,
+            "definitions": {
+                "psi_star[n]": "u_optimal: smallest safe candidate control for theta_n",
+                "u_optimal[n]": "smallest safe candidate control for theta_n",
+                "control_safe[n,j]": "physical safety of candidate u_j for theta_n",
+                "control_rocof[n,j]": "maximum absolute ROCOF [Hz/s] over control horizon",
+                "control_nadir[n,j]": "minimum frequency deviation [Hz] over control horizon",
+            },
+            "splits": reports,
         }
-
-    metadata = {
-        "schema": "mocu_control_extension_v2",
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        "source_probe_bank": str(probe_data_dir.resolve()),
-        "observation_storage": (
-            "delta_f is not duplicated; use source_probe_bank/{split}/delta_f.npy "
-            "with identical row indices"
-        ),
-        "source_relationship": (
-            "row n shares the identical theta across theta_M, theta_K, delta_f, "
-            "u_optimal and control tables"
-        ),
-        "control_spec_sha256": spec_hash,
-        "control_spec": spec_doc,
-        "definitions": {
-            "psi_star[n]": "u_optimal: smallest safe candidate control for theta_n",
-            "u_optimal[n]": "smallest safe candidate control for theta_n",
-            "control_safe[n,j]": "physical safety of candidate u_j for theta_n",
-            "control_rocof[n,j]": "maximum absolute ROCOF [Hz/s] over control horizon",
-            "control_nadir[n,j]": "minimum frequency deviation [Hz] over control horizon",
-        },
-        "splits": reports,
-    }
-    tmp_meta = meta_path.with_name(meta_path.name + ".tmp")
-    with tmp_meta.open("w", encoding="utf-8") as f:
-        yaml.safe_dump(metadata, f, sort_keys=False)
-    os.replace(tmp_meta, meta_path)
-    print(f"MOCU control extension regenerated -> {data_dir}")
-    print(f"control_spec_sha256={spec_hash}")
+        tmp_meta = meta_path.with_name(meta_path.name + ".tmp")
+        with tmp_meta.open("w", encoding="utf-8") as f:
+            yaml.safe_dump(metadata, f, sort_keys=False)
+        os.replace(tmp_meta, meta_path)
+        print(f"MOCU control extension regenerated -> {data_dir}")
+        print(f"control_spec_sha256={spec_hash}")
+        write_manifest(stage, {"schema": 1, "control_spec_sha256": spec_hash,
+                               "validated": True})
 
 
 if __name__ == "__main__":
