@@ -63,7 +63,20 @@ _METHOD_LABELS = {
     "Oracle": "Oracle",
 }
 
-_BUNDLE_FILES = ("metric.md", "time.md", "metric_vs_T.png", "time_vs_T.md", "meta.json")
+# Publication performance tables use exactly five evaluation seeds per cell.
+# Keep this contract explicit: ablation tables may change the column variable,
+# but they use the same five-seed summary unless their specification says otherwise.
+PERFORMANCE_TABLE_SEEDS = 5
+
+_BUNDLE_FILES = (
+    "objective_table.md",
+    "offline_time_table.md",
+    "online_time_table.md",
+    "objective_vs_T.png",
+    "offline_time_vs_T.png",
+    "online_time_vs_T.png",
+    "meta.json",
+)
 
 
 def _poster_label(method: Any) -> str | None:
@@ -147,26 +160,10 @@ def _load_summary_rows(exp_dir: Path, *, eig: bool) -> list[dict[str, Any]]:
         if path.is_file():
             with path.open(encoding="utf-8", newline="") as handle:
                 rows.extend(csv.DictReader(handle))
-    if len(paths) <= 1:
-        return rows
-    # One run folder owns one trained model. Collapse its evaluation seeds
-    # before the outer collector computes variation across training seeds.
-    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for row in rows:
-        grouped[str(row.get("method") or row.get("Method"))].append(row)
-    collapsed: list[dict[str, Any]] = []
-    for method, group in grouped.items():
-        row = dict(group[0])
-        for key in ("terminal_eig_mean", "mean_eig", "ΔH", "mean_mocu", "mean_gap",
-                    "online_seconds_per_rollout", "seconds_per_rollout"):
-            values=[]
-            for item in group:
-                try: values.append(float(item[key]))
-                except (KeyError, TypeError, ValueError): pass
-            if values: row[key] = sum(values) / len(values)
-        row["method"] = method
-        collapsed.append(row)
-    return collapsed
+    # Preserve one row per evaluation seed. Performance-table mean and sample
+    # SD are computed over these five seed-level values, never after collapsing
+    # them into one value and never by pooling systems/rollouts as IID seeds.
+    return rows
 
 
 def _rel_to_root(path: Path, root: Path) -> str:
@@ -559,18 +556,38 @@ def write_sweep_plot_bundle(
     root: Path | None = None,
     sweep_horizons: list[int] | None = None,
 ) -> Path:
-    """Write exactly five files into a stamped sweep plots folder."""
+    """Write three comparison tables, three plots, and provenance metadata."""
     root = root or repo_root()
     eig = experiment_type == "eig_based"
     metric, offline, online = _collect_cells(by_t, eig=eig)
     paired_eig = _collect_hierarchical_eig_pairs(by_t) if eig else []
     methods = _ordered_methods(set(metric))
     horizons = sorted(by_t)
-    n_seeds = len(_unique_seeds(by_t))
+    counts = {
+        (method, int(t)): len(values)
+        for method, by_horizon in metric.items()
+        for t, values in by_horizon.items()
+        if values
+    }
+    invalid_counts = {
+        key: count for key, count in counts.items()
+        if count != PERFORMANCE_TABLE_SEEDS
+    }
+    if invalid_counts:
+        details = ", ".join(
+            f"{method}/T={t}: n={count}"
+            for (method, t), count in sorted(invalid_counts.items())
+        )
+        raise ValueError(
+            "Performance tables require exactly "
+            f"{PERFORMANCE_TABLE_SEEDS} seed values per method/T cell; {details}"
+        )
+    n_seeds = PERFORMANCE_TABLE_SEEDS
     metric_name = "terminal EIG" if eig else "MOCU"
     better = "higher better" if eig else "lower better"
     title_metric = f"Mean {metric_name} ± std (n = {n_seeds} seeds) ({better})"
-    title_time = f"Time consumption: mean ± sample SD (n = {n_seeds} seeds)"
+    title_offline = f"Offline time: mean ± sample SD (n = {n_seeds} seeds)"
+    title_online = f"Online time: mean ± sample SD (n = {n_seeds} seeds)"
 
     headers_metric = ["Method"] + [f"T={t}" for t in horizons]
     rows_metric: list[list[str]] = []
@@ -598,24 +615,14 @@ def write_sweep_plot_bundle(
         rows_offline.append(offline_row)
         rows_online.append(online_row)
 
-    headers_vs = ["T"] + methods
-    rows_off: list[list[str]] = []
-    rows_on: list[list[str]] = []
-    for t in horizons:
-        off_row = [str(t)]
-        on_row = [str(t)]
-        for method in methods:
-            off_row.append(_mean_cell(offline.get(method, {}).get(t, []), digits=2))
-            on_row.append(_mean_cell(online.get(method, {}).get(t, []), digits=6))
-        rows_off.append(off_row)
-        rows_on.append(on_row)
-
     dest = Path(out_dir)
     dest.mkdir(parents=True, exist_ok=True)
-    metric_path = dest / "metric.md"
-    time_path = dest / "time.md"
-    fig_path = dest / "metric_vs_T.png"
-    time_vs_path = dest / "time_vs_T.md"
+    metric_path = dest / "objective_table.md"
+    offline_path = dest / "offline_time_table.md"
+    online_path = dest / "online_time_table.md"
+    fig_path = dest / "objective_vs_T.png"
+    offline_fig_path = dest / "offline_time_vs_T.png"
+    online_fig_path = dest / "online_time_vs_T.png"
     meta_path = dest / "meta.json"
 
     metric_lines = [f"# {title_metric}", ""] + _md_table(headers_metric, rows_metric)
@@ -652,32 +659,20 @@ def write_sweep_plot_bundle(
     metric_lines.append("")
     _write_text(metric_path, metric_lines)
     _write_text(
-        time_path,
+        offline_path,
         [
-            f"# {title_time}",
-            "",
-            "## Offline time (seconds)",
+            f"# {title_offline}",
             "",
             *_md_table(headers_time, rows_offline),
-            "",
-            "## Online time (seconds per rollout)",
-            "",
-            *_md_table(headers_time, rows_online),
             "",
         ],
     )
     _write_text(
-        time_vs_path,
+        online_path,
         [
-            f"# Mean time vs T (n = {n_seeds} seeds)",
+            f"# {title_online}",
             "",
-            "## Offline (s)",
-            "",
-            *_md_table(headers_vs, rows_off),
-            "",
-            "## Online (s / rollout)",
-            "",
-            *_md_table(headers_vs, rows_on),
+            *_md_table(headers_time, rows_online),
             "",
         ],
     )
@@ -689,16 +684,49 @@ def write_sweep_plot_bundle(
         title=title_metric,
         ylabel=f"Mean {metric_name}",
     )
+    _plot_metric_errorbars(
+        offline,
+        methods=methods,
+        horizons=horizons,
+        out_path=offline_fig_path,
+        title=title_offline,
+        ylabel="Offline time (seconds)",
+    )
+    _plot_metric_errorbars(
+        online,
+        methods=methods,
+        horizons=horizons,
+        out_path=online_fig_path,
+        title=title_online,
+        ylabel="Online time (seconds per rollout)",
+    )
 
     runs: list[dict[str, Any]] = []
     for t in horizons:
         for seed, exp_dir in sorted(by_t[t].items()):
             parsed = parse_result_dir_name(exp_dir.name) or {}
+            run_doc = load_run_config_doc(exp_dir)
+            manifest_path = exp_dir / "evaluation_manifest.json"
+            manifest = (
+                json.loads(manifest_path.read_text(encoding="utf-8"))
+                if manifest_path.is_file()
+                else {}
+            )
+            swing = dict(run_doc.get("swing_equation") or {})
             runs.append(
                 {
                     "dir": _rel_to_root(exp_dir, root),
                     "T": int(t),
-                    "seed": int(seed),
+                    "training_seed": int(seed),
+                    "evaluation_seeds": list(manifest.get("evaluation_seeds") or []),
+                    "methods": list(run_methods_from_doc(run_doc)),
+                    "probe_durations": list(swing.get("probe_durations") or []),
+                    "N_obs": run_doc.get("N_obs", parsed.get("N_obs")),
+                    "noise_sigma": run_doc.get(
+                        "noise_sigma", parsed.get("noise_sigma")
+                    ),
+                    "source_config": run_doc.get("source_config"),
+                    "data_dir": run_doc.get("data_dir"),
                     "stamp": parsed.get("stamp"),
                 }
             )
@@ -716,6 +744,10 @@ def write_sweep_plot_bundle(
         "seeds": _unique_seeds(by_t),
         "methods": _canonical_methods(by_t, methods_cli),
         "n_seeds": n_seeds,
+        "performance_table_seed_rule": (
+            "one table per metric; rows=methods; columns=T; each cell is "
+            "mean ± sample SD over exactly five evaluation seeds"
+        ),
         "n_runs": len(runs),
         "runs": runs,
         "run_selection": (
@@ -743,10 +775,10 @@ def write_sweep_plot_bundle(
 
     missing = [name for name in _BUNDLE_FILES if not (dest / name).is_file()]
     if missing:
-        raise RuntimeError(f"plots folder missing files {missing}: {dest}")
+        raise RuntimeError(f"visualization folder missing files {missing}: {dest}")
     extra = [p.name for p in dest.iterdir() if p.name not in allowed]
     if extra:
-        raise RuntimeError(f"plots folder has extra files {extra}: {dest}")
+        raise RuntimeError(f"visualization folder has extra files {extra}: {dest}")
     return dest
 
 
@@ -770,7 +802,7 @@ def write_sweep_plot_folders(
         if len(set(int(t) for t in name_horizons)) < 2 or len(by_t) < 2:
             print(
                 f"[plots] skip {config} {etype} Nobs{n_obs} sigma{sigma_token}: "
-                "plots folders are only for a T sweep (at least two horizons)"
+                "visualization folders require a T sweep (at least two horizons)"
             )
             continue
         name = make_plots_dir_name(
