@@ -40,21 +40,3 @@ bash sweep_run.sh --configs ieee9_eig --experiment_type eig_based \
 Publication sweeps default to training seeds `101,202,303` and evaluation
 seeds `1001,1002,1003,1004,1005`. Each run owns its models and results; model
 files are not shared between experiment folders.
-
-## Performance result format
-
-Performance tables follow one fixed publication format:
-
-- Write one table for each metric: EIG or MOCU, offline time, and online time.
-- Table columns are experiment horizons (`T`).
-- Table rows are methods.
-- Every cell is written as `mean ± std`, using the sample standard deviation.
-- The mean and standard deviation are computed over exactly five evaluation
-  seeds (`1001, 1002, 1003, 1004, 1005`). Do not replace these five seed-level
-  values with a single collapsed value, and do not treat systems or rollouts
-  within an evaluation as independent seeds.
-- A performance cell with fewer or more than five seed values is incomplete
-  and must not be reported as a final performance result.
-
-Ablation tables may use the ablated variable instead of `T` as their column
-axis. The one-metric-per-table and `mean ± std` requirements still apply.
