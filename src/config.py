@@ -16,6 +16,7 @@ IEEE_SYSTEM_LABELS: dict[str, str] = {
     "ieee5": "IEEE-5",
     "ieee9": "IEEE-9",
     "ieee14": "IEEE-14",
+    "ieee30": "IEEE-30",
     "sir_ode": "SIR-ODE",
     "sir": "SIR-ODE",
 }
@@ -419,6 +420,7 @@ SYSTEM_CONFIGS = {
     "ieee5": "ieee5",
     "ieee9": "ieee9",
     "ieee14": "ieee14",
+    "ieee30": "ieee30_mocu",
 }
 DEFAULT_N_OBS = 5
 

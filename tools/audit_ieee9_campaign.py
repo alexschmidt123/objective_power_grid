@@ -148,7 +148,7 @@ def prepare(args):
     save(campaign/'campaign.json',metadata)
     print('FINALISTS_FROZEN',finalists,flush=True)
 
-def fresh(args):
+def fresh(args, cfg=None):
     from src.banks.power_grid import _sample_power_grid_prior
     from src.domains.swing.design import Design,build_simulator
     from src.domains.swing.cuda import CudaTrajectoryEngine
@@ -159,7 +159,7 @@ def fresh(args):
     campaign=args.campaign; metadata=json.loads((campaign/'campaign.json').read_text())
     if metadata['status']!='finalists_frozen': raise ValueError('Finalists must be frozen before fresh validation')
     if (campaign/'validation.npz').exists(): raise ValueError('Fresh validation already exists; do not silently replace it')
-    inputs=np.load(campaign/'inputs.npz'); cfg=config()
+    inputs=np.load(campaign/'inputs.npz'); cfg=config() if cfg is None else cfg
     count=metadata['fresh_systems']
     M,K,_=_sample_power_grid_prior(cfg,count,np.random.default_rng(metadata['fresh_theta_seed']))
     known=np.r_[np.c_[inputs['M'],inputs['K']],np.c_[inputs['excluded_test_M'],inputs['excluded_test_K']]]

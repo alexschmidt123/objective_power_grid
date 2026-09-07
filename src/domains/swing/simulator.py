@@ -132,6 +132,23 @@ def ieee9_physical_input_map() -> np.ndarray:
     return input_map
 
 
+# Original IEEE CDF / MATPOWER case_ieee30, NOT the relocated-generator case30.
+# Lossless, unit-voltage, nominal-tap reduction, as in our IEEE9/14 model.
+# Source and explicit synthetic dynamic assumptions: documents/IEEE30_MODEL.md.
+IEEE30_MACHINE_BUSES = (1, 2, 5, 8, 11, 13)
+IEEE30_BRANCHES = [(0, 1, 0.0575), (0, 2, 0.1652), (1, 3, 0.1737), (2, 3, 0.0379), (1, 4, 0.1983), (1, 5, 0.1763), (3, 5, 0.0414), (4, 6, 0.116), (5, 6, 0.082), (5, 7, 0.042), (5, 8, 0.208), (5, 9, 0.556), (8, 10, 0.208), (8, 9, 0.11), (3, 11, 0.256), (11, 12, 0.14), (11, 13, 0.2559), (11, 14, 0.1304), (11, 15, 0.1987), (13, 14, 0.1997), (15, 16, 0.1923), (14, 17, 0.2185), (17, 18, 0.1292), (18, 19, 0.068), (9, 19, 0.209), (9, 16, 0.0845), (9, 20, 0.0749), (9, 21, 0.1499), (20, 21, 0.0236), (14, 22, 0.202), (21, 23, 0.179), (22, 23, 0.27), (23, 24, 0.3292), (24, 25, 0.38), (24, 26, 0.2087), (27, 26, 0.396), (26, 28, 0.4153), (26, 29, 0.6027), (28, 29, 0.4533), (7, 27, 0.2), (5, 27, 0.0599)]
+
+
+def generate_ieee30_coupling_matrix(coupling_strength: float = 1.0) -> np.ndarray:
+    coupling, _ = _kron_reduction(30, IEEE30_BRANCHES, [b-1 for b in IEEE30_MACHINE_BUSES])
+    return coupling_strength * coupling
+
+
+def ieee30_physical_input_map() -> np.ndarray:
+    _, mapping = _kron_reduction(30, IEEE30_BRANCHES, [b-1 for b in IEEE30_MACHINE_BUSES])
+    return mapping
+
+
 def generate_default_coupling_matrix(N: int, topology: str = 'fully_connected', 
                                      coupling_strength: float = 1.0) -> np.ndarray:
     """
@@ -155,6 +172,11 @@ def generate_default_coupling_matrix(N: int, topology: str = 'fully_connected',
             raise ValueError(f"Kron-reduced IEEE-14 requires N=5 dynamic buses, got N={N}")
         return generate_ieee14_coupling_matrix(coupling_strength)
     
+    if topology == "ieee30":
+        if N != 6:
+            raise ValueError(f"Kron-reduced IEEE-30 requires N=6 dynamic machines, got N={N}")
+        return generate_ieee30_coupling_matrix(coupling_strength)
+
     B = np.zeros((N, N))
     
     if topology == 'fully_connected':
@@ -604,13 +626,21 @@ def _build_system_params(config_swing: dict[str, Any] | None = None) -> dict[str
         cfg.get("enforce_initial_equilibrium", False)
     )
     topology = str(cfg.get("topology", ""))
-    if topology in {"ieee9", "ieee14"}:
+    if topology in {"ieee9", "ieee14", "ieee30"}:
         if topology == "ieee9":
             params["physical_input_map"] = ieee9_physical_input_map()
             retained = [1, 2, 3]
-        else:
+        elif topology == "ieee14":
             params["physical_input_map"] = ieee14_physical_input_map()
             retained = [1, 2, 3, 6, 8]
+        else:
+            params["physical_input_map"] = ieee30_physical_input_map()
+            retained = list(IEEE30_MACHINE_BUSES)
+        for field in ("dynamic_machine_buses", "retained_bus_map"):
+            if field in cfg and list(cfg[field]) != retained:
+                raise ValueError(f"{topology} {field} must be {retained}")
+        if int(cfg.get("physical_bus_count", params["physical_input_map"].shape[0])) != params["physical_input_map"].shape[0]:
+            raise ValueError("physical_bus_count disagrees with topology")
         physical_obs = int(cfg.get("observation_bus", 1))
         if physical_obs not in retained:
             raise ValueError(
