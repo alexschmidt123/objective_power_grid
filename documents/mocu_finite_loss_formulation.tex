@@ -1,0 +1,163 @@
+% Shared scientific formulation for the manuscript and methodology companion.
+\subsubsection{Relation to Yoon's MOCU}
+For a specified operational loss $L(\theta,u)$, the model-specific and
+intrinsically Bayesian robust (IBR) actions are, respectively,
+\begin{align}
+u_\theta^*&\in\arg\min_{u\in\mathcal U}L(\theta,u),\\
+u_b^*&\in\arg\min_{u\in\mathcal U}\mathbb E_b[L(\theta,u)].
+\label{eq:bayesian-control}
+\end{align}
+Yoon et al.'s construction compares these actions using the same loss
+\cite{yoon2013mocu}; the generalized formulation also treats noisy
+experiments~\cite{boluki2018generalized}:
+\begin{equation}
+\operatorname{MOCU}(b)=\mathbb E_b[L(\theta,u_b^*)-L(\theta,u_\theta^*)].
+\label{eq:general_mocu}
+\end{equation}
+Bayesian robustness means minimizing expected cost, not necessarily taking a
+worst-case maximum. The loss below is our power-grid specialization; neither
+its coefficient nor the 95\% level is prescribed by Yoon et al.
+
+\subsubsection{Physical control requirement and finite loss}
+Let $\mathcal U=[0,u_{\max}]$ be the continuous terminal-control range. Define
+$U(\theta)$ as the minimum magnitude satisfying the prescribed nadir and
+ROCOF limits for every $c\in\mathcal C$. The scalar requirement model assumes
+that safety is monotone over this range and that a safe magnitude exists.
+These assumptions must be checked for each simulator and contingency set;
+otherwise a scalar threshold is insufficient and the full simulated
+action-dependent loss must be used. Equivalently, under these assumptions,
+\begin{equation}
+\mathcal U_{\mathrm{safe}}(\theta)=[U(\theta),u_{\max}].
+\label{eq:safe_control_set}
+\end{equation}
+The current IEEE9 scenario is the configured single contingency; a general
+set $\mathcal C$ does not establish N--1 security without evaluating that set.
+
+For $\lambda>1$ and $(z)_+=\max(z,0)$, choose
+\begin{equation}
+L(\theta,u)=u+\lambda[U(\theta)-u]_+,
+\qquad \lambda=20.
+\label{eq:operational_cost}
+\end{equation}
+This finite loss penalizes supplementary injection and unmet required
+injection. It is a power-equivalent operational surrogate, not an empirically
+calibrated monetary damage model or a direct measure of violation severity.
+The coefficient is prespecified to encode an asymmetric preference against
+under-control. A sensitivity study should vary this preference while changing
+the decision quantile consistently. No additional binary violation penalty
+or control margin is included in the primary formulation.
+
+Since the loss decreases with slope $1-\lambda$ below $U$ and increases with
+slope $1$ above $U$, its model-specific minimizer is
+\begin{equation}
+u_\theta^*=u_{\mathrm{optimal}}(\theta)=U(\theta),
+\quad L(\theta,u_\theta^*)=U(\theta).
+\label{eq:model_specific_control}
+\end{equation}
+
+\subsubsection{Derivation of the 95\% decision}
+Write $F_b(v)=\Pr_b(U\le v)$ and $\alpha=1/\lambda=0.05$.
+The left and right derivatives of posterior expected loss at $u$ are
+$1-\lambda+\lambda F_b(u^-)$ and
+$1-\lambda+\lambda F_b(u)$, respectively. Convexity therefore gives the
+optimality condition
+\begin{equation}
+F_b(u^- )\le 1-\alpha\le F_b(u).
+\label{eq:quantile_optimality}
+\end{equation}
+Choosing the smallest minimizer yields
+\begin{equation}
+u_b^*=Q_{0.95}(U\mid b)
+=\inf\{v:F_b(v)\ge0.95\}.
+\label{eq:u_ctrl_support}
+\end{equation}
+Thus the quantile is derived from the finite loss, rather than appended to
+an unrelated MOCU definition. Equivalently, realized regret is
+\begin{equation}
+\operatorname{OCU}(\theta,b)
+=(u_b^*-U)_++19(U-u_b^*)_+\ge0.
+\label{eq:ocu}
+\end{equation}
+Over-control has unit marginal regret and under-control has marginal regret
+19; the coefficient 20 in the total loss includes the avoided injection cost.
+The corresponding belief MOCU is
+\begin{equation}
+\operatorname{MOCU}(b)=\mathbb E_b\!\left[
+u_b^*+20(U-u_b^*)_+-U\right].
+\label{eq:belief_mocu}
+\end{equation}
+It vanishes when the required control is known exactly, even if other model
+parameters remain uncertain. Subtracting $\mathbb E_b[U]$ without including
+the shortfall term is not this finite-loss MOCU.
+
+\subsubsection{Particle bank and implemented terminal action}
+Let $U_n$ denote the stored control requirement for particle $\theta^{(n)}$,
+with normalized posterior weights $w_n$. The empirical CDF and decision are
+\begin{align}
+F_N(v)&=\sum_n w_n\mathbf1\{U_n\le v\},\\
+q_N&=\inf\{v:F_N(v)\ge0.95\},\\
+u_{\mathrm{ctrl}}(b)&=\operatorname{snap}_{\mathcal G}^{\uparrow}(q_N).
+\label{eq:u_ctrl}
+\end{align}
+Here $\mathcal G$ is the configured control grid. The aligned implementation
+requires every $U_n\in\mathcal G$ and zero margin, so the empirical quantile
+already lies on the grid and snapping does not change it. It is consequently
+an exact IBR action for this finite particle-bank loss. If requirements lie
+off-grid, rounding a continuous quantile upward is not generally the
+unconstrained grid Bayes optimum; one must minimize expected loss over the
+grid explicitly or retain continuous controls. The implementation checks
+this alignment before running the primary experiment.
+
+The bank-level objective used for training and posterior evaluation is
+\begin{equation}
+\widehat{\operatorname{MOCU}}_N(b)
+=\sum_n w_n\{u_{\mathrm{ctrl}}+20(U_n-u_{\mathrm{ctrl}})_+-U_n\}.
+\label{eq:particle_mocu}
+\end{equation}
+All methods use the same bank, loss, quantile, and control range. Probe and
+control bank rows must match in particle values and ordering, physics,
+scenario, units, and simulator provenance. A dense control-grid bank is a
+numerical approximation to the continuous physical requirements; its error
+must be distinguished from posterior uncertainty.
+
+\subsubsection{Sequential design and held-out validation}
+The ideal design objective and its implemented approximation are
+\begin{align}
+\pi^*&\in\arg\min_\pi\mathbb E_{H_T\mid\pi}
+[\operatorname{MOCU}(b_T)],\\
+\widehat\pi&\approx\arg\min_\pi\mathbb E_{H_T\mid\pi}
+[\widehat{\operatorname{MOCU}}_N(b_T)].
+\label{eq:mocu_policy}
+\end{align}
+Under an exact posterior and the same generative model, the tower property
+equates expected posterior MOCU to expected realized regret. Also,
+$\mathbb E_{H_T}\mathbb E_{b_T}[U]=\mathbb E_{p_0}[U]$ is independent of the
+probe policy: minimizing expected MOCU is equivalent to minimizing expected
+total operational loss, not merely the control magnitude. Optimal expected
+MOCU cannot increase when additional observations may be ignored; this does
+not imply monotonic improvement for every realized history or trained policy.
+
+For an independent test system $\theta^\star$, evaluate the applied action
+against a separately computed continuous physical oracle $U^*(\theta^\star)$:
+\begin{equation}
+R^*=u_{\mathrm{ctrl}}+20[U^*(\theta^\star)-u_{\mathrm{ctrl}}]_+
+-U^*(\theta^\star).
+\label{eq:realized_regret}
+\end{equation}
+Mean held-out $R^*$ is the primary empirical endpoint; posterior bank MOCU
+is reported separately. Their difference can reflect finite support,
+control-grid approximation, and model or posterior miscalibration. Regret
+against a continuous oracle includes control discretization error and should
+not be described as purely uncertainty cost for a restricted grid action
+class. A strictly grid-relative MOCU instead subtracts
+$\min_{v\in\mathcal G}L(\theta,v)$ for each model.
+
+Under the threshold model and exact posterior, the quantile ensures posterior
+coverage $\Pr_b(U\le u_b^*)\ge0.95$. It does not protect every posterior
+model and is not a guaranteed empirical safety rate. Report true-system
+nadir and ROCOF violations, safety counts and confidence intervals, control
+magnitude, and regret separately. Any 95\% safety eligibility rule must be
+prespecified; retain results for ineligible methods and distinguish a point
+estimate passing 95\% from statistical evidence for that claim. The finite
+loss is scientifically a MOCU specialization, while its engineering adequacy
+depends on the stated loss preference, physical validation, and calibration.

@@ -21,15 +21,17 @@ power-grid dynamics. At each stage, a policy selects a probing bus and duration,
 observes a noisy frequency response, and updates uncertainty over
 machine-specific parameters. We distinguish parameter-oriented expected
 information gain (EIG) from Yoon's mean objective cost of uncertainty (MOCU).
-The terminal action is the minimum-cost control that is safe over the posterior
-support, and MOCU measures the expected excess control cost caused by model
-uncertainty.
+We specialize the MOCU framework to a finite operational loss combining
+injection cost and unmet control requirement. Its Bayesian terminal decision
+is the posterior 95\% quantile, and MOCU is expected regret relative to the
+model-specific optimum under that same loss.
 Random, fixed, myopic,
 deep adaptive design (DAD), and reinforcement-learning sequential Bayesian
-optimal experimental design (RL-sBOED), and Step-DAD are evaluated under common
+optimal experimental design (RL-sBOED), and Step-DAD form the comparison under common
 simulation banks and held-out protocols. A susceptible--infected--recovered (SIR) model
 provides an implementation benchmark; IEEE 9-bus, IEEE 14-bus, and IEEE 30-bus
-systems assess the power-grid application and scalability. \todo{Add final
+systems define the planned application sequence. IEEE30 dynamic implementation
+and the final multi-seed comparisons remain to be completed. \todo{Add final
 quantitative findings.}
 \end{abstract}
 
@@ -49,11 +51,11 @@ EIG values parameter learning, but parameter information does not necessarily
 improve a final control decision. We therefore also study MOCU, which values an
 experiment by its reduction of expected decision penalty.
 
-The contributions are:
+The study is organized around the following intended contributions:
 \begin{itemize}
   \item sequential bus--duration BOED for uncertain power-grid dynamics;
   \item a power-grid specialization of Yoon MOCU linking probing to the excess
-  cost of a posterior-safe control;
+  operational loss of a posterior-quantile control;
   \item a matched comparison of random, fixed, myopic, DAD, RL-sBOED, and
   Step-DAD; and
   \item SIR, IEEE9, IEEE14, and IEEE30 studies of objective choice, adaptation,
@@ -61,11 +63,14 @@ The contributions are:
 \end{itemize}
 
 \section{Related Work}
-Summarize BOED and EIG, adaptive and non-myopic design, DAD, RL-sBOED,
-Step-DAD, MOCU,
-and power-grid dynamic identification. End with the gap: objective-driven
-sequential design over power-grid probing buses and durations.
-\todo{Add verified references.}
+DAD amortizes sequential information-based design~\cite{foster2021dad},
+RL-sBOED uses reinforcement learning~\cite{blau2022rlsboed}, and Step-DAD
+adds history-specific online policy refinement~\cite{hedman2025stepdad}.
+MOCU instead values uncertainty through an operational decision and its
+loss~\cite{yoon2013mocu,boluki2018generalized}. We specialize this decision
+framework to bus--duration probing, adapting the policy objectives accordingly.
+Controlled excitation motivates the frequency-response probes~\cite{peng2024probing}.
+\todo{Expand the comparison with related power-grid identification studies.}
 
 \section{Problem Formulation}
 \label{sec:problem}
@@ -81,7 +86,7 @@ fixed.
 \subsection{Power-Grid Dynamics and Latent Parameter Space}
 Let $\mathcal N=\{1,\ldots,N\}$ denote all physical buses, and let
 $\mathcal M\subset\mathcal N$ denote the buses containing dynamic machines.
-The frequency response of those machines is modeled by
+For the reduced IEEE9 and IEEE14 models, the frequency response is modeled by
 \begin{equation}
 \mathbf M\dot{\boldsymbol{\omega}}(s)
 =-\Delta\mathbf P_e(s)
@@ -96,7 +101,7 @@ machines. The diagonal matrices $\mathbf M$, $\mathbf K$, and $\mathbf D$
 contain inertia, fast frequency-response, and damping coefficients,
 respectively, and $\mathbf u$ is an external active-power injection.
 
-Only the machine-specific coefficients are uncertain:
+In these reduced models, only the machine-specific coefficients are uncertain:
 \begin{equation}
 \boldsymbol{\theta}
 =\bigl((M_i,K_i):i\in\mathcal M\bigr)\in\Theta,
@@ -179,9 +184,11 @@ The measured response is
 \label{eq:observation}
 \end{equation}
 Here $N_{\mathrm{obs}}$ is a configurable observation dimension rather than a
-fixed part of the problem definition. Because every probe starts from
-equilibrium, the responses are conditionally independent given
-$\boldsymbol{\theta}$ and the selected designs:
+fixed part of the problem definition. Resetting and independent measurement
+noise give $p(\mathbf y_t\mid\boldsymbol\theta,h_{t-1},\xi_t)
+=p(\mathbf y_t\mid\boldsymbol\theta,\xi_t)$. The adaptive selection
+probabilities depend on observed history, not additionally on the unknown
+parameter, so they cancel from the posterior:
 \begin{equation}
 p(\boldsymbol{\theta}\mid h_t)\propto p_0(\boldsymbol{\theta})
 \prod_{k=1}^{t}p(\mathbf y_k\mid\boldsymbol{\theta},\xi_k).
@@ -222,8 +229,7 @@ $u\in\mathcal U$. Its location, activation time, and temporal profile are fixed.
 For model $\boldsymbol\theta$, contingency $c\in\mathcal C$, and magnitude $u$,
 the terminal simulator returns frequency nadir
 $f_{\mathrm{nad}}(\boldsymbol\theta,c,u)$, maximum absolute ROCOF
-$r(\boldsymbol\theta,c,u)$, and settling time
-$t_{\mathrm{set}}(\boldsymbol\theta,c,u)$. The intervention is safe for all
+$r(\boldsymbol\theta,c,u)$. The intervention is safe for all
 credible contingencies when
 \begin{equation}
 \mathsf{Safe}(\boldsymbol{\theta},u)
@@ -239,99 +245,12 @@ The next section expresses these requirements as a feasible control set and
 defines the minimum safe action. The retained parameter support must contain a
 safe candidate for every particle.
 
-\subsection{Control-Oriented MOCU}
-Safety is imposed as an engineering feasibility requirement rather than as a
-weighted penalty. This yields one operational cost and follows the original
-OCU/MOCU definition of Yoon et al.~\cite{yoon2013mocu} directly.
-
-For each model, define the safe-control set
-\begin{equation}
-\begin{split}
-\mathcal U_{\mathrm{safe}}(\boldsymbol\theta)=\{u\in\mathcal U:{}&
-f_{\mathrm{nad}}(\boldsymbol\theta,c,u)\ge f_{\mathrm{lim}},\\
-&r(\boldsymbol\theta,c,u)\le r_{\mathrm{lim}},
-\quad \forall c\in\mathcal C\}.
-\end{split}
-\label{eq:safe-control-set}
-\end{equation}
-The control grid is required to contain at least one safe action for every
-retained model. With increasing control cost \(J(u)\), the model-specific action
-is
-\begin{equation}
-u_{\mathrm{optimal}}(\boldsymbol\theta)
-=\arg\min_{u\in\mathcal U_{\mathrm{safe}}(\boldsymbol\theta)}J(u).
-\label{eq:model-specific-control}
-\end{equation}
-
-For posterior belief \(b\), define
-\begin{equation}
-L(\boldsymbol\theta,u)=
-\begin{cases}
-J(u),&u\in\mathcal U_{\mathrm{safe}}(\boldsymbol\theta),\\
-+\infty,&\text{otherwise}.
-\end{cases}
-\label{eq:operational-cost}
-\end{equation}
-Yoon's Bayesian robust action, which is the practical terminal command, is
-\begin{equation}
-\boxed{
-u_{\mathrm{ctrl}}(b)
-=\arg\min_{u\in\mathcal U}
-\E_{\boldsymbol\theta\sim b}[L(\boldsymbol\theta,u)].
-}
-\label{eq:bayesian-control}
-\end{equation}
-Under monotone safety this is the smallest action safe for every model in the
-posterior support:
-\begin{equation}
-u_{\mathrm{ctrl}}(b)
-=\max_{\boldsymbol\theta\in\operatorname{supp}(b)}
-u_{\mathrm{optimal}}(\boldsymbol\theta).
-\label{eq:robust-control}
-\end{equation}
-
-The corresponding objective cost of uncertainty and MOCU are
-\begin{align}
-\operatorname{OCU}(\boldsymbol\theta,b)
-&=J\!\left(u_{\mathrm{ctrl}}(b)\right)-J(u_{\mathrm{optimal}}(\boldsymbol\theta)),\\
-\operatorname{MOCU}(b)
-&=J\!\left(u_{\mathrm{ctrl}}(b)\right)
--\E_{\boldsymbol\theta\sim b}[J(u_{\mathrm{optimal}}(\boldsymbol\theta))]\ge0.
-\label{eq:belief-mocu}
-\end{align}
-For the primary choice \(J(u)=u\), MOCU is measured directly in units of
-supplementary power.
-
-For particles with weights \(w_n\), let
-\(u_{\mathrm{optimal}}^{(n)}=u_{\mathrm{optimal}}(\boldsymbol\theta^{(n)})\).
-The corresponding particle approximation is
-\begin{align}
-\mathcal I(b)&=\{n:w_n>10^{-12}\},\\
-u_{\mathrm{ctrl}}(b)&=\max_{n\in\mathcal I(b)}u_{\mathrm{optimal}}^{(n)},\\
-\operatorname{MOCU}(b)
-&=u_{\mathrm{ctrl}}(b)-\sum_{n=1}^{N_{\mathrm p}} w_n u_{\mathrm{optimal}}^{(n)}.
-\label{eq:particle-mocu}
-\end{align}
-Scientific alignment requires policy optimization and posterior evaluation to
-use these identical expressions, so that both stages represent the same
-terminal decision problem.
-
-The sequential design objective is
-\begin{equation}
-\pi^*_{\mathrm{MOCU}}
-=\arg\min_\pi\E_{H_T\mid\pi}
-\left[\operatorname{MOCU}\!\left(p(\boldsymbol\theta\mid H_T)\right)\right].
-\label{eq:policy-mocu}
-\end{equation}
-MOCU measures uncertainty-induced excess control among posterior-safe actions.
-Held-out safety probability, nadir violations, and ROCOF violations are
-reported separately. A method that fails the declared safety requirement is not
-ranked. This avoids an unsupported numerical exchange rate between control
-effort and safety.
+\subsection{Finite-Loss Control-Oriented MOCU}
+\input{mocu_finite_loss_formulation}
 
 \section{Compared Design Methods}
 \begin{table}[t]
-\caption{Compared Methods}
+\caption{Method capabilities; adaptive or horizon-aware architecture does not establish a measured performance advantage.}
 \centering
 \begin{tabular}{lccc}
 \toprule Method & Adaptive & Non-myopic & Learned\\
@@ -349,7 +268,10 @@ Random ignores observations. Fixed selects an open-loop sequence. Myopic
 optimizes immediate expected utility after each observation. DAD learns an
 amortized history-conditioned policy offline. RL-sBOED learns a sequential
 policy with stepwise rewards. \todo{Give reproducible implementation details.}
-Step-DAD starts from an amortized DAD policy and performs limited
+For MOCU, the DAD-family loss is the finite-loss posterior objective, not
+the original information-gain objective. Discrete actions use score-function
+policy optimization. These are objective-based adaptations of the cited methods.
+Step-DAD~\cite{hedman2025stepdad} starts from an amortized DAD policy and performs limited
 history-specific online refinement. Report its offline DAD training cost,
 online refinement cost, and action-selection cost separately.
 \todo{Describe the implementation and deviations from the original paper.}
@@ -362,31 +284,62 @@ application contribution. \todo{State its parameters, actions, and noise.}
 
 \subsection{IEEE9 Experiments}
 IEEE9 has nine physical probe buses, three dynamic machines, and six uncertain
-$M_i/K_i$ coordinates. Six durations give 54 actions. Evaluate EIG and MOCU
-with $N_{\mathrm{obs}}=5$, $\sigma=0.005$, $T=3,\ldots,7$, and seeds 101, 202,
-and 303. \todo{Insert final durations and priors.}
+$M_i/K_i$ coordinates. Six durations give 54 actions. The main MOCU plan
+uses $N_{\mathrm{obs}}=5$, $\sigma=0.005$, and $T\in\{3,4,5\}$.
+The current baseline catalog is $\{0.28,0.32,0.37,0.40,0.47,0.62\}$~s;
+it is not asserted to be the final audited choice. Training seeds are
+101, 202, and 303, crossed with evaluation seeds 1001--1005. A single
+training/evaluation pair is a pilot, not a complete publication cell.
+\todo{Insert validated priors, final catalog, and completed-run provenance.}
 
 \subsection{IEEE14 MOCU Extension}
 IEEE14 has 14 physical probe buses, five dynamic machines, and ten uncertain
 $M_i/K_i$ coordinates. Six durations give 84 actions. The MOCU workflow,
-methods, noise, horizons, and seeds match IEEE9; only IEEE-system physics and
-machine parameters differ. \todo{Insert the validated durations.}
+methods, nominal noise, planned horizons, and seed protocol match IEEE9.
+Its priors, control scenario, thresholds, banks, and duration catalog require
+separate validation. \todo{Insert the validated configuration and durations.}
 
 \subsection{IEEE30 MOCU Scalability Study}
-IEEE30 extends the same objective-driven MOCU protocol to a larger network.
-Use machine-specific uncertain parameters only for its dynamic machines, allow
-probing at all configured physical buses, and retain the same methods, noise,
-horizons, seeds, terminal objective, and held-out evaluation rules used for
-IEEE9 and IEEE14. \todo{Insert the verified dynamic-machine mapping, prior
-ranges, action count, bank size, and audited six-duration combination.}
+The planned IEEE30 extension uses the published dynamic reference of
+Demetriou et al.~\cite{demetriou2017dynamic}, not one dynamic machine per bus.
+The reference configuration has six machines: two governed generators and
+four synchronous condensers, with six added terminal buses (36 electrical
+buses in the modified network). The proposed uncertainty comprises six
+inertia constants and the two generator governor-droop parameters; the
+condensers are not assigned artificial governor coefficients. Prior ranges
+are study assumptions, separate from published nominal data. The full
+machine/exciter/governor backend is pending; this configuration cannot be
+treated as a completed reduced-swing experiment.
+\todo{Validate initialization, dynamics, safety thresholds, probe mapping,
+master bank, and duration catalog before reporting IEEE30 results.}
 
 \subsection{Duration Selection and Evaluation}
-Select six durations before policy training using a method-independent search
-over 281 values from 0.20 to 3.00~s. Screen adaptive value, non-myopic value,
-and observation-dependent branching; do not tune durations for a reported
-method. All methods share physical banks, held-out systems, and noise
-realizations. Report three-seed mean and sample standard deviation, plus paired
-held-out differences. \todo{Add bank sizes and evaluation sample counts.}
+The IEEE9 master bank contains 281 durations from 0.20 to 3.00~s at
+0.01~s spacing at each of nine buses: 2,529 candidate actions. A six-duration
+catalog includes all buses and therefore gives 54 actions. Full coverage of
+this dense grid is not exhaustive enumeration of the $\binom{281}{6}$
+catalogs or a genuinely continuous simulator oracle.
+The current search uses global sampling, local refinement, and comparisons
+among calibrated Fixed, Myopic, and lookahead planners. It is independent of
+neural-policy training but is planner-based selection, so selection criteria
+and possible selection bias must be disclosed. Freeze finalists before fresh
+validation, account for multiple comparisons, and use a separate untouched
+test for final policy comparisons. Report the best catalog found, search
+coverage, and uncertainty; do not claim global optimality.
+
+All methods share evaluation systems and noise streams. Final tables report
+one metric each, with methods as rows and $T$ as columns. For trained methods,
+report mean $\pm$ sample standard deviation over the 3 training $\times$ 5
+evaluation combinations, explicitly as descriptive crossed results rather
+than 15 independent training runs. Deduplicate non-training methods by
+evaluation seed (five results). Offline training/calibration time is summarized
+at run level, not repeated across evaluation seeds. Incomplete cells are em
+dashes; bold all tied best values in completed comparison columns.
+Paired uncertainty intervals resample independent test systems, keeping their
+noise replicas together; intervals conditional on a fixed bank do not quantify
+uncertainty from regenerating that bank.
+\todo{Record bank sizes, split indices, audit budgets, oracle tolerances,
+run identifiers, and numbers of independent test systems.}
 
 \section{Results}
 
@@ -394,26 +347,29 @@ held-out differences. \todo{Add bank sizes and evaluation sample counts.}
 \todo{Report EIG and runtime for every method.}
 
 \subsection{IEEE9 EIG Results}
-\todo{Report mean $\pm$ standard deviation for $T=3,\ldots,7$.}
+\todo{Report mean $\pm$ standard deviation for $T\in\{3,4,5\}$.}
 
 \subsection{IEEE9 MOCU Results}
-\todo{Report terminal MOCU, safety, paired differences, and controls.}
+\todo{Report realized operational regret, posterior bank MOCU, safety,
+paired differences, and controls in separate tables.}
 
-\begin{table*}[t]
-\caption{Terminal MOCU Across Three Seeds (Mean $\pm$ Standard Deviation)}
+\begin{table}[t]
+\caption{Held-out Realized Operational Regret (Mean $\pm$ Sample Standard
+Deviation). Trained methods: 3 training $\times$ 5 evaluation seeds;
+non-training methods: 5 unique evaluation seeds. Em dashes denote incomplete cells.}
 \centering
-\begin{tabular}{lccccc}
-\toprule Method & $T=3$ & $T=4$ & $T=5$ & $T=6$ & $T=7$\\
+\begin{tabular}{lccc}
+\toprule Method & $T=3$ & $T=4$ & $T=5$\\
 \midrule
-Random & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
-Fixed & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
-Myopic & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
-DAD & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
-RL-sBOED & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
-Step-DAD & \todo{}&\todo{}&\todo{}&\todo{}&\todo{}\\
+Random & \textemdash{} & \textemdash{} & \textemdash{}\\
+Fixed & \textemdash{} & \textemdash{} & \textemdash{}\\
+Myopic & \textemdash{} & \textemdash{} & \textemdash{}\\
+DAD & \textemdash{} & \textemdash{} & \textemdash{}\\
+RL-sBOED & \textemdash{} & \textemdash{} & \textemdash{}\\
+Step-DAD & \textemdash{} & \textemdash{} & \textemdash{}\\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 \subsection{IEEE14 MOCU Results}
 \todo{Report the same methods and metrics as IEEE9.}
@@ -431,13 +387,18 @@ Discuss when adaptation and non-myopic planning improve the downstream
 objective, why Fixed can be competitive, why EIG and MOCU can disagree, and how
 horizon and system size affect performance. Limitations include simulated
 Kron-reduced networks, prescribed priors, fixed probe amplitude, discrete
-actions, simplified terminal control, and three training seeds. Machine-specific
-$K_i$ allocations introduced for the larger IEEE systems are modeling
-assumptions unless directly supported by a cited dynamic-data source.
+actions, simplified terminal control, and three training seeds. Reduced-model $K_i$ allocations and parameter priors are study assumptions.
+The paper-based IEEE30 model requires a different dynamic representation.
+The finite-loss coefficient needs sensitivity analysis and does not quantify
+actual outage damage; empirical calibration and physical safety must be
+validated separately. Adaptive branching and improvement over Myopic and
+Fixed are empirical hypotheses, not prerequisites imposed on the results.
 
 \section{Conclusion}
 This paper formulates power-grid probing as sequential BOED and connects
-learning to Yoon IBR terminal control through MOCU. \todo{State only final
+learning to a finite-loss Bayesian terminal decision using Yoon's MOCU
+construction. The 95\% quantile follows from the chosen loss, while
+held-out safety and regret test its practical performance. \todo{State only final
 conclusions supported by completed three-seed results.}
 
 \section*{Acknowledgment}
