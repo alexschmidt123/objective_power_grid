@@ -14,7 +14,7 @@ import torch
 from src.config import load_config_for_run
 from src.layout import make_experiment_dir_name, write_run_config
 from src.objectives.mocu.context import build_context_from_config
-from src.objectives.mocu.space_audit import AuditBudget, SpacePlanner, summarize_runs
+from tools.audits.space import AuditBudget, SpacePlanner, summarize_runs
 
 
 def main():

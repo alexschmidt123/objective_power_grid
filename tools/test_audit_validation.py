@@ -4,7 +4,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from types import SimpleNamespace
 import unittest
 import numpy as np
-from src.objectives.mocu.audit_validation import batch_control_oracle
+from tools.audits.validation import batch_control_oracle
 from src.control.oracle_u_ctrl import compute_u_ctrl_opt
 
 class FakeEngine:

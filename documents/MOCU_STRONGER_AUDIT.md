@@ -58,3 +58,13 @@ Existing SIR reevaluations use their separate frozen snapshot.
 A four-fresh-system end-to-end smoke completed on labpc, including all four
 stages and both physical reproduction/scalar-oracle checks. It verifies the
 pipeline, not the scientific result of the production campaign.
+
+## Source organization
+
+Standalone audit implementations live under `tools/audits/`: `space.py`,
+`validation.py`, and the historical `bank_structure.py`. Entry points and
+audit regressions remain under `tools/`. Audits call the production objective
+and simulator; production training does not import these audit engines.
+The legacy explicit bank-structure-audit CLI routes to the tools package.
+Existing submitted campaigns retain their frozen source snapshot, so this
+file relocation does not alter a running campaign.

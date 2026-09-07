@@ -15,7 +15,7 @@ import torch
 from src.config import load_config_for_run
 from src.layout import make_experiment_dir_name, write_run_config
 from src.objectives.mocu.context import build_context_from_config
-from src.objectives.mocu.space_audit import AuditBudget, SpacePlanner, summarize_runs
+from tools.audits.space import AuditBudget, SpacePlanner, summarize_runs
 from tools.bank_sweeps.sweep_ieee9_eig_duration_sets import load_catalog, resolve_pool_actions
 
 

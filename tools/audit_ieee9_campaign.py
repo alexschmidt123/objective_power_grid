@@ -13,7 +13,7 @@ import torch
 from src.config import load_config_for_run
 from src.layout import write_run_config
 from src.objectives.mocu.context import build_context_from_config
-from src.objectives.mocu.space_audit import AuditBudget, SpacePlanner, summarize_runs
+from tools.audits.space import AuditBudget, SpacePlanner, summarize_runs
 from tools.audit_ieee9_duration_combos import candidate_sets, digest
 from tools.bank_sweeps.sweep_ieee9_eig_duration_sets import load_catalog, resolve_pool_actions
 
@@ -154,7 +154,7 @@ def fresh(args):
     from src.domains.swing.cuda import CudaTrajectoryEngine
     from src.control.cuda_control import CudaControlEngine
     from src.control.u_req import ControlSpec
-    from src.objectives.mocu.audit_validation import batch_control_oracle
+    from tools.audits.validation import batch_control_oracle
     from src.control.oracle_u_ctrl import compute_u_ctrl_opt
     campaign=args.campaign; metadata=json.loads((campaign/'campaign.json').read_text())
     if metadata['status']!='finalists_frozen': raise ValueError('Finalists must be frozen before fresh validation')

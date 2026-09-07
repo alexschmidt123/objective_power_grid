@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import src.banks.audit as bank_audit
-from src.banks.audit import screen_t2_adaptive_room
+import tools.audits.bank_structure as bank_audit
+from tools.audits.bank_structure import screen_t2_adaptive_room
 from src.control.posterior_ctrl import (
     belief_mocu,
     ibr_max_u_ctrl,

@@ -5,7 +5,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import unittest
 import numpy as np
 import torch
-from src.objectives.mocu.space_audit import AuditBudget, SpacePlanner, paired_interval
+from tools.audits.space import AuditBudget, SpacePlanner, paired_interval
 
 
 class AuditTests(unittest.TestCase):
