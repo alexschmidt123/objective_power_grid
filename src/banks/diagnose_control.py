@@ -1,7 +1,7 @@
 """Diagnose U-bank degeneracy / binding constraints (no method training).
 
 Core audit used by the EIG control-bank generation path
-(``src.objectives.eig.cli``). Offline shim: ``tools.diagnostics.diagnose_control``.
+(``src.objectives.eig.cli``). Used directly by the bank diagnostics CLI.
 """
 
 from __future__ import annotations

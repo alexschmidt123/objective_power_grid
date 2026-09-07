@@ -26,6 +26,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.layout import make_experiment_dir_name
+from tools.audits.catalog import proxy_scores, proxy_value
 from tools.bank_sweeps.sweep_ieee9_eig_duration_sets import (
     Catalog,
     evaluate_combination_seed,
@@ -42,28 +43,8 @@ def candidate_key(indices: np.ndarray | tuple[int, ...]) -> tuple[int, ...]:
     return tuple(sorted(int(x) for x in indices))
 
 
-def proxy_scores(centres: np.ndarray, n_durations: int, n_buses: int) -> tuple[np.ndarray, np.ndarray]:
-    """Return duration informativeness and pairwise response dissimilarity."""
-    shaped = centres.reshape(n_durations, n_buses, centres.shape[1], centres.shape[2])
-    # Preserve particle-dependent response shape; remove the per-action mean so
-    # duration separation is not merely a waveform offset.
-    fingerprints = shaped - shaped.mean(axis=2, keepdims=True)
-    fingerprints = fingerprints.reshape(n_durations, -1).astype(np.float64)
-    norms = np.linalg.norm(fingerprints, axis=1, keepdims=True)
-    normalized = fingerprints / np.maximum(norms, 1e-12)
-    similarity = np.clip(normalized @ normalized.T, -1.0, 1.0)
-    dissimilarity = 1.0 - similarity
-    info = shaped.var(axis=2).mean(axis=(1, 2)).astype(np.float64)
-    info = info / max(float(np.max(info)), 1e-12)
-    return info, dissimilarity
 
 
-def proxy_value(key: tuple[int, ...], info: np.ndarray, distance: np.ndarray) -> float:
-    ids = np.asarray(key, dtype=np.int64)
-    pair = distance[np.ix_(ids, ids)]
-    upper = pair[np.triu_indices(len(ids), 1)]
-    # Require all six durations to be informative; reward non-redundant shapes.
-    return float(0.55 * np.min(info[ids]) + 0.25 * np.mean(info[ids]) + 0.20 * np.mean(upper))
 
 
 def exact_audit(

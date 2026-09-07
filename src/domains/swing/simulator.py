@@ -134,7 +134,8 @@ def ieee9_physical_input_map() -> np.ndarray:
 
 # Original IEEE CDF / MATPOWER case_ieee30, NOT the relocated-generator case30.
 # Lossless, unit-voltage, nominal-tap reduction, as in our IEEE9/14 model.
-# Source and explicit synthetic dynamic assumptions: documents/IEEE30_MODEL.md.
+# Legacy synthetic helpers only; the paper-based model and execution guard are
+# documented in AGENTS.md and configs/ieee30_mocu.yaml.
 IEEE30_MACHINE_BUSES = (1, 2, 5, 8, 11, 13)
 IEEE30_BRANCHES = [(0, 1, 0.0575), (0, 2, 0.1652), (1, 3, 0.1737), (2, 3, 0.0379), (1, 4, 0.1983), (1, 5, 0.1763), (3, 5, 0.0414), (4, 6, 0.116), (5, 6, 0.082), (5, 7, 0.042), (5, 8, 0.208), (5, 9, 0.556), (8, 10, 0.208), (8, 9, 0.11), (3, 11, 0.256), (11, 12, 0.14), (11, 13, 0.2559), (11, 14, 0.1304), (11, 15, 0.1987), (13, 14, 0.1997), (15, 16, 0.1923), (14, 17, 0.2185), (17, 18, 0.1292), (18, 19, 0.068), (9, 19, 0.209), (9, 16, 0.0845), (9, 20, 0.0749), (9, 21, 0.1499), (20, 21, 0.0236), (14, 22, 0.202), (21, 23, 0.179), (22, 23, 0.27), (23, 24, 0.3292), (24, 25, 0.38), (24, 26, 0.2087), (27, 26, 0.396), (26, 28, 0.4153), (26, 29, 0.6027), (28, 29, 0.4533), (7, 27, 0.2), (5, 27, 0.0599)]
 

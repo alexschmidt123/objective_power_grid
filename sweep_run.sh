@@ -52,7 +52,7 @@ usage() {
     echo "  --seeds     alias for --seed" >&2
     echo "  --eval-seeds evaluation seeds used inside every independent run.sh folder (default: ${DEFAULT_EVAL_SEEDS})" >&2
     echo "  --configs   comma-separated core config stems (default: ieee9_mocu,ieee14_mocu)" >&2
-    echo "              available: sir_ode, ieee9_eig, ieee9_mocu, ieee14_mocu" >&2
+    echo "              available: sir_ode_eig, ieee9_eig, ieee9_mocu, ieee14_mocu, ieee30_mocu (backend pending)" >&2
     echo "  --systems   alias for --configs" >&2
     echo "  --config    alias for --configs (also accepts full yaml paths)" >&2
     echo "  --T         one horizon or comma-separated list (default: ${DEFAULT_STEP_NUMBER})" >&2
@@ -66,7 +66,7 @@ usage() {
     echo "  $0 --configs ieee9_mocu,ieee14_mocu --T 8  # same T, multiple yaml" >&2
     echo "  $0 --configs ieee9_mocu --T 4,5,8          # same yaml, multiple T" >&2
     echo "  $0 --configs ieee9_mocu,ieee14_mocu --T 4,8 # product of both" >&2
-    echo "  $0 --configs sir_ode --T 4,5 --experiment_type eig_based" >&2
+    echo "  $0 --configs sir_ode_eig --T 4,5 --experiment_type eig_based" >&2
 }
 
 resolve_cfg() {

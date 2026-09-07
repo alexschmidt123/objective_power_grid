@@ -8,11 +8,11 @@ import argparse,json,math,time
 import numpy as np
 from src.layout import write_run_config
 from src.objectives.mocu.context import build_context_from_config
-from tools.audit_ieee9_campaign import config,run_policy,save,fresh,confirm,finalize as finalize_campaign
-from tools.audit_ieee9_duration_combos import digest
+from tools.audits.campaign import config,run_policy,save,fresh,confirm,finalize as finalize_campaign
+from tools.audits.catalog import digest
 from tools.audits.space import AuditBudget
-from tools.bank_sweeps.sweep_ieee9_eig_duration_sets import load_catalog,resolve_pool_actions
-from tools.bank_sweeps.search_ieee9_eig_duration_sets_full import proxy_scores,proxy_value
+from tools.audits.catalog import load_catalog,resolve_pool_actions
+from tools.audits.catalog import proxy_scores,proxy_value
 
 
 def select_finalists(rows,baseline,gap_count=2,loss_count=2):
@@ -60,7 +60,7 @@ def prepare(args):
     for d in range(len(durations)):
         others=rng.choice(np.delete(np.arange(len(durations)),d),5,replace=False)
         keys.add(tuple(sorted([d]+others.tolist())))
-    previous=json.loads(args.previous.read_text())
+    previous=json.loads(args.previous.read_text()) if args.previous else {'candidates':[]}
     keys.update(tuple(k) for k in previous['candidates'])
     while len(keys)<1024:keys.add(tuple(sorted(rng.choice(281,6,replace=False).tolist())))
     keys=sorted(keys)
@@ -77,7 +77,7 @@ def prepare(args):
         'fresh_theta_seed':907091701,'fresh_noise_seeds':[11001,11002,11003],
         'horizons':[2] if q else [2,3,4,5],
         'input_sha256':digest(curves),'control_values_sha256':digest(U),
-        'theta_sha256':digest(np.c_[M,K]),'previous_search':str(args.previous),
+        'theta_sha256':digest(np.c_[M,K]),'previous_search':str(args.previous) if args.previous else None,
         'selection':'two strongest min(combined,nonmyopic) mean gains plus two lowest lookahead losses plus original baseline',
         'claim_scope':'best found in sampled/local search; not global optimum; screen is exploratory',
         'screen':[],'refinement':[],'convergence':[]}

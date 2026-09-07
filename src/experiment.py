@@ -1,9 +1,7 @@
 """Config-driven experiment steps (called by scripts/*.sh).
 
-  python -m src.experiment allocate-dir --config configs/ieee9.yaml
-  python -m src.experiment generate-data --config configs/ieee9.yaml --exp-dir ...
-  python -m src.experiment train --config configs/ieee9.yaml --method dad --exp-dir ...
-  python -m src.experiment evaluate --config configs/ieee9.yaml --exp-dir ...
+Formal runs must enter through run.sh, sweep_run.sh, or scripts/*.sh.
+This module is their internal implementation, not an alternative run workflow.
 
 Result folders are always named:
   date_time_configname_Uctrl|EIG_Tnum_NobsN_sigmaX

@@ -417,9 +417,8 @@ def repo_root() -> Path:
 
 # Canonical study-system config stems under configs/ (no experiment package import).
 SYSTEM_CONFIGS = {
-    "ieee5": "ieee5",
-    "ieee9": "ieee9",
-    "ieee14": "ieee14",
+    "ieee9": "ieee9_mocu",
+    "ieee14": "ieee14_mocu",
     "ieee30": "ieee30_mocu",
 }
 DEFAULT_N_OBS = 5

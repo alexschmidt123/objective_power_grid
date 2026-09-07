@@ -34,9 +34,18 @@ Use `sweep_run.sh` for a series of independent `run.sh` executions:
 
 ```bash
 bash sweep_run.sh --configs ieee9_eig --experiment_type eig_based \
-  --T 3,4,5,6,7 --N_obs 5 --noise_sigma 0.005
+  --T 3,4,5 --N_obs 5 --noise_sigma 0.005
 ```
 
 Publication sweeps default to training seeds `101,202,303` and evaluation
 seeds `1001,1002,1003,1004,1005`. Each run owns its models and results; model
 files are not shared between experiment folders.
+
+Canonical configs: `ieee9_eig`, `ieee9_mocu`, `ieee14_mocu`,
+`ieee30_mocu`, and `sir_ode_eig`. IEEE30 contains the published dynamic
+reference; its full dynamic backend is pending and formal runs are blocked.
+
+For SIR, use `--config configs/sir_ode_eig.yaml --experiment_type eig_based`.
+Use `scripts/data_generation.sh`, `scripts/training.sh`, and
+`scripts/evaluation.sh` for separate stages. Reusable Slurm wrappers are in
+`hprc/`; detailed workflow and reporting rules are in `AGENTS.md`.

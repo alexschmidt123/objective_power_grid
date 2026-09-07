@@ -4,7 +4,7 @@
 #   bash run.sh --config configs/ieee9_mocu.yaml
 #   bash run.sh --config configs/ieee9_mocu.yaml --T 8
 #   bash run.sh --config configs/ieee9_eig.yaml --experiment_type eig_based
-#   bash run.sh --config configs/sir_ode.yaml
+#   bash run.sh --config configs/sir_ode_eig.yaml
 #   bash run.sh --config configs/ieee9_mocu.yaml --method dad --force
 #
 # Result folder (allocated once, reused for all steps):
@@ -183,7 +183,7 @@ usage() {
     echo "Examples:" >&2
     echo "  bash run.sh --config configs/ieee9_mocu.yaml" >&2
     echo "  bash run.sh --config configs/ieee9_mocu.yaml --T 8 --seed 101" >&2
-    echo "  bash run.sh --config configs/sir_ode.yaml" >&2
+    echo "  bash run.sh --config configs/sir_ode_eig.yaml" >&2
 }
 
 while [[ $# -gt 0 ]]; do

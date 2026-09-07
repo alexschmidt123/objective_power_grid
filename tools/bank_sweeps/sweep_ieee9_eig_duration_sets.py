@@ -42,22 +42,12 @@ if str(ROOT) not in sys.path:
 from src.objectives.eig.vector import VectorEIGEngine
 from src.observations.likelihood import evenly_spaced_indices
 from src.layout import make_experiment_dir_name
+from tools.audits.catalog import Catalog, load_catalog, resolve_pool_actions
 
 
 DEFAULT_DURATIONS = tuple(np.round(np.arange(0.2, 3.0001, 0.2), 2))
 
 
-@dataclass(frozen=True)
-class Catalog:
-    designs: tuple[tuple[float, int, float], ...]
-
-    @property
-    def buses(self) -> tuple[int, ...]:
-        return tuple(sorted({int(row[1]) for row in self.designs}))
-
-    @property
-    def durations(self) -> tuple[float, ...]:
-        return tuple(sorted({round(float(row[2]), 10) for row in self.designs}))
 
 
 def parse_float_list(raw: str) -> tuple[float, ...]:
@@ -74,42 +64,8 @@ def parse_int_list(raw: str) -> tuple[int, ...]:
     return values
 
 
-def load_catalog(bank_dir: Path) -> Catalog:
-    path = bank_dir / "meta" / "catalog.json"
-    raw = json.loads(path.read_text(encoding="utf-8"))
-    designs = tuple(
-        (float(row[0]), int(row[1]), float(row[2])) for row in raw["designs"]
-    )
-    if not designs:
-        raise ValueError(f"empty action catalog: {path}")
-    return Catalog(designs=designs)
 
 
-def resolve_pool_actions(
-    catalog: Catalog,
-    durations: Iterable[float],
-    *,
-    tolerance: float = 5e-7,
-) -> tuple[np.ndarray, dict[float, np.ndarray]]:
-    requested = tuple(sorted(set(round(float(x), 10) for x in durations)))
-    by_duration: dict[float, np.ndarray] = {}
-    for duration in requested:
-        ids = np.asarray(
-            [
-                i
-                for i, (_, _, bank_duration) in enumerate(catalog.designs)
-                if abs(float(bank_duration) - duration) <= tolerance
-            ],
-            dtype=np.int64,
-        )
-        if ids.size != len(catalog.buses):
-            raise ValueError(
-                f"duration {duration:g}s maps to {ids.size} bank actions; "
-                f"expected one action for each of {len(catalog.buses)} buses"
-            )
-        by_duration[duration] = ids
-    pool_ids = np.concatenate([by_duration[d] for d in requested])
-    return pool_ids, by_duration
 
 
 def load_support_centres(
