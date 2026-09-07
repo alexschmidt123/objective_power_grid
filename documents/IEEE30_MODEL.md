@@ -1,19 +1,26 @@
-# IEEE30 reduced dynamic study model
+# IEEE30 published dynamic reference
 
-This is an explicitly constructed dynamic extension of the **original IEEE CDF 30-bus network**, using MATPOWER `case_ieee30`, not MATPOWER `case30` (which relocates generators). Source: https://github.com/MATPOWER/matpower/blob/master/data/case_ieee30.m (retrieved 2026-09-07). The downloaded source is retained at `tools/reference_data/case_ieee30.m`; its SHA256 is in `configs/ieee30_mocu.yaml`.
+`configs/ieee30_mocu.yaml` now transcribes the machine, excitation and governor parameters from Tables I–III of the authors' IEEE30 data sheet:
+https://www.kios.ucy.ac.cy/testsystems/wp-content/uploads/2020/03/IEEE-30.pdf
 
-The original case lists six online machine terminals: **1, 2, 5, 8, 11, 13**. Buses 1 and 2 have positive scheduled active generation; the other four have zero scheduled active generation and supply reactive power. We retain all six as rotating machines, including condenser terminals. A zero active dispatch is not a reason to remove rotating inertia.
+Reference: P. Demetriou, M. Asprou, J. Quirós-Tortós, E. Kyriakides, “Dynamic IEEE Test Systems for Transient Analysis,” IEEE Systems Journal 11(4), 2108–2117, 2017. DOI: 10.1109/JSYST.2015.2444893. Paper: https://zenodo.org/records/1238086 . Author network files: https://www.kios.ucy.ac.cy/testsystems/index.php/ieee-30-bus-modified-test-system/ . The data sheet hash is recorded in the YAML.
 
-Only these six retained machines have M and K coordinates, so N=6 and theta has 12 coordinates. The other 24 physical buses have no independent inertia or fast-response latent variables. Their injections are mapped through the algebraic Kron reduction. All 30 physical buses can be probed. Observation is at retained physical bus 1. Control bus 0 is reduced index 0, physical bus 1.
+The model has six GENROU machines: generators at original buses 1 and 2; synchronous condensers at 5, 8, 11 and 13. All six have IEEET1 excitation; only the two generators have BPA_GG governors. Original buses map to added machine terminals 31–36 in that order. The published modified network therefore has 36 electrical buses but only six rotating machines. Load buses are algebraic, with constant-impedance loads. The nominal frequency is 50 Hz, as in the paper's IEEE30 response plots.
 
-The 41 branch reactances define a lossless, unit-voltage network with nominal transformer taps. Resistance, shunts, voltage/reactive dynamics and AC operating-point angles are omitted, consistently with the project's IEEE9/14 reduced swing approximation. The equilibrium is zero angle with consistent zero deviation injections. This is not a reproduction of the original case's full AC transient dynamics.
+H = [4.130,5.078,1.520,1.520,1.200,1.200] seconds, on machine rated powers [270,51.2,40,40,25,25] MVA. The YAML preserves the published reactances, time constants, saturation, exciter and governor fields on their stated bases. These are published typical benchmark parameters, not utility measurements.
 
-The power-flow source does **not** supply dynamic M/K data. The following are synthetic, prespecified study assumptions:
+## Uncertainty and units
 
-- Total nominal 2H is 51 seconds on the study's common 100-MVA base, matched to IEEE14. Each of six machines has nominal 2H=8.5 seconds, M=8.5/(2*pi*60), with independent +/-30% uncertainty.
-- Each terminal has an independent K in [0.05/6, 0.50/6], preserving the existing aggregate response range. K represents fast active frequency support in the existing reduced equation. In particular, positive K at a condenser terminal assumes supplementary fast active support; it is **not** a claim that an ordinary synchronous condenser has a turbine governor.
-- Fixed D_i=0.1*M_nominal. The contingency and 95% quantile finite-loss rule match IEEE14. Baseline durations [0.3,0.6,1,1.5,2,2.5] are prespecified, not claimed optimal.
+The proposed study prior has eight independent coordinates: six machine inertias H and two generator droops R. +/-30% uniform bounds are explicitly study assumptions, not supplied by the paper. Condensers have no governor-response latent variable. Their excitation gains are not active-power droop gains.
 
-This is appropriate for a controlled method/scaling study, with the above assumptions disclosed. Claims about actual IEEE30 dynamic security require an independently justified dynamic data set. Moving from IEEE14 to IEEE30 changes the physical network from 14 to 30 buses, the state from five to six machines, and the six-duration catalog from 84 to 180 actions; it does not create 30 uncertain machines.
+For the existing electrical angular-frequency convention, the inertia conversion is M_i=2 H_i (S_i/S_base)/(2*pi*f_base). Omitting the machine/system power-base factor would be incorrect. The derived static generator response K_i=(S_i/S_base)/(R_i*f_base) is documented for units only; it does not replace the BPA_GG governor with instantaneous damping.
 
-Validation checks six-dimensional priors, 30x6 injection mapping, identity at retained buses, conservation, connectivity, an independent full-network linear solve against the reduced solve, rejection of incorrect maps/N, and CUDA trajectories against adaptive CPU ODE integration.
+## Implementation status
+
+This is a reference configuration; the current reduced CPU/CUDA swing backend does not implement GENROU, IEEET1, BPA_GG or the modified AC network initialization. It explicitly rejects this YAML before simulation. No new experiment should be launched with it until a compatible backend and network import have been implemented and validated. The existing six-machine lossless topology helpers are retained for historical reproducibility, but are not the published full dynamic model.
+
+The observation, prior widths and control protocol are study choices. The copied 22 Hz/s safety threshold was removed; its replacement is pending physical justification. Other retained control/probe choices are labeled unvalidated proposals. New dataset paths prevent reuse of synthetic banks; automatic generation is disabled.
+
+## Superseded audit
+
+IEEE30 jobs 19687885–19687888 were cancelled on 2026-09-07 at the user's request. Their frozen source and partial audit bank use the old synthetic six-machine model and remain historical artifacts, not validation of this paper-based configuration. IEEE14 jobs continue with their own frozen source.

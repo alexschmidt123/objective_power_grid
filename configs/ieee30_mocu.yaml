@@ -1,114 +1,86 @@
-# Six dynamic machines only; 12 latent coordinates. See documents/IEEE30_MODEL.md.
+# Published IEEE30 dynamic reference: six machines, two governors, eight proposed latent coordinates.
+# Full dynamic backend pending: this YAML must not execute with the legacy reduced swing solver.
+# Source parameters are on each machine rated-MVA base; priors and probe/control choices are study assumptions.
 system:
   name: ieee30
+  variant: demetriou2017_modified_dynamic
 N: 6
-data:
-  dataset_dir: data/ieee30_mocu_machinewise_mk
-  mocu_dataset_dir: data/ieee30_mocu_machinewise_mk_control
-  generate_if_missing: true
-observation:
-  sampling: uniform
-  objective_based:
-    N_obs: 5
-    noise_sigma: 0.005
-  eig_based:
-    N_obs: 5
-    noise_sigma: 0.01
-oracle:
-  tolerance: 0.0001
+model_provenance:
+  citation: P. Demetriou, M. Asprou, J. Quiros-Tortos, E. Kyriakides, Dynamic IEEE Test Systems for Transient
+    Analysis, IEEE Systems Journal 11(4), 2108-2117, 2017
+  doi: 10.1109/JSYST.2015.2444893
+  paper_url: https://zenodo.org/records/1238086
+  parameter_source: https://www.kios.ucy.ac.cy/testsystems/wp-content/uploads/2020/03/IEEE-30.pdf
+  parameter_tables:
+  - 'I: machine data'
+  - 'II: exciter data'
+  - 'III: governor data'
+  parameter_source_sha256: 6f89b7942f283de59074ea3ffe5feca4030e5110e9a0f25cd5f9ea757a3efd59
+  network_download: https://www.kios.ucy.ac.cy/testsystems/wp-content/uploads/2020/03/IEEE-30-Bus_modified_pwb.7z
+  data_basis: published typical machine data; not measured utility parameters
+  frequency_basis: 50 Hz, paper IEEE30 frequency-response figure
+implementation:
+  status: reference_configuration_backend_pending
+  required_backend: GENROU + IEEET1 + BPA_GG with algebraic AC network
+  current_backend_compatible: false
+  reason: Current CPU/CUDA backend implements reduced swing equations only; full governor/exciter dynamics
+    and modified network initialization are not implemented.
+network:
+  original_bus_count: 30
+  electrical_bus_count: 36
+  machine_terminal_buses:
+  - 31
+  - 32
+  - 33
+  - 34
+  - 35
+  - 36
+  original_to_terminal_bus:
+    1: 31
+    2: 32
+    5: 33
+    8: 34
+    11: 35
+    13: 36
+  base_power_mva: 100.0
+  base_frequency_hz: 50.0
+  transmission_lines: 37
+  transformers: 10
+  load_model: constant_impedance
+  load_count: 21
+  total_load_mw: 283.4
+  total_load_mvar: 126.2
+  initialization: solve published AC power flow, then initialize machines, exciters and governors at that
+    operating point
+  network_data_status: author PowerWorld network import required; original MATPOWER lossless reduction
+    is not equivalent
 swing_equation:
   topology: ieee30
+  dynamics_model: GENROU_IEEET1_BPA_GG
   physical_bus_count: 30
-  dynamic_machine_buses:
+  dynamic_machine_buses: &id001
   - 1
   - 2
   - 5
   - 8
   - 11
   - 13
-  retained_bus_map:
+  retained_bus_map: *id001
+  generator_buses:
   - 1
   - 2
+  condenser_buses:
   - 5
   - 8
   - 11
   - 13
-  bus_label_conventions:
-    physical_bus_numbering: one_based_ieee
-    probe_bus_indexing: zero_based_physical
-    observation_bus_field: one_based_physical
-    control_bus_indexing: zero_based_reduced_dynamic
-    reduced_index_to_physical_bus:
-      0: 1
-      1: 2
-      2: 5
-      3: 8
-      4: 11
-      5: 13
-  observation_bus: 1
-  base_frequency_hz: 60.0
+  governor_buses:
+  - 1
+  - 2
+  base_frequency_hz: 50.0
   base_power_mva: 100.0
-  coupling_strength: 1.0
-  damping: 0.0
-  latent_model: machinewise_mk
-  M_lower_nodes:
-  - 0.015782865189946288
-  - 0.015782865189946288
-  - 0.015782865189946288
-  - 0.015782865189946288
-  - 0.015782865189946288
-  - 0.015782865189946288
-  M_upper_nodes:
-  - 0.0293110353527574
-  - 0.0293110353527574
-  - 0.0293110353527574
-  - 0.0293110353527574
-  - 0.0293110353527574
-  - 0.0293110353527574
-  K_lower_nodes:
-  - 0.008333333333333333
-  - 0.008333333333333333
-  - 0.008333333333333333
-  - 0.008333333333333333
-  - 0.008333333333333333
-  - 0.008333333333333333
-  K_upper_nodes:
-  - 0.08333333333333333
-  - 0.08333333333333333
-  - 0.08333333333333333
-  - 0.08333333333333333
-  - 0.08333333333333333
-  - 0.08333333333333333
-  use_node_specific_damping: true
-  D_nodes:
-  - 0.0022546950271351844
-  - 0.0022546950271351844
-  - 0.0022546950271351844
-  - 0.0022546950271351844
-  - 0.0022546950271351844
-  - 0.0022546950271351844
-  P_m_nodes:
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.0
-  theta0_nodes:
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.0
-  omega0_nodes:
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.0
-  enforce_initial_equilibrium: true
+  latent_model: machine_inertia_generator_droop
+  observation_bus: 1
   probe_buses:
   - 0
   - 1
@@ -149,12 +121,349 @@ swing_equation:
   - 1.5
   - 2.0
   - 2.5
-  probe_duration: 2.0
   reset_after_probe: true
   T_obs_sec: 4.0
-  ode_dt: 0.0015625
   fs_hz: 40.0
-  sigma: 0.2
+  probe_protocol_status: study choices, not specified by the dynamic-data paper
+dynamic_machines:
+- physical_bus: 1
+  terminal_bus: 31
+  role: synchronous_generator
+  model: GENROU
+  rated_power_mva: 270.0
+  H_s: 4.13
+  rated_voltage_kv: 18.0
+  rated_power_factor: 0.85
+  D_pu: 2.0
+  ra_pu: 0.0016
+  xd_pu: 1.7
+  xq_pu: 1.62
+  xd_prime_pu: 0.256
+  xq_prime_pu: 0.245
+  xd_double_prime_pu: 0.185
+  xq_double_prime_pu: 0.185
+  xl_pu: 0.155
+  Tdo_prime_s: 4.8
+  Tqo_prime_s: 0.004
+  Tdo_double_prime_s: 0.004
+  Tqo_double_prime_s: 0.004
+  S_1_0: 0.125
+  S_1_2: 0.45
+  exciter:
+    model: IEEET1
+    Tr_s: 0.0
+    Ka: 30.0
+    Ta_s: 0.4
+    VRmax: 4.59
+    VRmin: -4.59
+    Ke: -0.02
+    Te_s: 0.56
+    Kf: 0.05
+    Tf_s: 1.3
+    E1: 2.5875
+    SE_E1: 0.7298
+    E2: 3.45
+    SE_E2: 1.3496
+  governor:
+    model: BPA_GG
+    Pmax_pu: 0.8518
+    R_pu: 0.0185
+    T1_s: 0.1
+    T2_s: 0.0
+    T3_s: 0.259
+    T4_s: 0.1
+    T5_s: 10.0
+    F: 0.272
+- physical_bus: 2
+  terminal_bus: 32
+  role: synchronous_generator
+  model: GENROU
+  rated_power_mva: 51.2
+  H_s: 5.078
+  rated_voltage_kv: 13.8
+  rated_power_factor: 0.8
+  D_pu: 2.0
+  ra_pu: 0.0
+  xd_pu: 1.27
+  xq_pu: 1.24
+  xd_prime_pu: 0.209
+  xq_prime_pu: 0.85
+  xd_double_prime_pu: 0.116
+  xq_double_prime_pu: 0.116
+  xl_pu: 0.108
+  Tdo_prime_s: 6.6
+  Tqo_prime_s: 0.004
+  Tdo_double_prime_s: 0.004
+  Tqo_double_prime_s: 0.004
+  S_1_0: 0.2067
+  S_1_2: 0.724
+  exciter:
+    model: IEEET1
+    Tr_s: 0.0
+    Ka: 400.0
+    Ta_s: 0.05
+    VRmax: 0.613
+    VRmin: -0.613
+    Ke: -0.0769
+    Te_s: 1.37
+    Kf: 0.04
+    Tf_s: 1.0
+    E1: 3.0975
+    SE_E1: 0.1117
+    E2: 4.13
+    SE_E2: 0.2248
+  governor:
+    model: BPA_GG
+    Pmax_pu: 1.035
+    R_pu: 0.1523
+    T1_s: 0.2
+    T2_s: 0.0
+    T3_s: 0.3
+    T4_s: 0.09
+    T5_s: 0.0
+    F: 1.0
+- physical_bus: 5
+  terminal_bus: 33
+  role: synchronous_condenser
+  model: GENROU
+  rated_power_mva: 40.0
+  H_s: 1.52
+  rated_voltage_kv: 13.8
+  rated_power_factor: 0.0
+  D_pu: 0.0
+  ra_pu: 0.0
+  xd_pu: 2.373
+  xq_pu: 1.172
+  xd_prime_pu: 0.343
+  xq_prime_pu: 1.172
+  xd_double_prime_pu: 0.231
+  xq_double_prime_pu: 0.231
+  xl_pu: 0.132
+  Tdo_prime_s: 11.6
+  Tqo_prime_s: 0.159
+  Tdo_double_prime_s: 0.058
+  Tqo_double_prime_s: 0.201
+  S_1_0: 0.295
+  S_1_2: 0.776
+  exciter:
+    model: IEEET1
+    Tr_s: 0.0
+    Ka: 400.0
+    Ta_s: 0.05
+    VRmax: 6.63
+    VRmin: -6.63
+    Ke: -0.17
+    Te_s: 0.95
+    Kf: 0.04
+    Tf_s: 1.0
+    E1: 6.375
+    SE_E1: 0.2174
+    E2: 8.5
+    SE_E2: 0.9388
+  governor: null
+- physical_bus: 8
+  terminal_bus: 34
+  role: synchronous_condenser
+  model: GENROU
+  rated_power_mva: 40.0
+  H_s: 1.52
+  rated_voltage_kv: 13.8
+  rated_power_factor: 0.0
+  D_pu: 0.0
+  ra_pu: 0.0
+  xd_pu: 2.373
+  xq_pu: 1.172
+  xd_prime_pu: 0.343
+  xq_prime_pu: 1.172
+  xd_double_prime_pu: 0.231
+  xq_double_prime_pu: 0.231
+  xl_pu: 0.132
+  Tdo_prime_s: 11.6
+  Tqo_prime_s: 0.159
+  Tdo_double_prime_s: 0.058
+  Tqo_double_prime_s: 0.201
+  S_1_0: 0.295
+  S_1_2: 0.776
+  exciter:
+    model: IEEET1
+    Tr_s: 0.0
+    Ka: 400.0
+    Ta_s: 0.05
+    VRmax: 6.63
+    VRmin: -6.63
+    Ke: -0.17
+    Te_s: 0.95
+    Kf: 0.04
+    Tf_s: 1.0
+    E1: 6.375
+    SE_E1: 0.2174
+    E2: 8.5
+    SE_E2: 0.9388
+  governor: null
+- physical_bus: 11
+  terminal_bus: 35
+  role: synchronous_condenser
+  model: GENROU
+  rated_power_mva: 25.0
+  H_s: 1.2
+  rated_voltage_kv: 13.8
+  rated_power_factor: 0.0
+  D_pu: 0.0
+  ra_pu: 0.0025
+  xd_pu: 1.769
+  xq_pu: 0.855
+  xd_prime_pu: 0.304
+  xq_prime_pu: 0.5795
+  xd_double_prime_pu: 0.2035
+  xq_double_prime_pu: 0.2035
+  xl_pu: 0.1045
+  Tdo_prime_s: 8.0
+  Tqo_prime_s: 0.008
+  Tdo_double_prime_s: 0.0525
+  Tqo_double_prime_s: 0.0151
+  S_1_0: 0.304
+  S_1_2: 0.667
+  exciter:
+    model: IEEET1
+    Tr_s: 0.0
+    Ka: 400.0
+    Ta_s: 0.05
+    VRmax: 4.407
+    VRmin: -4.407
+    Ke: -0.17
+    Te_s: 0.95
+    Kf: 0.04
+    Tf_s: 1.0
+    E1: 4.2375
+    SE_E1: 0.2174
+    E2: 5.65
+    SE_E2: 0.9386
+  governor: null
+- physical_bus: 13
+  terminal_bus: 36
+  role: synchronous_condenser
+  model: GENROU
+  rated_power_mva: 25.0
+  H_s: 1.2
+  rated_voltage_kv: 13.8
+  rated_power_factor: 0.0
+  D_pu: 0.0
+  ra_pu: 0.0025
+  xd_pu: 1.769
+  xq_pu: 0.855
+  xd_prime_pu: 0.304
+  xq_prime_pu: 0.5795
+  xd_double_prime_pu: 0.2035
+  xq_double_prime_pu: 0.2035
+  xl_pu: 0.1045
+  Tdo_prime_s: 8.0
+  Tqo_prime_s: 0.008
+  Tdo_double_prime_s: 0.0525
+  Tqo_double_prime_s: 0.0151
+  S_1_0: 0.304
+  S_1_2: 0.667
+  exciter:
+    model: IEEET1
+    Tr_s: 0.0
+    Ka: 400.0
+    Ta_s: 0.05
+    VRmax: 4.407
+    VRmin: -4.407
+    Ke: -0.17
+    Te_s: 0.95
+    Kf: 0.04
+    Tf_s: 1.0
+    E1: 4.2375
+    SE_E1: 0.2174
+    E2: 5.65
+    SE_E2: 0.9386
+  governor: null
+uncertainty:
+  status: proposed study prior, not provided by the paper
+  latent_dimension: 8
+  latent_names:
+  - H_1
+  - H_2
+  - H_5
+  - H_8
+  - H_11
+  - H_13
+  - R_1
+  - R_2
+  inertia:
+    distribution: independent_uniform
+    physical_buses: *id001
+    nominal_s:
+    - 4.13
+    - 5.078
+    - 1.52
+    - 1.52
+    - 1.2
+    - 1.2
+    lower_s:
+    - 2.8909999999999996
+    - 3.5545999999999998
+    - 1.0639999999999998
+    - 1.0639999999999998
+    - 0.84
+    - 0.84
+    upper_s:
+    - 5.369
+    - 6.601400000000001
+    - 1.9760000000000002
+    - 1.9760000000000002
+    - 1.56
+    - 1.56
+  governor_droop:
+    distribution: independent_uniform
+    physical_buses:
+    - 1
+    - 2
+    nominal_pu:
+    - 0.0185
+    - 0.1523
+    lower_pu:
+    - 0.012949999999999998
+    - 0.10660999999999998
+    upper_pu:
+    - 0.02405
+    - 0.19799
+  condenser_governor_response: absent; no K/R latent variable
+  other_dynamic_parameters: fixed at published nominal values
+derived_parameter_conventions:
+  purpose: unit conversion reference, not an instantaneous-governor approximation
+  M_formula: M_i = 2 H_i (S_i / S_base) / (2 pi f_base), for electrical angular-speed deviation in rad/s
+  M_nominal_nodes:
+  - 0.07098947081670899
+  - 0.0165517066449028
+  - 0.003870648215994895
+  - 0.003870648215994895
+  - 0.0019098593171027439
+  - 0.0019098593171027439
+  K_static_formula: K_i = (S_i / S_base) / (R_i f_base), in system-pu power per Hz; generator steady-state
+    gain only
+  K_static_nominal_nodes:
+  - 2.9189189189189193
+  - 0.06723571897570585
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  warning: Use the BPA_GG time constants and limits; static K must not replace the governor dynamics
+data:
+  dataset_dir: data/ieee30_demetriou2017_mocu
+  mocu_dataset_dir: data/ieee30_demetriou2017_mocu_control
+  generate_if_missing: false
+observation:
+  sampling: uniform
+  objective_based:
+    N_obs: 5
+    noise_sigma: 0.005
+  eig_based:
+    N_obs: 5
+    noise_sigma: 0.01
+oracle:
+  tolerance: 0.0001
 prior:
   mc_samples: 512
   mc_support_seed: 1
@@ -175,7 +484,6 @@ control:
   enforce_bayes_loss_alignment: true
   safety_margin: 0.0
   snap_up: true
-  rocof_limit_hz_s: 22.0
   delta_f_nadir_hz: -0.2
   T_obs_sec: 10.0
   ode_dt: 0.00625
@@ -222,19 +530,14 @@ control:
   fixed_exhaustive_threshold: 0
   fixed_noise_replicas: 2
   fixed_greedy_restarts: 8
-data_generation:
-  backend: cuda
-  cuda_batch_size: 128
-  theta_sample_size_train: 512
-  theta_sample_size_test: 128
-  train_seed: 101
-  test_seed: 202
-bank_quality:
-  enabled: true
-  min_u_positive_frac: 0.5
-  min_u_q95: 0.05
-  min_u_headroom: 0.015
-  min_max_abs_corr_rocof_u: 0.05
+  physical_protocol_status: legacy study proposal; recalibration required after published dynamic backend
+    is implemented
+  bus_indexing: zero-based machine index; index 0 maps to original bus 1 / terminal bus 31
+  rocof_limit_hz_s: null
+  pending_choices:
+  - physical ROCOF threshold
+  - contingency severity and feasible control range
+  - probe/control integration tolerances
 evaluation:
   eig_test_systems: 128
   eig_fixed_calibration_seed: 104729
@@ -291,46 +594,3 @@ training:
     moe_low_ess_threshold: 0.4
     moe_residual_scale_coefficient: 0.01
     moe_logit_scale_target: 3.5
-  eig_based:
-    eig_epochs: 200
-    eig_steps_per_epoch: 512
-    batch_size: 256
-    learning_rate: 0.0003
-    entropy_coef: 0.05
-    eig_validation_systems: 128
-    eig_bc_trajectories: 96
-    eig_bc_lookahead: two_step
-    eig_bc_temperature: 0.5
-    eig_bc_fantasies: 12
-    eig_rl_use_ppo: true
-    eig_moe_ppo_epochs: 4
-    eig_moe_ppo_clip: 0.2
-    eig_moe_critic_lr: 0.001
-    eig_moe_cf_coefficient: 0.0
-    eig_moe_cf_anneal_fraction: 0.0
-    eig_moe_cf_floor_fraction: 0.0
-    eig_moe_cf_rollouts_per_batch: 0
-    eig_moe_freeze_base_after_bc: false
-    eig_moe_leave_base_coefficient: 0.0
-    eig_moe_leave_base_margin: 0.5
-    eig_moe_branching_coefficient: 0.15
-    eig_moe_low_ess_residual_coefficient: 0.1
-    eig_moe_low_ess_threshold: 0.4
-    eig_moe_residual_scale_coefficient: 0.05
-    eig_moe_logit_scale_target: 3.5
-    eig_moe_balance_coefficient: 0.005
-    eig_moe_routing_information_coefficient: 0.01
-    eig_moe_redundancy_coefficient: 0.02
-    eig_prefer_unique_sequence_floor: true
-    eig_min_unique_sequence_fraction: 0.08
-    eig_unique_floor_slack: 0.03
-model_provenance:
-  network_case: MATPOWER case_ieee30 (original IEEE CDF)
-  source_url: https://raw.githubusercontent.com/MATPOWER/matpower/master/data/case_ieee30.m
-  source_sha256: b3bcc6165577e9e70a39af98f808405233a184289056cab8ce35fbc5a3ad953e
-  dynamic_parameters: synthetic matched-total-inertia prior; not supplied by IEEE
-    power-flow case
-  K_interpretation: uncertain fast active response at retained machine terminals,
-    including assumed supplementary support at condenser terminals
-  network_approximation: lossless unit-voltage nominal-tap Kron reduction; zero-angle
-    equilibrium; not AC operating-point transient stability

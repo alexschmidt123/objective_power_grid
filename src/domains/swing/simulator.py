@@ -602,6 +602,11 @@ forward response of a fixed (θ, ξ) pair.
 
 def _build_system_params(config_swing: dict[str, Any] | None = None) -> dict[str, Any]:
     cfg = config_swing or {}
+    if cfg.get("dynamics_model", "reduced_swing") != "reduced_swing":
+        raise NotImplementedError(
+            "This configuration requires GENROU/exciter/governor dynamics and AC network initialization; "
+            "the reduced swing backend cannot execute the published IEEE30 model."
+        )
     N = int(cfg.get("N", 14))
     params = get_default_swing_equation_params(
         N=N,
