@@ -363,51 +363,61 @@ only its expectation generally equals expected entropy reduction. EIG and MOCU a
 objectives: EIG rewards learning $\theta$, whereas MOCU rewards learning only
 insofar as it improves the terminal operational decision.
 
-\subsection{4. Terminal Control Action and Safety Conditions}
-Probing identifies uncertain parameters; the terminal intervention is a
-separate response to a contingency. Let $\mathcal C$ be a nonempty finite
-set of specified contingencies, with known machine-input profile
-$\mathbf d_c(s)$. The operator chooses only $u\in\mathcal U=[0,u_{\max}]$;
-the control location $b_{\mathrm c}$ and dimensionless profile $g(s)$ are fixed:
+\subsection{4. Terminal Control and Safety Constraints}
+After $T$ probes, the operator uses the learned parameter distribution to
+choose a corrective power injection $u\in\mathcal U=[0,u_{\max}]$.
+The injection location $b_{\mathrm c}$ and time profile $g(s)$ are fixed;
+only its magnitude is chosen. For a disturbance $c\in\mathcal C$, the input is
 \begin{equation}
-\mathbf v_c(s;u)=\mathbf d_c(s)+\mathbf a(b_{\mathrm c})u g(s).
+\mathbf v_c(s;u)=\mathbf d_c(s)+\mathbf a(b_{\mathrm c})u g(s),
 \label{eq:terminal-input}
 \end{equation}
-Both probe and terminal simulations start from the stated equilibrium.
-Let $\mathcal O_{\mathrm s}\subseteq\mathcal M$ be the nonempty monitored
-machine set and $S_{\mathrm c}>0$ the terminal observation horizon. Define
+where $\mathbf d_c$ is the disturbance profile and $\mathcal C$ is the
+specified contingency set. Each response starts from the stated equilibrium.
+
+A control is safe when it limits both the frequency drop and the rate of
+frequency change. Over the monitored machines $\mathcal O_{\mathrm s}$ and
+time interval $[0,S_{\mathrm c}]$, define
 \begin{align}
 f_{\mathrm{nad}}(\theta,c,u)&=
-\min_{i\in\mathcal O_{\mathrm s}}\inf_{0\le s\le S_{\mathrm c}}
-\frac{\omega_i(s;\theta,c,u)}{2\pi},\\
+\min_{i\in\mathcal O_{\mathrm s},\,0\le s\le S_{\mathrm c}}
+\Delta f_i(s;\theta,c,u),\\
 r(\theta,c,u)&=
 \max_{i\in\mathcal O_{\mathrm s}}\operatorname*{ess\,sup}_{0\le s\le S_{\mathrm c}}
-\left|\frac{\dot\omega_i(s;\theta,c,u)}{2\pi}\right|.
+|\dot{\Delta f}_i(s;\theta,c,u)|.
 \label{eq:safety-functionals}
 \end{align}
-The limits $f_{\mathrm{lim}}<0$ and $r_{\mathrm{lim}}>0$ apply to frequency
-deviation (Hz) and absolute ROCOF (Hz/s), respectively:
+Here $\Delta f_i=\omega_i/(2\pi)$ is frequency deviation in Hz. The prescribed
+nadir and ROCOF limits are $f_{\mathrm{lim}}<0$ and $r_{\mathrm{lim}}>0$:
 \begin{equation}
 \mathsf{Safe}(\theta,u)\iff
-\left\{\begin{array}{l}
+\begin{cases}
 f_{\mathrm{nad}}(\theta,c,u)\ge f_{\mathrm{lim}},\\
-r(\theta,c,u)\le r_{\mathrm{lim}}
-\end{array}\right.
+r(\theta,c,u)\le r_{\mathrm{lim}},
+\end{cases}
 \quad\forall c\in\mathcal C.
 \label{eq:safety}
 \end{equation}
-Safety is relative to the specified contingency set, monitored buses,
-time interval, and limits.
+Assume that a safe magnitude exists for every $\theta$ and that the safe set
+is closed and upward closed within $\mathcal U$. Its minimum is
+\begin{equation}
+U(\theta)=\min\{u\in\mathcal U:\mathsf{Safe}(\theta,u)\},
+\quad\mathcal U_{\mathrm{safe}}(\theta)=[U(\theta),u_{\max}].
+\label{eq:safe_control_set}
+\end{equation}
+Assume $U$ is measurable. Feasibility and monotonicity are assumptions of
+this scalar-control model. If $\theta$ were known, $U(\theta)$ would be the
+smallest safe injection. Because $\theta$ is uncertain, the operator must
+balance control expenditure against the possibility of choosing too little
+control. The following MOCU loss specifies that tradeoff.
 
-For compatibility with the candidate-control notation below, write
-$\mathcal S=\mathcal U$ and let $\mathcal G\subset\mathcal U$ be a numerical grid.
-For a single contingency, whenever the feasible set has a minimum, define
+For the numerical notation used below, $\mathcal S=\mathcal U$ and
+$\mathcal G\subset\mathcal U$ is the control grid. For a single contingency,
 \begin{equation}
 u_{\mathrm{req}}(\theta,c)=\min\{u\in\mathcal U:
 f_{\mathrm{nad}}(\theta,c,u)\ge f_{\mathrm{lim}},\ r(\theta,c,u)\le r_{\mathrm{lim}}\}.
 \label{eq:u_req}
 \end{equation}
-The full contingency set is handled by the common safe-set definition below.
 
 \subsection{5. Finite-Loss Control-Oriented MOCU}
 % BEGIN SHARED FINITE-LOSS MOCU
@@ -431,18 +441,7 @@ For integrable costs and attained minima, MOCU is
 \end{align}
 Both actions use the same loss~\cite{yoon2013mocu,boluki2018generalized}.
 
-\subsubsection{Scalar control requirement and assumptions}
-Assume that, for every $\theta\in\Theta$, the safe-control set is nonempty,
-closed, and upward closed within $\mathcal U$. Equivalently, there exists a
-measurable threshold
-\begin{equation}
-U(\theta)=\min\{u\in\mathcal U:\mathsf{Safe}(\theta,u)\},
-\quad\mathcal U_{\mathrm{safe}}(\theta)=[U(\theta),u_{\max}].
-\label{eq:safe_control_set}
-\end{equation}
-Feasibility and monotonicity are assumptions of this scalar-threshold
-model; they are not implied by the swing equation.
-
+\subsubsection{Control cost and shortfall}
 Normalize the marginal injection cost to one. For a dimensionless
 shortfall-penalty parameter $\lambda>1$, define
 \begin{equation}
@@ -1159,8 +1158,8 @@ R^*=u_{\mathrm{ctrl}}+\lambda[U^*(\theta^\star)-u_{\mathrm{ctrl}}]_+
 -U^*(\theta^\star).
 \label{eq:realized_regret}
 \end{equation}
-Mean held-out $R^*$ is the primary empirical endpoint; posterior bank MOCU
-is reported separately. Their difference can reflect finite support,
+Report mean held-out $R^*$ alongside posterior bank MOCU as a separate
+measure of operational performance. Their difference can reflect finite support,
 control-grid approximation, and model or posterior miscalibration. Regret
 against a continuous oracle includes control discretization error and should
 not be described as purely uncertainty cost for a restricted grid action
