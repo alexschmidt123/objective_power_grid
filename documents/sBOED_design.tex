@@ -85,7 +85,7 @@ The presentation follows the causal workflow used by the implementation:
   \item specify reset-to-equilibrium probe actions and noisy observations;
   \item update the posterior and define parameter EIG;
   \item define terminal $u_{\mathrm{ctrl}}$ and the frequency-security criteria;
-  \item construct finite-loss MOCU and derive its 95\% quantile decision; and
+  \item construct finite-loss MOCU and derive its penalty-dependent quantile decision; and
   \item optimize and evaluate sequential probe-selection policies.
 \end{enumerate}
 This ordering separates the physical model, statistical experiment, and
@@ -400,7 +400,7 @@ experiments~\cite{boluki2018generalized}:
 \end{equation}
 Bayesian robustness means minimizing expected cost, not necessarily taking a
 worst-case maximum. The loss below is our power-grid specialization; neither
-its coefficient nor the 95\% level is prescribed by Yoon et al.
+its penalty parameter nor the resulting quantile level is prescribed by Yoon et al.
 
 \subsubsection{Physical control requirement and finite loss}
 Let $\mathcal U=[0,u_{\max}]$ be the continuous terminal-control range. Define
@@ -419,14 +419,15 @@ set $\mathcal C$ does not establish N--1 security without evaluating that set.
 
 For $\lambda>1$ and $(z)_+=\max(z,0)$, choose
 \begin{equation}
-L(\theta,u)=u+\lambda[U(\theta)-u]_+,
-\qquad \lambda=20.
+L(\theta,u)=u+\lambda[U(\theta)-u]_+.
 \label{eq:operational_cost}
 \end{equation}
 This finite loss penalizes supplementary injection and unmet required
 injection. It is a power-equivalent operational surrogate, not an empirically
 calibrated monetary damage model or a direct measure of violation severity.
-The coefficient is prespecified to encode an asymmetric preference against
+The dimensionless parameter $\lambda$ is the shortfall penalty relative to
+the control-cost coefficient, which is normalized to one. It is prespecified
+to encode an asymmetric preference against
 under-control. A sensitivity study should vary this preference while changing
 the decision quantile consistently. No additional binary violation penalty
 or control margin is included in the primary formulation.
@@ -439,8 +440,8 @@ u_\theta^*=u_{\mathrm{optimal}}(\theta)=U(\theta),
 \label{eq:model_specific_control}
 \end{equation}
 
-\subsubsection{Derivation of the 95\% decision}
-Write $F_b(v)=\Pr_b(U\le v)$ and $\alpha=1/\lambda=0.05$.
+\subsubsection{Derivation of the parameterized quantile decision}
+Write $F_b(v)=\Pr_b(U\le v)$ and $\alpha=1/\lambda\in(0,1)$.
 The left and right derivatives of posterior expected loss at $u$ are
 $1-\lambda+\lambda F_b(u^-)$ and
 $1-\lambda+\lambda F_b(u)$, respectively. Convexity therefore gives the
@@ -451,23 +452,23 @@ F_b(u^- )\le 1-\alpha\le F_b(u).
 \end{equation}
 Choosing the smallest minimizer yields
 \begin{equation}
-u_b^*=Q_{0.95}(U\mid b)
-=\inf\{v:F_b(v)\ge0.95\}.
+u_b^*=Q_{1-\alpha}(U\mid b)
+=\inf\{v:F_b(v)\ge1-\alpha\}.
 \label{eq:u_ctrl_support}
 \end{equation}
 Thus the quantile is derived from the finite loss, rather than appended to
 an unrelated MOCU definition. Equivalently, realized regret is
 \begin{equation}
 \operatorname{OCU}(\theta,b)
-=(u_b^*-U)_++19(U-u_b^*)_+\ge0.
+=(u_b^*-U)_++(\lambda-1)(U-u_b^*)_+\ge0.
 \label{eq:ocu}
 \end{equation}
 Over-control has unit marginal regret and under-control has marginal regret
-19; the coefficient 20 in the total loss includes the avoided injection cost.
+$\lambda-1$; the coefficient $\lambda$ in the total loss includes the avoided injection cost.
 The corresponding belief MOCU is
 \begin{equation}
 \operatorname{MOCU}(b)=\mathbb E_b\!\left[
-u_b^*+20(U-u_b^*)_+-U\right].
+u_b^*+\lambda(U-u_b^*)_+-U\right].
 \label{eq:belief_mocu}
 \end{equation}
 It vanishes when the required control is known exactly, even if other model
@@ -479,7 +480,7 @@ Let $U_n$ denote the stored control requirement for particle $\theta^{(n)}$,
 with normalized posterior weights $w_n$. The empirical CDF and decision are
 \begin{align}
 F_N(v)&=\sum_n w_n\mathbf1\{U_n\le v\},\\
-q_N&=\inf\{v:F_N(v)\ge0.95\},\\
+q_N&=\inf\{v:F_N(v)\ge1-\alpha\},\\
 u_{\mathrm{ctrl}}(b)&=\operatorname{snap}_{\mathcal G}^{\uparrow}(q_N).
 \label{eq:u_ctrl}
 \end{align}
@@ -495,7 +496,7 @@ this alignment before running the primary experiment.
 The bank-level objective used for training and posterior evaluation is
 \begin{equation}
 \widehat{\operatorname{MOCU}}_N(b)
-=\sum_n w_n\{u_{\mathrm{ctrl}}+20(U_n-u_{\mathrm{ctrl}})_+-U_n\}.
+=\sum_n w_n\{u_{\mathrm{ctrl}}+\lambda(U_n-u_{\mathrm{ctrl}})_+-U_n\}.
 \label{eq:particle_mocu}
 \end{equation}
 All methods use the same bank, loss, quantile, and control range. Probe and
@@ -524,7 +525,7 @@ not imply monotonic improvement for every realized history or trained policy.
 For an independent test system $\theta^\star$, evaluate the applied action
 against a separately computed continuous physical oracle $U^*(\theta^\star)$:
 \begin{equation}
-R^*=u_{\mathrm{ctrl}}+20[U^*(\theta^\star)-u_{\mathrm{ctrl}}]_+
+R^*=u_{\mathrm{ctrl}}+\lambda[U^*(\theta^\star)-u_{\mathrm{ctrl}}]_+
 -U^*(\theta^\star).
 \label{eq:realized_regret}
 \end{equation}
@@ -537,7 +538,7 @@ class. A strictly grid-relative MOCU instead subtracts
 $\min_{v\in\mathcal G}L(\theta,v)$ for each model.
 
 Under the threshold model and exact posterior, the quantile ensures posterior
-coverage $\Pr_b(U\le u_b^*)\ge0.95$. It does not protect every posterior
+coverage $\Pr_b(U\le u_b^*)\ge1-\alpha$. It does not protect every posterior
 model and is not a guaranteed empirical safety rate. Report true-system
 nadir and ROCOF violations, safety counts and confidence intervals, control
 magnitude, and regret separately. Any 95\% safety eligibility rule must be
@@ -738,7 +739,7 @@ J_{\mathrm{DAD}}(\phi)
 This method is non-myopic because the policy is trained using the final consequence of the complete adaptive probe sequence. An early probe is therefore valued not only by its immediate effect, but also by how its observation changes the later probe selections and the final \(u_{\mathrm{ctrl}}\).
 
 Because the probe actions are discrete and the IBR map
-\(\psi^\star=Q_{0.95}(U\mid b)\) is nondifferentiable, a policy-gradient
+\(\psi^\star=Q_{1-\alpha}(U\mid b)\) is nondifferentiable, a policy-gradient
 estimator is used. For rollout \(b\), the preferred terminal cost is the belief
 MOCU~\eqref{eq:belief_mocu} of the sampled trajectory
 \[
@@ -813,11 +814,11 @@ mapping from posterior beliefs, not generally a single fixed sequence.
 For the aligned particle bank, the terminal quantile is piecewise constant
 on the particle simplex:
 \begin{equation}
-u_{\mathrm{ctrl}}(b)=\inf\{v:\sum_nw_n\mathbf1\{U_n\le v\}\ge0.95\}.
+u_{\mathrm{ctrl}}(b)=\inf\{v:\sum_nw_n\mathbf1\{U_n\le v\}\ge1-\alpha\}.
 \label{eq:moe_piecewise_control}
 \end{equation}
 The corresponding MOCU is Eq.~\eqref{eq:particle_mocu}. Posterior mass can
-cross the 0.95 boundary without eliminating any particle, changing the
+cross the $1-\alpha$ boundary without eliminating any particle, changing the
 terminal action and potentially the best next probe.
 The optimal action partitions belief space into regions
 \begin{equation}
@@ -1177,6 +1178,13 @@ is reported as a validation diagnostic. A method with \(\widehat P_{\mathrm{safe
 
 \subsubsection{Publication-level experimental design}
 
+\paragraph{Loss-preference setting.}
+The current numerical experiments set $\lambda=20$, equivalently
+$\alpha=1/\lambda=0.05$, so the terminal decision is the posterior 95\%
+quantile. This is a prespecified loss preference, not a physical constant or
+an empirically calibrated damage ratio. All methods use the same setting;
+a sensitivity comparison must vary $\lambda$ and $\alpha$ consistently.
+
 \paragraph{Prespecified systems and factors.}
 The primary benchmark is a factorial comparison over IEEE
 \(\{9,14,30\}\)-bus systems and horizons \(T\in\{3,4,5\}\).
@@ -1374,7 +1382,7 @@ operational intervention. Their feasibility and safety checks are distinct.
 \paragraph{Practical problem statement.}
 For each validated physical model, choose $T$ sequential bus--duration probes
 at fixed amplitude. Observations update the distribution of required terminal
-control. The shared finite-loss decision is its 95\% quantile; the scientific
+control. The shared finite-loss decision is its $(1-\alpha)$ quantile; the scientific
 question is whether observation-dependent planning reduces realized regret
 relative to strong Myopic and Fixed baselines. A maximum across contingencies
 may define a model's physical requirement, but a maximum across posterior
