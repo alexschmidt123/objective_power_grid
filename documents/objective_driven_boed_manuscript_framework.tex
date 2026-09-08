@@ -76,56 +76,76 @@ Controlled excitation motivates the frequency-response probes~\cite{peng2024prob
 \label{sec:problem}
 
 \subsection{Power-Grid Dynamics and Latent Parameter Space}
-Let $\mathcal N$ be the set of physical buses, $\mathcal M\subseteq\mathcal N$
-the dynamic-machine buses, and $\mathcal A=\mathcal N\setminus\mathcal M$
-the algebraic buses. Put $m=|\mathcal M|$. For the reduced swing model,
-let $\delta_i(s)$ be the rotor angle in the synchronous reference frame
-and $\omega_i(s)$ the angular-speed deviation. The closed state equations are
+Following Peng et al.~\cite{peng2024probing}, we model inertia and fast
+frequency response jointly. Let $\Delta\omega(s)$ be angular-speed deviation
+from an equilibrium with synchronous speed $\omega_{\mathrm s}=2\pi f_0$.
+On a common power base $S_{\mathrm{base}}$, the incremental power balance is
+\begin{equation}
+M\frac{d\Delta\omega}{ds}
+=\Delta P_m-\Delta P_e-D\Delta\omega,
+\qquad M=\frac{2HS_n}{\omega_{\mathrm s}S_{\mathrm{base}}}.
+\label{eq:inertia-balance}
+\end{equation}
+Here $H$ is the inertia constant, $S_n$ the rating associated with $H$,
+$\Delta P_m$ and $\Delta P_e$ the input and electrical-output power changes,
+and $D$ the damping coefficient. Power changes are in per unit.
+The paper represents fast frequency support by a droop relation,
+\begin{equation}
+\Delta P_m=-K\Delta f=-\frac{K}{2\pi}\Delta\omega,
+\qquad \Delta f=\frac{\Delta\omega}{2\pi},
+\label{eq:frequency-support}
+\end{equation}
+where $K$ is expressed here in per-unit power per Hz. Substitution gives
+\begin{equation}
+M\frac{d\Delta\omega}{ds}
+=-\Delta P_e-\left(\frac{K}{2\pi}+D\right)\Delta\omega.
+\label{eq:aggregate_model}
+\end{equation}
+Thus $M$ governs the rate of frequency change, whereas $K$ governs the
+restoring power supplied in response to a frequency deviation. We retain
+known damping $D$; Peng et al. neglect it in their estimation model.
+
+To represent probe location, we extend this aggregate relation to a reduced
+network. Let $\mathcal N$ be the physical-bus set and
+$\mathcal M\subseteq\mathcal N$ the dynamic-machine buses, with
+$m=|\mathcal M|$. For $i\in\mathcal M$, write $\omega_i$ for angular-speed
+deviation and $\delta_i$ for rotor angle in the synchronous frame:
 \begin{align}
 \dot\delta_i(s)&=\omega_i(s),\\
 M_i\dot\omega_i(s)&=-\Delta P_{e,i}(\boldsymbol\delta(s))
--\left(\frac{K_i}{2\pi}+D_i\right)\omega_i(s)+v_i(s),
-\label{eq:swing-frequency}\\
-\Delta P_{e,i}(\boldsymbol\delta)&=
-\sum_{j\in\mathcal M}B_{ij}
-\left[\sin(\delta_i-\delta_j)-\sin(\delta_i^0-\delta_j^0)\right].
-\label{eq:network-power}
+-\left(\frac{K_i}{2\pi}+D_i\right)\omega_i(s)+v_i(s).
+\label{eq:swing-frequency}
 \end{align}
-Here $i\in\mathcal M$, $(\boldsymbol\delta^0,\mathbf0)$ is the equilibrium,
-and $M_i>0$, $K_i,D_i\ge0$. Injections use a common per-unit base and
-$\Delta f_i=\omega_i/(2\pi)$ is measured in Hz. The reduced model follows
-the frequency-response formulation in~\cite{peng2024probing}.
-
-For a connected lossless network with fixed voltage magnitudes, let
-$\mathbf L$ be the weighted susceptance Laplacian, ordered as
-$(\mathcal M,\mathcal A)$. If $\mathcal A\ne\varnothing$, assume
-$\mathbf L_{\mathcal A\mathcal A}$ is invertible and define
-\begin{align}
-\mathbf L_{\mathrm{red}}&=\mathbf L_{\mathcal M\mathcal M}
--\mathbf L_{\mathcal M\mathcal A}\mathbf L_{\mathcal A\mathcal A}^{-1}
-\mathbf L_{\mathcal A\mathcal M},\\
-\mathbf A_{\mathrm{inj}}&=
-\left[\mathbf I_m\; -\mathbf L_{\mathcal M\mathcal A}
-\mathbf L_{\mathcal A\mathcal A}^{-1}\right],\\
-B_{ij}&=-(L_{\mathrm{red}})_{ij}\quad(i\ne j),\qquad B_{ii}=0.
-\label{eq:kron-map}
-\end{align}
-The physical-bus input map is $\mathbf a(b)=\mathbf A_{\mathrm{inj}}\mathbf e_b$
-in the stated ordering. With no algebraic buses, use $\mathbf L_{\mathrm{red}}=\mathbf L$
-and $\mathbf A_{\mathrm{inj}}=\mathbf I_m$. The linear Kron map combined with
-sinusoidal coupling is a reduced-model approximation. Network data follow
-the IEEE test cases in MATPOWER~\cite{zimmerman2011matpower}.
-
-The uncertain parameters are machine-specific:
+The initial state is $(\boldsymbol\delta^0,\mathbf0)$, and the reduced
+lossless-network power change is
 \begin{equation}
-\boldsymbol\theta=((M_i,K_i):i\in\mathcal M)\in\Theta,
-\qquad \boldsymbol\theta\sim p_0.
+\Delta P_{e,i}(\boldsymbol\delta)=\sum_{j\in\mathcal M}B_{ij}
+\left[\sin(\delta_i-\delta_j)-\sin(\delta_i^0-\delta_j^0)\right],
+\label{eq:network-power}
+\end{equation}
+with known coupling coefficients $B_{ij}$. A physical-bus injection is
+mapped to $\mathbf v$ by the known vector $\mathbf a(b)$; the reduction is
+given in Eq.~\eqref{eq:kron-map}. This machine-wise model is our extension
+of the paper's aggregate response, with $K_i$ representing effective fast
+frequency support at each retained machine bus.
+
+The latent vector contains the inertia and response coefficients:
+\begin{equation}
+\boldsymbol\theta=(M_1,\ldots,M_m,K_1,\ldots,K_m)^\top\in\Theta,
+\qquad\boldsymbol\theta\sim p_0,
 \label{eq:theta-prior}
 \end{equation}
-Assume $\Theta$ is compact, $M_i\ge M_{\min}>0$, $K_i\ge0$, and known
-$D_i\ge0$. The prior is a probability distribution on $\Theta$.
-Inputs are bounded and piecewise continuous. Uncertain parameters are
-assigned only to dynamic machines.
+where indices $1,\ldots,m$ follow the retained-machine ordering and
+\begin{equation}
+\Theta=\prod_{i=1}^{m}[M_i^-,M_i^+]
+\times\prod_{i=1}^{m}[K_i^-,K_i^+],
+\qquad M_i^->0,\quad K_i^-\ge0.
+\label{eq:latent-space}
+\end{equation}
+The topology, coupling, damping, and equilibrium are known. Algebraic buses
+remain admissible probe locations but have no independent $M_i$ or $K_i$.
+With bounded piecewise-continuous inputs, these assumptions define the
+frequency trajectories used by the observation and terminal-control models.
 
 \subsection{Reset Probe Experiment and Design Space}
 At stage $t$, the design is a bus--duration pair
@@ -368,6 +388,29 @@ history follows.
 % END SHARED FINITE-LOSS MOCU
 
 \section{Numerical Approximation and Evaluation}
+\subsection{Reduced-network construction}
+Let $\mathcal A=\mathcal N\setminus\mathcal M$. For a connected lossless
+network with fixed voltage magnitudes, let
+$\mathbf L$ be the weighted susceptance Laplacian, ordered as
+$(\mathcal M,\mathcal A)$. If $\mathcal A\ne\varnothing$, assume
+$\mathbf L_{\mathcal A\mathcal A}$ is invertible and define
+\begin{align}
+\mathbf L_{\mathrm{red}}&=\mathbf L_{\mathcal M\mathcal M}
+-\mathbf L_{\mathcal M\mathcal A}\mathbf L_{\mathcal A\mathcal A}^{-1}
+\mathbf L_{\mathcal A\mathcal M},\\
+\mathbf A_{\mathrm{inj}}&=
+\left[\mathbf I_m\; -\mathbf L_{\mathcal M\mathcal A}
+\mathbf L_{\mathcal A\mathcal A}^{-1}\right],\\
+B_{ij}&=-(L_{\mathrm{red}})_{ij}\quad(i\ne j),\qquad B_{ii}=0.
+\label{eq:kron-map}
+\end{align}
+The physical-bus input map is $\mathbf a(b)=\mathbf A_{\mathrm{inj}}\mathbf e_b$
+in the stated ordering. With no algebraic buses, use $\mathbf L_{\mathrm{red}}=\mathbf L$
+and $\mathbf A_{\mathrm{inj}}=\mathbf I_m$. The linear Kron map combined with
+sinusoidal coupling is a reduced-model approximation. Network data follow
+the IEEE test cases in MATPOWER~\cite{zimmerman2011matpower}.
+
+
 \subsection{Particle approximation}
 The implementation represents this posterior with $N_{\mathrm p}$ particles
 $\{\boldsymbol{\theta}^{(n)},w_n^{(t)}\}_{n=1}^{N_{\mathrm p}}$. Their weights
