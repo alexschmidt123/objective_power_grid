@@ -1,5 +1,8 @@
 #!/bin/bash
 # Source from a Slurm allocation; override BOED_VENV for another environment.
+# Site profile scripts assume non-strict login-shell behavior.
+set +eu
+set +o pipefail
 source /etc/profile
 set -euo pipefail
 module purge
