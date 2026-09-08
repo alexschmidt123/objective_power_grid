@@ -415,29 +415,32 @@ depends on the stated loss preference, physical validation, and calibration.
 
 \section{Compared Design Methods}
 \begin{table}[t]
-\caption{Method capabilities; adaptive or horizon-aware architecture does not establish a measured performance advantage.}
+\caption{How the compared methods select experiments.}
 \centering
 \begin{tabular}{lccc}
-\toprule Method & Adaptive & Non-myopic & Learned\\
+\toprule Method & Adaptive & Non-myopic & Trained policy\\
 \midrule
 Random & No & No & No\\
-Fixed & No & Open-loop & No\\
+Fixed & No & Yes & No\\
 Myopic & Yes & No & No\\
 DAD & Yes & Yes & Yes\\
 RL-sBOED & Yes & Yes & Yes\\
-Step-DAD & Yes & Yes & Semi-amortized\\
+Step-DAD & Yes & Yes & Yes\\
 \bottomrule
 \end{tabular}
 \end{table}
-Random ignores observations. Fixed selects an open-loop sequence. Myopic
-optimizes immediate expected utility after each observation. DAD learns an
-amortized history-conditioned policy offline. RL-sBOED learns a sequential
+Adaptive methods use observed outcomes to choose subsequent probes.
+Non-myopic methods account for the value of later probes. Random ignores
+observations. Fixed optimizes a complete sequence before collecting any
+observations and then keeps that sequence unchanged. Myopic optimizes only
+the next probe's expected utility after each observation. DAD trains a policy
+that maps observation histories to probe choices. RL-sBOED learns a sequential
 policy with stepwise rewards. \todo{Give reproducible implementation details.}
 For MOCU, the DAD-family loss is the finite-loss posterior objective, not
 the original information-gain objective. Discrete actions use score-function
 policy optimization. These are objective-based adaptations of the cited methods.
-Step-DAD~\cite{hedman2025stepdad} starts from an amortized DAD policy and performs limited
-history-specific online refinement. Report its offline DAD training cost,
+Step-DAD~\cite{hedman2025stepdad} starts from a trained DAD policy and updates it using the
+current observation history before selecting subsequent probes. Report its offline DAD training cost,
 online refinement cost, and action-selection cost separately.
 \todo{Describe the implementation and deviations from the original paper.}
 
