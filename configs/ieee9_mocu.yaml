@@ -118,7 +118,7 @@ control:
   robust_rule: quantile
   # Posterior 95% quantile; held-out physical safety is a separate check. Safety is
   # still measured by the physical simulator; methods below 0.95 are invalid.
-  alpha: 0.05
+  posterior_coverage: 0.95  # Single MOCU decision-preference parameter.
   enforce_bayes_loss_alignment: true
   safety_margin: 0.0
   snap_up: true
@@ -194,11 +194,9 @@ poster_mocu_protocol:
   horizons: [2, 3, 4]
   N_obs: 5
   noise_sigma: 0.01
-  alpha: 0.05
   pilot_seed: 101
   seeds: [101, 202, 303]
   methods: [dad, rl_sboed, step_dad, myopic, fixed, random]
-  minimum_safety_rate: 0.95
   promotion_gate: paired_advantage_and_non_degenerate_terminal_control
 
 training:
@@ -247,14 +245,12 @@ training:
     actor_lr: 0.0003
     critic_lr: 0.001
     max_grad_norm: 1.0
-    undercontrol_penalty: 20.0
     # Keep the terminal rule and its scored loss mathematically aligned.
     # With alpha=0.05 and undercontrol_penalty=20, zero event penalty gives
     # over/under slopes 1:19, whose Bayes action is exactly Q_0.95(U|history).
     # Physical safety remains an independent >=0.95 evaluation validity gate.
     violation_penalty: 0.0
     checkpoint_safety_penalty: 50.0
-    min_valid_safety_rate: 0.95
     moe_counterfactual_coefficient: 0.0
     moe_branching_coefficient: 0.0
     moe_counterfactual_floor_fraction: 0.0

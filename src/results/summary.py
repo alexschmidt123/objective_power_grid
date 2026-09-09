@@ -116,107 +116,36 @@ def write_objective_summary_md(
         if parsed and parsed.get("step_number") is not None:
             meta["T"] = parsed["step_number"]
 
-    headers = [
-        "Method",
-        "mean_MOCU",
-        "mean_u_ctrl",
-        "safety_rate",
-        "valid",
-        "n_unique_sequences",
-    ]
-    parsed_rows: list[dict[str, Any]] = []
+    parsed_rows = []
     if summary_csv.is_file():
         with summary_csv.open(encoding="utf-8") as handle:
-            for row in csv.DictReader(handle):
-                method = str(row.get("method", ""))
-                if method.endswith("_stochastic"):
-                    continue
-                parsed_rows.append(row)
-    rows: list[list[str]] = []
-    for row in parsed_rows:
-        method = str(row.get("method", ""))
-        mean_gap = row.get("mean_gap")
-        mean_excess = row.get("mean_excess")
-        under = row.get("under_control_rate")
-        if mean_excess in (None, "") and mean_gap not in (None, ""):
-            # Legacy CSV: approximate excess from raw gap (clamped).
-            try:
-                mean_excess = max(float(mean_gap), 0.0)
-            except (TypeError, ValueError):
-                mean_excess = ""
-        rows.append(
-            [
-                method,
-                _fmt(row.get("mean_mocu", row.get("mean_gap"))),
-                _fmt(row.get("mean_u_ctrl")),
-                _fmt(row.get("safety_rate"), digits=3),
-                (
-                    "VALID"
-                    if str(row.get("method", "")) == "Oracle"
-                    or str(row.get("valid", "0")) in ("1", "True", "true")
-                    else "INVALID"
-                ),
-                str(row.get("n_unique_sequences") or "—"),
-            ]
-        )
-    if not rows:
-        rows.append(["(summary.csv missing)", "—", "—", "—", "—", "—"])
-
-    def _rank_key(row: dict[str, Any]) -> tuple[float]:
-        def _f(key: str, default: float) -> float:
-            try:
-                v = row.get(key)
-                if v in (None, ""):
-                    return default
-                return float(v)
-            except (TypeError, ValueError):
-                return default
-
-        return (_f("mean_mocu", _f("mean_gap", float("inf"))),)
-
-    ranking = [
-        m
-        for m, _ in sorted(
-            (
-                (str(r["method"]), _rank_key(r))
-                for r in parsed_rows
-                if str(r.get("method", "")) not in ("", "Oracle")
-                and str(r.get("valid", "0")) in ("1", "True", "true")
-            ),
-            key=lambda x: x[1],
-        )
-    ]
-    extra: list[str] = [
-        "Notes:",
-        "",
-        "- `mean_MOCU` = mean terminal posterior Yoon MOCU on common "
-        "held-out systems: `u_ctrl − posterior_mean(u_optimal)`.",
-        "- Raw `u_ctrl − u_ctrl_opt` is a separate held-out perfect-information "
-        "diagnostic and is not the posterior MOCU.",
-        "- Methods with safety rate below 0.95 are INVALID and receive no rank.",
-        "- Valid methods are ranked by lower mean_MOCU.",
-        "- `mean_u_ctrl` remains a secondary physical-control metric.",
-        "- Policies use argmax actions only (no `*_stochastic` rows).",
-    ]
-    if ranking:
-        extra.extend(
-            [
-                "",
-                "## Ranking (safety ≥ 0.95; mean_MOCU ↓)",
-                "",
-                ", ".join(ranking),
-            ]
-        )
-
+            parsed_rows = [r for r in csv.DictReader(handle)
+                           if r.get("method") != "Oracle"
+                           and not r.get("method", "").endswith("_stochastic")]
+    rows = [[str(r["method"]), _fmt(r.get("mean_posterior_mocu"))]
+            for r in parsed_rows]
+    extra = ["", "## Empirical safety rate", "",
+             "| Method | Safety rate | Safe outcomes / evaluated outcomes | Physical systems |",
+             "|---|---:|---:|---:|"]
+    for r in parsed_rows:
+        rate = r.get("safety_rate")
+        rate_text = f"{100 * float(rate):.2f}%" if rate not in (None, "") else "—"
+        safe = r.get("safety_safe_outcomes", "—")
+        total = r.get("safety_n_outcomes", r.get("n_design_replicates", "—"))
+        systems = r.get("safety_n_systems", r.get("n", "—"))
+        extra.append(f"| {r['method']} | {rate_text} | {safe} / {total} | {systems} |")
+    coverage = next((r.get("posterior_coverage") for r in parsed_rows
+                     if r.get("posterior_coverage") not in (None, "")), "not recorded")
+    extra.extend(["", f"Posterior coverage: {coverage}.", "",
+        "Posterior MOCU and empirical safety rate are separate primary reported metrics.",
+        "Safety requires both physical frequency and RoCoF limits to hold in the declared scenario.",
+        "Rates average repeats within each physical system before averaging across systems.",
+        "These are single-run estimates; across-seed standard deviations require multiple runs.",
+        "Coverage is a decision preference, not a measured safety rate or engineering acceptance threshold."])
     return write_summary_md(
-        exp_dir,
-        system=system,
-        experiment_type="objective_based",
-        meta=meta,
-        table_headers=headers,
-        table_rows=rows,
-        extra_lines=extra or None,
-    )
+        exp_dir, system=system, experiment_type="objective_based", meta=meta,
+        table_headers=["Method", "Terminal posterior MOCU"],
+        table_rows=rows or [["(summary.csv missing)", "—"]], extra_lines=extra)
 
 
 def write_eig_summary_md(

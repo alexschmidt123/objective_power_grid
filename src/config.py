@@ -121,6 +121,38 @@ class SBOEDConfig:
     raw: dict[str, Any]
     config_path: Path
 
+    def __post_init__(self) -> None:
+        """Resolve the optional single-parameter finite-loss MOCU interface.
+
+        posterior_coverage is posterior coverage, not an engineering safety guarantee.
+        It takes precedence over legacy derived keys in resolved run records.
+        Configurations without it retain their existing behavior.
+        """
+        control = self.raw.get("control") or {}
+        if "posterior_coverage" not in control:
+            return
+        value = control["posterior_coverage"]
+        if isinstance(value, bool):
+            raise ValueError("control.posterior_coverage must be a finite number in (0, 1)")
+        q = float(value)
+        if not np.isfinite(q) or not 0.0 < q < 1.0:
+            raise ValueError("control.posterior_coverage must be a finite number in (0, 1)")
+        training = self.raw.setdefault("training", {})
+        nested = any(key in training for key in EXPERIMENT_TYPES)
+        objective = training.setdefault("objective_based", {}) if nested else training
+        if control.get("robust_rule", "quantile") != "quantile":
+            raise ValueError("control.posterior_coverage requires robust_rule: quantile")
+        if float(control.get("safety_margin", 0.0)) != 0.0:
+            raise ValueError("control.posterior_coverage requires zero safety_margin")
+        if float(objective.get("violation_penalty", 0.0)) != 0.0:
+            raise ValueError("control.posterior_coverage requires zero violation_penalty")
+        control.update(posterior_coverage=q, alpha=1.0-q, robust_rule="quantile",
+                       enforce_bayes_loss_alignment=True)
+        objective.update(undercontrol_penalty=1.0/(1.0-q),
+                         min_valid_safety_rate=q, violation_penalty=0.0)
+        protocol = self.raw.setdefault("poster_mocu_protocol", {})
+        protocol.update(alpha=1.0-q, minimum_safety_rate=q)
+
     @property
     def name(self) -> str:
         return self.config_path.stem

@@ -391,6 +391,29 @@ def attach_oracle(
     return enriched, errors
 
 
+def safety_statistics(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Equal-system Monte Carlo safety estimate; retain outcome denominators."""
+    grouped: dict[int, list[int]] = {}
+    for row in rows:
+        safe = row["method_safe"]
+        if safe not in (0, 1, False, True):
+            raise ValueError("method_safe must be a binary physical-safety outcome")
+        grouped.setdefault(int(row["theta_id"]), []).append(int(safe))
+    if not grouped:
+        raise ValueError("Safety statistics require evaluated outcomes")
+    per_system = np.asarray([np.mean(v) for v in grouped.values()])
+    count = sum(len(v) for v in grouped.values())
+    safe_count = sum(sum(v) for v in grouped.values())
+    return {
+        "safety_rate": float(per_system.mean()),
+        "safety_n_systems": len(grouped),
+        "safety_n_outcomes": count,
+        "safety_safe_outcomes": safe_count,
+        "safety_unsafe_outcomes": count - safe_count,
+        "safety_rate_weighting": "equal physical systems; average repeats within system",
+    }
+
+
 def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
     sub = [r for r in rows if r["method"] == method]
     if not sub:
@@ -414,7 +437,8 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
     ]
     eval_mode = sub[0].get("eval_mode", "")
     base = sub[0].get("base_method") or method
-    safety_rate = float(safe.mean())
+    safety_stats = safety_statistics(sub)
+    safety_rate = safety_stats["safety_rate"]
     # Cluster repeated stochastic-design draws by physical system.  Treating
     # every Random seed as an independent test system would understate the CI.
     mocu_by_theta: dict[int, list[float]] = {}
@@ -457,7 +481,7 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
         "mean_realized_control_gap": float(gaps.mean()),
         "gap_ci95_low": float(np.percentile(gaps, 2.5)),
         "gap_ci95_high": float(np.percentile(gaps, 97.5)),
-        "safety_rate": safety_rate,
+        **safety_stats,
         "valid": int(safety_rate >= MIN_VALID_SAFETY_RATE),
         "validity_threshold": MIN_VALID_SAFETY_RATE,
         "n_unique_sequences": int(div["n_unique_sequences"]),
@@ -701,6 +725,7 @@ def run_full_evaluation(
             "seconds_per_rollout"
         ]
         summary["eval_seed"] = int(eval_seed)
+        summary["posterior_coverage"] = 1.0 - float(ctx.alpha)
         summary["timing_scope"] = (
             "offline=method-specific preparation; online=warm action selection + "
             "observation lookup + posterior update + terminal decision; shared physical "

@@ -251,3 +251,62 @@ These rules are mandatory for every final performance table:
 
 For an ablation table, the columns may represent the ablated variable instead
 of `T`. The one-metric-per-table and `mean ± std` rules still apply.
+
+
+## Configurable posterior coverage for MOCU
+
+- Set `control.posterior_coverage: q` with `0 < q < 1` in the experiment YAML.
+  This is a posterior coverage preference, not a physical safety standard.
+  Express the loss as `L(u,U)=u+max(U-u,0)/(1-q)` and the decision as the
+  posterior q-quantile. Do not introduce separate named tail or penalty
+  parameters in the manuscript or user configuration. The loader supplies
+  legacy internal fields and the checkpoint/diagnostic threshold from `q`. Derived legacy keys
+  are overridden when this parameter is present; old snapshots without it
+  keep their original behavior. Quantile control, zero margin, and zero
+  binary violation penalty are required. Physical frequency and RoCoF limits
+  are separate and are not changed by this parameter.
+- Retrain each coverage setting through `sweep_run.sh` in an isolated source
+  snapshot; reuse matching physical banks, not checkpoints or Fixed caches
+  from a different loss. Record the input ratio and resolved loss parameters.
+- Compare methods within each ratio; raw MOCU across ratios has a different
+  loss scale. When the user asks for MOCU, report `mean_posterior_mocu` only
+  by default; do not relabel `mean_mocu` (held-out regret) as posterior MOCU.
+
+
+## Explicit approval before task submission
+
+- User instruction: never submit any task without explicit user approval. Before
+  submitting cluster jobs or launching experiment/audit tasks, present the exact
+  settings, methods, seeds, job count, estimated duration, and SU cost for review
+  and wait for approval. A parameter discussion or request to make a parameter
+  configurable is not submission approval. Read-only status checks, preparation,
+  and requested cancellations can proceed. Do not expand an approved run scope.
+
+
+## Explicit approval before running or editing code
+
+- Never run any code or edit any code without the user's explicit approval.
+  This includes scripts, shell commands, tests, diagnostics, experiments, and
+  code changes. Describe the proposed action and wait for approval before
+  executing it. Do not infer approval from a discussion, suggestion, status
+  question, or earlier approval for a different action. Approval applies only
+  to the action and scope explicitly authorized by the user.
+- This rule takes precedence over any earlier instruction allowing autonomous
+  execution, read-only command checks, preparation, tests, or code edits.
+
+
+## Joint MOCU and safety reporting
+
+- Report terminal posterior MOCU and empirical physical safety rate as separate
+  primary metrics for each method. Posterior coverage is an input preference;
+  empirical safety is an output, not an engineering acceptance threshold.
+- Safety requires both frequency-nadir and RoCoF limits for the declared
+  monitoring interval and contingency set. Average repeated outcomes within
+  each physical system before averaging systems; preserve safe/unsafe counts,
+  number of outcomes, and number of distinct physical systems. Confidence
+  intervals must respect physical-system clusters and stated sampling assumptions.
+- The human-readable MOCU column uses mean_posterior_mocu, never the legacy
+  mean_mocu field (held-out regret). Keep every method visible, including poor
+  safety outcomes; legacy validity flags do not establish engineering approval.
+- Never edit existing submitted source snapshots or historical result files
+  to apply reporting changes. New code applies to future authorized runs.
