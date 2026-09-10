@@ -149,9 +149,9 @@ class SBOEDConfig:
         control.update(posterior_coverage=q, alpha=1.0-q, robust_rule="quantile",
                        enforce_bayes_loss_alignment=True)
         objective.update(undercontrol_penalty=1.0/(1.0-q),
-                         min_valid_safety_rate=q, violation_penalty=0.0)
+                         violation_penalty=0.0)
         protocol = self.raw.setdefault("poster_mocu_protocol", {})
-        protocol.update(alpha=1.0-q, minimum_safety_rate=q)
+        protocol.update(alpha=1.0-q)
 
     @property
     def name(self) -> str:

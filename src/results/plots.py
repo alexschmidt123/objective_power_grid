@@ -136,7 +136,7 @@ def _metric_value(row: dict[str, Any], *, eig: bool) -> float | None:
     keys = (
         ("terminal_eig_mean", "mean_eig", "ΔH")
         if eig
-        else ("mean_mocu", "mean_gap")
+        else ("mean_posterior_mocu",)
     )
     for key in keys:
         raw = row.get(key)

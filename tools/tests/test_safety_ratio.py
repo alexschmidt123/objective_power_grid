@@ -17,7 +17,7 @@ class PosteriorCoverageTests(unittest.TestCase):
             tr = resolve_training_block(cfg.raw['training'], 'objective_based')
             penalty = tr['undercontrol_penalty']
             self.assertAlmostEqual(penalty, 1/(1-q))
-            self.assertEqual(tr['min_valid_safety_rate'], q)
+            self.assertNotIn('min_valid_safety_rate', tr)
             costs = support[None, :] + penalty*np.maximum(support[:, None]-support[None, :], 0)
             exhaustive = weights @ costs
             mocu, action, _ = _posterior_mocu_gpu(

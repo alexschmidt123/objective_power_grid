@@ -584,9 +584,9 @@ p_{\mathrm{safe}}(b_T,u)
 under the feasible, monotone threshold assumptions. Hence
 $p_{\mathrm{safe}}(b_T,u_q^\pi(h_T))\ge q$ under that posterior model;
 this does not ensure $\widehat p_{\mathrm{safe}}\ge q$ on a finite test set
-or guarantee safety under model mismatch. Every method is assessed by both
-terminal posterior MOCU (lower is better) and empirical safety rate (higher
-is better), reported separately. The coverage $q$ is an input preference;
+or guarantee safety under model mismatch. Terminal posterior MOCU is the primary design-comparison metric.
+Empirical safety rate and control magnitude are supporting physical diagnostics,
+reported separately without treating minimum control as an independent goal. The coverage $q$ is an input preference;
 safety rate is an outcome, not another tuning parameter or an automatic
 engineering acceptance threshold.
 
@@ -685,8 +685,8 @@ P_{\mathrm{safe}}(\pi)
 \right].
 \]
 This quantity verifies posterior calibration, control-bank coverage, and
-simulator consistency. A method is valid for final comparison only when
-\(P_{\mathrm{safe}}(\pi)\ge0.95\); invalid methods receive no rank.
+simulator consistency. It is reported without a safety eligibility gate;
+methods are compared by terminal posterior MOCU.
 
 \subsubsection{Sequential probe-selection methods}
 
@@ -1000,7 +1000,7 @@ already optimal and no adaptive architecture can obtain a strict gain.
 The MoE mechanism is therefore supported only if experiments separately show
 \begin{enumerate}
     \item lower paired held-out terminal MOCU than RL-sBOED and a
-    parameter-matched single network, with safety rate \(\ge0.95\);
+    parameter-matched single network; safety is reported separately;
     \item adaptivity evidence (\(n_{\mathrm{unique}}\gg 1\), nontrivial
     router/expert utilization) on claimed adaptive cells; and
     \item transfer to the SIR ODE EIG benchmark under the same method list.
@@ -1237,10 +1237,9 @@ Under the threshold model and exact posterior, the quantile ensures posterior
 coverage $\Pr_b(U\le u_b^*)\ge q$. It does not protect every posterior
 model and is not a guaranteed empirical safety rate. Report true-system
 nadir and ROCOF violations, safety counts and confidence intervals, control
-magnitude, and regret separately. A safety eligibility threshold, if used, is a separate declared study
-criterion; it is not established by the loss-derived quantile. The current
-95\% diagnostic threshold has no cited engineering-standard basis. Retain
-all method outcomes and report uncertainty in the safety estimate.
+magnitude, and regret separately. No safety-rate gate is used for method
+ranking or primary checkpoint selection. Retain all method outcomes and
+report uncertainty in the safety estimate.
 Mathematical consistency with MOCU does not by itself validate this surrogate
 as an engineering cost model.
 
@@ -1277,19 +1276,23 @@ produces the terminal action. The selected \(u_{\mathrm{ctrl}}(H_T)\) is evaluat
 parameter \(\theta^\star\), not on a posterior mean or on a particle selected
 with knowledge of \(\theta^\star\).
 
-The primary comparison metric is mean held-out realized operational regret:
+The primary comparison metric is mean terminal posterior MOCU:
+\begin{equation}
+\widehat{\mathcal M}_m=\frac1{B_{\mathrm{test}}}\sum_b\operatorname{MOCU}(b_T^{(b,m)}).
+\label{eq:empirical_posterior_mocu}
+\end{equation}
+Held-out realized operational regret is a separate diagnostic:
 \begin{equation}
 \widehat R_m=\frac1{B_{\mathrm{test}}}\sum_{b=1}^{B_{\mathrm{test}}}
 R^*(\theta^{\star(b)},H_T^{(b)}).
 \label{eq:empirical_regret}
 \end{equation}
 The continuous oracle and finite-loss expression are given in
-Eq.~\eqref{eq:realized_regret}. Mean posterior bank MOCU is a separate
-diagnostic; subtracting the true-system requirement from the applied control
+Eq.~\eqref{eq:realized_regret}. This diagnostic is not posterior MOCU; subtracting the true-system requirement from the applied control
 without the shortfall penalty can reward under-control and is invalid here.
 Report control magnitude and shortfall components as well as the scalar loss.
-Retain all method outcomes, including those failing a prespecified safety
-eligibility rule, but do not give ineligible methods an operational winner rank.
+Retain all method outcomes. Rank finite posterior MOCU values without a
+safety-rate eligibility gate; control magnitude and safety explain physical outcomes.
 
 The true-system safety rate
 \[
@@ -1299,7 +1302,12 @@ The true-system safety rate
 \sum_{b=1}^{B_{\mathrm{test}}}
 \mathbf 1\{\text{terminal control is safe on }\theta^{\star(b)}\}
 \]
-is reported as a validation diagnostic. Under the current benchmark convention, a method with \(\widehat P_{\mathrm{safe},m}<0.95\) is flagged as below the study threshold. This flag is not an engineering noncompliance determination; its MOCU and safety results remain reported. The numerator and denominator (for example, \(61/64\)) and a binomial confidence interval are reported with the point estimate. The final test size is selected by an a priori precision or power calculation; a small pilot test set is not used to make a definitive 0.95 safety claim. A low value may reflect sampling variation, the chosen loss tradeoff, posterior miscalibration, insufficient particle support, an incomplete control range, or simulator mismatch; it does not imply that the diagnostic probe itself was unsafe. Posterior entropy and terminal EIG may be reported as secondary explanatory measures, but they do not determine the method ranking.
+is reported as a physical validation diagnostic, with no fixed acceptance
+threshold. Report counts and denominators. For one independent trial per
+system, binomial intervals may be used; repeated outcomes require intervals
+that preserve physical-system clusters. The empirical safety rate does not
+determine the MOCU ranking.
+
 
 \subsubsection{Publication-level experimental design}
 
@@ -1383,12 +1391,12 @@ and, where applicable, the same noise realization. The primary contrast is
 \[
 \Delta_{m,\mathrm{Myopic}}
 =
-\widehat R_m
+\widehat{\mathcal M}_m
 -
-\widehat R_{\mathrm{Myopic}}.
+\widehat{\mathcal M}_{\mathrm{Myopic}}.
 \]
 A paired bootstrap confidence interval is reported for each prespecified
-contrast. An advantage is claimed only when the method is valid and the
+contrast. An advantage is claimed only when the paired posterior-MOCU
 confidence interval for \(\Delta\) lies below zero. Effect sizes, confidence
 intervals, and exact test counts are reported in addition to ranks. Familywise
 or false-discovery-rate control is used for confirmatory claims across the

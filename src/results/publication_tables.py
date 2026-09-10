@@ -77,7 +77,7 @@ def collect(
     offline: dict[tuple[str, int], dict[int, float]] = defaultdict(dict)
     coverage: dict[int, set[int]] = defaultdict(set)
     filename = "terminal_eig_summary.csv" if eig else "summary.csv"
-    metric_keys = ("terminal_eig_mean", "mean_eig", "ΔH") if eig else ("mean_mocu", "mean_gap")
+    metric_keys = ("terminal_eig_mean", "mean_eig", "ΔH") if eig else ("mean_posterior_mocu",)
     for exp_dir in exp_dirs:
         parsed = parse_result_dir_name(exp_dir.name)
         if parsed is None:

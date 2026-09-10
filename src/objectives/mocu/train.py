@@ -116,9 +116,6 @@ class TrainConfig:
     # Goal-oriented utility C=u + lambda_gap*(u_req-u)_+ + lambda_event*1[unsafe].
     undercontrol_penalty: float = 10.0
     violation_penalty: float = 0.10
-    # Checkpoint score adds this penalty per unit empirical under-control rate.
-    checkpoint_safety_penalty: float = 10.0
-    min_valid_safety_rate: float = 0.95
     # Dense DAD/RL policies otherwise see only the sampled action's return out
     # of a large discrete action set.  This auxiliary uses the same simulated
     # rollout batch to rank every feasible next experiment under the current
@@ -267,10 +264,6 @@ class TrainConfig:
             cfg.undercontrol_penalty = float(raw["undercontrol_penalty"])
         if "violation_penalty" in raw:
             cfg.violation_penalty = float(raw["violation_penalty"])
-        if "checkpoint_safety_penalty" in raw:
-            cfg.checkpoint_safety_penalty = float(raw["checkpoint_safety_penalty"])
-        if "min_valid_safety_rate" in raw:
-            cfg.min_valid_safety_rate = float(raw["min_valid_safety_rate"])
         if "dense_counterfactual_coefficient" in raw:
             cfg.dense_counterfactual_coefficient = float(
                 raw["dense_counterfactual_coefficient"]
@@ -651,44 +644,22 @@ def dense_post_prior_branching_loss(
 
 
 def checkpoint_score(
-    mean_u_ctrl: float,
+    mean_posterior_mocu: float,
     n_unique: int,
     n_rollouts: int,
     *,
     diversity_weight: float,
     min_unique_fraction: float,
-    under_control_rate: float = 0.0,
-    safety_penalty: float = 0.0,
-    min_safety_rate: float = 0.95,
 ) -> tuple[float, bool]:
-    """Joint checkpoint score (lower is better).
-
-    ``score = mean_mocu - diversity_weight * unique_frac`` for safety-valid
-    policies, so modest diversity is rewarded without ignoring MOCU. Unsafe
-    policies stay in the 1000+ band. ``meets_floor`` is a soft-gate diagnostic
-    for ``should_replace_checkpoint``.
-    """
+    """Posterior MOCU score; optional research diversity term, no safety gate."""
     n = max(int(n_rollouts), 1)
     unique_frac = float(n_unique) / float(n)
     min_unique = 1
     if n >= 2:
         min_unique = max(2, int(np.ceil(float(min_unique_fraction) * n)))
     meets_floor = int(n_unique) >= int(min_unique)
-    safety_rate = 1.0 - float(under_control_rate)
-    if safety_rate < float(min_safety_rate):
-        # Invalid checkpoints cannot beat any valid checkpoint.
-        score = (
-            1_000.0
-            + float(safety_penalty) * (float(min_safety_rate) - safety_rate)
-            + float(mean_u_ctrl)
-        )
-    else:
-        score = float(mean_u_ctrl) - float(diversity_weight) * unique_frac
+    score = float(mean_posterior_mocu) - float(diversity_weight) * unique_frac
     return score, meets_floor
-
-
-# Safety-invalid checkpoints use score = 1000 + … in ``checkpoint_score``.
-_CHECKPOINT_UNSAFE_SCORE = 500.0
 
 
 def checkpoint_rank_key(
@@ -697,8 +668,7 @@ def checkpoint_rank_key(
     n_unique: int,
 ) -> tuple:
     """Lexicographic rank on joint score (lower tuple is better)."""
-    unsafe = float(score) >= _CHECKPOINT_UNSAFE_SCORE
-    return (unsafe, float(score), -int(n_unique))
+    return (float(score), -int(n_unique))
 
 
 def should_replace_checkpoint(
@@ -728,10 +698,6 @@ def should_replace_checkpoint(
     slack = max(float(floor_mocu_slack), 0.0)
 
     if prefer_unique_floor and bool(meets_floor) != bool(best_meets_floor):
-        cand_unsafe = float(score) >= _CHECKPOINT_UNSAFE_SCORE
-        best_unsafe = float(best_score) >= _CHECKPOINT_UNSAFE_SCORE
-        if cand_unsafe and not best_unsafe:
-            return False
         if meets_floor and not best_meets_floor:
             # Upgrade collapsed → diverse only if MOCU is preserved within slack.
             if cand_mocu <= best_mocu + slack + 1e-12:
@@ -984,6 +950,7 @@ def evaluate_policy(
                 "sequence": " ".join(map(str, traj["actions"])),
                 "u_ctrl": traj["terminal_u_ctrl"],
                 "u_req": float(systems[tid]["u_req"]),
+                "posterior_mocu": traj["terminal_posterior_mocu"],
                 "eval_mode": "deterministic" if deterministic else "stochastic",
             }
         )
@@ -1008,9 +975,9 @@ def evaluate_policy(
         "median_u_ctrl": float(np.median(u)) if u.size else float("nan"),
         "std_u_ctrl": float(u.std()) if u.size else float("nan"),
         "under_control_rate": float(np.mean(u + 1e-12 < u_req)),
-        "mean_mocu": (
-            float(realized_mocu.mean()) if realized_mocu.size else float("nan")
-        ),
+        "mean_mocu": float(np.mean([r["posterior_mocu"] for r in rows])),
+        "mean_posterior_mocu": float(np.mean([r["posterior_mocu"] for r in rows])),
+        "mean_realized_regret": float(realized_mocu.mean()),
         "mean_shortfall": float(np.maximum(u_req - u, 0.0).mean()),
         "n_unique_sequences": int(div["n_unique_sequences"]),
         "sequence_entropy": float(div["sequence_entropy"]),
@@ -1881,9 +1848,6 @@ def train_policy(
                 int(config.validation_rollouts),
                 diversity_weight=config.checkpoint_diversity_weight,
                 min_unique_fraction=config.min_unique_sequence_fraction,
-                under_control_rate=float(val["under_control_rate"]),
-                safety_penalty=config.checkpoint_safety_penalty,
-                min_safety_rate=config.min_valid_safety_rate,
             )
             row["validation_mean_u_ctrl"] = val["mean_u_ctrl"]
             row["validation_mean_mocu"] = val["mean_mocu"]
@@ -1891,10 +1855,8 @@ def train_policy(
             row["validation_sequence_entropy"] = val["sequence_entropy"]
             row["validation_unique_frac"] = val["unique_frac"]
             row["validation_under_control_rate"] = val["under_control_rate"]
-            row["validation_valid"] = int(
-                float(val["under_control_rate"])
-                <= 1.0 - config.min_valid_safety_rate + 1e-12
-            )
+            row["validation_valid"] = int(np.isfinite(val["mean_posterior_mocu"]))
+            row["validation_mean_realized_regret"] = val["mean_realized_regret"]
             row["validation_mean_shortfall"] = val["mean_shortfall"]
             row["validation_checkpoint_score"] = score
             row["validation_meets_unique_floor"] = int(meets_floor)

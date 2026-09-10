@@ -260,7 +260,7 @@ of `T`. The one-metric-per-table and `mean ± std` rules still apply.
   Express the loss as `L(u,U)=u+max(U-u,0)/(1-q)` and the decision as the
   posterior q-quantile. Do not introduce separate named tail or penalty
   parameters in the manuscript or user configuration. The loader supplies
-  legacy internal fields and the checkpoint/diagnostic threshold from `q`. Derived legacy keys
+  legacy internal loss fields from `q`; it sets no empirical safety threshold. Derived legacy keys
   are overridden when this parameter is present; old snapshots without it
   keep their original behavior. Quantile control, zero margin, and zero
   binary violation penalty are required. Physical frequency and RoCoF limits
@@ -298,7 +298,7 @@ of `T`. The one-metric-per-table and `mean ± std` rules still apply.
 ## Joint MOCU and safety reporting
 
 - Report terminal posterior MOCU and empirical physical safety rate as separate
-  primary metrics for each method. Posterior coverage is an input preference;
+  metrics for each method; posterior MOCU is primary and safety is diagnostic. Posterior coverage is an input preference;
   empirical safety is an output, not an engineering acceptance threshold.
 - Safety requires both frequency-nadir and RoCoF limits for the declared
   monitoring interval and contingency set. Average repeated outcomes within
@@ -310,3 +310,18 @@ of `T`. The one-metric-per-table and `mean ± std` rules still apply.
   safety outcomes; legacy validity flags do not establish engineering approval.
 - Never edit existing submitted source snapshots or historical result files
   to apply reporting changes. New code applies to future authorized runs.
+
+
+## Posterior-MOCU selection protocol
+
+- Primary training rewards, validation checkpoint selection, result ranking,
+  plots, and publication tables use terminal posterior MOCU. Safety rate and
+  control magnitude are supporting diagnostics, with no automatic safety gate.
+- Coverage does not set an empirical safety threshold. Deprecated safety-gate
+  keys do not affect checkpoint selection. Optional MoE diversity ablations
+  must remain explicitly labeled; standard methods use zero diversity weight.
+- The legacy evaluation mean_mocu column still denotes realized regret for
+  schema compatibility. Never use it as a fallback for missing posterior MOCU.
+- Historical submitted runs used the earlier regret-based checkpoint selection
+  and safety gate. Their frozen protocols must be disclosed, not retroactively
+  described as using the corrected posterior-only checkpoint rule.

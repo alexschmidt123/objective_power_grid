@@ -447,9 +447,9 @@ p_{\mathrm{safe}}(b_T,u)
 under the feasible, monotone threshold assumptions. Hence
 $p_{\mathrm{safe}}(b_T,u_q^\pi(h_T))\ge q$ under that posterior model;
 this does not ensure $\widehat p_{\mathrm{safe}}\ge q$ on a finite test set
-or guarantee safety under model mismatch. Every method is assessed by both
-terminal posterior MOCU (lower is better) and empirical safety rate (higher
-is better), reported separately. The coverage $q$ is an input preference;
+or guarantee safety under model mismatch. Terminal posterior MOCU is the primary design-comparison metric.
+Empirical safety rate and control magnitude are supporting physical diagnostics,
+reported separately without treating minimum control as an independent goal. The coverage $q$ is an input preference;
 safety rate is an outcome, not another tuning parameter or an automatic
 engineering acceptance threshold.
 
@@ -650,10 +650,9 @@ Under the threshold model and exact posterior, the quantile ensures posterior
 coverage $\Pr_b(U\le u_b^*)\ge q$. It does not protect every posterior
 model and is not a guaranteed empirical safety rate. Report true-system
 nadir and ROCOF violations, safety counts and confidence intervals, control
-magnitude, and regret separately. A safety eligibility threshold, if used, is a separate declared study
-criterion; it is not established by the loss-derived quantile. The current
-95\% diagnostic threshold has no cited engineering-standard basis. Retain
-all method outcomes and report uncertainty in the safety estimate.
+magnitude, and regret separately. No safety-rate gate is used for method
+ranking or primary checkpoint selection. Retain all method outcomes and
+report uncertainty in the safety estimate.
 Mathematical consistency with MOCU does not by itself validate this surrogate
 as an engineering cost model.
 

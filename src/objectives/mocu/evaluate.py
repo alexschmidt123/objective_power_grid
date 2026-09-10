@@ -34,7 +34,6 @@ from src.control.oracle_u_ctrl import (
     load_or_compute_oracle_cache,
 )
 
-MIN_VALID_SAFETY_RATE = 0.95
 
 
 def _synchronize_cuda() -> None:
@@ -414,6 +413,22 @@ def safety_statistics(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def rank_posterior_mocu(summaries):
+    """Rank finite posterior scores without a physical-safety eligibility gate."""
+    for row in summaries:
+        row["valid"] = int(row.get("n", 0) > 0 and np.isfinite(
+            float(row.get("mean_posterior_mocu", float("nan")))))
+        row["validity_definition"] = "finite posterior MOCU; not safety approval"
+        row["rank_by_posterior_mocu"] = ""
+    ranked = sorted([row for row in summaries if row["valid"]],
+                    key=lambda row: float(row["mean_posterior_mocu"]))
+    for row in ranked:
+        row["rank_by_posterior_mocu"] = 1 + sum(
+            float(other["mean_posterior_mocu"]) < float(row["mean_posterior_mocu"])
+            for other in ranked)
+    return ranked
+
+
 def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
     sub = [r for r in rows if r["method"] == method]
     if not sub:
@@ -482,8 +497,7 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
         "gap_ci95_low": float(np.percentile(gaps, 2.5)),
         "gap_ci95_high": float(np.percentile(gaps, 97.5)),
         **safety_stats,
-        "valid": int(safety_rate >= MIN_VALID_SAFETY_RATE),
-        "validity_threshold": MIN_VALID_SAFETY_RATE,
+
         "n_unique_sequences": int(div["n_unique_sequences"]),
         "sequence_entropy": float(div["sequence_entropy"]),
         "unique_frac": float(div["unique_frac"]),
@@ -731,25 +745,7 @@ def run_full_evaluation(
             "observation lookup + posterior update + terminal decision; shared physical "
             "bank generation excluded and must be reported separately"
         )
-    # Hard validity constraint: methods below 95% safety are not ranked.
-    # Among valid methods, lower terminal MOCU wins.
-    ranked = sorted(
-        [
-            s
-            for s in summaries
-            if s.get("n", 0) > 0
-            and float(s.get("safety_rate", 0.0)) >= MIN_VALID_SAFETY_RATE
-        ],
-        key=lambda s: float(s.get("mean_mocu", float("inf"))),
-    )
-    for s in summaries:
-        s["valid"] = int(
-            float(s.get("safety_rate", 0.0)) >= MIN_VALID_SAFETY_RATE
-        )
-        s["validity_threshold"] = MIN_VALID_SAFETY_RATE
-        s["rank_by_mean_gap"] = ""
-    for i, s in enumerate(ranked):
-        s["rank_by_mean_gap"] = i + 1  # Legacy column name; rank is by mean_mocu.
+    ranked = rank_posterior_mocu(summaries)
 
     oracle_row = oracle_summary_row(enriched)
     if oracle_row is not None:
@@ -833,11 +829,11 @@ def run_full_evaluation(
         if enriched
         else None,
         "method_ranking": [s["method"] for s in ranked],
-        "minimum_valid_safety_rate": MIN_VALID_SAFETY_RATE,
+        "safety_eligibility_threshold": None,
         "invalid_methods": [
             s["method"] for s in summaries if not bool(s.get("valid", 0))
         ],
-        "primary_metric": "mean_mocu",
+        "primary_metric": "mean_posterior_mocu",
         "metric_schema": "realized_operational_regret_v2",
         "terminal_robust_rule": ctx.robust_rule,
         "runtime_by_method": runtime_by_method,
@@ -845,12 +841,10 @@ def run_full_evaluation(
             "Per-method online evaluation only; training, fixed-search preprocessing, "
             "hybrid calibration, and oracle/safety evaluation are reported separately."
         ),
-        "mocu_definition": (
-            "realized_operational_regret_v2: held-out mean of "
-            "u + lambda*(U-u)_+ + rho*1[unsafe] - U"
-        ),
+        "mocu_definition": "posterior expected excess loss under configured terminal rule",
+        "legacy_mean_mocu_definition": "held-out realized operational regret",
         "ranking_rule": (
-            "safety_rate >= 0.95 required; valid methods ranked by mean_mocu asc"
+            "finite mean_posterior_mocu ascending; no safety eligibility gate"
         ),
         "eval_seed": int(eval_seed),
         "summaries": summaries,

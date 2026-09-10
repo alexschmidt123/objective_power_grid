@@ -1,7 +1,7 @@
 """Write a single experiment-root ``summary.md`` comparison table.
 
 Observation mode follows ``N_obs`` (max_rocof if 0, sampled Δf otherwise).
-Primary metric: ``mean_mocu`` for objective_based, ``mean_eig`` for eig_based.
+Primary metric: ``mean_posterior_mocu`` for objective_based, ``mean_eig`` for eig_based.
 """
 
 from __future__ import annotations
@@ -137,7 +137,7 @@ def write_objective_summary_md(
     coverage = next((r.get("posterior_coverage") for r in parsed_rows
                      if r.get("posterior_coverage") not in (None, "")), "not recorded")
     extra.extend(["", f"Posterior coverage: {coverage}.", "",
-        "Posterior MOCU and empirical safety rate are separate primary reported metrics.",
+        "Posterior MOCU is primary; safety rate and control magnitude are physical diagnostics.",
         "Safety requires both physical frequency and RoCoF limits to hold in the declared scenario.",
         "Rates average repeats within each physical system before averaging across systems.",
         "These are single-run estimates; across-seed standard deviations require multiple runs.",
