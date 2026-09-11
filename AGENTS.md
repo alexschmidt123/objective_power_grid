@@ -365,3 +365,19 @@ of `T`. The one-metric-per-table and `mean ± std` rules still apply.
   they do not change the MOCU or EIG protocols or their submitted snapshots.
 - MSC implementation work is not run authorization. Formal experiments still
   require the user's explicit approval and maintained shell entrypoints.
+
+
+## Shared bank layout
+
+- Store reusable IEEE9 data under `data/ieee9/probe_master/`,
+  `data/ieee9/probe_subsets/<bank-id>/`, and
+  `data/ieee9/control_banks/<bank-id>/`. MOCU and MSC share physical control
+  bank structures; coverage and objective belong to run configuration.
+- Bank IDs preserve physical/data provenance; validate physics, safety limits,
+  control grid and identical parameter rows before reuse. A matching folder
+  name alone does not establish compatibility.
+- Put run configurations, checkpoints and results in stamped experiments.
+  Reference shared bank paths; do not generate reusable banks inside a run.
+- Preserve old paths as compatibility symlinks when relocating existing banks;
+  never rewrite frozen source snapshots or historical bank metadata.
+  `data/ieee9/layout_manifest.json` records old and new locations.

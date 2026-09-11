@@ -14,12 +14,12 @@ N: 3
 
 data:
   # Relative to the clone root, so both workstations share the same layout.
-  dataset_dir: data/ieee9_mocu_duration_v2_best_subset
+  dataset_dir: data/ieee9/probe_subsets/18bbf82fb4c41693
   # Reuse matching theta rows and select only the configured 54 action columns.
-  reuse_bank_dir: data/ieee9_duration_dense_0p01
+  reuse_bank_dir: data/ieee9/probe_master
   # Separate terminal-control/OCU extension.  Row n is tied to row n of the
   # shared EIG probe bank; delta_f is referenced, not duplicated.
-  mocu_dataset_dir: data/ieee9_mocu_duration_v2_best_control
+  mocu_dataset_dir: data/ieee9/control_banks/51a41921b19785d0
   # If the bank already exists, generate-data reuses it. If it is missing
   # (fresh clone), generate-data builds it with CUDA.
   generate_if_missing: true
