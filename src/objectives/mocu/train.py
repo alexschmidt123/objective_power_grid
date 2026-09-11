@@ -24,7 +24,7 @@ from src.objectives.mocu.context import (
     belief_summary,
     control_from_log_weights,
     observe_compressed,
-    posterior_mocu,
+    posterior_mocu, posterior_objective, objective_name,
     update_posterior_vector,
 )
 from src.objectives.mocu.rewards import (
@@ -829,7 +829,7 @@ def sample_trajectory(
     actions: list[int] = []
     observations: list[np.ndarray] = []
     u_path = [control_from_log_weights(ctx, log_w).u_ctrl]
-    mocu_path = [posterior_mocu(ctx, log_w)]
+    mocu_path = [posterior_objective(ctx, log_w)]
     states: list[tuple[torch.Tensor, ...]] = []
     log_probs: list[float] = []
     carry = (
@@ -882,7 +882,7 @@ def sample_trajectory(
         observations.append(y)
         log_w = update_posterior_vector(ctx, log_w, action, y)
         u_path.append(control_from_log_weights(ctx, log_w).u_ctrl)
-        mocu_path.append(posterior_mocu(ctx, log_w))
+        mocu_path.append(posterior_objective(ctx, log_w))
 
     if reward_mode == "dad_terminal":
         trace = dad_rewards(mocu_path)
@@ -892,12 +892,14 @@ def sample_trajectory(
         "actions": actions,
         "observations": observations,
         "u_path": u_path,
-        "posterior_mocu_path": mocu_path,
+        "posterior_objective_path": mocu_path,
+        "objective": objective_name(ctx),
         "rewards": list(trace.rewards),
         "log_probs": log_probs,
         "states": states,
         "terminal_u_ctrl": float(u_path[-1]),
-        "terminal_posterior_mocu": float(mocu_path[-1]),
+        "terminal_posterior_mocu": float(posterior_mocu(ctx, log_w)),
+        "terminal_objective": float(mocu_path[-1]),
         "theta_id": theta_id,
         "log_w": log_w,
     }
@@ -951,6 +953,7 @@ def evaluate_policy(
                 "u_ctrl": traj["terminal_u_ctrl"],
                 "u_req": float(systems[tid]["u_req"]),
                 "posterior_mocu": traj["terminal_posterior_mocu"],
+                "objective": traj.get("terminal_objective", traj["terminal_posterior_mocu"]),
                 "eval_mode": "deterministic" if deterministic else "stochastic",
             }
         )
@@ -976,6 +979,7 @@ def evaluate_policy(
         "std_u_ctrl": float(u.std()) if u.size else float("nan"),
         "under_control_rate": float(np.mean(u + 1e-12 < u_req)),
         "mean_mocu": float(np.mean([r["posterior_mocu"] for r in rows])),
+        "mean_objective": float(np.mean([r["objective"] for r in rows])),
         "mean_posterior_mocu": float(np.mean([r["posterior_mocu"] for r in rows])),
         "mean_realized_regret": float(realized_mocu.mean()),
         "mean_shortfall": float(np.maximum(u_req - u, 0.0).mean()),
@@ -1025,7 +1029,10 @@ def _posterior_mocu_gpu(
     violation_penalty: float,
     robust_rule: str = "ibr_max",
     weight_eps: float = 1.0e-12,
+    objective: str = "mocu",
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    if objective == "msc" and robust_rule != "quantile":
+        raise ValueError("MSC requires quantile control")
     weights = torch.softmax(log_w, dim=-1)
     rule = str(robust_rule).strip().lower()
     if rule in {"ibr", "ibr_max", "max", "yoon_ibr"}:
@@ -1045,6 +1052,12 @@ def _posterior_mocu_gpu(
     u_ctrl, weights = _posterior_control_gpu(
         log_w, u_support, u_grid, alpha=alpha, margin=margin, snap_up=snap_up
     )
+    if objective == "msc":
+        if margin != 0 or not snap_up or torch.any(u_support > u_grid[-1] + 1e-12):
+            raise ValueError("Invalid or infeasible MSC control support")
+        return u_ctrl, u_ctrl, weights
+    if objective != "mocu":
+        raise ValueError(f"Unknown objective: {objective}")
     shortfall = (u_support[None, :] - u_ctrl[:, None]).clamp_min(0.0)
     realized_cost = (
         u_ctrl[:, None]
@@ -1189,7 +1202,7 @@ def _collect_batched_rollouts(
         margin=ctx.margin,
         undercontrol_penalty=config.undercontrol_penalty,
         violation_penalty=config.violation_penalty,
-        robust_rule=ctx.robust_rule, snap_up=ctx.snap_up,
+        robust_rule=ctx.robust_rule, objective=objective_name(ctx), snap_up=ctx.snap_up,
     )
     mocu_by_step.append(mocu0)
     batch_index = torch.arange(batch, device=device)
@@ -1256,7 +1269,7 @@ def _collect_batched_rollouts(
                     margin=ctx.margin,
                     undercontrol_penalty=config.undercontrol_penalty,
                     violation_penalty=config.violation_penalty,
-                    robust_rule=ctx.robust_rule, snap_up=ctx.snap_up,
+                    robust_rule=ctx.robust_rule, objective=objective_name(ctx), snap_up=ctx.snap_up,
                 )
                 # Policy utilities are maximized, hence negative MOCU.
                 utilities = -cf_mocu.reshape(batch, chunk)
@@ -1359,7 +1372,7 @@ def _collect_batched_rollouts(
             margin=ctx.margin,
             undercontrol_penalty=config.undercontrol_penalty,
             violation_penalty=config.violation_penalty,
-            robust_rule=ctx.robust_rule, snap_up=ctx.snap_up,
+            robust_rule=ctx.robust_rule, objective=objective_name(ctx), snap_up=ctx.snap_up,
         )
         mocu_by_step.append(mocu)
     mocu_path = torch.stack(mocu_by_step, dim=1)
@@ -1392,6 +1405,7 @@ def _collect_batched_rollouts(
         "returns": returns,
         "terminal_u_ctrl": u_ctrl,
         "terminal_cost": terminal_cost,
+        "terminal_objective": mocu_path[:, -1],
         "counterfactual_utility": (
             torch.cat(counterfactual_utility_by_step, dim=0)
             if counterfactual_utility_by_step
@@ -1413,6 +1427,10 @@ def train_policy(
     if not smoke:
         from src.objectives.mocu.preflight import enforce_decision_preflight
         enforce_decision_preflight(ctx)
+    if objective_name(ctx) == "msc":
+        # Retain the MOCU diagnostic loss; MSC rewards use only posterior control.
+        training_block = dict(training_block, undercontrol_penalty=ctx.undercontrol_penalty,
+                              violation_penalty=ctx.violation_penalty)
     config = TrainConfig.from_cfg(training_block)
     if (
         abs(float(config.undercontrol_penalty) - float(ctx.undercontrol_penalty))
@@ -1453,7 +1471,7 @@ def train_policy(
     )
     print(
         f"[train] {method} checkpoint selection: "
-        f"joint_score=MOCU-{config.checkpoint_diversity_weight:g}*unique_frac; "
+        f"joint_score={objective_name(ctx).upper()}-{config.checkpoint_diversity_weight:g}*unique_frac; "
         f"soft_floor={'ON' if config.prefer_unique_sequence_floor else 'OFF'} "
         f"(uniq>={min_u}/{config.validation_rollouts}, "
         f"mocu_slack={config.unique_floor_mocu_slack:g})"
@@ -1806,6 +1824,8 @@ def train_policy(
             "update": update,
             "mean_train_u_ctrl": float(np.mean(terminals)),
             "mean_train_control_cost": float(np.mean(terminal_costs)),
+            "mean_train_objective": float(rollout["terminal_objective"].mean().item()),
+            "objective": objective_name(ctx),
             "method": method,
             "update_seconds": float(update_elapsed),
             "trajectories_sampled": int(trajectories_sampled),
@@ -1843,7 +1863,7 @@ def train_policy(
                 deterministic=True,
             )
             score, meets_floor = checkpoint_score(
-                float(val["mean_mocu"]),
+                float(val["mean_objective"]),
                 int(val["n_unique_sequences"]),
                 int(config.validation_rollouts),
                 diversity_weight=config.checkpoint_diversity_weight,
@@ -1851,11 +1871,15 @@ def train_policy(
             )
             row["validation_mean_u_ctrl"] = val["mean_u_ctrl"]
             row["validation_mean_mocu"] = val["mean_mocu"]
+            row["validation_mean_objective"] = val["mean_objective"]
+            row["objective"] = objective_name(ctx)
+            if objective_name(ctx) == "msc":
+                row["validation_mean_msc"] = val["mean_objective"]
             row["validation_n_unique_sequences"] = val["n_unique_sequences"]
             row["validation_sequence_entropy"] = val["sequence_entropy"]
             row["validation_unique_frac"] = val["unique_frac"]
             row["validation_under_control_rate"] = val["under_control_rate"]
-            row["validation_valid"] = int(np.isfinite(val["mean_posterior_mocu"]))
+            row["validation_valid"] = int(np.isfinite(val["mean_objective"]))
             row["validation_mean_realized_regret"] = val["mean_realized_regret"]
             row["validation_mean_shortfall"] = val["mean_shortfall"]
             row["validation_checkpoint_score"] = score
@@ -1869,7 +1893,7 @@ def train_policy(
             print(
                 f"[train] {method} val update={update} "
                 f"mean_u={val['mean_u_ctrl']:.4f} "
-                f"mocu={val['mean_mocu']:.4f} "
+                f"{objective_name(ctx)}={val['mean_objective']:.4f} "
                 f"under={val['under_control_rate']:.3f} "
                 f"unique_seq={val['n_unique_sequences']}/{config.validation_rollouts} "
                 f"seq_H={val['sequence_entropy']:.3f} "
@@ -1897,12 +1921,12 @@ def train_policy(
                 best_meets_floor=bool(best_meets_floor),
                 best_unique=int(best_unique),
                 prefer_unique_floor=bool(config.prefer_unique_sequence_floor),
-                mean_mocu=float(val["mean_mocu"]),
+                mean_mocu=float(val["mean_objective"]),
                 best_mean_mocu=float(best_val),
                 floor_mocu_slack=float(config.unique_floor_mocu_slack),
             ):
                 best_score = float(score)
-                best_val = float(val["mean_mocu"])
+                best_val = float(val["mean_objective"])
                 best_unique = int(val["n_unique_sequences"])
                 best_meets_floor = bool(meets_floor)
                 best_state = copy.deepcopy(policy.state_dict())
@@ -1917,7 +1941,11 @@ def train_policy(
                         "n_obs": ctx.n_obs,
                         "obs_indices": ctx.obs_indices.tolist(),
                         "checkpoint_score": best_score,
-                        "validation_mean_mocu": best_val,
+                        "objective": objective_name(ctx),
+                        "posterior_coverage": 1-ctx.alpha,
+                        "terminal_rule_hash": ctx.terminal_rule_hash,
+                        "validation_mean_objective": best_val,
+                        ("validation_mean_msc" if objective_name(ctx) == "msc" else "validation_mean_mocu"): best_val,
                         "validation_n_unique_sequences": best_unique,
                         "validation_meets_unique_floor": best_meets_floor,
                         "parent_initialization": None,
@@ -1970,7 +1998,11 @@ def train_policy(
             "n_obs": ctx.n_obs,
             "obs_indices": ctx.obs_indices.tolist(),
             "checkpoint_score": best_score,
-            "validation_mean_mocu": best_val,
+            "objective": objective_name(ctx),
+                        "posterior_coverage": 1-ctx.alpha,
+                        "terminal_rule_hash": ctx.terminal_rule_hash,
+                        "validation_mean_objective": best_val,
+                        ("validation_mean_msc" if objective_name(ctx) == "msc" else "validation_mean_mocu"): best_val,
             "validation_n_unique_sequences": best_unique,
             "validation_meets_unique_floor": best_meets_floor,
             "parent_initialization": None,
@@ -2021,13 +2053,15 @@ def train_policy(
         f"[train] {method} finished updates={len(history)} "
         f"trajectories={trajectories_sampled} "
         f"elapsed={elapsed_total:.1f}s "
-        f"best_val_mocu={best_val:.4f} unique={best_unique} "
+        f"best_val_{objective_name(ctx)}={best_val:.4f} unique={best_unique} "
         f"score={best_score:.4f} → {policy_path}"
     )
     result = {
         "method": method,
         "seed": seed,
-        "best_validation_mean_mocu": best_val,
+        ("best_validation_mean_msc" if objective_name(ctx) == "msc" else "best_validation_mean_mocu"): best_val,
+        "objective": objective_name(ctx),
+        "best_validation_mean_objective": best_val,
         "best_validation_n_unique_sequences": best_unique,
         "best_checkpoint_score": best_score,
         "best_meets_unique_floor": best_meets_floor,
@@ -2070,7 +2104,8 @@ def train_policy(
             "n_updates_ran": result["n_updates_ran"],
             "trajectories_sampled": result["trajectories_sampled"],
             "trajectories_budget": result["trajectories_budget"],
-            "best_validation_mean_mocu": result["best_validation_mean_mocu"],
+            "objective": objective_name(ctx),
+            "best_validation_mean_objective": result["best_validation_mean_objective"],
             "best_validation_n_unique_sequences": result[
                 "best_validation_n_unique_sequences"
             ],
@@ -2116,6 +2151,14 @@ def load_trained_policy(
             f"(expected {stem}.pth)"
         )
     payload = torch.load(ckpt_path, map_location=device, weights_only=False)
+    saved_objective = payload.get("objective", "mocu")
+    if saved_objective != objective_name(ctx):
+        raise ValueError("Checkpoint objective mismatch: MSC and MOCU policies are not interchangeable")
+    if objective_name(ctx) == "msc" and (
+        payload.get("posterior_coverage") != 1-ctx.alpha
+        or payload.get("terminal_rule_hash") != ctx.terminal_rule_hash
+    ):
+        raise ValueError("MSC checkpoint coverage/control rule mismatch")
     is_moe = (
         str(payload.get("architecture", "")).endswith("moe")
         or "moe" in str(payload.get("architecture", ""))

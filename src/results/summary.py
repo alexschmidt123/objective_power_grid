@@ -122,7 +122,9 @@ def write_objective_summary_md(
             parsed_rows = [r for r in csv.DictReader(handle)
                            if r.get("method") != "Oracle"
                            and not r.get("method", "").endswith("_stochastic")]
-    rows = [[str(r["method"]), _fmt(r.get("mean_posterior_mocu"))]
+    is_msc = meta.get("experiment_type") == "msc_based"
+    primary = "mean_msc" if is_msc else "mean_posterior_mocu"
+    rows = [[str(r["method"]), _fmt(r.get(primary))]
             for r in parsed_rows]
     extra = ["", "## Empirical safety rate", "",
              "| Method | Safety rate | Safe outcomes / evaluated outcomes | Physical systems |",
@@ -134,17 +136,22 @@ def write_objective_summary_md(
         total = r.get("safety_n_outcomes", r.get("n_design_replicates", "—"))
         systems = r.get("safety_n_systems", r.get("n", "—"))
         extra.append(f"| {r['method']} | {rate_text} | {safe} / {total} | {systems} |")
+    extra.extend(["", "## Selected control and oracle MSC", "",
+                  "| Method | Selected control | Oracle MSC |", "|---|---:|---:|"])
+    for r in parsed_rows:
+        extra.append(f"| {r['method']} | {_fmt(r.get('mean_u_ctrl'))} | {_fmt(r.get('mean_oracle_msc', r.get('mean_u_ctrl_opt')))} |")
     coverage = next((r.get("posterior_coverage") for r in parsed_rows
                      if r.get("posterior_coverage") not in (None, "")), "not recorded")
     extra.extend(["", f"Posterior coverage: {coverage}.", "",
-        "Posterior MOCU is primary; safety rate and control magnitude are physical diagnostics.",
+        f"Safety evaluation: {meta.get('safety_evaluation', 'not recorded')}.",
+        ("Posterior MSC is primary; physical safety is independently evaluated and is not certified by coverage." if is_msc else "Posterior MOCU is primary; safety rate and control magnitude are physical diagnostics."),
         "Safety requires both physical frequency and RoCoF limits to hold in the declared scenario.",
         "Rates average repeats within each physical system before averaging across systems.",
         "These are single-run estimates; across-seed standard deviations require multiple runs.",
         "Coverage is a decision preference, not a measured safety rate or engineering acceptance threshold."])
     return write_summary_md(
-        exp_dir, system=system, experiment_type="objective_based", meta=meta,
-        table_headers=["Method", "Terminal posterior MOCU"],
+        exp_dir, system=system, experiment_type="msc_based" if is_msc else "objective_based", meta=meta,
+        table_headers=["Method", "Posterior MSC" if is_msc else "Terminal posterior MOCU"],
         table_rows=rows or [["(summary.csv missing)", "—"]], extra_lines=extra)
 
 

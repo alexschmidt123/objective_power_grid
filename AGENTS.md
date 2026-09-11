@@ -325,3 +325,43 @@ of `T`. The one-metric-per-table and `mean ± std` rules still apply.
 - Historical submitted runs used the earlier regret-based checkpoint selection
   and safety gate. Their frozen protocols must be disclosed, not retroactively
   described as using the corrected posterior-only checkpoint rule.
+
+
+## Independent MSC objective
+
+- `--experiment_type msc_based` selects posterior minimum safe control, alongside
+  existing `objective_based` (MOCU) and `eig_based` (EIG). This adds an objective;
+  do not rename historical MOCU runs or overwrite their results/checkpoints.
+- MSC is restricted to IEEE9, IEEE14 and IEEE30 configurations. IEEE30 remains
+  blocked by the existing unsupported dynamic-backend guard; selecting MSC does
+  not authorize or validate the reduced-swing surrogate for that model.
+- Reuse the canonical grid YAMLs and their physical observation/control banks.
+  `u_optimal.npy` / legacy `psi_star.npy` stores minimum-safe requirements;
+  `control_safe.npy` stores safety across the candidate grid. There is no need
+  for another physics bank solely because the probe objective changes.
+- MSC uses zero margin, the discrete admissible control grid and configured
+  `control.posterior_coverage=q`. It minimizes expected terminal selected
+  control, E_D[u_MSC(D;q)], subject to the posterior coverage constraint in each
+  decision. It has no shortfall penalty in its training/design score.
+  A lower MSC is not a physical safety certificate. Quantile expectation is
+  not generally monotone under information; do not promise a method advantage.
+- Reject nonfinite/infeasible requirements and bank safety tables inconsistent
+  with the assumed monotone scalar safety threshold. Never discard unsafe
+  systems to make a result look better. Frequency/RoCoF safety is evaluated
+  independently on held-out true systems.
+- DAD rewards negative terminal MSC; RL-sBOED uses telescoping MSC reduction;
+  Fixed, Myopic and Step-DAD optimize the same terminal MSC. Random uses the
+  same final controller. Use independent `training.msc_based` settings.
+- MSC checkpoints record objective, posterior coverage and terminal-rule hash;
+  reject cross-objective or mismatched-rule reuse. Fixed caches include the
+  objective in their fingerprint. MSC folders have an MSC token.
+- For MSC, primary `mean_msc` is the selected control averaged within physical
+  systems and then across systems; `mean_oracle_msc` uses true parameters and
+  the refined numerical oracle. Report physical safety alongside MSC, and
+  preserve actual `mean_posterior_mocu` as a distinct secondary diagnostic.
+  Do not label MSC as monetary cost or energy without a physical conversion.
+- Keep one metric per publication table and the existing crossed-seed rules.
+  These instructions override MOCU-only reward/ranking instructions for MSC;
+  they do not change the MOCU or EIG protocols or their submitted snapshots.
+- MSC implementation work is not run authorization. Formal experiments still
+  require the user's explicit approval and maintained shell entrypoints.

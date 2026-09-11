@@ -48,8 +48,8 @@ from src.layout import (
     write_run_config,
 )
 
-ExperimentType = Literal["objective_based", "eig_based"]
-EXPERIMENT_TYPES: tuple[str, ...] = ("objective_based", "eig_based")
+ExperimentType = Literal["objective_based", "eig_based", "msc_based"]
+EXPERIMENT_TYPES: tuple[str, ...] = ("objective_based", "eig_based", "msc_based")
 
 
 def load_experiment_config(
@@ -110,7 +110,7 @@ def _add_experiment_type(parser: argparse.ArgumentParser) -> None:
         dest="experiment_type",
         default="objective_based",
         choices=EXPERIMENT_TYPES,
-        help="objective_based (default u_ctrl) or eig_based (terminal EIG)",
+        help="objective_based (MOCU), msc_based (posterior MSC), or eig_based (EIG)",
     )
 
 
@@ -268,6 +268,8 @@ def _evaluate_run_identity(
         n_obs=n_obs,
         noise_sigma=sigma,
     )
+    if exp_type == "msc_based":
+        cfg.validate_msc()
     exp_dir = _resolve_exp_dir(cfg, exp_type, args.exp_dir, create_new=False)
     run_doc = load_run_config_doc(exp_dir) or run_doc
     train_seed = int(
@@ -281,7 +283,7 @@ def _evaluate_run_identity(
         if explicit_eval_seed is not None
         else resolve_eval_seed(exp_dir, getattr(args, "seed", None))
     )
-    if exp_type == "objective_based":
+    if exp_type in {"objective_based", "msc_based"}:
         # Training seeds measure optimizer variability.  Evaluation noise must
         # remain fixed across those seeds or the reported variance conflates two
         # unrelated sources.  This also supplies common random numbers across T.
@@ -335,6 +337,8 @@ def cmd_generate_data(args: argparse.Namespace) -> None:
         noise_sigma=args.noise_sigma,
     )
     exp_type = resolve_experiment_type(args.experiment_type)
+    if exp_type == "msc_based":
+        cfg.validate_msc()
     exp_dir = _resolve_exp_dir(
         cfg, exp_type, args.exp_dir, create_new=args.exp_dir is None
     )
@@ -410,7 +414,7 @@ def cmd_generate_data(args: argparse.Namespace) -> None:
         print(f"EXP_DIR={exp_dir}")
         return
 
-    if exp_type == "objective_based" or _use_vector_eig_pipeline(
+    if exp_type in {"objective_based", "msc_based"} or _use_vector_eig_pipeline(
         cfg, exp_type, int(args.n_obs)
     ):
         from src.banks.power_grid import bank_has_max_rocof, bank_is_complete
@@ -546,13 +550,15 @@ def cmd_train(args: argparse.Namespace) -> None:
             f"train only supports dad|rl_sboed|moe_sboed|matched_dense, got {args.method!r}"
         )
 
+    if exp_type == "msc_based":
+        cfg.validate_msc()
     exp_dir = _resolve_exp_dir(
         cfg, exp_type, args.exp_dir, create_new=False
     )
     prev_methods = load_run_config_doc(exp_dir).get("methods")
     train_record_methods = list(prev_methods) if prev_methods else [key]
 
-    if exp_type == "objective_based":
+    if exp_type in {"objective_based", "msc_based"}:
         ctx = build_context_from_config(
             cfg,
             ensure_bank=True,
@@ -688,7 +694,7 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
     cfg, exp_type, exp_dir, identity, eval_seed = _evaluate_run_identity(args)
     method_keys = list(identity["methods"])
 
-    if exp_type == "objective_based":
+    if exp_type in {"objective_based", "msc_based"}:
         ctx = build_context_from_config(
             cfg,
             ensure_bank=True,
@@ -817,8 +823,10 @@ def _diagnostic_context(args: argparse.Namespace):
         noise_sigma=args.noise_sigma,
     )
     exp_type = resolve_experiment_type(args.experiment_type)
-    if exp_type != "objective_based":
+    if exp_type not in {"objective_based", "msc_based"}:
         raise SystemExit("Policy diagnostics only support objective_based experiments")
+    if exp_type == "msc_based":
+        cfg.validate_msc()
     exp_dir = _resolve_exp_dir(cfg, exp_type, args.exp_dir, create_new=False)
     ctx = build_context_from_config(
         cfg,

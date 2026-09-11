@@ -22,7 +22,7 @@ NOISE_SIGMA="$DEFAULT_NOISE_SIGMA"
 SEED=101
 
 usage() {
-    echo "Usage: $0 --config <config.yaml> [--method <methods>|all] [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based] [--exp-dir <path>] [--smoke]" >&2
+    echo "Usage: $0 --config <config.yaml> [--method <methods>|all] [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based|msc_based] [--exp-dir <path>] [--smoke]" >&2
     echo "" >&2
     echo "  --method  optional comma-separated trainers (default: all trainable in config)" >&2
     echo "            default trainable: dad, rl_sboed" >&2

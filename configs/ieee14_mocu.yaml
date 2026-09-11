@@ -22,6 +22,9 @@ data:
   generate_if_missing: true
 
 observation:
+  msc_based:
+    N_obs: 5
+    noise_sigma: 0.005
   # EIG and MOCU are independent protocols. run.sh resolves the active subtree
   # from --experiment_type; explicit CLI observation arguments still override it.
   sampling: uniform
@@ -115,7 +118,7 @@ control:
   robust_rule: quantile
   # Posterior 95% quantile; held-out physical safety is a separate check. Safety is
   # still measured by the physical simulator; methods below 0.95 are invalid.
-  alpha: 0.05
+  posterior_coverage: 0.95
   enforce_bayes_loss_alignment: true
   safety_margin: 0.0
   snap_up: true
@@ -189,7 +192,7 @@ poster_mocu_protocol:
   horizons: [2, 3, 4]
   N_obs: 5
   noise_sigma: 0.01
-  alpha: 0.05
+  posterior_coverage: 0.95
   pilot_seed: 101
   seeds: [101, 202, 303]
   methods: [dad, rl_sboed, step_dad, myopic, fixed, random]
@@ -197,6 +200,49 @@ poster_mocu_protocol:
   promotion_gate: paired_advantage_and_non_degenerate_terminal_control
 
 training:
+  msc_based:
+    reference_method_fidelity: true
+    updates: 2000
+    min_updates_per_horizon: 200
+    trajectories_per_update: 128
+    ppo_epochs: 4
+    validation_interval: 50
+    validation_rollouts: 256
+    patience: 0
+    entropy_coefficient: 0.1
+    entropy_final_coefficient: 0.005
+    entropy_anneal_fraction: 0.8
+    dense_counterfactual_coefficient: 0.0
+    dense_counterfactual_temperature: 0.35
+    dense_branching_coefficient: 0.0
+    dense_branching_similarity_threshold: 0.5
+    dense_branching_margin: 0.35
+    dad_optimizer: reinforce
+    checkpoint_diversity_weight: 0.0
+    min_unique_sequence_fraction: 0.1
+    prefer_unique_sequence_floor: false
+    unique_floor_mocu_slack: 0.0025
+    open_loop_warn_after_updates: 100
+    actor_lr: 0.0003
+    critic_lr: 0.001
+    max_grad_norm: 1.0
+    moe_counterfactual_coefficient: 0.0
+    moe_branching_coefficient: 0.0
+    moe_counterfactual_floor_fraction: 0.0
+    moe_counterfactual_anneal_fraction: 0.33
+    moe_counterfactual_bootstrap: true
+    moe_prototype_reset_fraction: 0.2
+    moe_balance_coefficient: 0.001
+    moe_redundancy_coefficient: 0.005
+    moe_logit_scale_init: 3.0
+    moe_fixed_bc_coefficient: 0.25
+    moe_fixed_bc_anneal_fraction: 0.5
+    moe_fixed_bc_floor_fraction: 0.0
+    moe_fixed_bc_ess_threshold: 0.4
+    moe_low_ess_residual_coefficient: 0.05
+    moe_low_ess_threshold: 0.4
+    moe_residual_scale_coefficient: 0.01
+    moe_logit_scale_target: 3.5
   # Shared across types (merged into the active subtree).
   use_bank_observations: true
   device: auto

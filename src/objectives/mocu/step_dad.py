@@ -17,7 +17,7 @@ import torch
 from src.control.posterior_ctrl import normalize_log_weights
 from src.objectives.mocu.context import (
     ExperimentContext, control_from_log_weights, observe_compressed,
-    posterior_mocu, update_posterior_vector,
+    posterior_objective, posterior_mocu, objective_name, update_posterior_vector,
 )
 from src.objectives.mocu.train import _tensors_from_state, load_trained_policy
 
@@ -33,7 +33,7 @@ class StepDADConfig:
 
 
 def config_from_context(ctx: ExperimentContext, *, smoke: bool = False) -> StepDADConfig:
-    raw = dict(ctx.cfg.training_for("objective_based") or {})
+    raw = dict(ctx.cfg.training_for(ctx.experiment_type) or {})
     refine = raw.get("step_dad_refine_from_step")
     return StepDADConfig(
         refinement_steps=2 if smoke else int(raw.get("step_dad_refinement_steps", 64)),
@@ -105,7 +105,7 @@ def refine_policy(
                 fa.append(action)
                 fy.append(y)
                 fw = update_posterior_vector(ctx, fw, action, y)
-            returns.append(-float(posterior_mocu(ctx, fw)))
+            returns.append(-float(posterior_objective(ctx, fw)))
             log_prob_sums.append(torch.stack(lps).sum())
             entropy_sums.append(torch.stack(ents).sum())
 
@@ -152,7 +152,7 @@ def refine_policy(
                 fa.append(action)
                 fy.append(y)
                 fw = update_posterior_vector(ctx, fw, action, y)
-            values.append(-float(posterior_mocu(ctx, fw)))
+            values.append(-float(posterior_objective(ctx, fw)))
         return float(np.mean(values))
 
     refined_utility = validation_utility(policy)
@@ -239,7 +239,7 @@ def evaluate_step_dad(
         "fantasy_rollouts_per_update": int(cfg.fantasy_rollouts),
         "refinement_seconds": float(refine_seconds),
         "refinement_fantasy_rollouts": int(refine_fantasies),
-        "objective": "negative terminal posterior Yoon MOCU",
+        "objective": f"negative terminal posterior {objective_name(ctx)}",
         "gradient_estimator": "REINFORCE for discrete designs",
     }
 

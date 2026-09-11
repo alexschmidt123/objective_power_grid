@@ -22,7 +22,7 @@ NOISE_SIGMA="$DEFAULT_NOISE_SIGMA"
 SEED="$DEFAULT_SEED"
 
 usage() {
-    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based] [--method <methods>] [--exp-dir <path>] [--force] [--smoke]" >&2
+    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--exp-dir <path>] [--force] [--smoke]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -60,6 +60,9 @@ fi
 # Core YAMLs point to a reusable full-duration bank and a six-duration subset.
 # Each layer is idempotent: complete full banks, subsets, and MOCU extensions
 # are validated and skipped rather than regenerated.
+if [[ "$EXPERIMENT_TYPE" == "msc_based" ]]; then
+    python3 -c 'from src.config import load_config; import sys; load_config(sys.argv[1]).validate_msc()' "$CONFIG"
+fi
 FULL_ARGS=(--config "$CONFIG")
 [[ -n "$SMOKE" ]] && FULL_ARGS+=(--smoke)
 python3 tools/ensure_full_physical_bank.py "${FULL_ARGS[@]}"
@@ -68,7 +71,7 @@ python3 tools/ensure_full_physical_bank.py "${FULL_ARGS[@]}"
 # are copied from the full bank without rerunning physical simulation.
 python3 -m src.experiment "${ARGS[@]}"
 
-if [[ "$EXPERIMENT_TYPE" == "objective_based" ]]; then
+if [[ "$EXPERIMENT_TYPE" == "objective_based" || "$EXPERIMENT_TYPE" == "msc_based" ]]; then
     MOCU_DIR="$(python3 -c '
 import sys, yaml
 from pathlib import Path

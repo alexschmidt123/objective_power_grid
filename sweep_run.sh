@@ -44,7 +44,7 @@ EXPERIMENT_TYPE_SET=0
 PLOTS_ONLY=0
 
 usage() {
-    echo "Usage: $0 [--configs ieee9_mocu,ieee14_mocu] [--T 5|4,8] [--N_obs 0|120] [--noise_sigma 0.005|0.001,0.005] [--seed 101,202,303] [--eval-seeds 1001,1002,1003,1004,1005] [--experiment_type objective_based|eig_based] [--method <methods>] [--force] [--bank-structure-audit] [--smoke] [--plots-only]" >&2
+    echo "Usage: $0 [--configs ieee9_mocu,ieee14_mocu] [--T 5|4,8] [--N_obs 0|120] [--noise_sigma 0.005|0.001,0.005] [--seed 101,202,303] [--eval-seeds 1001,1002,1003,1004,1005] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--force] [--bank-structure-audit] [--smoke] [--plots-only]" >&2
     echo "" >&2
     echo "  --method    optional comma-separated evaluate/train subset (default: yaml methods)" >&2
     echo "              e.g. --method dad,rl_sboed,myopic  (no MoE; skips MoE training)" >&2

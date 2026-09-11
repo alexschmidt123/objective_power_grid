@@ -22,7 +22,7 @@ SEED="$DEFAULT_SEED"
 EVAL_SEED=""
 
 usage() {
-    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seed <evaluation-seed>] [--experiment_type objective_based|eig_based] [--method <methods>] [--exp-dir <path>] [--smoke]" >&2
+    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seed <evaluation-seed>] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--exp-dir <path>] [--smoke]" >&2
     echo "" >&2
     echo "  --method  optional comma-separated list (default excludes moe_sboed)" >&2
 }

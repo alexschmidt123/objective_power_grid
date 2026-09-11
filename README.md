@@ -49,3 +49,12 @@ For SIR, use `--config configs/sir_ode_eig.yaml --experiment_type eig_based`.
 Use `scripts/data_generation.sh`, `scripts/training.sh`, and
 `scripts/evaluation.sh` for separate stages. Reusable Slurm wrappers are in
 `hprc/`; detailed workflow and reporting rules are in `AGENTS.md`.
+
+MSC (IEEE9/IEEE14; IEEE30 dynamic backend pending) is an independent objective:
+```bash
+bash sweep_run.sh --configs ieee9_mocu --experiment_type msc_based --T 3 --N_obs 5 --noise_sigma 0.005 --seed 101 --eval-seeds 1001 --method dad,rl_sboed,step_dad,myopic,fixed,random
+```
+The canonical grid YAMLs share physical banks and contain independent
+`training.msc_based` / `observation.msc_based` blocks. Set
+`control.posterior_coverage` and probe durations in the selected configuration.
+The example uses that YAML's durations; it does not override the catalog.

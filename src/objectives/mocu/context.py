@@ -426,6 +426,7 @@ def _score_fixed_subset(
     max_theta: int | None = None,
     robust_rule: str = "ibr_max",
     snap_up: bool = True,
+    objective: str = "mocu",
 ) -> float:
     """Mean configured posterior MOCU for a Fixed probe subset."""
     subset = tuple(sorted(int(a) for a in subset))
@@ -451,10 +452,10 @@ def _score_fixed_subset(
                     y, centres_by_theta[:, act, :], sigma_y
                 )
             w = normalize_log_weights(log_w)
-            score, _ = posterior_mocu_batch(
+            score, _ = posterior_objective_batch(
                 U_support, w[None, :], alpha=alpha, margin=margin, u_grid=u_grid,
                 undercontrol_penalty=undercontrol_penalty, violation_penalty=violation_penalty,
-                robust_rule=robust_rule, snap_up=snap_up,
+                robust_rule=robust_rule, snap_up=snap_up, objective=objective,
             )
             scores.append(float(score[0]))
     return float(np.mean(scores))
@@ -478,6 +479,7 @@ def _greedy_fixed_sequence(
     chronological: bool = False,
     robust_rule: str = "ibr_max",
     snap_up: bool = True,
+    objective: str = "mocu",
 ) -> tuple[list[int], float]:
     """Greedy no-repeat Fixed design; optional forced first action for restarts."""
     _n_theta, n_actions, _obs_dim = centres_by_theta.shape
@@ -507,7 +509,7 @@ def _greedy_fixed_sequence(
                 u_grid=u_grid,
                 undercontrol_penalty=undercontrol_penalty,
                 violation_penalty=violation_penalty,
-                robust_rule=robust_rule, snap_up=snap_up,
+                robust_rule=robust_rule, snap_up=snap_up, objective=objective,
                 seed=seed,
                 noise_replicas=noise_replicas,
             )
@@ -519,7 +521,7 @@ def _greedy_fixed_sequence(
         chosen.append(int(best_a))
         print(
             f"[fixed] greedy step {step + 1}/{horizon}: action={best_a} "
-            f"mean_safety_mocu={best_score:.4f}"
+            f"mean_{objective}={best_score:.4f}"
         )
     final = _score_fixed_subset(
         chosen,
@@ -532,7 +534,7 @@ def _greedy_fixed_sequence(
         u_grid=u_grid,
         undercontrol_penalty=undercontrol_penalty,
         violation_penalty=violation_penalty,
-        robust_rule=robust_rule, snap_up=snap_up,
+        robust_rule=robust_rule, snap_up=snap_up, objective=objective,
         seed=seed,
         noise_replicas=noise_replicas,
     )
@@ -555,6 +557,7 @@ def _exhaustive_fixed_sequence(
     noise_replicas: int = 1,
     robust_rule: str = "ibr_max",
     snap_up: bool = True,
+    objective: str = "mocu",
 ) -> tuple[list[int], float, int]:
     """Enumerate all unordered size-T subsets; return best ordered by increasing id."""
     import itertools
@@ -578,7 +581,7 @@ def _exhaustive_fixed_sequence(
             u_grid=u_grid,
             undercontrol_penalty=undercontrol_penalty,
             violation_penalty=violation_penalty,
-            robust_rule=robust_rule, snap_up=snap_up,
+            robust_rule=robust_rule, snap_up=snap_up, objective=objective,
             seed=seed,
             noise_replicas=noise_replicas,
         )
@@ -587,7 +590,7 @@ def _exhaustive_fixed_sequence(
             best_score = score
             best_subset = subset
         if n_eval % report_every == 0:
-            print(f"  evaluated {n_eval}/{total}  best_mocu={best_score:.4f}")
+            print(f"  evaluated {n_eval}/{total}  best_{objective}={best_score:.4f}")
     if best_subset is None:
         raise RuntimeError("Exhaustive Fixed search found no subset")
     # Deterministic rollout order: sorted action ids (nonadaptive set)
@@ -613,6 +616,7 @@ def _resolve_fixed_sequence(
     smoke: bool = False,
     robust_rule: str = "ibr_max",
     snap_up: bool = True,
+    objective: str = "mocu",
 ) -> list[int]:
     """Load a length-T Fixed design; search if missing (never silent range(T)).
 
@@ -630,13 +634,13 @@ def _resolve_fixed_sequence(
         resolve_dataset_dir(cfg)
         / "fixed_cache"
         / (
-            f"objective_fixed_safetyocu_T{horizon}_Nobs{resolve_n_obs(cfg)}"
+            f"{objective}_fixed_safetyocu_T{horizon}_Nobs{resolve_n_obs(cfg)}"
             f"_sigma{sigma_tag}.json"
         )
     )
     import hashlib
     identity = hashlib.sha256()
-    identity.update(json.dumps({"schema": "terminal_mocu_v2", "rule": robust_rule,
+    identity.update(json.dumps({"schema": "terminal_mocu_v2", "objective": objective, "rule": robust_rule,
         "snap_up": snap_up, "alpha": alpha, "margin": margin, "sigma": sigma_y,
         "horizon": horizon, "control": cfg.raw.get("control", {}),
         "under": undercontrol_penalty, "event": violation_penalty,
@@ -668,7 +672,7 @@ def _resolve_fixed_sequence(
         seq, meta = loaded
         if meta.get("objective_fingerprint") != objective_fingerprint:
             continue
-        if "objective_mean_safety_aware_mocu" not in meta:
+        if ("objective_mean_msc" if objective == "msc" else "objective_mean_safety_aware_mocu") not in meta:
             print(
                 f"[fixed] ignoring legacy expected-u cache {path}; "
                 "unified safety-aware MOCU search required"
@@ -732,7 +736,7 @@ def _resolve_fixed_sequence(
             u_grid=u_grid,
             undercontrol_penalty=undercontrol_penalty,
             violation_penalty=violation_penalty,
-            robust_rule=robust_rule, snap_up=snap_up,
+            robust_rule=robust_rule, snap_up=snap_up, objective=objective,
             horizon=horizon,
             seed=seed,
             noise_replicas=noise_replicas,
@@ -761,7 +765,7 @@ def _resolve_fixed_sequence(
                 u_grid=u_grid,
                 undercontrol_penalty=undercontrol_penalty,
                 violation_penalty=violation_penalty,
-                robust_rule=robust_rule, snap_up=snap_up,
+                robust_rule=robust_rule, snap_up=snap_up, objective=objective,
                 horizon=horizon,
                 # All restarts must be compared under identical fantasy noise.
                 seed=seed,
@@ -791,7 +795,9 @@ def _resolve_fixed_sequence(
         "horizon": horizon,
         "search_mode": search_mode,
         "n_actions": n_actions,
-        "objective_mean_safety_aware_mocu": score,
+        "objective": objective,
+        "objective_mean": score,
+        ("objective_mean_msc" if objective == "msc" else "objective_mean_safety_aware_mocu"): score,
         "undercontrol_penalty": float(undercontrol_penalty),
         "violation_penalty": float(violation_penalty),
         "fixed_noise_replicas": int(noise_replicas),
@@ -820,6 +826,8 @@ def build_context_from_config(
 ) -> ExperimentContext:
     from src.domains.sir.context import build_sir_context, is_sir_config
 
+    if experiment_type == "msc_based":
+        cfg.validate_msc()
     if is_sir_config(cfg):
         return build_sir_context(
             cfg,
@@ -848,7 +856,7 @@ def build_context_from_config(
     control_safe_test = None
     ocu_table_full = None
     ocu_table_test = None
-    if str(experiment_type).lower() == "objective_based":
+    if str(experiment_type).lower() in {"objective_based", "msc_based"}:
         mocu_rel = (cfg.raw.get("data") or {}).get("mocu_dataset_dir")
         if not mocu_rel:
             raise RuntimeError(
@@ -1074,6 +1082,10 @@ def build_context_from_config(
                 "violation_penalty=0 when enforce_bayes_loss_alignment=true"
             )
 
+    if experiment_type == "msc_based":
+        from src.objectives.msc import validate_msc_support
+        validate_msc_support(U_support, u_grid, None if control_safe_full is None else np.asarray(control_safe_full)[pick])
+
     if str(experiment_type).lower() == "eig_based":
         # Vector-EIG computes its own entropy-optimized Fixed sequence in
         # ``eig_based.vector``.  Running the objective/MOCU exhaustive search
@@ -1097,6 +1109,7 @@ def build_context_from_config(
             violation_penalty=violation_penalty,
             robust_rule=robust_rule, snap_up=snap_up,
             smoke=smoke,
+            objective="msc" if experiment_type == "msc_based" else "mocu",
         )
 
     return ExperimentContext(
@@ -1354,6 +1367,31 @@ def posterior_mocu(ctx, log_w, *, undercontrol_penalty=None, violation_penalty=N
     return float(scores[0])
 
 
+def objective_name(ctx):
+    return "msc" if getattr(ctx, "experiment_type", "objective_based") == "msc_based" else "mocu"
+
+
+def posterior_objective_batch(required, weights, *, objective="mocu", **kwargs):
+    if objective == "msc":
+        from src.objectives.msc import posterior_msc
+        if kwargs.get("robust_rule") != "quantile" or kwargs.get("margin", 0) != 0 or not kwargs.get("snap_up", True):
+            raise ValueError("MSC requires the zero-margin snapped quantile rule")
+        controls = np.asarray([posterior_msc(required, w, coverage=1-kwargs["alpha"],
+            grid=kwargs["u_grid"]) for w in weights])
+        return controls, controls
+    if objective != "mocu":
+        raise ValueError(f"Unknown control objective: {objective}")
+    return posterior_mocu_batch(required, weights, **kwargs)
+
+
+def posterior_objective(ctx, log_w):
+    if objective_name(ctx) == "msc":
+        from src.objectives.msc import posterior_msc
+        return posterior_msc(ctx.U_support, normalize_log_weights(log_w),
+            coverage=1-ctx.alpha, grid=ctx.u_grid)
+    return posterior_mocu(ctx, log_w)
+
+
 def expected_mocu_after_action_vector(
     action: int,
     log_w: np.ndarray,
@@ -1370,6 +1408,7 @@ def expected_mocu_after_action_vector(
     violation_penalty: float,
     robust_rule: str = "ibr_max",
     snap_up: bool = True,
+    objective: str = "mocu",
 ) -> float:
     c = centres[int(action)]
     y = c[idx] + noise
@@ -1382,10 +1421,10 @@ def expected_mocu_after_action_vector(
     shifted = log_w_h - np.max(log_w_h, axis=-1, keepdims=True)
     weights = np.exp(shifted)
     weights /= np.clip(weights.sum(axis=-1, keepdims=True), 1e-300, None)
-    scores, _ = posterior_mocu_batch(
+    scores, _ = posterior_objective_batch(
         U, weights, alpha=alpha, margin=margin, u_grid=u_grid,
         undercontrol_penalty=undercontrol_penalty, violation_penalty=violation_penalty,
-        robust_rule=robust_rule, snap_up=snap_up,
+        robust_rule=robust_rule, snap_up=snap_up, objective=objective,
     )
     return float(np.mean(scores))
 
@@ -1481,6 +1520,8 @@ def control_engine_for(ctx: ExperimentContext):
 def context_report_meta(ctx: ExperimentContext) -> dict[str, Any]:
     return {
         "system": ctx.system,
+        "experiment_type": ctx.experiment_type,
+        "objective": objective_name(ctx),
         "config_path": str(ctx.cfg.config_path),
         "config_hash": ctx.config_hash,
         "n_theta_train": len(ctx.train_systems) + len(ctx.validation_systems),

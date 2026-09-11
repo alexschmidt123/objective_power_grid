@@ -38,7 +38,7 @@ def decision_preflight(ctx, *, rollouts=64, seed=104729):
 
 
 def enforce_decision_preflight(ctx):
-    settings = (ctx.cfg.raw.get('training') or {}).get('objective_based') or {}
+    settings = ctx.cfg.training_for(getattr(ctx, "experiment_type", "objective_based"))
     report = decision_preflight(ctx)
     if not report['finite']:
         raise RuntimeError('MOCU preflight produced non-finite controls or losses')

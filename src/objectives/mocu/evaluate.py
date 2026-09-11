@@ -19,7 +19,7 @@ from src.objectives.mocu.context import (
     method_display_name,
     observe_compressed,
     posterior_ess,
-    posterior_mocu,
+    posterior_mocu, objective_name,
     terminal_u_ctrl,
     update_posterior_vector,
 )
@@ -325,13 +325,22 @@ def attach_oracle(
     # Oracle cache lives under eval/ with other evaluation artifacts.
     oracle_dir = ctx.out_dir / "eval" / "oracle"
     oracle_dir.mkdir(parents=True, exist_ok=True)
-    cache_path = oracle_dir / "u_ctrl_opt_cache.json"
+    theta_ids = sorted({int(row["theta_id"]) for row in method_rows})
+    if not theta_ids:
+        return [], []
+    if theta_ids == list(range(len(ctx.test_systems))):
+        cache_name = "u_ctrl_opt_cache.json"
+    else:
+        import hashlib
+        ids_hash = hashlib.sha256(json.dumps(theta_ids).encode()).hexdigest()[:16]
+        cache_name = f"u_ctrl_opt_cache_subset_{ids_hash}.json"
+    cache_path = oracle_dir / cache_name
 
     engine, spec = control_engine_for(ctx)
     # Build oracle systems with true M/K only (not used during design selection).
     oracle_systems = [
         {"M": ctx.M_test[i].tolist(), "K": ctx.K_test[i].tolist()}
-        for i in range(len(ctx.test_systems))
+        for i in theta_ids
     ]
     oracle_rows = load_or_compute_oracle_cache(
         cache_path,
@@ -340,7 +349,7 @@ def attach_oracle(
         spec,
         tolerance=ctx.oracle_tolerance,
     )
-    opt_by_tid = {int(r["theta_id"]): r for r in oracle_rows}
+    opt_by_tid = {theta_ids[int(r["theta_id"])]: r for r in oracle_rows}
 
     enriched = []
     errors: list[str] = []
@@ -382,6 +391,7 @@ def attach_oracle(
                 "raw_control_gap": gap,
                 "control_shortfall": max(u_opt - u_ctrl, 0.0),
                 "method_safe": int(method_safe),
+                "safety_evaluation": "oracle_threshold_proxy" if skip_cuda_safety else "physical_simulation",
                 "oracle_feasible": int(bool(opt.get("feasible", True))),
                 "oracle_message": opt.get("message", ""),
                 "oracle_consistency_error": err or "",
@@ -429,6 +439,17 @@ def rank_posterior_mocu(summaries):
     return ranked
 
 
+def rank_msc(summaries):
+    """Rank selected posterior MSC, not oracle control or MOCU diagnostics."""
+    for row in summaries:
+        row["valid"] = int(int(row.get("n", 0)) > 0 and np.isfinite(float(row.get("mean_msc", float("nan")))))
+        row["rank_by_msc"] = ""
+    ranked = sorted([r for r in summaries if r["valid"]], key=lambda r: r["mean_msc"])
+    for row in ranked:
+        row["rank_by_msc"] = 1 + sum(other["mean_msc"] < row["mean_msc"] for other in ranked)
+    return ranked
+
+
 def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
     sub = [r for r in rows if r["method"] == method]
     if not sub:
@@ -471,6 +492,9 @@ def summarize_rows(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
         "eval_mode": eval_mode,
         "n": len(mocu_by_theta),
         "n_design_replicates": len(sub),
+        "safety_evaluation": sub[0].get("safety_evaluation", "not_recorded"),
+        "mean_msc": float(np.mean([np.mean([r["u_ctrl"] for r in sub if r["theta_id"] == tid]) for tid in mocu_by_theta])),
+        "mean_oracle_msc": float(np.mean([np.mean([r["u_ctrl_opt"] for r in sub if r["theta_id"] == tid]) for tid in mocu_by_theta])),
         "mean_u_ctrl": float(u.mean()),
         "median_u_ctrl": float(np.median(u)),
         "mean_u_ctrl_opt": float(opts.mean()),
@@ -534,6 +558,8 @@ def oracle_summary_row(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     return {
         "method": "Oracle",
         "n": int(vals.size),
+        "mean_msc": float(vals.mean()),
+        "mean_oracle_msc": float(vals.mean()),
         "mean_u_ctrl": float(vals.mean()),
         "median_u_ctrl": float(np.median(vals)),
         "mean_u_ctrl_opt": float(vals.mean()),
@@ -722,6 +748,10 @@ def run_full_evaluation(
     enriched, errors = attach_oracle(
         ctx, rows, skip_cuda_safety=skip_cuda_safety
     )
+    for row in enriched:
+        row["msc"] = float(row["u_ctrl"])
+        row["oracle_msc"] = float(row["u_ctrl_opt"])
+        row["objective"] = objective_name(ctx)
     from src.layout import ensure_result_layout
 
     _, eval_root = ensure_result_layout(ctx.out_dir)
@@ -745,7 +775,16 @@ def run_full_evaluation(
             "observation lookup + posterior update + terminal decision; shared physical "
             "bank generation excluded and must be reported separately"
         )
-    ranked = rank_posterior_mocu(summaries)
+    primary_metric = "mean_msc" if objective_name(ctx) == "msc" else "mean_posterior_mocu"
+    for summary in summaries:
+        summary["objective"] = objective_name(ctx)
+        summary["experiment_type"] = ctx.experiment_type
+        summary["primary_metric"] = primary_metric
+        summary["metric_schema"] = "posterior_msc_v1" if objective_name(ctx) == "msc" else summary["metric_schema"]
+    if objective_name(ctx) == "msc":
+        ranked = rank_msc(summaries)
+    else:
+        ranked = rank_posterior_mocu(summaries)
 
     oracle_row = oracle_summary_row(enriched)
     if oracle_row is not None:
@@ -782,7 +821,7 @@ def run_full_evaluation(
         grouped.setdefault(r["method"], {})
         tid = int(r["theta_id"])
         grouped[r["method"]].setdefault(tid, []).append(
-            float(r["posterior_mocu"])
+            float(r["msc"] if objective_name(ctx) == "msc" else r["posterior_mocu"])
         )
     by_method = {
         method: {
@@ -833,8 +872,9 @@ def run_full_evaluation(
         "invalid_methods": [
             s["method"] for s in summaries if not bool(s.get("valid", 0))
         ],
-        "primary_metric": "mean_posterior_mocu",
-        "metric_schema": "realized_operational_regret_v2",
+        "primary_metric": primary_metric,
+        "safety_evaluation": "oracle_threshold_proxy" if skip_cuda_safety else "physical_simulation",
+        "metric_schema": "posterior_msc_v1" if objective_name(ctx) == "msc" else "realized_operational_regret_v2",
         "terminal_robust_rule": ctx.robust_rule,
         "runtime_by_method": runtime_by_method,
         "runtime_scope": (
@@ -844,7 +884,7 @@ def run_full_evaluation(
         "mocu_definition": "posterior expected excess loss under configured terminal rule",
         "legacy_mean_mocu_definition": "held-out realized operational regret",
         "ranking_rule": (
-            "finite mean_posterior_mocu ascending; no safety eligibility gate"
+            f"finite {primary_metric} ascending; empirical safety reported separately, not guaranteed"
         ),
         "eval_seed": int(eval_seed),
         "summaries": summaries,

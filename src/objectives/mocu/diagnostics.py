@@ -12,6 +12,7 @@ import torch
 from src.control.posterior_ctrl import normalize_log_weights
 from src.objectives.mocu.context import (
     GLOBAL_SEED,
+    objective_name,
     ExperimentContext,
     expected_mocu_after_action_vector,
     normalize_method_key,
@@ -68,7 +69,7 @@ def select_myopic_action(
             noise=noise,
             undercontrol_penalty=ctx.undercontrol_penalty,
             violation_penalty=ctx.violation_penalty,
-            robust_rule=ctx.robust_rule, snap_up=ctx.snap_up,
+            robust_rule=ctx.robust_rule, snap_up=ctx.snap_up, objective=objective_name(ctx),
         )
         if score < best_score - 1e-15 or (
             abs(score - best_score) <= 1e-15 and (best_a is None or a < best_a)

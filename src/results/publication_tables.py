@@ -71,17 +71,20 @@ def _evaluation_seed(path: Path, row: dict[str, Any]) -> int:
 
 
 def collect(
-    exp_dirs: list[Path], *, eig: bool
+    exp_dirs: list[Path], *, eig: bool, msc: bool = False
 ) -> tuple[dict[tuple[str, int], Crossed], dict[tuple[str, int], dict[int, float]], dict[int, set[int]]]:
     crossed: dict[tuple[str, int], Crossed] = defaultdict(lambda: defaultdict(list))
     offline: dict[tuple[str, int], dict[int, float]] = defaultdict(dict)
     coverage: dict[int, set[int]] = defaultdict(set)
     filename = "terminal_eig_summary.csv" if eig else "summary.csv"
-    metric_keys = ("terminal_eig_mean", "mean_eig", "ΔH") if eig else ("mean_posterior_mocu",)
+    metric_keys = ("terminal_eig_mean", "mean_eig", "ΔH") if eig else (("mean_msc",) if msc else ("mean_posterior_mocu",))
     for exp_dir in exp_dirs:
         parsed = parse_result_dir_name(exp_dir.name)
         if parsed is None:
             raise ValueError(f"invalid result folder name: {exp_dir.name}")
+        expected_type = "eig_based" if eig else ("msc_based" if msc else "objective_based")
+        if parsed["experiment_type"] != expected_type:
+            raise ValueError("Cannot mix MSC, MOCU and EIG runs in one objective table")
         horizon = int(parsed["T"])
         train_seed = _training_seed(exp_dir)
         coverage[horizon].add(train_seed)
@@ -92,6 +95,8 @@ def collect(
                     method = LABELS.get(str(row.get("method") or row.get("Method")))
                     if method not in METHOD_ORDER:
                         continue
+                    if not any(row.get(k) not in (None, "") for k in metric_keys):
+                        raise ValueError(f"Missing primary metric {metric_keys} in {path}")
                     eval_seed = _evaluation_seed(path, row)
                     crossed[(method, horizon)][(train_seed, eval_seed)].append(
                         _float(row, *metric_keys)
@@ -154,8 +159,8 @@ def write_table(
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def generate(exp_dirs: list[Path], output_dir: Path, *, eig: bool) -> None:
-    crossed, offline, coverage = collect(exp_dirs, eig=eig)
+def generate(exp_dirs: list[Path], output_dir: Path, *, eig: bool, msc: bool = False) -> None:
+    crossed, offline, coverage = collect(exp_dirs, eig=eig, msc=msc)
     horizons = sorted(coverage)
     output_dir.mkdir(parents=True, exist_ok=True)
     metric: dict[tuple[str, int], list[float] | None] = {}
@@ -169,7 +174,7 @@ def generate(exp_dirs: list[Path], output_dir: Path, *, eig: bool) -> None:
             offline_cells[(method, horizon)] = (
                 [run_values[s] for s in TRAIN_SEEDS] if set(run_values) == set(TRAIN_SEEDS) else None
             )
-    metric_name = "EIG" if eig else "MOCU"
+    metric_name = "EIG" if eig else ("MSC" if msc else "MOCU")
     write_table(output_dir / f"{metric_name.lower()}_table.md", metric_name, horizons, metric,
                 digits=4, higher_is_better=eig)
     write_table(output_dir / "offline_time_table.md", "Offline time (seconds)", horizons,
@@ -180,11 +185,11 @@ def generate(exp_dirs: list[Path], output_dir: Path, *, eig: bool) -> None:
 
 def main() -> None:
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--experiment-type", choices=("eig_based", "objective_based"), required=True)
+    parser.add_argument("--experiment-type", choices=("eig_based", "objective_based", "msc_based"), required=True)
     parser.add_argument("--exp-dir", action="append", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     args=parser.parse_args()
-    generate(args.exp_dir, args.output_dir, eig=args.experiment_type == "eig_based")
+    generate(args.exp_dir, args.output_dir, eig=args.experiment_type == "eig_based", msc=args.experiment_type == "msc_based")
 
 
 if __name__ == "__main__":

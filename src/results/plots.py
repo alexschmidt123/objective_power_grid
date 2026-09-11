@@ -132,11 +132,11 @@ def _online_seconds(row: dict[str, Any]) -> float:
     return 0.0
 
 
-def _metric_value(row: dict[str, Any], *, eig: bool) -> float | None:
+def _metric_value(row: dict[str, Any], *, eig: bool, msc: bool = False) -> float | None:
     keys = (
         ("terminal_eig_mean", "mean_eig", "ΔH")
         if eig
-        else ("mean_posterior_mocu",)
+        else (("mean_msc",) if msc else ("mean_posterior_mocu",))
     )
     for key in keys:
         raw = row.get(key)
@@ -331,6 +331,7 @@ def _collect_cells(
     by_t: dict[int, dict[int, Path]],
     *,
     eig: bool,
+    msc: bool = False,
 ) -> tuple[
     dict[str, dict[int, list[float]]],
     dict[str, dict[int, list[float]]],
@@ -345,7 +346,7 @@ def _collect_cells(
                 label = _poster_label(row.get("method") or row.get("Method"))
                 if label is None:
                     continue
-                value = _metric_value(row, eig=eig)
+                value = _metric_value(row, eig=eig, msc=msc)
                 if value is None:
                     continue
                 metric[label][t].append(value)
@@ -559,7 +560,7 @@ def write_sweep_plot_bundle(
     """Write three comparison tables, three plots, and provenance metadata."""
     root = root or repo_root()
     eig = experiment_type == "eig_based"
-    metric, offline, online = _collect_cells(by_t, eig=eig)
+    metric, offline, online = _collect_cells(by_t, eig=eig, msc=experiment_type == "msc_based")
     paired_eig = _collect_hierarchical_eig_pairs(by_t) if eig else []
     methods = _ordered_methods(set(metric))
     horizons = sorted(by_t)
@@ -583,7 +584,7 @@ def write_sweep_plot_bundle(
             f"{PERFORMANCE_TABLE_SEEDS} seed values per method/T cell; {details}"
         )
     n_seeds = PERFORMANCE_TABLE_SEEDS
-    metric_name = "terminal EIG" if eig else "MOCU"
+    metric_name = "terminal EIG" if eig else ("MSC" if experiment_type == "msc_based" else "MOCU")
     better = "higher better" if eig else "lower better"
     title_metric = f"Mean {metric_name} ± std (n = {n_seeds} seeds) ({better})"
     title_offline = f"Offline time: mean ± sample SD (n = {n_seeds} seeds)"
@@ -857,7 +858,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument(
         "--experiment-type",
         default=None,
-        choices=("eig_based", "objective_based"),
+        choices=("eig_based", "objective_based", "msc_based"),
     )
     parser.add_argument("--exp-dir", action="append", default=[], dest="exp_dirs")
     parser.add_argument(

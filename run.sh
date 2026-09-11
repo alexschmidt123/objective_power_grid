@@ -63,12 +63,12 @@ validate_experiment_type() {
     local t="${1,,}"
     t="${t//-/_}"
     case "$t" in
-        objective_based|eig_based)
+        objective_based|eig_based|msc_based)
             echo "$t"
             return 0
             ;;
         *)
-            echo "Invalid --experiment_type: $1 (allowed: objective_based|eig_based)" >&2
+            echo "Invalid --experiment_type: $1 (allowed: objective_based|eig_based|msc_based)" >&2
             return 1
             ;;
     esac
@@ -168,7 +168,7 @@ SEED="$DEFAULT_SEED"
 EVAL_SEEDS="$DEFAULT_EVAL_SEEDS"
 
 usage() {
-    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seeds <csv>] [--experiment_type objective_based|eig_based] [--method <methods>] [--exp-dir <path>] [--force] [--bank-structure-audit] [--smoke]" >&2
+    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seeds <csv>] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--exp-dir <path>] [--force] [--bank-structure-audit] [--smoke]" >&2
     echo "" >&2
     echo "  --method  optional; comma-separated list (default: experiment.methods in yaml)" >&2
     echo "            e.g. --method dad,random  (skips training when all selected are baselines)" >&2
