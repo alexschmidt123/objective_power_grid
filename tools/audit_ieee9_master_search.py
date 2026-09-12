@@ -32,7 +32,8 @@ def prepare(args):
     if (campaign/"campaign.json").exists(): raise ValueError("Refuse to overwrite a search")
     ctx=build_context_from_config(cfg,project_root=ROOT,out_dir=campaign,smoke=False,experiment_type=experiment_type)
     dense=Path(cfg.raw['data'].get('reuse_bank_dir',str(ROOT/'data/ieee9/probe_master')))
-    if not dense.is_absolute(): dense=ROOT/dense; catalog=load_catalog(dense)
+    if not dense.is_absolute(): dense=ROOT/dense
+    catalog=load_catalog(dense)
     durations=list(catalog.durations); current=load_catalog(ctx.data_dir)
     baseline=tuple(durations.index(d) for d in current.durations)
     systems=ctx.train_systems+ctx.validation_systems
