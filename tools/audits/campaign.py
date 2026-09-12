@@ -14,8 +14,15 @@ def save(path,data):
     temp.write_text(json.dumps(data,indent=2)+'\n'); temp.replace(path)
 
 
-def config():
-    cfg=load_config_for_run('configs/ieee9_mocu.yaml',ROOT,step_number=5)
+def config(path='configs/ieee9_mocu.yaml', objective='mocu'):
+    cfg=load_config_for_run(path,ROOT,step_number=5)
+    if objective == 'msc':
+        cfg.raw.setdefault('experiment', {})['experiment_type']='msc_based'
+        cfg.validate_msc()
+        obs=cfg.raw.setdefault('observation',{}); obs.update(obs.get('msc_based',{}))
+        cfg.raw['experiment']['allow_trivial_fixed']=True
+        return cfg
+    if objective != 'mocu': raise ValueError('Unknown objective')
     obs=cfg.raw.setdefault('observation',{}); obs.update(obs.get('objective_based',{}))
     tr=cfg.training_for('objective_based'); c=cfg.raw['control']
     if (c['robust_rule']!='quantile' or c['alpha']!=.05 or tr['undercontrol_penalty']!=20
@@ -28,7 +35,9 @@ def config():
 def run_policy(campaign,tag,key,horizon,budget,inputs,validation,metadata,seeds,continuous=False):
     ids=np.concatenate([np.array(metadata['duration_actions'][str(k)],dtype=int) for k in key])
     planner=SpacePlanner(inputs['curves'][:metadata['n_support'],ids,:].transpose(1,0,2),
-        inputs['U'][:metadata['n_support']],inputs['grid'],sigma=metadata['sigma'],device='cuda',budget=budget)
+        inputs['U'][:metadata['n_support']],inputs['grid'],sigma=metadata['sigma'],device='cuda',budget=budget,
+        objective=metadata.get('objective','mocu'), alpha=1-metadata.get('posterior_coverage',.95),
+        penalty=1/(1-metadata.get('posterior_coverage',.95)))
     prior=float(planner.risk(planner.prior())[0][0])
     fixed,cal=planner.fixed_sequence(horizon,104729+horizon)
     if continuous:
@@ -43,7 +52,7 @@ def run_policy(campaign,tag,key,horizon,budget,inputs,validation,metadata,seeds,
             for method,r in row.items():
                 r['bank_loss']=r['loss'].copy()
                 u=r['control']; opt=validation['u_opt']
-                r['loss']=u+20*np.maximum(opt-u,0)-opt
+                r['loss']=u.copy() if metadata.get('objective')=='msc' else u+20*np.maximum(opt-u,0)-opt
                 where=np.searchsorted(inputs['grid'],u)
                 np.testing.assert_allclose(inputs['grid'][where],u,atol=1e-12)
                 r['physical_safe']=validation['candidate_safe'][np.arange(len(u)),where]
@@ -54,7 +63,8 @@ def run_policy(campaign,tag,key,horizon,budget,inputs,validation,metadata,seeds,
     result.update(key=list(key),durations_s=[metadata['durations'][k] for k in key],horizon=horizon,
         budget=asdict(budget),fixed_sequence=fixed,fixed_calibration_loss=cal)
     if continuous:
-        result['metric']='continuous_oracle_realized_operational_regret'
+        result['metric']='selected_msc_with_physical_safety' if metadata.get('objective')=='msc' else 'continuous_oracle_realized_operational_regret'
+        result['mean_oracle_control']=float(np.mean(validation['u_opt']))
         for m in result['methods']:
             result['methods'][m]['mean_bank_loss']=float(np.mean([r[m]['bank_loss'] for r in runs]))
             result['methods'][m]['physical_safety_rate']=float(np.mean([r[m]['physical_safe'] for r in runs]))
@@ -158,7 +168,7 @@ def finalize(args):
     save(campaign/'campaign_results.json',{'status':'complete','n_fresh':metadata['fresh_systems'],'results':rows})
     lines=['# IEEE9 master-bank duration audit','',
         f'{metadata["candidate_count"]} duration sets screened; {metadata["fresh_systems"]} fresh validation systems.',
-        'Primary metric: finite-loss realized regret against the continuous-control oracle.',
+        ('Primary metric: posterior selected MSC; physical safety reported separately.' if metadata.get('objective')=='msc' else 'Primary metric: finite-loss realized regret against the continuous-control oracle.'),
         'Positive gains favor the named adaptive policy. Adjusted intervals include all finalist/horizon/contrast comparisons.',
         'Approximate Fixed and rolling two-step planning remain limitations; validation assumes the specified physical/prior/noise model.','']
     for r in rows:

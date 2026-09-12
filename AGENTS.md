@@ -388,3 +388,13 @@ of `T`. The one-metric-per-table and `mean ± std` rules still apply.
 - The audit scores production posterior selected control, never MOCU regret. It compares no probes, Random, calibrated Fixed, Myopic and receding two-step lookahead. Save paired arrays and histories, coverage, budgets and provenance.
 - Treat bank-threshold coverage as a proxy, not physical simulation. Existing training-validation systems are development data, not fresh confirmation. Bootstrap intervals cluster repeated noise seeds by physical system.
 - A null approximate-planner result does not prove absence of adaptive or non-myopic opportunity. Increasing fantasy budgets and independent confirmation are needed before positive claims.
+
+- To search new MSC duration combinations, use `scripts/audit.sh master` with
+  `--objective msc --config <resolved-MSC-yaml>`. The `prepare` stage searches
+  the complete master duration catalog; a single `msc-space` audit does not.
+  Run `prepare`, `fresh`, each finalist `confirm`, then `finalize` in order.
+  Declare horizons, global candidate count and fresh-system count before launch.
+  Freeze finalists before simulating fresh validation; retain all candidate
+  scores, paired arrays and physics checks. Report MSC and physical safety
+  separately. A sampled/global-local search identifies best-found sets, not
+  an exhaustive optimum over all six-duration combinations.

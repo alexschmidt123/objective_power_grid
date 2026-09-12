@@ -27,10 +27,12 @@ def select_finalists(rows,baseline,gap_count=2,loss_count=2):
 
 
 def prepare(args):
-    campaign=args.campaign; cfg=config()
+    campaign=args.campaign; cfg=config(args.config,args.objective)
+    experiment_type='msc_based' if args.objective=='msc' else 'objective_based'
     if (campaign/"campaign.json").exists(): raise ValueError("Refuse to overwrite a search")
-    ctx=build_context_from_config(cfg,project_root=ROOT,out_dir=campaign,smoke=False,experiment_type='objective_based')
-    dense=ROOT/'data/ieee9_duration_dense_0p01'; catalog=load_catalog(dense)
+    ctx=build_context_from_config(cfg,project_root=ROOT,out_dir=campaign,smoke=False,experiment_type=experiment_type)
+    dense=Path(cfg.raw['data'].get('reuse_bank_dir',str(ROOT/'data/ieee9/probe_master')))
+    if not dense.is_absolute(): dense=ROOT/dense; catalog=load_catalog(dense)
     durations=list(catalog.durations); current=load_catalog(ctx.data_dir)
     baseline=tuple(durations.index(d) for d in current.durations)
     systems=ctx.train_systems+ctx.validation_systems
@@ -62,26 +64,27 @@ def prepare(args):
         keys.add(tuple(sorted([d]+others.tolist())))
     previous=json.loads(args.previous.read_text()) if args.previous else {'candidates':[]}
     keys.update(tuple(k) for k in previous['candidates'])
-    while len(keys)<1024:keys.add(tuple(sorted(rng.choice(281,6,replace=False).tolist())))
+    while len(keys)<args.global_candidates:keys.add(tuple(sorted(rng.choice(281,6,replace=False).tolist())))
     keys=sorted(keys)
     if set(k for row in keys for k in row)!=set(range(281)):raise ValueError('Incomplete duration coverage')
     if q:keys=[baseline,next(k for k in keys if k!=baseline)]
     meta={'schema':'ieee9_master_global_local_v1','status':'global_search','quick':q,
-        'candidate_count':len(keys),'durations':durations,'baseline':list(baseline),
+        'objective':args.objective,'posterior_coverage':cfg.raw['control'].get('posterior_coverage',.95),
+        'config_path':str(Path(args.config).resolve()),'candidate_count':len(keys),'durations':durations,'baseline':list(baseline),
         'candidates':[list(k) for k in keys], 'total_combinations':math.comb(281,6),'exhaustive':False,
         'combo_definition':'six durations crossed with all nine physical probe buses; 54 actions',
         'master_bank':str(dense),'master_action_count':2529,'duration_options':281,
         'duration_actions':{str(i):resolve_pool_actions(catalog,[d])[0].tolist() for i,d in enumerate(durations)},
         'designs':[list(d) for d in catalog.designs],'sigma':ctx.sigma_y,'n_support':fit,
-        'old_screen_rows':[fit,fit+(4 if q else 64)],'fresh_systems':4 if q else 512,
+        'old_screen_rows':[fit,fit+(4 if q else 64)],'fresh_systems':4 if q else args.fresh_systems,
         'fresh_theta_seed':907091701,'fresh_noise_seeds':[11001,11002,11003],
-        'horizons':[2] if q else [2,3,4,5],
+        'horizons':[2] if q else list(map(int,args.horizons.split(','))),
         'input_sha256':digest(curves),'control_values_sha256':digest(U),
         'theta_sha256':digest(np.c_[M,K]),'previous_search':str(args.previous) if args.previous else None,
         'selection':'two strongest min(combined,nonmyopic) mean gains plus two lowest lookahead losses plus original baseline',
         'claim_scope':'best found in sampled/local search; not global optimum; screen is exploratory',
         'screen':[],'refinement':[],'convergence':[]}
-    write_run_config(campaign,cfg,ctx.data_dir,experiment_type='objective_based',extra={'master_search':meta,'methods':[]})
+    write_run_config(campaign,cfg,ctx.data_dir,experiment_type=experiment_type,extra={'master_search':meta,'methods':[]})
     save(campaign/'campaign.json',meta)
     n=4 if q else 64
     validation={'curves':curves[fit:fit+n],'U':U[fit:fit+n]}
@@ -109,7 +112,7 @@ def prepare(args):
         pick=rng.choice(len(remaining),min(1 if q else 128,len(remaining)),replace=False)
         chosen += [remaining[int(i)] for i in pick]
     meta.update(status='local_search',local_neighborhood_count=len(local),local_candidates=[list(k) for k in chosen],
-        local_proxy='response diversity only for proposals; final scores use aligned finite-loss MOCU')
+        local_proxy='response diversity only for proposals; final scores use the declared production objective')
     save(campaign/'campaign.json',meta)
     # Append local results to the same exploratory screen with distinct raw names.
     meta['local_screen']=[];score(chosen,'local_screen',cheap,[101] if q else [101,202])
@@ -138,19 +141,29 @@ def finalize(args):
     for horizon in meta['horizons']:
         rows=[r for r in results if r['horizon']==horizon]
         ranks[str(horizon)]=[
-            {'durations_s':r['durations_s'],'lookahead_regret':r['methods']['lookahead']['mean_loss'],
+            {'durations_s':r['durations_s'],'lookahead_objective':r['methods']['lookahead']['mean_loss'],
              'physical_safety_rate':r['methods']['lookahead']['physical_safety_rate'],
              'joint_positive_signal':r['joint_positive_signal']}
             for r in sorted(rows,key=lambda r:r['methods']['lookahead']['mean_loss'])]
     save(args.campaign/'best_combos.json',{'status':'complete','rankings':ranks,
         'scope':'descriptive ordering of frozen finalists; no global-optimality or post-selection superiority claim',
+        'objective':meta.get('objective','mocu'),'posterior_coverage':meta.get('posterior_coverage',.95),
         'searched_combinations':meta['candidate_count'],'total_combinations':meta['total_combinations']})
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('stage',choices=['prepare','fresh','confirm','finalize'])
     p.add_argument('--campaign',type=Path,required=True);p.add_argument('--previous',type=Path)
+    p.add_argument('--objective',choices=['mocu','msc'],default='mocu')
+    p.add_argument('--config',default='configs/ieee9_mocu.yaml')
+    p.add_argument('--global-candidates',type=int,default=1024)
+    p.add_argument('--fresh-systems',type=int,default=512)
+    p.add_argument('--horizons',default='2,3,4,5')
     p.add_argument('--index',type=int,default=0);p.add_argument('--quick',action='store_true')
     args=p.parse_args();args.campaign=args.campaign.resolve();args.campaign.mkdir(parents=True,exist_ok=True)
-    {'prepare':prepare,'fresh':fresh,'confirm':confirm,'finalize':finalize}[args.stage](args)
+    if args.stage=='fresh':
+        meta=json.loads((args.campaign/'campaign.json').read_text())
+        fresh(args,cfg=config(meta.get('config_path',args.config),meta.get('objective',args.objective)))
+    else:
+        {'prepare':prepare,'confirm':confirm,'finalize':finalize}[args.stage](args)
 if __name__=='__main__':main()
