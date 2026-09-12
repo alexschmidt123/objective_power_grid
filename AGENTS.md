@@ -381,3 +381,10 @@ of `T`. The one-metric-per-table and `mean ± std` rules still apply.
 - Preserve old paths as compatibility symlinks when relocating existing banks;
   never rewrite frozen source snapshots or historical bank metadata.
   `data/ieee9/layout_manifest.json` records old and new locations.
+
+## MSC development-space audit
+
+- Use `bash scripts/audit.sh msc-space --config <resolved-MSC-yaml> --output <stamped-experiment-directory>` for MSC diagnostics.
+- The audit scores production posterior selected control, never MOCU regret. It compares no probes, Random, calibrated Fixed, Myopic and receding two-step lookahead. Save paired arrays and histories, coverage, budgets and provenance.
+- Treat bank-threshold coverage as a proxy, not physical simulation. Existing training-validation systems are development data, not fresh confirmation. Bootstrap intervals cluster repeated noise seeds by physical system.
+- A null approximate-planner result does not prove absence of adaptive or non-myopic opportunity. Increasing fantasy budgets and independent confirmation are needed before positive claims.

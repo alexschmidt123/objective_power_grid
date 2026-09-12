@@ -25,7 +25,9 @@ class AuditBudget:
 
 class SpacePlanner:
     def __init__(self, centres, required, grid, *, sigma, alpha=.05,
-                 penalty=20., device='cpu', budget=None):
+                 penalty=20., device='cpu', budget=None, objective='mocu'):
+        if objective not in ('mocu', 'msc'): raise ValueError('Unknown objective')
+        self.objective = objective
         self.device = torch.device(device)
         self.dtype = torch.float64
         self.centres = self.tensor(centres)  # action x support x observation
@@ -82,7 +84,7 @@ class SpacePlanner:
         loss, control, _ = _posterior_mocu_gpu(
             logw.reshape(-1, self.P), self.required, self.grid, alpha=self.alpha,
             margin=0., undercontrol_penalty=self.penalty, violation_penalty=0.,
-            robust_rule='quantile', snap_up=True)
+            robust_rule='quantile', snap_up=True, objective=self.objective)
         return loss.reshape(shape), control.reshape(shape)
 
     def update(self, logw, actions, observations):
@@ -188,13 +190,18 @@ class SpacePlanner:
         noise = self.tensor(np.random.default_rng(seed).normal(
             0, self.sigma, (n, horizon, self.A, self.D)))
         rows = {}
-        for method in ('fixed', 'myopic', 'lookahead'):
+        methods = ('no_probe', 'random', 'fixed', 'myopic', 'lookahead') if self.objective == 'msc' else ('fixed', 'myopic', 'lookahead')
+        for method in methods:
             started = time.perf_counter()
             logw = self.prior(n)
             used = torch.zeros((n, self.A), dtype=torch.bool, device=self.device)
             sequences = []
-            for step in range(horizon):
-                if method == 'fixed':
+            stage_scores = [self.risk(logw)[0].cpu().numpy()]
+            random_rng = np.random.default_rng(seed+700001)
+            for step in range(0 if method == "no_probe" else horizon):
+                if method == 'random':
+                    actions = torch.as_tensor([random_rng.choice(np.flatnonzero(~row)) for row in used.cpu().numpy()], device=self.device)
+                elif method == 'fixed':
                     actions = torch.full((n,), fixed[step], dtype=torch.long, device=self.device)
                 else:
                     depth = 2 if method == 'lookahead' and step < horizon-1 else 1
@@ -210,14 +217,17 @@ class SpacePlanner:
                 logw = self.update(logw, actions, observation)
                 used[idx, actions] = True
                 sequences.append(actions.cpu().numpy())
+                stage_scores.append(self.risk(logw)[0].cpu().numpy())
             risk, control = self.risk(logw)
             realized = control + self.penalty*(required-control).clamp_min(0) - required
-            rows[method] = {'loss': realized.cpu().numpy(), 'posterior_risk': risk.cpu().numpy(),
+            score = control if self.objective == 'msc' else realized
+            rows[method] = {'loss': score.cpu().numpy(), 'posterior_risk': risk.cpu().numpy(),
                 'control': control.cpu().numpy(),
                 'posterior_ess': (1/logw.softmax(-1).square().sum(-1)).cpu().numpy(), 'bank_coverage': (control+1e-12 >= required).cpu().numpy(),
-                'sequence': np.stack(sequences, axis=1), 'seconds': time.perf_counter()-started}
+                'stage_scores': np.stack(stage_scores, axis=1),
+                'sequence': np.stack(sequences, axis=1) if sequences else np.empty((n,0),dtype=int), 'seconds': time.perf_counter()-started}
             print(f"[audit] T={horizon} seed={seed} {method}: "
-                  f"loss={float(realized.mean()):.6f}, seconds={rows[method]['seconds']:.1f}", flush=True)
+                  f"loss={float(score.mean()):.6f}, seconds={rows[method]['seconds']:.1f}", flush=True)
         return rows
 
 
@@ -233,7 +243,7 @@ def paired_interval(differences, *, bootstrap=2000, seed=493):
 
 def summarize_runs(runs, prior_risk, budget):
     out = {'methods': {}}
-    for method in ('fixed', 'myopic', 'lookahead'):
+    for method in runs[0]:
         losses = np.stack([r[method]['loss'] for r in runs])
         out['methods'][method] = {'mean_loss': float(losses.mean()),
             'std_across_seed_means': float(losses.mean(1).std(ddof=1)) if len(runs)>1 else None,
