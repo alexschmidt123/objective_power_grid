@@ -1,13 +1,12 @@
 # Objective-Driven Sequential BOED
 
-This project applies sequential Bayesian optimal experimental design (sBOED)
-to SIR ODE and IEEE power-grid models. It compares DAD, RL-sBOED, Step-DAD,
-Myopic, Fixed, and Random designs using expected information gain (EIG) or
-mean objective cost of uncertainty (MOCU).
+Sequential Bayesian experimental design for power-grid and SIR models, comparing
+DAD, RL-sBOED, Step-DAD, Myopic, Fixed and Random. IEEE9 supports EIG, minimum
+safe control (MSC) and finite-loss MOCU objectives. Probes have continuous
+duration, fixed injection bus/amplitude and consecutive four-second recording
+windows; the physical state carries between probes. Simulation runs online.
 
 ## Installation
-
-Create the Python environment and install the dependencies:
 
 ```bash
 conda create -n mocu_optimized python=3.10 -y
@@ -17,44 +16,35 @@ pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 \
 pip install -r requirements.txt
 ```
 
-CUDA is recommended for power-grid bank generation and full experiments.
+A CUDA GPU and compatible CUDA toolkit are required for the online grid runner.
 
 ## Running experiments
 
-Use `run.sh` for one self-contained run. It checks its required data banks,
-generates missing banks, trains local models, and writes the configuration,
-models, logs, and evaluation results into one folder under `experiments/`.
+Use the maintained shell entrypoints. This example is a workability smoke test:
 
 ```bash
-bash run.sh --config configs/ieee9_mocu.yaml --experiment_type objective_based \
-  --T 5 --N_obs 5 --noise_sigma 0.005 --seed 101
+bash run.sh --config configs/ieee9_mocu.yaml --objective msc --coverage 0.9 \
+  --T 3 --N_obs 5 --noise_sigma 0.005 --seed 101 --eval-seeds 1001 \
+  --smoke --output experiments/ieee9_msc_smoke
 ```
 
-Use `sweep_run.sh` for a series of independent `run.sh` executions:
+Use `--objective mocu` for MOCU, or `--objective eig --config
+configs/ieee9_eig.yaml` for EIG. Coverage applies to the MSC/MOCU terminal
+controller. Output directories must be new. For a sweep:
 
 ```bash
-bash sweep_run.sh --configs ieee9_eig --experiment_type eig_based \
-  --T 3,4,5 --N_obs 5 --noise_sigma 0.005
+bash sweep_run.sh --configs ieee9_mocu --objective msc --coverage 0.9 \
+  --T 3,4,5 --N_obs 5 --noise_sigma 0.005 --seed 101 --eval-seeds 1001
 ```
 
-Publication sweeps default to training seeds `101,202,303` and evaluation
-seeds `1001,1002,1003,1004,1005`. Each run owns its models and results; model
-files are not shared between experiment folders.
+Set training, evaluation and planning budgets explicitly for performance studies;
+smoke tests establish workability only. Each run saves its settings, policies,
+ordered observations, evaluations and completion status under `experiments/`.
+No equilibrium probe or control bank is used by the new grid protocol.
 
-Canonical configs: `ieee9_eig`, `ieee9_mocu`, `ieee14_mocu`,
-`ieee30_mocu`, and `sir_ode_eig`. IEEE30 contains the published dynamic
-reference; its full dynamic backend is pending and formal runs are blocked.
-
-For SIR, use `--config configs/sir_ode_eig.yaml --experiment_type eig_based`.
-Use `scripts/data_generation.sh`, `scripts/training.sh`, and
-`scripts/evaluation.sh` for separate stages. Reusable Slurm wrappers are in
-`hprc/`; detailed workflow and reporting rules are in `AGENTS.md`.
-
-MSC (IEEE9/IEEE14; IEEE30 dynamic backend pending) is an independent objective:
-```bash
-bash sweep_run.sh --configs ieee9_mocu --experiment_type msc_based --T 3 --N_obs 5 --noise_sigma 0.005 --seed 101 --eval-seeds 1001 --method dad,rl_sboed,step_dad,myopic,fixed,random
-```
-The canonical grid YAMLs share physical banks and contain independent
-`training.msc_based` / `observation.msc_based` blocks. Set
-`control.posterior_coverage` and probe durations in the selected configuration.
-The example uses that YAML's durations; it does not override the catalog.
+IEEE14/IEEE30 physical configurations are retained, but their online backends
+are not yet implemented and runs are blocked. SIR remains available through
+`run.sh --config configs/sir_ode_eig.yaml --experiment_type eig_based`.
+Run checks with `bash scripts/check.sh` in the activated environment.
+See [AGENTS.md](AGENTS.md) for authorization, method adaptations, detailed
+workflows, reporting and HPRC instructions. Manuscript sources are in `documents/`.

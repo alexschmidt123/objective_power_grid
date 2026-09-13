@@ -66,6 +66,8 @@ def load_experiment_config(
         cfg = load_config(path.resolve())
     else:
         cfg = load_config(resolve_config_path(config_arg, root))
+    if str(cfg.raw.get("system", {}).get("name", "")).lower().startswith("ieee"):
+        raise ValueError("Reset/bank power-grid stages are retired; use run.sh for the non-reset online experiment")
     T = effective_step_number(step_number, default=DEFAULT_STEP_NUMBER)
     cfg = with_step_number(cfg, T)
     if int(n_obs) < 0:

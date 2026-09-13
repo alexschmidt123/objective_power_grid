@@ -168,11 +168,16 @@ class SBOEDConfig:
             raise ValueError("MSC requires control.posterior_coverage in (0, 1)")
         if c.get("robust_rule", "quantile") != "quantile" or float(c.get("safety_margin", 0)) != 0:
             raise ValueError("MSC requires a quantile decision with zero safety margin")
-        if not bool(c.get("snap_up", True)):
-            raise ValueError("MSC currently requires the discrete admissible control grid (snap_up=true)")
-        g = np.asarray(c.get("u_candidates", []), dtype=float)
-        if g.size == 0 or not np.isfinite(g).all() or np.any(g < 0) or np.any(np.diff(g) <= 0):
-            raise ValueError("MSC requires a finite, nonnegative, strictly increasing control grid")
+        if (self.raw.get("experiment") or {}).get("mode") == "continuous_duration_no_reset":
+            bounds = np.asarray(c.get("u_bounds", []), dtype=float)
+            if bounds.shape != (2,) or not np.isfinite(bounds).all() or not 0 <= bounds[0] < bounds[1]:
+                raise ValueError("MSC requires finite continuous control u_bounds")
+            if "u_candidates" in c or "snap_up" in c:
+                raise ValueError("Non-reset control is continuous; remove discrete control settings")
+        else:
+            g = np.asarray(c.get("u_candidates", []), dtype=float)
+            if g.size == 0 or not np.isfinite(g).all() or np.any(g < 0) or np.any(np.diff(g) <= 0):
+                raise ValueError("Invalid legacy control grid")
         cal = self.raw.get("control_safety_calibration") or {}
         if cal.get("enabled", False) or cal.get("mode", "config") != "config":
             raise ValueError("MSC uses the declared coverage; empirical rule calibration is unsupported")

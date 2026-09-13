@@ -1,400 +1,69 @@
 # Project instructions
 
-## Repository layout and manuscript editing
+## Authorization
 
-- Keep exactly these files at the root of `documents/`:
-  `objective_driven_boed_manuscript_framework.tex`, `sBOED_design.tex`,
-  `objective_driven_boed_refs.bib`, and the existing
-  `objective_driven_boed_manuscript_framework.pdf`. Keep `images/` and `papers/`.
-  Do not add audit reports, temporary notes, LaTeX fragments, or build files there.
-- Edit LaTeX and BibTeX only by default. **Never compile or rebuild the manuscript
-  PDF unless the user explicitly asks.** Preserve its existing bytes during
-  cleanup and synchronization. For ordinary edits, check citation keys, labels,
-  inputs, and matching equations using source-only validation.
-- Both standalone LaTeX documents contain a marked finite-loss MOCU block.
-  Update both copies together; `tools/check_repository.py` checks their identity.
-- Keep cited primary-source PDFs in `documents/papers/`; verify PDF content and
-  title, and record source URL, filename, and SHA-256 in that folder's
-  `manifest.json`. BibTeX `file` fields are relative to `documents/`.
-- Figures belong in `documents/images/`. Preserve the IEEE9/IEEE14 style when
-  adding networks: numbered circles, black branches, yellow slack, green
-  machine terminals, blue algebraic buses, clear legend and source. A PV bus
-  does not automatically imply a governed dynamic generator.
-- Only five YAML files may exist in `configs/`: `ieee9_eig.yaml`,
-  `ieee9_mocu.yaml`, `ieee14_mocu.yaml`, `ieee30_mocu.yaml`, and
-  `sir_ode_eig.yaml`. No subfolders, host variants, temporary sweeps, or backups.
-  Store any necessary resolved experimental variation inside its stamped
-  `experiments/` directory, derived from and linked to a canonical configuration.
-  Do not change physics just to accommodate a host's paths.
-- `tools/` is for reusable bank helpers, diagnostics, audit engines, reference
-  data, and regression checks. Shared audit functions belong in `tools/audits/`,
-  tests in `tools/tests/`. Remove obsolete one-off rerun/search scripts after
-  consolidating useful functions. Do not duplicate the production objective
-  inside a diagnostic or monkey-patch its terminal rule.
-- `hprc/` contains only reusable cluster environment and Slurm wrappers.
-  Job IDs, seeds specific to one campaign, and completed-run paths belong in
-  run manifests, not permanent wrappers. Never edit running source snapshots.
-- Keep this `AGENTS.md` as the authoritative reusable workflow guide. Keep
-  `README.md` brief: introduction, installation, and basic run instructions.
-  Historical audit reports remain in their experiment artifacts or Git history.
+- Never run or edit code, launch experiments, submit jobs, terminate jobs, or push to GitHub without explicit user authorization for that action and scope. A concrete request to check, implement or smoke-test authorizes those specific operations; do not expand it to publication experiments, additional seeds or submissions.
+- Before every experiment or diagnostic experiment, state its host, scope, estimated elapsed time and completion window. For HPRC also state resource requests, estimated actual SU charge, maximum walltime reservation and estimated remaining account balance. Separate queue delay from compute time. Estimates are uncertain until measured and do not replace authorization.
+- Preserve submitted source snapshots and historical results. Do not change active HPRC jobs while editing labpc. GitHub and HPRC synchronization require authorization.
 
-## Mandatory formal-run entrypoints
+## Active power-grid protocol: non-reset only
 
-- **Every formal data-generation, training, evaluation, or publication run must
-  start through `run.sh`, `sweep_run.sh`, or a maintained `scripts/*.sh` entrypoint.**
-  This rule applies on labpc, Grace, other hosts, and inside Slurm jobs.
-- Do not launch a formal run by invoking `python -m src.experiment`, a training
-  function, or a temporary Python/shell launcher directly. The maintained shell
-  entrypoints may call Python internally. If a reusable operation is missing,
-  implement and verify the appropriate `scripts/*.sh` entrypoint first.
-- Slurm wrappers may select resources, activate the environment, enter a frozen
-  source directory, and forward arguments to the maintained shell entrypoints.
-  Do not implement another training/evaluation pipeline in `hprc/`.
-- Unit tests and bounded diagnostic audits are not formal method comparisons.
-  Use `scripts/check.sh` and `scripts/audit.sh` for their reusable workflows;
-  label smoke/audit outputs so they cannot be mistaken for publication results.
-- Do not submit new long-running experiments merely to verify a cleanup or
-  documentation change. Do not terminate or modify existing jobs without task
-  authorization. A new run uses a new output directory and records its command.
+- The reset experiment has been retired from the active project. Its verified core source backup is the sibling folder `objective power grid with reset ` (including the requested trailing space). The backup excludes results, banks, environments, caches and paper PDFs; BACKUP_MANIFEST.json records source hashes. Do not edit this backup.
+- All new power-grid experiments use real-valued durations in [0.2,3] seconds, fixed physical injection bus 1 and fixed amplitude 0.05 pu unless the user approves a variation. Recording windows are 4 seconds. Enforce pairwise duration separation of 0.01 seconds in every method, training rollout, validation and fantasy. Do not round to a grid or treat permutations as equivalent.
+- The next probe starts at the end of the preceding recording window. Carry every rotor angle and speed deviation. M/K remain fixed within each episode; initialize equilibrium only once at episode start. Policy histories retain stage order. Each posterior particle carries its own state under the actual action sequence; never supply true M/K or evaluator hidden states to a policy or controller.
+- For N_obs=5, sample frequency deviation at 0.0015625, 1.0015625, 2.0015625, 3 and 4 seconds within each window. Noise is independent Gaussian measurement noise with sigma specified in Hz. This is a declared sensor model, not certification of a particular device.
+- Online simulation replaces equilibrium observation banks. The old master/subset banks cannot supply later-stage likelihoods. Neither MSC nor MOCU uses a history-independent control bank. Existing data and experiment folders are historical records, not sources for new non-reset runs.
+- IEEE9 is implemented. IEEE14 and IEEE30 remain blocked for this online backend until independently implemented and validated. IEEE30 retains its referenced dynamic specification; do not replace it with 30 dynamic machines or run the unsupported full model through the reduced swing solver. SIR is a separate benchmark and is not silently migrated.
 
-## Scientific configuration and validity
+## Terminal control and objectives
 
-- Main application order: IEEE9 MOCU, then IEEE14 MOCU, then IEEE30 MOCU.
-  SIR ODE EIG is an implementation benchmark. Do not expand IEEE14/IEEE30 bank
-  work while the user's current priority remains IEEE9 unless requested.
-- Primary MOCU uses `robust_rule: quantile`, `alpha: 0.05`, zero safety margin,
-  under-control penalty 20, zero binary event penalty, and aligned grid support.
-  Total loss is `L(u,U)=u+20*max(U-u,0)` and regret is `L(u,U)-U`.
-  The 95% quantile is a Bayes action for this loss; it is not a worst-case
-  maximum or a guarantee of 95% out-of-sample physical safety.
-- Training, Fixed calibration, Myopic fantasies, Step-DAD refinement, and
-  posterior evaluation must use the identical loss and decision rule.
-  Snapped quantiles are aligned only when stored requirements already lie on
-  the candidate grid. Otherwise use continuous controls or explicitly minimize
-  the finite loss over the available grid. Preserve the alignment guard.
-- Primary `mean_mocu` in schema `realized_operational_regret_v2` means held-out
-  realized regret against a refined continuous-control oracle.
-  `mean_posterior_mocu` is a separate bank-posterior diagnostic. Never combine
-  older posterior-only or hard-maximum results under a shared metric label.
-  A continuous-oracle comparison also includes control discretization error.
-- Report empirical physical safety, nadir/ROCOF violations, control magnitude,
-  posterior ESS, and regret separately. Keep failed/ineligible method outcomes;
-  distinguish a safety point estimate from its statistical confidence interval.
-- The scalar requirement model assumes a feasible control range and monotone
-  safety. Check both. Do not discard or resample infeasible physical systems
-  to improve safety scores. A single-contingency run is not N--1 validation.
-- IEEE30 is the Demetriou et al. (2017), DOI 10.1109/JSYST.2015.2444893,
-  modified dynamic reference: 36 electrical buses, six GENROU machines,
-  IEEET1 excitation, and BPA_GG governors only on the two generators.
-  Original buses 1,2,5,8,11,13 map to terminals 31--36; the last four machines
-  are synchronous condensers. The proposed latent vector is six H and two R
-  coordinates. Prior widths are study assumptions, not measured data.
-  Machine-base conversion is `M_i=2*H_i*(S_i/S_base)/(2*pi*f_base)`.
-  Do not assign inertia or governor response to every bus, or replace a
-  condenser's excitation gain by active-power droop. The full dynamic backend
-  and AC initialization are pending; retain the explicit unsupported-model
-  guard and do not launch this YAML with the reduced swing solver.
+- At the end of probing, the declared control contingency and supplementary step injection start immediately from the carried terminal state. Zero decision/communication delay is an explicit simulation assumption. Changing latency requires propagating state through that delay.
+- For every posterior M/K particle, solve for a continuous control in the configured u_bounds from that particle's terminal state under the configured contingency. Safety is the conjunction of the configured frequency-nadir and maximum absolute RoCoF limits over the complete control window, including its initial frequency. Do not claim these study limits or coverage are engineering standards.
+- MSC selects the smallest admissible control whose posterior safe mass is at least `control.posterior_coverage`. MSC training minimizes expected selected terminal control, with no shortfall penalty. Coverage is a model-conditioned decision preference, not a guaranteed held-out safety rate. Use a scan to bracket safe transitions, refine by bisection to solver_tolerance, and check the selected control directly across all posterior particles. The scan is a numerical solver, not a discrete action space. Sampled monotonicity checks do not certify behavior between scan points.
+- MOCU retains finite loss `L(u,U)=u+max(U-u,0)/(1-q)`, where q is the single posterior coverage parameter and U is the numerically resolved minimum safe continuous control for the particle's actual terminal state. Score posterior expected `L(u,U)-U`; never substitute EIG or selected control for MOCU. MOCU requires finite scalar requirements for all posterior particles and sampled monotone safety; reject detected violations. MSC retains infeasible-particle probability mass and may proceed only if the remaining safe mass meets coverage. This loss is a control-sizing surrogate, not an established monetary or physical violation cost.
+- No feasible posterior-safe action is an explicit error, never an unmarked maximum-control fallback. Do not resample/drop systems to hide infeasibility. Record failed runs. The terminal controller's posterior excludes the evaluator truth in training and evaluation.
+- The evaluation oracle is the numerically resolved smallest safe continuous action within the same u_bounds and solver tolerance, using true M/K and that method's actual terminal state. Record oracle infeasibility. Do not call this a certified continuous global optimum or reuse an oracle across different probe histories.
+- EIG reports the sequential prior-contrastive lower bound (sPCE), contrast count and log(L+1) ceiling. Its inclusion of the true particle in the bound denominator is specific to that estimator; it does not authorize putting truth in the MSC/MOCU controller's posterior.
 
-## Data generation and reuse
+## Methods and scientific verification
 
-1. Activate the installed environment and inspect the canonical YAML, physical
-   model, observation definition, action catalog, control scenario, units,
-   and bank paths. Use the finite-loss alignment and repository checks first.
-2. Generate or validate data through, for example:
-   `bash scripts/data_generation.sh --config configs/ieee9_mocu.yaml --experiment_type objective_based --T 3 --N_obs 5 --noise_sigma 0.005 --seed 101`.
-   Do not invoke the internal bank helpers directly for a formal generation.
-3. The reusable pipeline ensures the configured master bank, extracts the
-   active subset without resimulation, then validates/builds the separate
-   control extension. `data.reuse_bank_dir` identifies the master bank.
-   For IEEE9 the full grid has 281 durations, 0.20--3.00 s in 0.01 s steps,
-   crossed with nine buses: 2,529 actions. Six selected durations give 54
-   actions; this is not a selection of six arbitrary bus--duration pairs.
-4. A dense grid is a master bank, not an exact continuous-duration simulator.
-   Every on-grid duration combination must be extractable as a subset.
-   Check complete duration-by-bus coverage and exact observation-column order.
-   IEEE14 needs 281*14=3,934 actions for its analogous master bank.
-5. Validate theta values and row ordering across observation/control banks,
-   configuration/source hashes, shapes, finite trajectories, grid, and units.
-   File existence alone is insufficient. Changing the decision rule alone
-   need not regenerate physical responses; changed physics invalidates reuse.
-6. Preserve transactional bank writing: stable sibling lock, private staging,
-   validation/completion manifest, publication only after success, and retained
-   replaced banks for existing memory maps. Do not delete failed staging
-   evidence or old banks while readers are active.
-7. Keep training/validation/final-test roles explicit. Fit support and neural
-   training may share their declared training bank; Fixed calibration uses
-   training simulations. Final test outcomes must not guide selection.
-   Preserve validation preflight and inspect constant terminal decisions
-   before expensive training; do not disable it merely to obtain a run.
+- All six methods use the same ordered history, feasible continuous durations, physical model, observations, terminal rule and paired evaluation systems/noise. Methods: DAD, RL-sBOED, Step-DAD, Myopic, Fixed and Random.
+- For EIG, DAD/Fixed/Step-DAD use pathwise gradients with numerical simulator state/duration Jacobians (step 1e-5). Test chained state carry and feasible-duration-map gradients. This is a numerical simulator derivative, not an analytic swing derivative.
+- MSC/MOCU use continuous actions but non-smooth safety indicators and quantile objectives. DAD/Fixed/Step-DAD remain deterministic policies with full-horizon objectives; train using antithetic Gaussian parameter perturbations with paired model/noise seeds. This estimates the gradient of a parameter-smoothed objective, with finite-smoothing bias relative to the original objective. Disclose this optimizer adaptation; do not claim original pathwise DAD gradients. Validation/evaluation use the unperturbed deterministic policy. Fixed is an ordered sequence independent of observations.
+- RL-sBOED is a REDQ-style adaptation with replay, critic ensemble, random-subset target minimum, entropy temperature and target averaging. Reward increments telescope to terminal utility; gamma=1. Step-DAD reuses the matching DAD policy, then refines on posterior-predictive future simulations after observations, keeping prior refinements within that episode.
+- Myopic uses continuous search over expected one-step utility. Random is uniform over the remaining feasible intervals. Fixed tests short/central/long/spread validation initializations before training. Evaluation data must not select designs or checkpoints.
+- Label all algorithms as documented adaptations, not exact reproductions. Smoke tests establish workability only. A single-seed pilot cannot establish publication-level superiority. Check posterior-particle sensitivity, EIG contrast sensitivity, convergence and checkpoint quality before publication claims. Do not retune final-test designs to force a learned-method win.
 
-## Experiments, reruns, and Grace
+## Launch and output workflow
 
-- A single matched pilot:
-  `bash run.sh --config configs/ieee9_mocu.yaml --experiment_type objective_based --method dad,rl_sboed,step_dad,myopic,fixed,random --T 3 --N_obs 5 --noise_sigma 0.005 --seed 101 --eval-seeds 1001`.
-- A full main-study sweep:
-  `bash sweep_run.sh --configs ieee9_mocu --experiment_type objective_based --T 3,4,5 --N_obs 5 --noise_sigma 0.005 --seed 101,202,303 --eval-seeds 1001,1002,1003,1004,1005`.
-- Separate training uses `scripts/training.sh`. Rerun evaluation through
-  `scripts/evaluation.sh --config ... --experiment_type ... --exp-dir ... --T ... --N_obs ... --noise_sigma ... --seed ... --eval-seed ...`.
-  Verify the full configuration and checkpoint identity before reuse;
-  Step-DAD reuses its matching DAD checkpoint and adds online refinement.
-  Preserve original results and record replacement provenance for reruns.
-- On labpc the usual environment is `mocu_optimized`; on Grace the reusable
-  environment wrapper loads GCCcore/12.2.0, Python/3.10.8, CUDA/12.1.1 and
-  `/scratch/user/g.lin/venvs/objective_power_grid` (override with `BOED_VENV`).
-  Never run GPU simulation/training on login nodes.
-- Freeze source/configuration before submission and record commit, content
-  hashes, resolved arguments, and Slurm IDs. Include `src`, `tools`, `configs`,
-  `scripts`, `hprc`, `documents`, `run.sh`, `sweep_run.sh`, `AGENTS.md`, and
-  `README.md` when preparing an audit archive used by repository checks.
-  Symlink shared data into the snapshot; output belongs outside the snapshot.
-- Submit formal work with
-  `sbatch --output=/absolute/run/logs/%x-%j.out hprc/experiment.slurm /absolute/source_snapshot run [run.sh arguments]`.
-  Create the log directory before submission. Entry choices are `run`, `sweep`,
-  `generate`, `train`, `evaluate`, and `visualize`. Override resource requests
-  at submission time; do not make a new wrapper for each seed or horizon.
-- Report queue delay separately from estimated compute time. Base ETA on
-  measured stage throughput when available; a Slurm wall limit is not an ETA.
-  Inspect `squeue`, `sacct`, logs, and completion manifests before claiming
-  completion. A zero exit code without expected method/seed outputs is insufficient.
+- Every formal experiment starts through `run.sh`, `sweep_run.sh` or maintained `scripts/*.sh`. Never invoke internal training functions or ad hoc Python launchers for formal work.
+- A user-approved MSC pilot uses, for example: `bash run.sh --config configs/ieee9_mocu.yaml --objective msc --coverage 0.9 --T 3 --N_obs 5 --noise_sigma 0.005 --seed 101 --eval-seeds 1001`. Use `--objective mocu` for MOCU and `--objective eig --config configs/ieee9_eig.yaml` for EIG. Explicit method/budget arguments are supported; do not confuse defaults with approved budgets.
+- Workability: add `--smoke` and a fresh `--output experiments/<stamp>`. Smoke budgets are two training updates, four training/validation systems, two evaluation systems, eight posterior/planning particles, one refinement update and all requested methods. No performance claims.
+- `bash sweep_run.sh --configs ieee9_mocu --objective msc --coverage 0.9 --T 3,4,5 --seed 101,202,303 --eval-seeds 1001,1002,1003,1004,1005` is an example requiring explicit authorization for all cells. Evaluation seeds reuse a matching trained checkpoint. Each cell gets a new output directory.
+- For an explicitly approved three-objective pilot, `scripts/objective_comparison.sh --output experiments/<campaign> <common arguments>` freezes committed code and runs EIG, MSC and MOCU sequentially on one host. Commit and push requested changes before launching; record per-objective failures and keep independent remaining objectives queued.
+- `scripts/continuous.sh` is a direct shared online entrypoint. `scripts/continuous_eig.sh` is the EIG-specific compatibility entrypoint. SIR uses the guarded `scripts/sir_run.sh`; retired grid bank-generation/training/evaluation stages must fail clearly.
+- `--estimate-only` is a bounded timing diagnostic, not approval for the full run. `--preflight-max-hours` checks padded measured compute estimates before formal training; an exceeded budget must stop, not silently expand resources. Use `scripts/check.sh` for repository and regression checks.
+- Store resolved physics, objective/coverage, command/settings, source hashes and snapshot, validation histories, checkpoints, ordered rollouts, posterior particles/states/weights, true evaluation parameters, physical safety, oracle and completion records in stamped `experiments/` folders. Preserve failed partial outputs. No new equilibrium master or control banks are needed.
+- Only claim completion when all requested methods/seeds are present with finite scores and the success marker. Distinguish partial training, failed evaluation and complete results.
 
-## Reusable audits
+## Reporting
 
-- `bash scripts/audit.sh alignment` checks production objective agreement;
-  `... preflight --config configs/ieee9_mocu.yaml` checks decision sensitivity.
-- `bash scripts/audit.sh space --config configs/ieee9_mocu.yaml --horizons 2,3,4,5 --phase screen`
-  runs a bounded planner screen. Use `--phase confirm` only with declared
-  unconsumed validation. Increase fantasies, first-action coverage, and Fixed
-  calibration to investigate numerical convergence on screening systems.
-- `bash scripts/submit_audit.sh --archive /absolute/source.tar --commit COMMIT --runtime /absolute/runtime`
-  submits the reusable IEEE9 master search on Grace. `--previous` optionally
-  reuses candidates from a specified previous campaign; no historical run path
-  is hard-coded. The stages are prepare, fresh, confirm, finalize, with Slurm
-  `afterok` dependencies and confirmation concurrency controlled by an argument.
-- Master search samples global catalogs covering all 281 durations, refines
-  local neighbors, includes the unchanged baseline, and selects by both low
-  loss and estimated adaptive/planning room. It is planner-based selection.
-  Label the result best found, not global optimum over C(281,6).
-- Freeze finalists before fresh physical validation. Reproduce known probe
-  curves and compare batched/scalar continuous oracles (tolerance 1e-4).
-  Use the union of finalist actions for fresh validation; do not regenerate
-  the full master for each subset. Do not reuse consumed validation for new
-  confirmatory selection without new independent data.
-- Distinguish Fixed-minus-Myopic adaptation, Myopic-minus-lookahead planning,
-  and Fixed-minus-lookahead combined gain. Branch counts alone prove none.
-  Approximate Fixed and rolling two-step lookahead are not globally optimal;
-  a null result is not a theorem that DAD has no useful full-horizon strategy.
-- Select second actions and estimate their values with independent fantasy
-  sets. Pair true systems and action/step noise across methods. Average noise
-  replicas within theta before theta-cluster bootstrap; adjust confirmatory
-  intervals for all prespecified finalists/horizons/contrasts. Disclose that
-  intervals conditional on a bank do not measure bank-generation uncertainty.
-- Keep all candidates, failed checks, raw arrays, frozen choices, budgets,
-  seeds, oracle brackets, configuration, source hashes, and reports inside
-  the campaign directory. Never change priors or durations after inspecting
-  final test results merely to make a DAD-family method win.
+- Keep one performance table per metric, methods as rows and T as columns; ablations may use the ablated parameter as columns. Use mean ± sample SD across run-level seed summaries, never per-system Bernoulli SD as safety-rate uncertainty. A single seed has no across-seed SD; show unavailable rather than zero.
+- Full comparisons use training seeds 101/202/303 crossed with evaluation seeds 1001–1005. These are three independent training seeds, not 15 independent trainings. Deduplicate non-training baselines only when actual policies/results are identical; a fitted Fixed policy may depend on its calibration seed.
+- Report MSC (selected control), oracle MSC and physical safety for MSC runs. Report posterior MOCU and physical safety/control diagnostics for MOCU. The legacy mean_mocu realized-regret schema must not be pooled with posterior MOCU or new non-reset results.
+- Keep system dispersion separate from seed variability and confidence intervals. Preserve safe counts, number of physical systems, evaluation seeds, continuous control bounds/solver tolerance, limits and contingency. Cluster repeated measurements within physical systems.
+- A smaller MOCU does not guarantee smaller control or higher safety. Lower MSC does not certify safety. State carry/order does not establish an adaptive advantage. Do not imply physical stability outside the measured frequency/RoCoF criteria.
 
-## Results and visualization
+## Repository and manuscript
 
-- All generated run outputs live in stamped `experiments/` directories:
-  resolved configuration, source/command provenance, local checkpoints,
-  training logs, diagnostics, evaluation seed subdirectories, raw per-system
-  records, summaries, and completion manifests. Keep banks under `data/`.
-  Do not scatter new logs, results, configs, or caches into repository roots.
-- Verify every requested method, horizon, training seed and evaluation seed;
-  finite scores; metric schema; shared physical systems/noise; and runtime
-  units. Never fabricate missing cells or silently drop failed seeds.
-- Replot existing sweeps using `bash sweep_run.sh --configs ... --T ... --N_obs ... --noise_sigma ... --seed ... --experiment_type ... --plots-only`.
-  For explicit historical run directories, use
-  `bash scripts/visualization.sh results --exp-dir /absolute/run1 --exp-dir /absolute/run2 --T 3,4,5 --N_obs 5 --noise_sigma 0.005 --experiment-type objective_based`.
-  Old SIR folders retain the `sir_ode` stem: pass explicit directories instead
-  of renaming their records to the new `sir_ode_eig` config stem.
-- Save plot provenance and the underlying tables. Do not pool incompatible
-  duration catalogs, objectives, noise settings, or model versions.
-- Render the IEEE30 reference topology with
-  `bash scripts/visualization.sh network --config configs/ieee30_mocu.yaml --output documents/images/ieee30_diagram.png`.
-  This draws a source-checked network; it does not validate or execute the
-  pending full dynamic simulator. Do not generate technical connectivity with
-  an image model or infer machines from all bus labels.
+- Keep exactly five canonical YAMLs: ieee9_eig.yaml, ieee9_mocu.yaml, ieee14_mocu.yaml, ieee30_mocu.yaml and sir_ode_eig.yaml. No host variants/subfolders. Grid YAMLs contain only the new non-reset experiment settings and referenced physical models.
+- Keep reusable diagnostics in tools/, tests in tools/tests/, shell entrypoints in scripts/, cluster wrappers in hprc/. Do not leave temporary scripts in project roots or duplicate production objective formulas in audits.
+- Documents root contains the two manuscript/sBOED .tex files, their .bib, the existing manuscript PDF, images/ and papers/. Never rebuild the manuscript PDF without an explicit request. Preserve its existing bytes. Keep shared MOCU blocks in both LaTeX files identical when editing them.
+- README is a brief introduction, installation and run guide. This file contains detailed reusable workflows. Papers live in documents/papers/ with source/hash manifest; preserve referenced model provenance and existing diagrams.
 
-## Performance-result tables
+## HPRC
 
-These rules are mandatory for every final performance table:
-
-- Create one table per metric. EIG, MOCU, offline time, and online time must
-  never be combined into one table.
-- Use methods as rows.
-- Use experiment horizon `T` as columns.
-- Format every numeric cell as `mean ± std`, using sample standard deviation.
-- Final publication tables merge all training and evaluation seeds into one
-  table; do not publish a separate table for each training seed.
-- For trained methods (DAD, RL-sBOED, and Step-DAD), compute EIG, MOCU, and
-  online-time mean and sample standard deviation over all 15 crossed results:
-  3 training seeds (`101`, `202`, `303`) × 5 evaluation seeds (`1001` through
-  `1005`).
-- For non-training methods (Myopic, Fixed, and Random), training-seed copies
-  are duplicate evaluations. Deduplicate by evaluation seed and compute mean
-  and sample standard deviation over the 5 unique evaluation seeds. When a
-  repeated runtime measurement differs, average its repeated copies within
-  each evaluation seed before computing the five-seed summary.
-- Offline time is not evaluation-seed dependent. For trained methods, compute
-  mean and sample standard deviation over the 3 training seeds; do not repeat
-  an offline time five times. Apply the same run-level treatment to any
-  non-training calibration time that is measured once per experiment run.
-- Treat the 15 trained-method combinations as descriptive crossed results, not
-  as 15 independent training runs. State the `3 training × 5 evaluation`
-  design in the table caption or accompanying text.
-- Bold the best method value within each comparison column (`T`). For EIG,
-  higher is better; for MOCU and both time metrics, lower is better. Bold all
-  tied winners.
-- Missing training or evaluation seeds make a cell incomplete; show an em dash
-  rather than presenting it as a final result.
-
-For an ablation table, the columns may represent the ablated variable instead
-of `T`. The one-metric-per-table and `mean ± std` rules still apply.
-
-
-## Configurable posterior coverage for MOCU
-
-- Set `control.posterior_coverage: q` with `0 < q < 1` in the experiment YAML.
-  This is a posterior coverage preference, not a physical safety standard.
-  Express the loss as `L(u,U)=u+max(U-u,0)/(1-q)` and the decision as the
-  posterior q-quantile. Do not introduce separate named tail or penalty
-  parameters in the manuscript or user configuration. The loader supplies
-  legacy internal loss fields from `q`; it sets no empirical safety threshold. Derived legacy keys
-  are overridden when this parameter is present; old snapshots without it
-  keep their original behavior. Quantile control, zero margin, and zero
-  binary violation penalty are required. Physical frequency and RoCoF limits
-  are separate and are not changed by this parameter.
-- Retrain each coverage setting through `sweep_run.sh` in an isolated source
-  snapshot; reuse matching physical banks, not checkpoints or Fixed caches
-  from a different loss. Record the input ratio and resolved loss parameters.
-- Compare methods within each ratio; raw MOCU across ratios has a different
-  loss scale. When the user asks for MOCU, report `mean_posterior_mocu` only
-  by default; do not relabel `mean_mocu` (held-out regret) as posterior MOCU.
-
-
-## Explicit approval before task submission
-
-- User instruction: never submit any task without explicit user approval. Before
-  submitting cluster jobs or launching experiment/audit tasks, present the exact
-  settings, methods, seeds, job count, estimated duration, and SU cost for review
-  and wait for approval. A parameter discussion or request to make a parameter
-  configurable is not submission approval. Read-only status checks, preparation,
-  and requested cancellations can proceed. Do not expand an approved run scope.
-
-
-## Explicit approval before running or editing code
-
-- Never run any code or edit any code without the user's explicit approval.
-  This includes scripts, shell commands, tests, diagnostics, experiments, and
-  code changes. Describe the proposed action and wait for approval before
-  executing it. Do not infer approval from a discussion, suggestion, status
-  question, or earlier approval for a different action. Approval applies only
-  to the action and scope explicitly authorized by the user.
-- This rule takes precedence over any earlier instruction allowing autonomous
-  execution, read-only command checks, preparation, tests, or code edits.
-
-
-## Joint MOCU and safety reporting
-
-- Report terminal posterior MOCU and empirical physical safety rate as separate
-  metrics for each method; posterior MOCU is primary and safety is diagnostic. Posterior coverage is an input preference;
-  empirical safety is an output, not an engineering acceptance threshold.
-- Safety requires both frequency-nadir and RoCoF limits for the declared
-  monitoring interval and contingency set. Average repeated outcomes within
-  each physical system before averaging systems; preserve safe/unsafe counts,
-  number of outcomes, and number of distinct physical systems. Confidence
-  intervals must respect physical-system clusters and stated sampling assumptions.
-- The human-readable MOCU column uses mean_posterior_mocu, never the legacy
-  mean_mocu field (held-out regret). Keep every method visible, including poor
-  safety outcomes; legacy validity flags do not establish engineering approval.
-- Never edit existing submitted source snapshots or historical result files
-  to apply reporting changes. New code applies to future authorized runs.
-
-
-## Posterior-MOCU selection protocol
-
-- Primary training rewards, validation checkpoint selection, result ranking,
-  plots, and publication tables use terminal posterior MOCU. Safety rate and
-  control magnitude are supporting diagnostics, with no automatic safety gate.
-- Coverage does not set an empirical safety threshold. Deprecated safety-gate
-  keys do not affect checkpoint selection. Optional MoE diversity ablations
-  must remain explicitly labeled; standard methods use zero diversity weight.
-- The legacy evaluation mean_mocu column still denotes realized regret for
-  schema compatibility. Never use it as a fallback for missing posterior MOCU.
-- Historical submitted runs used the earlier regret-based checkpoint selection
-  and safety gate. Their frozen protocols must be disclosed, not retroactively
-  described as using the corrected posterior-only checkpoint rule.
-
-
-## Independent MSC objective
-
-- `--experiment_type msc_based` selects posterior minimum safe control, alongside
-  existing `objective_based` (MOCU) and `eig_based` (EIG). This adds an objective;
-  do not rename historical MOCU runs or overwrite their results/checkpoints.
-- MSC is restricted to IEEE9, IEEE14 and IEEE30 configurations. IEEE30 remains
-  blocked by the existing unsupported dynamic-backend guard; selecting MSC does
-  not authorize or validate the reduced-swing surrogate for that model.
-- Reuse the canonical grid YAMLs and their physical observation/control banks.
-  `u_optimal.npy` / legacy `psi_star.npy` stores minimum-safe requirements;
-  `control_safe.npy` stores safety across the candidate grid. There is no need
-  for another physics bank solely because the probe objective changes.
-- MSC uses zero margin, the discrete admissible control grid and configured
-  `control.posterior_coverage=q`. It minimizes expected terminal selected
-  control, E_D[u_MSC(D;q)], subject to the posterior coverage constraint in each
-  decision. It has no shortfall penalty in its training/design score.
-  A lower MSC is not a physical safety certificate. Quantile expectation is
-  not generally monotone under information; do not promise a method advantage.
-- Reject nonfinite/infeasible requirements and bank safety tables inconsistent
-  with the assumed monotone scalar safety threshold. Never discard unsafe
-  systems to make a result look better. Frequency/RoCoF safety is evaluated
-  independently on held-out true systems.
-- DAD rewards negative terminal MSC; RL-sBOED uses telescoping MSC reduction;
-  Fixed, Myopic and Step-DAD optimize the same terminal MSC. Random uses the
-  same final controller. Use independent `training.msc_based` settings.
-- MSC checkpoints record objective, posterior coverage and terminal-rule hash;
-  reject cross-objective or mismatched-rule reuse. Fixed caches include the
-  objective in their fingerprint. MSC folders have an MSC token.
-- For MSC, primary `mean_msc` is the selected control averaged within physical
-  systems and then across systems; `mean_oracle_msc` uses true parameters and
-  the refined numerical oracle. Report physical safety alongside MSC, and
-  preserve actual `mean_posterior_mocu` as a distinct secondary diagnostic.
-  Do not label MSC as monetary cost or energy without a physical conversion.
-- Keep one metric per publication table and the existing crossed-seed rules.
-  These instructions override MOCU-only reward/ranking instructions for MSC;
-  they do not change the MOCU or EIG protocols or their submitted snapshots.
-- MSC implementation work is not run authorization. Formal experiments still
-  require the user's explicit approval and maintained shell entrypoints.
-
-
-## Shared bank layout
-
-- Store reusable IEEE9 data under `data/ieee9/probe_master/`,
-  `data/ieee9/probe_subsets/<bank-id>/`, and
-  `data/ieee9/control_banks/<bank-id>/`. MOCU and MSC share physical control
-  bank structures; coverage and objective belong to run configuration.
-- Bank IDs preserve physical/data provenance; validate physics, safety limits,
-  control grid and identical parameter rows before reuse. A matching folder
-  name alone does not establish compatibility.
-- Put run configurations, checkpoints and results in stamped experiments.
-  Reference shared bank paths; do not generate reusable banks inside a run.
-- Preserve old paths as compatibility symlinks when relocating existing banks;
-  never rewrite frozen source snapshots or historical bank metadata.
-  `data/ieee9/layout_manifest.json` records old and new locations.
-
-## MSC development-space audit
-
-- Use `bash scripts/audit.sh msc-space --config <resolved-MSC-yaml> --output <stamped-experiment-directory>` for MSC diagnostics.
-- The audit scores production posterior selected control, never MOCU regret. It compares no probes, Random, calibrated Fixed, Myopic and receding two-step lookahead. Save paired arrays and histories, coverage, budgets and provenance.
-- Treat bank-threshold coverage as a proxy, not physical simulation. Existing training-validation systems are development data, not fresh confirmation. Bootstrap intervals cluster repeated noise seeds by physical system.
-- A null approximate-planner result does not prove absence of adaptive or non-myopic opportunity. Increasing fantasy budgets and independent confirmation are needed before positive claims.
-
-- To search new MSC duration combinations, use `scripts/audit.sh master` with
-  `--objective msc --config <resolved-MSC-yaml>`. The `prepare` stage searches
-  the complete master duration catalog; a single `msc-space` audit does not.
-  Run `prepare`, `fresh`, each finalist `confirm`, then `finalize` in order.
-  Declare horizons, global candidate count and fresh-system count before launch.
-  Freeze finalists before simulating fresh validation; retain all candidate
-  scores, paired arrays and physics checks. Report MSC and physical safety
-  separately. A sampled/global-local search identifies best-found sets, not
-  an exhaustive optimum over all six-duration combinations.
+- Only active root: `/scratch/user/g.lin/Documents/objective_power_grid/`, a real shared-scratch directory. No project copy in home, extra runtime tree or loose scratch scripts. Freeze each authorized job's source under its campaign before submission. Do not modify existing submitted snapshots.
+- `hprc/experiment.slurm <source> run|sweep|continuous ...` forwards to maintained shell entrypoints. GPU computation runs on compute nodes only.
+- Source hprc/environment.sh; it sources cache.sh, uses the canonical .venv, puts CUDA/PyCUDA/matplotlib/torch/XDG caches in writable job-local storage and disables bytecode. Check byte and file quotas. Do not use home for caches or alter unrelated editor/SSH services.
+- For authorized cleanup, use tools/archive_records.py to archive results to labpc, verify every checksum and save a receipt before pruning. Retain physical data and historical records unless their removal is explicitly approved. Never delete submitted snapshots just to update code.

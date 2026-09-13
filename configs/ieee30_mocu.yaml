@@ -1,13 +1,11 @@
-# Published IEEE30 dynamic reference: six machines, two governors, eight proposed latent coordinates.
-# Full dynamic backend pending: this YAML must not execute with the legacy reduced swing solver.
-# Source parameters are on each machine rated-MVA base; priors and probe/control choices are study assumptions.
+# Non-reset only. u_bounds is continuous; solver_scan_points only brackets roots.
 system:
   name: ieee30
   variant: demetriou2017_modified_dynamic
 N: 6
 model_provenance:
-  citation: P. Demetriou, M. Asprou, J. Quiros-Tortos, E. Kyriakides, Dynamic IEEE Test Systems for Transient
-    Analysis, IEEE Systems Journal 11(4), 2108-2117, 2017
+  citation: P. Demetriou, M. Asprou, J. Quiros-Tortos, E. Kyriakides, Dynamic IEEE
+    Test Systems for Transient Analysis, IEEE Systems Journal 11(4), 2108-2117, 2017
   doi: 10.1109/JSYST.2015.2444893
   paper_url: https://zenodo.org/records/1238086
   parameter_source: https://www.kios.ucy.ac.cy/testsystems/wp-content/uploads/2020/03/IEEE-30.pdf
@@ -23,8 +21,8 @@ implementation:
   status: reference_configuration_backend_pending
   required_backend: GENROU + IEEET1 + BPA_GG with algebraic AC network
   current_backend_compatible: false
-  reason: Current CPU/CUDA backend implements reduced swing equations only; full governor/exciter dynamics
-    and modified network initialization are not implemented.
+  reason: Current CPU/CUDA backend implements reduced swing equations only; full governor/exciter
+    dynamics and modified network initialization are not implemented.
 network:
   original_bus_count: 30
   electrical_bus_count: 36
@@ -50,10 +48,10 @@ network:
   load_count: 21
   total_load_mw: 283.4
   total_load_mvar: 126.2
-  initialization: solve published AC power flow, then initialize machines, exciters and governors at that
-    operating point
-  network_data_status: author PowerWorld network import required; original MATPOWER lossless reduction
-    is not equivalent
+  initialization: solve published AC power flow, then initialize machines, exciters
+    and governors at that operating point
+  network_data_status: author PowerWorld network import required; original MATPOWER
+    lossless reduction is not equivalent
 swing_equation:
   topology: ieee30
   dynamics_model: GENROU_IEEET1_BPA_GG
@@ -83,48 +81,15 @@ swing_equation:
   observation_bus: 1
   probe_buses:
   - 0
-  - 1
-  - 2
-  - 3
-  - 4
-  - 5
-  - 6
-  - 7
-  - 8
-  - 9
-  - 10
-  - 11
-  - 12
-  - 13
-  - 14
-  - 15
-  - 16
-  - 17
-  - 18
-  - 19
-  - 20
-  - 21
-  - 22
-  - 23
-  - 24
-  - 25
-  - 26
-  - 27
-  - 28
-  - 29
   probe_amplitudes:
   - 0.05
-  probe_durations:
-  - 0.3
-  - 0.6
-  - 1.0
-  - 1.5
-  - 2.0
-  - 2.5
-  reset_after_probe: true
+  reset_after_probe: false
   T_obs_sec: 4.0
   fs_hz: 40.0
   probe_protocol_status: study choices, not specified by the dynamic-data paper
+  probe_duration_bounds:
+  - 0.2
+  - 3.0
 dynamic_machines:
 - physical_bus: 1
   terminal_bus: 31
@@ -432,7 +397,8 @@ uncertainty:
   other_dynamic_parameters: fixed at published nominal values
 derived_parameter_conventions:
   purpose: unit conversion reference, not an instantaneous-governor approximation
-  M_formula: M_i = 2 H_i (S_i / S_base) / (2 pi f_base), for electrical angular-speed deviation in rad/s
+  M_formula: M_i = 2 H_i (S_i / S_base) / (2 pi f_base), for electrical angular-speed
+    deviation in rad/s
   M_nominal_nodes:
   - 0.07098947081670899
   - 0.0165517066449028
@@ -440,8 +406,8 @@ derived_parameter_conventions:
   - 0.003870648215994895
   - 0.0019098593171027439
   - 0.0019098593171027439
-  K_static_formula: K_i = (S_i / S_base) / (R_i f_base), in system-pu power per Hz; generator steady-state
-    gain only
+  K_static_formula: K_i = (S_i / S_base) / (R_i f_base), in system-pu power per Hz;
+    generator steady-state gain only
   K_static_nominal_nodes:
   - 2.9189189189189193
   - 0.06723571897570585
@@ -449,29 +415,23 @@ derived_parameter_conventions:
   - 0.0
   - 0.0
   - 0.0
-  warning: Use the BPA_GG time constants and limits; static K must not replace the governor dynamics
+  warning: Use the BPA_GG time constants and limits; static K must not replace the
+    governor dynamics
 data:
-  dataset_dir: data/ieee30_demetriou2017_mocu
-  mocu_dataset_dir: data/ieee30_demetriou2017_mocu_control
+  observation_backend: online_continuous_swing
+  uses_probe_bank: false
+  uses_control_bank: false
   generate_if_missing: false
 observation:
-  msc_based:
-    N_obs: 5
-    noise_sigma: 0.005
-  sampling: uniform
-  objective_based:
-    N_obs: 5
-    noise_sigma: 0.005
-  eig_based:
-    N_obs: 5
-    noise_sigma: 0.01
-oracle:
-  tolerance: 0.0001
+  N_obs: 5
+  noise_sigma: 0.005
+  sampling: uniform_within_fixed_recording_window
 prior:
   mc_samples: 512
   mc_support_seed: 1
 experiment:
-  mode: duration_bus_reset
+  mode: continuous_duration_no_reset
+  experiment_type: objective_based
   step_number: 3
   methods:
   - dad
@@ -480,13 +440,9 @@ experiment:
   - myopic
   - fixed
   - random
-  experiment_type: objective_based
+  min_duration_separation: 0.01
 control:
-  robust_rule: quantile
-  posterior_coverage: 0.95
-  enforce_bayes_loss_alignment: true
-  safety_margin: 0.0
-  snap_up: true
+  posterior_coverage: 0.9
   delta_f_nadir_hz: -0.2
   T_obs_sec: 10.0
   ode_dt: 0.00625
@@ -501,142 +457,23 @@ control:
     duration: 10.0
     shape: step
     units: pu
-  u_candidates:
-  - 0.0
-  - 0.05
-  - 0.1
-  - 0.15
-  - 0.2
-  - 0.25
-  - 0.3
-  - 0.31
-  - 0.32
-  - 0.33
-  - 0.34
-  - 0.35
-  - 0.36
-  - 0.37
-  - 0.38
-  - 0.39
-  - 0.4
-  - 0.41
-  - 0.42
-  - 0.43
-  - 0.44
-  - 0.45
-  - 0.46
-  - 0.47
-  - 0.48
-  - 0.49
-  - 0.5
-  myopic_hypothetical: 256
-  fixed_exhaustive_threshold: 0
-  fixed_noise_replicas: 2
-  fixed_greedy_restarts: 8
-  physical_protocol_status: legacy study proposal; recalibration required after published dynamic backend
-    is implemented
-  bus_indexing: zero-based machine index; index 0 maps to original bus 1 / terminal bus 31
   rocof_limit_hz_s: null
-  pending_choices:
-  - physical ROCOF threshold
-  - contingency severity and feasible control range
-  - probe/control integration tolerances
-evaluation:
-  eig_test_systems: 128
-  eig_fixed_calibration_seed: 104729
-  eig_random_replicates: 32
-  objective_eval_seed: 104729
+  robust_rule: quantile
+  safety_margin: 0.0
+  initial_state: carried_terminal_probe_state
+  u_bounds:
+  - 0.0
+  - 0.5
+  solver_scan_points: 33
+  solver_tolerance: 1.0e-05
+nonreset_backend_status: unsupported_pending_validation_do_not_launch
 training:
+  eig_based:
+    updates: 2000
+    batch_size: 64
   msc_based:
-    reference_method_fidelity: true
     updates: 2000
-    min_updates_per_horizon: 200
-    trajectories_per_update: 128
-    ppo_epochs: 4
-    validation_interval: 50
-    validation_rollouts: 256
-    patience: 0
-    entropy_coefficient: 0.1
-    entropy_final_coefficient: 0.005
-    entropy_anneal_fraction: 0.8
-    dense_counterfactual_coefficient: 0.0
-    dense_counterfactual_temperature: 0.35
-    dense_branching_coefficient: 0.0
-    dense_branching_similarity_threshold: 0.5
-    dense_branching_margin: 0.35
-    dad_optimizer: reinforce
-    checkpoint_diversity_weight: 0.0
-    min_unique_sequence_fraction: 0.1
-    prefer_unique_sequence_floor: false
-    unique_floor_mocu_slack: 0.0025
-    open_loop_warn_after_updates: 100
-    actor_lr: 0.0003
-    critic_lr: 0.001
-    max_grad_norm: 1.0
-    moe_counterfactual_coefficient: 0.0
-    moe_branching_coefficient: 0.0
-    moe_counterfactual_floor_fraction: 0.0
-    moe_counterfactual_anneal_fraction: 0.33
-    moe_counterfactual_bootstrap: true
-    moe_prototype_reset_fraction: 0.2
-    moe_balance_coefficient: 0.001
-    moe_redundancy_coefficient: 0.005
-    moe_logit_scale_init: 3.0
-    moe_fixed_bc_coefficient: 0.25
-    moe_fixed_bc_anneal_fraction: 0.5
-    moe_fixed_bc_floor_fraction: 0.0
-    moe_fixed_bc_ess_threshold: 0.4
-    moe_low_ess_residual_coefficient: 0.05
-    moe_low_ess_threshold: 0.4
-    moe_residual_scale_coefficient: 0.01
-    moe_logit_scale_target: 3.5
-  use_bank_observations: true
-  device: auto
-  policy_hidden: 256
+    batch_size: 64
   objective_based:
-    reference_method_fidelity: true
     updates: 2000
-    min_updates_per_horizon: 200
-    trajectories_per_update: 128
-    ppo_epochs: 4
-    validation_interval: 50
-    validation_rollouts: 256
-    patience: 0
-    entropy_coefficient: 0.1
-    entropy_final_coefficient: 0.005
-    entropy_anneal_fraction: 0.8
-    dense_counterfactual_coefficient: 0.0
-    dense_counterfactual_temperature: 0.35
-    dense_branching_coefficient: 0.0
-    dense_branching_similarity_threshold: 0.5
-    dense_branching_margin: 0.35
-    dad_optimizer: reinforce
-    checkpoint_diversity_weight: 0.0
-    min_unique_sequence_fraction: 0.1
-    prefer_unique_sequence_floor: false
-    unique_floor_mocu_slack: 0.0025
-    open_loop_warn_after_updates: 100
-    actor_lr: 0.0003
-    critic_lr: 0.001
-    max_grad_norm: 1.0
-    undercontrol_penalty: 20.0
-    violation_penalty: 0.0
-
-
-    moe_counterfactual_coefficient: 0.0
-    moe_branching_coefficient: 0.0
-    moe_counterfactual_floor_fraction: 0.0
-    moe_counterfactual_anneal_fraction: 0.33
-    moe_counterfactual_bootstrap: true
-    moe_prototype_reset_fraction: 0.2
-    moe_balance_coefficient: 0.001
-    moe_redundancy_coefficient: 0.005
-    moe_logit_scale_init: 3.0
-    moe_fixed_bc_coefficient: 0.25
-    moe_fixed_bc_anneal_fraction: 0.5
-    moe_fixed_bc_floor_fraction: 0.0
-    moe_fixed_bc_ess_threshold: 0.4
-    moe_low_ess_residual_coefficient: 0.05
-    moe_low_ess_threshold: 0.4
-    moe_residual_scale_coefficient: 0.01
-    moe_logit_scale_target: 3.5
+    batch_size: 64

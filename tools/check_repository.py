@@ -52,7 +52,7 @@ def check():
                     if name.startswith('tools.'):
                         path=ROOT/Path(*name.split('.'))
                         assert path.is_dir() or path.with_suffix('.py').is_file(), ('Broken tools import',p,name)
-    assert {p.name for p in (ROOT/'hprc').iterdir()}=={'environment.sh','experiment.slurm','master_audit.slurm'}
+    assert {p.name for p in (ROOT/'hprc').iterdir()}=={'environment.sh','cache.sh','experiment.slurm','master_audit.slurm'}
     print('Repository layout, manuscript references, PDF provenance, and tools imports: OK')
 
 

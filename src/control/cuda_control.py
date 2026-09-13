@@ -60,15 +60,18 @@ extern "C" __global__ void simulate_control_metrics(
     double k1[28], k2[28], k3[28], k4[28], yt[28];
 
     for (int i = 0; i < N; ++i) {
-        y[i] = theta0[i];
-        y[N + i] = omega0[i];
+        y[i] = theta0[idx * N + i];
+        y[N + i] = omega0[idx * N + i];
     }
 
     const double U = u_mag[idx];
     double rocof_max = 0.0;
     double nadir = 1.0e300;
     double omega_prev[14];
-    for (int i = 0; i < N; ++i) omega_prev[i] = y[N + i];
+    for (int i = 0; i < N; ++i) {
+        omega_prev[i] = y[N + i];
+        if (y[N + i] / (2.0 * pi) < nadir) nadir = y[N + i] / (2.0 * pi);
+    }
 
     for (int s = 0; s < n_steps; ++s) {
         const double t = s * dt;
@@ -274,6 +277,7 @@ class CudaControlEngine:
         u_mags: np.ndarray,
         *,
         batch_size: int = 512,
+        initial_states: np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:
         """
         Args:
@@ -289,6 +293,17 @@ class CudaControlEngine:
         if M_rows.shape != (n_traj, self.N) or K_rows.shape != (n_traj, self.N):
             raise ValueError("M_rows/K_rows must be (n_traj, N)")
 
+        # A separate carried state for every (parameter, control) trajectory.
+        # Omitting it is retained only for low-level equilibrium reference tests.
+        if initial_states is None:
+            initial_states = np.broadcast_to(np.r_[self._theta0, self._omega0], (n_traj, 2*self.N))
+        initial_states = np.asarray(initial_states, dtype=np.float64)
+        if initial_states.shape != (n_traj, 2*self.N) or not np.isfinite(initial_states).all():
+            raise ValueError("Expected finite initial_states with shape (n_traj, 2*N)")
+        if not np.isfinite(M_rows).all() or np.any(M_rows <= 0) or not np.isfinite(K_rows).all() or not np.isfinite(u_mags).all():
+            raise ValueError("Invalid control simulation input")
+        angles0 = np.ascontiguousarray(initial_states[:, :self.N])
+        speeds0 = np.ascontiguousarray(initial_states[:, self.N:])
         rocof = np.zeros(n_traj, dtype=np.float64)
         nadir = np.zeros(n_traj, dtype=np.float64)
         block = 128
@@ -312,8 +327,8 @@ class CudaControlEngine:
                     cuda.In(self._B),
                     cuda.In(self._P_m),
                     cuda.In(self._D),
-                    cuda.In(self._theta0),
-                    cuda.In(self._omega0),
+                    cuda.In(angles0[start:end]),
+                    cuda.In(speeds0[start:end]),
                     cuda.In(u_mags[start:end]),
                     np.int32(cont.bus),
                     np.float64(cont.magnitude),
@@ -340,6 +355,8 @@ class CudaControlEngine:
                     )
                 rocof[start:end] = out_r
                 nadir[start:end] = out_n
+        if not np.isfinite(rocof).all() or not np.isfinite(nadir).all():
+            raise RuntimeError("Nonfinite terminal control simulation")
         return rocof, nadir
 
     def evaluate_one(

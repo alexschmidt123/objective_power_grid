@@ -11,7 +11,7 @@
 #SBATCH --time=24:00:00
 set -euo pipefail
 SOURCE=${1:?Provide an absolute source snapshot directory}
-ENTRY=${2:?Choose run, sweep, generate, train, evaluate, or visualize}
+ENTRY=${2:?Choose run, sweep, generate, train, evaluate, visualize, or continuous-eig}
 shift 2
 [[ "$SOURCE" = /* && -d "$SOURCE" ]] || { echo "Invalid source directory" >&2; exit 2; }
 cd "$SOURCE"
@@ -23,5 +23,7 @@ case "$ENTRY" in
   train) exec bash scripts/training.sh "$@" ;;
   evaluate) exec bash scripts/evaluation.sh "$@" ;;
   visualize) exec bash scripts/visualization.sh "$@" ;;
+  continuous) exec bash scripts/continuous.sh "$@" ;;
+  continuous-eig) exec bash scripts/continuous_eig.sh "$@" ;;
   *) echo "Unsupported entrypoint: $ENTRY" >&2; exit 2 ;;
 esac

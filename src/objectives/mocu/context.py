@@ -838,6 +838,7 @@ def build_context_from_config(
             experiment_type=experiment_type,
         )
 
+    raise ValueError("The power-grid equilibrium-bank experiment pipeline is retired. Use run.sh with the non-reset online protocol. Historical replay belongs in the reset backup.")
     root = project_root or repo_root()
     system = system_name_from_cfg(cfg)
     data_dir = resolve_dataset_dir(cfg, root)

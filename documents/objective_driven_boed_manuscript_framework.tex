@@ -16,65 +16,54 @@ Power-Grid Dynamic Learning and Control}
 \maketitle
 
 \begin{abstract}
-This paper studies sequential Bayesian experimental design for uncertain
-power-grid dynamics. At each stage, a policy selects a probing bus and duration,
-observes a noisy frequency response, and updates uncertainty over
-machine-specific parameters. We distinguish parameter-oriented expected
-information gain (EIG) from Yoon's mean objective cost of uncertainty (MOCU).
-We specialize the MOCU framework to a finite operational loss combining
-injection cost and unmet control requirement. Its Bayesian terminal decision
-is the posterior $q$ quantile for a specified posterior coverage $q\in(0,1)$, and MOCU is expected regret relative to the
-model-specific optimum under that same loss.
-Random, fixed, myopic,
-deep adaptive design (DAD), and reinforcement-learning sequential Bayesian
-optimal experimental design (RL-sBOED), and Step-DAD form the comparison under common
-simulation banks and held-out protocols. A susceptible--infected--recovered (SIR) model
-provides an implementation benchmark; IEEE 9-bus, IEEE 14-bus, and IEEE 30-bus
-systems define the planned application sequence. IEEE30 dynamic implementation
-and the final multi-seed comparisons remain to be completed. \todo{Add final
-quantitative findings.}
+This paper formulates sequential Bayesian experiment design for a reduced
+power-grid model with uncertain inertia and frequency response. Probe duration
+is continuous while injection location and amplitude are fixed. Physical states
+carry between recording windows, making the order of probes relevant.
+Noisy frequency measurements update a posterior model that determines a
+continuous terminal power injection under declared frequency-security criteria.
+We distinguish expected information gain (EIG), expected selected minimum safe
+control (MSC), and finite-loss mean objective cost of uncertainty (MOCU).
+Posterior coverage is a model-based decision preference; physical safety is
+assessed separately on held-out true systems. Six design methods share the
+physics and objective-specific terminal rule, with their numerical adaptations
+stated explicitly. IEEE9 is the implemented non-reset benchmark; the remaining
+system extensions and publication-level comparisons require further validation.
+\todo{Add quantitative findings only from completed matched non-reset runs.}
 \end{abstract}
-
 \begin{IEEEkeywords}
-Bayesian experimental design, power-system dynamics, adaptive design,
-mean objective cost of uncertainty, information gain.
+Sequential Bayesian experimental design, power-system dynamics, non-reset
+probing, minimum safe control, mean objective cost of uncertainty.
 \end{IEEEkeywords}
-
 \section{Introduction}
-\IEEEPARstart{U}{ncertainty} in power-system inertia and fast frequency response
-complicates frequency-security assessment and control selection. Controlled
-probing can reduce uncertainty, but an experiment must determine where to probe,
-how long to probe, and whether later probes should depend on earlier
-observations. \todo{Add motivation and citations.}
+\IEEEPARstart{U}{ncertainty} in inertia and effective frequency response affects
+both the interpretation of a probe signal and the control needed for a specified
+disturbance. Probing supplies observations; the final engineering decision is
+a supplementary power-injection magnitude. These two decisions belong to
+different action spaces and are connected through a posterior dynamical model.
 
-EIG values parameter learning, but parameter information does not necessarily
-improve a final control decision. We therefore also study MOCU, which values an
-experiment by its reduction of expected decision penalty.
-
-The study is organized around the following intended contributions:
-\begin{itemize}
-  \item sequential bus--duration BOED for uncertain power-grid dynamics;
-  \item a power-grid specialization of Yoon MOCU linking probing to the excess
-  operational loss of a posterior-quantile control;
-  \item a matched comparison of random, fixed, myopic, DAD, RL-sBOED, and
-  Step-DAD; and
-  \item SIR, IEEE9, IEEE14, and IEEE30 studies of objective choice, adaptation,
-  horizon, and scalability.
-\end{itemize}
+We study an ordered sequence of fixed-amplitude, fixed-location probes whose
+durations are continuous. Each probe begins when the preceding recording window
+ends, retaining its physical state. The objectives are parameter-oriented EIG,
+expected selected minimum safe control (MSC), and finite-loss MOCU. Their
+comparison asks whether different information requirements lead to different
+probe policies and subsequent controls, without requiring any method family
+to win by construction.
 
 \section{Related Work}
-DAD amortizes sequential information-based design~\cite{foster2021dad},
-RL-sBOED uses reinforcement learning~\cite{blau2022rlsboed}, and Step-DAD
-adds history-specific online policy refinement~\cite{hedman2025stepdad}.
-MOCU instead values uncertainty through an operational decision and its
-loss~\cite{yoon2013mocu,boluki2018generalized}. We specialize this decision
-framework to bus--duration probing, adapting the policy objectives accordingly.
-Controlled excitation motivates the frequency-response probes~\cite{peng2024probing}.
-\todo{Expand the comparison with related power-grid identification studies.}
+Controlled excitation motivates the inertia/response identification model
+of Peng et al.~\cite{peng2024probing}. Our multi-machine non-reset benchmark
+extends that motivation; its sensing, prior and control assumptions are stated
+separately rather than attributed to that paper. DAD, RL-sBOED and Step-DAD
+provide policy-based sequential design methods~\cite{foster2021dad,blau2022rlsboed,hedman2025stepdad}.
+Yoon's MOCU framework and its generalizations evaluate uncertainty through a
+specified downstream loss~\cite{yoon2013mocu,boluki2018generalized}.
+The present MSC criterion and particular MOCU shortfall loss are declared
+application choices. They are not asserted to be engineering standards or
+objectives already established by those design-method papers.
 
 \section{Problem Formulation}
 \label{sec:problem}
-
 \subsection{Power-Grid Dynamics and Latent Parameter Space}
 Following Peng et al.~\cite{peng2024probing}, we model inertia and fast
 frequency response jointly. Let $\Delta\omega(s)$ be angular-speed deviation
@@ -143,396 +132,370 @@ where indices $1,\ldots,m$ follow the retained-machine ordering and
 \label{eq:latent-space}
 \end{equation}
 The topology, coupling, damping, and equilibrium are known. Algebraic buses
-remain admissible probe locations but have no independent $M_i$ or $K_i$.
+enter the coupling and injection map but have no independent $M_i$ or $K_i$.
 With bounded piecewise-continuous inputs, these assumptions define the
 frequency trajectories used by the observation and terminal-control models.
 
-\subsection{Reset Probe Experiment and Design Space}
-At stage $t$, the design is a bus--duration pair
+\subsection{Ordered Non-Reset Probes and Observations}
+The controllable probe variable is its duration, $\xi_t=\tau_t$.
+Injection bus $b_{\mathrm p}$ and amplitude $A_{\mathrm p}$ are fixed.
+A stage occupies a recording window of length $W$, independently of the
+injection duration. With $s_t=(t-1)W$ and local time $\ell=s-s_t$, the
+stage input is
 \begin{equation}
-\xi_t=(b_t,\tau_t)\in\Xi=\mathcal N\times\mathcal T,
-\label{eq:probe-action}
+\mathbf v_{\mathrm p,t}(\ell)
+=\mathbf a(b_{\mathrm p})\frac{A_{\mathrm p}}{2}
+\left[1-\cos\left(\frac{2\pi\ell}{\tau_t}\right)\right]
+\mathbf1_{[0,\tau_t]}(\ell),\quad 0\le\ell\le W.
+\label{eq:probe-input}
 \end{equation}
-where $\mathcal T\subset(0,S_{\mathrm p}]$ is a finite duration catalog,
-$S_{\mathrm p}>0$ is the probe observation horizon, and amplitude $A$ is fixed.
-The probing signal is the Hann pulse used for controlled frequency excitation
-in~\cite{peng2024probing}:
+Let $\mathbf x=(\boldsymbol\delta,\boldsymbol\omega)$ and let
+$\Phi_\theta(\mathbf x,\tau;\ell)$ denote propagation of the swing equations
+under this input. The state transition is
 \begin{equation}
-u_{\mathrm p}(s;\tau_t)=
-\begin{cases}
-\displaystyle\frac{A}{2}
-\left[1-\cos\!\left(\frac{2\pi s}{\tau_t}\right)\right],
-&0\le s\le\tau_t,\\
-0,&s>\tau_t.
-\end{cases}
-\label{eq:hann-probe}
+\mathbf x_t(\theta)=\Phi_\theta(\mathbf x_{t-1}(\theta),\tau_t;W),
+\qquad \mathbf x_0=(\boldsymbol\delta^0,\mathbf0).
+\label{eq:carry}
 \end{equation}
-During a probe simulation,
-\begin{equation}
-\mathbf v(s)=\mathbf a(b_t)u_{\mathrm p}(s;\tau_t),
-\qquad u_{\mathrm{ctrl}}=0,
-\label{eq:probe-test-input}
-\end{equation}
-and the state is reset to $(\boldsymbol\delta^0,\mathbf0)$ before each probe.
-The action catalog has $|\mathcal N||\mathcal T|$ elements; assume
-$T\le|\Xi|$. Exact repetition of a bus--duration pair is disallowed within a
-rollout.
+Only the beginning of a new episode uses $\mathbf x_0$. Later stages use the
+preceding terminal state. The latent $M_i,K_i$ do not change within an episode.
+Consequently, $(\tau_1,\tau_2)$ and $(\tau_2,\tau_1)$ are different input
+histories, even when their unordered duration sets coincide.
 
-After $t$ probes, the realized history is
+Write $h_t=((\tau_1,\mathbf y_1),\ldots,(\tau_t,\mathbf y_t))$ for the
+ordered available history. The design space at stage $t$ is
 \begin{equation}
-h_t=\bigl((\xi_1,\mathbf y_1),\ldots,(\xi_t,\mathbf y_t)\bigr).
-\label{eq:history}
+\Xi(h_{t-1})=\{\tau\in[\tau_{\min},\tau_{\max}]:
+|\tau-\tau_k|\ge\varepsilon_\tau\text{ for every }k<t\},
+\label{eq:design-space}
 \end{equation}
-An adaptive policy selects
-\begin{equation}
-\xi_t\sim\pi_t(\,\cdot\mid h_{t-1}),\qquad t=1,\ldots,T,
-\label{eq:policy}
-\end{equation}
-subject to the no-repetition constraint. The horizon $T$ is the probe budget.
+where $0<\tau_{\min}<\tau_{\max}\le W$. This is a continuous set with
+previously used neighborhoods excluded, not a catalog of bus--duration pairs.
 
-\subsubsection{Observation model and Bayesian update}
-Let $o\in\mathcal M$ be the monitored PMU bus and
-$\Delta f_o(s)=\omega_o(s)/(2\pi)$ its frequency deviation. At prescribed
-sampling times $0\le s_1<\cdots<s_{N_{\mathrm{obs}}}\le S_{\mathrm p}$,
-fixed before observing outcomes, define the noise-free response
+At known local sample times $0<r_1<\cdots<r_{N_{\mathrm{obs}}}\le W$, a frequency sensor
+at physical bus $b_{\mathrm y}$ produces
 \begin{equation}
-\mathbf y(\boldsymbol{\theta},\xi_t)
-=\bigl[\Delta f_o(s_j;\boldsymbol{\theta},\xi_t)\bigr]_{j=1}^{N_{\mathrm{obs}}}.
-\label{eq:forward-observation}
-\end{equation}
-The measured response is
-\begin{equation}
-\mathbf y_t=\mathbf y(\boldsymbol{\theta}^{\star},\xi_t)
-+\boldsymbol{\epsilon}_t,\qquad
-\boldsymbol{\epsilon}_t\sim\mathcal N(\mathbf 0,\sigma_y^2\mathbf I).
+\mathbf y_t=\mathbf g(\theta,\mathbf x_{t-1}(\theta),\tau_t)
++\boldsymbol\epsilon_t,
+\qquad \boldsymbol\epsilon_t\sim\mathcal N(\mathbf0,\sigma^2\mathbf I_{N_{\mathrm{obs}}}),
 \label{eq:observation}
 \end{equation}
-Here $N_{\mathrm{obs}}$ is a configurable observation dimension rather than a
-fixed part of the problem definition. Assume $\sigma_y>0$ (in Hz), and
-noise vectors independent across probes and independent of $\theta$ and
-policy randomization. For $N_{\mathrm{obs}}=1$, the single sampling time
-remains a specified part of the observation model. Resetting and independent measurement
-noise give $p(\mathbf y_t\mid\boldsymbol\theta,h_{t-1},\xi_t)
-=p(\mathbf y_t\mid\boldsymbol\theta,\xi_t)$. The adaptive selection
-probabilities depend on observed history, not additionally on the unknown
-parameter, so they cancel from the posterior:
+where $j=1,\ldots,N_{\mathrm{obs}}$ and $g_j=\Delta f_{b_{\mathrm y}}(s_t+r_j)$. Independent sensor noise is
+added to observations, not to the propagated physical state. The last sample
+is available before the next design decision. The benchmark assumes zero
+computation/communication delay; a delayed implementation would also have to
+propagate the state during that delay.
+
+\subsection{History-Conditioned Bayesian Update and EIG}
+The posterior is
 \begin{equation}
-p(\boldsymbol{\theta}\mid h_t)\propto p_0(\boldsymbol{\theta})
-\prod_{k=1}^{t}p(\mathbf y_k\mid\boldsymbol{\theta},\xi_k).
+p_t(\theta)=
+\frac{p_{t-1}(\theta)
+ p(\mathbf y_t\mid\theta,h_{t-1},\tau_t)}
+{\int p_{t-1}(\vartheta)
+ p(\mathbf y_t\mid\vartheta,h_{t-1},\tau_t)\,d\vartheta},
 \label{eq:posterior}
 \end{equation}
-\subsection{Expected Information Gain}
-Let $H_T$ denote the random terminal history induced by policy $\pi$. For the
-parameter-learning experiments, the policy maximizes
-\begin{equation}
-\operatorname{EIG}(\pi)
-=\E_{H_T\mid\pi}\!\left[
-D_{\mathrm{KL}}\!\left(
-p(\boldsymbol{\theta}\mid H_T)
-\Vert p_0(\boldsymbol{\theta})\right)\right].
-\label{eq:policy-eig}
-\end{equation}
-The MOCU objective below instead incorporates the terminal control loss.
+with the Gaussian likelihood from Eq.~\eqref{eq:observation}. Its mean must
+be simulated from the candidate model's own carried state. An equilibrium
+response indexed only by $(\theta,\tau_t)$ is insufficient after the first probe.
 
-\subsection{Terminal Control and Safety Constraints}
-After $T$ probes, the operator uses the learned parameter distribution to
-choose a corrective power injection $u\in\mathcal U=[0,u_{\max}]$.
-The injection location $b_{\mathrm c}$ and time profile $g(s)$ are fixed;
-only its magnitude is chosen. For a disturbance $c\in\mathcal C$, the input is
+For a deterministic policy $\tau_t=\pi_\phi(h_{t-1})$, the information objective is
 \begin{equation}
-\mathbf v_c(s;u)=\mathbf d_c(s)+\mathbf a(b_{\mathrm c})u g(s),
-\label{eq:terminal-input}
+J_{\mathrm{EIG}}(\pi_\phi)=
+\E_{\theta\sim p_0,\,H_T\mid\theta,\pi_\phi}
+\left[\log\frac{p(\theta\mid H_T)}{p_0(\theta)}\right].
+\label{eq:eig}
 \end{equation}
-where $\mathbf d_c$ is the disturbance profile and $\mathcal C$ is the
-specified contingency set. Each response starts from the stated equilibrium.
-
-A control is safe when it limits both the frequency drop and the rate of
-frequency change. Over the monitored machines $\mathcal O_{\mathrm s}$ and
-time interval $[0,S_{\mathrm c}]$, define
+The implementation uses the sequential prior-contrastive lower bound
+(sPCE) of DAD~\cite{foster2021dad}, with history-conditioned likelihoods:
 \begin{align}
-f_{\mathrm{nad}}(\theta,c,u)&=
-\min_{i\in\mathcal O_{\mathrm s},\,0\le s\le S_{\mathrm c}}
-\Delta f_i(s;\theta,c,u),\\
-r(\theta,c,u)&=
-\max_{i\in\mathcal O_{\mathrm s}}\operatorname*{ess\,sup}_{0\le s\le S_{\mathrm c}}
-|\dot{\Delta f}_i(s;\theta,c,u)|.
-\label{eq:safety-functionals}
+\ell_t^{(n)}&=\sum_{k=1}^t
+\log p(\mathbf y_k\mid\theta^{(n)},h_{k-1},\tau_k),\\
+\widehat I_t&=\ell_t^{(0)}-
+\log\left[\frac{1}{L+1}\sum_{n=0}^{L}\exp(\ell_t^{(n)})\right].
+\label{eq:spce}
 \end{align}
-Here $\Delta f_i=\omega_i/(2\pi)$ is frequency deviation in Hz. The prescribed
-nadir and ROCOF limits are $f_{\mathrm{lim}}<0$ and $r_{\mathrm{lim}}>0$:
+Here $\theta^{(0)}$ generates the observations and the other models are
+independent prior draws. The reported expected bound depends on $L$ and
+has ceiling $\log(L+1)$. These scores are not pooled with historical
+bank-entropy estimates.
+
+\subsection{Continuous Terminal Control and Physical Safety}
+The final engineering decision is an injection magnitude
 \begin{equation}
-\mathsf{Safe}(\theta,u)\iff
-\begin{cases}
-f_{\mathrm{nad}}(\theta,c,u)\ge f_{\mathrm{lim}},\\
-r(\theta,c,u)\le r_{\mathrm{lim}},
-\end{cases}
-\quad\forall c\in\mathcal C.
+u_{\mathrm{ctrl}}\in\mathcal U=[u_{\min},u_{\max}],
+\label{eq:control-space}
+\end{equation}
+which is continuous and distinct from the probe duration in
+Eq.~\eqref{eq:design-space}. At global time $TW$, the probe input ends and
+the declared contingency and supplementary step control begin. With local
+control time $r$, the input over the control-assessment window $[0,H_c]$ is
+\begin{equation}
+\mathbf v_{\mathrm c}(r;u)=\mathbf p_{\mathrm c}+\mathbf a(b_{\mathrm c})u,
+\qquad \mathbf x_{\mathrm c}(0;\theta,h_T)=\mathbf x_T(\theta).
+\label{eq:control-input}
+\end{equation}
+The disturbance, injection location, window and units are fixed before design
+optimization. Thus the connection from probing to action is explicit:
+observations update the posterior over $M/K$, each candidate $M/K$ determines
+a carried terminal state, and the controller evaluates safety from those states.
+
+For the monitored dynamic buses $\mathcal M$, define
+\begin{align}
+f_{\min}(\theta,h,u)&=\min_{i\in\mathcal M,\,0\le r\le H_c}
+\Delta f_i(r;\theta,\mathbf x_T(\theta),u),\\
+R_{\max}(\theta,h,u)&=\max_{i\in\mathcal M,\,0\le r\le H_c}
+\left|\frac{d\Delta f_i(r;\theta,\mathbf x_T(\theta),u)}{dr}\right|,\\
+S(\theta,h,u)&=\mathbf1\{f_{\min}(\theta,h,u)\ge\underline f,
+\ R_{\max}(\theta,h,u)\le\overline R\}.
 \label{eq:safety}
-\end{equation}
-Assume that a safe magnitude exists for every $\theta$ and that the safe set
-is closed and upward closed within $\mathcal U$. Its minimum is
+\end{align}
+The initial frequency is included in this window. These are declared
+frequency-security criteria, not a claim of general transient stability or
+certified safety throughout the preceding probes.
+The model-specific minimum safe control is
 \begin{equation}
-U(\theta)=\min\{u\in\mathcal U:\mathsf{Safe}(\theta,u)\},
-\quad\mathcal U_{\mathrm{safe}}(\theta)=[U(\theta),u_{\max}].
-\label{eq:safe_control_set}
+U(\theta,h)=\inf\{u\in\mathcal U:S(\theta,h,u)=1\},
+\label{eq:oracle}
 \end{equation}
-Assume $U$ is measurable. Feasibility and monotonicity are assumptions of
-this scalar-control model. If $\theta$ were known, $U(\theta)$ would be the
-smallest safe injection. Because $\theta$ is uncertain, the operator must
-balance control expenditure against the possibility of choosing too little
-control. The following MOCU loss specifies that tradeoff.
+with $U=+\infty$ when the admissible safe set is empty.
+The current scalar solver assumes that a nonempty safe set is
+$[U(\theta,h),u_{\max}]$. It checks sampled monotonicity and rejects a detected
+violation; those numerical checks do not prove the assumption globally.
+
+\subsection{Minimum Safe Control as a Design Objective}
+For a specified posterior coverage $q\in(0,1)$, select
+\begin{equation}
+u_{\mathrm{MSC}}(h;q)=\inf\left\{u\in\mathcal U:
+\int S(\theta,h,u)p(\theta\mid h)\,d\theta\ge q\right\}.
+\label{eq:msc-controller}
+\end{equation}
+If this set is empty, the decision is infeasible. Under the scalar safety
+assumption, Eq.~\eqref{eq:msc-controller} is the posterior $q$ quantile of
+$U(\theta,h)$. Coverage expresses a conditional model-based requirement;
+it is not an observed safety rate or a value established by an engineering standard.
+
+We use \emph{MSC} as a descriptive abbreviation for minimum safe control,
+not as a claim of standardized terminology. Its BOED target is
+\begin{equation}
+\min_\pi J_{\mathrm{MSC}}(\pi),\qquad
+J_{\mathrm{MSC}}(\pi)=\E_{H_T\mid\pi}[u_{\mathrm{MSC}}(H_T;q)].
+\label{eq:msc-objective}
+\end{equation}
+The physical requirement $U(\theta^\star,h)$ evaluated with true parameters
+is the oracle; $u_{\mathrm{MSC}}(h;q)$ is the implementable decision using
+noisy observations. They are not interchangeable. Lower expected MSC values
+smaller selected control at the declared posterior coverage, without an
+under-control penalty in the design score.
 
 \subsection{Finite-Loss Control-Oriented MOCU}
 % BEGIN SHARED FINITE-LOSS MOCU
-% Shared scientific formulation for the manuscript and methodology companion.
-\subsubsection{Operational loss and objective cost of uncertainty}
-Let $b$ denote a posterior probability distribution on $\Theta$.
-For an operational loss $L(\theta,u)$, define the model-specific optimum
-and the intrinsically Bayesian robust (IBR) action by
-\begin{align}
-u_\theta^*&\in\arg\min_{u\in\mathcal U}L(\theta,u),\\
-u_b^*&\in\arg\min_{u\in\mathcal U}\mathbb E_b[L(\theta,u)].
-\label{eq:bayesian-control}
-\end{align}
-For integrable costs and attained minima, MOCU is
-\begin{align}
-\operatorname{MOCU}(b)
-&=\mathbb E_b[L(\theta,u_b^*)-L(\theta,u_\theta^*)]\\
-&=\min_{u\in\mathcal U}\mathbb E_b[L(\theta,u)]
--\mathbb E_b[\min_{v\in\mathcal U}L(\theta,v)].
-\label{eq:general_mocu}
-\end{align}
-This is the expected excess operational cost in the MOCU framework of
-Yoon et al.~\cite{yoon2013mocu} and its generalized formulation
-\cite{boluki2018generalized}. Both actions use the same loss and action class.
-These references establish the construction; they do not prescribe a
-power-grid loss, a penalty ratio, or a safety probability.
-
-\subsubsection{Control cost and shortfall}
-Let $q\in(0,1)$ denote the desired posterior coverage. We use the
-application-specific loss
+MOCU compares the loss of a decision made under uncertainty with that of a
+model-informed decision~\cite{yoon2013mocu,boluki2018generalized}.
+Our particular control-sizing loss, for finite feasible $U(\theta,h)$, is
 \begin{equation}
-L(\theta,u)=u+\frac{[U(\theta)-u]_+}{1-q},
-\qquad (z)_+=\max(z,0).
+C_q(u,\theta;h)=u+\frac{[U(\theta,h)-u]_+}{1-q}.
 \label{eq:operational_cost}
 \end{equation}
-The single parameter $q$ determines both the terminal quantile and the
-relative cost of insufficient control; there is no separate penalty parameter.
-This piecewise-linear surrogate penalizes inadequate control capacity; it
-does not model outage damage or the magnitude of frequency violations.
-The coverage $q$ is a decision preference unless calibrated to a stated
-engineering application. The general MOCU construction remains valid for
-other operational losses, but the terminal action must then be derived
-from that loss rather than assumed to be a quantile.
-For known $\theta$, the loss has slopes $-q/(1-q)<0$ below $U(\theta)$ and
-$1$ above it. Consequently,
-\begin{equation}
-u_\theta^*=U(\theta),\qquad L(\theta,u_\theta^*)=U(\theta).
-\label{eq:model_specific_control}
-\end{equation}
+This is a chosen surplus/shortfall surrogate in control-magnitude units.
+It is not an engineering-calibrated cost of violating the frequency or RoCoF
+limits. The cited MOCU framework supplies the decision-theoretic construction,
+not this particular loss or an engineering value of $q$.
 
-\subsubsection{Bayes action and quantile characterization}
-Let $F_b(v)=\Pr_b(U\le v)$.
-The convex function $J_b(u)=\mathbb E_b[L(\theta,u)]$ has left and right
-derivatives $(F_b(u^-)-q)/(1-q)$ and
-$(F_b(u)-q)/(1-q)$, respectively. Its minimizers satisfy
+For fixed $h$, the model-informed optimum is $u=U(\theta,h)$ with loss
+$U(\theta,h)$. A posterior Bayes action satisfies
 \begin{equation}
-F_b(u^- )\le q\le F_b(u).
+u_q(h)\in\arg\min_{u\in\mathcal U}
+\E_{\theta\mid h}[C_q(u,\theta;h)].
+\label{eq:bayes-action}
+\end{equation}
+Writing $F_h$ for the posterior CDF of $U(\theta,h)$, its optimality condition is
+\begin{equation}
+F_h(u_q^-)\le q\le F_h(u_q).
 \label{eq:quantile_optimality}
 \end{equation}
-The smallest minimizer, including for discrete beliefs, is
+Choosing the smallest such action gives the same controller as
+Eq.~\eqref{eq:msc-controller} under the stated threshold assumption. The
+\emph{design objectives} nevertheless differ: the posterior MOCU is
 \begin{equation}
-u_b^*=Q_{q}(U\mid b)
-=\inf\{v:F_b(v)\ge q\}.
-\label{eq:u_ctrl_support}
+\mathcal M(h;q)=\E_{\theta\mid h}
+\left[u_q(h)+\frac{[U(\theta,h)-u_q(h)]_+}{1-q}-U(\theta,h)\right],
+\label{eq:mocu}
 \end{equation}
-The associated objective cost of uncertainty is
+and MOCU-based design minimizes
 \begin{equation}
-\operatorname{OCU}(\theta,b)
-=(u_b^*-U)_++\frac{q}{1-q}(U-u_b^*)_+\ge0.
-\label{eq:ocu}
+J_{\mathrm{MOCU}}(\pi)=\E_{H_T\mid\pi}[\mathcal M(H_T;q)].
+\label{eq:mocu-objective}
 \end{equation}
-Thus over-control and under-control have marginal regret $1$ and
-$q/(1-q)$, and posterior MOCU is
-\begin{equation}
-\operatorname{MOCU}(b)=\mathbb E_b
-\left[u_b^*+\frac{(U-u_b^*)_+}{1-q}-U\right].
-\label{eq:belief_mocu}
-\end{equation}
-Under the threshold assumptions,
-$\Pr_b(\mathsf{Safe}(\theta,u_b^*))=F_b(u_b^*)\ge q$.
-The chosen coverage $q$ follows from the specified loss; it is not a
-universal parameter of MOCU or an engineering reliability standard. This probability is conditional on the assumed model
-and posterior; it is neither a frequentist confidence level nor an
-out-of-sample safety guarantee. A separately imposed engineering reliability
-constraint would define an additional decision requirement.
+MSC scores selected control; MOCU scores expected excess loss relative to
+the model-specific requirement. MOCU is nonnegative under its assumptions
+and vanishes when the required control is known exactly. A lower MOCU need
+not imply a smaller selected control or a larger empirical safety rate.
+Infeasible requirements make this finite-loss construction unsupported and
+must not be hidden by clipping or resampling.
 
-\subsubsection{Sequential objective and value of information}
-Let $\Pi_T$ be the class of measurable history-dependent policies satisfying
-the probe budget and no-repetition constraint. With histories generated by
-$p_0$, the observation likelihood, and $\pi$, the design problem is
-\begin{equation}
-\pi^*\in\arg\min_{\pi\in\Pi_T}
-\mathbb E_{H_T\mid\pi}[\operatorname{MOCU}(b_T)].
-\label{eq:mocu_policy}
-\end{equation}
-Here $b_T=p(\theta\mid H_T)$. The tower property gives
-\begin{align}
-\mathbb E_{H_T\mid\pi}[\operatorname{MOCU}(b_T)]
-&=\mathbb E_{\theta,H_T\mid\pi}
-[L(\theta,u_{b_T}^*)-U(\theta)],\\
-\mathbb E_{H_T\mid\pi}\mathbb E_{b_T}[U]
-&=\mathbb E_{p_0}[U].
-\label{eq:mocu-tower}
-\end{align}
-Hence minimizing expected terminal MOCU is equivalent to minimizing
-expected terminal operational loss. The expectation identities require the
-posterior and history distribution to use the same generative model.
-
-For any admissible next probe $\xi$, posterior updating satisfies
-\begin{equation}
-\mathbb E_{Y\mid b,\xi}[\operatorname{MOCU}(b^{\xi,Y})]
-\le\operatorname{MOCU}(b).
-\label{eq:mocu-information-value}
-\end{equation}
-The inequality follows by retaining $u_b^*$ after the observation and
-applying the tower property. If an additional probe is feasible and has no
-cost in the objective, the optimal expected MOCU cannot increase with the
-budget. Neither strict adaptive gains nor improvement for every realized
-history follows.
+In the non-reset application, probing changes both the posterior and the
+physical state entering control. Thus $U(\theta,h)$ itself depends on the
+applied probe history. A fixed-application value-of-information monotonicity
+argument cannot be transferred without qualification: increasing the horizon
+need not reduce either MSC or MOCU, and any improvement is not automatically
+attributable to information alone.
 % END SHARED FINITE-LOSS MOCU
 
-\subsection{Policy Safety Probability and Empirical Safety Rate}
-Safety is evaluated separately from the finite-loss MOCU objective. Define
-the indicator $S(\theta,u)=\mathbf1\{\mathsf{Safe}(\theta,u)\}$ using
-Eq.~\eqref{eq:safety}: both limits must hold over the monitored machines,
-control interval, and every contingency in the declared set $\mathcal C$.
-For a fixed trained method $\pi$, the terminal control is
-$u_q^\pi(h_T)=Q_q(U\mid b_T(h_T))$. Its safety probability is
+\subsection{Physical Safety Rate and Held-Out Evaluation}
+The policy safety probability is
 \begin{equation}
-p_{\mathrm{safe}}(\pi;q)
-=\mathbb E_{\theta\sim p_{\mathrm{test}}}
- \mathbb E_{h_T\sim p(\cdot\mid\theta,\pi)}
- [S(\theta,u_q^\pi(h_T))].
-\label{eq:policy_safety_probability}
+\mathrm{SR}(\pi;q)=\E_{\theta\sim p_0,\,H_T\mid\theta,\pi}
+[S(\theta,H_T,u_q(H_T))].
+\label{eq:safety-rate}
 \end{equation}
-Here $p_{\mathrm{test}}$ is the declared physical-system test distribution;
-the inner expectation includes observation noise and any randomized design
-choices. The trained policy is held fixed. This probability is specific to
-the modeled operating conditions and contingency set, not a grid-wide
-reliability index.
-
-For $M$ test systems with $R_i$ repeated observation/design realizations,
-the empirical safety rate is
+With an exact posterior and the same correctly specified prior-predictive
+model, conditional coverage in Eq.~\eqref{eq:msc-controller} implies
+$\mathrm{SR}(\pi;q)\ge q$ by iterated expectation. A finite-particle
+approximation, model mismatch or a finite test sample does not provide that
+empirical guarantee.
+For $N$ independent test systems and $R_i$ observation-noise replicas per system,
 \begin{equation}
-\widehat p_{\mathrm{safe}}(\pi;q)
-=\frac{1}{M}\sum_{i=1}^{M}\frac{1}{R_i}\sum_{r=1}^{R_i}
-S(\theta_i,u_q^\pi(h_{T,i,r})).
-\label{eq:empirical_safety_rate}
+\widehat{\mathrm{SR}}=\frac1N\sum_{i=1}^N\frac1{R_i}
+\sum_{r=1}^{R_i}S(\theta_i^\star,h_{i,r},u_q(h_{i,r})).
+\label{eq:empirical-safety}
 \end{equation}
-Each physical system receives equal weight. With one realization per system,
-this is the number of safe outcomes divided by $M$; with equal repetition
-counts, it is also the proportion of safe outcomes among all $MR$ trials.
-Repeated realizations of one system are not independent physical test systems.
-Uncertainty intervals must respect this grouping, and training-seed variation
-must be reported separately from within-run physical-system variation.
+Controls and posterior objectives use the same within-system averaging.
+The held-out oracle is recomputed using $\theta_i^\star$ and that method's
+actual terminal state. Different probe histories can therefore have different
+oracle values even for the same true $M/K$. True parameters are used only
+to generate/evaluate physical outcomes, never as controller or policy inputs.
 
-The posterior safety probability for a particular history is instead
-\begin{equation}
-p_{\mathrm{safe}}(b_T,u)
-=\mathbb E_{b_T}[S(\theta,u)]
-=F_{b_T}(u)
-\label{eq:posterior_safety_probability}
-\end{equation}
-under the feasible, monotone threshold assumptions. Hence
-$p_{\mathrm{safe}}(b_T,u_q^\pi(h_T))\ge q$ under that posterior model;
-this does not ensure $\widehat p_{\mathrm{safe}}\ge q$ on a finite test set
-or guarantee safety under model mismatch. Terminal posterior MOCU is the primary design-comparison metric.
-Empirical safety rate and control magnitude are supporting physical diagnostics,
-reported separately without treating minimum control as an independent goal. The coverage $q$ is an input preference;
-safety rate is an outcome, not another tuning parameter or an automatic
-engineering acceptance threshold.
-
-
-
-\section{Design Methods}
-\subsection{Policy comparison}
+\section{Design Methods and Numerical Implementation}
 \begin{table}[t]
-\caption{How the compared methods select experiments.}
+\caption{Method capabilities; these properties do not establish a performance advantage.}
 \centering
 \begin{tabular}{lccc}
-\toprule Method & Adaptive & Non-myopic & Trained policy\\
+\toprule
+Method & \shortstack{Uses\\observations} & \shortstack{Horizon-aware\\objective} & \shortstack{Online policy\\refinement}\\
 \midrule
 Random & No & No & No\\
 Fixed & No & Yes & No\\
 Myopic & Yes & No & No\\
-DAD & Yes & Yes & Yes\\
-RL-sBOED & Yes & Yes & Yes\\
+DAD & Yes & Yes & No\\
+RL-sBOED & Yes & Yes & No\\
 Step-DAD & Yes & Yes & Yes\\
 \bottomrule
 \end{tabular}
 \end{table}
-Adaptive methods use observed outcomes to choose subsequent probes.
-Non-myopic methods account for the value of later probes. Random ignores
-observations. Fixed optimizes a complete sequence before collecting any
-observations and then keeps that sequence unchanged. Myopic optimizes only
-the next probe's expected utility after each observation. DAD trains a policy
-that maps observation histories to probe choices. RL-sBOED learns a sequential
-policy with stepwise rewards. \todo{Give reproducible implementation details.}
-For MOCU, the DAD-family loss is the finite-loss posterior objective, not
-the original information-gain objective. Discrete actions use score-function
-policy optimization. These are objective-based adaptations of the cited methods.
-Step-DAD~\cite{hedman2025stepdad} starts from a trained DAD policy and updates it using the
-current observation history before selecting subsequent probes. Report its offline DAD training cost,
-online refinement cost, and action-selection cost separately.
-\todo{Describe the implementation and deviations from the original paper.}
 
-\subsection{Particle approximation}
-The implementation represents this posterior with $N_{\mathrm p}$ particles
-$\{\boldsymbol{\theta}^{(n)},w_n^{(t)}\}_{n=1}^{N_{\mathrm p}}$. Their weights
-are updated by
+\subsection{Common Objective and Ordered History}
+Define terminal utility $G_T$ as $\widehat I_T$ for EIG,
+$-u_{\mathrm{MSC}}(h_T;q)$ for MSC, and $-\widehat{\mathcal M}(h_T;q)$ for
+MOCU. Each objective defines a separate policy-training problem; an EIG
+checkpoint is not reused as an MSC/MOCU policy. Inputs retain the stage
+positions of all observed duration--frequency pairs. Exchangeable pooling
+is inappropriate because Eq.~\eqref{eq:carry} depends on input order.
+Every method uses the same admissible duration set and terminal controller.
+
+DAD uses a deterministic map $\tau_t=\pi_\phi(h_{t-1})$, learned offline
+by maximizing expected full-horizon utility. Its weights stay fixed during
+an evaluated episode. This preserves the policy-based, non-myopic construction
+of Foster et al.~\cite{foster2021dad}; the control objectives and numerical
+training described below are explicit extensions of its EIG setting.
+
+RL-sBOED uses a stochastic policy and a REDQ-style off-policy actor--critic,
+with replay, a critic ensemble, random-subset target minimum, target-network
+averaging and entropy regularization~\cite{blau2022rlsboed}. Let $G_t$ be
+the corresponding utility assessed hypothetically at prefix $h_t$, with
+$G_0=0$. The step rewards obey
 \begin{equation}
-w_n^{(t)}
-=\frac{w_n^{(t-1)}
-p(\mathbf y_t\mid\boldsymbol{\theta}^{(n)},\xi_t)}
-{\displaystyle\sum_{j=1}^{N_{\mathrm p}}w_j^{(t-1)}
-p(\mathbf y_t\mid\boldsymbol{\theta}^{(j)},\xi_t)}.
+r_t=G_t-G_{t-1},\qquad \gamma=1,
+\qquad \sum_{t=1}^T r_t=G_T.
+\label{eq:rl-rewards}
+\end{equation}
+For MSC/MOCU, a prefix control is a counterfactual used in the training
+reward; physical control is applied only after stage $T$. The unregularized
+return therefore targets the same terminal utility as DAD. REDQ additionally
+uses its entropy regularizer during training; evaluation uses the actor's
+mean transformed to the feasible duration set.
+
+Step-DAD starts with its matching DAD policy. After observing a prefix, it
+updates the posterior and refines a private policy by simulating the
+\emph{remaining} horizon from posterior parameter/state particles. Past
+inputs and observations remain fixed. The first probe uses the original
+policy; later refinements retain previous within-episode updates. This
+preserves the infer--refine structure of Hedman et al.~\cite{hedman2025stepdad}.
+
+Fixed optimizes a deterministic ordered sequence offline, without access to
+future observations. Its initialization is selected among short, central,
+long and spread feasible sequences using validation data. Myopic searches
+for the next duration maximizing expected next-stage utility under its
+current posterior. Random samples uniformly over the lengths of the remaining
+feasible intervals. Neither structural adaptivity nor horizon awareness
+imposes an expected ordering of these methods' results.
+
+\subsection{Online Posterior and Continuous Control Solver}
+For posterior particles $\theta^{(n)}$, all states are propagated under the
+actual ordered durations. Weights use
+\begin{equation}
+w_n^{(t)}\propto w_n^{(t-1)}
+p(\mathbf y_t\mid\theta^{(n)},h_{t-1},\tau_t),\qquad \sum_nw_n^{(t)}=1.
 \label{eq:particle-update}
 \end{equation}
+The controller's support is sampled independently of the system generating
+an evaluation trajectory; that generating model is not deliberately inserted
+into this posterior. Its role in the sPCE denominator is specific to
+Eq.~\eqref{eq:spce} and must not be transferred to control inference.
 
-\paragraph{Terminal decision.}
-Let $U_n$ denote the stored control requirement for particle $\theta^{(n)}$,
-with normalized posterior weights $w_n$. The empirical CDF and decision are
+For each carried state, a coarse numerical scan brackets the first detected
+unsafe-to-safe transition, followed by bisection to approximate
+$U_n=U(\theta^{(n)},h)$. The scan points are not admissible-action restrictions:
+final controls take continuous values between them. A detected non-monotone
+safe set stops the scalar solver. With normalized weights,
 \begin{align}
-F_N(v)&=\sum_n w_n\mathbf1\{U_n\le v\},\\
-q_N&=\inf\{v:F_N(v)\ge q\},\\
-u_{\mathrm{ctrl}}(b)&=\operatorname{snap}_{\mathcal G}^{\uparrow}(q_N).
-\label{eq:u_ctrl}
+\widehat F_h(v)&=\sum_n w_n\mathbf1\{\widehat U_n\le v\},\\
+\widehat u_q(h)&=\inf\{v\in\mathcal U:\widehat F_h(v)\ge q\},\\
+\widehat{\mathcal M}(h;q)&=\sum_nw_n
+\left[\widehat u_q+\frac{(\widehat U_n-\widehat u_q)_+}{1-q}-\widehat U_n\right].
+\label{eq:particle-objectives}
 \end{align}
-Here $\mathcal G$ is the configured control grid. The aligned implementation
-requires every $U_n\in\mathcal G$ and zero margin, so the empirical quantile
-already lies on the grid and snapping does not change it. It is consequently
-an exact IBR action for this finite particle-bank loss. If requirements lie
-off-grid, rounding a continuous quantile upward is not generally the
-unconstrained grid Bayes optimum; one must minimize expected loss over the
-grid explicitly or retain continuous controls. The implementation checks
-this alignment before running the primary experiment.
+The selected action is checked again by direct safety simulation across the
+posterior support. For MSC, an infeasible particle keeps its original
+posterior mass with $\widehat U_n=+\infty$; a finite decision exists only if
+coverage can still be met. Finite-loss MOCU instead requires finite feasible
+requirements. No failed system is discarded to improve reported safety.
 
-The bank-level objective used for training and posterior evaluation is
+The full evaluation records ordered actions, noisy observations, posterior
+weights and states, selected continuous control, true-system safety and a
+separately computed continuous numerical oracle at the actual terminal state.
+An equilibrium control bank indexed only by $M/K$ cannot replace this calculation.
+
+\subsection{Gradient Treatment and Method Fidelity}
+For EIG, deterministic DAD, Fixed and Step-DAD use pathwise differentiation
+of the complete observation/state trajectory. Simulator state and duration
+Jacobians are numerical central differences, with one-sided differences at
+bounds. The feasible-duration map is differentiated locally within its
+selected intervals. Interval switches and numerical derivatives require
+sensitivity checks; no globally exact derivative is claimed.
+
+Continuity of the physical action $u$ does not make a finite-particle empirical
+quantile smooth in its posterior weights. The control-objective implementation
+therefore retains deterministic design policies but uses antithetic numerical
+policy-parameter perturbations~\cite{salimans2017es}. If $J(\phi)=\E[G_T]$,
+$z\sim\mathcal N(0,I)$ and $d>0$ is a numerical optimization scale, the estimator is
 \begin{equation}
-\widehat{\operatorname{MOCU}}_N(b)
-=\sum_n w_n\{u_{\mathrm{ctrl}}+\frac{(U_n-u_{\mathrm{ctrl}})_+}{1-q}-U_n\}.
-\label{eq:particle_mocu}
+\widehat{\nabla J_d}(\phi)=\frac1K\sum_{k=1}^K
+\frac{\widehat J(\phi+d z_k)-\widehat J(\phi-d z_k)}{2d}\,z_k.
+\label{eq:numerical-gradient}
 \end{equation}
-All methods use the same bank, loss, quantile, and control range. Probe and
-control bank rows must match in particle values and ordering, physics,
-scenario, units, and simulator provenance. A dense control-grid bank is a
-numerical approximation to the continuous physical requirements; its error
-must be distinguished from posterior uncertainty.
+Each pair uses common model/noise draws and the same exact, numerically
+refined terminal objective. This targets the Gaussian-smoothed parameter
+objective $J_d(\phi)=\E_z[J(\phi+dz)]$, not an unbiased derivative of
+unsmoothed $J$ at finite $d$. Validation and evaluation use the unperturbed
+policy and the original controller. Scale/direction sensitivity is required
+before performance claims. This is a declared optimizer adaptation, not
+original DAD's pathwise estimator and not stochastic-action REINFORCE relabeled
+as deterministic DAD. RL-sBOED retains its REDQ updates and does not require
+terminal-controller derivatives.
 
-
-
-\section{Experimental Setup}
+\section{Experimental Protocol}
 \subsection{Reduced-network construction}
 Let $\mathcal A=\mathcal N\setminus\mathcal M$. For a connected lossless
 network with fixed voltage magnitudes, let
@@ -558,169 +521,129 @@ the IEEE test cases in MATPOWER~\cite{zimmerman2011matpower}.
 
 
 
-\subsection{SIR EIG Benchmark}
-SIR verifies the EIG implementation on a simpler nonlinear model; it is not the
-application contribution. \todo{State its parameters, actions, and noise.}
+\subsection{Active IEEE9 Configuration}
+The active non-reset backend is IEEE9: nine electrical buses, three retained
+dynamic machines and six uncertain $M_i/K_i$ coordinates. The new experiment
+uses fixed physical probe and measurement bus 1, probe amplitude $0.05$~pu,
+continuous durations $[0.2,3]$~s, separation $0.01$~s and recording window
+$W=4$~s. With $T=3$, probing lasts 12~s. The five frequency samples occur
+at $\{0.0015625,1.0015625,2.0015625,3,4\}$~s within each window and use
+independent noise with $\sigma=0.005$~Hz.
 
-\paragraph{Benchmark loss and engineering interpretation.}
-The experiments use posterior coverage $q=0.95$. This is an uncalibrated
-benchmark preference, not a value prescribed by an engineering standard.
-All methods use the same coverage-dependent loss in Eq.~\eqref{eq:operational_cost}.
-Engineering use requires a documented basis for the chosen coverage, control
-profile, and physical nadir/ROCOF limits. Sensitivity to $q$ should be assessed
-without selecting it to favor a method. No engineering calibration or
-completed coverage-sensitivity result is claimed here.
+The control magnitude is continuous on $[0,0.5]$~pu. The configured contingency
+is a $-0.45$~pu step at physical bus 1, beginning immediately after probing;
+control is injected at the same bus for the following 10~s. The monitored
+limits are $\underline f=-0.2$~Hz and $\overline R=22$~Hz/s. These values,
+the simplified disturbance and coverage $q=0.9$ are benchmark assumptions,
+not cited operating standards or engineering acceptance certificates.
+The ODE step is $1/640$~s; the control root solver uses 33 scan points and
+$10^{-5}$~pu bracket tolerance. ODE discretization and root-bracket error
+are distinct from posterior approximation error.
 
-\subsection{IEEE9 Experiments}
-IEEE9 has nine physical probe buses, three dynamic machines, and six uncertain
-$M_i/K_i$ coordinates. Six durations give 54 actions. The main MOCU plan
-uses $N_{\mathrm{obs}}=5$, $\sigma=0.005$, and $T\in\{3,4,5\}$.
-The current baseline catalog is $\{0.28,0.32,0.37,0.40,0.47,0.62\}$~s;
-it is not asserted to be the final audited choice. Training seeds are
-101, 202, and 303, crossed with evaluation seeds 1001--1005. A single
-training/evaluation pair is a pilot, not a complete publication cell.
-\todo{Insert validated priors, final catalog, and completed-run provenance.}
-
-\subsection{IEEE14 MOCU Extension}
-IEEE14 has 14 physical probe buses, five dynamic machines, and ten uncertain
-$M_i/K_i$ coordinates. Six durations give 84 actions. The MOCU workflow,
-methods, nominal noise, planned horizons, and seed protocol match IEEE9.
-Its priors, control scenario, thresholds, banks, and duration catalog require
-separate validation. \todo{Insert the validated configuration and durations.}
-
-\subsection{IEEE30 MOCU Scalability Study}
-The planned IEEE30 extension uses the published dynamic reference of
-Demetriou et al.~\cite{demetriou2017dynamic}, not one dynamic machine per bus.
-The reference configuration has six machines: two governed generators and
-four synchronous condensers, with six added terminal buses (36 electrical
-buses in the modified network). The proposed uncertainty comprises six
-inertia constants and the two generator governor-droop parameters; the
-condensers are not assigned artificial governor coefficients. Prior ranges
-are study assumptions, separate from published nominal data. The full
-machine/exciter/governor backend is pending; this configuration cannot be
-treated as a completed reduced-swing experiment.
-\todo{Validate initialization, dynamics, safety thresholds, probe mapping,
-master bank, and duration catalog before reporting IEEE30 results.}
-
-\subsection{Duration Selection and Evaluation}
-The IEEE9 master bank contains 281 durations from 0.20 to 3.00~s at
-0.01~s spacing at each of nine buses: 2,529 candidate actions. A six-duration
-catalog includes all buses and therefore gives 54 actions. Full coverage of
-this dense grid is not exhaustive enumeration of the $\binom{281}{6}$
-catalogs or a genuinely continuous simulator oracle.
-The current search uses global sampling, local refinement, and comparisons
-among calibrated Fixed, Myopic, and lookahead planners. It is independent of
-neural-policy training but is planner-based selection, so selection criteria
-and possible selection bias must be disclosed. Freeze finalists before fresh
-validation, account for multiple comparisons, and use a separate untouched
-test for final policy comparisons. Report the best catalog found, search
-coverage, and uncertainty; do not claim global optimality.
-
-All methods share evaluation systems and noise streams. Final tables report
-one metric each, with methods as rows and $T$ as columns. For trained methods,
-report mean $\pm$ sample standard deviation over the 3 training $\times$ 5
-evaluation combinations, explicitly as descriptive crossed results rather
-than 15 independent training runs. Deduplicate non-training methods by
-evaluation seed (five results). Offline training/calibration time is summarized
-at run level, not repeated across evaluation seeds. Incomplete cells are em
-dashes; bold all tied best values in completed comparison columns.
-Paired uncertainty intervals resample independent test systems, keeping their
-noise replicas together; intervals conditional on a fixed bank do not quantify
-uncertainty from regenerating that bank.
-\todo{Record bank sizes, split indices, audit budgets, oracle tolerances,
-run identifiers, and numbers of independent test systems.}
-
-\subsection{Held-out validation}
-For an independent test system $\theta^\star$, evaluate the applied action
-against a separately computed continuous physical oracle $U^*(\theta^\star)$:
-\begin{equation}
-R^*=u_{\mathrm{ctrl}}+\frac{[U^*(\theta^\star)-u_{\mathrm{ctrl}}]_+}{1-q}
--U^*(\theta^\star).
-\label{eq:realized_regret}
-\end{equation}
-Report mean held-out $R^*$ alongside posterior bank MOCU as a separate
-measure of operational performance. Their difference can reflect finite support,
-control-grid approximation, and model or posterior miscalibration. Regret
-against a continuous oracle includes control discretization error and should
-not be described as purely uncertainty cost for a restricted grid action
-class. A strictly grid-relative MOCU instead subtracts
-$\min_{v\in\mathcal G}L(\theta,v)$ for each model.
-
-Under the threshold model and exact posterior, the quantile ensures posterior
-coverage $\Pr_b(U\le u_b^*)\ge q$. It does not protect every posterior
-model and is not a guaranteed empirical safety rate. Report true-system
-nadir and ROCOF violations, safety counts and confidence intervals, control
-magnitude, and regret separately. No safety-rate gate is used for method
-ranking or primary checkpoint selection. Retain all method outcomes and
-report uncertainty in the safety estimate.
-Mathematical consistency with MOCU does not by itself validate this surrogate
-as an engineering cost model.
-
-
-\section{Results}
-
-\subsection{SIR Implementation Validation}
-\todo{Report EIG and runtime for every method.}
-
-\subsection{IEEE9 EIG Results}
-\todo{Report mean $\pm$ standard deviation for $T\in\{3,4,5\}$.}
-
-\subsection{IEEE9 MOCU Results}
-\todo{Report realized operational regret, posterior bank MOCU, safety,
-paired differences, and controls in separate tables.}
 
 \begin{table}[t]
-\caption{Held-out Realized Operational Regret (Mean $\pm$ Sample Standard
-Deviation). Trained methods: 3 training $\times$ 5 evaluation seeds;
-non-training methods: 5 unique evaluation seeds. Em dashes denote incomplete cells.}
+\caption{IEEE9 independent uniform prior bounds and known damping. Values are rounded here; resolved YAML values are retained with each run. Units follow Eq.~\eqref{eq:swing-frequency}.}
 \centering
-\begin{tabular}{lccc}
-\toprule Method & $T=3$ & $T=4$ & $T=5$\\
+\begin{tabular}{lrrr}
+\toprule Parameter & Machine 1 & Machine 2 & Machine 3\\
 \midrule
-Random & \textemdash{} & \textemdash{} & \textemdash{}\\
-Fixed & \textemdash{} & \textemdash{} & \textemdash{}\\
-Myopic & \textemdash{} & \textemdash{} & \textemdash{}\\
-DAD & \textemdash{} & \textemdash{} & \textemdash{}\\
-RL-sBOED & \textemdash{} & \textemdash{} & \textemdash{}\\
-Step-DAD & \textemdash{} & \textemdash{} & \textemdash{}\\
+$M_i^-$ & 0.0877899 & 0.0237671 & 0.0111780\\
+$M_i^+$ & 0.1630383 & 0.0441390 & 0.0207591\\
+$K_i^-$ & 0.029375 & 0.013125 & 0.007500\\
+$K_i^+$ & 0.293750 & 0.131250 & 0.075000\\
+$D_i$ & 0.0125414 & 0.0033953 & 0.0015969\\
 \bottomrule
 \end{tabular}
 \end{table}
+The prior is uniform on the product set in Eq.~\eqref{eq:latent-space};
+its coordinate widths are study choices, not identification results.
+The benchmark begins with zero relative rotor angles and zero speed deviations,
+with nominal incremental power balance consistent with that equilibrium.
+This operating point is a reduced perturbation-model assumption, not a
+validated loaded AC dynamic operating point.
 
-\subsection{IEEE14 MOCU Results}
-\todo{Report the same methods and metrics as IEEE9.}
+The full resolved priors, coupling, damping, simulator settings and seeds
+must accompany every reported run. Changes to coverage or physical thresholds
+must be declared before final testing and must not be selected to favor a method.
+The obsolete six-duration catalogs and equilibrium master banks are not part
+of this experiment.
 
-\subsection{IEEE30 MOCU Results}
-\todo{Report the same methods and metrics as IEEE9 and IEEE14, emphasizing
-scalability in action count, latent dimension, training time, and online time.}
+\subsection{Verification and Comparison Scope}
+A workability test uses $T=3$, training seed 101, evaluation seed 1001,
+two training updates, training batch size four, four validation systems, two test systems,
+eight posterior/planning particles and all six methods. It checks execution,
+state carry, objective consistency and output completeness; its scores are
+not performance evidence. Independent CPU/GPU trajectory checks, continuous
+root-solver checks, posterior-truth exclusion and RL reward telescoping are
+separate implementation checks.
 
-\subsection{Computational Cost}
-\todo{Separate bank generation, offline training, online selection, and
-Step-DAD history-specific refinement time.}
+A proposed full comparison uses independently trained policies for seeds
+101/202/303, evaluated on seeds 1001--1005, with fixed declared optimization
+budgets at each horizon. That plan is not a claim that the runs are complete.
+Inference-particle sensitivity, EIG contrast sensitivity, numerical-gradient
+sensitivity, convergence and checkpoint quality must be assessed before
+publication-level ranking. The no-reset model and common budgets alone do
+not prove that any method has converged or that a learned family wins.
+
+Each metric gets a separate table with methods as rows and horizons as columns.
+Use run-level sample standard deviations across the declared seeds;
+per-system Bernoulli dispersion is not the uncertainty of a reported safety
+rate. A single evaluation seed has no across-seed standard deviation.
+Keep physical systems and their repeated noise outcomes together in paired
+uncertainty calculations. Fixed training/calibration copies may be deduplicated
+only if the resulting policies and evaluations are actually identical.
+Report posterior MSC or MOCU as the primary objective-specific score, with
+control, physical safety and the history-dependent oracle as appropriate.
+Do not relabel realized regret as posterior MOCU. Timing must distinguish
+offline optimization, online probe choice/refinement, terminal posterior/control
+computation and evaluation-only oracle work.
+
+\subsection{Other Systems and Historical Results}
+SIR remains a separate EIG implementation benchmark. Its former results do
+not validate the changed power-grid observation or control protocol.
+IEEE14 requires a separately validated online state-carry and control backend
+before comparison; the active implementation rejects unsupported execution.
+The planned IEEE30 extension retains Demetriou et al.'s dynamic reference
+with six machines, including two governed generators and four synchronous
+condensers, and six added machine terminal buses~\cite{demetriou2017dynamic}.
+Its proposed uncertainty is six inertia constants and two generator governor
+parameters, rather than assigning $M/K$ to every electrical bus. The full
+machine/exciter/governor implementation and initialization remain pending.
+No non-reset IEEE14/IEEE30 results are claimed.
+
+\section{Results and Remaining Validation}
+\todo{Insert completed, matched non-reset multi-seed results separately for EIG, MSC and MOCU.}
+Historical reset results and the earlier repeated-duration EIG pilot are
+separate protocols. They must not populate the new comparison tables. A
+successful smoke test establishes workability only, and no method superiority
+is concluded from it.
 
 \section{Discussion}
-Discuss when adaptation and non-myopic planning improve the downstream
-objective, why Fixed can be competitive, why EIG and MOCU can disagree, and how
-horizon and system size affect performance. Limitations include simulated
-Kron-reduced networks, prescribed priors, fixed probe amplitude, discrete
-actions, simplified terminal control, and three training seeds. Reduced-model $K_i$ allocations and parameter priors are study assumptions.
-The paper-based IEEE30 model requires a different dynamic representation.
-The finite-loss coefficient needs sensitivity analysis and does not quantify
-actual outage damage; empirical calibration and physical safety must be
-validated separately. Adaptive branching and improvement over Myopic and
-Fixed are empirical hypotheses, not prerequisites imposed on the results.
+The probe sequence now changes both what is known about the grid and the
+state from which terminal control acts. This is why the physical oracle is
+history dependent and why a state-independent control bank is insufficient.
+MSC directly values the selected control under a posterior safety constraint.
+MOCU evaluates excess loss under its declared surrogate; EIG values parameter
+information. These are different objectives, even where MSC and MOCU select
+the same controller for a given history.
+
+Engineering interpretation still requires validation of the reduced dynamics,
+parameter priors, contingency, sensing assumptions, control authority and
+physical limits. Neither coverage nor numerical agreement with a reduced
+simulator certifies field safety. Zero decision latency, a single prescribed
+contingency and a scalar step actuator limit the present application.
+The MOCU shortfall loss is not a validated outage-damage model. Method claims
+must also distinguish original algorithms from the documented objective and
+numerical-optimization adaptations. Adaptivity and non-myopic gains remain
+empirical questions rather than required outcomes imposed on the experiment.
 
 \section{Conclusion}
-This paper formulates power-grid probing as sequential BOED and connects
-learning to a finite-loss Bayesian terminal decision using Yoon's MOCU
-construction. The quantile level $q$ follows from the chosen loss, while
-held-out safety and regret test its practical performance. \todo{State only final
-conclusions supported by completed three-seed results.}
-
-\section*{Acknowledgment}
-\todo{Add funding and computing resources.}
+The formulation connects an ordered sequence of noisy, non-reset probe
+experiments to a continuous terminal power-injection decision. It separates
+EIG, minimum safe control and finite-loss MOCU, and specifies the corresponding
+physical safety evaluation. \todo{Add conclusions supported by completed
+non-reset experiments after the required validation.}
 
 \bibliographystyle{IEEEtran}
 \bibliography{objective_driven_boed_refs}
-
 \end{document}
