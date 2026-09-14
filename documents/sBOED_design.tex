@@ -122,20 +122,48 @@ ordered available history. The design space at stage $t$ is
 \end{equation}
 where $0<\tau_{\min}<\tau_{\max}\le W$. This is a continuous set with
 previously used neighborhoods excluded, not a catalog of bus--duration pairs.
+For every horizon $T$ we restrict durations to increase:
+$\tau_1<\cdots<\tau_T$. At stage $t$, the admissible interval is
+$[a_t,\tau_{\max}-(T-t)\varepsilon_\tau]$, where
+$a_1=\tau_{\min}$ and $a_t=\tau_{t-1}+\varepsilon_\tau$ for $t>1$.
+This reserves room for subsequent probes. All methods select within this
+interval before simulation; histories are never sorted after observing data.
+Random samples uniformly within the current interval, not uniformly over
+complete increasing sequences. This restriction applies at every horizon.
 
-At known local sample times $0<r_1<\cdots<r_{N_{\mathrm{obs}}}\le W$, a frequency sensor
-at physical bus $b_{\mathrm y}$ produces
+
+The default observation is one scalar maximum absolute RoCoF at physical
+bus $b_{\mathrm y}$, reported at the end of each recording window. Let
+$r_k=k\Delta r$, $k=0,\ldots,K$, where $K\Delta r=W$. For the trajectory
+generated from the carried state $\mathbf x_{t-1}(\theta)$, define
 \begin{equation}
-\mathbf y_t=\mathbf g(\theta,\mathbf x_{t-1}(\theta),\tau_t)
-+\boldsymbol\epsilon_t,
-\qquad \boldsymbol\epsilon_t\sim\mathcal N(\mathbf0,\sigma^2\mathbf I_{N_{\mathrm{obs}}}),
+g_R(\theta,\mathbf x_{t-1}(\theta),\tau_t)
+=\max_{1\le k\le K}\left|
+\frac{\Delta f_{b_{\mathrm y}}(s_t+r_k)-\Delta f_{b_{\mathrm y}}(s_t+r_{k-1})}
+{\Delta r}\right|.
+\label{eq:rocof-observation-functional}
+\end{equation}
+The scalar observation model is
+\begin{equation}
+y_t=g_R(\theta,\mathbf x_{t-1}(\theta),\tau_t)+\epsilon_t,
+\qquad \epsilon_t\sim\mathcal N(0,\sigma_R^2).
 \label{eq:observation}
 \end{equation}
-where $j=1,\ldots,N_{\mathrm{obs}}$ and $g_j=\Delta f_{b_{\mathrm y}}(s_t+r_j)$. Independent sensor noise is
-added to observations, not to the propagated physical state. The last sample
-is available before the next design decision. The benchmark assumes zero
-computation/communication delay; a delayed implementation would also have to
-propagate the state during that delay.
+Here $g_R$, $y_t$ and $\sigma_R$ have units Hz/s. The initial frequency
+at $r_0=0$ is included in the first finite difference. Noise is independent
+between windows and is added to the extracted clean peak, not to the physical
+state or to individual frequency samples before differentiation. This is a
+declared summary-measurement error model, not a claim that differentiating
+noisy sensor data yields Gaussian peak errors. Internally, the implementation
+flag \texttt{N\_obs=0} selects this one-dimensional observation; it does not
+mean that no measurement is taken. Vector notation for observations below
+includes this scalar case. Positive values of this flag retain an optional
+sampled-frequency variant, whose noise is instead specified in Hz.
+
+The scalar is available before the next design decision. The benchmark assumes
+zero computation/communication delay; a delayed implementation would also
+have to propagate the state during that delay. The finite-difference peak
+is piecewise smooth; numerical duration derivatives may cross a peak switch.
 
 \subsection{History-Conditioned Bayesian Update and EIG}
 The posterior is
@@ -351,6 +379,11 @@ an evaluated episode. This preserves the policy-based, non-myopic construction
 of Foster et al.~\cite{foster2021dad}; the control objectives and numerical
 training described below are explicit extensions of its EIG setting.
 
+RL-sBOED measures policy entropy in normalized tanh coordinates $[-1,1]$
+and uses automatic temperature tuning with target entropy $-1$ for its
+one-dimensional action. This training regularizer is distinct from the
+physical noise and terminal-control coverage. Reported evaluation scores
+exclude the entropy bonus.
 RL-sBOED uses a stochastic policy and a REDQ-style off-policy actor--critic,
 with replay, a critic ensemble, random-subset target minimum, target-network
 averaging and entropy regularization~\cite{blau2022rlsboed}. Let $G_t$ be
@@ -477,9 +510,12 @@ The active non-reset backend is IEEE9: nine electrical buses, three retained
 dynamic machines and six uncertain $M_i/K_i$ coordinates. The new experiment
 uses fixed physical probe and measurement bus 1, probe amplitude $0.05$~pu,
 continuous durations $[0.2,3]$~s, separation $0.01$~s and recording window
-$W=4$~s. With $T=3$, probing lasts 12~s. The five frequency samples occur
-at $\{0.0015625,1.0015625,2.0015625,3,4\}$~s within each window and use
-independent noise with $\sigma=0.005$~Hz.
+$W=3$~s. With $T=3$, probing lasts 9~s. Each window yields one maximum
+absolute RoCoF observation, using 40~Hz frequency differencing
+($\Delta r=0.025$~s, $K=120$) and independent scalar noise
+$\sigma_R=0.005$~Hz/s. These settings apply to EIG, MSC and MOCU;
+they specify the probe observation, separately from terminal-control safety
+assessment. Continuous duration remains the design variable.
 
 The control magnitude is continuous on $[0,0.5]$~pu. The configured contingency
 is a $-0.45$~pu step at physical bus 1, beginning immediately after probing;
