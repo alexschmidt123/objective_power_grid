@@ -97,9 +97,9 @@ The implemented grid benchmark is IEEE9. This paper specifies the methodology;
 quantitative conclusions require completed experiments and the validation
 described in Section~\ref{sec:experimental-protocol}.
 
-\section{Related Work}
+\subsection{Related Work}
 \label{sec:related-work}
-\subsection{Probing for Dynamic Parameter Identification}
+\subsubsection{Probing for Dynamic Parameter Identification}
 Probing-based identification uses a designed excitation to expose dynamic
 responses that are difficult to distinguish from passive measurements alone.
 Peng et al.~\cite{peng2024probing} jointly estimate inertia and frequency
@@ -111,7 +111,7 @@ The scalar peak-RoCoF observation, state-carry model and Bayesian prior here
 are additional modeling choices; their validity is not established by the
 hardware validation of a different estimator or measurement model.
 
-\subsection{Amortized and Semi-Amortized Bayesian Design}
+\subsubsection{Amortized and Semi-Amortized Bayesian Design}
 DAD learns a policy before deployment so that the next experimental design can
 be obtained from the accumulated observations by a network evaluation.
 Foster et al.~\cite{foster2021dad} introduce sequential contrastive information
@@ -139,7 +139,7 @@ observed prefix and optimizes only future probes. This distinguishes online
 adaptation from retraining a policy on the evaluator's latent parameter, which
 would give the design method information unavailable in a real experiment.
 
-\subsection{Objective-Based Uncertainty and Experimental Design}
+\subsubsection{Objective-Based Uncertainty and Experimental Design}
 MOCU measures uncertainty through the expected loss incurred when an operator
 must be selected without knowing the true model~\cite{yoon2013mocu}.
 Generalized MOCU extends the decision-oriented framework and its connection
@@ -160,7 +160,7 @@ parameters would not describe later non-reset stages unless it also represented
 the relevant carried states and histories. No learned MOCU surrogate is used
 in the comparisons specified here.
 
-\subsection{Scope of the Present Comparison}
+\subsection{Contributions and Scope}
 The preceding approaches address complementary issues: excitation for
 identification, policy amortization, online refinement, and uncertainty
 measured through a decision loss. We combine these ideas in one explicitly
@@ -171,9 +171,67 @@ constraints, matched evaluation systems and method-specific numerical checks
 make differences interpretable within the stated model. They do not establish
 optimality, field safety, or superiority beyond that model.
 
-\section{Problem Formulation}
-\label{sec:problem}
-\subsection{Power-Grid Dynamics and Latent Parameter Space}
+\subsection{Organization of the Paper}
+Section~\ref{sec:ieee-system} introduces the IEEE network and reduction.
+Section~\ref{sec:dynamics} defines the swing dynamics and latent parameters,
+and Section~\ref{sec:probe-design} specifies probing, observations and inference.
+Section~\ref{sec:objectives} develops the design objectives.
+Sections~\ref{sec:methodology} and~\ref{sec:experimental-protocol} present the
+algorithms and experimental protocol, respectively.
+Section~\ref{sec:results} is reserved for verified numerical findings, and
+Section~\ref{sec:conclusion} closes the paper.
+
+\section{IEEE Test System and Network Representation}
+\label{sec:ieee-system}
+\subsection{Physical Network and Retained Machines}
+The implemented study uses the IEEE9 network, comprising nine electrical
+buses and three retained dynamic machines. Let $\mathcal N$ denote all physical
+buses, $\mathcal M\subseteq\mathcal N$ the retained-machine buses, and
+$m=|\mathcal M|$. The remaining buses are algebraic network nodes.
+This distinction separates electrical topology from the dimension of the
+dynamic model: an algebraic bus is not assigned an independent inertia or
+frequency-response coefficient. The network determines how an injection at
+a physical bus enters the retained-machine dynamics.
+
+\subsection{Network Reduction and Injection Mapping}
+Let $\mathcal A=\mathcal N\setminus\mathcal M$. For a connected lossless
+network with fixed voltage magnitudes, let
+$\mathbf L$ be the weighted susceptance Laplacian, ordered as
+$(\mathcal M,\mathcal A)$. If $\mathcal A\ne\varnothing$, assume
+$\mathbf L_{\mathcal A\mathcal A}$ is invertible and define
+\begin{align}
+\mathbf L_{\mathrm{red}}&=\mathbf L_{\mathcal M\mathcal M}
+-\mathbf L_{\mathcal M\mathcal A}\mathbf L_{\mathcal A\mathcal A}^{-1}
+\mathbf L_{\mathcal A\mathcal M},\\
+\mathbf A_{\mathrm{inj}}&=
+\left[\mathbf I_m\; -\mathbf L_{\mathcal M\mathcal A}
+\mathbf L_{\mathcal A\mathcal A}^{-1}\right],\\
+B_{ij}&=-(L_{\mathrm{red}})_{ij}\quad(i\ne j),\qquad B_{ii}=0.
+\label{eq:kron-map}
+\end{align}
+The physical-bus input map is $\mathbf a(b)=\mathbf A_{\mathrm{inj}}\mathbf e_b$
+in the stated ordering. With no algebraic buses, use $\mathbf L_{\mathrm{red}}=\mathbf L$
+and $\mathbf A_{\mathrm{inj}}=\mathbf I_m$. The linear Kron map combined with
+sinusoidal coupling is a reduced-model approximation. Network data follow
+the IEEE test cases in MATPOWER~\cite{zimmerman2011matpower}.
+
+
+\subsection{Benchmark Scope}
+SIR remains a separate EIG implementation benchmark. Its former results do
+not validate the changed power-grid observation or control protocol.
+IEEE14 requires a separately validated online state-carry and control backend
+before comparison; the active implementation rejects unsupported execution.
+The planned IEEE30 extension retains Demetriou et al.'s dynamic reference
+with six machines, including two governed generators and four synchronous
+condensers, and six added machine terminal buses~\cite{demetriou2017dynamic}.
+Its proposed uncertainty is six inertia constants and two generator governor
+parameters, rather than assigning $M/K$ to every electrical bus. The full
+machine/exciter/governor implementation and initialization remain pending.
+No non-reset IEEE14/IEEE30 results are claimed.
+
+\section{Swing Dynamics and Latent Parameter Space}
+\label{sec:dynamics}
+\subsection{Inertia and Effective Frequency Response}
 Motivated by the joint estimation setting of Peng et al.~\cite{peng2024probing},
 we represent inertia and effective frequency response jointly in the following
 reduced study model. Let $\Delta\omega(s)$ be angular-speed deviation
@@ -204,10 +262,9 @@ Thus $M$ governs the rate of frequency change, whereas $K$ governs the
 restoring power supplied in response to a frequency deviation. We retain
 known damping $D$; Peng et al. neglect it in their estimation model.
 
-To represent probe location, we extend this aggregate relation to a reduced
-network. Let $\mathcal N$ be the physical-bus set and
-$\mathcal M\subseteq\mathcal N$ the dynamic-machine buses, with
-$m=|\mathcal M|$. For $i\in\mathcal M$, write $\omega_i$ for angular-speed
+\subsection{Coupled Machine Dynamics}
+Using the reduced network in Section~\ref{sec:ieee-system}, we extend the
+aggregate response to the retained machines. For $i\in\mathcal M$, write $\omega_i$ for angular-speed
 deviation and $\delta_i$ for rotor angle in the synchronous frame:
 \begin{align}
 \dot\delta_i(s)&=\omega_i(s),\\
@@ -228,6 +285,7 @@ given in Eq.~\eqref{eq:kron-map}. This machine-wise model is our extension
 of the paper's aggregate response, with $K_i$ representing effective fast
 frequency support at each retained machine bus.
 
+\subsection{Latent Parameters and Prior Distribution}
 The latent vector contains the inertia and response coefficients:
 \begin{equation}
 \boldsymbol\theta=(M_1,\ldots,M_m,K_1,\ldots,K_m)^\top\in\Theta,
@@ -246,7 +304,28 @@ enter the coupling and injection map but have no independent $M_i$ or $K_i$.
 With bounded piecewise-continuous inputs, these assumptions define the
 frequency trajectories used by the observation and terminal-control models.
 
-\subsection{Ordered Non-Reset Probes and Observations}
+\subsection{IEEE9 Prior Specification}
+\begin{table}[t]
+\caption{IEEE9 independent uniform prior bounds and known damping. Values are rounded here; resolved YAML values are retained with each run. Units follow Eq.~\eqref{eq:swing-frequency}.}
+\centering
+\begin{tabular}{lrrr}
+\toprule Parameter & Machine 1 & Machine 2 & Machine 3\\
+\midrule
+$M_i^-$ & 0.0877899 & 0.0237671 & 0.0111780\\
+$M_i^+$ & 0.1630383 & 0.0441390 & 0.0207591\\
+$K_i^-$ & 0.029375 & 0.013125 & 0.007500\\
+$K_i^+$ & 0.293750 & 0.131250 & 0.075000\\
+$D_i$ & 0.0125414 & 0.0033953 & 0.0015969\\
+\bottomrule
+\end{tabular}
+\end{table}
+The prior is uniform on the product set in Eq.~\eqref{eq:latent-space};
+its coordinate widths are study choices, not identification results.
+
+\section{Probe Experiments and Sequential Design Space}
+\label{sec:probe-design}
+\label{sec:problem}
+\subsection{Probe Waveform and Non-Reset State Evolution}
 The controllable probe variable is its duration, $\xi_t=\tau_t$.
 Injection bus $b_{\mathrm p}$ and amplitude $A_{\mathrm p}$ are fixed.
 A stage occupies a recording window of length $W$, independently of the
@@ -272,6 +351,7 @@ preceding terminal state. The latent $M_i,K_i$ do not change within an episode.
 Consequently, $(\tau_1,\tau_2)$ and $(\tau_2,\tau_1)$ are different input
 histories, even when their unordered duration sets coincide.
 
+\subsection{Ordered Design Space}
 Write $h_t=((\tau_1,\mathbf y_1),\ldots,(\tau_t,\mathbf y_t))$ for the
 ordered available history. The design space at stage $t$ is
 \begin{equation}
@@ -291,6 +371,7 @@ Random samples uniformly within the current interval, not uniformly over
 complete increasing sequences. This restriction applies at every horizon.
 
 
+\subsection{Maximum-RoCoF Observation Model}
 The default observation is one scalar maximum absolute RoCoF at physical
 bus $b_{\mathrm y}$, reported at the end of each recording window. Let
 $r_k=k\Delta r$, $k=0,\ldots,K$, where $K\Delta r=W$. For the trajectory
@@ -324,7 +405,7 @@ zero computation/communication delay; a delayed implementation would also
 have to propagate the state during that delay. The finite-difference peak
 is piecewise smooth; numerical duration derivatives may cross a peak switch.
 
-\subsection{History-Conditioned Bayesian Update and EIG}
+\subsection{History-Conditioned Bayesian Inference}
 The posterior is
 \begin{equation}
 p_t(\theta)=
@@ -338,6 +419,25 @@ with the Gaussian likelihood from Eq.~\eqref{eq:observation}. Its mean must
 be simulated from the candidate model's own carried state. An equilibrium
 response indexed only by $(\theta,\tau_t)$ is insufficient after the first probe.
 
+\section{Motivation and Design Objectives}
+\label{sec:objectives}
+\subsection{From Parameter Learning to a Terminal Decision}
+A useful experiment need not be the one that reduces parameter uncertainty
+most strongly. For example, information that distinguishes models requiring
+nearly identical controls can improve an information score without materially
+changing the terminal action. Information that shifts posterior mass across
+a control-requirement threshold can instead affect the decision directly.
+This motivates evaluating three distinct utilities on the same probing
+process rather than treating an information score as a proxy for control cost.
+
+The non-reset setting adds a second mechanism: a probe changes both the
+posterior and the physical state. Design objectives therefore depend on the
+complete history, including the state from which control will act. We first
+define parameter-oriented EIG, then specify the terminal-control task needed
+to define MSC and finite-loss MOCU. The physical safety rate is a separate
+evaluation quantity, not a substitute for either design objective.
+
+\subsection{Expected Information Gain}
 For a deterministic policy $\tau_t=\pi_\phi(h_{t-1})$, the information objective is
 \begin{equation}
 J_{\mathrm{EIG}}(\pi_\phi)=
@@ -505,7 +605,7 @@ actual terminal state. Different probe histories can therefore have different
 oracle values even for the same true $M/K$. True parameters are used only
 to generate/evaluate physical outcomes, never as controller or policy inputs.
 
-\section{Methodology: Sequential Design and Numerical Optimization}
+\section{Methodology}
 \label{sec:methodology}
 \subsection{Common Information State and Feasible Actions}
 Let $h_{t-1}$ contain the ordered durations and observations available before
@@ -821,15 +921,6 @@ For control objectives, numerical parameter gradients use the same clipping
 threshold. Equal update counts do not imply equal simulation counts or costs
 across these optimizers.
 
-The specified full-budget EIG comparison uses 2,000 trajectory-batch updates,
-batch size 32, 128 contrast models, and 128 validation systems evaluated every
-100 updates and at initialization. Evaluation uses 128 physical systems per
-seed, with 128 independent planning particles. Myopic uses 16 candidate
-proposals per round, three rounds and 32 fantasies per proposal. Step-DAD uses
-16 conditional refinement updates at each stage after the first. These are
-computational settings, not established convergence thresholds; control-objective
-studies must declare their own perturbation and solver budgets.
-
 Evaluation resets the random-number generator for each method so that the
 latent systems, prior contrast models and measurement-noise draws are paired.
 Method-specific actions still induce different observations and terminal
@@ -849,34 +940,9 @@ objective-specific evaluation costs separately, together with the execution
 hardware. Numerical correctness, practical convergence and evidence across
 independent seeds are distinct requirements.
 
-\section{Experimental Protocol}
+\section{Experimental Setup and Evaluation Protocol}
 \label{sec:experimental-protocol}
-\subsection{Reduced-network construction}
-Let $\mathcal A=\mathcal N\setminus\mathcal M$. For a connected lossless
-network with fixed voltage magnitudes, let
-$\mathbf L$ be the weighted susceptance Laplacian, ordered as
-$(\mathcal M,\mathcal A)$. If $\mathcal A\ne\varnothing$, assume
-$\mathbf L_{\mathcal A\mathcal A}$ is invertible and define
-\begin{align}
-\mathbf L_{\mathrm{red}}&=\mathbf L_{\mathcal M\mathcal M}
--\mathbf L_{\mathcal M\mathcal A}\mathbf L_{\mathcal A\mathcal A}^{-1}
-\mathbf L_{\mathcal A\mathcal M},\\
-\mathbf A_{\mathrm{inj}}&=
-\left[\mathbf I_m\; -\mathbf L_{\mathcal M\mathcal A}
-\mathbf L_{\mathcal A\mathcal A}^{-1}\right],\\
-B_{ij}&=-(L_{\mathrm{red}})_{ij}\quad(i\ne j),\qquad B_{ii}=0.
-\label{eq:kron-map}
-\end{align}
-The physical-bus input map is $\mathbf a(b)=\mathbf A_{\mathrm{inj}}\mathbf e_b$
-in the stated ordering. With no algebraic buses, use $\mathbf L_{\mathrm{red}}=\mathbf L$
-and $\mathbf A_{\mathrm{inj}}=\mathbf I_m$. The linear Kron map combined with
-sinusoidal coupling is a reduced-model approximation. Network data follow
-the IEEE test cases in MATPOWER~\cite{zimmerman2011matpower}.
-
-
-
-
-\subsection{Active IEEE9 Configuration}
+\subsection{Probe and Control Settings}
 The active non-reset backend is IEEE9: nine electrical buses, three retained
 dynamic machines and six uncertain $M_i/K_i$ coordinates. The new experiment
 uses fixed physical probe and measurement bus 1, probe amplitude $0.05$~pu,
@@ -899,22 +965,7 @@ $10^{-5}$~pu bracket tolerance. ODE discretization and root-bracket error
 are distinct from posterior approximation error.
 
 
-\begin{table}[t]
-\caption{IEEE9 independent uniform prior bounds and known damping. Values are rounded here; resolved YAML values are retained with each run. Units follow Eq.~\eqref{eq:swing-frequency}.}
-\centering
-\begin{tabular}{lrrr}
-\toprule Parameter & Machine 1 & Machine 2 & Machine 3\\
-\midrule
-$M_i^-$ & 0.0877899 & 0.0237671 & 0.0111780\\
-$M_i^+$ & 0.1630383 & 0.0441390 & 0.0207591\\
-$K_i^-$ & 0.029375 & 0.013125 & 0.007500\\
-$K_i^+$ & 0.293750 & 0.131250 & 0.075000\\
-$D_i$ & 0.0125414 & 0.0033953 & 0.0015969\\
-\bottomrule
-\end{tabular}
-\end{table}
-The prior is uniform on the product set in Eq.~\eqref{eq:latent-space};
-its coordinate widths are study choices, not identification results.
+\subsection{Operating Point and Numerical Settings}
 The benchmark begins with zero relative rotor angles and zero speed deviations,
 with nominal incremental power balance consistent with that equilibrium.
 This operating point is a reduced perturbation-model assumption, not a
@@ -925,6 +976,16 @@ must accompany every reported run. Changes to coverage or physical thresholds
 must be declared before final testing and must not be selected to favor a method.
 The obsolete six-duration catalogs and equilibrium master banks are not part
 of this experiment.
+
+\subsection{Training and Planning Budgets}
+The specified full-budget EIG comparison uses 2,000 trajectory-batch updates,
+batch size 32, 128 contrast models, and 128 validation systems evaluated every
+100 updates and at initialization. Evaluation uses 128 physical systems per
+seed, with 128 independent planning particles. Myopic uses 16 candidate
+proposals per round, three rounds and 32 fantasies per proposal. Step-DAD uses
+16 conditional refinement updates at each stage after the first. These are
+computational settings, not established convergence thresholds; control-objective
+studies must declare their own perturbation and solver budgets.
 
 \subsection{Verification and Comparison Scope}
 A workability test uses $T=3$, training seed 101, evaluation seed 1001,
@@ -937,7 +998,7 @@ separate implementation checks.
 
 The current full-budget IEEE9 EIG protocol uses horizons $T=3,4,5$, training
 seed 101 and evaluation seed 1001, with all six methods and the budgets stated
-in Section~\ref{sec:methodology}. This is one seed pair, irrespective of its
+in this section. This is one seed pair, irrespective of its
 training budget. A broader comparison for seed variability would independently
 train seeds 101/202/303 and evaluate seeds 1001--1005. This specifies a study
 design and does not assert completed experiments.
@@ -959,20 +1020,7 @@ Do not relabel realized regret as posterior MOCU. Timing must distinguish
 offline optimization, online probe choice/refinement, terminal posterior/control
 computation and evaluation-only oracle work.
 
-\subsection{Supported Systems and Applicability}
-SIR remains a separate EIG implementation benchmark. Its former results do
-not validate the changed power-grid observation or control protocol.
-IEEE14 requires a separately validated online state-carry and control backend
-before comparison; the active implementation rejects unsupported execution.
-The planned IEEE30 extension retains Demetriou et al.'s dynamic reference
-with six machines, including two governed generators and four synchronous
-condensers, and six added machine terminal buses~\cite{demetriou2017dynamic}.
-Its proposed uncertainty is six inertia constants and two generator governor
-parameters, rather than assigning $M/K$ to every electrical bus. The full
-machine/exciter/governor implementation and initialization remain pending.
-No non-reset IEEE14/IEEE30 results are claimed.
-
-\section{Scope and Limitations}
+\subsection{Modeling Assumptions and Interpretation Limits}
 The probe sequence now changes both what is known about the grid and the
 state from which terminal control acts. This is why the physical oracle is
 history dependent and why a state-independent control bank is insufficient.
@@ -990,6 +1038,45 @@ The MOCU shortfall loss is not a validated outage-damage model. Method claims
 must also distinguish original algorithms from the documented objective and
 numerical-optimization adaptations. Adaptivity and non-myopic gains remain
 empirical questions rather than required outcomes imposed on the experiment.
+
+\section{Results}
+\label{sec:results}
+% Populate this section only from completed, validated runs. Do not insert
+% smoke scores, incomplete checkpoints, inferred rankings or invented values.
+\subsection{Design Performance Across Horizons}
+% EIG: methods as rows; T=3,4,5 as columns; report sPCE and contrast count.
+% MSC/MOCU: separate metric tables only when matching experiments are complete.
+% State the actual training/evaluation seed coverage; a single seed pair has
+% no across-seed standard deviation. Never pool incompatible protocols.
+\subsection{Optimization Convergence and Numerical Sensitivity}
+% Present initialization and validation histories, selected checkpoints,
+% late-training changes, and completed particle/contrast/gradient checks.
+\subsection{Computational Cost}
+% Separate offline training, online decisions/refinement and evaluation-only
+% computations. Include hardware and attribute shared Fixed/DAD training costs.
+\subsection{Interpretation of the Comparisons}
+% Discuss observed adaptivity and lookahead effects only after results exist.
+% Include controller safety/oracle diagnostics only for evaluated control tasks.
+
+\section{Conclusion}
+\label{sec:conclusion}
+This work formulates sequential Bayesian design for a power-grid experiment
+whose physical state persists across probes. The network representation,
+swing dynamics, latent parameter space and observation model define a common
+basis for comparing information-oriented and control-oriented objectives.
+The methodology specifies six design strategies together with the numerical
+approximations needed for online inference, policy optimization and terminal
+control. In particular, the maximum-RoCoF observation requires a consistent
+active-branch derivative when pathwise optimization is used.
+
+The formulation distinguishes parameter information, selected minimum safe
+control and the objective cost of uncertainty, while retaining separate
+physical safety assessment. Its empirical implications must be established
+by completed comparisons, convergence diagnostics and sensitivity analyses.
+No numerical ranking or field-level safety guarantee follows from the
+formulation alone. Broader validation requires additional independent seeds,
+operating conditions and dynamic models beyond the implemented IEEE9 setting.
+% Add a concise quantitative conclusion only after Section VIII is populated.
 
 \bibliographystyle{IEEEtran}
 \bibliography{objective_driven_boed_refs}
