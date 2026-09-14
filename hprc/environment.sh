@@ -8,6 +8,8 @@ set -euo pipefail
 module purge
 module load GCCcore/12.2.0 Python/3.10.8 CUDA/12.1.1
 export PATH="${BOED_VENV:-/scratch/user/g.lin/Documents/objective_power_grid/.venv}/bin:$PATH"
+export BOED_EXECUTION_SITE=hprc
+export BOED_CLUSTER="${SLURM_CLUSTER_NAME:-${BOED_CLUSTER:-}}"
 export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-1}"
 export PYTHONUNBUFFERED=1
 source "$(dirname "${BASH_SOURCE[0]}")/cache.sh"

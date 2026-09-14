@@ -530,6 +530,8 @@ def write_run_config(
         "methods": stamped,
         **body,
     }
+    from src.hardware import hardware_info
+    doc["hardware"] = hardware_info()
     # Publication provenance for both clean and intentionally dirty working
     # trees.  A commit hash alone is insufficient while experiments are being
     # developed from reviewed but uncommitted changes.

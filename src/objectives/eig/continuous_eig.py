@@ -590,7 +590,8 @@ def main():
         'dimension':observer.n_obs,
         'sampling':'max_absolute_rocof_over_fixed_recording_window' if args.N_obs==0 else 'uniform_within_fixed_recording_window',
         'noise_units':'Hz/s' if args.N_obs==0 else 'Hz'}
-    metadata={'protocol':protocol_name(args),'settings':vars(args),
+    from src.hardware import hardware_info
+    metadata={'protocol':protocol_name(args),'settings':vars(args),'hardware':hardware_info(),
         'comparison_revision':'ordered_pathwise_dad_redq_stepdad_v1',
         'gradient_backend':'pathwise chain rule; numerical state/duration Jacobians (1e-5); max-RoCoF uses the primal active sample for its branch derivative',
         'history_representation':'ordered stage slots; no permutation pooling',
