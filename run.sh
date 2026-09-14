@@ -1,5 +1,5 @@
 #!/bin/bash
-# Full experiment: call core scripts in order.
+# Launch one experiment; outputs use experiments/MMDDYYYY/MMDDYYYY_<time>_<objective_parameters>/.
 #
 #   bash run.sh --config configs/ieee9_mocu.yaml
 #   bash run.sh --config configs/ieee9_mocu.yaml --T 8
@@ -8,7 +8,7 @@
 #   bash run.sh --config configs/ieee9_mocu.yaml --method dad --force
 #
 # Result folder (allocated once, reused for all steps):
-#   experiments/date_time_configname_Uctrl|EIG_Tnum_NobsN_sigmaX
+#   experiments/MMDDYYYY/MMDDYYYY_HHMMSS_config_objective_Tnum_NobsN_sigmaX
 # Full terminal history is saved as <result_folder>/logs/run_log.log
 #
 # Nested scripts may ``source`` this file for shared env/helpers only
@@ -51,7 +51,7 @@ export PYTHONPATH="${ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
 EXPERIMENT_TYPE_DEFAULT="objective_based"
 DEFAULT_STEP_NUMBER=3
-DEFAULT_N_OBS=5
+DEFAULT_N_OBS=0
 DEFAULT_NOISE_SIGMA=0.005
 DEFAULT_SEED=101
 # Publication training RNGs (sweep cartesian axis). Bank θ uses yaml
@@ -149,4 +149,5 @@ if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
 fi
 
 set -euo pipefail
+echo "[run.sh] Default results: experiments/MMDDYYYY/MMDDYYYY_<time>_<objective_parameters>/"
 exec python3 -m src.online_cli "$@"

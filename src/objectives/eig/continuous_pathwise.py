@@ -28,9 +28,14 @@ class SwingStage(torch.autograd.Function):
         observer=ctx.observer
         go=grad_obs.detach().cpu().numpy() if grad_obs is not None else 0.
         gs=grad_final.detach().cpu().numpy() if grad_final is not None else 0.
+        active=(observer.prepare_derivative(theta,state,duration)
+                if hasattr(observer,'prepare_derivative') else None)
+        def propagate(s,d):
+            return (observer.propagate_derivative(theta,s,d,active) if active is not None
+                    else observer.propagate(theta,s,d))
         def difference(sp,sm,dp,dm,denominator):
-            plus=observer.propagate(theta,sp,dp)
-            minus=observer.propagate(theta,sm,dm)
+            plus=propagate(sp,dp)
+            minus=propagate(sm,dm)
             return (np.sum((plus.observations-minus.observations)*go,axis=1)+
                     np.sum((plus.terminal_state-minus.terminal_state)*gs,axis=1))/denominator
         state_grad=None
@@ -52,11 +57,17 @@ class SwingStage(torch.autograd.Function):
         return None,None,state_grad,duration_grad
 
 
-def feasible_duration_torch(unit,history,bounds,separation):
+def feasible_duration_torch(unit,history,bounds,separation,horizon=None):
     """Piecewise differentiable interval-length map; keep history in order."""
     lo,hi=bounds
     result=[]
     gap=separation+1e-10
+    if horizon is not None:
+        lower = history[-1]+gap if history else torch.full_like(unit,lo)
+        upper = hi-(horizon-len(history)-1)*gap
+        if len(history)>=horizon or torch.any(lower>upper+1e-12):
+            raise ValueError('No increasing duration remains')
+        return lower+unit*torch.clamp(upper-lower,min=0.)
     for row,q in enumerate(unit.reshape(-1)):
         intervals=[(q.new_tensor(lo),q.new_tensor(hi))]
         for action in history:
@@ -96,7 +107,7 @@ def pathwise_rollout(engine,policy,rng,batch,*,initial=None,history=None,stage_s
             feature[:,start+1+engine.n_obs]=1.
         distribution,_=policy(feature.float(),stage)
         duration=feasible_duration_torch(torch.sigmoid(distribution.mean.double()),
-            actions,engine.observer.bounds,engine.min_separation)
+            actions,engine.observer.bounds,engine.min_separation,engine.horizon)
         means,final=SwingStage.apply(engine.observer,theta.reshape(-1,theta.shape[-1]),
             states.reshape(-1,states.shape[-1]),duration.repeat_interleave(particles))
         means=means.reshape(batch,particles,engine.n_obs)

@@ -30,14 +30,17 @@ class REDQPolicy(nn.Module):
         dist,_=self(features)
         z=dist.rsample()
         unit=(torch.tanh(z)+1)/2
-        log_jac=math.log(2)-2*z-2*F.softplus(-2*z)
+        log_jac=2*(math.log(2)-z-F.softplus(-2*z))
+        # Entropy is measured in normalized tanh coordinates [-1,1].
+        # The critic receives unit=(tanh(z)+1)/2; do not mix density units
+        # by adding log(2) here without also shifting the entropy target.
         return unit,dist.log_prob(z)-log_jac
 
 
 class REDQTrainer:
     def __init__(self,policy,args):
         self.policy=policy
-        self.dimension=1+args.T*(args.N_obs+2)
+        self.dimension=1+args.T*(max(args.N_obs,1)+2)
         self.critics=nn.ModuleList([mlp(self.dimension+1,1) for _ in range(getattr(args,'redq_critics',10))])
         self.targets=copy.deepcopy(self.critics)
         for p in self.targets.parameters():p.requires_grad_(False)
@@ -45,11 +48,19 @@ class REDQTrainer:
         self.critic_optimizer=torch.optim.Adam(self.critics.parameters(),lr=3e-4)
         self.log_alpha=nn.Parameter(torch.tensor(math.log(.01)))
         self.alpha_optimizer=torch.optim.Adam([self.log_alpha],lr=3e-4)
+        # SAC/REDQ automatic target: minus the normalized action dimension.
+        # +1 is unreachable on [-1,1], whose maximum entropy is log(2).
+        self.target_entropy=-1.
+        self.last_diagnostics={}
+        self.gradient_updates=0
         self.capacity=100000
         self.replay=np.empty((self.capacity,2*self.dimension+3),dtype=np.float32)
         self.position=self.count=0
         self.updates=getattr(args,'redq_updates_per_batch',5)
         self.rng=np.random.default_rng(args.seed+330000)
+
+    def temperature_loss(self,logp):
+        return -(self.log_alpha*(logp.detach()+self.target_entropy)).mean()
 
     def observe(self,engine,result,batch):
         info=result['info']
@@ -91,11 +102,23 @@ class REDQTrainer:
             self.actor_optimizer.zero_grad();aloss.backward();self.actor_optimizer.step()
             for p in self.critics.parameters():p.requires_grad_(True)
             self.alpha_optimizer.zero_grad()
-            alpha_loss=-(self.log_alpha*(logp.detach()+1)).mean()
+            alpha_loss=self.temperature_loss(logp)
             alpha_loss.backward();self.alpha_optimizer.step()
             with torch.no_grad():
                 self.log_alpha.clamp_(-10,2)
                 for target_net,net in zip(self.targets,self.critics):
                     for target_p,p in zip(target_net.parameters(),net.parameters()):
                         target_p.lerp_(p,.005)
+            self.gradient_updates+=1
+        self.last_diagnostics={
+            'entropy_temperature':float(self.log_alpha.detach().exp()),
+            'normalized_policy_entropy':float(-logp.detach().mean()),
+            'target_entropy':self.target_entropy,
+            'critic_mse':float(qloss.detach()),
+            'actor_loss':float(aloss.detach()),
+            'mean_q':float(qa.detach().mean()),
+            'mean_td_target':float(target.detach().mean()),
+            'replay_transitions':self.count,
+            'gradient_updates':self.gradient_updates,
+            'entropy_coordinates':'normalized_tanh_minus1_plus1'}
         return float(result['info'][:,-1].mean())

@@ -22,6 +22,22 @@ class UninformativeObserver:
 
 
 class ContinuousEIGTests(unittest.TestCase):
+    def test_increasing_t3_map_reserves_room_and_preserves_gradients(self):
+        from src.objectives.eig.continuous_pathwise import feasible_duration_torch
+        for value in [0.,.5,1.]:
+            history=[]
+            for stage in range(3):
+                a=feasible_duration([value],history,(.2,3.),.01,3)
+                self.assertLessEqual(a[0],3.+1e-12)
+                if history:self.assertGreaterEqual(a[0]-history[-1][0],.01)
+                history.append(a)
+        q=torch.tensor([.7],dtype=torch.float64,requires_grad=True)
+        past=torch.tensor([1.1],dtype=torch.float64,requires_grad=True)
+        fn=lambda x,y:feasible_duration_torch(x,[y],(.2,3.),.01,3)
+        self.assertTrue(torch.autograd.gradcheck(fn,(q,past)))
+        np.testing.assert_allclose(fn(q,past).detach().numpy(),
+            feasible_duration([.7],[[1.1]],(.2,3.),.01,3))
+
     def test_history_order_changes_policy_inputs(self):
         engine=OnlineEIG(self.config(),UninformativeObserver(),horizon=3,sigma=.005,contrasts=4)
         actions=[np.array([.5]),np.array([2.5])]
@@ -81,7 +97,7 @@ class ContinuousEIGTests(unittest.TestCase):
         for i in range(3):
             for j in range(i):
                 self.assertTrue(np.all(np.abs(result['actions'][i]-result['actions'][j])>=.01))
-        with self.assertRaisesRegex(ValueError,'non-repetition'):
+        with self.assertRaisesRegex(ValueError,'non-repetition|increasing'):
             engine.rollout(None,np.random.default_rng(1),2,stochastic=False,
                            selector=lambda *args:[3.,3.])
 
@@ -130,7 +146,7 @@ class ContinuousEIGTests(unittest.TestCase):
             durations=row['duration_sequence_s']
             for i in range(3):
                 for j in range(i):
-                    self.assertGreaterEqual(abs(durations[i]-durations[j]),.01)
+                    self.assertGreaterEqual(durations[i]-durations[j],.01)
             self.assertEqual(np.asarray(row['observations_hz']).shape,(3,5))
         # Same evaluator truth for all methods; not a separate test draw per method.
         for row in rows[1:]:

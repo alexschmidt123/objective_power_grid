@@ -241,7 +241,7 @@ def allocate_result_dir(
         n_obs=n_obs,
         noise_sigma=noise_sigma,
     )
-    path = (root / "experiments" / name).resolve()
+    path = (root / "experiments" / name[:8] / name).resolve()
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -258,11 +258,17 @@ def find_latest_result_dir(
     if not experiments.is_dir():
         return None
     et = str(experiment_type).strip().lower().replace("-", "_")
-    want_config = cfg.run_slug
+    want_config = re.sub(r"_(?:eig|mocu|msc)$", "", cfg.run_slug, flags=re.IGNORECASE)
     want_T = int(cfg.step_number)
     want_n_obs, want_sigma = _cfg_observation_values(cfg)
     matches: list[Path] = []
-    for path in experiments.iterdir():
+    # Search dated campaigns and legacy flat paths, not source snapshots or
+    # nested evaluations. Both naming generations remain readable.
+    candidates = list(experiments.iterdir())
+    for bucket in list(candidates):
+        if bucket.is_dir() and re.fullmatch(r"\d{8}",bucket.name):
+            candidates.extend(bucket.iterdir())
+    for path in candidates:
         if not path.is_dir():
             continue
         # Never treat scratch dirs (e.g. _sir_smoke_ctx, _plots) as results.

@@ -16,7 +16,7 @@ import torch
 
 def improve_numerical(engine,policy,optimizer,rng,batch,*,scale=.01,directions=4,**kwargs):
     if scale<=0 or directions<1:raise ValueError('Positive numerical-gradient scale and direction count required')
-    params=[p for name,p in policy.named_parameters() if name=='sequence' or name.startswith('network.')]
+    params=[p for name,p in policy.named_parameters() if name in {'sequence','stage_bias'} or name.startswith('network.')]
     originals=[p.detach().clone() for p in params]
     gradients=[torch.zeros_like(p) for p in params]
     paired=[]

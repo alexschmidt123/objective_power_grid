@@ -42,6 +42,10 @@ class CudaContinuousSwingObserver(ContinuousSwingObserver):
             self.kernel = self.module.get_function("simulate_continuous_stage")
 
     def propagate(self, theta, state, duration):
+        return self._propagate(theta, state, duration)
+
+    def _propagate(self, theta, state, duration, *, kernel=None, extra_args=()):
+        """Shared launcher for the forward and observation-linearization kernels."""
         theta = np.asarray(theta, dtype=np.float64)
         state = np.ascontiguousarray(state, dtype=np.float64)
         if theta.ndim != 2 or theta.shape[1] != 2*self.N or state.shape != theta.shape:
@@ -59,7 +63,7 @@ class CudaContinuousSwingObserver(ContinuousSwingObserver):
         indices = np.asarray(np.rint(self.times/self.sim.ode_dt)-1, dtype=np.int32)
         from src.control.cuda_control import _PrimaryCtx
         with _PrimaryCtx():
-            self.kernel(
+            (self.kernel if kernel is None else kernel)(
                 np.int32(count), np.int32(n_steps), np.int32(self.N),
                 cuda.In(np.arange(count, dtype=np.int32)),
                 cuda.In(np.ascontiguousarray(theta[:,:self.N])),
@@ -69,7 +73,7 @@ class CudaContinuousSwingObserver(ContinuousSwingObserver):
                 cuda.In(np.full(count, self.amplitude)),
                 cuda.In(np.tile(self.sim.physical_input_map[self.bus], (count,1))),
                 np.int32(self.sim.observation_bus), cuda.In(duration), np.float64(self.sim.ode_dt),
-                cuda.Out(output), cuda.In(state), cuda.Out(final), np.int32(self.n_obs), cuda.In(indices),
+                cuda.Out(output), cuda.In(state), cuda.Out(final), np.int32(self.n_obs), cuda.In(indices), *extra_args,
                 block=(128,1,1), grid=((count+127)//128,1))
         if not np.all(np.isfinite(output)) or not np.all(np.isfinite(final)):
             raise RuntimeError('Nonfinite continuous CUDA trajectory')

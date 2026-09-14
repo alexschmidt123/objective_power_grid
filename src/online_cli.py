@@ -11,6 +11,10 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def main():
     argv=sys.argv[1:]
+    for arg in argv:
+        flag=arg.split('=',1)[0].replace('_','-')
+        if flag.startswith(('--reuse','--resume','--checkpoint','--load-checkpoint','--skip-training')):
+            raise SystemExit('run.sh/sweep_run.sh require fresh experiments; checkpoint/result reuse and resume are forbidden.')
     if '--sweep' not in argv:
         p=argparse.ArgumentParser(add_help=False)
         p.add_argument('--config',default='configs/ieee9_eig.yaml')
@@ -22,10 +26,10 @@ def main():
         online()
         return
     argv.remove('--sweep')
-    p=argparse.ArgumentParser(description='Explicit Cartesian sweep of online non-reset runs; one training per training seed, reused across evaluation seeds.')
+    p=argparse.ArgumentParser(description='Explicit Cartesian sweep; each cell starts a fresh run.sh experiment with its own training and evaluations.')
     p.add_argument('--configs','--config',default='ieee9_mocu')
     p.add_argument('--T',default='3')
-    p.add_argument('--N_obs','--N-obs',default='5')
+    p.add_argument('--N_obs','--N-obs',default='0')
     p.add_argument('--noise_sigma','--noise-sigma',default='0.005')
     p.add_argument('--seed',default='101')
     p.add_argument('--eval-seeds',default='1001')

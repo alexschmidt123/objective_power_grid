@@ -29,7 +29,7 @@ from src.objectives.eig.continuous_pathwise import improve_pathwise
 from src.objectives.eig.continuous_redq import REDQPolicy, REDQTrainer
 
 
-def feasible_duration(unit, history, bounds, min_separation):
+def feasible_duration(unit, history, bounds, min_separation, horizon=None):
     """Map [0,1] onto the remaining intervals by their lengths, without snapping.
 
     Uniform unit samples are uniform over feasible duration length. The mapping
@@ -42,6 +42,12 @@ def feasible_duration(unit, history, bounds, min_separation):
     past = [np.broadcast_to(np.asarray(a, dtype=float), unit.shape) for a in history]
     result = np.empty_like(unit)
     gap = float(min_separation) + 1e-10
+    if horizon is not None:
+        lower = past[-1] + gap if past else np.full_like(unit, lo)
+        upper = hi - (horizon-len(past)-1)*gap
+        if len(past) >= horizon or np.any(lower > upper+1e-12):
+            raise ValueError('No increasing duration remains')
+        return lower + unit*np.maximum(upper-lower, 0.)
     for row, q in enumerate(unit):
         intervals = [(lo, hi)]
         for a in past:
@@ -74,6 +80,7 @@ class DurationPolicy(torch.nn.Module):
         if fixed:
             self.sequence = torch.nn.Parameter(torch.zeros(horizon))
         else:
+            self.stage_bias = torch.nn.Parameter(torch.zeros(horizon))
             self.network = torch.nn.Sequential(
                 torch.nn.Linear(1+horizon*(n_obs+2), 64), torch.nn.Tanh(),
                 torch.nn.Linear(64,64), torch.nn.Tanh(), torch.nn.Linear(64,1))
@@ -81,7 +88,8 @@ class DurationPolicy(torch.nn.Module):
             torch.nn.Linear(1+horizon*(n_obs+2),64), torch.nn.Tanh(),torch.nn.Linear(64,1))
 
     def forward(self, features, stage):
-        mean = self.sequence[stage].expand(len(features)) if self.fixed else self.network(features).squeeze(-1)
+        mean = (self.sequence[stage].expand(len(features)) if self.fixed else
+                self.network(features).squeeze(-1)+self.stage_bias[stage])
         return torch.distributions.Normal(mean, self.log_std.clamp(-3.,1.).exp()), self.critic(features).squeeze(-1)
 
 
@@ -144,13 +152,17 @@ class OnlineEIG:
                 unit = torch.sigmoid((latent*getattr(policy,'unit_scale',1.)).double()).detach().numpy()
                 unit_actions.append(unit)
                 duration = feasible_duration(unit,
-                    actions, self.observer.bounds, self.min_separation)
+                    actions, self.observer.bounds, self.min_separation, self.horizon)
                 logprobs.append(distribution.log_prob(latent.detach()))
                 values.append(value)
             if (not np.all(np.isfinite(duration)) or np.any(duration < self.observer.bounds[0]) or
                 np.any(duration > self.observer.bounds[1]) or
                 any(np.any(np.abs(duration-a) < self.min_separation) for a in actions)):
                 raise ValueError('Selected duration violates bounds or non-repetition constraint')
+            if (
+                (actions and np.any(duration-actions[-1] < self.min_separation)) or
+                np.any(duration > self.observer.bounds[1]-(self.horizon-stage-1)*self.min_separation+1e-12)):
+                raise ValueError('increasing durations require room for later probes')
             prediction = self.observer.propagate(theta.reshape(-1,theta.shape[-1]),
                 states.reshape(-1,states.shape[-1]),np.repeat(duration,particles))
             means = prediction.observations.reshape(batch,particles,self.n_obs)
@@ -197,9 +209,30 @@ def improve_policy(engine, policy, optimizer, rng, batch, *, critic=False,
     return float(info[:,-1].mean())
 
 
-def train(engine, method, args, directory):
+def fixed_initializations(engine):
+    """Interior ordered sequences; avoid saturated endpoint-logit initializations."""
+    lo,hi=engine.observer.bounds
+    gap=engine.min_separation+1e-10
+    free=hi-lo-(engine.horizon-1)*gap
+    candidates=[]
+    for label,start,end in [('short',.05,.35),('central',.3,.7),
+                            ('long',.65,.95),('spread',.05,.95)]:
+        durations=lo+np.arange(engine.horizon)*gap+free*np.linspace(start,end,engine.horizon)
+        history=[];logits=[]
+        for k,d in enumerate(durations):
+            lower=history[-1]+gap if history else lo
+            upper=hi-(engine.horizon-k-1)*gap
+            unit=(d-lower)/(upper-lower)
+            if not 0.<unit<1.:raise ValueError('Fixed initialization must be interior')
+            logits.append(float(np.log(unit/(1-unit))))
+            history.append(d)
+        candidates.append((label,logits))
+    return candidates
+
+
+def train(engine, method, args, directory, *, initial_sequence=None):
     torch.manual_seed(args.seed)
-    policy = REDQPolicy(args.T,args.N_obs) if method=='rl_sboed' else DurationPolicy(args.T,args.N_obs,fixed=method=='fixed')
+    policy = REDQPolicy(args.T,engine.n_obs) if method=='rl_sboed' else DurationPolicy(args.T,engine.n_obs,fixed=method=='fixed')
     optimizer = torch.optim.Adam(policy.parameters(),lr=args.learning_rate)
     redq = REDQTrainer(policy,args) if method=='rl_sboed' else None
     rng = np.random.default_rng(args.seed)
@@ -212,10 +245,30 @@ def train(engine, method, args, directory):
     # Candidate selection uses the same validation prior as checkpoint selection,
     # never evaluator systems. Retain the strongest as the update-zero checkpoint.
     initialization=[]
+    if method=='dad' and initial_sequence is not None:
+        # A history-independent Fixed policy is a valid member of the DAD class.
+        # Compare using validation only; never choose initialization on evaluation data.
+        candidates=[('random',copy.deepcopy(policy.state_dict()))]
+        with torch.no_grad():
+            policy.network[-1].weight.zero_()
+            policy.network[-1].bias.zero_()
+            # Move endpoint logits into the interior so DAD can actually learn.
+            policy.stage_bias.copy_(torch.as_tensor(initial_sequence).clamp(-4.,4.))
+        candidates.append(('interior_from_new_fixed',copy.deepcopy(policy.state_dict())))
+        winner=None
+        for label,state in candidates:
+            policy.load_state_dict(state)
+            with torch.no_grad():
+                result=engine.rollout(policy,np.random.default_rng(args.seed+900000),
+                                     args.validation_systems,stochastic=False)
+            score=float(result['info'][:,-1].mean())
+            initialization.append({'candidate':label,'validation_utility':score})
+            if winner is None or score>winner[0]:winner=(score,copy.deepcopy(state),label)
+        policy.load_state_dict(winner[1])
+        (directory/'dad_initialization.json').write_text(json.dumps(
+            {'candidates':initialization,'selected':winner[2]},indent=2)+'\n')
     if method=='fixed':
-        candidates=[('central',[0.]*args.T),('long',[20.]*args.T),
-                    ('short',[-20.]*args.T),
-                    ('spread',np.linspace(-3.,3.,args.T).tolist())]
+        candidates=fixed_initializations(engine)
         winner=None
         for label,sequence in candidates:
             with torch.no_grad():
@@ -240,17 +293,19 @@ def train(engine, method, args, directory):
                                           args.validation_systems,stochastic=False)
             score=float(validation['info'][:,-1].mean())
             records.append({'update':update,'training_utility':training_score,'validation_utility':score})
+            if redq is not None:
+                records[-1]['redq']=dict(redq.last_diagnostics)
             print(f'[online-design] {method} update={update} validation_utility={score:.6f}',flush=True)
             if score>best:
                 best,best_state=score,copy.deepcopy(policy.state_dict())
                 best_update=update
                 temporary=directory/(method+'.pth.tmp')
-                torch.save({'state_dict':best_state,'method':method,'horizon':args.T,'n_obs':args.N_obs,
+                torch.save({'state_dict':best_state,'method':method,'horizon':args.T,'n_obs':engine.n_obs,
                             'protocol':protocol_name(args),'settings':vars(args)},temporary)
                 os.replace(temporary,directory/(method+'.pth'))
             (directory/(method+'_training.json')).write_text(json.dumps(records,indent=2)+'\n')
     policy.load_state_dict(best_state)
-    torch.save({'state_dict':best_state,'method':method,'horizon':args.T,'n_obs':args.N_obs,
+    torch.save({'state_dict':best_state,'method':method,'horizon':args.T,'n_obs':engine.n_obs,
                 'protocol':protocol_name(args),'settings':vars(args)},directory/(method+'.pth'))
     (directory/(method+'_training.json')).write_text(json.dumps(records,indent=2)+'\n')
     diagnostic={'best_update':best_update,'best_validation_utility':best,
@@ -259,6 +314,7 @@ def train(engine, method, args, directory):
         'recent_validation_change':records[-1]['validation_utility']-records[max(0,len(records)-6)]['validation_utility'],
         'convergence_established':False,
         'note':'Validation history is evidence to inspect, not proof of convergence; equal updates are not equal optimization quality.'}
+    diagnostic['validation_gain_from_initial']=best-records[0]['validation_utility']
     (directory/(method+'_training_diagnostics.json')).write_text(json.dumps(diagnostic,indent=2)+'\n')
     return policy,time.monotonic()-start
 
@@ -273,7 +329,7 @@ def myopic_duration(belief,rng,args,actions=(),min_separation=.01):
     for iteration in range(args.search_rounds):
         proposals = rng.uniform(lo,hi,args.search_candidates) if iteration==0 else np.clip(
             rng.normal(centre,spread,args.search_candidates),lo,hi)
-        durations=feasible_duration(proposals,actions,belief.observer.bounds,min_separation)
+        durations=feasible_duration(proposals,actions,belief.observer.bounds,min_separation,args.T)
         scorer=getattr(belief,'expected_design_utility',belief.expected_information)
         scores=np.asarray([scorer(d,noise_samples=args.fantasies,
                            rng=np.random.default_rng(seed)) for d in durations])
@@ -327,7 +383,7 @@ def evaluate(engine,policies,args,record_path=None):
         # draws across methods. Planner RNG/support are separate from evaluation.
         rng=np.random.default_rng(args.eval_seed)
         theta,states=engine.sample(rng,args.eval_systems)
-        noise=rng.normal(size=(args.eval_systems,args.T,args.N_obs))
+        noise=rng.normal(size=(args.eval_systems,args.T,engine.n_obs))
         for system in range(args.eval_systems):
             planner_rng=np.random.default_rng(args.eval_seed+700000+system)
             particles=planner_rng.uniform(engine.lower,engine.upper,
@@ -349,7 +405,7 @@ def evaluate(engine,policies,args,record_path=None):
                     planning_ess.append(float(1/np.exp(2*belief.log_weights).sum()))
                 if method=='random':
                     duration=feasible_duration([planner_rng.uniform()],actions,
-                        engine.observer.bounds,engine.min_separation)
+                        engine.observer.bounds,engine.min_separation,engine.horizon)
                 elif method=='myopic':
                     duration=[myopic_duration(belief,planner_rng,args,actions,engine.min_separation)]
                 else:
@@ -360,7 +416,7 @@ def evaluate(engine,policies,args,record_path=None):
                     with torch.no_grad():
                         distribution,_=policy(engine.features(actions,observations,1,stage),stage)
                         duration=feasible_duration(torch.sigmoid((distribution.mean*getattr(policy,'unit_scale',1.)).double()).detach().numpy(),
-                            actions,engine.observer.bounds,engine.min_separation)
+                            actions,engine.observer.bounds,engine.min_separation,engine.horizon)
                 decision_seconds.append(time.monotonic()-decision_start)
                 return duration
             with torch.no_grad() if method!='step_dad' else torch.enable_grad():
@@ -374,6 +430,8 @@ def evaluate(engine,policies,args,record_path=None):
                 'observations_hz':[y[0].tolist() for y in result['observations']],
                 'true_terminal_state':result['states'][0,0].tolist(),
                 'evaluation_seed':args.eval_seed, 'true_MK':theta[system,0].tolist()})
+            if getattr(args,'N_obs',engine.n_obs)==0:
+                rows[-1]['observations_rocof_hz_s']=rows[-1].pop('observations_hz')
             if hasattr(engine,'control'):
                 row=rows[-1]
                 row.pop('terminal_spce_nats')
@@ -398,7 +456,7 @@ def evaluate(engine,policies,args,record_path=None):
 
 def protocol_name(args):
     objective=getattr(args,'objective','eig')
-    return 'continuous_no_reset_ordered_spce_v3' if objective=='eig' else f'continuous_no_reset_ordered_{objective}_v2'
+    return 'continuous_no_reset_increasing_spce_v5' if objective=='eig' else f'continuous_no_reset_increasing_{objective}_v3'
 
 
 def main():
@@ -411,7 +469,7 @@ def main():
     p.add_argument('--numerical-gradient-directions',type=int,default=4)
     p.add_argument('--output',default=None)
     p.add_argument('--T',type=int,default=3)
-    p.add_argument('--N-obs','--N_obs',dest='N_obs',type=int,default=5)
+    p.add_argument('--N-obs','--N_obs',dest='N_obs',type=int,default=0)
     p.add_argument('--noise-sigma','--noise_sigma',dest='noise_sigma',type=float,default=.005)
     p.add_argument('--duration-min',type=float,default=.2)
     p.add_argument('--duration-max',type=float,default=3.)
@@ -419,7 +477,7 @@ def main():
                    help='Minimum pairwise separation in seconds; applies to every method and stage')
     p.add_argument('--bus',type=int,default=1,help='One-based physical injection bus')
     p.add_argument('--amplitude',type=float,default=.05)
-    p.add_argument('--window',type=float,default=4.)
+    p.add_argument('--window',type=float,default=3.)
     p.add_argument('--seed',type=int,default=101)
     p.add_argument('--eval-seed',type=int,default=1001)
     p.add_argument('--eval-seeds',default=None)
@@ -450,11 +508,16 @@ def main():
         p.error('Objective and experiment_type disagree')
     args.objective=args.objective or requested or {'eig_based':'eig','msc_based':'msc','objective_based':'mocu'}[load_config(args.config).raw['experiment']['experiment_type']]
     if args.output is None:
-        args.output=str(Path(__file__).resolve().parents[3]/'experiments'/
-            (datetime.now().strftime('%m%d%Y_%H%M%S_%f')+f'_ieee9_nonreset_{args.objective}_T{args.T}_train{args.seed}'))
+        now=datetime.now()
+        sigma_token=format(args.noise_sigma,'.12g').replace('.','p')
+        window_token=format(args.window,'.12g').replace('.','p')
+        label=(now.strftime('%m%d%Y_%H%M%S_%f')+
+            f'_ieee9_nonreset_{args.objective}_T{args.T}_Nobs{args.N_obs}_sigma{sigma_token}_W{window_token}_train{args.seed}')
+        args.output=str(Path(__file__).resolve().parents[3]/'experiments'/now.strftime('%m%d%Y')/label)
     eval_seeds=[int(x) for x in args.eval_seeds.split(',')] if args.eval_seeds else [args.eval_seed]
     if not eval_seeds or len(set(eval_seeds))!=len(eval_seeds):p.error('Use distinct evaluation seeds')
-    for key in ['T','N_obs','updates','batch_size','contrasts','validation_systems','validate_every',
+    if args.N_obs<0:p.error('N_obs must be nonnegative')
+    for key in ['T','updates','batch_size','contrasts','validation_systems','validate_every',
                 'eval_systems','planner_particles','search_candidates','search_rounds','fantasies','refinement_updates']:
         if getattr(args,key)<1:p.error(key+' must be positive')
     if args.redq_critics<2 or args.redq_updates_per_batch<1:p.error('Invalid REDQ budgets')
@@ -506,8 +569,13 @@ def main():
     cfg.raw['experiment']={'mode':'continuous_duration_no_reset','experiment_type':{'eig':'eig_based','msc':'msc_based','mocu':'objective_based'}[args.objective],
                            'step_number':args.T,'methods':args.methods.split(',')}
     from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
-    observer=CudaContinuousSwingObserver(cfg,duration_bounds=(args.duration_min,args.duration_max),
-        injection_bus=args.bus,amplitude=args.amplitude,n_obs=args.N_obs,window=args.window)
+    observer_kwargs=dict(duration_bounds=(args.duration_min,args.duration_max),
+        injection_bus=args.bus,amplitude=args.amplitude,window=args.window)
+    if args.N_obs==0:
+        from src.domains.swing.continuous_rocof import MaxRocofObserver
+        observer=MaxRocofObserver(cfg,**observer_kwargs)
+    else:
+        observer=CudaContinuousSwingObserver(cfg,n_obs=args.N_obs,**observer_kwargs)
     if args.objective=='eig':
         engine=OnlineEIG(cfg,observer,horizon=args.T,sigma=args.noise_sigma,contrasts=args.contrasts,
                          min_separation=args.min_duration_separation)
@@ -518,10 +586,15 @@ def main():
     if hasattr(engine,'control'):
         engine.numerical_gradient_scale=args.numerical_gradient_scale
         engine.numerical_gradient_directions=args.numerical_gradient_directions
+    cfg.raw['observation']={'N_obs':args.N_obs, 'noise_sigma':args.noise_sigma,
+        'dimension':observer.n_obs,
+        'sampling':'max_absolute_rocof_over_fixed_recording_window' if args.N_obs==0 else 'uniform_within_fixed_recording_window',
+        'noise_units':'Hz/s' if args.N_obs==0 else 'Hz'}
     metadata={'protocol':protocol_name(args),'settings':vars(args),
         'comparison_revision':'ordered_pathwise_dad_redq_stepdad_v1',
-        'gradient_backend':'pathwise chain rule with numerical state/duration simulator Jacobians (step 1e-5)',
+        'gradient_backend':'pathwise chain rule; numerical state/duration Jacobians (1e-5); max-RoCoF uses the primal active sample for its branch derivative',
         'history_representation':'ordered stage slots; no permutation pooling',
+        'duration_order':'strictly_increasing',
         'method_implementations':{'dad':'deterministic continuous DAD with pathwise sPCE gradients',
             'rl_sboed':'REDQ-style off-policy actor, replay and critic ensemble; telescoping sPCE rewards; gamma=1',
             'step_dad':'prefix-conditioned pathwise refinement after each observation; warm-start previous adapted policy',
@@ -529,6 +602,11 @@ def main():
             'myopic':'one-step posterior-particle information search',
             'random':'uniform over remaining feasible duration intervals'},
         'publication_validation_complete':False,
+        'observation_kind':'max_absolute_rocof' if args.N_obs==0 else 'sampled_frequency',
+        'observation_dimension':observer.n_obs,
+        'noise_units':'Hz/s' if args.N_obs==0 else 'Hz',
+        'rocof_sample_dt':getattr(observer,'rocof_sample_dt',None),
+        'numerical_gradient_caveat':'Max-RoCoF is piecewise smooth. The active sample is fixed in numerical Jacobians; peak ties remain nondifferentiable.' if args.N_obs==0 else None,
         'recording_window_s':observer.window,'observation_times_within_stage_s':observer.times.tolist(),
         'measurement_bus_physical':cfg.swing.get('observation_bus',1),
         'prior_lower':engine.lower.tolist(),'prior_upper':engine.upper.tolist(),
@@ -558,18 +636,20 @@ def main():
     (output/'run_config.json').write_text(json.dumps(metadata,indent=2)+'\n')
     if args.estimate_only or args.preflight_max_hours>0:
         torch.manual_seed(args.seed)
-        policy=DurationPolicy(args.T,args.N_obs)
+        policy=DurationPolicy(args.T,engine.n_obs)
         optimizer=torch.optim.Adam(policy.parameters(),lr=args.learning_rate)
         rng=np.random.default_rng(args.seed)
         start=time.monotonic()
         for _ in range(3):
             improve_objective(engine,policy,optimizer,rng,args.batch_size)
         seconds=(time.monotonic()-start)/3
-        redq_policy=REDQPolicy(args.T,args.N_obs)
+        redq_policy=REDQPolicy(args.T,engine.n_obs)
         redq=REDQTrainer(redq_policy,args)
         start=time.monotonic()
-        for _ in range(3):redq.step(engine,rng,args.batch_size)
-        redq_seconds=(time.monotonic()-start)/3
+        train_redq='rl_sboed' in args.methods.split(',')
+        if train_redq:
+            for _ in range(3):redq.step(engine,rng,args.batch_size)
+        redq_seconds=(time.monotonic()-start)/3 if train_redq else 0.
         timings_start=time.monotonic()
         with torch.no_grad():
             engine.rollout(policy,np.random.default_rng(args.seed+800000),args.validation_systems,stochastic=False)
@@ -579,13 +659,15 @@ def main():
         timings_start=time.monotonic()
         print('[preflight] Timing one simulated evaluation system per method; not performance results',flush=True)
         evaluate(engine,{'dad':policy,'rl_sboed':redq_policy,
-                         'fixed':DurationPolicy(args.T,args.N_obs,fixed=True)},evaluation_args)
+                         'fixed':DurationPolicy(args.T,engine.n_obs,fixed=True)},evaluation_args)
         evaluation_seconds=time.monotonic()-timings_start
-        projected_hours=(args.updates*(2*seconds+redq_seconds)+
+        train_seconds=(int(bool({'dad','step_dad'} & set(args.methods.split(','))))+
+                       int('fixed' in args.methods.split(',')))*seconds+redq_seconds
+        projected_hours=(args.updates*train_seconds+
             3*(args.updates//args.validate_every+1)*validation_seconds+
             len(eval_seeds)*args.eval_systems*evaluation_seconds)/3600
         estimate={'pathwise_training_update_seconds':seconds,'redq_training_update_seconds':redq_seconds,
-                  'three_trainers_hours_excluding_validation_and_evaluation':args.updates*(2*seconds+redq_seconds)/3600,
+                  'requested_training_hours_excluding_validation_and_evaluation':args.updates*train_seconds/3600,
                   'validation_batch_seconds':validation_seconds,
                   'all_methods_one_evaluation_system_seconds':evaluation_seconds,
                   'projected_total_hours':projected_hours,
@@ -617,7 +699,9 @@ def main():
         methods.add('dad')
     for method in ['fixed','dad','rl_sboed']:
         if method in methods:
-            policies[method],times[method]=train(engine,method,args,models)
+            initial=(policies['fixed'].sequence.detach().clone()
+                     if method=='dad' and 'fixed' in policies and args.objective=='eig' else None)
+            policies[method],times[method]=train(engine,method,args,models,initial_sequence=initial)
     rows=[]
     for evaluation_seed in eval_seeds:
         evaluation_args=copy.copy(args)
