@@ -1,23 +1,182 @@
-\documentclass[11pt]{article}
-\usepackage[margin=1in]{geometry}
+\documentclass[journal]{IEEEtran}
 \usepackage{amsmath,amssymb,booktabs,xcolor}
 \usepackage[hidelinks]{hyperref}
 \newcommand{\E}{\mathbb E}
-\newcommand{\todo}[1]{\textcolor{blue}{[TODO: #1]}}
-\title{Ordered Non-Reset Power-Grid sBOED: EIG, MSC and MOCU}
+\title{Sequential Bayesian Experimental Design for Non-Reset Power-Grid Identification and Control}
 \author{}
 \date{}
 \begin{document}
 \maketitle
-This specification matches the active online IEEE9 experiment. Probe duration
-and terminal control are continuous but distinct decisions. The physical system
-is initialized only once per episode. The reset design catalogs and banks belong
-to the historical protocol and are not used for this specification.
+\begin{abstract}
+Sequential probing can reduce uncertainty in power-system dynamics while
+changing the physical state from which a subsequent controller operates.
+We formulate Bayesian experimental design for this non-reset setting, using
+continuous probe durations, fixed injection location and amplitude, and one
+noisy maximum absolute rate-of-change-of-frequency observation per recording
+window. The formulation separates expected information gain, expected
+posterior-selected minimum safe control, and finite-loss mean objective cost
+of uncertainty. We specify six design strategies under common dynamics and
+action constraints: DAD, RL-sBOED, Step-DAD, Myopic, Fixed and Random.
+The methodology includes ordered policy histories, state-carrying particle
+inference, numerical terminal-control optimization, and branch-consistent
+pathwise derivatives for the peak observation. Control-objective optimization
+uses an explicitly stated parameter-smoothing approximation. An IEEE9
+experimental protocol separates derivative verification, policy convergence,
+physical safety assessment and statistical comparison. The resulting methods
+section defines reproducible comparisons without presupposing an empirical
+ranking or claiming field-level safety.
+\end{abstract}
+\begin{IEEEkeywords}
+Bayesian experimental design, power-system identification, adaptive probing,
+rate of change of frequency, minimum safe control, MOCU.
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:introduction}
+Uncertain inertia and effective frequency response influence both how a power
+system reacts to an injected probe and how much supplementary power is needed
+following a disturbance. Controlled excitation provides a way to learn these
+quantities rather than waiting for an uncontrolled event. Peng et
+al.~\cite{peng2024probing} develop a probing-based approach to joint inertia
+and frequency-response estimation. This motivates the present identification
+setting, while the reduced multi-machine dynamics, prior distributions,
+observation summary and terminal-control task used here are stated study
+assumptions rather than consequences of that estimation method.
+
+The experimental-design question is which excitation to apply next, given the
+measurements already collected. A probe is useful when its response helps
+resolve uncertainty relevant to subsequent decisions, but information about
+parameters and improvement in an engineering objective need not coincide.
+Two posterior distributions can have different parameter uncertainty while
+inducing the same control decision. Conversely, a relatively small change in
+posterior mass near a safety threshold can change the selected control.
+These observations motivate comparing parameter-oriented expected information
+gain (EIG) with objectives defined directly through the terminal decision.
+The objective-based view follows the distinction between model uncertainty
+and its operational cost in MOCU~\cite{yoon2013mocu,boluki2018generalized}.
+
+This work considers a finite sequence of duration-controlled probes followed
+by a continuous supplementary power injection. Probe bus and amplitude are
+fixed, and each probe is observed over a fixed recording window. The physical
+system is initialized once, before the first probe, and its state carries
+between windows. Consequently, changing a duration affects the current
+measurement, the state entering later probes, and the state from which
+terminal control begins. A likelihood evaluated from equilibrium after every
+probe would represent a different experiment. Similarly, reordering an
+observed history would generally change its physical interpretation.
+
+We use one noisy maximum absolute rate-of-change-of-frequency (RoCoF)
+summary per window as the default observation. The summary is computed from
+finite frequency differences and becomes available at the end of the window.
+This gives a compact observation interface, but the maximum operation also
+makes the numerical observation map only piecewise smooth. A reliable design
+comparison must therefore specify both the statistical observation model and
+how optimization differentiates, or avoids differentiating, the simulator.
+Otherwise, an apparent failure of a policy family can arise from an incorrect
+numerical gradient rather than from its design objective or adaptivity.
+
+Three objectives connect the same probing model to different notions of
+experimental value. EIG rewards information about the uncertain parameters.
+Minimum safe control (MSC) minimizes the expected magnitude selected by a
+posterior-coverage controller. Finite-loss MOCU minimizes the posterior excess
+loss of a common control relative to controls selected with knowledge of the
+model. MSC and MOCU can select the same control for an individual posterior
+under the stated assumptions, yet assign different values to probe policies.
+Physical safety is evaluated separately on the true simulated system; a
+posterior coverage level is not identified with an empirical safety rate.
+
+The methodological contributions are a common non-reset formulation for these
+three objectives, an implementation of six design strategies under identical
+physical and observation constraints, and a verification protocol that
+separates numerical correctness from optimization and statistical evidence.
+The six strategies cover random probing, an optimized fixed sequence, myopic
+posterior-based selection, fully amortized DAD and RL-sBOED policies, and
+within-episode Step-DAD refinement. The comparison is intended to measure
+when horizon planning and adaptation help, without imposing a desired ranking.
+The implemented grid benchmark is IEEE9. This paper specifies the methodology;
+quantitative conclusions require completed experiments and the validation
+described in Section~\ref{sec:experimental-protocol}.
+
+\section{Related Work}
+\label{sec:related-work}
+\subsection{Probing for Dynamic Parameter Identification}
+Probing-based identification uses a designed excitation to expose dynamic
+responses that are difficult to distinguish from passive measurements alone.
+Peng et al.~\cite{peng2024probing} jointly estimate inertia and frequency
+response using an injected probing signal, with a regression-based estimator
+and power-hardware-in-the-loop validation. Their work motivates learning the
+two effects together. Our question concerns selection of successive probe
+durations under posterior uncertainty and a downstream control objective.
+The scalar peak-RoCoF observation, state-carry model and Bayesian prior here
+are additional modeling choices; their validity is not established by the
+hardware validation of a different estimator or measurement model.
+
+\subsection{Amortized and Semi-Amortized Bayesian Design}
+DAD learns a policy before deployment so that the next experimental design can
+be obtained from the accumulated observations by a network evaluation.
+Foster et al.~\cite{foster2021dad} introduce sequential contrastive information
+bounds for this purpose. We use the sequential prior-contrastive objective
+for EIG, while replacing exchangeable history representations with ordered
+stage slots appropriate to a state-carrying simulator. Optimizing MSC or MOCU
+with a deterministic policy is an objective-specific adaptation, not an
+assertion that the original DAD training objective already represents those
+control criteria.
+
+Blau et al.~\cite{blau2022rlsboed} formulate sequential experimental design as
+a reinforcement-learning problem, allowing policy optimization without
+requiring derivatives through the probabilistic simulator. Our RL-sBOED
+implementation uses a continuous REDQ-style actor--critic and rewards formed
+from changes in the prefix objective. Stepwise rewards do not make this a
+myopic method: the critic accounts for later rewards over the remaining
+horizon. Both its entropy regularization and its numerical budgets must be
+distinguished from the information score reported at evaluation.
+
+Step-DAD introduces semi-amortized design: an offline policy is refined during
+an experiment as observations arrive~\cite{hedman2025stepdad}. We retain that
+infer--refine structure, using a posterior over parameters together with the
+state carried by each posterior particle. A refinement is conditional on the
+observed prefix and optimizes only future probes. This distinguishes online
+adaptation from retraining a policy on the evaluator's latent parameter, which
+would give the design method information unavailable in a real experiment.
+
+\subsection{Objective-Based Uncertainty and Experimental Design}
+MOCU measures uncertainty through the expected loss incurred when an operator
+must be selected without knowing the true model~\cite{yoon2013mocu}.
+Generalized MOCU extends the decision-oriented framework and its connection
+to experimental design~\cite{boluki2018generalized}. This perspective explains
+why reduction of parameter uncertainty is not, by itself, the same criterion
+as reduction of decision loss. In the present application, the operator is a
+continuous terminal injection and the finite loss penalizes its magnitude
+and a model-dependent control shortfall. The specific surrogate loss and
+posterior-coverage choice are declared here rather than attributed to a
+universal monetary or reliability model.
+
+Computational approximations are also important for objective-based design.
+Chen et al.~\cite{chen2023objectiveoed} use neural message passing to accelerate
+MOCU evaluation and experimental design for uncertain oscillator systems.
+The current benchmark instead evaluates online trajectories and a numerical
+terminal-control solver directly. A surrogate indexed only by the uncertain
+parameters would not describe later non-reset stages unless it also represented
+the relevant carried states and histories. No learned MOCU surrogate is used
+in the comparisons specified here.
+
+\subsection{Scope of the Present Comparison}
+The preceding approaches address complementary issues: excitation for
+identification, policy amortization, online refinement, and uncertainty
+measured through a decision loss. We combine these ideas in one explicitly
+specified benchmark rather than claiming a new general-purpose design
+algorithm. Random, Fixed and Myopic provide controls for the effects of
+offline optimization, observation dependence and lookahead. The common action
+constraints, matched evaluation systems and method-specific numerical checks
+make differences interpretable within the stated model. They do not establish
+optimality, field safety, or superiority beyond that model.
+
 \section{Problem Formulation}
 \label{sec:problem}
 \subsection{Power-Grid Dynamics and Latent Parameter Space}
-Following Peng et al.~\cite{peng2024probing}, we model inertia and fast
-frequency response jointly. Let $\Delta\omega(s)$ be angular-speed deviation
+Motivated by the joint estimation setting of Peng et al.~\cite{peng2024probing},
+we represent inertia and effective frequency response jointly in the following
+reduced study model. Let $\Delta\omega(s)$ be angular-speed deviation
 from an equilibrium with synchronous speed $\omega_{\mathrm s}=2\pi f_0$.
 On a common power base $S_{\mathrm{base}}$, the incremental power balance is
 \begin{equation}
@@ -346,13 +505,44 @@ actual terminal state. Different probe histories can therefore have different
 oracle values even for the same true $M/K$. True parameters are used only
 to generate/evaluate physical outcomes, never as controller or policy inputs.
 
-\section{Design Methods and Numerical Implementation}
+\section{Methodology: Sequential Design and Numerical Optimization}
+\label{sec:methodology}
+\subsection{Common Information State and Feasible Actions}
+Let $h_{t-1}$ contain the ordered durations and observations available before
+probe $t$. For a fixed horizon, the policy input is
+\begin{equation}
+z_t=\left[\frac{t-1}{T},
+ \left(m_k\frac{\tau_k-\tau_{\min}}{\tau_{\max}-\tau_{\min}},
+ m_k\frac{\mathbf y_k}{s_y},m_k\right)_{k=1}^{T}\right],
+\label{eq:history-features}
+\end{equation}
+where $m_k=1$ for $k<t$ and is zero otherwise; unobserved slots are zero.
+The observation scale is $s_y=0.05$ in the units of the chosen observation
+model. Thus the default scalar observation gives $1+3T$ input coordinates.
+The stage index and masks distinguish an unobserved entry from a measured
+zero. No latent parameter, true terminal state, or future observation is an
+input to the design policy.
+
+Let $a_t$ and $b_t=\tau_{\max}-(T-t)\varepsilon_\tau$ be the endpoints of
+the increasing feasible interval defined in Section~\ref{sec:problem}.
+All methods first select a unit coordinate $v_t\in[0,1]$ and then apply
+\begin{equation}
+\tau_t=a_t+(b_t-a_t)v_t.
+\label{eq:common-action-map}
+\end{equation}
+This enforces duration order and reserves room for every remaining stage
+before simulation. The implementation adds a small numerical margin to the
+minimum separation to avoid roundoff violations. It neither sorts completed
+actions nor snaps them to a duration grid. Random and Myopic know the remaining
+feasible interval even though they do not optimize a full-horizon objective.
+
 \begin{table}[t]
-\caption{Method capabilities; these properties do not establish a performance advantage.}
+\caption{Capabilities of the implemented design strategies. Horizon awareness
+here means the optimized utility, not merely reserving feasible action space.}
 \centering
 \begin{tabular}{lccc}
 \toprule
-Method & \shortstack{Uses\\observations} & \shortstack{Horizon-aware\\objective} & \shortstack{Online policy\\refinement}\\
+Method & \shortstack{Uses\\observations} & \shortstack{Full-horizon\\utility} & \shortstack{Online policy\\refinement}\\
 \midrule
 Random & No & No & No\\
 Fixed & No & Yes & No\\
@@ -362,58 +552,162 @@ RL-sBOED & Yes & Yes & No\\
 Step-DAD & Yes & Yes & Yes\\
 \bottomrule
 \end{tabular}
+\label{tab:method-capabilities}
 \end{table}
 
-\subsection{Common Objective and Ordered History}
-Define terminal utility $G_T$ as $\widehat I_T$ for EIG,
-$-u_{\mathrm{MSC}}(h_T;q)$ for MSC, and $-\widehat{\mathcal M}(h_T;q)$ for
-MOCU. Each objective defines a separate policy-training problem; an EIG
-checkpoint is not reused as an MSC/MOCU policy. Inputs retain the stage
-positions of all observed duration--frequency pairs. Exchangeable pooling
-is inappropriate because Eq.~\eqref{eq:carry} depends on input order.
-Every method uses the same admissible duration set and terminal controller.
+For each objective, define the terminal score
+\begin{equation}
+G_T=\begin{cases}
+\widehat I_T, & \text{EIG},\\
+-u_{\mathrm{MSC}}(h_T;q), & \text{MSC},\\
+-\widehat{\mathcal M}(h_T;q), & \text{MOCU}.
+\end{cases}
+\qquad J(\phi)=\E[G_T].
+\label{eq:common-terminal-utility}
+\end{equation}
+The expectation includes parameter and measurement-noise draws and, when
+used, stochastic policy actions. Each objective is trained separately.
+All methods share the physical model and observation likelihood; MSC and
+MOCU additionally use the same declared terminal-control assumptions.
+An EIG-only evaluation reports information and does not itself produce a
+terminal-control safety assessment.
 
-DAD uses a deterministic map $\tau_t=\pi_\phi(h_{t-1})$, learned offline
-by maximizing expected full-horizon utility. Its weights stay fixed during
-an evaluated episode. This preserves the policy-based, non-myopic construction
-of Foster et al.~\cite{foster2021dad}; the control objectives and numerical
-training described below are explicit extensions of its EIG setting.
+\subsection{DAD: Offline Full-Horizon Policy Optimization}
+The deterministic policy is
+$v_t=\operatorname{sigmoid}(f_\phi(z_t)+c_t)$, where $c_t$ is a trainable
+stage bias. The implemented network has two hidden layers of width 64 with
+tanh activations and a scalar output. This ordered representation retains the
+policy-based construction of DAD~\cite{foster2021dad} while respecting the
+non-reset physical model. Training maximizes the Monte Carlo estimate of
+Eq.~\eqref{eq:common-terminal-utility}; evaluation uses the selected policy
+without changing its weights during an episode.
 
-RL-sBOED measures policy entropy in normalized tanh coordinates $[-1,1]$
-and uses automatic temperature tuning with target entropy $-1$ for its
-one-dimensional action. This training regularizer is distinct from the
-physical noise and terminal-control coverage. Reported evaluation scores
-exclude the entropy bonus.
-RL-sBOED uses a stochastic policy and a REDQ-style off-policy actor--critic,
-with replay, a critic ensemble, random-subset target minimum, target-network
-averaging and entropy regularization~\cite{blau2022rlsboed}. Let $G_t$ be
-the corresponding utility assessed hypothetically at prefix $h_t$, with
-$G_0=0$. The step rewards obey
+For EIG, parameters and standard Gaussian observation noises are sampled,
+and complete trajectories are generated with the same latent model carried
+across stages. The sPCE score is computed using the truth-generating model and
+$L$ independent prior contrast models as in Eq.~\eqref{eq:spce}. Every contrast
+model follows the actual durations selected from the generated history, but
+propagates its own physical state. Gradients pass through the policy, feasible
+action map, observations and carried states over the full horizon.
+
+In a joint EIG run, DAD compares a random initialization against a policy
+initialized from that run's newly optimized Fixed sequence. For the latter,
+the final network layer is set to zero and the sequence logits populate the
+stage biases after clipping to $[-4,4]$. This creates a trainable interior
+initial policy; it need not reproduce a boundary-valued Fixed sequence exactly.
+The choice uses a fixed validation simulation set, never evaluation outcomes.
+Fixed training is a prerequisite for this initialization, so its cost must
+be disclosed when reporting the total cost of that DAD training procedure.
+No checkpoint from a previous experiment is loaded.
+
+\subsection{RL-sBOED: Incremental Rewards with Full-Horizon Return}
+Let $G_t$ denote the objective score assessed after prefix $h_t$, with $G_0=0$.
+Transitions receive
 \begin{equation}
 r_t=G_t-G_{t-1},\qquad \gamma=1,
-\qquad \sum_{t=1}^T r_t=G_T.
+\qquad \sum_{t=1}^{T}r_t=G_T.
 \label{eq:rl-rewards}
 \end{equation}
-For MSC/MOCU, a prefix control is a counterfactual used in the training
-reward; physical control is applied only after stage $T$. The unregularized
-return therefore targets the same terminal utility as DAD. REDQ additionally
-uses its entropy regularizer during training; evaluation uses the actor's
-mean transformed to the feasible duration set.
+For EIG, this is the increment of sPCE, not an exact information gain available
+without simulation. For MSC/MOCU, prefix scores use hypothetical terminal
+controls at that prefix; these controls are reward calculations, not additional
+physical interventions. The undiscounted unregularized return is therefore
+the same terminal criterion used by the deterministic methods. A myopic
+optimizer would maximize only the next increment, whereas the RL critic
+includes future returns.
 
-Step-DAD starts with its matching DAD policy. After observing a prefix, it
-updates the posterior and refines a private policy by simulating the
-\emph{remaining} horizon from posterior parameter/state particles. Past
-inputs and observations remain fixed. The first probe uses the original
-policy; later refinements retain previous within-episode updates. This
-preserves the infer--refine structure of Hedman et al.~\cite{hedman2025stepdad}.
+The implemented RL-sBOED adaptation uses a tanh-Gaussian actor with two
+128-unit ReLU hidden layers, a replay buffer and a REDQ-style critic
+ensemble~\cite{blau2022rlsboed}. If $a_t=\tanh(\zeta_t)\in[-1,1]$ is the
+normalized stochastic action, the feasible-map coordinate is $v_t=(a_t+1)/2$.
+The log density includes the tanh Jacobian and is measured in $a_t$ coordinates,
+while critics receive $v_t$. These conventions matter for entropy tuning.
 
-Fixed optimizes a deterministic ordered sequence offline, without access to
-future observations. Its initialization is selected among short, central,
-long and spread feasible sequences using validation data. Myopic searches
-for the next duration maximizing expected next-stage utility under its
-current posterior. Random samples uniformly over the lengths of the remaining
-feasible intervals. Neither structural adaptivity nor horizon awareness
-imposes an expected ordering of these methods' results.
+For a replay transition $(z,v,r,d,z')$, where $d$ marks termination, the
+critic target and actor loss are
+\begin{align}
+y_Q&=r+(1-d)\left[
+ \min_{j\in\mathcal S}\overline Q_j(z',v')-alpha\log\pi_\phi(a'\mid z')\right],\\
+\mathcal L_\pi&=\E\left[\alpha\log\pi_\phi(a\mid z)
+ -\frac{1}{N_Q}\sum_{j=1}^{N_Q}Q_j(z,v)\right].
+\label{eq:redq-objectives}
+\end{align}
+Here $\mathcal S$ is a uniformly chosen pair of target critics; each critic
+minimizes squared error to $y_Q$. The current settings use ten critics,
+a replay capacity of $10^5$ transitions, replay minibatches of 256 and five
+updates per newly simulated trajectory batch. Target parameters move toward
+the online parameters with coefficient 0.005. Actor, critic and temperature
+optimizers use Adam with learning rate $3\times10^{-4}$.
+
+The initial temperature is 0.01, and its target entropy is $-1$ for the
+one-dimensional normalized action. The temperature objective is
+$\mathcal L_\alpha=-\E[\log\alpha\,
+(\log\pi_\phi(a\mid z)-1)]$, treating the sampled log density as constant
+for this update. This regularizer changes the training objective; entropy
+bonuses are excluded from reported EIG/MSC/MOCU scores. Evaluation transforms
+the Gaussian mean deterministically through the same action map. Recorded
+entropy, temperature, critic error and target statistics are diagnostics,
+not proofs of policy convergence.
+
+\subsection{Step-DAD: Posterior-Conditional Online Refinement}
+Step-DAD begins each episode with the DAD checkpoint trained in the same run.
+Its first probe uses that policy unchanged. Once a prefix is observed, each
+planning particle is propagated under the realized durations and reweighted
+by the likelihood. A private policy copy is then refined for the remaining
+horizon, following the semi-amortized structure of
+Hedman et al.~\cite{hedman2025stepdad}.
+
+For EIG refinement, a fantasy truth and its contrasts are sampled from the
+current discrete posterior, with their corresponding carried states. Future
+observations are simulated from the fantasy truth, the observed prefix is held
+fixed, and the conditional future sPCE objective replaces a restart from the
+original prior. The actual evaluation truth is never supplied to this procedure.
+MSC/MOCU refinements instead use their terminal control utility from these
+posterior-conditional simulations.
+
+Each refinement call creates a fresh optimizer and performs the declared
+number of updates. Candidate policies are compared on a separate fixed set of
+conditional validation simulations; the starting policy is retained if no
+candidate improves that estimate. Policy weights selected at one stage seed
+the next refinement within the episode, while a new episode starts again from
+the original DAD checkpoint. Thus the method carries adapted weights, not an
+optimizer state or observations from other evaluation systems. Improvement
+on conditional validation does not guarantee improvement on the eventual
+realized trajectory.
+
+\subsection{Fixed, Myopic and Random Baselines}
+Fixed uses trainable stage logits $c_1,\ldots,c_T$ and
+$v_t=\operatorname{sigmoid}(c_t)$, independent of observations. The sequential
+map in Eq.~\eqref{eq:common-action-map} makes this a deterministic increasing
+sequence. Initialization candidates cover short, central, long and spread
+interior durations. Each desired sequence is converted to feasible-interval
+logits, and validation selects the starting candidate. Initial logits such as
+$\pm20$ are avoided because sigmoid saturation can suppress useful gradients.
+Fixed then receives full-horizon optimization and validation-based checkpoint
+selection; initialization selection alone is not reported as successful
+optimization.
+
+Myopic selects a duration by maximizing expected one-step utility under the
+current particle belief. Its EIG criterion is estimated by
+\begin{equation}
+\widehat V_t(\tau)=\frac{1}{F}\sum_{f=1}^{F}
+\log\frac{p(y^{(f)}\mid\theta^{(f)},h_{t-1},\tau)}
+{\sum_n w_n p(y^{(f)}\mid\theta^{(n)},h_{t-1},\tau)},
+\label{eq:myopic-utility}
+\end{equation}
+where fantasy models follow the current posterior and each model uses its
+own carried state. For MSC/MOCU, fantasies instead score the next posterior's
+control objective. Search uses continuous random proposals followed by elite
+mean/variance refinement in the unit interval. Common random draws are used
+across proposals within a decision, and the best observed proposal is retained.
+This finite search is not a global one-step optimum. It does not propagate a
+lookahead tree to the end of the remaining horizon.
+
+Random draws $v_t$ uniformly from $[0,1]$ at each stage. It is uniform over the
+current feasible duration interval, not over all complete increasing sequences.
+Neither Random nor Myopic has an offline policy-training cost, but Myopic
+incurs online posterior and candidate-evaluation costs. All baseline scores
+are evaluated with the same final estimator used for the learned methods.
 
 \subsection{Online Posterior and Continuous Control Solver}
 For posterior particles $\theta^{(n)}$, all states are propagated under the
@@ -423,6 +717,7 @@ w_n^{(t)}\propto w_n^{(t-1)}
 p(\mathbf y_t\mid\theta^{(n)},h_{t-1},\tau_t),\qquad \sum_nw_n^{(t)}=1.
 \label{eq:particle-update}
 \end{equation}
+The particle support is fixed within an episode; weights and states are updated without particle rejuvenation. Effective sample size is monitored because small support can become unrepresentative after several probes. Increasing the support is a sensitivity analysis, not a correction obtained by inserting the evaluator truth.
 The controller's support is sampled independently of the system generating
 an evaluation trajectory; that generating model is not deliberately inserted
 into this posterior. Its role in the sPCE denominator is specific to
@@ -446,40 +741,116 @@ posterior mass with $\widehat U_n=+\infty$; a finite decision exists only if
 coverage can still be met. Finite-loss MOCU instead requires finite feasible
 requirements. No failed system is discarded to improve reported safety.
 
-The full evaluation records ordered actions, noisy observations, posterior
+For MSC/MOCU, the full evaluation records ordered actions, noisy observations, posterior
 weights and states, selected continuous control, true-system safety and a
 separately computed continuous numerical oracle at the actual terminal state.
 An equilibrium control bank indexed only by $M/K$ cannot replace this calculation.
 
-\subsection{Gradient Treatment and Method Fidelity}
-For EIG, deterministic DAD, Fixed and Step-DAD use pathwise differentiation
-of the complete observation/state trajectory. Simulator state and duration
-Jacobians are numerical central differences, with one-sided differences at
-bounds. The feasible-duration map is differentiated locally within its
-selected intervals. Interval switches and numerical derivatives require
-sensitivity checks; no globally exact derivative is claimed.
+\subsection{Pathwise Gradients for Maximum Absolute RoCoF}
+Write one simulator stage as
+$(\mathbf x_t,g_t)=\mathcal F(\theta,\mathbf x_{t-1},\tau_t)$.
+For deterministic EIG policies, differentiation must include both the action
+path and the carried-state path. In particular,
+\begin{equation}
+\frac{d\mathbf x_t}{d\phi}=
+\frac{\partial\mathcal F_x}{\partial\mathbf x_{t-1}}
+\frac{d\mathbf x_{t-1}}{d\phi}
++\frac{\partial\mathcal F_x}{\partial\tau_t}
+\frac{d\tau_t}{d\phi}.
+\label{eq:state-chain-gradient}
+\end{equation}
+The action derivative also includes dependence on earlier observations and
+the moving lower endpoint of the feasible interval. Differentiating only the
+current duration while treating the incoming state as independent would omit
+how earlier probes change later information.
 
-Continuity of the physical action $u$ does not make a finite-particle empirical
-quantile smooth in its posterior weights. The control-objective implementation
-therefore retains deterministic design policies but uses antithetic numerical
-policy-parameter perturbations~\cite{salimans2017es}. If $J(\phi)=\E[G_T]$,
-$z\sim\mathcal N(0,I)$ and $d>0$ is a numerical optimization scale, the estimator is
+Simulator Jacobians are approximated numerically, using central differences
+with state perturbation $10^{-5}\max(1,|x_j|)$ and duration perturbation
+$10^{-5}$~s, clipped at the duration bounds. Let $r_k$ denote a sampled signed
+frequency difference divided by its sampling interval. At a trajectory with a
+unique maximizing index $k^*=\arg\max_k|r_k|$ and nonzero $r_{k^*}$,
+\begin{equation}
+D\max_k|r_k|=\operatorname{sign}(r_{k^*})D r_{k^*}.
+\label{eq:active-rocof-gradient}
+\end{equation}
+The implementation records this index and sign on the unperturbed trajectory
+and holds them fixed while forming observation Jacobians. The forward
+observation remains the maximum over all samples. Independently reselecting
+a maximum for every coordinate perturbation can mix different branches and
+produce a Jacobian inconsistent with the original trajectory. Peak ties remain
+nondifferentiable; a fixed-branch numerical derivative does not remove that
+limitation or establish global smoothness.
+
+Verification compares full sPCE directional derivatives with independent
+end-to-end finite differences for both Fixed and adaptive policies at
+$T=3,4,5$. Conditional-prefix checks exercise the gradients used by Step-DAD.
+Forward calculations must agree with the original maximum-observation model.
+These checks concern the derivative implementation; training histories and
+sensitivity to numerical scales remain necessary for assessing optimization.
+
+\subsection{Numerical Optimization of Control Objectives}
+A continuous control variable does not make a finite-particle empirical
+quantile smooth in posterior weights. MSC/MOCU training therefore retains
+deterministic design policies but uses paired, antithetic parameter
+perturbations, following the black-box optimization principle of
+Salimans et al.~\cite{salimans2017es}. For independent
+$z_k\sim\mathcal N(0,I)$ and scale $d>0$, the estimator is
 \begin{equation}
 \widehat{\nabla J_d}(\phi)=\frac1K\sum_{k=1}^K
 \frac{\widehat J(\phi+d z_k)-\widehat J(\phi-d z_k)}{2d}\,z_k.
 \label{eq:numerical-gradient}
 \end{equation}
-Each pair uses common model/noise draws and the same exact, numerically
-refined terminal objective. This targets the Gaussian-smoothed parameter
-objective $J_d(\phi)=\E_z[J(\phi+dz)]$, not an unbiased derivative of
-unsmoothed $J$ at finite $d$. Validation and evaluation use the unperturbed
-policy and the original controller. Scale/direction sensitivity is required
-before performance claims. This is a declared optimizer adaptation, not
-original DAD's pathwise estimator and not stochastic-action REINFORCE relabeled
-as deterministic DAD. RL-sBOED retains its REDQ updates and does not require
-terminal-controller derivatives.
+Each positive/negative pair uses the same model and noise draws. Every utility
+evaluation still calls the original numerically resolved control objective;
+no differentiable replacement of the safety indicator is substituted.
+The target is the Gaussian-smoothed objective
+$J_d(\phi)=\E_z[J(\phi+dz)]$, with finite-smoothing bias relative to $J$.
+Validation and evaluation use the unperturbed policy. Scale and direction-count
+sensitivity are required before interpreting a performance difference.
+This is a stated numerical adaptation of the deterministic methods; it is
+neither the original pathwise DAD estimator nor a stochastic-action policy
+gradient. RL-sBOED avoids simulator and terminal-controller derivatives by
+using observed simulated rewards in its actor--critic updates.
+
+\subsection{Training, Checkpoint Selection and Reproducibility}
+Offline training uses independent simulated batches and a fixed validation
+set, with checkpoints selected by the relevant unregularized validation
+utility. EIG DAD/Fixed use Adam with learning rate $10^{-3}$ and gradient-norm
+clipping at 5; Step-DAD uses the same learning rate for its conditional updates.
+For control objectives, numerical parameter gradients use the same clipping
+threshold. Equal update counts do not imply equal simulation counts or costs
+across these optimizers.
+
+The specified full-budget EIG comparison uses 2,000 trajectory-batch updates,
+batch size 32, 128 contrast models, and 128 validation systems evaluated every
+100 updates and at initialization. Evaluation uses 128 physical systems per
+seed, with 128 independent planning particles. Myopic uses 16 candidate
+proposals per round, three rounds and 32 fantasies per proposal. Step-DAD uses
+16 conditional refinement updates at each stage after the first. These are
+computational settings, not established convergence thresholds; control-objective
+studies must declare their own perturbation and solver budgets.
+
+Evaluation resets the random-number generator for each method so that the
+latent systems, prior contrast models and measurement-noise draws are paired.
+Method-specific actions still induce different observations and terminal
+states. Planning simulations use a separate random stream and particle support.
+The evaluation truth can appear in the sPCE scoring denominator but cannot
+enter a planner or terminal controller by privileged access. Every independent
+run trains fresh policies; within-run Step-DAD initialization from its matching
+DAD policy is part of the method definition.
+
+For each trained method, record initialization scores, the selected update,
+full validation history, gain over initialization and recent validation change.
+Assess whether improvements persist near the budget limit, whether the selected
+checkpoint is stable, and whether the result is sensitive to optimization and
+Monte Carlo budgets. No fixed recent-change threshold by itself proves
+convergence. Report offline training, online decision/refinement and
+objective-specific evaluation costs separately, together with the execution
+hardware. Numerical correctness, practical convergence and evidence across
+independent seeds are distinct requirements.
 
 \section{Experimental Protocol}
+\label{sec:experimental-protocol}
 \subsection{Reduced-network construction}
 Let $\mathcal A=\mathcal N\setminus\mathcal M$. For a connected lossless
 network with fixed voltage magnitudes, let
@@ -564,9 +935,12 @@ not performance evidence. Independent CPU/GPU trajectory checks, continuous
 root-solver checks, posterior-truth exclusion and RL reward telescoping are
 separate implementation checks.
 
-A proposed full comparison uses independently trained policies for seeds
-101/202/303, evaluated on seeds 1001--1005, with fixed declared optimization
-budgets at each horizon. That plan is not a claim that the runs are complete.
+The current full-budget IEEE9 EIG protocol uses horizons $T=3,4,5$, training
+seed 101 and evaluation seed 1001, with all six methods and the budgets stated
+in Section~\ref{sec:methodology}. This is one seed pair, irrespective of its
+training budget. A broader comparison for seed variability would independently
+train seeds 101/202/303 and evaluate seeds 1001--1005. This specifies a study
+design and does not assert completed experiments.
 Inference-particle sensitivity, EIG contrast sensitivity, numerical-gradient
 sensitivity, convergence and checkpoint quality must be assessed before
 publication-level ranking. The no-reset model and common budgets alone do
@@ -585,7 +959,7 @@ Do not relabel realized regret as posterior MOCU. Timing must distinguish
 offline optimization, online probe choice/refinement, terminal posterior/control
 computation and evaluation-only oracle work.
 
-\subsection{Other Systems and Historical Results}
+\subsection{Supported Systems and Applicability}
 SIR remains a separate EIG implementation benchmark. Its former results do
 not validate the changed power-grid observation or control protocol.
 IEEE14 requires a separately validated online state-carry and control backend
@@ -598,14 +972,7 @@ parameters, rather than assigning $M/K$ to every electrical bus. The full
 machine/exciter/governor implementation and initialization remain pending.
 No non-reset IEEE14/IEEE30 results are claimed.
 
-\section{Results and Remaining Validation}
-\todo{Insert completed, matched non-reset multi-seed results separately for EIG, MSC and MOCU.}
-Historical reset results and the earlier repeated-duration EIG pilot are
-separate protocols. They must not populate the new comparison tables. A
-successful smoke test establishes workability only, and no method superiority
-is concluded from it.
-
-\section{Discussion}
+\section{Scope and Limitations}
 The probe sequence now changes both what is known about the grid and the
 state from which terminal control acts. This is why the physical oracle is
 history dependent and why a state-independent control bank is insufficient.
@@ -623,13 +990,6 @@ The MOCU shortfall loss is not a validated outage-damage model. Method claims
 must also distinguish original algorithms from the documented objective and
 numerical-optimization adaptations. Adaptivity and non-myopic gains remain
 empirical questions rather than required outcomes imposed on the experiment.
-
-\section{Conclusion}
-The formulation connects an ordered sequence of noisy, non-reset probe
-experiments to a continuous terminal power-injection decision. It separates
-EIG, minimum safe control and finite-loss MOCU, and specifies the corresponding
-physical safety evaluation. \todo{Add conclusions supported by completed
-non-reset experiments after the required validation.}
 
 \bibliographystyle{IEEEtran}
 \bibliography{objective_driven_boed_refs}
