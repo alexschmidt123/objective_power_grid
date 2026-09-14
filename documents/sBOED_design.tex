@@ -22,8 +22,8 @@ inference, numerical terminal-control optimization, and branch-consistent
 pathwise derivatives for the peak observation. Control-objective optimization
 uses an explicitly stated parameter-smoothing approximation. An IEEE9
 experimental protocol separates derivative verification, policy convergence,
-physical safety assessment and statistical comparison. The resulting methods
-section defines reproducible comparisons without presupposing an empirical
+physical safety assessment and statistical comparison. The resulting formulation
+defines reproducible comparisons without presupposing an empirical
 ranking or claiming field-level safety.
 \end{abstract}
 \begin{IEEEkeywords}
@@ -172,16 +172,16 @@ make differences interpretable within the stated model. They do not establish
 optimality, field safety, or superiority beyond that model.
 
 \subsection{Organization of the Paper}
-Section~\ref{sec:ieee-system} introduces the IEEE network and reduction.
-Section~\ref{sec:dynamics} defines the swing dynamics and latent parameters,
-and Section~\ref{sec:probe-design} specifies probing, observations and inference.
-Section~\ref{sec:objectives} develops the design objectives.
-Sections~\ref{sec:methodology} and~\ref{sec:experimental-protocol} present the
-algorithms and experimental protocol, respectively.
-Section~\ref{sec:results} is reserved for verified numerical findings, and
-Section~\ref{sec:conclusion} closes the paper.
+Section~\ref{sec:system-model} defines the network representation, swing
+dynamics and uncertain parameters. Section~\ref{sec:design-problem} formulates
+the sequential probes, observation model and design objectives.
+Section~\ref{sec:methodology} presents the solution methods, followed by the
+experimental protocol in Section~\ref{sec:experimental-protocol}.
+Section~\ref{sec:results} organizes the numerical comparisons and their
+interpretation, and Section~\ref{sec:conclusion} concludes the paper.
 
-\section{IEEE Test System and Network Representation}
+\section{Power-System Model}
+\label{sec:system-model}
 \label{sec:ieee-system}
 \subsection{Physical Network and Retained Machines}
 The implemented study uses the IEEE9 network, comprising nine electrical
@@ -216,20 +216,6 @@ sinusoidal coupling is a reduced-model approximation. Network data follow
 the IEEE test cases in MATPOWER~\cite{zimmerman2011matpower}.
 
 
-\subsection{Benchmark Scope}
-SIR remains a separate EIG implementation benchmark. Its former results do
-not validate the changed power-grid observation or control protocol.
-IEEE14 requires a separately validated online state-carry and control backend
-before comparison; the active implementation rejects unsupported execution.
-The planned IEEE30 extension retains Demetriou et al.'s dynamic reference
-with six machines, including two governed generators and four synchronous
-condensers, and six added machine terminal buses~\cite{demetriou2017dynamic}.
-Its proposed uncertainty is six inertia constants and two generator governor
-parameters, rather than assigning $M/K$ to every electrical bus. The full
-machine/exciter/governor implementation and initialization remain pending.
-No non-reset IEEE14/IEEE30 results are claimed.
-
-\section{Swing Dynamics and Latent Parameter Space}
 \label{sec:dynamics}
 \subsection{Inertia and Effective Frequency Response}
 Motivated by the joint estimation setting of Peng et al.~\cite{peng2024probing},
@@ -322,7 +308,8 @@ $D_i$ & 0.0125414 & 0.0033953 & 0.0015969\\
 The prior is uniform on the product set in Eq.~\eqref{eq:latent-space};
 its coordinate widths are study choices, not identification results.
 
-\section{Probe Experiments and Sequential Design Space}
+\section{Sequential Experimental Design Problem}
+\label{sec:design-problem}
 \label{sec:probe-design}
 \label{sec:problem}
 \subsection{Probe Waveform and Non-Reset State Evolution}
@@ -419,9 +406,8 @@ with the Gaussian likelihood from Eq.~\eqref{eq:observation}. Its mean must
 be simulated from the candidate model's own carried state. An equilibrium
 response indexed only by $(\theta,\tau_t)$ is insufficient after the first probe.
 
-\section{Motivation and Design Objectives}
+\subsection{Motivation for Decision-Oriented Objectives}
 \label{sec:objectives}
-\subsection{From Parameter Learning to a Terminal Decision}
 A useful experiment need not be the one that reduces parameter uncertainty
 most strongly. For example, information that distinguishes models requiring
 nearly identical controls can improve an information score without materially
@@ -624,7 +610,7 @@ zero. No latent parameter, true terminal state, or future observation is an
 input to the design policy.
 
 Let $a_t$ and $b_t=\tau_{\max}-(T-t)\varepsilon_\tau$ be the endpoints of
-the increasing feasible interval defined in Section~\ref{sec:problem}.
+the increasing feasible interval defined in Section~\ref{sec:design-problem}.
 All methods first select a unit coordinate $v_t\in[0,1]$ and then apply
 \begin{equation}
 \tau_t=a_t+(b_t-a_t)v_t.
@@ -1020,6 +1006,19 @@ Do not relabel realized regret as posterior MOCU. Timing must distinguish
 offline optimization, online probe choice/refinement, terminal posterior/control
 computation and evaluation-only oracle work.
 
+\subsection{Scope of the Benchmarks}
+SIR remains a separate EIG implementation benchmark. Its former results do
+not validate the changed power-grid observation or control protocol.
+IEEE14 requires a separately validated online state-carry and control backend
+before comparison; the active implementation rejects unsupported execution.
+The planned IEEE30 extension retains Demetriou et al.'s dynamic reference
+with six machines, including two governed generators and four synchronous
+condensers, and six added machine terminal buses~\cite{demetriou2017dynamic}.
+Its proposed uncertainty is six inertia constants and two generator governor
+parameters, rather than assigning $M/K$ to every electrical bus. The full
+machine/exciter/governor implementation and initialization remain pending.
+No non-reset IEEE14/IEEE30 results are claimed.
+
 \subsection{Modeling Assumptions and Interpretation Limits}
 The probe sequence now changes both what is known about the grid and the
 state from which terminal control acts. This is why the physical oracle is
@@ -1039,7 +1038,7 @@ must also distinguish original algorithms from the documented objective and
 numerical-optimization adaptations. Adaptivity and non-myopic gains remain
 empirical questions rather than required outcomes imposed on the experiment.
 
-\section{Results}
+\section{Results and Discussion}
 \label{sec:results}
 % Populate this section only from completed, validated runs. Do not insert
 % smoke scores, incomplete checkpoints, inferred rankings or invented values.
@@ -1076,7 +1075,7 @@ by completed comparisons, convergence diagnostics and sensitivity analyses.
 No numerical ranking or field-level safety guarantee follows from the
 formulation alone. Broader validation requires additional independent seeds,
 operating conditions and dynamic models beyond the implemented IEEE9 setting.
-% Add a concise quantitative conclusion only after Section VIII is populated.
+% Add a concise quantitative conclusion only after the Results and Discussion section is populated.
 
 \bibliographystyle{IEEEtran}
 \bibliography{objective_driven_boed_refs}
