@@ -456,6 +456,8 @@ def evaluate(engine,policies,args,record_path=None):
 
 def protocol_name(args):
     objective=getattr(args,'objective','eig')
+    if getattr(args,'observation_kind',None)=='endpoint_rocof':
+        return f'continuous_no_reset_increasing_{objective}_endpoint_rocof_v1'
     return 'continuous_no_reset_increasing_spce_v5' if objective=='eig' else f'continuous_no_reset_increasing_{objective}_v3'
 
 
@@ -478,6 +480,8 @@ def main():
     p.add_argument('--bus',type=int,default=1,help='One-based physical injection bus')
     p.add_argument('--amplitude',type=float,default=.05)
     p.add_argument('--window',type=float,default=3.)
+    p.add_argument('--observation-kind',choices=['max_absolute_rocof','endpoint_rocof','sampled_frequency'],default=None,
+                   help='Explicit sensor variant; endpoint_rocof reports signed RoCoF at window end')
     p.add_argument('--seed',type=int,default=101)
     p.add_argument('--eval-seed',type=int,default=1001)
     p.add_argument('--eval-seeds',default=None)
@@ -517,6 +521,9 @@ def main():
     eval_seeds=[int(x) for x in args.eval_seeds.split(',')] if args.eval_seeds else [args.eval_seed]
     if not eval_seeds or len(set(eval_seeds))!=len(eval_seeds):p.error('Use distinct evaluation seeds')
     if args.N_obs<0:p.error('N_obs must be nonnegative')
+    args.observation_kind=args.observation_kind or ('max_absolute_rocof' if args.N_obs==0 else 'sampled_frequency')
+    if (args.observation_kind=='sampled_frequency') != (args.N_obs>0):
+        p.error('RoCoF variants require N_obs=0; sampled_frequency requires positive N_obs')
     for key in ['T','updates','batch_size','contrasts','validation_systems','validate_every',
                 'eval_systems','planner_particles','search_candidates','search_rounds','fantasies','refinement_updates']:
         if getattr(args,key)<1:p.error(key+' must be positive')
@@ -572,8 +579,9 @@ def main():
     observer_kwargs=dict(duration_bounds=(args.duration_min,args.duration_max),
         injection_bus=args.bus,amplitude=args.amplitude,window=args.window)
     if args.N_obs==0:
-        from src.domains.swing.continuous_rocof import MaxRocofObserver
-        observer=MaxRocofObserver(cfg,**observer_kwargs)
+        from src.domains.swing.continuous_rocof import MaxRocofObserver,EndpointRocofObserver
+        observer_class=EndpointRocofObserver if args.observation_kind=='endpoint_rocof' else MaxRocofObserver
+        observer=observer_class(cfg,**observer_kwargs)
     else:
         observer=CudaContinuousSwingObserver(cfg,n_obs=args.N_obs,**observer_kwargs)
     if args.objective=='eig':
@@ -588,7 +596,9 @@ def main():
         engine.numerical_gradient_directions=args.numerical_gradient_directions
     cfg.raw['observation']={'N_obs':args.N_obs, 'noise_sigma':args.noise_sigma,
         'dimension':observer.n_obs,
-        'sampling':'max_absolute_rocof_over_fixed_recording_window' if args.N_obs==0 else 'uniform_within_fixed_recording_window',
+        'sampling':{'max_absolute_rocof':'max_absolute_rocof_over_fixed_recording_window',
+                    'endpoint_rocof':'signed_rocof_at_window_end',
+                    'sampled_frequency':'uniform_within_fixed_recording_window'}[args.observation_kind],
         'noise_units':'Hz/s' if args.N_obs==0 else 'Hz'}
     from src.hardware import hardware_info
     metadata={'protocol':protocol_name(args),'settings':vars(args),'hardware':hardware_info(),
@@ -603,17 +613,24 @@ def main():
             'myopic':'one-step posterior-particle information search',
             'random':'uniform over remaining feasible duration intervals'},
         'publication_validation_complete':False,
-        'observation_kind':'max_absolute_rocof' if args.N_obs==0 else 'sampled_frequency',
+        'observation_kind':args.observation_kind,
         'observation_dimension':observer.n_obs,
         'noise_units':'Hz/s' if args.N_obs==0 else 'Hz',
         'rocof_sample_dt':getattr(observer,'rocof_sample_dt',None),
-        'numerical_gradient_caveat':'Max-RoCoF is piecewise smooth. The active sample is fixed in numerical Jacobians; peak ties remain nondifferentiable.' if args.N_obs==0 else None,
+        'numerical_gradient_caveat':'Max-RoCoF is piecewise smooth. The active sample is fixed in numerical Jacobians; peak ties remain nondifferentiable.' if args.observation_kind=='max_absolute_rocof' else None,
         'recording_window_s':observer.window,'observation_times_within_stage_s':observer.times.tolist(),
         'measurement_bus_physical':cfg.swing.get('observation_bus',1),
         'prior_lower':engine.lower.tolist(),'prior_upper':engine.upper.tolist(),
         'physical_config':cfg.raw,'uses_probe_bank':False,'estimator':'sequential prior-contrastive lower bound',
         'bound_ceiling_nats':math.log(args.contrasts+1),'smoke_not_performance':args.smoke,
         'source_hashes':{}}
+    if args.observation_kind=='endpoint_rocof':
+        metadata.update(gradient_backend='pathwise chain rule; numerical state/duration Jacobians (1e-5); signed endpoint RoCoF',
+            rocof_difference_times_within_stage_s=[observer.window-observer.rocof_sample_dt,observer.window],
+            stage_start_times_s=[k*observer.window for k in range(args.T)],
+            observation_absolute_times_s=[(k+1)*observer.window for k in range(args.T)],
+            total_simulated_time_s=args.T*observer.window,
+            interstage_gap_s=0.,initial_state='equilibrium once; full state carry thereafter')
     if args.objective!='eig':
         metadata.update(protocol=protocol_name(args),estimator='independent finite-particle posterior control',
             gradient_backend='antithetic parameter-perturbation numerical gradient for deterministic DAD/Fixed/Step-DAD; REDQ for RL-sBOED',

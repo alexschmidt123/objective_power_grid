@@ -12,13 +12,16 @@ METHODS=('dad','rl_sboed','step_dad','myopic','fixed','random')
 def collect_campaign(campaign, horizons=(3,4,5), training_seed=101, evaluation_seed=1001, n_obs=0, noise_sigma=.005):
     """Validate full EIG runs and collect one comparison without rerunning methods."""
     root=Path(campaign).resolve()
-    summaries={};provenance={}
+    summaries={};provenance={};sensor_signature=None
     for t in horizons:
         run=root/f'T{t}'/'run'
         cfg=json.loads((run/'run_config.json').read_text())
         done=json.loads((run/'completion.json').read_text())
         rows=json.loads((run/'rollouts.json').read_text())
         summary=json.loads((run/'summary.json').read_text());s=cfg['settings']
+        signature=(cfg['observation_kind'],s['window'],cfg.get('rocof_sample_dt'))
+        if sensor_signature is None:sensor_signature=signature
+        assert signature==sensor_signature, 'Cannot combine different sensors or recording windows'
         assert done['objective']=='eig' and not done['smoke_only']
         assert set(done['methods'])==set(METHODS) and done['evaluation_seeds']==[evaluation_seed]
         assert (s['T'],s['seed'],s['N_obs'],s['noise_sigma'])==(t,training_seed,n_obs,noise_sigma)
@@ -49,6 +52,7 @@ def collect_campaign(campaign, horizons=(3,4,5), training_seed=101, evaluation_s
             shutil.copy2(root/f'T{t}'/'run'/f,dest/f)
     lines=['# IEEE9 EIG — fresh full-budget runs','',
            f'Train {training_seed}; eval {evaluation_seed}; N_obs={n_obs}; sigma={noise_sigma}. All six methods freshly trained/evaluated as applicable.',
+           f'Observation: {sensor_signature[0]}; recording window: {sensor_signature[1]} s; RoCoF difference interval: {sensor_signature[2]} s.',
            'One seed pair: across-seed standard deviations and publication-level superiority are not established.','',
            '| Method | '+' | '.join(f'T={t} sPCE (nats)' for t in horizons)+' |','|---|'+'---:|'*len(horizons)]
     for m in METHODS:

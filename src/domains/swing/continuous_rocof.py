@@ -60,3 +60,30 @@ class MaxRocofObserver(CudaContinuousSwingObserver):
         index,sign=active_sample
         return self._propagate(theta,state,duration,kernel=self.derivative_kernel,
                               extra_args=(cuda.In(index),cuda.In(sign)))
+
+
+class EndpointRocofObserver(CudaContinuousSwingObserver):
+    """Signed backward frequency slope at the end of the recording window.
+
+    Reports one scalar, [f(W)-f(W-delta)]/delta. Delta follows configured
+    fs_hz on the ODE grid, as in MaxRocofObserver. Carries the full W state.
+    """
+    def __init__(self, cfg, **kwargs):
+        from src.domains.swing.continuous_cuda import _carry_kernel_source
+        from src.control.cuda_control import _PrimaryCtx
+        from pycuda.compiler import SourceModule
+        super().__init__(cfg, n_obs=1, **kwargs)
+        down=max(1,int(np.floor(1./(float(cfg.swing['fs_hz'])*self.sim.ode_dt))))
+        self.rocof_sample_dt=down*self.sim.ode_dt
+        if self.window <= self.rocof_sample_dt:
+            raise ValueError('Endpoint RoCoF requires window greater than differencing interval')
+        source=_carry_kernel_source()
+        old='        for (int j = 0; j < n_obs; ++j) {\n            if (s == obs_indices[j]) out_df[idx * n_obs + j] = y[N + pb] / (2.0 * pi);\n        }'
+        assert source.count(old)==1
+        source=source.replace(old,
+            f'        if (s == n_steps - {down} - 1) out_df[idx] = -y[N+pb]/(2.0*pi*{down}*dt);\n'
+            f'        if (s == n_steps - 1) out_df[idx] += y[N+pb]/(2.0*pi*{down}*dt);')
+        with _PrimaryCtx():
+            self.module=SourceModule(source)
+            self.kernel=self.module.get_function('simulate_continuous_stage')
+        self.times=np.array([self.window])
