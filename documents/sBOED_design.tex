@@ -85,21 +85,53 @@ under the stated assumptions, yet assign different values to probe policies.
 Physical safety is evaluated separately on the true simulated system; a
 posterior coverage level is not identified with an empirical safety rate.
 
-The methodological contributions are a common non-reset formulation for these
-three objectives, an implementation of six design strategies under identical
-physical and observation constraints, and a verification protocol that
-separates numerical correctness from optimization and statistical evidence.
-The six strategies cover random probing, an optimized fixed sequence, myopic
-posterior-based selection, fully amortized DAD and RL-sBOED policies, and
-within-episode Step-DAD refinement. The comparison is intended to measure
-when horizon planning and adaptation help, without imposing a desired ranking.
-The implemented grid benchmark is IEEE9. This paper specifies the methodology;
-quantitative conclusions require completed experiments and the validation
-described in Section~\ref{sec:experimental-protocol}.
+\subsection{Research Gap}
+The unresolved issue addressed here is the joint effect of objective choice
+and policy adaptation in an experiment whose probes also change the future
+physical state. A method comparison based only on parameter information does
+not determine its control consequences. A comparison that resets the simulator
+between probes does not represent the stated operating sequence. These two
+issues must be treated together, while keeping optimization error and
+posterior approximation error distinct from differences between objectives.
+The literature discussed next supplies the identification, decision-theoretic
+and policy-learning foundations; the present study specifies their interaction
+within one reproducible non-reset power-grid benchmark.
 
-\subsection{Related Work}
+\subsection{Research Purpose and Contributions}
+The research purpose is to determine how the definition of experimental value
+changes sequential probe selection when learning and physical state evolution
+are coupled. The study asks three questions. First, how do information-oriented
+and control-oriented objectives value the same admissible histories? Second,
+what additional value do observation dependence, horizon planning and online
+policy refinement provide under matched computational settings? Third, which
+numerical approximations materially affect the reliability of that comparison?
+These are empirical questions within the specified model, not assumptions
+that an adaptive method must outperform a baseline.
+
+The contributions are threefold. We formulate an ordered non-reset probing
+problem that connects uncertain swing dynamics to a posterior-dependent
+terminal action. We specify EIG, MSC and finite-loss MOCU within the same
+physical and observation model while separating them from true-system safety.
+We develop a reproducible comparison of six design strategies, including
+state-carrying inference, feasible continuous actions, objective-specific
+optimization and numerical verification. The contribution is the application
+formulation and carefully specified comparison; the policy families themselves
+are adapted from the cited literature. IEEE9 is the implemented benchmark,
+and the scope of any empirical conclusion is limited by the completed
+experiments, seed coverage and model assumptions.
+
+\subsection{Organization of the Paper}
+Section~\ref{sec:related-work} positions the study within the literature.
+Section~\ref{sec:formulation} defines the physical model, sequential experiment
+and design objectives. Section~\ref{sec:methodology} develops the six solution
+methods and their numerical implementation. Section~\ref{sec:experimental-protocol}
+specifies the experimental setup and evaluation procedures.
+Sections~\ref{sec:results} and~\ref{sec:conclusion} are reserved for the results,
+discussion and conclusions of the completed study.
+
+\section{Related Work}
 \label{sec:related-work}
-\subsubsection{Probing for Dynamic Parameter Identification}
+\subsection{Probing for Dynamic Parameter Identification}
 Probing-based identification uses a designed excitation to expose dynamic
 responses that are difficult to distinguish from passive measurements alone.
 Peng et al.~\cite{peng2024probing} jointly estimate inertia and frequency
@@ -111,7 +143,7 @@ The scalar peak-RoCoF observation, state-carry model and Bayesian prior here
 are additional modeling choices; their validity is not established by the
 hardware validation of a different estimator or measurement model.
 
-\subsubsection{Amortized and Semi-Amortized Bayesian Design}
+\subsection{Amortized and Semi-Amortized Bayesian Design}
 DAD learns a policy before deployment so that the next experimental design can
 be obtained from the accumulated observations by a network evaluation.
 Foster et al.~\cite{foster2021dad} introduce sequential contrastive information
@@ -139,7 +171,7 @@ observed prefix and optimizes only future probes. This distinguishes online
 adaptation from retraining a policy on the evaluator's latent parameter, which
 would give the design method information unavailable in a real experiment.
 
-\subsubsection{Objective-Based Uncertainty and Experimental Design}
+\subsection{Objective-Based Uncertainty and Experimental Design}
 MOCU measures uncertainty through the expected loss incurred when an operator
 must be selected without knowing the true model~\cite{yoon2013mocu}.
 Generalized MOCU extends the decision-oriented framework and its connection
@@ -160,30 +192,12 @@ parameters would not describe later non-reset stages unless it also represented
 the relevant carried states and histories. No learned MOCU surrogate is used
 in the comparisons specified here.
 
-\subsection{Contributions and Scope}
-The preceding approaches address complementary issues: excitation for
-identification, policy amortization, online refinement, and uncertainty
-measured through a decision loss. We combine these ideas in one explicitly
-specified benchmark rather than claiming a new general-purpose design
-algorithm. Random, Fixed and Myopic provide controls for the effects of
-offline optimization, observation dependence and lookahead. The common action
-constraints, matched evaluation systems and method-specific numerical checks
-make differences interpretable within the stated model. They do not establish
-optimality, field safety, or superiority beyond that model.
-
-\subsection{Organization of the Paper}
-Section~\ref{sec:system-model} defines the network representation, swing
-dynamics and uncertain parameters. Section~\ref{sec:design-problem} formulates
-the sequential probes, observation model and design objectives.
-Section~\ref{sec:methodology} presents the solution methods, followed by the
-experimental protocol in Section~\ref{sec:experimental-protocol}.
-Section~\ref{sec:results} organizes the numerical comparisons and their
-interpretation, and Section~\ref{sec:conclusion} concludes the paper.
-
-\section{Power-System Model}
+\section{Problem Formulation}
+\label{sec:formulation}
+\subsection{Power-System Model}
 \label{sec:system-model}
 \label{sec:ieee-system}
-\subsection{Physical Network and Retained Machines}
+\subsubsection{Physical Network and Retained Machines}
 The implemented study uses the IEEE9 network, comprising nine electrical
 buses and three retained dynamic machines. Let $\mathcal N$ denote all physical
 buses, $\mathcal M\subseteq\mathcal N$ the retained-machine buses, and
@@ -193,7 +207,7 @@ dynamic model: an algebraic bus is not assigned an independent inertia or
 frequency-response coefficient. The network determines how an injection at
 a physical bus enters the retained-machine dynamics.
 
-\subsection{Network Reduction and Injection Mapping}
+\subsubsection{Network Reduction and Injection Mapping}
 Let $\mathcal A=\mathcal N\setminus\mathcal M$. For a connected lossless
 network with fixed voltage magnitudes, let
 $\mathbf L$ be the weighted susceptance Laplacian, ordered as
@@ -216,8 +230,9 @@ sinusoidal coupling is a reduced-model approximation. Network data follow
 the IEEE test cases in MATPOWER~\cite{zimmerman2011matpower}.
 
 
+\subsection{Swing Dynamics and Latent Parameters}
 \label{sec:dynamics}
-\subsection{Inertia and Effective Frequency Response}
+\subsubsection{Inertia and Effective Frequency Response}
 Motivated by the joint estimation setting of Peng et al.~\cite{peng2024probing},
 we represent inertia and effective frequency response jointly in the following
 reduced study model. Let $\Delta\omega(s)$ be angular-speed deviation
@@ -248,7 +263,7 @@ Thus $M$ governs the rate of frequency change, whereas $K$ governs the
 restoring power supplied in response to a frequency deviation. We retain
 known damping $D$; Peng et al. neglect it in their estimation model.
 
-\subsection{Coupled Machine Dynamics}
+\subsubsection{Coupled Machine Dynamics}
 Using the reduced network in Section~\ref{sec:ieee-system}, we extend the
 aggregate response to the retained machines. For $i\in\mathcal M$, write $\omega_i$ for angular-speed
 deviation and $\delta_i$ for rotor angle in the synchronous frame:
@@ -271,7 +286,7 @@ given in Eq.~\eqref{eq:kron-map}. This machine-wise model is our extension
 of the paper's aggregate response, with $K_i$ representing effective fast
 frequency support at each retained machine bus.
 
-\subsection{Latent Parameters and Prior Distribution}
+\subsubsection{Latent Parameters and Prior Distribution}
 The latent vector contains the inertia and response coefficients:
 \begin{equation}
 \boldsymbol\theta=(M_1,\ldots,M_m,K_1,\ldots,K_m)^\top\in\Theta,
@@ -290,29 +305,11 @@ enter the coupling and injection map but have no independent $M_i$ or $K_i$.
 With bounded piecewise-continuous inputs, these assumptions define the
 frequency trajectories used by the observation and terminal-control models.
 
-\subsection{IEEE9 Prior Specification}
-\begin{table}[t]
-\caption{IEEE9 independent uniform prior bounds and known damping. Values are rounded here; resolved YAML values are retained with each run. Units follow Eq.~\eqref{eq:swing-frequency}.}
-\centering
-\begin{tabular}{lrrr}
-\toprule Parameter & Machine 1 & Machine 2 & Machine 3\\
-\midrule
-$M_i^-$ & 0.0877899 & 0.0237671 & 0.0111780\\
-$M_i^+$ & 0.1630383 & 0.0441390 & 0.0207591\\
-$K_i^-$ & 0.029375 & 0.013125 & 0.007500\\
-$K_i^+$ & 0.293750 & 0.131250 & 0.075000\\
-$D_i$ & 0.0125414 & 0.0033953 & 0.0015969\\
-\bottomrule
-\end{tabular}
-\end{table}
-The prior is uniform on the product set in Eq.~\eqref{eq:latent-space};
-its coordinate widths are study choices, not identification results.
-
-\section{Sequential Experimental Design Problem}
+\subsection{Probe Design and Observations}
 \label{sec:design-problem}
 \label{sec:probe-design}
 \label{sec:problem}
-\subsection{Probe Waveform and Non-Reset State Evolution}
+\subsubsection{Probe Waveform and Non-Reset State Evolution}
 The controllable probe variable is its duration, $\xi_t=\tau_t$.
 Injection bus $b_{\mathrm p}$ and amplitude $A_{\mathrm p}$ are fixed.
 A stage occupies a recording window of length $W$, independently of the
@@ -338,7 +335,7 @@ preceding terminal state. The latent $M_i,K_i$ do not change within an episode.
 Consequently, $(\tau_1,\tau_2)$ and $(\tau_2,\tau_1)$ are different input
 histories, even when their unordered duration sets coincide.
 
-\subsection{Ordered Design Space}
+\subsubsection{Ordered Design Space}
 Write $h_t=((\tau_1,\mathbf y_1),\ldots,(\tau_t,\mathbf y_t))$ for the
 ordered available history. The design space at stage $t$ is
 \begin{equation}
@@ -358,7 +355,7 @@ Random samples uniformly within the current interval, not uniformly over
 complete increasing sequences. This restriction applies at every horizon.
 
 
-\subsection{Maximum-RoCoF Observation Model}
+\subsubsection{Maximum-RoCoF Observation Model}
 The default observation is one scalar maximum absolute RoCoF at physical
 bus $b_{\mathrm y}$, reported at the end of each recording window. Let
 $r_k=k\Delta r$, $k=0,\ldots,K$, where $K\Delta r=W$. For the trajectory
@@ -406,7 +403,7 @@ with the Gaussian likelihood from Eq.~\eqref{eq:observation}. Its mean must
 be simulated from the candidate model's own carried state. An equilibrium
 response indexed only by $(\theta,\tau_t)$ is insufficient after the first probe.
 
-\subsection{Motivation for Decision-Oriented Objectives}
+\subsection{Design Objectives}
 \label{sec:objectives}
 A useful experiment need not be the one that reduces parameter uncertainty
 most strongly. For example, information that distinguishes models requiring
@@ -423,7 +420,7 @@ define parameter-oriented EIG, then specify the terminal-control task needed
 to define MSC and finite-loss MOCU. The physical safety rate is a separate
 evaluation quantity, not a substitute for either design objective.
 
-\subsection{Expected Information Gain}
+\subsubsection{Expected Information Gain}
 For a deterministic policy $\tau_t=\pi_\phi(h_{t-1})$, the information objective is
 \begin{equation}
 J_{\mathrm{EIG}}(\pi_\phi)=
@@ -445,7 +442,7 @@ independent prior draws. The reported expected bound depends on $L$ and
 has ceiling $\log(L+1)$. These scores are not pooled with historical
 bank-entropy estimates.
 
-\subsection{Continuous Terminal Control and Physical Safety}
+\subsubsection{Continuous Terminal Control and Physical Safety}
 The final engineering decision is an injection magnitude
 \begin{equation}
 u_{\mathrm{ctrl}}\in\mathcal U=[u_{\min},u_{\max}],
@@ -488,7 +485,7 @@ The current scalar solver assumes that a nonempty safe set is
 $[U(\theta,h),u_{\max}]$. It checks sampled monotonicity and rejects a detected
 violation; those numerical checks do not prove the assumption globally.
 
-\subsection{Minimum Safe Control as a Design Objective}
+\subsubsection{Minimum Safe Control as a Design Objective}
 For a specified posterior coverage $q\in(0,1)$, select
 \begin{equation}
 u_{\mathrm{MSC}}(h;q)=\inf\left\{u\in\mathcal U:
@@ -513,7 +510,7 @@ noisy observations. They are not interchangeable. Lower expected MSC values
 smaller selected control at the declared posterior coverage, without an
 under-control penalty in the design score.
 
-\subsection{Finite-Loss Control-Oriented MOCU}
+\subsubsection{Finite-Loss Control-Oriented MOCU}
 % BEGIN SHARED FINITE-LOSS MOCU
 MOCU compares the loss of a decision made under uncertainty with that of a
 model-informed decision~\cite{yoon2013mocu,boluki2018generalized}.
@@ -566,30 +563,6 @@ argument cannot be transferred without qualification: increasing the horizon
 need not reduce either MSC or MOCU, and any improvement is not automatically
 attributable to information alone.
 % END SHARED FINITE-LOSS MOCU
-
-\subsection{Physical Safety Rate and Held-Out Evaluation}
-The policy safety probability is
-\begin{equation}
-\mathrm{SR}(\pi;q)=\E_{\theta\sim p_0,\,H_T\mid\theta,\pi}
-[S(\theta,H_T,u_q(H_T))].
-\label{eq:safety-rate}
-\end{equation}
-With an exact posterior and the same correctly specified prior-predictive
-model, conditional coverage in Eq.~\eqref{eq:msc-controller} implies
-$\mathrm{SR}(\pi;q)\ge q$ by iterated expectation. A finite-particle
-approximation, model mismatch or a finite test sample does not provide that
-empirical guarantee.
-For $N$ independent test systems and $R_i$ observation-noise replicas per system,
-\begin{equation}
-\widehat{\mathrm{SR}}=\frac1N\sum_{i=1}^N\frac1{R_i}
-\sum_{r=1}^{R_i}S(\theta_i^\star,h_{i,r},u_q(h_{i,r})).
-\label{eq:empirical-safety}
-\end{equation}
-Controls and posterior objectives use the same within-system averaging.
-The held-out oracle is recomputed using $\theta_i^\star$ and that method's
-actual terminal state. Different probe histories can therefore have different
-oracle values even for the same true $M/K$. True parameters are used only
-to generate/evaluate physical outcomes, never as controller or policy inputs.
 
 \section{Methodology}
 \label{sec:methodology}
@@ -926,7 +899,7 @@ objective-specific evaluation costs separately, together with the execution
 hardware. Numerical correctness, practical convergence and evidence across
 independent seeds are distinct requirements.
 
-\section{Experimental Setup and Evaluation Protocol}
+\section{Experimental Setup}
 \label{sec:experimental-protocol}
 \subsection{Probe and Control Settings}
 The active non-reset backend is IEEE9: nine electrical buses, three retained
@@ -951,6 +924,24 @@ $10^{-5}$~pu bracket tolerance. ODE discretization and root-bracket error
 are distinct from posterior approximation error.
 
 
+\subsection{IEEE9 Prior Specification}
+\begin{table}[t]
+\caption{IEEE9 independent uniform prior bounds and known damping. Values are rounded here; resolved YAML values are retained with each run. Units follow Eq.~\eqref{eq:swing-frequency}.}
+\centering
+\begin{tabular}{lrrr}
+\toprule Parameter & Machine 1 & Machine 2 & Machine 3\\
+\midrule
+$M_i^-$ & 0.0877899 & 0.0237671 & 0.0111780\\
+$M_i^+$ & 0.1630383 & 0.0441390 & 0.0207591\\
+$K_i^-$ & 0.029375 & 0.013125 & 0.007500\\
+$K_i^+$ & 0.293750 & 0.131250 & 0.075000\\
+$D_i$ & 0.0125414 & 0.0033953 & 0.0015969\\
+\bottomrule
+\end{tabular}
+\end{table}
+The prior is uniform on the product set in Eq.~\eqref{eq:latent-space};
+its coordinate widths are study choices, not identification results.
+
 \subsection{Operating Point and Numerical Settings}
 The benchmark begins with zero relative rotor angles and zero speed deviations,
 with nominal incremental power balance consistent with that equilibrium.
@@ -972,6 +963,30 @@ proposals per round, three rounds and 32 fantasies per proposal. Step-DAD uses
 16 conditional refinement updates at each stage after the first. These are
 computational settings, not established convergence thresholds; control-objective
 studies must declare their own perturbation and solver budgets.
+
+\subsection{Physical Safety Rate and Held-Out Evaluation}
+The policy safety probability is
+\begin{equation}
+\mathrm{SR}(\pi;q)=\E_{\theta\sim p_0,\,H_T\mid\theta,\pi}
+[S(\theta,H_T,u_q(H_T))].
+\label{eq:safety-rate}
+\end{equation}
+With an exact posterior and the same correctly specified prior-predictive
+model, conditional coverage in Eq.~\eqref{eq:msc-controller} implies
+$\mathrm{SR}(\pi;q)\ge q$ by iterated expectation. A finite-particle
+approximation, model mismatch or a finite test sample does not provide that
+empirical guarantee.
+For $N$ independent test systems and $R_i$ observation-noise replicas per system,
+\begin{equation}
+\widehat{\mathrm{SR}}=\frac1N\sum_{i=1}^N\frac1{R_i}
+\sum_{r=1}^{R_i}S(\theta_i^\star,h_{i,r},u_q(h_{i,r})).
+\label{eq:empirical-safety}
+\end{equation}
+Controls and posterior objectives use the same within-system averaging.
+The held-out oracle is recomputed using $\theta_i^\star$ and that method's
+actual terminal state. Different probe histories can therefore have different
+oracle values even for the same true $M/K$. True parameters are used only
+to generate/evaluate physical outcomes, never as controller or policy inputs.
 
 \subsection{Verification and Comparison Scope}
 A workability test uses $T=3$, training seed 101, evaluation seed 1001,
@@ -1005,6 +1020,39 @@ control, physical safety and the history-dependent oracle as appropriate.
 Do not relabel realized regret as posterior MOCU. Timing must distinguish
 offline optimization, online probe choice/refinement, terminal posterior/control
 computation and evaluation-only oracle work.
+
+\subsection{Evaluation Metrics and Comparison Integrity}
+For EIG, the primary statistic is the mean terminal sPCE over the $N$ paired
+physical systems for a given training/evaluation seed pair,
+\begin{equation}
+\overline I_{\mathsf A,T}=\frac{1}{N}\sum_{i=1}^{N}\widehat I_{\mathsf A,T}^{(i)},
+\label{eq:reported-spce}
+\end{equation}
+where $\mathsf A$ denotes the design method. The contrast count and the ceiling
+$\log(L+1)$ accompany the score. Dispersion across physical systems measures
+heterogeneity within that run; it is not a standard deviation across
+independent training runs. With a single seed pair, the latter is unavailable.
+When comparing two methods, differences are formed for the same physical
+systems before any paired uncertainty calculation. A bootstrap over systems,
+if reported, is conditional on the trained policies and does not measure
+variation due to retraining.
+
+For MSC and MOCU, report the corresponding terminal objective separately from
+selected control magnitude, safe-system counts and history-dependent oracle
+values. Do not construct a joint numerical ranking by mixing nats, control
+magnitudes and loss values. Likewise, the scalar probing observation must not
+be confused with the monitored safety quantities over the terminal-control
+window. An EIG-only experiment cannot supply uncomputed control-safety metrics.
+
+A run enters the comparison only after the requested methods and evaluation
+systems have completed and its per-system records agree with its summary.
+Check finite objective values, duration bounds and ordering, common physical
+and observation settings, and the provenance of the numerical implementation.
+Preserve failure records and report missing cells rather than removing failed
+systems or substituting results from a different protocol. Training and
+validation budgets, selected checkpoints and execution hardware accompany
+each accepted result. This establishes traceability; it does not certify
+convergence or compensate for insufficient independent replication.
 
 \subsection{Scope of the Benchmarks}
 SIR remains a separate EIG implementation benchmark. Its former results do
@@ -1059,23 +1107,8 @@ empirical questions rather than required outcomes imposed on the experiment.
 
 \section{Conclusion}
 \label{sec:conclusion}
-This work formulates sequential Bayesian design for a power-grid experiment
-whose physical state persists across probes. The network representation,
-swing dynamics, latent parameter space and observation model define a common
-basis for comparing information-oriented and control-oriented objectives.
-The methodology specifies six design strategies together with the numerical
-approximations needed for online inference, policy optimization and terminal
-control. In particular, the maximum-RoCoF observation requires a consistent
-active-branch derivative when pathwise optimization is used.
-
-The formulation distinguishes parameter information, selected minimum safe
-control and the objective cost of uncertainty, while retaining separate
-physical safety assessment. Its empirical implications must be established
-by completed comparisons, convergence diagnostics and sensitivity analyses.
-No numerical ranking or field-level safety guarantee follows from the
-formulation alone. Broader validation requires additional independent seeds,
-operating conditions and dynamic models beyond the implemented IEEE9 setting.
-% Add a concise quantitative conclusion only after the Results and Discussion section is populated.
+% Complete after the numerical study: summarize the supported findings,
+% their scope, principal limitations and a focused future direction.
 
 \bibliographystyle{IEEEtran}
 \bibliography{objective_driven_boed_refs}
