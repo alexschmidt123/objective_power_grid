@@ -209,7 +209,7 @@ a physical bus enters the retained-machine dynamics.
 
 \subsubsection{Network Reduction and Injection Mapping}
 Let $\mathcal A=\mathcal N\setminus\mathcal M$. For a connected lossless
-network with fixed voltage magnitudes, let
+network with unit voltage magnitudes, let
 $\mathbf L$ be the weighted susceptance Laplacian, ordered as
 $(\mathcal M,\mathcal A)$. If $\mathcal A\ne\varnothing$, assume
 $\mathbf L_{\mathcal A\mathcal A}$ is invertible and define
@@ -261,7 +261,7 @@ M\frac{d\Delta\omega}{ds}
 \end{equation}
 Thus $M$ governs the rate of frequency change, whereas $K$ governs the
 restoring power supplied in response to a frequency deviation. We retain
-known damping $D$; Peng et al. neglect it in their estimation model.
+known damping $D$ as an explicit component of the present reduced model.
 
 \subsubsection{Coupled Machine Dynamics}
 Using the reduced network in Section~\ref{sec:ieee-system}, we extend the
@@ -439,8 +439,10 @@ The implementation uses the sequential prior-contrastive lower bound
 \end{align}
 Here $\theta^{(0)}$ generates the observations and the other models are
 independent prior draws. The reported expected bound depends on $L$ and
-has ceiling $\log(L+1)$. These scores are not pooled with historical
-bank-entropy estimates.
+has ceiling $\log(L+1)$. The lower-bound statement concerns the expectation
+of the Monte Carlo estimator, not a pointwise lower bound for every realized
+trajectory. A finite-sample score can be negative. Historical bank-entropy
+estimates represent a different statistic and are not combined with sPCE.
 
 \subsubsection{Continuous Terminal Control and Physical Safety}
 The final engineering decision is an injection magnitude
@@ -472,9 +474,23 @@ S(\theta,h,u)&=\mathbf1\{f_{\min}(\theta,h,u)\ge\underline f,
 \ R_{\max}(\theta,h,u)\le\overline R\}.
 \label{eq:safety}
 \end{align}
-The initial frequency is included in this window. These are declared
-frequency-security criteria, not a claim of general transient stability or
-certified safety throughout the preceding probes.
+The expressions in Eq.~\eqref{eq:safety} define the continuous-time target.
+The implemented control-safety calculation uses the RK4 trajectory at step
+$\Delta s=1/640$~s, with $J_c=H_c/\Delta s$, and computes
+\begin{align}
+\widehat f_{\min}&=\min_{i\in\mathcal M,\,j=0,\ldots,J_c}
+\Delta f_i(j\Delta s),\\
+\widehat R_{\max}&=\max_{i\in\mathcal M,\,j=1,\ldots,J_c}
+\left|\frac{\Delta f_i(j\Delta s)-\Delta f_i((j-1)\Delta s)}{\Delta s}\right|.
+\label{eq:discrete-control-safety}
+\end{align}
+The initial frequency is included in the nadir and in the first RoCoF
+difference. These safety metrics are evaluated at every integration step;
+the 40~Hz differencing interval specifies the probe observation only.
+The numerical safety indicator compares these computed extrema with the
+same declared thresholds. It approximates the continuous-time target and
+does not certify unsampled extrema or general transient stability throughout
+the preceding probes.
 The model-specific minimum safe control is
 \begin{equation}
 U(\theta,h)=\inf\{u\in\mathcal U:S(\theta,h,u)=1\},
@@ -782,7 +798,8 @@ an evaluation trajectory; that generating model is not deliberately inserted
 into this posterior. Its role in the sPCE denominator is specific to
 Eq.~\eqref{eq:spce} and must not be transferred to control inference.
 
-For each carried state, a coarse numerical scan brackets the first detected
+For each carried state, a numerical scan of the discretized safety indicator
+brackets the first detected
 unsafe-to-safe transition, followed by bisection to approximate
 $U_n=U(\theta^{(n)},h)$. The scan points are not admissible-action restrictions:
 final controls take continuous values between them. A detected non-monotone
@@ -795,7 +812,9 @@ safe set stops the scalar solver. With normalized weights,
 \label{eq:particle-objectives}
 \end{align}
 The selected action is checked again by direct safety simulation across the
-posterior support. For MSC, an infeasible particle keeps its original
+posterior support when computing terminal decisions and full-horizon training
+scores. Myopic control fantasies use the weighted numerical requirements
+without an additional direct safety simulation for each fantasy posterior. For MSC, an infeasible particle keeps its original
 posterior mass with $\widehat U_n=+\infty$; a finite decision exists only if
 coverage can still be met. Finite-loss MOCU instead requires finite feasible
 requirements. No failed system is discarded to improve reported safety.
@@ -919,7 +938,8 @@ control is injected at the same bus for the following 10~s. The monitored
 limits are $\underline f=-0.2$~Hz and $\overline R=22$~Hz/s. These values,
 the simplified disturbance and coverage $q=0.9$ are benchmark assumptions,
 not cited operating standards or engineering acceptance certificates.
-The ODE step is $1/640$~s; the control root solver uses 33 scan points and
+Classical fixed-step RK4 integrates both probe and control trajectories with
+step $1/640$~s; the control root solver uses 33 scan points and
 $10^{-5}$~pu bracket tolerance. ODE discretization and root-bracket error
 are distinct from posterior approximation error.
 
@@ -948,21 +968,26 @@ with nominal incremental power balance consistent with that equilibrium.
 This operating point is a reduced perturbation-model assumption, not a
 validated loaded AC dynamic operating point.
 
-The full resolved priors, coupling, damping, simulator settings and seeds
-must accompany every reported run. Changes to coverage or physical thresholds
-must be declared before final testing and must not be selected to favor a method.
-The obsolete six-duration catalogs and equilibrium master banks are not part
-of this experiment.
+Each run records its resolved priors, coupling, damping, simulator settings
+and seeds. Coverage and physical thresholds are specified before final testing.
+The online benchmark does not use equilibrium observation or control banks.
 
 \subsection{Training and Planning Budgets}
-The specified full-budget EIG comparison uses 2,000 trajectory-batch updates,
+The specified full-budget EIG comparison uses the explicitly submitted
+configuration rather than unmodified template defaults. In particular, the
+batch size is overridden from the default 64 to 32. Each offline-trained
+method receives 2,000 trajectory-batch updates,
 batch size 32, 128 contrast models, and 128 validation systems evaluated every
 100 updates and at initialization. Evaluation uses 128 physical systems per
 seed, with 128 independent planning particles. Myopic uses 16 candidate
 proposals per round, three rounds and 32 fantasies per proposal. Step-DAD uses
 16 conditional refinement updates at each stage after the first. These are
-computational settings, not established convergence thresholds; control-objective
-studies must declare their own perturbation and solver budgets.
+computational settings, not established convergence thresholds. The EIG-only
+runs do not call the MSC/MOCU terminal-control solver, even though the shared
+configuration retains its settings. Control-objective extensions use numerical
+parameter perturbations (default scale 0.01 and four directions per update);
+those budgets and any changes require separate reporting and sensitivity
+analysis.
 
 \subsection{Physical Safety Rate and Held-Out Evaluation}
 The policy safety probability is
@@ -1001,8 +1026,11 @@ The current full-budget IEEE9 EIG protocol uses horizons $T=3,4,5$, training
 seed 101 and evaluation seed 1001, with all six methods and the budgets stated
 in this section. This is one seed pair, irrespective of its
 training budget. A broader comparison for seed variability would independently
-train seeds 101/202/303 and evaluate seeds 1001--1005. This specifies a study
-design and does not assert completed experiments.
+train seeds 101/202/303 and evaluate seeds 1001--1005. The latter is a prospective replication plan, not the seed coverage of the
+current EIG comparison. The current single evaluation seed was also used during
+implementation development; its analysis is exploratory and does not constitute
+an untouched confirmatory test. Independent confirmation requires previously
+unconsumed evaluation simulations after methodological choices are fixed.
 Inference-particle sensitivity, EIG contrast sensitivity, numerical-gradient
 sensitivity, convergence and checkpoint quality must be assessed before
 publication-level ranking. The no-reset model and common budgets alone do
@@ -1017,7 +1045,7 @@ uncertainty calculations. Fixed training/calibration copies may be deduplicated
 only if the resulting policies and evaluations are actually identical.
 Report posterior MSC or MOCU as the primary objective-specific score, with
 control, physical safety and the history-dependent oracle as appropriate.
-Do not relabel realized regret as posterior MOCU. Timing must distinguish
+Realized regret and posterior MOCU are treated as distinct statistics. Timing must distinguish
 offline optimization, online probe choice/refinement, terminal posterior/control
 computation and evaluation-only oracle work.
 
@@ -1039,17 +1067,17 @@ variation due to retraining.
 
 For MSC and MOCU, report the corresponding terminal objective separately from
 selected control magnitude, safe-system counts and history-dependent oracle
-values. Do not construct a joint numerical ranking by mixing nats, control
-magnitudes and loss values. Likewise, the scalar probing observation must not
+values. Nats, control magnitudes and loss values are not combined into a joint
+numerical ranking. Likewise, the scalar probing observation must not
 be confused with the monitored safety quantities over the terminal-control
 window. An EIG-only experiment cannot supply uncomputed control-safety metrics.
 
 A run enters the comparison only after the requested methods and evaluation
 systems have completed and its per-system records agree with its summary.
-Check finite objective values, duration bounds and ordering, common physical
-and observation settings, and the provenance of the numerical implementation.
-Preserve failure records and report missing cells rather than removing failed
-systems or substituting results from a different protocol. Training and
+Acceptance checks require finite objective values, duration bounds and
+ordering, common physical and observation settings, and implementation
+provenance. Failure records are retained and missing cells are reported;
+failed systems are not removed or replaced by results from another protocol. Training and
 validation budgets, selected checkpoints and execution hardware accompany
 each accepted result. This establishes traceability; it does not certify
 convergence or compensate for insufficient independent replication.
