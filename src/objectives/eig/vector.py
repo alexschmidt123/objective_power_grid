@@ -29,6 +29,7 @@ from src.policies.moe import (
     BeliefConditionedMoEPolicy,
     parameter_matched_expert_hidden,
 )
+from src.policies.independent_moe import ARCHITECTURE, IndependentMoEPolicy
 from src.layout import model_dir
 from src.domains.sir.design import chronological_feasible
 
@@ -376,6 +377,15 @@ def _load_policy(
         hidden=hidden,
         particle_dim=int(ctx.particle_features.shape[1]),
     )
+    if meta.get("architecture") == ARCHITECTURE:
+        policy = IndependentMoEPolicy(
+            ctx.n_actions, config, n_experts=int(meta["n_experts"]),
+            top_k=int(meta["top_k"]), expert_hidden=int(meta["expert_hidden"]),
+            routing=str(meta.get("routing", "learned")),
+        ).to(device)
+        policy.load_state_dict(payload["state_dict"], strict=True)
+        policy.eval()
+        return policy
     if policy_cls is BeliefConditionedMoEPolicy:
         policy = policy_cls(
             ctx.n_actions,
@@ -406,6 +416,9 @@ def train_vector_eig_policy(
     seed: int,
 ) -> dict[str, Any]:
     """Train a dense or belief-conditioned MoE policy for vector EIG."""
+    if method == "moe_sboed":
+        from src.objectives.eig.independent_moe import train_independent_moe
+        return train_independent_moe(ctx, smoke=smoke, seed=seed)
     if method not in {"dad_eig", "rl_sboed_eig", "moe_sboed", "matched_dense"}:
         raise ValueError(method)
     torch.manual_seed(int(seed))
@@ -1460,6 +1473,8 @@ def _rollout(
                 device=engine.device,
             )
             logits = dad(*tensors).squeeze(0)
+            if isinstance(dad, IndependentMoEPolicy):
+                trace.append({"step": step, **dad.routing_record(*tensors)})
             # Mask already applied in policy tensors / feasible; argmax on logits.
             action = int(torch.argmax(logits).item())
             if int(action) not in {int(a) for a in feasible.tolist()}:
@@ -1796,7 +1811,10 @@ def evaluate_vector_eig(
             moe_payload.get("elapsed_seconds", 0.0)
         )
         meta = dict(moe_payload.get("meta") or {})
-        if meta.get("moe_step0_action") is not None:
+        if meta.get("architecture") == ARCHITECTURE:
+            # Independent MoE learns every action; never invoke a planner here.
+            moe_step0_action = None
+        elif meta.get("moe_step0_action") is not None:
             moe_step0_action = int(meta["moe_step0_action"])
         else:
             moe_step0_action = _prior_two_step_action(
@@ -1992,6 +2010,32 @@ def diagnose_vector_eig_moe(
         device = torch.device(device_name)
     engine = VectorEIGEngine(ctx, device)
     policy = _load_policy(ctx, "moe_sboed", device)
+    if isinstance(policy, IndependentMoEPolicy):
+        from src.layout import resolve_eval_seed
+        if int(n_rollouts) < 1:
+            raise ValueError("n_rollouts must be positive")
+        seed = int(resolve_eval_seed(ctx.out_dir))
+        rows = [
+            _rollout(ctx, engine, system, rollout_id=i, method="moe_sboed", dad=policy,
+                     fixed_sequence=[], n_fantasies=0, eval_seed=seed)
+            for i, system in enumerate(ctx.test_systems[:int(n_rollouts)])
+        ]
+        stages = []
+        for stage in range(ctx.horizon):
+            traces = [row["router_trace"][stage] for row in rows]
+            pairs = [tuple(sorted(t["selected_experts"][0])) for t in traces]
+            counts = np.bincount(np.asarray(pairs).reshape(-1), minlength=policy.n_experts)
+            stages.append({"stage": stage, "selected_expert_counts": counts.tolist(),
+                           "distinct_expert_pairs": len(set(pairs))})
+        report = {"method": "moe_sboed", "architecture": ARCHITECTURE,
+                  "eval_seed": seed, "n_rollouts": len(rows), "n_experts": policy.n_experts,
+                  "top_k": policy.top_k, "teacher": None, "first_action": "learned",
+                  "n_unique_sequences": len({tuple(row["sequence"]) for row in rows}),
+                  "stages": stages}
+        directory = ctx.out_dir / "diagnostics"
+        directory.mkdir(exist_ok=True)
+        (directory / "eig_moe_mechanism_report.json").write_text(json.dumps(report, indent=2) + "\n")
+        return report
     if not isinstance(policy, BeliefConditionedMoEPolicy):
         raise RuntimeError("moe_sboed checkpoint is not a belief-conditioned MoE")
     policy.eval()

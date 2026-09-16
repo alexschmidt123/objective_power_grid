@@ -4,6 +4,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/run.sh"
 set -euo pipefail
 
 CONFIG=""
+MOE_VARIANT="learned"
 METHOD=""
 SMOKE=""
 FORCE=""
@@ -21,7 +22,7 @@ SEED="$DEFAULT_SEED"
 EVAL_SEEDS="$DEFAULT_EVAL_SEEDS"
 
 usage() {
-    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seeds <csv>] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--exp-dir <path>] [--force] [--bank-structure-audit] [--smoke]" >&2
+    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seeds <csv>] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--exp-dir <path>] [--force] [--bank-structure-audit] [--moe-variant learned|uniform|matched_dense] [--smoke]" >&2
     echo "" >&2
     echo "  --method  optional; comma-separated list (default: experiment.methods in yaml)" >&2
     echo "            e.g. --method dad,random  (skips training when all selected are baselines)" >&2
@@ -42,6 +43,7 @@ usage() {
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --config|-config|-c) CONFIG="$2"; shift 2 ;;
+        --moe-variant) MOE_VARIANT="$2"; shift 2 ;;
         --method|-method|-m) METHOD="$2"; shift 2 ;;
         -T|--T|--step-number|--step_number) T="$2"; shift 2 ;;
         --N_obs|--n-obs|--n_obs) N_OBS="$2"; N_OBS_SET=1; shift 2 ;;
@@ -151,7 +153,11 @@ mapfile -t TRAIN_METHODS < <(
     resolve_training_method_keys "$CONFIG" "$T" "$N_OBS" "$NOISE_SIGMA" "$METHOD_FILTER"
 ) || true
 
-TYPE_ARGS=(--experiment_type "$EXPERIMENT_TYPE")
+if [[ "$MOE_VARIANT" != "learned" && "$METHOD" != "moe_sboed" ]]; then
+    echo "--moe-variant requires explicit --method moe_sboed" >&2
+    exit 1
+fi
+TYPE_ARGS=(--experiment_type "$EXPERIMENT_TYPE" --moe-variant "$MOE_VARIANT")
 T_ARGS=(-T "$T")
 OBS_ARGS=(--N_obs "$N_OBS" --noise_sigma "$NOISE_SIGMA")
 if [[ -z "$EXP_DIR" ]]; then

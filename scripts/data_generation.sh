@@ -11,6 +11,7 @@ set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/run.sh"
 
 CONFIG=""
+MOE_VARIANT="learned"
 SMOKE=""
 FORCE=""
 METHOD=""
@@ -22,12 +23,13 @@ NOISE_SIGMA="$DEFAULT_NOISE_SIGMA"
 SEED="$DEFAULT_SEED"
 
 usage() {
-    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--exp-dir <path>] [--force] [--smoke]" >&2
+    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--exp-dir <path>] [--force] [--moe-variant learned|uniform|matched_dense] [--smoke]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --config|-config|-c) CONFIG="$2"; shift 2 ;;
+        --moe-variant) MOE_VARIANT="$2"; shift 2 ;;
         -T|--T|--step-number|--step_number) T="$2"; shift 2 ;;
         --N_obs|--n-obs|--n_obs) N_OBS="$2"; shift 2 ;;
         --noise_sigma|--noise-sigma) NOISE_SIGMA="$2"; shift 2 ;;
@@ -50,6 +52,7 @@ done
 echo "=== data_generation (config=$CONFIG type=$EXPERIMENT_TYPE T=${T:-$DEFAULT_STEP_NUMBER} N_obs=$N_OBS noise_sigma=$NOISE_SIGMA seed=$SEED methods=${METHOD:-config}) ==="
 ARGS=(generate-data --config "$CONFIG" --experiment-type "$EXPERIMENT_TYPE" --N_obs "$N_OBS" --noise_sigma "$NOISE_SIGMA" --seed "$SEED")
 [[ -n "$T" ]] && ARGS+=(-T "$T")
+ARGS+=(--moe-variant "$MOE_VARIANT")
 [[ -n "$EXP_DIR" ]] && ARGS+=(--exp-dir "$EXP_DIR")
 if [[ -n "$METHOD" && "${METHOD,,}" != "all" ]]; then
     ARGS+=(--method "$METHOD")
