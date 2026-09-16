@@ -612,23 +612,31 @@ actions nor snaps them to a duration grid. Random and Myopic know the remaining
 feasible interval even though they do not optimize a full-horizon objective.
 
 \begin{table}[t]
-\caption{Capabilities of the implemented design strategies. Horizon awareness
-here means the optimized utility, not merely reserving feasible action space.}
+\caption{Adaptation and planning in the implemented design strategies.
+Adaptive means using observations from the current experiment to choose
+later probes. Myopic means optimizing only the next probe's expected utility.
+N/A denotes no utility optimization.}
 \centering
-\begin{tabular}{lccc}
+\begin{tabular}{lcc}
 \toprule
-Method & \shortstack{Uses\\observations} & \shortstack{Full-horizon\\utility} & \shortstack{Online policy\\refinement}\\
+Method & Adaptive? & Myopic?\\
 \midrule
-Random & No & No & No\\
-Fixed & No & Yes & No\\
-Myopic & Yes & No & No\\
-DAD & Yes & Yes & No\\
-RL-sBOED & Yes & Yes & No\\
-Step-DAD & Yes & Yes & Yes\\
+Random & No & N/A\\
+Fixed & No & No\\
+Myopic & Yes & Yes\\
+DAD & Yes & No\\
+RL-sBOED & Yes & No\\
+Step-DAD & Yes & No\\
 \bottomrule
 \end{tabular}
 \label{tab:method-capabilities}
 \end{table}
+
+Fixed learns a shared probing sequence offline and does not adapt it to
+observations during evaluation. DAD and RL-sBOED use trained policies to
+respond to observations without updating their weights during an experiment.
+Step-DAD additionally updates its policy after observations using simulated
+future trajectories conditioned on the observed history.
 
 For each objective, define the terminal score
 \begin{equation}
