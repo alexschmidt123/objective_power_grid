@@ -58,7 +58,7 @@ def main():
     files = {str(f.relative_to(source)): hashlib.sha256(f.read_bytes()).hexdigest()
              for base in ('src', 'tools', 'configs', 'scripts', 'hprc')
              for f in (source / base).rglob('*') if f.is_file()}
-    for name in ('run.sh', 'sweep_run.sh', 'AGENTS.md'):
+    for name in ('run.sh', 'sweep_run.sh'):
         if (source / name).is_file():
             files[name] = hashlib.sha256((source / name).read_bytes()).hexdigest()
     (out / 'source_manifest.json').write_text(json.dumps({

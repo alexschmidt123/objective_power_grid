@@ -705,7 +705,7 @@ def main():
         target=snapshot/relative
         target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copy2(root/relative,target)
-    for relative in ['scripts/continuous_eig.sh','scripts/continuous.sh','run.sh','sweep_run.sh','AGENTS.md']:
+    for relative in ['scripts/continuous_eig.sh','scripts/continuous.sh','run.sh','sweep_run.sh']:
         target=snapshot/relative
         target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copy2(root/relative,target)

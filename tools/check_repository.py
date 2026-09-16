@@ -17,14 +17,14 @@ def check():
               'ieee30_mocu.yaml','sir_ode_eig.yaml'}
     actual={p.name for p in (ROOT/'configs').iterdir()}
     assert actual==expected, ('Unexpected configs layout',actual ^ expected)
-    expected_docs={'objective_driven_boed_manuscript_framework.tex','sBOED_design.tex',
+    expected_docs={'objective_driven_boed_manuscript_framework.tex',
                    'objective_driven_boed_refs.bib','objective_driven_boed_manuscript_framework.pdf',
                    'images','papers'}
     assert {p.name for p in (ROOT/'documents').iterdir()}==expected_docs, 'Unexpected documents root'
     manuscripts=[(ROOT/'documents'/n).read_text() for n in sorted(expected_docs) if n.endswith('.tex')]
-    blocks=[re.search(r'% BEGIN SHARED FINITE-LOSS MOCU\n(.*?)% END SHARED FINITE-LOSS MOCU',s,re.S).group(1)
-            for s in manuscripts]
-    assert len(blocks)==2 and blocks[0]==blocks[1], 'MOCU formulations differ'
+    assert len(manuscripts)==1, 'Expected one canonical manuscript'
+    blocks=re.findall(r'% BEGIN FINITE-LOSS MOCU\n(.*?)% END FINITE-LOSS MOCU',manuscripts[0],re.S)
+    assert len(blocks)==1 and blocks[0].strip(), 'Expected one finite-loss MOCU formulation'
     bib=(ROOT/'documents/objective_driven_boed_refs.bib').read_text()
     keys=set(re.findall(r'@\w+\s*\{\s*([^,]+),',bib))
     for text in manuscripts:

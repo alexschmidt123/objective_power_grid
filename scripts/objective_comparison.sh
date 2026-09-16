@@ -19,12 +19,12 @@ for arg in "$@"; do
   esac
 done
 [[ ! -e "$CAMPAIGN/source" ]] || { echo 'Refusing to reuse a campaign source' >&2; exit 2; }
-git -C "$ROOT" diff --quiet HEAD -- src configs scripts tools hprc run.sh sweep_run.sh AGENTS.md README.md requirements.txt || {
+git -C "$ROOT" diff --quiet HEAD -- src configs scripts tools hprc run.sh sweep_run.sh README.md requirements.txt || {
   echo 'Commit the reviewed source before freezing this campaign' >&2; exit 2;
 }
 mkdir -p "$CAMPAIGN/source" "$CAMPAIGN/logs"
 git -C "$ROOT" rev-parse HEAD > "$CAMPAIGN/source_commit.txt"
-git -C "$ROOT" archive HEAD src configs scripts tools hprc run.sh sweep_run.sh AGENTS.md README.md requirements.txt .gitignore |
+git -C "$ROOT" archive HEAD src configs scripts tools hprc run.sh sweep_run.sh README.md requirements.txt .gitignore |
   tar -xf - -C "$CAMPAIGN/source"
 printf '%s\n' "$@" > "$CAMPAIGN/common_arguments.txt"
 overall=0
