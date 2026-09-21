@@ -92,7 +92,7 @@ sharing the same likelihood and physical transition; and an evaluation
 protocol separating retraining variability, finite-contrast information,
 and online computational cost.
 
-\section{Non-Reset Experiment and Information Objective}
+\section{Problem Formulation}\label{sec:problem}
 \subsection{Reduced Dynamics and Parameter Uncertainty}
 IEEE9 retains dynamic buses 1, 2 and 3; IEEE14 retains buses 1, 2, 3, 6
 and 8. The remaining buses are algebraic network nodes. Branch reactances
@@ -158,8 +158,8 @@ $\varepsilon=0.01$ s. Before stage $t$, define
 a_t=\begin{cases}0.2,&t=1,\\\tau_{t-1}+\varepsilon,&t>1,\end{cases}
 \quad b_t=3-(T-t)\varepsilon.
 \end{equation}
-Every method maps a unit action $v_t\in[0,1]$ to
-$\tau_t=a_t+(b_t-a_t)v_t$ before simulation. This reserves space for later
+Every method maps a unit action $u_t\in[0,1]$ to
+$\tau_t=a_t+(b_t-a_t)u_t$ before simulation. This reserves space for later
 probes; no completed history is sorted or rounded to a duration grid.
 
 The observation at bus 1 is signed endpoint rate of change of frequency
@@ -174,13 +174,42 @@ $\epsilon_t\sim\mathcal N(0,0.005^2)$ independently across windows, in
 Hz/s. The conditional likelihood is Gaussian with this mean and variance. Observations arrive at window end. Computation latency is zero in
 simulated time; measured decision runtime is reported separately.
 
-\subsection{Sequential Prior-Contrastive Information}
-For ordered history $h_t=((\tau_k,y_k))_{k=1}^t$, a policy chooses
-$\tau_t=\pi(h_{t-1})$. The information objective is
+\subsection{Sequential Design Optimization Problem}
+The unknown quantity is the fixed parameter vector $\theta$; the design
+variable at stage $t$ is the probe duration $\tau_t$. Define the ordered
+history $h_t=((\tau_k,y_k))_{k=1}^t$, with $h_0=\varnothing$.
+A causal policy $\pi=(\pi_1,\ldots,\pi_T)$ uses only $h_{t-1}$ to select
+$\tau_t$; it has no access to $\theta$ or the true physical state.
+Policies may also use internal random draws independent of $\theta$.
+The posterior is determined by the state-carrying likelihood:
 \begin{equation}
-J(\pi)=\E_{\theta,H_T\mid\pi}
-\left[\log\frac{p(\theta\mid H_T)}{p_0(\theta)}\right].
+p(\theta\mid h_t)\propto p_0(\theta)
+\prod_{k=1}^{t}p(y_k\mid\theta,h_{k-1},\tau_k).
+\label{eq:posterior}
 \end{equation}
+The goal is to maximize expected reduction in parameter uncertainty over
+the complete horizon. With $\Pi$ denoting the causal policy class, the
+design problem is
+\begin{equation}
+\begin{aligned}
+\pi^\star &\in\operatorname*{arg\,max}_{\pi\in\Pi} J(\pi),\\
+J(\pi)&=\E_{\theta,H_T\mid\pi}
+ \left[\log\frac{p(\theta\mid H_T)}{p_0(\theta)}\right],\\
+\text{subject to}\quad
+\mathbf x_t&=\Phi_\theta(\mathbf x_{t-1},\tau_t;W),\\
+y_t&\sim p(\,\cdot\mid\theta,h_{t-1},\tau_t),\\
+\tau_t&\in[a_t,b_t],\qquad t=1,\ldots,T.
+\end{aligned}
+\label{eq:design_problem}
+\end{equation}
+Here $\theta\sim p_0$, $\mathbf x_0=\mathbf0$, and the intervals
+$[a_t,b_t]$ enforce both duration bounds and increasing order. The
+expectation includes parameter, observation and policy randomness.
+The objective is terminal information; each method below approximates
+this problem with a different balance of offline and online computation.
+
+\subsection{Computable Information Objective}
+Exact EIG involves an intractable marginal likelihood in this model.
 We optimize and report the sequential prior-contrastive (sPCE) estimator
 \cite{foster2021dad}. One model $\theta^{(0)}$ generates the observations;
 $L$ independent models are drawn from the prior. Define
