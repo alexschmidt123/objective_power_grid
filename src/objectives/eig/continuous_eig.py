@@ -132,6 +132,9 @@ class OnlineEIG:
 
     def rollout(self, policy, rng, batch, *, stochastic, initial=None,
                 history=None, stage_start=0, selector=None, noise=None):
+        if policy is not None and hasattr(policy, 'rollout'):
+            return policy.rollout(self,rng,batch,stochastic=stochastic,initial=initial,
+                history=history,stage_start=stage_start,selector=selector,noise=noise)
         theta,states = self.sample(rng,batch) if initial is None else initial
         theta,states = theta.copy(),states.copy()
         particles = theta.shape[1]
@@ -231,9 +234,27 @@ def fixed_initializations(engine):
 
 
 def train(engine, method, args, directory, *, initial_sequence=None):
+    if method=='moe_sboed' and getattr(args,'moe_training_mode','legacy')=='belief_specialist':
+        from src.objectives.eig.continuous_specialist_moe import train as train_specialist
+        return train_specialist(engine,args,directory)
+    if method=='moe_sboed' and getattr(args,'moe_training_mode','legacy')=='belief_value':
+        from src.objectives.eig.continuous_belief_moe import train as train_belief_moe
+        return train_belief_moe(engine,args,directory)
+    if method=='moe_sboed' and getattr(args,'moe_training_mode','legacy')!='policy_pathwise':
+        from src.objectives.eig.continuous_moe import train_moe
+        return train_moe(engine,args,directory)
     torch.manual_seed(args.seed)
-    policy = REDQPolicy(args.T,engine.n_obs) if method=='rl_sboed' else DurationPolicy(args.T,engine.n_obs,fixed=method=='fixed')
+    if method=='moe_sboed':
+        from src.policies.direct_moe import DirectMoEPolicy
+        policy=DirectMoEPolicy(args.T,engine.n_obs)
+    else:
+        policy = REDQPolicy(args.T,engine.n_obs) if method=='rl_sboed' else DurationPolicy(args.T,engine.n_obs,fixed=method=='fixed')
     optimizer = torch.optim.Adam(policy.parameters(),lr=args.learning_rate)
+    moe_schedule = None
+    if method == 'moe_sboed' and (getattr(args, 'moe_lr_schedule', 'constant') != 'constant'
+                                or getattr(args, 'moe_router_lr_scale', 1.) != 1.):
+        from src.objectives.eig.moe_optimization import make_optimizer
+        optimizer, moe_schedule = make_optimizer(policy, args)
     redq = REDQTrainer(policy,args) if method=='rl_sboed' else None
     rng = np.random.default_rng(args.seed)
     records=[]
@@ -245,16 +266,19 @@ def train(engine, method, args, directory, *, initial_sequence=None):
     # Candidate selection uses the same validation prior as checkpoint selection,
     # never evaluator systems. Retain the strongest as the update-zero checkpoint.
     initialization=[]
-    if method=='dad' and initial_sequence is not None:
+    if method in {'dad','moe_sboed'} and initial_sequence is not None:
         # A history-independent Fixed policy is a valid member of the DAD class.
         # Compare using validation only; never choose initialization on evaluation data.
         candidates=[('random',copy.deepcopy(policy.state_dict()))]
         with torch.no_grad():
-            policy.network[-1].weight.zero_()
-            policy.network[-1].bias.zero_()
-            # Move endpoint logits into the interior so DAD can actually learn.
-            policy.stage_bias.copy_(torch.as_tensor(initial_sequence).clamp(-4.,4.))
-        candidates.append(('interior_from_new_fixed',copy.deepcopy(policy.state_dict())))
+            if method=='moe_sboed':
+                policy.initialize_sequence(initial_sequence)
+            else:
+                policy.network[-1].weight.zero_()
+                policy.network[-1].bias.zero_()
+                # Move endpoint logits into the interior so DAD can actually learn.
+                policy.stage_bias.copy_(torch.as_tensor(initial_sequence).clamp(-4.,4.))
+        candidates.append(('interior_from_saved_fixed' if getattr(args,'fixed_initialization_from',None) else 'interior_from_new_fixed',copy.deepcopy(policy.state_dict())))
         winner=None
         for label,state in candidates:
             policy.load_state_dict(state)
@@ -265,7 +289,7 @@ def train(engine, method, args, directory, *, initial_sequence=None):
             initialization.append({'candidate':label,'validation_utility':score})
             if winner is None or score>winner[0]:winner=(score,copy.deepcopy(state),label)
         policy.load_state_dict(winner[1])
-        (directory/'dad_initialization.json').write_text(json.dumps(
+        (directory/(method+'_initialization.json')).write_text(json.dumps(
             {'candidates':initialization,'selected':winner[2]},indent=2)+'\n')
     if method=='fixed':
         candidates=fixed_initializations(engine)
@@ -285,6 +309,8 @@ def train(engine, method, args, directory, *, initial_sequence=None):
     for update in range(args.updates+1):
         training_score = None
         if update:
+            if moe_schedule is not None:
+                moe_schedule(update)
             training_score=(redq.step(engine,rng,args.batch_size) if redq is not None else
                             improve_objective(engine,policy,optimizer,rng,args.batch_size))
         if update % args.validate_every == 0 or update==args.updates:
@@ -295,6 +321,9 @@ def train(engine, method, args, directory, *, initial_sequence=None):
             records.append({'update':update,'training_utility':training_score,'validation_utility':score})
             if redq is not None:
                 records[-1]['redq']=dict(redq.last_diagnostics)
+            if method=='moe_sboed':
+                records[-1]['learning_rates'] = [g['lr'] for g in optimizer.param_groups]
+                records[-1]['routing']=policy.validation_diagnostics(engine,validation)
             print(f'[online-design] {method} update={update} validation_utility={score:.6f}',flush=True)
             if score>best:
                 best,best_state=score,copy.deepcopy(policy.state_dict())
@@ -315,6 +344,14 @@ def train(engine, method, args, directory, *, initial_sequence=None):
         'convergence_established':False,
         'note':'Validation history is evidence to inspect, not proof of convergence; equal updates are not equal optimization quality.'}
     diagnostic['validation_gain_from_initial']=best-records[0]['validation_utility']
+    if method=='moe_sboed':
+        diagnostic.update(architecture=policy.architecture,n_experts=policy.n_experts,
+            behavior_trajectories=args.updates*args.batch_size,counterfactual_trajectories=0,
+            teacher=None,training='same pathwise EIG loop as DAD',specialization_established=False,
+            parameter_count=sum(p.numel() for p in policy.parameters()),
+            initialization=('validation-selected random or explicitly saved Fixed sequence' if getattr(args,'fixed_initialization_from',None) else ('validation-selected random or fresh Fixed sequence' if initial_sequence is not None else 'random')),
+            selected_checkpoint_routing=next(r['routing'] for r in records if r['update']==best_update))
+
     (directory/(method+'_training_diagnostics.json')).write_text(json.dumps(diagnostic,indent=2)+'\n')
     return policy,time.monotonic()-start
 
@@ -390,20 +427,39 @@ def evaluate(engine,policies,args,record_path=None):
                                           size=(args.planner_particles,len(engine.lower)))
             belief=(engine.belief(particles) if hasattr(engine,'belief') else
                     ContinuousParticleBelief(engine.observer,particles,args.noise_sigma))
+            belief_moe = method=='moe_sboed' and hasattr(policies[method], 'planner_particles')
+            if belief_moe:
+                from src.objectives.eig.continuous_belief_moe import ParticleContext
+                moe_belief=ParticleContext(engine,particles[None])
             assimilated=0
             planning_ess=[]
             decision_seconds=[]
+            routing_records=[]
             adapted_policy=policies.get('dad')
             def selector(stage,actions,observations):
                 nonlocal assimilated,adapted_policy
                 decision_start=time.monotonic()
                 # Only completed stages enter the online planner.
-                while method in {'myopic','step_dad'} and assimilated<len(actions):
-                    belief.update(float(actions[assimilated][0]),observations[assimilated][0])
+                while (method in {'myopic','step_dad'} or belief_moe) and assimilated<len(actions):
+                    if belief_moe:
+                        moe_belief.update(actions[assimilated],observations[assimilated])
+                    else:
+                        belief.update(float(actions[assimilated][0]),observations[assimilated][0])
                     assimilated+=1
                 if method in {'myopic','step_dad'}:
                     planning_ess.append(float(1/np.exp(2*belief.log_weights).sum()))
-                if method=='random':
+                if belief_moe:
+                    policy=policies[method]
+                    with torch.no_grad():
+                        inputs=moe_belief.inputs(actions,observations,stage)
+                        latent,_,selected,q,means=policy.choose(inputs,stochastic=False)
+                        duration=feasible_duration(torch.sigmoid(latent.double()).numpy(),actions,
+                            engine.observer.bounds,engine.min_separation,engine.horizon)
+                    planning_ess.append(float(1/np.exp(2*moe_belief.logw).sum()))
+                    routing_records.append({'stage':stage,'selected_experts':selected.tolist(),
+                        'predicted_remaining_eig':q.tolist(),'expert_latent_means':means.tolist(),
+                        'value_kind':getattr(policy,'routing_value_kind','remaining_eig')})
+                elif method=='random':
                     duration=feasible_duration([planner_rng.uniform()],actions,
                         engine.observer.bounds,engine.min_separation,engine.horizon)
                 elif method=='myopic':
@@ -414,7 +470,10 @@ def evaluate(engine,policies,args,record_path=None):
                         policy=refine(engine,policy,belief,actions,observations,stage,args,planner_rng)
                         adapted_policy=policy
                     with torch.no_grad():
-                        distribution,_=policy(engine.features(actions,observations,1,stage),stage)
+                        features=engine.features(actions,observations,1,stage)
+                        distribution,_=policy(features,stage)
+                        if method=='moe_sboed':
+                            routing_records.append({'stage':stage,**policy.routing_record(features)})
                         duration=feasible_duration(torch.sigmoid((distribution.mean*getattr(policy,'unit_scale',1.)).double()).detach().numpy(),
                             actions,engine.observer.bounds,engine.min_separation,engine.horizon)
                 decision_seconds.append(time.monotonic()-decision_start)
@@ -430,6 +489,14 @@ def evaluate(engine,policies,args,record_path=None):
                 'observations_hz':[y[0].tolist() for y in result['observations']],
                 'true_terminal_state':result['states'][0,0].tolist(),
                 'evaluation_seed':args.eval_seed, 'true_MK':theta[system,0].tolist()})
+            if method=='moe_sboed':rows[-1]['routing_trace']=routing_records
+            if belief_moe:
+                while assimilated<len(result['actions']):
+                    moe_belief.update(result['actions'][assimilated],result['observations'][assimilated])
+                    assimilated+=1
+                rows[-1]['planner_posterior_MK']=moe_belief.theta[0].tolist()
+                rows[-1]['planner_posterior_states']=moe_belief.states[0].tolist()
+                rows[-1]['planner_posterior_weights']=np.exp(moe_belief.logw[0]).tolist()
             if getattr(args,'N_obs',engine.n_obs)==0:
                 rows[-1]['observations_rocof_hz_s']=rows[-1].pop('observations_hz')
             if hasattr(engine,'control'):
@@ -470,6 +537,7 @@ def main():
     p.add_argument('--numerical-gradient-scale',type=float,default=.01)
     p.add_argument('--numerical-gradient-directions',type=int,default=4)
     p.add_argument('--output',default=None)
+    p.add_argument('--evaluate-from',default=None,help='Opt in to evaluating matching completed checkpoints on additional seeds; no training')
     p.add_argument('--T',type=int,default=3)
     p.add_argument('--N-obs','--N_obs',dest='N_obs',type=int,default=0)
     p.add_argument('--noise-sigma','--noise_sigma',dest='noise_sigma',type=float,default=.005)
@@ -486,9 +554,15 @@ def main():
     p.add_argument('--eval-seed',type=int,default=1001)
     p.add_argument('--eval-seeds',default=None)
     p.add_argument('--methods','--method',default='dad,rl_sboed,step_dad,myopic,fixed,random')
+    p.add_argument('--moe-training-mode',choices=['legacy','stable','belief_value','belief_specialist','policy_pathwise'],default='legacy')
+    p.add_argument('--fixed-initialization-from',default=None,help='Explicit completed matching Fixed run supplying only the initial sequence for a fresh direct MoE')
+    p.add_argument('--moe-lr-schedule',choices=['constant','cosine'],default='constant')
+    p.add_argument('--moe-router-lr-scale',type=float,default=1.)
+    p.add_argument('--moe-lr-final-fraction',type=float,default=.1)
+    p.add_argument('--moe-fantasies',type=int,default=4,help='Independent assignment and gradient fantasy replicates for specialist MoE')
     p.add_argument('--updates',type=int,default=2000)
     p.add_argument('--batch-size',type=int,default=64)
-    p.add_argument('--contrasts',type=int,default=128)
+    p.add_argument('--contrasts',type=int,default=1024)
     p.add_argument('--validation-systems',type=int,default=64)
     p.add_argument('--validate-every',type=int,default=100)
     p.add_argument('--eval-systems',type=int,default=128)
@@ -504,6 +578,8 @@ def main():
                    help='Measure this host before training; stop if padded projected total exceeds this budget')
     p.add_argument('--smoke',action='store_true')
     p.add_argument('--estimate-only',action='store_true',help='Bounded labpc timing diagnostic; no formal training/evaluation')
+    from src.checkpoint_evaluation import inherit_settings, validate_reuse, load_policies
+    reuse=inherit_settings(p)
     args=p.parse_args()
     from src.config import resolve_config_path
     args.config=str(resolve_config_path(args.config))
@@ -511,12 +587,15 @@ def main():
     if args.objective is not None and requested is not None and args.objective!=requested:
         p.error('Objective and experiment_type disagree')
     args.objective=args.objective or requested or {'eig_based':'eig','msc_based':'msc','objective_based':'mocu'}[load_config(args.config).raw['experiment']['experiment_type']]
+    if str(load_config(args.config).raw.get('system',{}).get('name','')).lower()=='ieee14' and args.objective!='eig':
+        p.error('IEEE14 continuous support is enabled for EIG only; MSC/MOCU remain inactive')
     if args.output is None:
         now=datetime.now()
         sigma_token=format(args.noise_sigma,'.12g').replace('.','p')
         window_token=format(args.window,'.12g').replace('.','p')
+        system_name=str(load_config(args.config).raw['system']['name']).lower()
         label=(now.strftime('%m%d%Y_%H%M%S_%f')+
-            f'_ieee9_nonreset_{args.objective}_T{args.T}_Nobs{args.N_obs}_sigma{sigma_token}_W{window_token}_train{args.seed}')
+            f'_{system_name}_nonreset_{args.objective}_T{args.T}_Nobs{args.N_obs}_sigma{sigma_token}_W{window_token}_train{args.seed}')
         args.output=str(Path(__file__).resolve().parents[3]/'experiments'/now.strftime('%m%d%Y')/label)
     eval_seeds=[int(x) for x in args.eval_seeds.split(',')] if args.eval_seeds else [args.eval_seed]
     if not eval_seeds or len(set(eval_seeds))!=len(eval_seeds):p.error('Use distinct evaluation seeds')
@@ -527,6 +606,16 @@ def main():
     for key in ['T','updates','batch_size','contrasts','validation_systems','validate_every',
                 'eval_systems','planner_particles','search_candidates','search_rounds','fantasies','refinement_updates']:
         if getattr(args,key)<1:p.error(key+' must be positive')
+    if not math.isfinite(args.moe_router_lr_scale) or args.moe_router_lr_scale <= 0:
+        p.error('moe-router-lr-scale must be finite and positive')
+    if not math.isfinite(args.moe_lr_final_fraction) or not 0 < args.moe_lr_final_fraction <= 1:
+        p.error('moe-lr-final-fraction must be in (0,1]')
+    if (args.moe_lr_schedule != 'constant' or args.moe_router_lr_scale != 1.) and (
+            args.moe_training_mode != 'policy_pathwise' or 'moe_sboed' not in args.methods.split(',')):
+        p.error('MoE optimizer options require policy_pathwise and moe_sboed')
+    if args.moe_fantasies<2:p.error('moe-fantasies must be at least two')
+    if args.moe_training_mode=='policy_pathwise' and args.objective!='eig':
+        p.error('policy_pathwise MoE is implemented for EIG only')
     if args.redq_critics<2 or args.redq_updates_per_batch<1:p.error('Invalid REDQ budgets')
     if args.smoke:
         args.updates,args.batch_size,args.contrasts=2,4,8
@@ -536,9 +625,15 @@ def main():
         args.numerical_gradient_directions=1
     if len(set(args.methods.split(',')))!=len(args.methods.split(',')):p.error('Duplicate methods')
     if args.numerical_gradient_scale<=0 or args.numerical_gradient_directions<1:p.error('Invalid numerical gradient settings')
-    if not set(args.methods.split(',')) <= {'dad','rl_sboed','step_dad','myopic','fixed','random'}:
+    if not set(args.methods.split(',')) <= {'dad','rl_sboed','step_dad','myopic','fixed','random','moe_sboed'}:
         p.error('Unsupported method')
+    if 'moe_sboed' in args.methods.split(',') and (args.objective!='eig' or reuse):
+        p.error('Continuous MoE currently supports fresh EIG training only')
+    if args.fixed_initialization_from and (args.methods!='moe_sboed' or args.moe_training_mode!='policy_pathwise' or reuse):
+        p.error('--fixed-initialization-from requires fresh direct MoE-only training')
     root=Path(__file__).resolve().parents[3]
+    if reuse:
+        validate_reuse(reuse,args,root,eval_seeds)
     output=Path(args.output).resolve()
     output.mkdir(parents=True,exist_ok=False)
     import sys,traceback
@@ -646,11 +741,43 @@ def main():
             step_dad='posterior-prefix-conditioned numerical refinement of matching deterministic DAD',
             myopic='continuous search minimizing expected next-stage control objective',
             rl_sboed='REDQ with telescoping negative control-objective rewards; gamma=1')
+    if 'moe_sboed' in args.methods.split(','):
+        metadata['method_implementations']['moe_sboed']='Independent four-expert top-2 Gaussian-mixture policy; PPO on sPCE; no teacher or baseline checkpoint'
+        if args.methods=='moe_sboed':metadata['gradient_backend']='PPO likelihood-ratio gradients; no simulator Jacobians'
+        if args.moe_training_mode=='belief_value':
+            metadata['method_implementations']['moe_sboed']='Two belief-conditioned experts; hard action-value routing; posterior-predictive remaining-horizon score-function training'
+            metadata['moe_architecture']='belief_value_routed_moe_v1'
+            metadata['moe_planner_truth_excluded']=True
+            if args.methods=='moe_sboed':
+                metadata['gradient_backend']='Score-function proposal gradients with deterministic remaining-horizon continuation; action-value regression'
+    if 'moe_sboed' in args.methods.split(',') and args.moe_training_mode=='belief_specialist':
+        metadata['method_implementations']['moe_sboed']='Independent belief experts; paired-EIG router; full-horizon antithetic exploration; validation-protected blocks'
+        metadata['moe_architecture']='specialist_belief_moe_v5'
+        metadata['moe_planner_truth_excluded']=True
+        if args.methods=='moe_sboed':
+            metadata['gradient_backend']='Antithetic Gaussian-smoothed EIG gradients in proposal logits through full remaining-horizon online continuations'
+    if 'moe_sboed' in args.methods.split(',') and args.moe_training_mode=='policy_pathwise':
+        metadata['method_implementations']['moe_sboed']='Four independent history-only experts with a soft router; same full-horizon pathwise EIG trainer as DAD; no teacher'
+        metadata['moe_architecture']='history_soft_moe_pathwise_v2'
+        metadata['gradient_backend']='pathwise chain rule; numerical state/duration Jacobians (1e-5)'
     metadata['control_action_space']='continuous bounded magnitude' if hasattr(engine,'control') else None
     metadata['optimization_caveat']='MSC/MOCU numerical training estimates a Gaussian-smoothed parameter objective; validation and evaluation use the unperturbed deterministic policy and exact numerically refined controller. Check scale/direction sensitivity before publication.' if hasattr(engine,'control') else None
     for path in (root/'src').rglob('*.py'):
 
         metadata['source_hashes'][str(path.relative_to(root))]=hashlib.sha256(path.read_bytes()).hexdigest()
+    external_fixed_sequence=None
+    if args.fixed_initialization_from:
+        from src.objectives.eig.fixed_initialization import load_fixed_initialization
+        external_fixed_sequence,initialization_provenance=load_fixed_initialization(
+            args.fixed_initialization_from,args,metadata)
+        metadata['fixed_initialization']=initialization_provenance
+        (output/'fixed_initialization_provenance.json').write_text(json.dumps(initialization_provenance,indent=2)+'\n')
+    reused_policies=None
+    if reuse:
+        reused_policies,provenance=load_policies(reuse,args,engine,metadata,DurationPolicy,REDQPolicy)
+        metadata.update(evaluation_only=True,checkpoint_reuse=provenance)
+        (output/'checkpoint_provenance.json').write_text(json.dumps(provenance,indent=2)+'\n')
+        print('[online-design] Evaluation-only: loaded verified checkpoints; training skipped',flush=True)
     (output/'run_config.json').write_text(json.dumps(metadata,indent=2)+'\n')
     if args.estimate_only or args.preflight_max_hours>0:
         torch.manual_seed(args.seed)
@@ -658,33 +785,63 @@ def main():
         optimizer=torch.optim.Adam(policy.parameters(),lr=args.learning_rate)
         rng=np.random.default_rng(args.seed)
         start=time.monotonic()
-        for _ in range(3):
-            improve_objective(engine,policy,optimizer,rng,args.batch_size)
-        seconds=(time.monotonic()-start)/3
-        redq_policy=REDQPolicy(args.T,engine.n_obs)
-        redq=REDQTrainer(redq_policy,args)
+        train_pathwise=bool({'dad','step_dad','fixed'} & set(args.methods.split(',')))
+        if train_pathwise:
+            for _ in range(3):improve_objective(engine,policy,optimizer,rng,args.batch_size)
+        seconds=(time.monotonic()-start)/3 if train_pathwise else 0.
+        train_moe='moe_sboed' in args.methods.split(',')
+        moe_policy=None
         start=time.monotonic()
+        if train_moe:
+            if args.moe_training_mode=='policy_pathwise':
+                from src.policies.direct_moe import DirectMoEPolicy
+                moe_policy=DirectMoEPolicy(args.T,engine.n_obs)
+            elif args.moe_training_mode=='belief_specialist':
+                from src.objectives.eig.continuous_specialist_moe import ContinuousSpecialistMoE, make_optimizers, improve
+                moe_policy=ContinuousSpecialistMoE(engine,args.planner_particles)
+            elif args.moe_training_mode=='belief_value':
+                from src.objectives.eig.continuous_belief_moe import ContinuousBeliefMoE, improve as improve_moe
+                moe_policy=ContinuousBeliefMoE(engine,args.planner_particles)
+            else:
+                from src.objectives.eig.continuous_moe import ContinuousMoEPolicy,improve_moe
+                moe_policy=ContinuousMoEPolicy(args.T,engine.n_obs)
+            moe_policy.training_mode=args.moe_training_mode
+            moe_optimizer=(make_optimizers(moe_policy,args.learning_rate) if args.moe_training_mode=='belief_specialist'
+                           else torch.optim.Adam(moe_policy.parameters(),lr=args.learning_rate))
+            start=time.monotonic()
+            for _ in range(3):
+                if args.moe_training_mode=='policy_pathwise':
+                    improve_objective(engine,moe_policy,moe_optimizer,rng,args.batch_size)
+                elif args.moe_training_mode=='belief_specialist':
+                    improve(engine,moe_policy,moe_optimizer,rng,args.batch_size,args.moe_fantasies)
+                else:improve_moe(engine,moe_policy,moe_optimizer,rng,args.batch_size)
+        moe_seconds=(time.monotonic()-start)/3 if train_moe else 0.
+        redq_policy=None
         train_redq='rl_sboed' in args.methods.split(',')
+        start=time.monotonic()
         if train_redq:
+            redq_policy=REDQPolicy(args.T,engine.n_obs)
+            redq=REDQTrainer(redq_policy,args)
+            start=time.monotonic()
             for _ in range(3):redq.step(engine,rng,args.batch_size)
         redq_seconds=(time.monotonic()-start)/3 if train_redq else 0.
         timings_start=time.monotonic()
         with torch.no_grad():
-            engine.rollout(policy,np.random.default_rng(args.seed+800000),args.validation_systems,stochastic=False)
+            engine.rollout(moe_policy if train_moe else policy,np.random.default_rng(args.seed+800000),args.validation_systems,stochastic=False)
         validation_seconds=time.monotonic()-timings_start
         evaluation_args=copy.copy(args)
         evaluation_args.eval_systems=1
         timings_start=time.monotonic()
         print('[preflight] Timing one simulated evaluation system per method; not performance results',flush=True)
-        evaluate(engine,{'dad':policy,'rl_sboed':redq_policy,
+        evaluate(engine,{'dad':policy,'rl_sboed':redq_policy,'moe_sboed':moe_policy,
                          'fixed':DurationPolicy(args.T,engine.n_obs,fixed=True)},evaluation_args)
         evaluation_seconds=time.monotonic()-timings_start
         train_seconds=(int(bool({'dad','step_dad'} & set(args.methods.split(','))))+
-                       int('fixed' in args.methods.split(',')))*seconds+redq_seconds
+                       int('fixed' in args.methods.split(',')))*seconds+redq_seconds+moe_seconds
         projected_hours=(args.updates*train_seconds+
-            3*(args.updates//args.validate_every+1)*validation_seconds+
+            (int(bool({'dad','step_dad'} & set(args.methods.split(','))))+int('fixed' in args.methods.split(','))+int(train_redq)+int(train_moe))*(args.updates//args.validate_every+1)*validation_seconds+
             len(eval_seeds)*args.eval_systems*evaluation_seconds)/3600
-        estimate={'pathwise_training_update_seconds':seconds,'redq_training_update_seconds':redq_seconds,
+        estimate={'moe_training_update_seconds':moe_seconds,'pathwise_training_update_seconds':seconds,'redq_training_update_seconds':redq_seconds,
                   'requested_training_hours_excluding_validation_and_evaluation':args.updates*train_seconds/3600,
                   'validation_batch_seconds':validation_seconds,
                   'all_methods_one_evaluation_system_seconds':evaluation_seconds,
@@ -711,14 +868,17 @@ def main():
         shutil.copy2(root/relative,target)
     models=output/'models'
     models.mkdir()
-    policies,times={},{}
+    policies,times=(reused_policies or {}),{}
     methods=set(args.methods.split(','))
     if 'step_dad' in methods:
         methods.add('dad')
-    for method in ['fixed','dad','rl_sboed']:
-        if method in methods:
+    for method in ['fixed','dad','rl_sboed','moe_sboed']:
+        if method in methods and not reuse:
             initial=(policies['fixed'].sequence.detach().clone()
-                     if method=='dad' and 'fixed' in policies and args.objective=='eig' else None)
+                     if (method=='dad' or (method=='moe_sboed' and args.moe_training_mode=='policy_pathwise'))
+                     and 'fixed' in policies and args.objective=='eig' else None)
+            if method=='moe_sboed' and external_fixed_sequence is not None:
+                initial=external_fixed_sequence
             policies[method],times[method]=train(engine,method,args,models,initial_sequence=initial)
     rows=[]
     for evaluation_seed in eval_seeds:
@@ -733,7 +893,7 @@ def main():
         summary.append({'method':method,'mean_spce_nats':float(values.mean()),
             'sd_across_systems_nats':float(values.std(ddof=1)) if len(values)>1 else None,
             'n_systems':len(values),'training_seconds':times.get('dad' if method=='step_dad' else method,0.),
-            'training_reused_from':'dad' if method=='step_dad' else None,
+            'training_reused_from':str(reuse[0]) if reuse and method in {'dad','rl_sboed','step_dad','fixed'} else ('dad' if method=='step_dad' else None),
             'mean_decision_seconds':float(np.mean([sum(r['decision_seconds_per_stage'])+r.get('terminal_controller_seconds',0.) for r in rows if r['method']==method])),
             'minimum_planning_ess':min((e for r in rows if r['method']==method for e in r['planning_ess_before_action']),default=None)})
         if args.objective!='eig':
@@ -757,7 +917,7 @@ def main():
             seed_safety=[float(np.mean([r['safe'] for r in selected if r['evaluation_seed']==seed])) for seed in eval_seeds]
             summary[-1]['safety_rate_sd_across_seeds']=float(np.std(seed_safety,ddof=1)) if len(seed_safety)>1 else None
     (output/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
-    (output/'completion.json').write_text(json.dumps({'objective':args.objective,'methods':args.methods.split(','),'evaluation_seeds':eval_seeds,'records':len(rows),'wall_seconds':time.monotonic()-run_started,'smoke_only':args.smoke},indent=2)+'\n')
+    (output/'completion.json').write_text(json.dumps({'objective':args.objective,'methods':args.methods.split(','),'evaluation_seeds':eval_seeds,'records':len(rows),'wall_seconds':time.monotonic()-run_started,'smoke_only':args.smoke,'evaluation_only':bool(reuse)},indent=2)+'\n')
     (output/'exit_code').write_text('0\n')
     sys.excepthook=original_hook
     print('CONTINUOUS_'+args.objective.upper()+'_COMPLETE',output,flush=True)

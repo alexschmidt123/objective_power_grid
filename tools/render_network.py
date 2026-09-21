@@ -14,6 +14,82 @@ import hashlib
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def render_small(config, config_path, output):
+    """Reference connectivity with fixed, crossing-free IEEE9/14 layouts."""
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+    import networkx as nx
+    name=config['system']['name'];count=int(name.replace('ieee',''))
+    source=ROOT/f'tools/reference_data/case{count}.m'
+    rows=re.search(r'mpc\.branch\s*=\s*\[(.*?)\];',source.read_text(),re.S).group(1)
+    branches=[list(map(float,r.split('%')[0].strip().rstrip(';').split()))
+              for r in rows.splitlines() if r.split('%')[0].strip()]
+    edges=[(int(r[0]),int(r[1])) for r in branches]
+    machines=set(config['swing_equation']['dynamic_machine_buses'])
+    expected={9:({1,2,3},9),14:({1,2,3,6,8},20)}[count]
+    assert machines==expected[0] and len(edges)==expected[1]
+    graph=nx.Graph();graph.add_nodes_from(range(1,count+1));graph.add_edges_from(edges)
+    assert nx.is_connected(graph)
+    if count==9:
+        pos={1:(4,9),4:(4,7),9:(1.5,5.5),5:(6.5,5.5),
+             8:(1.5,2.8),6:(6.5,2.8),7:(4,1.3),2:(-1,2.8),3:(9,2.8)}
+        special={frozenset(e) for e in [(1,4),(2,8),(3,6)]}
+        special_label='Generator connection'
+        subtitle='9 electrical buses | 3 retained dynamic machines | 9 branches'
+    else:
+        pos={1:(-1,6),2:(1,8),3:(4,9),4:(4,6),5:(1,4),6:(3,1.5),
+             7:(7,7),8:(10,8),9:(7,5),10:(7,2.8),11:(5,1.5),
+             12:(4,-.2),13:(8,-.2),14:(10,3.7)}
+        special={frozenset((int(r[0]),int(r[1]))) for r in branches if r[8]!=0}
+        assert special=={frozenset(e) for e in [(4,7),(4,9),(5,6)]}
+        special_label='Transformer'
+        subtitle='14 electrical buses | 5 retained machine buses | 20 branches'
+    # Validate that no unrelated node or edge is obscured by the schematic.
+    def cross(p,q,r):return (q[0]-p[0])*(r[1]-p[1])-(q[1]-p[1])*(r[0]-p[0])
+    for i,(a,b) in enumerate(edges):
+        x,y=pos[a];dx,dy=pos[b][0]-x,pos[b][1]-y
+        for n,(nx0,ny0) in pos.items():
+            if n in (a,b):continue
+            t=max(0,min(1,((nx0-x)*dx+(ny0-y)*dy)/(dx*dx+dy*dy)))
+            assert ((nx0-x-t*dx)**2+(ny0-y-t*dy)**2)**.5>.35,(n,a,b)
+        for c,d in edges[i+1:]:
+            if {a,b}&{c,d}:continue
+            assert not (cross(pos[a],pos[b],pos[c])*cross(pos[a],pos[b],pos[d])<0 and
+                        cross(pos[c],pos[d],pos[a])*cross(pos[c],pos[d],pos[b])<0),(a,b,c,d)
+    fig,ax=plt.subplots(figsize=(14,12));fig.patch.set_facecolor('white')
+    for a,b in edges:
+        ax.plot([pos[a][0],pos[b][0]],[pos[a][1],pos[b][1]],color='black',lw=2,
+                ls='--' if frozenset((a,b)) in special else '-',zorder=1)
+    colors=['#f9df45' if n==1 else '#4caf50' if n in machines else '#4a90d9' for n in graph.nodes]
+    nx.draw_networkx_nodes(graph,pos,node_color=colors,edgecolors='black',linewidths=2,node_size=760,ax=ax)
+    nx.draw_networkx_labels(graph,pos,font_size=14,font_weight='bold',ax=ax)
+    handles=[Line2D([],[],marker='o',color='none',markerfacecolor=c,markeredgecolor='black',markersize=12,label=l)
+             for c,l in [('#f9df45','Slack machine bus'),('#4caf50','Generator / condenser bus'),('#4a90d9','Algebraic network bus')]]
+    handles += [Line2D([],[],color='black',lw=2,label='Transmission line'),
+                Line2D([],[],color='black',lw=2,ls='--',label=special_label)]
+    fig.suptitle(f'IEEE {count}-bus network (MATPOWER case{count})',fontsize=20,fontweight='bold',y=.975)
+    fig.legend(handles=handles,loc='upper center',bbox_to_anchor=(.5,.94),ncol=3,fontsize=11,frameon=True)
+    xs,ys=zip(*pos.values());ax.set_xlim(min(xs)-.9,max(xs)+.9);ax.set_ylim(min(ys)-.8,max(ys)+.8)
+    ax.set_aspect('equal');ax.set_axis_off()
+    fig.text(.5,.035,subtitle,ha='center',fontsize=12)
+    fig.text(.5,.016,'Full electrical topology; colored machine buses follow the project configuration.',ha='center',fontsize=10)
+    fig.subplots_adjust(top=.85,bottom=.075,left=.03,right=.97)
+    output.parent.mkdir(parents=True,exist_ok=True)
+    for ext in ['.png','.svg','.pdf']:
+        fig.savefig(output.with_suffix(ext),dpi=180,facecolor='white')
+    plt.close(fig)
+    metadata={'config':str(config_path),'reference_url':f'https://github.com/MATPOWER/matpower/blob/master/data/case{count}.m',
+              'branch_source':str(source.relative_to(ROOT)), 'branch_source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),
+              'nodes':list(graph.nodes),'edges':sorted([sorted(e) for e in edges]),'positions':pos,
+              'machine_buses':sorted(machines),'dashed_branches':[sorted(e) for e in special],
+              'dashed_branch_meaning':special_label,'layout_checks':'No nonincident edge crossings; no bus obscures an unrelated branch.',
+              'scope':'Full-network connectivity illustration, not validation of the online dynamic backend.'}
+    output.with_suffix('.json').write_text(json.dumps(metadata,indent=2)+'\n')
+    print(output)
+
+
 def reference_graph(config):
     import networkx as nx
     source = ROOT / 'tools/reference_data/case_ieee30.m'
@@ -51,6 +127,11 @@ def main():
     from matplotlib.lines import Line2D
     import networkx as nx
     config = yaml.safe_load(args.config.read_text())
+    if config.get('system',{}).get('name') in ('ieee9','ieee14'):
+        if args.output==Path('documents/images/ieee30_diagram.png'):
+            args.output=Path('documents/images')/(config['system']['name']+'_diagram.png')
+        render_small(config,args.config,args.output)
+        return
     if config.get('system', {}).get('variant') != 'demetriou2017_modified_dynamic':
         parser.error('This renderer requires the Demetriou IEEE30 reference configuration')
     graph, mapping, source = reference_graph(config)

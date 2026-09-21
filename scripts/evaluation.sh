@@ -11,6 +11,7 @@ set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/run.sh"
 
 CONFIG=""
+MOE_VARIANT="learned"
 METHOD=""
 SMOKE=""
 EXPERIMENT_TYPE="$EXPERIMENT_TYPE_DEFAULT"
@@ -22,7 +23,7 @@ SEED="$DEFAULT_SEED"
 EVAL_SEED=""
 
 usage() {
-    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seed <evaluation-seed>] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--exp-dir <path>] [--smoke]" >&2
+    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seed <evaluation-seed>] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--exp-dir <path>] [--moe-variant learned|uniform|matched_dense] [--smoke]" >&2
     echo "" >&2
     echo "  --method  optional comma-separated list (default excludes moe_sboed)" >&2
 }
@@ -30,6 +31,7 @@ usage() {
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --config|-config|-c) CONFIG="$2"; shift 2 ;;
+        --moe-variant) MOE_VARIANT="$2"; shift 2 ;;
         -T|--T|--step-number|--step_number) T="$2"; shift 2 ;;
         --N_obs|--n-obs|--n_obs) N_OBS="$2"; shift 2 ;;
         --noise_sigma|--noise-sigma) NOISE_SIGMA="$2"; shift 2 ;;
@@ -55,6 +57,7 @@ echo "=== evaluation (config=$CONFIG type=$EXPERIMENT_TYPE T=$T N_obs=$N_OBS noi
 ARGS=(evaluate --config "$CONFIG" --experiment-type "$EXPERIMENT_TYPE" --N_obs "$N_OBS" --noise_sigma "$NOISE_SIGMA" --seed "$SEED")
 [[ -n "$EVAL_SEED" ]] && ARGS+=(--eval-seed "$EVAL_SEED")
 ARGS+=(-T "$T")
+ARGS+=(--moe-variant "$MOE_VARIANT")
 [[ -n "$EXP_DIR" ]] && ARGS+=(--exp-dir "$EXP_DIR")
 if [[ -n "$METHOD" && "${METHOD,,}" != "all" ]]; then
     ARGS+=(--method "$METHOD")

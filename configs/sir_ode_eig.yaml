@@ -9,8 +9,8 @@
 #   observe y = I(τ) + N(0, σ_y²)        # infected COUNT (not I/N)
 #   ξ = measurement time, strictly increasing
 #
-# Training recipe (2026-08-13): soft two-step BC for DAD/RL/MoE (not hard myopic
-# CE), PPO for RL + MoE, modest CF/branching for MoE, soft unique floor.
+# DAD/RL retain their existing recipe. Explicit --method moe_sboed trains
+# independent_sparse_moe_v1 from scratch: no BC, teacher, or pinned first probe.
 #
 #   bash run.sh --config configs/sir_ode_eig.yaml
 
@@ -86,7 +86,11 @@ training:
     eig_moe_ppo_epochs: 4
     eig_moe_ppo_clip: 0.2
     eig_moe_critic_lr: 0.001
-    # Real MoE: residuals/router only after base BC. No teacher ranking CE.
+    eig_moe_n_experts: 4
+    eig_moe_top_k: 2
+    eig_moe_independent_balance: 0.01
+    # Legacy MoE controls retained for historical recipes. The independent
+    # trainer ignores all CF, residual, branching and unique-floor controls.
     eig_moe_cf_coefficient: 0.0
     eig_moe_cf_anneal_fraction: 0.0
     eig_moe_cf_floor_fraction: 0.0

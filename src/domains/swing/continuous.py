@@ -31,8 +31,8 @@ class ContinuousSwingObserver:
 
     def __init__(self, cfg, *, duration_bounds, injection_bus, amplitude,
                  n_obs=5, window=3.0, rtol=1e-8, atol=1e-10):
-        if str(cfg.raw.get('system', {}).get('name', '')).lower() != 'ieee9':
-            raise ValueError('The initial continuous protocol is restricted to IEEE9')
+        if str(cfg.raw.get('system', {}).get('name', '')).lower() not in {'ieee9','ieee14'}:
+            raise ValueError('Continuous reduced-swing observations support IEEE9 and IEEE14 only')
         self.sim = build_simulator(cfg)
         self.N = self.sim.N
         self.bounds = tuple(float(v) for v in duration_bounds)

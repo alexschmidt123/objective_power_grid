@@ -58,6 +58,7 @@ def load_experiment_config(
     step_number: int | None = None,
     n_obs: int = 0,
     noise_sigma: float = 0.005,
+    moe_variant: str | None = None,
 ):
     """Load YAML and apply CLI observation / horizon overrides."""
     root = repo_root()
@@ -80,6 +81,14 @@ def load_experiment_config(
     obs["N_obs"] = int(n_obs)
     obs["noise_sigma"] = float(noise_sigma)
     cfg.raw["observation"] = obs
+    if moe_variant is not None:
+        if moe_variant not in {"learned", "uniform", "matched_dense"}:
+            raise ValueError(f"Invalid MoE variant: {moe_variant}")
+        if not str(cfg.raw.get("system", {}).get("name", "")).startswith("sir"):
+            raise ValueError("--moe-variant is restricted to SIR ODE")
+        training = cfg.raw.setdefault("training", {})
+        block = training["eig_based"] if isinstance(training.get("eig_based"), dict) else training
+        block["eig_moe_variant"] = moe_variant
     return cfg
 
 
@@ -106,6 +115,9 @@ def _use_vector_eig_pipeline(cfg, exp_type: str, n_obs: int) -> bool:
 
 
 def _add_experiment_type(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--moe-variant", default=None,
+                        choices=("learned", "uniform", "matched_dense"),
+                        help="Independent SIR MoE ablation; saved in training settings")
     parser.add_argument(
         "--experiment-type",
         "--experiment_type",
@@ -266,6 +278,7 @@ def _evaluate_run_identity(
             exp_type = resolve_experiment_type(str(run_doc["experiment_type"]))
     cfg = load_experiment_config(
         args.config,
+        moe_variant=getattr(args, "moe_variant", None) or (run_doc.get("training") or {}).get("eig_moe_variant"),
         step_number=step,
         n_obs=n_obs,
         noise_sigma=sigma,
@@ -317,6 +330,7 @@ def cmd_allocate_dir(args: argparse.Namespace) -> None:
     """Print a newly allocated result folder path (for run.sh capture)."""
     cfg = load_experiment_config(
         args.config,
+        moe_variant=getattr(args, "moe_variant", None),
         step_number=args.step_number,
         n_obs=args.n_obs,
         noise_sigma=args.noise_sigma,
@@ -334,6 +348,7 @@ def cmd_allocate_dir(args: argparse.Namespace) -> None:
 def cmd_generate_data(args: argparse.Namespace) -> None:
     cfg = load_experiment_config(
         args.config,
+        moe_variant=getattr(args, "moe_variant", None),
         step_number=args.step_number,
         n_obs=args.n_obs,
         noise_sigma=args.noise_sigma,
@@ -542,6 +557,7 @@ def cmd_train(args: argparse.Namespace) -> None:
 
     cfg = load_experiment_config(
         args.config,
+        moe_variant=getattr(args, "moe_variant", None),
         step_number=step,
         n_obs=n_obs,
         noise_sigma=sigma,
@@ -820,6 +836,7 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
 def _diagnostic_context(args: argparse.Namespace):
     cfg = load_experiment_config(
         args.config,
+        moe_variant=getattr(args, "moe_variant", None),
         step_number=args.step_number,
         n_obs=args.n_obs,
         noise_sigma=args.noise_sigma,
@@ -862,6 +879,7 @@ def cmd_moe_mechanism(args: argparse.Namespace) -> None:
     if exp_type == "eig_based":
         cfg = load_experiment_config(
             args.config,
+            moe_variant=getattr(args, "moe_variant", None),
             step_number=args.step_number,
             n_obs=args.n_obs,
             noise_sigma=args.noise_sigma,

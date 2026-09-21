@@ -12,6 +12,7 @@ set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/run.sh"
 
 CONFIG=""
+MOE_VARIANT="learned"
 METHOD="all"
 SMOKE=""
 EXPERIMENT_TYPE="$EXPERIMENT_TYPE_DEFAULT"
@@ -22,7 +23,7 @@ NOISE_SIGMA="$DEFAULT_NOISE_SIGMA"
 SEED=101
 
 usage() {
-    echo "Usage: $0 --config <config.yaml> [--method <methods>|all] [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based|msc_based] [--exp-dir <path>] [--smoke]" >&2
+    echo "Usage: $0 --config <config.yaml> [--method <methods>|all] [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <int>] [--experiment_type objective_based|eig_based|msc_based] [--exp-dir <path>] [--moe-variant learned|uniform|matched_dense] [--smoke]" >&2
     echo "" >&2
     echo "  --method  optional comma-separated trainers (default: all trainable in config)" >&2
     echo "            default trainable: dad, rl_sboed" >&2
@@ -33,6 +34,7 @@ usage() {
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --config|-config|-c) CONFIG="$2"; shift 2 ;;
+        --moe-variant) MOE_VARIANT="$2"; shift 2 ;;
         --method|-method|-m) METHOD="$2"; shift 2 ;;
         -T|--T|--step-number|--step_number) T="$2"; shift 2 ;;
         --N_obs|--n-obs|--n_obs) N_OBS="$2"; shift 2 ;;
@@ -58,7 +60,7 @@ train_one() {
     echo "=== training method=$method (config=$CONFIG type=$EXPERIMENT_TYPE T=$T N_obs=$N_OBS noise_sigma=$NOISE_SIGMA seed=$SEED) ==="
     local args=(train --config "$CONFIG" --method "$method" --experiment-type "$EXPERIMENT_TYPE"
         --N_obs "$N_OBS" --noise_sigma "$NOISE_SIGMA" --seed "$SEED")
-    args+=(-T "$T")
+    args+=(-T "$T" --moe-variant "$MOE_VARIANT")
     [[ -n "$EXP_DIR" ]] && args+=(--exp-dir "$EXP_DIR")
     [[ -n "$SMOKE" ]] && args+=("$SMOKE")
     python3 -m src.experiment "${args[@]}"

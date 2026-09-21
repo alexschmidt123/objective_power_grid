@@ -25,6 +25,11 @@ def check():
     assert len(manuscripts)==1, 'Expected one canonical manuscript'
     blocks=re.findall(r'% BEGIN FINITE-LOSS MOCU\n(.*?)% END FINITE-LOSS MOCU',manuscripts[0],re.S)
     assert len(blocks)==1 and blocks[0].strip(), 'Expected one finite-loss MOCU formulation'
+    conference=(ROOT/'TPEC_conference/eig_power_grid_conference.tex').read_text()
+    assert r'\documentclass[conference]{IEEEtran}' in conference
+    assert r'\bibliographystyle{IEEEtran}' in conference
+    assert r'\bibliography{../documents/objective_driven_boed_refs}' in conference
+    manuscripts.append(conference)
     bib=(ROOT/'documents/objective_driven_boed_refs.bib').read_text()
     keys=set(re.findall(r'@\w+\s*\{\s*([^,]+),',bib))
     for text in manuscripts:

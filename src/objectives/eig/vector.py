@@ -6,6 +6,7 @@ import csv
 import copy
 import json
 import math
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -25,12 +26,22 @@ from src.policies.rl_sboed import (
     PolicyConfig,
     StateValueCritic,
 )
-from src.policies.moe import (
-    BeliefConditionedMoEPolicy,
-    parameter_matched_expert_hidden,
-)
 from src.layout import model_dir
 from src.domains.sir.design import chronological_feasible
+
+
+def _is_optional_policy(policy: Any, module: str, name: str) -> bool:
+    """Check optional policy types without importing them for baseline runs."""
+    policy_class = getattr(sys.modules.get(module), name, None)
+    return policy_class is not None and isinstance(policy, policy_class)
+
+
+def _is_legacy_moe(policy: Any) -> bool:
+    return _is_optional_policy(policy, "src.policies.moe", "BeliefConditionedMoEPolicy")
+
+
+def _is_independent_moe(policy: Any) -> bool:
+    return _is_optional_policy(policy, "src.policies.independent_moe", "IndependentMoEPolicy")
 
 
 def _eig_feasible(
@@ -297,7 +308,7 @@ def _policy_tensors(
     EIG policies retain history, ESS, maximum posterior mass, M/K summaries,
     posterior particle weights, and the feasible-action mask.
     """
-    from src.objectives.mocu.train import _tensors_from_state
+    from src.policies.state import _tensors_from_state
 
     tensors = _tensors_from_state(
         ctx,
@@ -355,13 +366,16 @@ def _load_policy(
     path = model_dir(ctx.out_dir) / f"{name}.pth"
     payload = torch.load(path, map_location=device, weights_only=False)
     meta = dict(payload.get("meta", {}))
-    policy_cls = (
-        BeliefConditionedMoEPolicy
-        if "moe" in str(meta.get("architecture", ""))
+    uses_moe = (
+        "moe" in str(meta.get("architecture", ""))
         or "matched_dense" in str(meta.get("architecture", ""))
         or name in {"moe_sboed", "matched_dense"}
-        else AdaptiveExperimentPolicy
     )
+    policy_cls = AdaptiveExperimentPolicy
+    if uses_moe:
+        from src.policies.moe import BeliefConditionedMoEPolicy
+        from src.policies.independent_moe import ARCHITECTURE, IndependentMoEPolicy
+        policy_cls = BeliefConditionedMoEPolicy
     training = ctx.cfg.training_for(
         getattr(ctx, "experiment_type", "eig_based")
     )
@@ -376,7 +390,16 @@ def _load_policy(
         hidden=hidden,
         particle_dim=int(ctx.particle_features.shape[1]),
     )
-    if policy_cls is BeliefConditionedMoEPolicy:
+    if uses_moe and meta.get("architecture") == ARCHITECTURE:
+        policy = IndependentMoEPolicy(
+            ctx.n_actions, config, n_experts=int(meta["n_experts"]),
+            top_k=int(meta["top_k"]), expert_hidden=int(meta["expert_hidden"]),
+            routing=str(meta.get("routing", "learned")),
+        ).to(device)
+        policy.load_state_dict(payload["state_dict"], strict=True)
+        policy.eval()
+        return policy
+    if uses_moe:
         policy = policy_cls(
             ctx.n_actions,
             config,
@@ -388,7 +411,7 @@ def _load_policy(
         policy = policy_cls(ctx.n_actions, config).to(device)
     sd = payload["state_dict"]
     # Older MoE checkpoints lack belief residual_gate; load non-strictly.
-    if isinstance(policy, BeliefConditionedMoEPolicy) and not any(
+    if _is_legacy_moe(policy) and not any(
         k.startswith("residual_gate.") for k in sd
     ):
         policy.load_state_dict(sd, strict=False)
@@ -406,6 +429,9 @@ def train_vector_eig_policy(
     seed: int,
 ) -> dict[str, Any]:
     """Train a dense or belief-conditioned MoE policy for vector EIG."""
+    if method == "moe_sboed":
+        from src.objectives.eig.independent_moe import train_independent_moe
+        return train_independent_moe(ctx, smoke=smoke, seed=seed)
     if method not in {"dad_eig", "rl_sboed_eig", "moe_sboed", "matched_dense"}:
         raise ValueError(method)
     torch.manual_seed(int(seed))
@@ -426,6 +452,7 @@ def train_vector_eig_policy(
     )
     is_residual_policy = method in {"moe_sboed", "matched_dense"}
     if is_residual_policy:
+        from src.policies.moe import BeliefConditionedMoEPolicy, parameter_matched_expert_hidden
         reference_experts = int(training.get("eig_moe_n_experts", 4))
         matched = method == "matched_dense"
         expert_hidden = (
@@ -508,7 +535,7 @@ def train_vector_eig_policy(
     # return at every step; this changes the estimator, not DAD's objective.
     rl_use_ppo = bool(training.get("eig_rl_use_ppo", True))
     dad_use_ppo = bool(training.get("eig_dad_use_ppo", False))
-    use_actor_critic = isinstance(policy, BeliefConditionedMoEPolicy) or (
+    use_actor_critic = _is_legacy_moe(policy) or (
         method == "rl_sboed_eig" and rl_use_ppo
     ) or (
         method == "dad_eig" and dad_use_ppo
@@ -593,7 +620,7 @@ def train_vector_eig_policy(
                 step=step,
                 device=device,
             )
-            if isinstance(policy, BeliefConditionedMoEPolicy):
+            if _is_legacy_moe(policy):
                 # Distill generalist expert 0 only. Fused MoE logits are never
                 # trained toward the two-step / myopic teacher.
                 logits = policy.base_logits(*tensors[:-1]).masked_fill(
@@ -604,7 +631,7 @@ def train_vector_eig_policy(
             imitation = _soft_bc_loss(
                 logits, scores, feasible, temperature=bc_temperature
             )
-            if isinstance(policy, BeliefConditionedMoEPolicy):
+            if _is_legacy_moe(policy):
                 # Soft KL alone left expert-0 greedy on a weak 0.5s probe.
                 # A small CE locks t=0 to the two-step argmax (same first
                 # action DAD/RL use); fused logits are still not cloned.
@@ -632,7 +659,7 @@ def train_vector_eig_policy(
         torch.nn.utils.clip_grad_norm_(policy.parameters(), 1.0)
         optimizer.step()
         bc_losses.append(float(bc_loss.detach().item()))
-    if isinstance(policy, BeliefConditionedMoEPolicy):
+    if _is_legacy_moe(policy):
         policy.reinitialize_residual_experts()
         if freeze_base_after_bc:
             policy.freeze_base_head()
@@ -658,7 +685,7 @@ def train_vector_eig_policy(
         ctx, engine, n_fantasies=4 if smoke else 12, seed=int(seed)
     )
     moe_step0_action: int | None = None
-    if isinstance(policy, BeliefConditionedMoEPolicy):
+    if _is_legacy_moe(policy):
         moe_step0_action = _prior_two_step_action(
             ctx,
             engine,
@@ -700,7 +727,7 @@ def train_vector_eig_policy(
     best_validation_eig, best_validation_unique = validation_eig()
     n_val_rollouts = max(len(validation_systems), 1)
     minimum_unique = max(
-        2 if isinstance(policy, BeliefConditionedMoEPolicy) else 1,
+        2 if _is_legacy_moe(policy) else 1,
         int(math.ceil(min_unique_frac * n_val_rollouts)),
     )
     best_meets_adaptivity = best_validation_unique >= minimum_unique
@@ -720,7 +747,7 @@ def train_vector_eig_policy(
         epoch_gains = []
         epoch_losses = []
         epoch_moe_stats: dict[str, float] = {}
-        if cf_coefficient > 0.0 and isinstance(policy, BeliefConditionedMoEPolicy):
+        if cf_coefficient > 0.0 and _is_legacy_moe(policy):
             if cf_anneal_fraction > 0.0:
                 cf_anneal_epochs = max(1, int(round(cf_anneal_fraction * epochs)))
                 cf_weight = max(
@@ -758,7 +785,7 @@ def train_vector_eig_policy(
                 entropy_before = float(engine.entropy(log_w).item())
                 collect_cf = (
                     cf_weight > 0.0
-                    and isinstance(policy, BeliefConditionedMoEPolicy)
+                    and _is_legacy_moe(policy)
                     and sample_offset < cf_rollouts_per_batch
                 )
                 for step in range(ctx.horizon):
@@ -881,7 +908,7 @@ def train_vector_eig_policy(
                 if (
                     cf_weight > 0.0
                     and cf_states
-                    and isinstance(policy, BeliefConditionedMoEPolicy)
+                    and _is_legacy_moe(policy)
                 ):
                     cf_inputs = tuple(
                         torch.cat([state[i] for state in cf_states], dim=0)
@@ -900,7 +927,7 @@ def train_vector_eig_policy(
                     policy_loss = policy_loss - entropy_coef * dist.entropy().mean()
                     actor_loss = policy_loss
                     moe_stats: dict[str, float] = {}
-                    if isinstance(policy, BeliefConditionedMoEPolicy):
+                    if _is_legacy_moe(policy):
                         auxiliary, moe_stats = policy.specialization_loss(
                             *inputs[:-1]
                         )
@@ -989,9 +1016,7 @@ def train_vector_eig_policy(
                 **epoch_moe_stats,
             }
         )
-        prefer_diverse_fallback = isinstance(
-            policy, BeliefConditionedMoEPolicy
-        ) and minimum_unique > 1
+        prefer_diverse_fallback = _is_legacy_moe(policy) and minimum_unique > 1
         better_fallback = (
             epoch_validation_unique > fallback_unique
             or (
@@ -1111,27 +1136,27 @@ def train_vector_eig_policy(
                 "eig_dad_use_ppo": bool(use_actor_critic and method == "dad_eig"),
                 "eig_moe_cf_coefficient": (
                     cf_coefficient
-                    if isinstance(policy, BeliefConditionedMoEPolicy)
+                    if _is_legacy_moe(policy)
                     else 0.0
                 ),
                 "eig_moe_cf_anneal_fraction": (
                     cf_anneal_fraction
-                    if isinstance(policy, BeliefConditionedMoEPolicy)
+                    if _is_legacy_moe(policy)
                     else 0.0
                 ),
                 "eig_moe_cf_floor_fraction": (
                     cf_floor_fraction
-                    if isinstance(policy, BeliefConditionedMoEPolicy)
+                    if _is_legacy_moe(policy)
                     else 0.0
                 ),
                 "eig_moe_cf_rollouts_per_batch": (
                     cf_rollouts_per_batch
-                    if isinstance(policy, BeliefConditionedMoEPolicy)
+                    if _is_legacy_moe(policy)
                     else 0
                 ),
                 "eig_moe_branching_coefficient": (
                     branching_coefficient
-                    if isinstance(policy, BeliefConditionedMoEPolicy)
+                    if _is_legacy_moe(policy)
                     else 0.0
                 ),
                 "eig_moe_balance_coefficient": float(
@@ -1145,28 +1170,26 @@ def train_vector_eig_policy(
                 ),
                 "eig_moe_low_ess_residual_coefficient": (
                     low_ess_residual_coefficient
-                    if isinstance(policy, BeliefConditionedMoEPolicy)
+                    if _is_legacy_moe(policy)
                     else 0.0
                 ),
                 "eig_moe_residual_scale_coefficient": (
                     residual_scale_coefficient
-                    if isinstance(policy, BeliefConditionedMoEPolicy)
+                    if _is_legacy_moe(policy)
                     else 0.0
                 ),
                 "eig_moe_freeze_base_after_bc": (
                     freeze_base_after_bc
-                    if isinstance(policy, BeliefConditionedMoEPolicy)
+                    if _is_legacy_moe(policy)
                     else False
                 ),
                 "eig_moe_leave_base_coefficient": (
                     leave_base_coefficient
-                    if isinstance(policy, BeliefConditionedMoEPolicy)
+                    if _is_legacy_moe(policy)
                     else 0.0
                 ),
                 "moe_step0_action": moe_step0_action,
-                "eig_moe_prototype_reset_after_warm_start": isinstance(
-                    policy, BeliefConditionedMoEPolicy
-                ),
+                "eig_moe_prototype_reset_after_warm_start": _is_legacy_moe(policy),
             },
             "elapsed_seconds": elapsed,
             "history": history,
@@ -1460,6 +1483,8 @@ def _rollout(
                 device=engine.device,
             )
             logits = dad(*tensors).squeeze(0)
+            if _is_independent_moe(dad):
+                trace.append({"step": step, **dad.routing_record(*tensors)})
             # Mask already applied in policy tensors / feasible; argmax on logits.
             action = int(torch.argmax(logits).item())
             if int(action) not in {int(a) for a in feasible.tolist()}:
@@ -1787,6 +1812,7 @@ def evaluate_vector_eig(
         )
     moe_step0_action: int | None = None
     if "moe_sboed" in selected_methods:
+        from src.policies.independent_moe import ARCHITECTURE
         moe_payload = torch.load(
             model_dir(ctx.out_dir) / "moe_sboed.pth",
             map_location="cpu",
@@ -1796,7 +1822,10 @@ def evaluate_vector_eig(
             moe_payload.get("elapsed_seconds", 0.0)
         )
         meta = dict(moe_payload.get("meta") or {})
-        if meta.get("moe_step0_action") is not None:
+        if meta.get("architecture") == ARCHITECTURE:
+            # Independent MoE learns every action; never invoke a planner here.
+            moe_step0_action = None
+        elif meta.get("moe_step0_action") is not None:
             moe_step0_action = int(meta["moe_step0_action"])
         else:
             moe_step0_action = _prior_two_step_action(
@@ -1986,13 +2015,40 @@ def diagnose_vector_eig_moe(
     device_name: str = "auto",
 ) -> dict[str, Any]:
     """Measure whether the EIG MoE uses belief-conditioned residual regimes."""
+    from src.policies.independent_moe import ARCHITECTURE
     if device_name == "auto":
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     else:
         device = torch.device(device_name)
     engine = VectorEIGEngine(ctx, device)
     policy = _load_policy(ctx, "moe_sboed", device)
-    if not isinstance(policy, BeliefConditionedMoEPolicy):
+    if _is_independent_moe(policy):
+        from src.layout import resolve_eval_seed
+        if int(n_rollouts) < 1:
+            raise ValueError("n_rollouts must be positive")
+        seed = int(resolve_eval_seed(ctx.out_dir))
+        rows = [
+            _rollout(ctx, engine, system, rollout_id=i, method="moe_sboed", dad=policy,
+                     fixed_sequence=[], n_fantasies=0, eval_seed=seed)
+            for i, system in enumerate(ctx.test_systems[:int(n_rollouts)])
+        ]
+        stages = []
+        for stage in range(ctx.horizon):
+            traces = [row["router_trace"][stage] for row in rows]
+            pairs = [tuple(sorted(t["selected_experts"][0])) for t in traces]
+            counts = np.bincount(np.asarray(pairs).reshape(-1), minlength=policy.n_experts)
+            stages.append({"stage": stage, "selected_expert_counts": counts.tolist(),
+                           "distinct_expert_pairs": len(set(pairs))})
+        report = {"method": "moe_sboed", "architecture": ARCHITECTURE,
+                  "eval_seed": seed, "n_rollouts": len(rows), "n_experts": policy.n_experts,
+                  "top_k": policy.top_k, "teacher": None, "first_action": "learned",
+                  "n_unique_sequences": len({tuple(row["sequence"]) for row in rows}),
+                  "stages": stages}
+        directory = ctx.out_dir / "diagnostics"
+        directory.mkdir(exist_ok=True)
+        (directory / "eig_moe_mechanism_report.json").write_text(json.dumps(report, indent=2) + "\n")
+        return report
+    if not _is_legacy_moe(policy):
         raise RuntimeError("moe_sboed checkpoint is not a belief-conditioned MoE")
     policy.eval()
     records: list[dict[str, Any]] = []

@@ -1,3 +1,4 @@
+# Durations strictly increase at every horizon, with a minimum 0.01-second gap.
 # Non-reset only. u_bounds is continuous; solver_scan_points only brackets roots.
 system:
   name: ieee30
@@ -84,7 +85,7 @@ swing_equation:
   probe_amplitudes:
   - 0.05
   reset_after_probe: false
-  T_obs_sec: 4.0
+  T_obs_sec: 3.0
   fs_hz: 40.0
   probe_protocol_status: study choices, not specified by the dynamic-data paper
   probe_duration_bounds:
@@ -423,9 +424,9 @@ data:
   uses_control_bank: false
   generate_if_missing: false
 observation:
-  N_obs: 5
-  noise_sigma: 0.005
-  sampling: uniform_within_fixed_recording_window
+  N_obs: 0  # One scalar maximum absolute RoCoF, not zero observations.
+  noise_sigma: 0.005  # Hz/s; noise is added after extracting the clean peak.
+  sampling: max_absolute_rocof_over_fixed_recording_window
 prior:
   mc_samples: 512
   mc_support_seed: 1
