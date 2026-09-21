@@ -28,11 +28,13 @@ def check():
     conference=(ROOT/'TPEC_conference/eig_power_grid_conference.tex').read_text()
     assert r'\documentclass[conference]{IEEEtran}' in conference
     assert r'\bibliographystyle{IEEEtran}' in conference
-    assert r'\bibliography{../documents/objective_driven_boed_refs}' in conference
+    assert r'\bibliography{conference_refs}' in conference
     manuscripts.append(conference)
-    bib=(ROOT/'documents/objective_driven_boed_refs.bib').read_text()
-    keys=set(re.findall(r'@\w+\s*\{\s*([^,]+),',bib))
-    for text in manuscripts:
+    bibliography_paths=[ROOT/'documents/objective_driven_boed_refs.bib',
+                        ROOT/'TPEC_conference/conference_refs.bib']
+    for text, bibliography_path in zip(manuscripts, bibliography_paths):
+        bib=bibliography_path.read_text()
+        keys=set(re.findall(r'@\w+\s*\{\s*([^,]+),',bib))
         cites={k.strip() for group in re.findall(r'\\cite\w*\{([^}]+)\}',text) for k in group.split(',')}
         assert cites<=keys, ('Missing bibliography entries',cites-keys)
         labels=re.findall(r'\\label\{([^}]+)\}',text)
