@@ -1,4 +1,6 @@
 \documentclass[journal]{IEEEtran}
+% General project reference: no six-page limit.
+% Short EIG conference draft: eig_power_grid_conference.tex.
 \usepackage{amsmath,amssymb,booktabs,graphicx,xcolor}
 \usepackage[hidelinks]{hyperref}
 
@@ -16,31 +18,39 @@ Power-Grid Dynamic Learning and Control}
 \maketitle
 
 \begin{abstract}
-Sequential probing can reduce uncertainty in power-system dynamics while
-changing the physical state from which a subsequent controller operates.
-We formulate Bayesian experimental design for this non-reset setting, using
-continuous probe durations, fixed injection location and amplitude, and one
-noisy maximum absolute rate-of-change-of-frequency observation per recording
-window. The formulation separates expected information gain, expected
-posterior-selected minimum safe control, and finite-loss mean objective cost
-of uncertainty. We specify six design strategies under common dynamics and
-action constraints: DAD, RL-sBOED, Step-DAD, Myopic, Fixed and Random.
-The methodology includes ordered policy histories, state-carrying particle
-inference, numerical terminal-control optimization, and branch-consistent
-pathwise derivatives for the peak observation. Control-objective optimization
-uses an explicitly stated parameter-smoothing approximation. An IEEE9
-experimental protocol separates derivative verification, policy convergence,
-physical safety assessment and statistical comparison. The resulting formulation
-defines reproducible comparisons without presupposing an empirical
-ranking or claiming field-level safety.
+This document records the formulation, methods and evaluation protocols of
+the objective-driven sequential Bayesian experimental-design project.
+Non-reset power-grid probing couples parameter learning to the physical
+state from which subsequent experiments and terminal control operate.
+The framework includes expected information gain (EIG), minimum safe control
+(MSC), and finite-loss mean objective cost of uncertainty (MOCU), with
+separate treatment of posterior objectives, physical safety and numerical
+approximations. DAD, RL-sBOED, Step-DAD, Myopic, Fixed and Random provide the
+core method comparison; MoE-sBOED is an optional extension. IEEE9 and the
+reduced IEEE14 EIG backend, the separate SIR benchmark, and the pending
+IEEE30 extension have distinct implementation and validation scopes.
+Current conference settings are documented as one campaign within this
+broader project, not as a restriction on its scientific content. Empirical
+claims require completed and verified results under the stated protocol.
 \end{abstract}
 \begin{IEEEkeywords}
 Bayesian experimental design, power-system identification, adaptive probing,
-rate of change of frequency, minimum safe control, MOCU.
+expected information gain, minimum safe control, MOCU, mixture of experts.
 \end{IEEEkeywords}
 
 \section{Introduction}
 \label{sec:introduction}
+\paragraph{Document scope}
+This is the general project reference, retaining the EIG, MSC and MOCU
+formulations, physical models, numerical methods, benchmark status and
+optional MoE-sBOED description. It is not restricted to six pages.
+The separate source \texttt{eig\_power\_grid\_conference.tex} is the short
+IEEE conference draft for the six-method IEEE9/IEEE14 EIG study.
+The conference excludes MoE-sBOED experiments, but this general document
+retains its optional formulation in Section~\ref{sec:optional-moe}.
+Control-objective sections remain part of the project; their presence does
+not imply that control-safety metrics were computed by an EIG-only campaign.
+
 Uncertain inertia and effective frequency response influence both how a power
 system reacts to an injected probe and how much supplementary power is needed
 following a disturbance. Controlled excitation provides a way to learn these
@@ -73,15 +83,13 @@ terminal control begins. A likelihood evaluated from equilibrium after every
 probe would represent a different experiment. Similarly, reordering an
 observed history would generally change its physical interpretation.
 
-We use one noisy maximum absolute rate-of-change-of-frequency (RoCoF)
-summary per window as the default observation. The summary is computed from
-finite frequency differences and becomes available at the end of the window.
-This gives a compact observation interface, but the maximum operation also
-makes the numerical observation map only piecewise smooth. A reliable design
-comparison must therefore specify both the statistical observation model and
-how optimization differentiates, or avoids differentiating, the simulator.
-Otherwise, an apparent failure of a policy family can arise from an incorrect
-numerical gradient rather than from its design objective or adaptivity.
+The conference observation is one noisy signed endpoint
+rate-of-change-of-frequency (RoCoF) value per 3.5-second window, computed from
+the final two frequency samples at 40 Hz. It becomes available at window end.
+The maximum-absolute-RoCoF sensor is retained as a separate historical variant;
+its results and peak-switch derivative requirements are not interchangeable
+with the endpoint protocol. Numerical differentiation must include both the
+observation and the carried physical state.
 
 Three objectives connect the same probing model to different notions of
 experimental value. EIG rewards information about the uncertain parameters.
@@ -124,7 +132,7 @@ We develop a reproducible comparison of six design strategies, including
 state-carrying inference, feasible continuous actions, objective-specific
 optimization and numerical verification. The contribution is the application
 formulation and carefully specified comparison; the policy families themselves
-are adapted from the cited literature. IEEE9 is the implemented benchmark,
+are adapted from the cited literature. IEEE9 and the reduced five-machine IEEE14 model are implemented EIG benchmarks,
 and the scope of any empirical conclusion is limited by the completed
 experiments, seed coverage and model assumptions.
 
@@ -147,7 +155,7 @@ response using an injected probing signal, with a regression-based estimator
 and power-hardware-in-the-loop validation. Their work motivates learning the
 two effects together. Our question concerns selection of successive probe
 durations under posterior uncertainty and a downstream control objective.
-The scalar peak-RoCoF observation, state-carry model and Bayesian prior here
+The scalar endpoint-RoCoF observation, state-carry model and Bayesian prior here
 are additional modeling choices; their validity is not established by the
 hardware validation of a different estimator or measurement model.
 
@@ -206,8 +214,9 @@ in the comparisons specified here.
 \label{sec:system-model}
 \label{sec:ieee-system}
 \subsubsection{Physical Network and Retained Machines}
-The implemented study uses the IEEE9 network, comprising nine electrical
-buses and three retained dynamic machines. Let $\mathcal N$ denote all physical
+The EIG study uses IEEE9 with nine electrical buses and three retained
+dynamic machines, and IEEE14 with fourteen buses and five retained dynamic
+machines. Their latent parameter dimensions are six and ten, respectively. Let $\mathcal N$ denote all physical
 buses, $\mathcal M\subseteq\mathcal N$ the retained-machine buses, and
 $m=|\mathcal M|$. The remaining buses are algebraic network nodes.
 This distinction separates electrical topology from the dimension of the
@@ -364,39 +373,35 @@ Random samples uniformly within the current interval, not uniformly over
 complete increasing sequences. This restriction applies at every horizon.
 
 
-\subsubsection{Maximum-RoCoF Observation Model}
-The default observation is one scalar maximum absolute RoCoF at physical
-bus $b_{\mathrm y}$, reported at the end of each recording window. Let
-$r_k=k\Delta r$, $k=0,\ldots,K$, where $K\Delta r=W$. For the trajectory
-generated from the carried state $\mathbf x_{t-1}(\theta)$, define
+\subsubsection{Signed Endpoint-RoCoF Observation Model}
+At measurement bus $b_{\mathrm y}$, the conference sensor reports
 \begin{equation}
 g_R(\theta,\mathbf x_{t-1}(\theta),\tau_t)
-=\max_{1\le k\le K}\left|
-\frac{\Delta f_{b_{\mathrm y}}(s_t+r_k)-\Delta f_{b_{\mathrm y}}(s_t+r_{k-1})}
-{\Delta r}\right|.
+=\frac{\Delta f_{b_{\mathrm y}}(s_t+W)
+-\Delta f_{b_{\mathrm y}}(s_t+W-\Delta r)}{\Delta r},
 \label{eq:rocof-observation-functional}
 \end{equation}
+where $W=3.5$ s and $\Delta r=0.025$ s. Thus the frequency samples are
+at 3.5 and 3.475 s relative to each probe start; no absolute value or
+maximum is taken. Each candidate model starts from its own carried state.
 The scalar observation model is
 \begin{equation}
 y_t=g_R(\theta,\mathbf x_{t-1}(\theta),\tau_t)+\epsilon_t,
-\qquad \epsilon_t\sim\mathcal N(0,\sigma_R^2).
+\qquad\epsilon_t\sim\mathcal N(0,\sigma_R^2).
 \label{eq:observation}
 \end{equation}
-Here $g_R$, $y_t$ and $\sigma_R$ have units Hz/s. The initial frequency
-at $r_0=0$ is included in the first finite difference. Noise is independent
-between windows and is added to the extracted clean peak, not to the physical
-state or to individual frequency samples before differentiation. This is a
-declared summary-measurement error model, not a claim that differentiating
-noisy sensor data yields Gaussian peak errors. Internally, the implementation
-flag \texttt{N\_obs=0} selects this one-dimensional observation; it does not
-mean that no measurement is taken. Vector notation for observations below
-includes this scalar case. Positive values of this flag retain an optional
-sampled-frequency variant, whose noise is instead specified in Hz.
+Here $g_R$, $y_t$ and $\sigma_R$ have units Hz/s. Independent noise is
+added to the clean summary, not to the physical state or individual frequency
+samples. The explicit combination \texttt{endpoint\_rocof},
+\texttt{N\_obs=0}, and $W=3.5$ selects this one-dimensional sensor.
+The flag alone does not distinguish it from the separate maximum-absolute
+RoCoF variant. Positive observation counts select a different sampled-frequency
+model with noise in Hz. These observation protocols must not be pooled.
 
-The scalar is available before the next design decision. The benchmark assumes
-zero computation/communication delay; a delayed implementation would also
-have to propagate the state during that delay. The finite-difference peak
-is piecewise smooth; numerical duration derivatives may cross a peak switch.
+The scalar becomes available at window end. Computation and communication
+latency are idealized as zero in simulated time; measured online runtime is
+reported separately. A physical implementation with delay would need to
+propagate the state during that delay.
 
 \subsection{History-Conditioned Bayesian Inference}
 The posterior is
@@ -453,7 +458,9 @@ of the Monte Carlo estimator, not a pointwise lower bound for every realized
 trajectory. A finite-sample score can be negative. Historical bank-entropy
 estimates represent a different statistic and are not combined with sPCE.
 
-\subsubsection{Continuous Terminal Control and Physical Safety}
+\subsubsection{Continuous Terminal Control and Physical Safety (Extension)}
+The following control model is retained for MSC/MOCU extensions and is not
+executed by the conference EIG campaign.
 The final engineering decision is an injection magnitude
 \begin{equation}
 u_{\mathrm{ctrl}}\in\mathcal U=[u_{\min},u_{\max}],
@@ -624,7 +631,7 @@ feasible interval even though they do not optimize a full-horizon objective.
 \caption{Adaptation and planning in the implemented design strategies.
 Adaptive means using observations from the current experiment to choose
 later probes. Myopic means optimizing only the next probe's expected utility.
-N/A denotes no utility optimization.}
+N/A denotes no utility optimization. MoE-sBOED is optional and excluded from the primary six-method campaign.}
 \centering
 \begin{tabular}{lcc}
 \toprule
@@ -636,6 +643,7 @@ Myopic & Yes & Yes\\
 DAD & Yes & No\\
 RL-sBOED & Yes & No\\
 Step-DAD & Yes & No\\
+MoE-sBOED (optional) & Yes & No\\
 \bottomrule
 \end{tabular}
 \label{tab:method-capabilities}
@@ -769,6 +777,49 @@ optimizer state or observations from other evaluation systems. Improvement
 on conditional validation does not guarantee improvement on the eventual
 realized trajectory.
 
+\subsection{MoE-sBOED (Optional Extension)}
+\label{sec:optional-moe}
+\textbf{Optional:} the current power-grid implementation is a deterministic,
+history-conditioned soft mixture, separate from the six-method conference
+campaign. Each of four experts receives the ordered features $z_t$ in
+Eq.~\eqref{eq:history-features}. Each expert has two 64-unit tanh hidden
+layers and a scalar latent-action output, with its own trainable stage bias.
+A router with one 64-unit tanh hidden layer produces four logits. With
+expert parameters $\psi_e$, router parameters $\eta$, and stage biases
+$c_{e,t}$, the action is
+\begin{align}
+w_e(z_t)&=\frac{\exp r_{\eta,e}(z_t)}
+{\sum_{j=1}^{4}\exp r_{\eta,j}(z_t)},\\
+u_t^{\mathrm{lat}}&=\sum_{e=1}^{4}w_e(z_t)
+\bigl[f_{\psi_e}(z_t)+c_{e,t}\bigr],\\
+v_t&=\operatorname{sigmoid}(u_t^{\mathrm{lat}}),\qquad
+\tau_t=a_t+(b_t-a_t)v_t.
+\label{eq:optional-moe-action}
+\end{align}
+The mixture acts on latent actions before the sigmoid and common feasible
+map. All four experts execute for each input: this is dense soft routing,
+not top-$k$ sparse execution. It is distinct from the separate SIR sparse-MoE
+implementation. IEEE9 and IEEE14 share this architecture but train separate
+weights under their own physical models.
+
+Experts and router are jointly trained offline to maximize full-horizon sPCE
+with the same numerical pathwise simulator derivatives used for DAD.
+The router initially assigns equal weights. A declared Fixed-sequence
+initialization may set the expert outputs to a common interior sequence;
+this is initialization rather than a DAD teacher or imitation objective.
+Its source and computational cost must be reported. During evaluation,
+weights remain fixed: the mixture responds to observations without the
+online gradient refinement used by Step-DAD. No planner receives the held-out
+true parameters or true carried state.
+
+Different expert outputs or approximately balanced router weights alone do
+not establish useful specialization. An optional evaluation should report
+router variation across histories, expert-output differences, online runtime,
+and comparisons with uniform routing and a parameter-matched single network,
+using paired evaluation cases and independent training seeds. Such ablations
+are proposed evidence, not completed results. No superiority over DAD is
+claimed, and MoE-sBOED scores must remain separate from the primary tables.
+
 \subsection{Fixed, Myopic and Random Baselines}
 Fixed uses trainable stage logits $c_1,\ldots,c_T$ and
 $v_t=\operatorname{sigmoid}(c_t)$, independent of observations. The sequential
@@ -843,7 +894,12 @@ weights and states, selected continuous control, true-system safety and a
 separately computed continuous numerical oracle at the actual terminal state.
 An equilibrium control bank indexed only by $M/K$ cannot replace this calculation.
 
-\subsection{Pathwise Gradients for Maximum Absolute RoCoF}
+\subsection{Pathwise Simulator Gradients}
+The conference endpoint sensor differentiates the signed difference of the
+two fixed terminal frequency samples in
+Eq.~\eqref{eq:rocof-observation-functional}. It has no peak-selection operation.
+The branch-consistency discussion below applies only to the separate
+maximum-absolute-RoCoF observation variant.
 Write one simulator stage as
 $(\mathbf x_t,g_t)=\mathcal F(\theta,\mathbf x_{t-1},\tau_t)$.
 For deterministic EIG policies, differentiation must include both the action
@@ -881,7 +937,7 @@ limitation or establish global smoothness.
 Verification compares full sPCE directional derivatives with independent
 end-to-end finite differences for both Fixed and adaptive policies at
 $T=3,4,5$. Conditional-prefix checks exercise the gradients used by Step-DAD.
-Forward calculations must agree with the original maximum-observation model.
+Forward calculations must agree with the explicitly selected observation model.
 These checks concern the derivative implementation; training histories and
 sensitivity to numerical scales remain necessary for assessing optimization.
 
@@ -943,29 +999,24 @@ independent seeds are distinct requirements.
 
 \section{Experimental Setup}
 \label{sec:experimental-protocol}
-\subsection{Probe and Control Settings}
-The active non-reset backend is IEEE9: nine electrical buses, three retained
-dynamic machines and six uncertain $M_i/K_i$ coordinates. The new experiment
-uses fixed physical probe and measurement bus 1, probe amplitude $0.05$~pu,
-continuous durations $[0.2,3]$~s, separation $0.01$~s and recording window
-$W=3$~s. With $T=3$, probing lasts 9~s. Each window yields one maximum
-absolute RoCoF observation, using 40~Hz frequency differencing
-($\Delta r=0.025$~s, $K=120$) and independent scalar noise
-$\sigma_R=0.005$~Hz/s. These settings apply to EIG, MSC and MOCU;
-they specify the probe observation, separately from terminal-control safety
-assessment. Continuous duration remains the design variable.
+\subsection{Conference Probe Settings and Control Extensions}
+IEEE9 has three retained machines and six uncertain $M_i/K_i$ coordinates;
+IEEE14 has five machines and ten coordinates. Both EIG campaigns use fixed
+physical probe and measurement bus 1, amplitude $0.05$ pu, continuous
+durations in $[0.2,3]$ s, increasing order with minimum separation $0.01$ s,
+and $W=3.5$ s. Horizons $T=3,4,5$ therefore span 10.5, 14 and 17.5 s of
+simulated probing. Each window yields the signed endpoint-RoCoF observation
+in Eq.~\eqref{eq:rocof-observation-functional}, with independent noise
+$\sigma_R=0.005$ Hz/s. Classical fixed-step RK4 uses step $1/640$ s;
+frequency differencing uses 40 Hz samples. Every machine state carries
+between windows, and durations remain continuous.
 
-The control magnitude is continuous on $[0,0.5]$~pu. The configured contingency
-is a $-0.45$~pu step at physical bus 1, beginning immediately after probing;
-control is injected at the same bus for the following 10~s. The monitored
-limits are $\underline f=-0.2$~Hz and $\overline R=22$~Hz/s. These values,
-the simplified disturbance and coverage $q=0.9$ are benchmark assumptions,
-not cited operating standards or engineering acceptance certificates.
-Classical fixed-step RK4 integrates both probe and control trajectories with
-step $1/640$~s; the control root solver uses 33 scan points and
-$10^{-5}$~pu bracket tolerance. ODE discretization and root-bracket error
-are distinct from posterior approximation error.
-
+The EIG campaign does not execute a terminal-control solver or report
+uncomputed safety metrics. Retained MSC/MOCU examples use a continuous
+control on $[0,0.5]$ pu, a $-0.45$ pu contingency at bus 1, a 10 s control
+window, coverage $q=0.9$, and specified nadir/RoCoF limits. These are
+separate study assumptions, not operating standards or settings inferred
+from the EIG results.
 
 \subsection{IEEE9 Prior Specification}
 \begin{table}[t]
@@ -1001,11 +1052,19 @@ configuration rather than unmodified template defaults. In particular, the
 batch size is overridden from the default 64 to 32. Each offline-trained
 method receives 2,000 trajectory-batch updates,
 batch size 32, 128 contrast models, and 128 validation systems evaluated every
-100 updates and at initialization. Evaluation uses 128 physical systems per
-seed, with 128 independent planning particles. Myopic uses 16 candidate
+100 updates and at initialization. Evaluation uses 512 physical systems per evaluation
+seed, with three evaluation seeds per trained policy (1,536 episodes) and
+128 independent planning particles. Myopic uses 16 candidate
 proposals per round, three rounds and 32 fantasies per proposal. Step-DAD uses
-16 conditional refinement updates at each stage after the first. These are
-computational settings, not established convergence thresholds. The EIG-only
+four conditional refinement updates at each stage after the first,
+with batch size 32 and validation after each update. This gives 8, 12 and
+16 total gradient updates per episode at $T=3,4,5$, respectively. The earlier
+16-update Step-DAD campaign is superseded and excluded from the conference comparison. These are
+computational settings, not established convergence thresholds. The
+conference contrast count is $L=128$, so its sPCE ceiling is
+$\log(129)\simeq4.8598$ nats. Separate MoE development runs may use
+$L=1024$ with ceiling $\log(1025)\simeq6.9324$ nats; those scores must not
+be pooled with this campaign. The EIG-only
 runs do not call the MSC/MOCU terminal-control solver, even though the shared
 configuration retains its settings. Control-objective extensions use numerical
 parameter perturbations (default scale 0.01 and four directions per update);
@@ -1045,22 +1104,25 @@ not performance evidence. Independent CPU/GPU trajectory checks, continuous
 root-solver checks, posterior-truth exclusion and RL reward telescoping are
 separate implementation checks.
 
-The current full-budget IEEE9 EIG protocol uses horizons $T=3,4,5$, training
-seed 101 and evaluation seed 1001, with all six methods and the budgets stated
-in this section. This is one seed pair, irrespective of its
-training budget. A broader comparison for seed variability would independently
-train seeds 101/202/303 and evaluate seeds 1001--1005. The latter is a prospective replication plan, not the seed coverage of the
-current EIG comparison. The current single evaluation seed was also used during
-implementation development; its analysis is exploratory and does not constitute
-an untouched confirmatory test. Independent confirmation requires previously
-unconsumed evaluation simulations after methodological choices are fixed.
-Inference-particle sensitivity, EIG contrast sensitivity, numerical-gradient
-sensitivity, convergence and checkpoint quality must be assessed before
-publication-level ranking. The no-reset model and common budgets alone do
-not prove that any method has converged or that a learned family wins.
+The submitted IEEE9 and IEEE14 EIG protocol uses $T=3,4,5$, training
+seeds 101/202/303 and evaluation seeds 1001/1002/1003. These are three
+independent trainings, not nine. Each trained policy is evaluated on
+512 systems per evaluation seed. Random and Myopic have no training-seed
+dependence under the fixed evaluation streams; their identical evaluations
+may be computed once per horizon and referenced across training seeds.
+Fixed remains separately trained for each training seed. Step-DAD reuses
+the corresponding DAD checkpoint, with its explicit four-update online
+budget recorded in evaluation provenance.
+
+Evaluation seed 1001 has informed development and is not an untouched
+confirmation set. Conclusions must distinguish exploratory evidence from
+confirmation after methodological choices are fixed. Contrast and particle
+sensitivity, numerical checks and checkpoint convergence are separate from
+simply completing the scheduled budget. No ranking is assumed in advance.
 
 Each metric gets a separate table with methods as rows and horizons as columns.
-Use run-level sample standard deviations across the declared seeds;
+Average the three evaluation-seed means within each training seed, then
+report the mean and sample standard deviation across the three training seeds;
 per-system Bernoulli dispersion is not the uncertainty of a reported safety
 rate. A single evaluation seed has no across-seed standard deviation.
 Keep physical systems and their repeated noise outcomes together in paired
@@ -1105,18 +1167,42 @@ validation budgets, selected checkpoints and execution hardware accompany
 each accepted result. This establishes traceability; it does not certify
 convergence or compensate for insufficient independent replication.
 
+\subsection{Project Content and Benchmark Status}
+EIG measures parameter information through the grid sPCE formulation.
+MSC and MOCU instead use the separately defined terminal-control problem,
+with numerical safety assessment, posterior coverage and a model-dependent
+oracle. These objectives must retain separate result tables and units.
+The signed endpoint-RoCoF conference campaign is one explicit protocol;
+maximum-absolute-RoCoF and sampled-frequency variants remain distinct.
+
+SIR-ODE is a separate sequential-design benchmark with its own likelihood,
+design variables and finite-particle information estimator. Its information
+scores must not be relabeled as the power-grid sPCE bound. The optional SIR
+MoE uses four experts with top-two sparse execution, whereas the current
+direct grid MoE evaluates all four experts and blends latent actions with
+soft weights. Architecture, training seeds and estimator settings must
+therefore be reported per benchmark rather than inferred across systems.
+
+IEEE9 supports the project's non-reset grid formulation. Reduced IEEE14 is
+validated for the declared EIG protocol; control-oriented IEEE14 and the
+referenced full dynamic IEEE30 extension require separate validation.
+The current conference emphasizes IEEE9/IEEE14 EIG and does not exhaust
+the contents or intended extensions of this project.
+
 \subsection{Scope of the Benchmarks}
 SIR remains a separate EIG implementation benchmark. Its former results do
 not validate the changed power-grid observation or control protocol.
-IEEE14 requires a separately validated online state-carry and control backend
-before comparison; the active implementation rejects unsupported execution.
+The reduced five-machine IEEE14 EIG backend passed online state-carry and
+CPU/GPU validation; its conference campaign uses the signed endpoint sensor.
+IEEE14 MSC/MOCU remain outside the validated active scope.
 The planned IEEE30 extension retains Demetriou et al.'s dynamic reference
 with six machines, including two governed generators and four synchronous
 condensers, and six added machine terminal buses~\cite{demetriou2017dynamic}.
 Its proposed uncertainty is six inertia constants and two generator governor
 parameters, rather than assigning $M/K$ to every electrical bus. The full
 machine/exciter/governor implementation and initialization remain pending.
-No non-reset IEEE14/IEEE30 results are claimed.
+Only completed and verified IEEE14 EIG results may enter the comparison;
+no IEEE30 results are claimed.
 
 \subsection{Modeling Assumptions and Interpretation Limits}
 The probe sequence now changes both what is known about the grid and the
@@ -1142,7 +1228,9 @@ empirical questions rather than required outcomes imposed on the experiment.
 Historical reset results and the earlier repeated-duration EIG pilot are
 separate protocols. They must not populate the new comparison tables. A
 successful smoke test establishes workability only, and no method superiority
-is concluded from it.
+is concluded from it. Superseded 16-update Step-DAD results are excluded;
+the conference uses four-update Step-DAD. MoE-sBOED remains optional and
+is not a seventh required row in the primary comparison.
 % Populate this section only from completed, validated runs. Do not insert
 % smoke scores, incomplete checkpoints, inferred rankings or invented values.
 \subsection{Design Performance Across Horizons}

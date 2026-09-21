@@ -1,0 +1,328 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath,amssymb,booktabs,graphicx,xcolor}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\E}{\mathbb E}
+\newcommand{\pending}{\textemdash}
+\newcommand{\draftnote}[1]{\textcolor{blue}{[Draft: #1]}}
+% Six-page target, including references; final pagination requires compilation.
+% Approximate page allocation: introduction 0.75; formulation 1.25;
+% methods 1.25; setup 0.75; results/discussion 1.5; conclusion/references 0.5.
+% Populate pending results only from completed, verified conference campaigns.
+% Full project reference: objective_driven_boed_manuscript_framework.tex.
+\title{Sequential Bayesian Experimental Design for Non-Reset
+Power-Grid Parameter Learning}
+\author{\IEEEauthorblockN{Authors to be supplied}
+\IEEEauthorblockA{Affiliations to be supplied}}
+\begin{document}
+\maketitle
+\begin{abstract}
+Controlled probing can reveal uncertain power-system parameters, but each
+probe also changes the state entering the next experiment. We study sequential
+Bayesian experimental design for this non-reset setting using reduced IEEE9
+and IEEE14 models with uncertain inertia and effective frequency response.
+The design variable is a continuous probe duration; observations are noisy
+signed endpoint rate-of-change-of-frequency summaries. We compare DAD,
+RL-sBOED, Step-DAD, Myopic, Fixed and Random under common physical constraints
+and paired evaluation systems. The study evaluates a sequential
+prior-contrastive lower bound on expected information gain and separates
+offline training from online design cost. Step-DAD uses four conditional
+refinement updates after each observation. The protocol covers three horizons
+and three independent training seeds. Numerical assumptions and the
+finite-contrast ceiling are stated explicitly.
+\draftnote{Add the principal quantitative finding after the campaign is complete.}
+\end{abstract}
+\begin{IEEEkeywords}
+Bayesian experimental design, power-system identification, adaptive probing,
+expected information gain, rate of change of frequency.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Inertia and effective frequency response govern how a power system reacts
+to disturbances. Designed excitation can provide information about both,
+motivating probing-based parameter estimation~\cite{peng2024probing}.
+Here the question is how to choose successive probe durations when previous
+observations inform the next choice and the physical system does not reset.
+The reduced dynamics and scalar sensor used below are study assumptions;
+they are not a reproduction of a hardware-validated identification system.
+
+A sequential design must account for both information and physical state.
+An early action determines its observation and changes the state from which
+later actions are applied. Replacing those later states with equilibrium
+would change the experiment. Likewise, histories must preserve observation
+order. These requirements motivate comparing full-horizon policies with
+one-step optimization and observation-independent baselines.
+
+DAD amortizes design optimization into an offline-trained policy and supplies
+sequential contrastive information bounds~\cite{foster2021dad}.
+RL-based design learns long-horizon behavior through simulated rewards
+without simulator derivatives~\cite{blau2022rlsboed}. Step-DAD refines an
+offline policy after observations arrive~\cite{hedman2025stepdad}.
+We adapt these families to ordered, state-carrying power-grid experiments.
+Our contribution is the common application formulation and comparison,
+including the information--online-computation trade-off, rather than a claim
+that these policy families are new or that adaptivity guarantees improvement.
+
+The paper addresses three questions: whether observation-dependent policies
+improve information over Fixed and Random; whether full-horizon policies
+improve on Myopic; and whether online refinement provides sufficient benefit
+to justify its computational cost. The scope is EIG on IEEE9/IEEE14.
+MSC/MOCU control objectives, SIR, and optional MoE-sBOED remain in the full
+project document and are not additional experiments in this comparison.
+
+\section{Non-Reset Experiment and Information Objective}
+\subsection{Reduced Dynamics and Parameter Uncertainty}
+IEEE9 retains three dynamic machines and IEEE14 retains five. Other buses
+are algebraic network nodes, not independent inertial machines. The network
+reduction and injection map use the declared test-case data
+\cite{zimmerman2011matpower}. For retained machine $i$,
+\begin{align}
+\dot\delta_i &= \omega_i,\\
+M_i\dot\omega_i &= -\sum_j B_{ij}
+ [\sin(\delta_i-\delta_j)-\sin(\delta_i^0-\delta_j^0)]
+ -(D_i+K_i/(2\pi))\omega_i+v_i .
+\label{eq:swing}
+\end{align}
+Here $\omega_i$ is angular-speed deviation, $\Delta f_i=\omega_i/(2\pi)$,
+$D_i$ is known damping, and $K_i$ is effective response in per-unit power
+per Hz. The uncertain vector is
+$\theta=(M_1,\ldots,M_m,K_1,\ldots,K_m)$, with independent bounded uniform
+priors fixed before training. Each system retains its machine-specific
+prior bounds, damping and coupling; parameter values are not transferred
+between IEEE9 and IEEE14. The reduced sinusoidal model with a linear Kron
+injection map is an approximation, not a full AC transient-stability model.
+\draftnote{Provide the final configuration archive/reference containing exact prior bounds and network parameters.}
+
+\subsection{Probe Sequence and Observation}
+A probe at fixed physical bus 1 has fixed amplitude $A=0.05$ pu and duration
+$\tau_t$. For local time $\ell$ within a window of length $W$,
+\begin{equation}
+\mathbf v_t(\ell)=\mathbf a(1)\frac{A}{2}
+ [1-\cos(2\pi\ell/\tau_t)]\mathbf1_{[0,\tau_t]}(\ell).
+\end{equation}
+Writing $\mathbf x=(\boldsymbol\delta,\boldsymbol\omega)$, the transition is
+$\mathbf x_t=\Phi_\theta(\mathbf x_{t-1},\tau_t;W)$.
+Only episode initialization uses equilibrium; all subsequent machine states
+carry forward. The same latent parameters apply throughout the episode.
+
+Durations lie in $[0.2,3]$ s and satisfy increasing order with separation
+$\varepsilon=0.01$ s. Before stage $t$, define
+\begin{equation}
+a_t=\begin{cases}0.2,&t=1,\\\tau_{t-1}+\varepsilon,&t>1,\end{cases}
+\quad b_t=3-(T-t)\varepsilon.
+\end{equation}
+Every method maps a unit action $v_t\in[0,1]$ to
+$\tau_t=a_t+(b_t-a_t)v_t$ before simulation. This reserves space for later
+probes; no completed history is sorted or rounded to a duration grid.
+
+The observation at bus 1 is signed endpoint RoCoF:
+\begin{equation}
+y_t=\frac{\Delta f_1(s_t+W)-\Delta f_1(s_t+W-\Delta r)}{\Delta r}
+ +\epsilon_t,
+\label{eq:sensor}
+\end{equation}
+where $s_t=(t-1)W$, $W=3.5$ s, $\Delta r=0.025$ s, and
+$\epsilon_t\sim\mathcal N(0,0.005^2)$ independently across windows, in
+Hz/s. Noise is added to the clean summary. This is not maximum absolute
+RoCoF. Observations arrive at window end. Computation latency is zero in
+simulated time; measured decision runtime is reported separately.
+
+\subsection{Sequential Prior-Contrastive Information}
+For ordered history $h_t=((\tau_k,y_k))_{k=1}^t$, a policy chooses
+$\tau_t=\pi(h_{t-1})$. The information objective is
+\begin{equation}
+J(\pi)=\E_{\theta,H_T\mid\pi}
+\left[\log\frac{p(\theta\mid H_T)}{p_0(\theta)}\right].
+\end{equation}
+We optimize and report the sequential prior-contrastive (sPCE) estimator
+\cite{foster2021dad}. One model $\theta^{(0)}$ generates the observations;
+$L$ independent models are drawn from the prior. Define
+\begin{align}
+\ell_t^{(n)}&=\sum_{k=1}^t\log p(y_k\mid\theta^{(n)},h_{k-1},\tau_k),\\
+\widehat I_t&=\ell_t^{(0)}-
+\log\left[\frac{1}{L+1}\sum_{n=0}^L\exp\ell_t^{(n)}\right].
+\label{eq:spce}
+\end{align}
+Each model follows the actual selected durations while propagating its own
+state. The expected estimator is a lower bound on EIG; an individual score
+can be negative. Its upper ceiling is $\log(L+1)$, equal to 4.8598 nats for
+the conference setting $L=128$. Near-ceiling scores cannot establish that
+true EIG has saturated or resolve differences hidden by the estimator.
+Evaluation truth appears in this scoring denominator, never as a privileged
+input to an online planner.
+
+\section{Compared Design Methods}
+\subsection{Common History and Offline Policies}
+Policy inputs contain the stage index and ordered slots for past durations,
+scaled observations and availability masks. Future slots are masked.
+True parameters and simulator states are not policy inputs.
+
+\textbf{DAD} uses a deterministic two-layer, 64-unit tanh network with a
+trainable stage bias and sigmoid output. Full-horizon sPCE training propagates
+gradients through actions, observations and carried states. Joint Fixed/DAD
+training selects between random and interior Fixed-based initialization
+using validation only; the Fixed initialization cost must be disclosed.
+The selected DAD policy requires no online weight updates.
+
+\textbf{RL-sBOED} uses a REDQ-style continuous actor--critic adaptation with
+ten critics and five replay updates per trajectory batch. Prefix rewards
+$r_t=\widehat I_t-\widehat I_{t-1}$ telescope to terminal sPCE with
+$\gamma=1$. Thus stepwise rewards do not make it myopic. The actor has two
+128-unit ReLU layers. Entropy uses the normalized tanh action with target
+entropy $-1$; evaluation scores exclude entropy bonuses. This adaptation
+does not require derivatives through the simulator.
+
+\subsection{Step-DAD Online Refinement}
+Step-DAD starts each episode from the matching DAD checkpoint. The first
+action uses that policy unchanged. Following each observation, 128 planning
+particles update likelihood weights and carry their own states under the
+observed action sequence. Fantasy truths and contrasts are sampled from
+this posterior to optimize the remaining-horizon conditional objective.
+
+Each refinement performs \textbf{four gradient updates}, using batch size
+32 and learning rate $10^{-3}$. A separate fixed conditional validation
+batch compares the initial and updated policies; the best candidate is
+retained. Adapted weights carry to the next stage, while the optimizer is
+reinitialized at each refinement. Episodes do not share adapted weights.
+There are $4(T-1)$ updates per episode: 8, 12 and 16 at the three horizons.
+The earlier 16-updates-per-stage results are superseded and excluded.
+
+\subsection{Baselines}
+\textbf{Fixed} optimizes one ordered, observation-independent sequence
+offline, comparing interior short, central, long and spread initializations.
+\textbf{Myopic} maximizes expected one-step information through continuous
+search with 16 proposals, three rounds and 32 fantasies per proposal.
+\textbf{Random} samples uniformly from each remaining feasible interval;
+this is not uniform sampling over complete ordered sequences.
+
+\subsection{Numerical Verification}
+RK4 integration uses step $1/640$ s. Numerical simulator Jacobians use
+state and duration perturbations of order $10^{-5}$, including the
+carried-state chain rule. Full-policy and conditional-prefix gradients
+must agree with independent finite-difference checks. The endpoint sensor
+uses fixed sample indices and does not require peak-switch differentiation.
+Finite-particle inference, ODE discretization and policy optimization are
+distinct error sources. Methods are documented adaptations, not claims of
+exact reproduction of their original benchmarks.
+
+\section{Experimental Protocol}
+\begin{table}[t]
+\caption{Matched conference settings for IEEE9 and IEEE14.}
+\centering\small
+\begin{tabular}{ll}
+\toprule Setting & Value\\\midrule
+Horizons & $T=3,4,5$\\
+Training seeds & 101, 202, 303\\
+Offline updates / batch size & 2,000 / 32\\
+DAD/Fixed learning rate & $10^{-3}$\\
+Validation & 128 systems, every 100 updates\\
+sPCE contrasts / planner particles & 128 / 128\\
+Evaluation seeds & 1001, 1002, 1003\\
+Systems per evaluation seed & 512\\
+Step-DAD updates after observation & 4\\
+\bottomrule
+\end{tabular}
+\label{tab:settings}
+\end{table}
+IEEE9 and IEEE14 use the same sensor, feasible design rule and numerical
+budgets, but separate physical configurations and learned policies.
+Validation selects checkpoints without gradient updates on validation cases.
+Each trained policy is evaluated on 1,536 episodes. Parameter and
+measurement-noise draws are paired across methods; the online planner uses
+a separate random stream. Random/Myopic have no training-seed dependence
+under these streams, so identical evaluations can be shared across training
+seeds. Fixed remains independently optimized for each training seed.
+
+For each trained method, average the three evaluation-seed means within a
+training seed, then report mean $\pm$ sample standard deviation across
+the three training seeds. Nine training/evaluation combinations do not
+constitute nine independent trainings. System dispersion and paired
+within-policy uncertainty are separate from retraining variation.
+Seed 1001 has informed development; it is not untouched confirmatory data.
+
+Record offline optimization time and online design time separately.
+Online episode time is the sum of decision times over all stages and
+includes posterior updates/refinement where used. Report CPU/GPU hardware
+alongside timings. IEEE9 uses Ubuntu RTX 5080 and IEEE14 uses Grace A100;
+cross-system timing differences therefore cannot be attributed solely to
+network size. EIG scoring time is not interchangeable with decision latency.
+
+\section{Results and Discussion}
+\draftnote{This section awaits final verified aggregation. Dashes below mean
+pending, not zero. Do not insert pilot scores or superseded Step-DAD results.}
+\subsection{Information Across Horizons}
+\begin{table}[t]
+\caption{Terminal sPCE (nats), IEEE9. Trained methods: mean $\pm$ sample
+SD across three training seeds. $L=128$; ceiling 4.8598. Results pending.}
+\centering
+\begin{tabular}{lccc}
+\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
+Random & \pending & \pending & \pending\\
+Fixed & \pending & \pending & \pending\\
+Myopic & \pending & \pending & \pending\\
+DAD & \pending & \pending & \pending\\
+RL-sBOED & \pending & \pending & \pending\\
+Step-DAD & \pending & \pending & \pending\\\bottomrule
+\end{tabular}
+\label{tab:ieee9}
+\end{table}
+\begin{table}[t]
+\caption{Terminal sPCE (nats), IEEE14, using the same aggregation and
+contrast count as Table~\ref{tab:ieee9}. Results pending.}
+\centering
+\begin{tabular}{lccc}
+\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
+Random & \pending & \pending & \pending\\
+Fixed & \pending & \pending & \pending\\
+Myopic & \pending & \pending & \pending\\
+DAD & \pending & \pending & \pending\\
+RL-sBOED & \pending & \pending & \pending\\
+Step-DAD & \pending & \pending & \pending\\\bottomrule
+\end{tabular}
+\label{tab:ieee14}
+\end{table}
+The primary comparisons are learned policies versus Fixed/Random,
+full-horizon policies versus Myopic, and Step-DAD versus its matching DAD.
+Report paired differences rather than interpreting small mean differences
+alone as evidence of a ranking. Random/Myopic do not have a retraining SD;
+their uncertainty must be labeled separately. Near-ceiling IEEE14 scores
+require particular care when interpreting apparent ties.
+
+\subsection{Information Versus Online Computation}
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][1.1in][c]{0.91\columnwidth}{\centering
+Pending verified figure:\\sPCE versus online seconds per episode\\
+logarithmic time axis; separate IEEE9/IEEE14 panels}}
+\caption{Planned information--computation comparison. Use measured
+online time on the stated hardware and label horizons. No data are drawn yet.}
+\label{fig:tradeoff}
+\end{figure}
+Compare the information benefit of refinement with its additional online
+cost, distinguishing offline-trained feed-forward policies from online
+simulation-based planners. A fast simulated decision does not certify
+feasibility for a physical deadline, particularly because the experiment
+model assumes zero decision delay.
+
+\subsection{Convergence and Interpretation Limits}
+Include a compact validation-history panel for representative completed
+training runs, showing initialization and selected checkpoints. A fixed
+2,000-update budget is not evidence of convergence. Contrast sensitivity,
+if available, should evaluate frozen policies on paired cases; a score below
+the ceiling alone does not establish estimator accuracy. Particle sensitivity
+addresses online inference and is a different issue from contrast count.
+Only completed diagnostics may be reported as evidence.
+
+The reduced dynamics, selected priors and scalar sensor limit generalization.
+The paper reports information, not terminal-control safety or field validation.
+Optional MoE-sBOED and control-oriented objectives are reserved for the
+broader project; no MoE superiority claim is part of this six-method study.
+
+\section{Conclusion}
+This study specifies a common non-reset power-grid experiment for comparing
+amortized, semi-amortized and online Bayesian design. The evaluation separates
+finite-contrast information from online computational cost under matched
+physical assumptions. \draftnote{Replace this sentence with conclusions
+supported by the completed IEEE9/IEEE14 tables and timing figure.}
+\bibliographystyle{IEEEtran}
+\bibliography{objective_driven_boed_refs}
+\end{document}
