@@ -47,7 +47,7 @@ reinforcement-learning-based sequential design, Step-DAD online refinement,
 myopic optimization, fixed design, and random design. The evaluation uses
 reduced IEEE9 and IEEE14 models under matched probing constraints.
 The primary comparison is a contrastive lower bound on information gain
-at fixed probing horizons; training-seed variability and computational
+at a fixed number of design steps; training-seed variability and computational
 cost are also assessed.
 \textit{[Results: insert the main quantitative comparisons at equal probe
 counts, including uncertainty.]}
@@ -72,13 +72,13 @@ A sequential design must account for both information and physical state.
 An early action determines its observation and changes the state from which
 later actions are applied. Replacing those later states with equilibrium
 would change the experiment. Likewise, histories must preserve observation
-order. These requirements motivate comparing full-horizon policies with
+order. These requirements motivate comparing policies that plan over all design steps with
 one-step optimization and observation-independent baselines.
 
 Deep adaptive design (DAD) amortizes design optimization into an offline-trained policy and supplies
 sequential contrastive information bounds~\cite{foster2021dad}.
 Reinforcement-learning-based sequential Bayesian optimal experimental
-design (RL-sBOED) learns long-horizon behavior through simulated rewards
+design (RL-sBOED) learns sequential design policies through simulated rewards
 without simulator derivatives~\cite{blau2022rlsboed}. Step-DAD is a semi-amortized method that refines an
 offline policy after observations arrive~\cite{hedman2025stepdad}.
 We adapt these families to ordered, state-carrying power-grid experiments.
@@ -87,7 +87,7 @@ including the information--online-computation trade-off, rather than a claim
 that these policy families are new or that adaptivity guarantees improvement.
 
 The paper addresses three questions: whether observation-dependent policies
-improve information over Fixed and Random; whether full-horizon policies
+improve information over Fixed and Random; whether policies that plan over all design steps
 improve on Myopic; and whether online refinement provides sufficient benefit
 to justify its computational cost. The scope is expected information gain
 (EIG) on IEEE9 and IEEE14. The contributions are an ordered, non-reset
@@ -192,7 +192,7 @@ p(\theta\mid h_t)\propto p_0(\theta)
 \label{eq:posterior}
 \end{equation}
 The goal is to maximize expected reduction in parameter uncertainty over
-the complete horizon. With $\Pi$ denoting the causal policy class, the
+all $T$ design steps. With $\Pi$ denoting the causal policy class, the
 design problem is
 \begin{equation}
 \begin{aligned}
@@ -238,7 +238,7 @@ scaled observations and availability masks. Future slots are masked.
 True parameters and simulator states are not policy inputs.
 
 \textbf{DAD} uses a deterministic two-layer, 64-unit tanh network with a
-trainable stage bias and sigmoid output. Full-horizon sPCE training propagates
+trainable stage bias and sigmoid output. sPCE training over all $T$ design steps propagates
 gradients through actions, observations and carried states. Joint Fixed/DAD
 training selects between random and interior Fixed-based initialization
 using validation only. Offline DAD cost includes this Fixed initialization
@@ -258,14 +258,14 @@ Step-DAD starts each episode from the matching DAD checkpoint. The first
 action uses that policy unchanged. Following each observation, 128 planning
 particles update likelihood weights and carry their own states under the
 observed action sequence. Fantasy truths and contrasts are sampled from
-this posterior to optimize the remaining-horizon conditional objective.
+this posterior to optimize the conditional objective over the remaining design steps.
 
 Each refinement performs \textbf{four gradient updates}, using batch size
 32 and learning rate $10^{-3}$. A separate fixed conditional validation
 batch compares the initial and updated policies; the best candidate is
 retained. Adapted weights carry to the next stage, while the optimizer is
 reinitialized at each refinement. Episodes do not share adapted weights.
-There are $4(T-1)$ updates per episode: 8, 12 and 16 at the three horizons.
+There are $4(T-1)$ updates per episode: 8, 12 and 16 for $T=3,4,5$, respectively.
 
 
 \subsection{Baselines}
@@ -286,28 +286,22 @@ Finite-particle inference, ODE discretization and policy optimization are
 distinct error sources. Methods are documented adaptations, not claims of
 exact reproduction of their original benchmarks.
 
-\section{Experimental Protocol}
-\begin{table}[t]
-\caption{Matched conference settings for IEEE9 and IEEE14.}
-\centering\small
-\begin{tabular}{p{0.48\columnwidth}p{0.40\columnwidth}}
-\toprule Setting & Value\\\midrule
-Horizons & $T=3,4,5$\\
-Training seeds & 101, 202, 303\\
-Offline updates / batch size & 2,000 / 32\\
-DAD/Fixed learning rate & $10^{-3}$\\
-Validation & 128 systems, every 100 updates\\
-sPCE contrasts / planner particles & 128 / 128\\
-Evaluation seeds & 1001, 1002, 1003\\
-Systems per evaluation seed & 512\\
-Step-DAD updates after observation & 4\\
-\bottomrule
-\end{tabular}
-\label{tab:settings}
-\end{table}
-Table~\ref{tab:settings} summarizes the matched budgets. IEEE9 and IEEE14
-use the same sensor and feasible design rule, with separate physical
-configurations and learned policies.
+\section{Experimental Settings}
+We compare all six methods using $T=3,4,5$ sequential design steps on
+IEEE9 and IEEE14. Each design step selects a probe duration, applies the
+probe, and collects one observation. Methods are compared at the same
+number of design steps to assess how much information they acquire under
+an equal probe budget. Both systems use the same sensor and feasible
+design rule, with separate physical configurations and learned policies.
+
+Offline training uses 2,000 updates with batch size 32 and three independent
+training seeds (101, 202 and 303). The DAD and Fixed learning rate is
+$10^{-3}$. Validation uses 128 systems every 100 updates. Training,
+validation and evaluation use 128 contrastive samples for the sPCE
+objective. Myopic and Step-DAD use 128 particles for online posterior
+planning; Step-DAD performs four refinement updates after each observation
+when design steps remain. Evaluation uses seeds 1001, 1002 and 1003,
+with 512 simulated experimental sequences per evaluation seed.
 Validation selects checkpoints without gradient updates on validation cases.
 Each trained policy is evaluated on 1,536 episodes. Parameter and
 measurement-noise draws are paired across methods; the online planner uses
@@ -340,7 +334,7 @@ configuration files are available at
 \noindent\textit{Results pending. This two-page area is reserved for completed
 IEEE9/IEEE14 comparisons. Dashes denote missing results, not zero.}
 
-\subsection{Information Across Horizons}
+\subsection{Information Versus Number of Design Steps}
 \begin{table}[!ht]
 \caption{IEEE9 terminal sPCE (nats). Trained methods: mean $\pm$ sample
 SD across three training seeds. $L=128$; ceiling 4.8598.}
@@ -372,7 +366,7 @@ Step-DAD & \pending & \pending & \pending\\\bottomrule
 \end{tabular}
 \end{table}
 \resultspace{2.3in}{Reserved for approximately 250 words:\\
-IEEE9 paired comparisons, horizon dependence, and training-seed variability.
+IEEE9 paired comparisons, dependence on the number of design steps, and training-seed variability.
 Use completed four-update Step-DAD results only.}
 
 \newpage
@@ -384,7 +378,7 @@ Discuss the distance to the contrastive ceiling.}
 \begin{figure}[!ht]
 \centering
 \resultspace{2.35in}{Reserved figure: sPCE versus online seconds per episode.\\
-IEEE9 and IEEE14 panels; logarithmic time axis; all six methods and horizons.}
+IEEE9 and IEEE14 panels; logarithmic time axis; all six methods and $T=3,4,5$.}
 \caption{Information and online computation on the stated hardware.
 Measured data and uncertainty remain to be inserted.}
 \label{fig:tradeoff}

@@ -7,7 +7,7 @@ Build from this folder with pdfLaTeX, BibTeX, then pdfLaTeX twice. The independe
 
 The draft compiles to six pages including references with default IEEEtran formatting:
 
-- Pages 1–3: abstract, introduction, model, information objective, six methods, and experimental protocol.
+- Pages 1–3: abstract, introduction, model, information objective, six methods, and experimental settings in prose.
 - Pages 4–5: reserved results and discussion, with two information tables, two figure slots, and interpretation space.
 - Page 6: completed conclusion and references; remaining room accommodates final edits.
 
