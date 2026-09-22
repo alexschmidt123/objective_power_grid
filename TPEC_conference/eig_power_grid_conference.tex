@@ -1,10 +1,25 @@
 \documentclass[conference]{IEEEtran}
-\usepackage{cite}
+\usepackage{cite,algorithmic,pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{amsmath,amssymb,amsfonts,booktabs,graphicx,textcomp,xcolor}
 \usepackage[hidelinks]{hyperref}
+\newcounter{algorithm}
 \newcommand{\E}{\mathbb E}
-\newcommand{\pending}{\textemdash}
+\newcommand{\pending}{0.00}
 \newcommand{\resultspace}[2]{\par\noindent\fbox{\parbox[c][#1][c]{0.94\columnwidth}{\centering\small #2}}\par}
+
+% Empty axes only: there are deliberately no data series or fabricated points.
+\newcommand{\emptyresultplot}[4]{%
+\begin{tikzpicture}
+\begin{axis}[width=0.95\columnwidth,height=1.25in,
+title={#1},xlabel={#2},ylabel={#3},
+tick label style={font=\scriptsize},label style={font=\scriptsize},
+title style={font=\small},xmin=0,xmax=1,ymin=0,ymax=1,
+xtick=\empty,ytick=\empty,axis lines=left,#4]
+\node[font=\scriptsize,text=gray] at (rel axis cs:0.5,0.5) {Data pending};
+\end{axis}
+\end{tikzpicture}}
+
 % Six-page draft budget: Sections I--IV at most three pages;
 % Section V reserves two pages for results; conclusion/references use page six.
 % Replace the result-space boxes with measured results and interpretation.
@@ -68,13 +83,6 @@ observations inform the next choice and the physical system does not reset.
 The reduced dynamics and scalar sensor used below are study assumptions;
 they are not a reproduction of a hardware-validated identification system.
 
-A sequential design must account for both information and physical state.
-An early action determines its observation and changes the state from which
-later actions are applied. Replacing those later states with equilibrium
-would change the experiment. Likewise, histories must preserve observation
-order. These requirements motivate comparing policies that plan over all design steps with
-one-step optimization and observation-independent baselines.
-
 Deep adaptive design (DAD) amortizes design optimization into an offline-trained policy and supplies
 sequential contrastive information bounds~\cite{foster2021dad}.
 Reinforcement-learning-based sequential Bayesian optimal experimental
@@ -86,15 +94,9 @@ Our contribution is the common application formulation and comparison,
 including the information--online-computation trade-off, rather than a claim
 that these policy families are new or that adaptivity guarantees improvement.
 
-The paper addresses three questions: whether observation-dependent policies
-improve information over Fixed and Random; whether policies that plan over all design steps
-improve on Myopic; and whether online refinement provides sufficient benefit
-to justify its computational cost. The scope is expected information gain
-(EIG) on IEEE9 and IEEE14. The contributions are an ordered, non-reset
-formulation with a common feasible action map; six method adaptations
-sharing the same likelihood and physical transition; and an evaluation
-protocol separating retraining variability, finite-contrast information,
-and online computational cost.
+We compare information gained at equal design-step budgets on IEEE9 and
+IEEE14, examining the benefit of adaptive decisions and planning over the
+complete sequence. Online runtime is a separate trade-off.
 
 \section{Problem Formulation}\label{sec:problem}
 \subsection{Reduced Dynamics and Parameter Uncertainty}
@@ -232,6 +234,35 @@ Evaluation truth appears in this scoring denominator, never as a privileged
 input to an online planner.
 
 \section{Compared Design Methods}
+
+Algorithm~\ref{alg:probing} summarizes the common online procedure after
+method-specific offline training. It is an application workflow for the
+existing methods, not an additional design algorithm.
+\begin{minipage}{\columnwidth}
+\small
+\refstepcounter{algorithm}\label{alg:probing}
+\hrule\smallskip
+\textbf{Algorithm \thealgorithm: Sequential power-system probing}
+\smallskip\hrule\smallskip
+\begin{algorithmic}[1]
+\REQUIRE Method, prior $p_0$, design steps $T$, trained policy/sequence if used
+\STATE Initialize $h_0=\varnothing$; initialize the system once.
+\STATE For Myopic/Step-DAD, draw prior particles and initialize their states.
+\STATE For Step-DAD, copy the matching DAD policy.
+\FOR{$t=1,\ldots,T$}
+\IF{Step-DAD and $t>1$}
+\STATE Refine the current policy on posterior fantasies (4 updates); retain the validation-best candidate.
+\ENDIF
+\STATE Select $\tau_t\in[a_t,b_t]$ using the chosen method and $h_{t-1}$.
+\STATE Apply the probe, carry the system state, and observe $y_t$.
+\STATE Append $(\tau_t,y_t)$ to obtain $h_t$.
+\STATE For Myopic/Step-DAD, propagate each particle under $\tau_t$ and update its likelihood weight using $y_t$.
+\ENDFOR
+\ENSURE History $h_T$; evaluator computes sPCE separately.
+\end{algorithmic}
+\smallskip\hrule
+\end{minipage}
+
 \subsection{Common History and Offline Policies}
 Policy inputs contain the stage index and ordered slots for past durations,
 scaled observations and availability masks. Future slots are masked.
@@ -277,22 +308,18 @@ search with 16 proposals, three rounds and 32 fantasies per proposal.
 this is not uniform sampling over complete ordered sequences.
 
 \subsection{Numerical Verification}
-RK4 integration uses step $1/640$ s. Numerical simulator Jacobians use
-state and duration perturbations of order $10^{-5}$, including the
-carried-state chain rule. The verification suite compares full-policy and conditional-prefix
-gradients with independent end-to-end finite differences. The endpoint sensor
-uses fixed sample indices and does not require peak-switch differentiation.
-Finite-particle inference, ODE discretization and policy optimization are
-distinct error sources. Methods are documented adaptations, not claims of
-exact reproduction of their original benchmarks.
+RK4 integration uses step $1/640$ s. Numerical state/duration Jacobians
+use perturbations of $10^{-5}$ and include carried-state derivatives.
+The verification suite compares policy and conditional-refinement gradients
+with end-to-end finite differences. The six methods are documented
+adaptations of existing approaches.
 
 \section{Experimental Settings}
-We compare all six methods using $T=3,4,5$ sequential design steps on
-IEEE9 and IEEE14. Each design step selects a probe duration, applies the
-probe, and collects one observation. Methods are compared at the same
-number of design steps to assess how much information they acquire under
-an equal probe budget. Both systems use the same sensor and feasible
-design rule, with separate physical configurations and learned policies.
+All six methods are compared at $T=3,4,5$ design steps on IEEE9 and
+IEEE14. Each step applies one probe and collects one observation.
+Equal design-step counts define the common probe budget. The systems
+share sensor and design constraints but use separate physical parameters
+and trained policies.
 
 Offline training uses 2,000 updates with batch size 32 and three independent
 training seeds (101, 202 and 303). The DAD and Fixed learning rate is
@@ -309,60 +336,57 @@ a separate random stream. Random/Myopic have no training-seed dependence
 under these streams, so identical evaluations can be shared across training
 seeds. Fixed remains independently optimized for each training seed.
 
-For each trained method, average the three evaluation-seed means within a
-training seed, then report mean $\pm$ sample standard deviation across
-the three training seeds. Nine training/evaluation combinations do not
-constitute nine independent trainings. System dispersion and paired
-within-policy uncertainty are separate from retraining variation.
-Seed 1001 has informed development; it is not untouched confirmatory data.
+For trained methods, we average evaluation-seed means within each training
+seed and report mean $\pm$ sample standard deviation across three trainings.
+Episode uncertainty is reported separately from retraining variation.
+Evaluation seed 1001 informed development and is not untouched test data.
 
-Offline optimization time and online design time are reported separately.
-Online episode time is the sum of decision times over all stages and
-includes posterior updates/refinement where used. Timings are accompanied by their execution hardware. IEEE9 uses Ubuntu RTX 5080 and IEEE14 uses Grace A100;
-cross-system timing differences therefore cannot be attributed solely to
-network size. Online time excludes the evaluator's post-decision EIG scoring. Reproducibility
-records include resolved configurations, source hashes, selected checkpoints,
-validation histories and episode-level scores. The implementation and
-configuration files are available at
+Offline training and online decision time are reported separately.
+Online time sums all decisions, including posterior updates and refinement,
+but excludes evaluator sPCE scoring. IEEE9 uses an RTX 5080 and IEEE14
+uses a Grace A100; runtimes are compared within each hardware platform.
+Resolved configurations, source hashes, checkpoints and episode scores
+record provenance. Code is available at
 \url{https://github.com/alexschmidt123/objective_power_grid}.
-
 
 % Draft reservation: two full pages; no performance values are asserted.
 \clearpage
 \section{Results and Discussion}
 \label{sec:results}
 \noindent\textit{Results pending. This two-page area is reserved for completed
-IEEE9/IEEE14 comparisons. Dashes denote missing results, not zero.}
+IEEE9/IEEE14 comparisons. All zero-valued table entries are placeholders,
+not measured results. Empty axes contain no experimental data.}
 
 \subsection{Information Versus Number of Design Steps}
 \begin{table}[!ht]
 \caption{IEEE9 terminal sPCE (nats). Trained methods: mean $\pm$ sample
-SD across three training seeds. $L=128$; ceiling 4.8598.}
+SD across three training seeds. $L=128$; ceiling 4.8598.
+All zeros are placeholders, not results.}
 \label{tab:ieee9}
-\centering
+\centering\small
 \begin{tabular}{lccc}
 \toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
 Random & \pending & \pending & \pending\\
-Fixed & \pending & \pending & \pending\\
+Fixed & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
 Myopic & \pending & \pending & \pending\\
-DAD & \pending & \pending & \pending\\
-RL-sBOED & \pending & \pending & \pending\\
-Step-DAD & \pending & \pending & \pending\\\bottomrule
+DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
+RL-sBOED & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
+Step-DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\\bottomrule
 \end{tabular}
 \end{table}
 \begin{table}[!ht]
 \caption{IEEE14 terminal sPCE (nats), using the same aggregation and
-contrast count as Table~\ref{tab:ieee9}.}
+contrast count as Table~\ref{tab:ieee9}. All zeros are placeholders.}
 \label{tab:ieee14}
-\centering
+\centering\small
 \begin{tabular}{lccc}
 \toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
 Random & \pending & \pending & \pending\\
-Fixed & \pending & \pending & \pending\\
+Fixed & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
 Myopic & \pending & \pending & \pending\\
-DAD & \pending & \pending & \pending\\
-RL-sBOED & \pending & \pending & \pending\\
-Step-DAD & \pending & \pending & \pending\\\bottomrule
+DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
+RL-sBOED & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
+Step-DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\\bottomrule
 \end{tabular}
 \end{table}
 \resultspace{2.3in}{Reserved for approximately 250 words:\\
@@ -377,10 +401,11 @@ Discuss the distance to the contrastive ceiling.}
 \subsection{Information Versus Online Computation}
 \begin{figure}[!ht]
 \centering
-\resultspace{2.35in}{Reserved figure: sPCE versus online seconds per episode.\\
-IEEE9 and IEEE14 panels; logarithmic time axis; all six methods and $T=3,4,5$.}
+\emptyresultplot{(a) IEEE9}{Online time (s/sequence; log scale)}{sPCE (nats)}{xmode=log,xmin=0.001,xmax=1000}
+\emptyresultplot{(b) IEEE14}{Online time (s/sequence; log scale)}{sPCE (nats)}{xmode=log,xmin=0.001,xmax=1000}
 \caption{Information and online computation on the stated hardware.
-Measured data and uncertainty remain to be inserted.}
+Empty plot placeholders; numerical axis ranges, measured points and
+uncertainty will be added with the results.}
 \label{fig:tradeoff}
 \end{figure}
 
@@ -392,10 +417,11 @@ training costs. Compare runtimes within each hardware platform.}
 \subsection{Optimization and Estimator Diagnostics}
 \begin{figure}[!ht]
 \centering
-\resultspace{2.0in}{Reserved figure: validation histories and selected checkpoints.\\
-Use representative IEEE9/IEEE14 runs and show training-seed variation.}
+\emptyresultplot{(a) IEEE9}{Training update}{Validation sPCE (nats)}{xmin=0,xmax=2000}
+\emptyresultplot{(b) IEEE14}{Training update}{Validation sPCE (nats)}{xmin=0,xmax=2000}
 \caption{Optimization histories for the completed campaigns.
-Final curves and checkpoint markers remain to be inserted.}
+Empty plot placeholders; validation curves, training-seed variation and
+selected-checkpoint markers remain to be inserted.}
 \label{fig:convergence}
 \end{figure}
 

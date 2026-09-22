@@ -18,3 +18,5 @@ Results and the abstract's results/conclusion sentences have writing placeholder
 A locally generated layout preview is stored at `output/pdf/eig_power_grid_conference.pdf` when available (excluded from Git).
 
 The local `sir ode result/` folder holds supplementary benchmark outputs. Generated result collections and build artifacts are excluded from GitHub.
+
+Result tables use zero-valued placeholders (including zero mean/SD for trained methods), explicitly labeled as unmeasured. Figures contain empty IEEE9/IEEE14 axes with no data series. Algorithm 1 summarizes the shared sequential design workflow and the Step-DAD refinement branch. Plot axes are drawn in LaTeX with PGFPlots; no external image files are required.
