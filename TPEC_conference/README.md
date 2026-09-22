@@ -13,7 +13,7 @@ The draft compiles to six pages including references with default IEEEtran forma
 
 Three author/affiliation/email placeholders are included. For two authors, remove the third block and its preceding `\and`.
 
-Only results have writing placeholders. Replace the `\resultspace` boxes with verified tables, figures and discussion. The explicit `\clearpage`/`\newpage` commands in the results area reserve the draft page budget; adjust/remove them during final typesetting and recheck six-page pagination after inserting results and actual author details. The abstract and conclusion make no unverified performance claims and can be updated with the final quantitative finding.
+Results and the abstract's results/conclusion sentences have writing placeholders. Replace the `\resultspace` boxes with verified tables, figures and discussion. The explicit `\clearpage`/`\newpage` commands in the results area reserve the draft page budget; adjust/remove them during final typesetting and recheck six-page pagination after inserting results and actual author details. The abstract emphasizes information gained at the same probe count and explicitly reserves its results and conclusion sentences for verified findings. The body conclusion makes no unverified performance claims and can be updated with those findings.
 
 A locally generated layout preview is stored at `output/pdf/eig_power_grid_conference.pdf` when available (excluded from Git).
 

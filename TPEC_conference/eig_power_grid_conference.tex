@@ -32,26 +32,27 @@ email@example.com}}
 \begin{document}
 \maketitle
 \begin{abstract}
-Uncertainty in inertia and frequency response limits how accurately a
-power-system model can predict the response to disturbances. Controlled
-probing can reduce this uncertainty, but the information obtained depends
-on which probing signals are applied. Choosing each signal through online
-optimization also incurs computational cost. This paper investigates how
-to select informative sequences of probes while accounting for the
-computation required to choose them. We formulate probe-duration selection
-as a sequential Bayesian experimental-design problem that maximizes
-expected information gain about uncertain system parameters. Each decision
-can use previous noisy frequency observations, and the physical state
-evolves continuously between probes. We apply six existing approaches:
-deep adaptive design, reinforcement-learning-based sequential design,
-Step-DAD online policy refinement, myopic optimization, fixed design, and
-random design. The comparison uses reduced IEEE9 and IEEE14 models with
-common probing constraints and evaluation conditions. Information is
-assessed through a contrastive lower bound, while offline training and
-online decision times are reported separately. The study examines whether
-observation-dependent and full-sequence designs acquire more information
-than simpler baselines, and whether online refinement provides sufficient
-additional information to justify its computational cost.
+Understanding power-system dynamics requires knowledge of latent parameters
+such as inertia and effective frequency response. Active probing provides
+a practical means of inferring these parameters by applying controlled
+inputs and measuring the resulting frequency response. The information
+obtained, however, depends on the probing signals selected. This paper
+investigates sequential Bayesian optimal experimental design for acquiring
+more information about latent parameters with the same number of probes.
+We formulate the selection of probe durations as an expected-information-gain
+maximization problem, allowing each decision to use observations from
+previous probes while accounting for the evolving system state. We apply
+and compare six existing approaches: deep adaptive design,
+reinforcement-learning-based sequential design, Step-DAD online refinement,
+myopic optimization, fixed design, and random design. The evaluation uses
+reduced IEEE9 and IEEE14 models under matched probing constraints.
+The primary comparison is a contrastive lower bound on information gain
+at fixed probing horizons; training-seed variability and computational
+cost are also assessed.
+\textit{[Results: insert the main quantitative comparisons at equal probe
+counts, including uncertainty.]}
+\textit{[Conclusion: state what the results establish about acquiring more
+parameter information with a fixed probe budget.]}
 \end{abstract}
 \begin{IEEEkeywords}
 Bayesian experimental design, power-system identification, adaptive probing,
