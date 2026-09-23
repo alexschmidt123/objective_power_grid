@@ -91,8 +91,8 @@ to the stated models and sensor.
 
 \section{Problem Formulation}\label{sec:problem}
 We seek informative probes within a budget of $T$ design steps.
-Here $t=1,\ldots,T$ indexes decisions, $t_{\mathrm{loc}}$ is elapsed
-physical time since the start of the current probe window, and $\tau_t$
+Here $k=1,\ldots,T$ indexes decisions, $t$ is elapsed
+physical time since the start of the current probe window, and $\tau_k$
 is the selected probe duration.
 
 \subsection{Unknown Parameters and Power-System Model}
@@ -115,7 +115,7 @@ M_i\dot\omega_i
 \end{aligned}
 \label{eq:swing}
 \end{equation}
-Dots denote derivatives with respect to physical time $t_{\mathrm{loc}}$. The damping $D_i$ and network
+Dots denote derivatives with respect to physical time $t$. The damping $D_i$ and network
 couplings $B_{ij}$ are known; frequency deviation is
 $\Delta f_i=\omega_i/(2\pi)$ in Hz. The units of $M_i$, $K_i$ and
 $D_i$ are pu$\,\mathrm{s}^2$/rad, pu/Hz and pu$\,\mathrm{s}$/rad,
@@ -165,35 +165,35 @@ IEEE14 & 1 & 0.0212207 & 0.0784314 & 0.0021221\\
 \subsection{Probe Design and Observation Model}
 To obtain information about these parameters, each experiment applies a
 raised-cosine power pulse at bus 1 with fixed
-amplitude $A=0.05$ pu and selected duration $\tau_t$:
+amplitude $A=0.05$ pu and selected duration $\tau_k$:
 \begin{equation}
-v_{1,t}(t_{\mathrm{loc}})=
+v_{1,k}(t)=
 \begin{cases}
-\dfrac{A}{2}\bigl[1-\cos(2\pi t_{\mathrm{loc}}/\tau_t)\bigr],&0\le t_{\mathrm{loc}}\le\tau_t,\\
-0,&\tau_t<t_{\mathrm{loc}}\le W.
+\dfrac{A}{2}\bigl[1-\cos(2\pi t/\tau_k)\bigr],&0\le t\le\tau_k,\\
+0,&\tau_k<t\le T_{\mathrm{window}}.
 \end{cases}
 \label{eq:probe}
 \end{equation}
 All other probing inputs are zero. Each observation window lasts
-$W=3.5$ s. The full angle and speed state at its end becomes the initial
+$T_{\mathrm{window}}=3.5$ s. The full angle and speed state at its end becomes the initial
 state of the next window, without resetting the system. Consequently,
-the response to probe $t$ depends on the complete duration sequence
-$\tau_{1:t}=(\tau_1,\ldots,\tau_t)$.
+the response to probe $k$ depends on the complete duration sequence
+$\tau_{1:k}=(\tau_1,\ldots,\tau_k)$.
 
-Write $\Delta f_{1,t}(t_{\mathrm{loc}};\theta,\tau_{1:t})$ for the resulting bus-1
+Write $\Delta f_{1,k}(t;\theta,\tau_{1:k})$ for the resulting bus-1
 frequency deviation. The noise-free observation is the signed endpoint
-rate of change of frequency (RoCoF), denoted by $\mu_t$:
+rate of change of frequency (RoCoF), denoted by $\mu_k$:
 \begin{equation}
-\mu_t(\theta,\tau_{1:t})=
-\frac{\Delta f_{1,t}(W)-\Delta f_{1,t}(W-\Delta t_{\mathrm{samp}})}{\Delta t_{\mathrm{samp}}}.
+\mu_k(\theta,\tau_{1:k})=
+\frac{\Delta f_{1,k}(T_{\mathrm{window}})-\Delta f_{1,k}(T_{\mathrm{window}}-\Delta t_{\mathrm{samp}})}{\Delta t_{\mathrm{samp}}}.
 \label{eq:sensor}
 \end{equation}
-The frequency arguments $\theta,\tau_{1:t}$ are suppressed in the
+The frequency arguments $\theta,\tau_{1:k}$ are suppressed in the
 numerator. With sampling interval $\Delta t_{\mathrm{samp}}=0.025$ s, the measured
 response follows
 \begin{equation}
-y_t=\mu_t(\theta,\tau_{1:t})+\epsilon_t,
-\qquad \epsilon_t\sim\mathcal N(0,\sigma^2),
+y_k=\mu_k(\theta,\tau_{1:k})+\epsilon_k,
+\qquad \epsilon_k\sim\mathcal N(0,\sigma^2),
 \label{eq:noise}
 \end{equation}
 where $\sigma=0.005$ Hz/s and noise is independent across windows.
@@ -202,32 +202,32 @@ idealized as zero in simulated time.
 
 \subsection{Sequential Decisions and Bayesian Updating}
 The observation model connects the physical experiment to inference and
-subsequent decisions. The data after step $t$ are the ordered design--observation
-history $h_t=((\tau_k,y_k))_{k=1}^{t}$, with $h_0=\varnothing$.
-A policy $\pi$ selects each duration using only $h_{t-1}$; it has no
+subsequent decisions. The data after step $k$ are the ordered design--observation
+history $h_k=((\tau_j,y_j))_{j=1}^{k}$, with $h_0=\varnothing$.
+A policy $\pi$ selects each duration using only $h_{k-1}$; it has no
 access to the true parameters or physical state. Feasible durations satisfy
 \begin{equation}
 \begin{aligned}
-0.2&\le\tau_t\le3, &&t=1,\ldots,T,\\
-\tau_t-\tau_{t-1}&\ge d_{\min}, &&t=2,\ldots,T,
+0.2&\le\tau_k\le3, &&k=1,\ldots,T,\\
+\tau_k-\tau_{k-1}&\ge d_{\min}, &&k=2,\ldots,T,
 \end{aligned}
 \label{eq:bounds}
 \end{equation}
-where $d_{\min}=0.01$ s. At step $t$, the upper limit is tightened to
-$3-(T-t)d_{\min}$ to leave room for the remaining probes; the lower
-limit is $0.2$ initially and $\tau_{t-1}+d_{\min}$ thereafter.
+where $d_{\min}=0.01$ s. At step $k$, the upper limit is tightened to
+$3-(T-k)d_{\min}$ to leave room for the remaining probes; the lower
+limit is $0.2$ initially and $\tau_{k-1}+d_{\min}$ thereafter.
 All methods map a unit action into this interval without sorting or
 discretizing durations. Let $\Pi$ denote the policies satisfying these constraints;
 any policy randomness is independent of $\theta$.
 
 The observation model defines a Gaussian likelihood
-$p(y_t\mid\theta,h_{t-1},\tau_t)$ with mean
-$\mu_t(\theta,\tau_{1:t})$ and variance $\sigma^2$.
+$p(y_k\mid\theta,h_{k-1},\tau_k)$ with mean
+$\mu_k(\theta,\tau_{1:k})$ and variance $\sigma^2$.
 Bayes' rule updates parameter uncertainty after each measurement:
 \begin{equation}
-p(\theta\mid h_t)=
-\frac{p(y_t\mid\theta,h_{t-1},\tau_t)\,p(\theta\mid h_{t-1})}
-{p(y_t\mid h_{t-1},\tau_t)}.
+p(\theta\mid h_k)=
+\frac{p(y_k\mid\theta,h_{k-1},\tau_k)\,p(\theta\mid h_{k-1})}
+{p(y_k\mid h_{k-1},\tau_k)}.
 \label{eq:posterior}
 \end{equation}
 The denominator is the predictive density, obtained by integrating the
@@ -266,14 +266,14 @@ let $\theta^{(1)},\ldots,\theta^{(L)}$ be independent prior contrasts.
 For any candidate $\theta$, define the observation likelihood along the
 realized sequence as
 \begin{equation}
-\mathcal L_t(\theta)=\prod_{k=1}^{t}
-p(y_k\mid\theta,h_{k-1},\tau_k).
+\mathcal L_k(\theta)=\prod_{j=1}^{k}
+p(y_j\mid\theta,h_{j-1},\tau_j).
 \label{eq:likelihood}
 \end{equation}
 The sampled information score is then
 \begin{equation}
-\widehat I_t=\log\frac{\mathcal L_t(\theta^{(0)})}
-{\frac{1}{L+1}\sum_{\ell=0}^{L}\mathcal L_t(\theta^{(\ell)})}.
+\widehat I_k=\log\frac{\mathcal L_k(\theta^{(0)})}
+{\frac{1}{L+1}\sum_{\ell=0}^{L}\mathcal L_k(\theta^{(\ell)})}.
 \label{eq:spce}
 \end{equation}
 Likelihoods are evaluated in the log domain. Averaging $\widehat I_T$
@@ -313,10 +313,10 @@ Step-DAD~\cite{hedman2025stepdad} & Yes & No & Both\\
 
 
 \subsection{Nonadaptive Designs: Random and Fixed}
-Random draws $u_t\sim\mathcal U(0,1)$ independently at each step and
-sets $\tau_t=\tau_t^{\min}+(\tau_t^{\max}-\tau_t^{\min})u_t$.
-Here $\tau_1^{\min}=0.2$, $\tau_t^{\min}=\tau_{t-1}+d_{\min}$ for $t>1$,
-and $\tau_t^{\max}=3-(T-t)d_{\min}$. Thus sampling is uniform within
+Random draws $u_k\sim\mathcal U(0,1)$ independently at each step and
+sets $\tau_k=\tau_k^{\min}+(\tau_k^{\max}-\tau_k^{\min})u_k$.
+Here $\tau_1^{\min}=0.2$, $\tau_k^{\min}=\tau_{k-1}+d_{\min}$ for $k>1$,
+and $\tau_k^{\max}=3-(T-k)d_{\min}$. Thus sampling is uniform within
 the remaining feasible interval, not over complete ordered sequences.
 It ignores observations and requires no offline training.
 
@@ -361,7 +361,7 @@ Fixed training; the full workflow incurs both costs.
 RL-sBOED~\cite{blau2022rlsboed} uses a REDQ-style actor--critic adaptation with ten critics
 and five replay updates per trajectory batch. The actor has two
 128-unit ReLU layers. Its per-step information rewards are
-$R_t=\widehat I_t-\widehat I_{t-1}$, with $\widehat I_0=0$ and
+$R_k=\widehat I_k-\widehat I_{k-1}$, with $\widehat I_0=0$ and
 discount $\gamma=1$, so their sum is terminal sPCE. Training therefore
 accounts for future design steps without differentiating through the
 simulator. Entropy regularization uses normalized tanh actions and
@@ -409,16 +409,16 @@ designs use the resulting history to select later probes.
  flow/.style={-{Latex[length=2mm]},thick,draw=black!75},
  note/.style={font=\footnotesize,align=center,fill=white,inner sep=2pt}]
 \node[box,fill=blue!5] (select) at (0,0)
- {Choose a feasible duration $\tau_t$\\Selected design method\\Start at $t=1$, $h_0=\varnothing$};
+ {Choose a feasible duration $\tau_k$\\Selected design method\\Start at $k=1$, $h_0=\varnothing$};
 \node[box,fill=blue!5] (grid) at (5.8,0)
  {Apply pulse to the power grid\\Unknown, fixed $\theta=(\mathbf M,\mathbf K)$\\Physical state carries between probes};
 \node[box,fill=blue!5] (observe) at (11.6,0)
- {Measure the response\\Observe noisy endpoint RoCoF $y_t$\\Response depends on $\theta$};
+ {Measure the response\\Observe noisy endpoint RoCoF $y_k$\\Response depends on $\theta$};
 \node[box,fill=gray!5] (history) at (11.6,-2.3)
- {Append design and observation\\$h_t=(h_{t-1},(\tau_t,y_t))$\\History retains all preceding probes};
+ {Append design and observation\\$h_k=(h_{k-1},(\tau_k,y_k))$\\History retains all preceding probes};
 \node[box,fill=green!5,minimum height=1.5cm] (posterior) at (5.8,-2.3)
- {Update parameter uncertainty\\$p(\theta\mid h_t)\propto$\\
- $p(y_t\mid\theta,h_{t-1},\tau_t)$\\$\times\,p(\theta\mid h_{t-1})$\\Initial belief: $p_0(\theta)$};
+ {Update parameter uncertainty\\$p(\theta\mid h_k)\propto$\\
+ $p(y_k\mid\theta,h_{k-1},\tau_k)$\\$\times\,p(\theta\mid h_{k-1})$\\Initial belief: $p_0(\theta)$};
 \node[box,fill=orange!6,minimum height=1.5cm] (next) at (0,-2.3)
  {Next adaptive design\\DAD, RL-sBOED: history\\Myopic, Step-DAD: history\\and particle posterior};
 \draw[flow] (select) -- (grid);
@@ -427,10 +427,10 @@ designs use the resulting history to select later probes.
 \draw[flow] (history) -- (posterior);
 \draw[flow] (posterior) -- node[note,above,text width=1.1cm] {Posterior} (next);
 \draw[flow] (history.south) -- (11.6,-3.65)
- -- node[note,pos=.5] {Observed history $h_t$} (0,-3.65) -- (next.south);
-\draw[flow] (next.north) -- node[note,left] {$t\leftarrow t+1$} (select.south);
+ -- node[note,pos=.5] {Observed history $h_k$} (0,-3.65) -- (next.south);
+\draw[flow] (next.north) -- node[note,left] {$k\leftarrow k+1$} (select.south);
 \node[note,anchor=north] at (5.8,-4.05)
- {Repeat while $t<T$. Aim: greater expected reduction in uncertainty about $M$ and $K$ at the same probe budget.};
+ {Repeat while $k<T$. Aim: greater expected reduction in uncertainty about $M$ and $K$ at the same probe budget.};
 \end{tikzpicture}
 \caption{Sequential probing and information feedback. Each response extends
 the history, which determines the posterior through the likelihood.
