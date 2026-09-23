@@ -69,7 +69,7 @@ steps, versus $4.2907\pm0.0368$ for Myopic, with mean online
 computation of 1.22 ms versus 10.00 s per sequence.
 These results support informative probing through offline-trained designs;
 online refinement shows no clear additional benefit in this setting.
-\textit{[IEEE9 results and the final cross-system conclusion pending.]}
+\textit{[Final IEEE9 Step-DAD $T=5$ comparison pending.]}
 \end{abstract}
 \begin{IEEEkeywords}
 Bayesian experimental design, power-system identification, adaptive probing,
@@ -355,29 +355,21 @@ provenance. Code: \url{https://github.com/alexschmidt123/objective_power_grid}.
 \clearpage
 \section{Results and Discussion}
 \label{sec:results}
-\noindent\textit{Draft status: IEEE14 results are measured; IEEE9 table
-zeros and empty plot panels remain placeholders. Both campaigns currently
-use three evaluation seeds; the five-seed target is incomplete.}
+\noindent\textit{Draft status: grid tables contain measured results;
+only IEEE9 Step-DAD $T=5$ remains pending. Grids currently have
+three evaluation seeds; SIR-ODE has five.}
 
 \subsection{Information Versus Number of Design Steps}
-\begin{table}[!ht]
-\caption{IEEE9 terminal sPCE (nats). Trained methods: mean $\pm$ sample
-SD across three training seeds. Random/Myopic: mean $\pm$ sample SD
-across evaluation-seed means (five planned; three currently complete).
-$L=128$; ceiling 4.8598.
-All zeros are placeholders, not results.}
-\label{tab:ieee9}
-\centering\small
-\begin{tabular}{lccc}
-\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-Fixed & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-Myopic & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-RL-sBOED & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-Step-DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\\bottomrule
-\end{tabular}
-\end{table}
+\begin{table}[!ht]\caption{IEEE9 terminal sPCE (nats), mean $\pm$ sample SD. Trained methods: three training-seed means; Random/Myopic: three evaluation-seed means. Step-DAD $T=5$ is incomplete. $L=128$; ceiling 4.8598.}\label{tab:ieee9}\centering\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lccc@{}}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
+Random & $0.4321\pm0.0310$ & $0.4924\pm0.0342$ & $0.5392\pm0.0471$\\
+Fixed & $2.0112\pm0.0116$ & $2.3192\pm0.0004$ & $2.5066\pm0.0013$\\
+Myopic & $1.9736\pm0.0438$ & $2.1707\pm0.0366$ & $2.2407\pm0.0547$\\
+DAD & $2.1366\pm0.0161$ & $2.4095\pm0.0080$ & $2.6351\pm0.0179$\\
+RL-sBOED & $2.1257\pm0.0027$ & $2.3963\pm0.0333$ & $2.5307\pm0.0114$\\
+Step-DAD & $2.1471\pm0.0110$ & $2.4382\pm0.0048$ & \textit{Pending}\\
+\bottomrule\end{tabular}\end{table}
+
 \begin{table}[!ht]
 \caption{IEEE14 terminal sPCE (nats), mean $\pm$ sample SD.
 Trained methods use three training-seed means; Random/Myopic use
@@ -393,9 +385,23 @@ DAD & $4.7576\pm0.0362$ & $4.8325\pm0.0047$ & $4.8443\pm0.0026$\\
 RL-sBOED & $4.7445\pm0.0022$ & $4.8275\pm0.0112$ & $4.8383\pm0.0108$\\
 Step-DAD & $4.7527\pm0.0275$ & $4.8297\pm0.0067$ & $4.8446\pm0.0042$\\
 \bottomrule\end{tabular}\end{table}
-\resultspace{2.3in}{Reserved for approximately 250 words:\\
-IEEE9 paired comparisons, dependence on the number of design steps, and training-seed variability.
-Use completed four-update Step-DAD results only.}
+On IEEE9, DAD exceeds Fixed by 0.1253, 0.0903 and 0.1286 nats
+at $T=3,4,5$, respectively. The observed Step-DAD gains over DAD
+are 0.0105 and 0.0287 nats at $T=3,4$; the three-training-seed
+$T=5$ comparison remains incomplete. IEEE9 scores stay farther from
+the estimator ceiling than IEEE14 scores. Runtime is reported within
+each platform: Table~\ref{tab:ieee9time} uses Ubuntu's RTX 5080;
+the pending migrated Step-DAD cell will require a separate hardware label.
+\begin{table}[!ht]\caption{IEEE9 mean online computation (seconds per complete sequence), Ubuntu RTX 5080.}\label{tab:ieee9time}\centering\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lccc@{}}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
+Random & 0.00007 & 0.00009 & 0.00012\\
+Fixed & 0.00052 & 0.00062 & 0.00077\\
+Myopic & 9.30817 & 12.57734 & 15.89200\\
+DAD & 0.00054 & 0.00068 & 0.00084\\
+RL-sBOED & 0.00049 & 0.00063 & 0.00076\\
+Step-DAD & 6.34247 & 15.80823 & \textit{Pending}\\
+\bottomrule\end{tabular}\end{table}
+
 
 \newpage
 For IEEE14, Table~\ref{tab:ieee14} shows higher mean sPCE for
@@ -418,7 +424,21 @@ methods and repeated evaluation for Random/Myopic.
 \subsection{Information Versus Online Computation}
 \begin{figure}[!ht]
 \centering
-\emptyresultplot{(a) IEEE9}{Online time (s/sequence; log scale)}{sPCE (nats)}{xmode=log,xmin=0.001,xmax=1000}
+\begin{tikzpicture}
+\begin{semilogxaxis}[width=0.98\columnwidth,height=2.0in,
+title={(a) IEEE9: $T=3,4,5$},title style={font=\small},
+xlabel={Online time (s/sequence)},ylabel={sPCE (nats)},
+xmin=0.00005,xmax=100,ymin=0,ymax=3,
+tick label style={font=\scriptsize},label style={font=\scriptsize},
+legend style={font=\tiny,at={(0.5,-0.35)},anchor=north,legend columns=3},
+grid=major,grid style={gray!20}]
+\addplot+[black,mark=o,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(0.00007145,0.43214422) +- (0,0.03096603) (0.00009445,0.49239726) +- (0,0.03416626) (0.00012119,0.53923611) +- (0,0.04708656)};\addlegendentry{Random}
+\addplot+[blue,mark=square,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(0.00052316,2.01122652) +- (0,0.01164503) (0.00062277,2.31917840) +- (0,0.00042862) (0.00076596,2.50656393) +- (0,0.00130762)};\addlegendentry{Fixed}
+\addplot+[orange!80!black,mark=triangle,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(9.30816641,1.97360205) +- (0,0.04382580) (12.57733692,2.17068114) +- (0,0.03659225) (15.89199993,2.24073785) +- (0,0.05468861)};\addlegendentry{Myopic}
+\addplot+[red,mark=*,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(0.00053701,2.13656963) +- (0,0.01614446) (0.00068319,2.40952139) +- (0,0.00797838) (0.00083806,2.63514481) +- (0,0.01791659)};\addlegendentry{DAD}
+\addplot+[teal,mark=diamond,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(0.00049159,2.12573521) +- (0,0.00273759) (0.00062626,2.39634374) +- (0,0.03329598) (0.00076391,2.53068190) +- (0,0.01136973)};\addlegendentry{RL-sBOED}
+\addplot+[violet,mark=x,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(6.34247410,2.14711260) +- (0,0.01095406) (15.80822840,2.43819801) +- (0,0.00480527)};\addlegendentry{Step-DAD}
+\end{semilogxaxis}\end{tikzpicture}
 \begin{tikzpicture}
 \begin{semilogxaxis}[width=0.98\columnwidth,height=2.0in,
 title={(b) IEEE14: $T=3,4,5$},title style={font=\small},
@@ -434,9 +454,10 @@ grid=major,grid style={gray!20}]
 \addplot+[teal,mark=diamond,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(0.00168412,4.74454216) +- (0,0.00223913) (0.00331039,4.82746201) +- (0,0.01122399) (0.00270814,4.83827537) +- (0,0.01078762)};\addlegendentry{RL-sBOED}
 \addplot+[violet,mark=x,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(9.11275457,4.75270046) +- (0,0.02745488) (23.24278100,4.82965673) +- (0,0.00674086) (44.69260655,4.84460957) +- (0,0.00415931)};\addlegendentry{Step-DAD}
 \end{semilogxaxis}\end{tikzpicture}
-\caption{Information versus online computation. IEEE9 remains a
-placeholder. IEEE14 points connect $T=3,4,5$ for each method on
-Grace A100; vertical bars show the SD defined in Table~\ref{tab:ieee14}.}
+\caption{Information versus online computation: IEEE9 on RTX 5080
+and IEEE14 on Grace A100. Connected points follow $T=3,4,5$;
+IEEE9 Step-DAD includes $T=3,4$ only. Bars use the SD definitions
+in Tables~\ref{tab:ieee9}--\ref{tab:ieee14}; compare times within a panel.}
 \label{fig:tradeoff}
 \end{figure}
 
@@ -489,7 +510,17 @@ demonstrate real-time feasibility for the online planners.
 \subsection{Optimization and Estimator Diagnostics}
 \begin{figure}[!ht]
 \centering
-\emptyresultplot{(a) IEEE9}{Training update}{Validation sPCE (nats)}{xmin=0,xmax=2000}
+\begin{tikzpicture}
+\begin{axis}[width=0.98\columnwidth,height=1.5in,
+title={(a) IEEE9, $T=3$},title style={font=\small},
+xlabel={Training update},ylabel={Validation sPCE (nats)},
+xmin=0,xmax=2000,ymin=0,ymax=3,
+tick label style={font=\scriptsize},label style={font=\scriptsize},
+grid=major,grid style={gray!20}]
+\addplot+[blue,mark=square,mark size=1pt,error bars/.cd,y dir=both,y explicit] coordinates {(0,1.6253716) +- (0,0.0736916) (100,1.7044916) +- (0,0.0700958) (200,1.7607497) +- (0,0.0658073) (300,1.7988502) +- (0,0.0642427) (400,1.8269565) +- (0,0.0679794) (500,1.8477837) +- (0,0.0730190) (600,1.8666953) +- (0,0.0799046) (700,1.8853827) +- (0,0.0868951) (800,1.9033551) +- (0,0.0926483) (900,1.9243339) +- (0,0.0982332) (1000,1.9435560) +- (0,0.1012520) (1100,1.9581644) +- (0,0.1052244) (1200,1.9692124) +- (0,0.1066106) (1300,1.9765496) +- (0,0.1066078) (1400,1.9815258) +- (0,0.1052657) (1500,1.9877926) +- (0,0.1008092) (1600,1.9936960) +- (0,0.0962275) (1700,1.9971703) +- (0,0.0921810) (1800,2.0029897) +- (0,0.0860336) (1900,2.0080637) +- (0,0.0807224) (2000,2.0147773) +- (0,0.0754525) };
+\addplot+[red,mark=*,mark size=1pt,error bars/.cd,y dir=both,y explicit] coordinates {(0,2.0163634) +- (0,0.0781377) (100,2.1716405) +- (0,0.0765703) (200,2.1938964) +- (0,0.0972557) (300,2.1931332) +- (0,0.1106115) (400,2.1905034) +- (0,0.1078583) (500,2.1924882) +- (0,0.0909910) (600,2.2081921) +- (0,0.1084485) (700,2.2046662) +- (0,0.1032304) (800,2.2063122) +- (0,0.0911712) (900,2.2096665) +- (0,0.0997505) (1000,2.2112905) +- (0,0.0976339) (1100,2.2154210) +- (0,0.1087907) (1200,2.2108924) +- (0,0.0961597) (1300,2.2004255) +- (0,0.0892013) (1400,2.2227146) +- (0,0.1347574) (1500,2.2301413) +- (0,0.1285934) (1600,2.2050604) +- (0,0.0805980) (1700,2.2237199) +- (0,0.1102263) (1800,2.2232881) +- (0,0.1234840) (1900,2.2335924) +- (0,0.1217143) (2000,2.2188058) +- (0,0.1066645) };
+\addplot+[teal,mark=diamond,mark size=1pt,error bars/.cd,y dir=both,y explicit] coordinates {(0,0.1281796) +- (0,0.0624556) (100,1.6131872) +- (0,0.2219524) (200,1.9380324) +- (0,0.0834448) (300,2.0228991) +- (0,0.1816286) (400,2.0854133) +- (0,0.2033030) (500,2.0990467) +- (0,0.1896730) (600,2.1255849) +- (0,0.1696070) (700,2.1629546) +- (0,0.1267324) (800,2.1691155) +- (0,0.1293486) (900,2.1829718) +- (0,0.1365095) (1000,2.1571353) +- (0,0.0955932) (1100,2.1709082) +- (0,0.0924709) (1200,2.1696186) +- (0,0.0941855) (1300,2.1467591) +- (0,0.0906350) (1400,2.1647795) +- (0,0.1251407) (1500,2.1471278) +- (0,0.1021962) (1600,2.1316212) +- (0,0.1091391) (1700,2.1392691) +- (0,0.1185547) (1800,2.1407332) +- (0,0.1356071) (1900,2.1454119) +- (0,0.1266718) (2000,2.1400327) +- (0,0.1137904) };
+\end{axis}\end{tikzpicture}
 \begin{tikzpicture}
 \begin{axis}[width=0.98\columnwidth,height=1.9in,
 title={(b) IEEE14, $T=3$},title style={font=\small},
@@ -502,20 +533,18 @@ grid=major,grid style={gray!20}]
 \addplot+[red,mark=*,mark size=1pt,error bars/.cd,y dir=both,y explicit] coordinates {(0,4.3056310) +- (0,0.0884842) (100,4.6054699) +- (0,0.0767474) (200,4.6520299) +- (0,0.0178238) (300,4.6521123) +- (0,0.0278241) (400,4.7250247) +- (0,0.0379395) (500,4.7386363) +- (0,0.0514131) (600,4.7362601) +- (0,0.0626278) (700,4.7335787) +- (0,0.0552164) (800,4.7646153) +- (0,0.0631625) (900,4.7214585) +- (0,0.0810713) (1000,4.6818032) +- (0,0.1175679) (1100,4.7152211) +- (0,0.0437546) (1200,4.7163271) +- (0,0.0298613) (1300,4.6454681) +- (0,0.0969027) (1400,4.7256597) +- (0,0.0457552) (1500,4.7385533) +- (0,0.0717775) (1600,4.7130738) +- (0,0.0640673) (1700,4.7142996) +- (0,0.0706896) (1800,4.7187608) +- (0,0.0691741) (1900,4.7196770) +- (0,0.0741207) (2000,4.7302000) +- (0,0.0571390) };\addlegendentry{DAD}
 \addplot+[teal,mark=diamond,mark size=1pt,error bars/.cd,y dir=both,y explicit] coordinates {(0,0.1056154) +- (0,0.0204537) (100,4.7388674) +- (0,0.0478719) (200,4.7293038) +- (0,0.0659883) (300,4.6940668) +- (0,0.0199181) (400,4.7216434) +- (0,0.0343805) (500,4.7266305) +- (0,0.0307746) (600,4.7609060) +- (0,0.0450490) (700,4.7450431) +- (0,0.0291426) (800,4.7624977) +- (0,0.0252877) (900,4.7691974) +- (0,0.0307367) (1000,4.7762294) +- (0,0.0428594) (1100,4.7618579) +- (0,0.0174054) (1200,4.7378003) +- (0,0.0191420) (1300,4.7180765) +- (0,0.0289507) (1400,4.6884590) +- (0,0.0365092) (1500,4.6927760) +- (0,0.0455855) (1600,4.6892406) +- (0,0.0165945) (1700,4.6720824) +- (0,0.0198717) (1800,4.6598243) +- (0,0.0835648) (1900,4.6492609) +- (0,0.0205563) (2000,4.6478596) +- (0,0.0817302) };\addlegendentry{RL-sBOED}
 \end{axis}\end{tikzpicture}
-\caption{Validation histories. IEEE9 remains a placeholder.
-IEEE14 $T=3$ curves show mean $\pm$ sample SD across three training
-seeds at each checkpoint. Step-DAD reuses the trained DAD policy.}
+\caption{Validation histories for IEEE9 and IEEE14 at $T=3$:
+mean $\pm$ sample SD across three training seeds. Both panels share
+the legend. Step-DAD reuses the trained DAD policy.}
 \label{fig:convergence}
 \end{figure}
 
-Figure~\ref{fig:convergence} reports the saved validation histories
-for IEEE14 at $T=3$. Policies are evaluated using their best validation
-checkpoint, rather than necessarily the last update. DAD begins from
-a validation-selected initialization, which can reuse the separately
-trained Fixed design. The plotted DAD update axis therefore omits
-that preceding cost; Table~\ref{tab:offline} reports it separately.
+Figure~\ref{fig:convergence} shows validation histories at $T=3$.
+Evaluation uses each policy's best validation checkpoint. DAD can
+initialize from the separately trained Fixed design; its update axis
+omits that preceding cost, reported separately in Table~\ref{tab:offline}.
 
-For training seed 101, the selected DAD and RL-sBOED checkpoints
+For IEEE14 training seed 101, the DAD and RL-sBOED checkpoints
 occur at updates 1,200 and 1,000, respectively, whereas Fixed selects
 update 2,000. Later updates need not improve validation utility.
 Neither a fixed update budget nor these curves establish convergence.
@@ -538,6 +567,44 @@ error and should not be conflated. Information gain alone establishes
 neither terminal-control safety nor field performance.
 
 \clearpage
+\subsection{Supplementary SIR-ODE Benchmark}
+SIR-ODE provides an additional benchmark for sequential measurement
+selection. Its susceptible--infected--recovered model uses a population
+of 500 with two initially infected individuals. Designs select increasing
+measurement times from 100 candidates; observations are noisy infected
+counts with Gaussian standard deviation 1.0. This historical experiment
+uses a precomputed simulation bank and 1,024 posterior-support particles.
+It reports posterior entropy reduction, with prior entropy
+$\log(1024)=6.9315$ nats, rather than the grid sPCE estimator.
+
+The archive contains three training seeds and five evaluation seeds,
+with 512 systems per evaluation. Random uses 32 design replicates per
+system, averaged within system before aggregation. Historical policy
+training uses a behavioral-cloning warm start and different optimizers
+from the grid experiment; checkpoint selection also includes a configured
+sequence-diversity preference. SIR is therefore a supplementary historical
+comparison, not a matched replication of the grid implementations.
+\begin{table}[!ht]\caption{SIR-ODE entropy reduction (nats), mean $\pm$ sample SD. DAD/RL-sBOED/Step-DAD: three training-seed means. Random/Myopic/Fixed: five evaluation-seed means after deduplicating identical copies across training seeds.}\label{tab:sir}\centering\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lccc@{}}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
+Random & $3.7783\pm0.0167$ & $3.8593\pm0.0167$ & $3.9241\pm0.0167$\\
+Fixed & $6.2816\pm0.0101$ & $6.4501\pm0.0091$ & $6.5360\pm0.0044$\\
+Myopic & $6.7108\pm0.0125$ & $6.7437\pm0.0124$ & $6.7596\pm0.0135$\\
+DAD & $6.8394\pm0.0087$ & $6.8591\pm0.0039$ & $6.8658\pm0.0077$\\
+RL-sBOED & $6.8494\pm0.0029$ & $6.8674\pm0.0020$ & $6.8814\pm0.0015$\\
+Step-DAD & $6.8438\pm0.0095$ & $6.8679\pm0.0011$ & $6.8761\pm0.0109$\\
+\bottomrule\end{tabular}\end{table}
+
+The DAD-family means exceed the baselines for all three design-step
+counts, but lie close to the finite-particle entropy ceiling. Small
+differences within that family do not establish superiority. The SIR
+Fixed sequence is calibrated once, so its uncertainty is across evaluation
+seeds; grid Fixed is independently fitted for each training seed.
+SIR timing includes observation lookup and posterior updates, with
+incompletely recorded historical hardware. It is not pooled with the
+grid decision timings. Full configurations, model files and per-run
+timings are retained in the companion result collection.
+
+\newpage
 \section{Conclusion}
 This paper formulates sequential power-grid probing as an information-driven
 design problem in which each observation informs the next duration and the
@@ -552,7 +619,7 @@ On IEEE14, the offline-trained DAD family yields higher mean sPCE
 than the three baselines at equal design-step counts. Four-update
 Step-DAD provides no clear gain over DAD while adding substantial
 online computation. Near-ceiling scores and the incomplete five-seed
-evaluation target limit the conclusions; the final IEEE9 comparison
+evaluation target limit the conclusions; the final IEEE9 Step-DAD $T=5$ comparison
 remains pending. Extensions include model mismatch and decision latency.
 Mixture-of-experts sequential design (MoE-sBOED) is optional future work
 outside the present six-method comparison.
