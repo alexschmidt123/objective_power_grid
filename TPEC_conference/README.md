@@ -5,10 +5,12 @@ Build from this folder with pdfLaTeX, BibTeX, then pdfLaTeX twice. The source us
 
 ## Paper organization
 
-- Pages 1–3: purpose, power-grid formulation, methods/pseudocode and experimental settings.
-- Page 4: aligned IEEE9/IEEE14 information tables, IEEE9 online timing and information-versus-computation plots.
-- Page 5: IEEE14 online/offline computation, grid validation histories and limitations.
-- Page 6: supplementary SIR-ODE protocol/results, conclusion and references.
+The paper flows naturally across six pages, without forced page or column breaks. IEEEtran margins and font sizes remain unchanged; display spacing is not stretched to fill columns, and the last page uses balanced columns.
+
+- Problem formulation: unknown M/K and grid dynamics, probe/observation model, feasible adaptive policies, then EIG and its finite-contrast approximation.
+- Results: aligned IEEE9/IEEE14 information tables and measured online/offline computation, followed by limitations and the supplementary SIR-ODE comparison.
+- Figure 1: directly labeled information and runtime panels at T=3, with the same method order throughout. Information panels show mean ± SD; runtime panels use a logarithmic axis and labels in ms/s. Tables retain T=3,4,5. Hardware is identified separately for each system.
+- The former Figure 2 is an optional optimization diagnostic, preserved as [validation histories](results/diagnostics/validation_histories.pdf) in the local result collection. It is omitted from the main six-page paper.
 
 All result tables use Random, Fixed, Myopic, DAD, RL-sBOED, Step-DAD row order and T=3,4,5 columns. IEEE9 Step-DAD T=5 remains pending until all three training-seed evaluations finish. Grid results currently contain three evaluation seeds; the five-seed target is incomplete. SIR has five evaluation seeds and a different finite-particle entropy estimator and historical training protocol, explicitly disclosed in the supplementary subsection. SIR Fixed uses evaluation-seed SD; grid Fixed uses training-seed SD.
 
