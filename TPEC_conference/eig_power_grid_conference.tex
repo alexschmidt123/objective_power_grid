@@ -1,8 +1,8 @@
 \documentclass[conference]{IEEEtran}
-\usepackage{cite,algorithmic,balance}
+\usepackage{cite,tikz,balance}
 \usepackage{amsmath,amssymb,amsfonts,booktabs,graphicx,textcomp,xcolor}
 \usepackage[hidelinks]{hyperref}
-\newcounter{algorithm}
+\usetikzlibrary{arrows.meta,positioning,calc}
 % All tables span exactly one IEEE column with shared typography.
 \newcommand{\papertablestyle}{\centering\small\setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{1.05}}
 \newcommand{\E}{\mathbb E}
@@ -239,8 +239,8 @@ evaluator's denominator only; it is never supplied to an online planner.
 All six methods select the same continuous probe duration from the
 feasible interval in~\eqref{eq:bounds}. They differ in whether they use
 observations, optimize online, or learn a policy offline. The following
-subsections specify how each decision is obtained; Algorithm~\ref{alg:probing}
-in the experimental settings summarizes the complete study workflow. These are application-specific adaptations
+subsections specify how each decision is obtained; Figure~\ref{fig:probing}
+in the experimental settings illustrates how probing provides parameter information. These are application-specific adaptations
 of existing methods, not a new design algorithm.
 
 
@@ -320,38 +320,71 @@ Equal design-step counts define the common probe budget. The systems
 share sensor and design constraints but use separate physical parameters
 and trained policies.
 
-Algorithm~\ref{alg:probing} organizes the experiment into offline
-preparation, sequential probing, and final scoring. Method-specific
-particle updates and policy refinement follow Section~III.
+Figure~\ref{fig:probing} links the physical experiment to parameter
+inference. Different values of $M$ and $K$ predict different responses
+to the same probe. An observation reweights these candidate explanations
+through their likelihood; informative probes separate them more clearly.
+Adaptive methods use the resulting history to select later durations.
 
-\begin{figure}[t]
-\small
-\refstepcounter{algorithm}\label{alg:probing}
-\hrule\smallskip
-\textbf{Algorithm \thealgorithm: Power-system probing workflow}
-\smallskip\hrule\smallskip
-\begin{algorithmic}[1]
-\REQUIRE Grid model, parameter prior, probe constraints, sensor model and design-step budget $T$
-\STATE Fix a common simulation and evaluation protocol for all six methods.
-\STATE Train offline designs/policies where needed; select checkpoints on validation cases and record training time.
-\STATE Generate evaluation systems and measurement-noise draws paired across methods; keep true parameters hidden from design methods.
-\FOR{each method and evaluation system}
-\STATE Initialize the grid at equilibrium, set $h_0=\varnothing$, and initialize method-specific planning state.
-\FOR{$t=1,\ldots,T$}
-\STATE Start the online decision timer.
-\STATE Use $h_{t-1}$ to update the planner or refine the policy if required by the selected method.
-\STATE Select a feasible probe duration $\tau_t\in[a_t,b_t]$; stop the decision timer.
-\STATE Apply the fixed-amplitude pulse at bus 1 and simulate the complete recording window.
-\STATE Collect the noisy endpoint-RoCoF observation $y_t$; append $(\tau_t,y_t)$ to the history.
-\STATE Carry the terminal grid state into the next design step without resetting.
-\ENDFOR
-\STATE Compute terminal sPCE separately; sum decision times over the sequence.
-\ENDFOR
-\STATE Aggregate information scores and computation times using the declared training/evaluation-seed groups.
-\ENSURE Information gained at equal probe budgets, offline training cost, and online decision cost
-\end{algorithmic}
-\smallskip\hrule
-\end{figure}
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,
+ box/.style={draw=black!65,rounded corners=2pt,align=center,
+ font=\small,inner sep=5pt,minimum height=1.15cm,text width=3.15cm},
+ flow/.style={-{Latex[length=2mm]},thick,draw=black!75},
+ note/.style={font=\footnotesize,align=center,fill=white,inner sep=2pt}]
+\node[box,fill=blue!5] (select) at (0,0)
+ {Select probe duration\\$\tau_t\in[a_t,b_t]$\\Using the chosen design method};
+\node[box,fill=blue!5] (pulse) at (4.25,0)
+ {Apply a power pulse\\Fixed bus and amplitude\\Duration $\tau_t$};
+\node[box,fill=blue!5] (grid) at (8.5,0)
+ {Power-grid response\\Unknown, fixed $M$ and $K$\\State carries between probes};
+\node[box,fill=blue!5] (observe) at (12.75,0)
+ {Measure the response\\Noisy endpoint RoCoF $y_t$\\One observation per probe};
+\draw[flow] (select) -- (pulse);
+\draw[flow] (pulse) -- (grid);
+\draw[flow] (grid) -- (observe);
+% Only observed history feeds back to the design method, never simulator truth.
+\draw[flow,dashed] (observe.south) -- (12.75,-1.4)
+ -- node[note,pos=.5] {Append $(\tau_t,y_t)$ to history $h_t$; use it for the next adaptive decision} (0,-1.4)
+ -- (select.south);
+\node[box,text width=3.15cm,minimum height=2.65cm,anchor=north,fill=gray!5] (prior) at (0,-2.05) {};
+\node[font=\small,align=center,anchor=north] at (0,-2.18)
+ {Prior uncertainty\\$p_0(\theta)$, $\theta=(\mathbf M,\mathbf K)$};
+\draw[thin,->] (-1.1,-4.03) -- (1.12,-4.03) node[right,font=\scriptsize] {$\theta_j$};
+\draw[thin,->] (-1.1,-4.03) -- (-1.1,-3.2);
+\draw[thick,gray!80!black] (-.92,-4.03) -- (-.92,-3.53) -- (.86,-3.53) -- (.86,-4.03);
+\node[box,text width=5.1cm,minimum height=2.65cm,anchor=north,fill=orange!6] (update) at (6.25,-2.05)
+ {Bayesian parameter update\\[3pt]
+ Compare predicted and observed responses\\[3pt]
+ $p(\theta\mid h_t)\propto$\\
+ $p(y_t\mid\theta,h_{t-1},\tau_t)\,p(\theta\mid h_{t-1})$\\[3pt]
+ Downweight values inconsistent with the data};
+\node[box,text width=3.4cm,minimum height=2.65cm,anchor=north,fill=green!5] (posterior) at (12.75,-2.05) {};
+\node[font=\small,align=center,anchor=north] at (12.75,-2.18)
+ {Posterior uncertainty\\$p(\theta\mid h_t)$};
+\draw[thin,->] (11.65,-4.03) -- (13.87,-4.03) node[right,font=\scriptsize] {$\theta_j$};
+\draw[thin,->] (11.65,-4.03) -- (11.65,-3.2);
+\draw[thick,green!40!black,domain=-1:1,samples=60]
+ plot ({12.7+\x},{-4.03+.77*exp(-\x*\x/.10)});
+\draw[flow] (prior.east) -- (update.west);
+\draw[flow] (update.east) -- (posterior.west);
+\draw[flow] (6.25,-1.4) -- (update.north);
+\node[note,anchor=north] at (6.25,-5.10)
+ {Aim: greater expected uncertainty reduction about $M$ and $K$ with the same $T$ probes.};
+\end{tikzpicture}
+\caption{How sequential probing provides information about latent grid
+parameters. The physical response depends on $M$ and $K$; observations
+update their relative plausibility through the likelihood. The dashed
+feedback path is used by adaptive methods; Random and Fixed do not
+condition their designs on observations. The lower row explains Bayesian
+information acquisition, not an explicit posterior calculation required
+of every policy: DAD and RL-sBOED act directly on history. Marginal-density
+sketches are illustrative, not measured results. Uncertainty reduction is
+an expectation over experiments, not guaranteed for every observation.
+Terminal sPCE and computation time are evaluated separately.}
+\label{fig:probing}
+\end{figure*}
 
 The swing equations are integrated by RK4 with step $1/640$ s.
 Numerical state/duration Jacobians use perturbations of $10^{-5}$
