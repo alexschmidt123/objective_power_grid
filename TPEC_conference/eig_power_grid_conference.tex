@@ -179,10 +179,10 @@ the response depends on the complete design sequence
 $\xi_{1:t}=(\xi_1,\ldots,\xi_t)$.
 
 Write $\Delta f_{1,t}(d;\theta,\xi_{1:t})$ for the resulting bus-1
-frequency deviation. The noise-free observation is the signed endpoint
-rate of change of frequency (RoCoF), denoted by $\mu_t$:
+frequency deviation. The noise-free response is the signed endpoint
+rate of change of frequency (RoCoF), denoted by $y_t$:
 \begin{equation}
-\mu_t(\theta,\xi_{1:t})=
+y_t(\theta,\xi_{1:t})=
 \frac{\Delta f_{1,t}(D_{\mathrm{obs}})-\Delta f_{1,t}(D_{\mathrm{obs}}-\Delta d_{\mathrm{samp}})}{\Delta d_{\mathrm{samp}}}.
 \label{eq:sensor}
 \end{equation}
@@ -190,7 +190,7 @@ The frequency arguments $\theta,\xi_{1:t}$ are suppressed in the
 numerator. With sampling interval $\Delta d_{\mathrm{samp}}=0.025$ s, the measured
 response follows
 \begin{equation}
-y_t=\mu_t(\theta,\xi_{1:t})+\epsilon_t,
+y_{\mathrm{obs},t}=y_t(\theta,\xi_{1:t})+\epsilon_t,
 \qquad \epsilon_t\sim\mathcal N(0,\sigma^2),
 \label{eq:noise}
 \end{equation}
@@ -201,7 +201,7 @@ idealized as zero in simulated time.
 \subsection{Sequential Decisions and Bayesian Updating}
 The observation model connects the physical experiment to inference and
 subsequent decisions. The data after step $t$ are the ordered design--observation
-history $h_t=((\xi_k,y_k))_{k=1}^{t}$, with $h_0=\varnothing$.
+history $h_t=((\xi_k,y_{\mathrm{obs},k}))_{k=1}^{t}$, with $h_0=\varnothing$.
 A policy $\pi$ selects $\xi_t$ using only observed history $h_{t-1}$,
 with amplitude and bus fixed as above. It has no access to true parameters
 or physical state. Feasible durations satisfy
@@ -220,13 +220,13 @@ discretizing durations. Let $\Pi$ denote the policies satisfying these constrain
 any policy randomness is independent of $\theta$.
 
 The observation model defines a Gaussian likelihood
-$p(y_t\mid\theta,h_{t-1},\xi_t)$ with mean
-$\mu_t(\theta,\xi_{1:t})$ and variance $\sigma^2$.
+$p(y_{\mathrm{obs},t}\mid\theta,h_{t-1},\xi_t)$ with mean
+$y_t(\theta,\xi_{1:t})$ and variance $\sigma^2$.
 Bayes' rule updates parameter uncertainty after each measurement:
 \begin{equation}
 p(\theta\mid h_t)=
-\frac{p(y_t\mid\theta,h_{t-1},\xi_t)\,p(\theta\mid h_{t-1})}
-{p(y_t\mid h_{t-1},\xi_t)}.
+\frac{p(y_{\mathrm{obs},t}\mid\theta,h_{t-1},\xi_t)\,p(\theta\mid h_{t-1})}
+{p(y_{\mathrm{obs},t}\mid h_{t-1},\xi_t)}.
 \label{eq:posterior}
 \end{equation}
 The denominator is the predictive density, obtained by integrating the
@@ -266,7 +266,7 @@ For any candidate $\theta$, define the observation likelihood along the
 realized sequence as
 \begin{equation}
 \mathcal L_t(\theta)=\prod_{k=1}^{t}
-p(y_k\mid\theta,h_{k-1},\xi_k).
+p(y_{\mathrm{obs},k}\mid\theta,h_{k-1},\xi_k).
 \label{eq:likelihood}
 \end{equation}
 The sampled information score is then
@@ -386,7 +386,7 @@ $T=3,4,5$. The planner never receives the evaluator's true parameters.
 
 For both Myopic and Step-DAD, assimilation is performed only when a
 subsequent decision requires it. No final planner update is needed
-after $y_T$ for this EIG experiment; terminal information is computed
+after $y_{\mathrm{obs},T}$ for this EIG experiment; terminal information is computed
 separately by the evaluator using~\eqref{eq:spce}.
 
 \section{Experimental Settings}
@@ -412,12 +412,12 @@ designs use the resulting history to select later probes.
 \node[box,fill=blue!5] (grid) at (5.8,0)
  {Apply pulse to the power grid\\Unknown, fixed $\theta=(\mathbf M,\mathbf K)$\\Physical state carries between probes};
 \node[box,fill=blue!5] (observe) at (11.6,0)
- {Measure the response\\Observe noisy endpoint RoCoF $y_t$\\Response depends on $\theta$};
+ {Measure the response\\Observe noisy endpoint RoCoF $y_{\mathrm{obs},t}$\\Response depends on $\theta$};
 \node[box,fill=gray!5] (history) at (11.6,-2.3)
- {Append design and observation\\$h_t=(h_{t-1},(\xi_t,y_t))$\\History retains all preceding probes};
+ {Append design and observation\\$h_t=(h_{t-1},(\xi_t,y_{\mathrm{obs},t}))$\\History retains all preceding probes};
 \node[box,fill=green!5,minimum height=1.5cm] (posterior) at (5.8,-2.3)
  {Update parameter uncertainty\\$p(\theta\mid h_t)\propto$\\
- $p(y_t\mid\theta,h_{t-1},\xi_t)$\\$\times\,p(\theta\mid h_{t-1})$\\Initial belief: $p_0(\theta)$};
+ $p(y_{\mathrm{obs},t}\mid\theta,h_{t-1},\xi_t)$\\$\times\,p(\theta\mid h_{t-1})$\\Initial belief: $p_0(\theta)$};
 \node[box,fill=orange!6,minimum height=1.5cm] (next) at (0,-2.3)
  {Next adaptive design\\DAD, RL-sBOED: history\\Myopic, Step-DAD: history\\and particle posterior};
 \draw[flow] (select) -- (grid);
