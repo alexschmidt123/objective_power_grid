@@ -269,10 +269,8 @@ to an online planner.
 \section{Compared Design Methods}
 All six methods select the same continuous probe duration from the
 feasible interval in~\eqref{eq:bounds}. They differ in whether they use
-observations, optimize online, or learn a policy offline. The following
-subsections specify how each decision is obtained; Figure~\ref{fig:probing}
-in the experimental settings illustrates how probing provides parameter information. These are application-specific adaptations
-of existing methods, not a new design algorithm.
+observations, optimize online, or learn a policy offline. Figure~\ref{fig:probing} illustrates the experimental workflow.
+These are application-specific adaptations of existing methods.
 Table~\ref{tab:methods} distinguishes adaptation to observations from
 myopic optimization of only the next probe.
 
@@ -284,8 +282,8 @@ sequence; Random has no information objective (N/A).}
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
 \toprule Method & Adaptive & Myopic & Optimization\\\midrule
 Random & No & N/A & None\\
-Fixed~\cite{foster2021dad} & No & No & Offline\\
-Myopic~\cite{foster2021dad} & Yes & Yes & Online\\
+Fixed~\cite{huan2016sequential} & No & No & Offline\\
+Myopic~\cite{huan2016sequential} & Yes & Yes & Online\\
 DAD~\cite{foster2021dad} & Yes & No & Offline\\
 RL-sBOED~\cite{blau2022rlsboed} & Yes & No & Offline\\
 Step-DAD~\cite{hedman2025stepdad} & Yes & No & Both\\
@@ -304,7 +302,7 @@ the remaining feasible interval, not over complete ordered sequences.
 It ignores observations and requires no offline training.
 
 Fixed is a static Bayesian design: all durations are optimized jointly
-before observations are collected~\cite[Sec.~2]{foster2021dad}.
+before observations are collected~\cite[Sec.~2.4]{huan2016sequential}.
 Our implementation optimizes the ordered sequence using terminal sPCE.
 It compares short, central, long and spread interior initializations
 using validation, then optimizes the selected initialization. Each
@@ -314,7 +312,7 @@ Fixed executes that sequence without adapting to observations.
 \subsection{Online One-Step Design: Myopic}
 Myopic follows conventional adaptive BOED, maximizing the expected
 information from the next observation under the current
-posterior~\cite[Sec.~2.1]{foster2021dad}. Our implementation maintains
+posterior~\cite[Sec.~2.4]{huan2016sequential}. Our implementation maintains
 a weighted particle approximation to this posterior. Before each decision after the first, particles propagate
 their own states under the preceding duration and update likelihood
 weights using the latest observation. Continuous search then maximizes
