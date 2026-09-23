@@ -238,47 +238,12 @@ evaluator's denominator only; it is never supplied to an online planner.
 \section{Compared Design Methods}
 All six methods select the same continuous probe duration from the
 feasible interval in~\eqref{eq:bounds}. They differ in whether they use
-observations, optimize online, or learn a policy offline. Algorithm~\ref{alg:probing}
-summarizes their evaluation procedure; the following subsections specify
-how each decision is obtained. These are application-specific adaptations
+observations, optimize online, or learn a policy offline. The following
+subsections specify how each decision is obtained; Algorithm~\ref{alg:probing}
+in the experimental settings summarizes the complete study workflow. These are application-specific adaptations
 of existing methods, not a new design algorithm.
 
-\begin{figure}[t]
-\small
-\refstepcounter{algorithm}\label{alg:probing}
-\hrule\smallskip
-\textbf{Algorithm \thealgorithm: Evaluate one probe sequence}
-\smallskip\hrule\smallskip
-\begin{algorithmic}[1]
-\REQUIRE Method $\mathsf M$, prior $p_0$, steps $T$, selected offline model if needed
-\STATE Set $h_0=\varnothing$; initialize the physical system once.
-\IF{$\mathsf M\in\{\mathrm{Myopic},\mathrm{Step\mbox{-}DAD}\}$}
-\STATE Initialize 128 prior particles, their states and equal weights.
-\ENDIF
-\IF{$\mathsf M=\mathrm{Step\mbox{-}DAD}$}
-\STATE Set episode policy $\phi$ to the matching DAD checkpoint.
-\ENDIF
-\FOR{$t=1,\ldots,T$}
-\IF{$t>1$ and $\mathsf M\in\{\mathrm{Myopic},\mathrm{Step\mbox{-}DAD}\}$}
-\STATE Propagate particles under $\tau_{t-1}$; update their weights with $y_{t-1}$.
-\ENDIF
-\IF{$\mathsf M=\mathrm{Random}$}
-\STATE Draw $u_t\sim\mathcal U(0,1)$ and map it to $\tau_t\in[a_t,b_t]$.
-\ELSIF{$\mathsf M=\mathrm{Myopic}$}
-\STATE Search feasible durations for maximum expected one-step information.
-\ELSE
-\IF{$\mathsf M=\mathrm{Step\mbox{-}DAD}$ and $t>1$}
-\STATE Refine $\phi$ on posterior future simulations for four updates; keep the conditional-validation-best candidate, including the unchanged policy.
-\ENDIF
-\STATE Evaluate the Fixed/DAD/RL-sBOED model or $\phi$; map its output to $\tau_t\in[a_t,b_t]$.
-\ENDIF
-\STATE Apply the pulse; carry the physical state to window end and observe $y_t$.
-\STATE Append $(\tau_t,y_t)$ to form $h_t$.
-\ENDFOR
-\ENSURE History $h_T$; score terminal sPCE separately.
-\end{algorithmic}
-\smallskip\hrule
-\end{figure}
+
 
 \subsection{Nonadaptive Designs: Random and Fixed}
 Random samples a unit action uniformly and applies the common feasible
@@ -354,6 +319,39 @@ IEEE14. Each step applies one probe and collects one observation.
 Equal design-step counts define the common probe budget. The systems
 share sensor and design constraints but use separate physical parameters
 and trained policies.
+
+Algorithm~\ref{alg:probing} organizes the experiment into offline
+preparation, sequential probing, and final scoring. Method-specific
+particle updates and policy refinement follow Section~III.
+
+\begin{figure}[t]
+\small
+\refstepcounter{algorithm}\label{alg:probing}
+\hrule\smallskip
+\textbf{Algorithm \thealgorithm: Power-system probing workflow}
+\smallskip\hrule\smallskip
+\begin{algorithmic}[1]
+\REQUIRE Grid model, parameter prior, probe constraints, sensor model and design-step budget $T$
+\STATE Fix a common simulation and evaluation protocol for all six methods.
+\STATE Train offline designs/policies where needed; select checkpoints on validation cases and record training time.
+\STATE Generate evaluation systems and measurement-noise draws paired across methods; keep true parameters hidden from design methods.
+\FOR{each method and evaluation system}
+\STATE Initialize the grid at equilibrium, set $h_0=\varnothing$, and initialize method-specific planning state.
+\FOR{$t=1,\ldots,T$}
+\STATE Start the online decision timer.
+\STATE Use $h_{t-1}$ to update the planner or refine the policy if required by the selected method.
+\STATE Select a feasible probe duration $\tau_t\in[a_t,b_t]$; stop the decision timer.
+\STATE Apply the fixed-amplitude pulse at bus 1 and simulate the complete recording window.
+\STATE Collect the noisy endpoint-RoCoF observation $y_t$; append $(\tau_t,y_t)$ to the history.
+\STATE Carry the terminal grid state into the next design step without resetting.
+\ENDFOR
+\STATE Compute terminal sPCE separately; sum decision times over the sequence.
+\ENDFOR
+\STATE Aggregate information scores and computation times using the declared training/evaluation-seed groups.
+\ENSURE Information gained at equal probe budgets, offline training cost, and online decision cost
+\end{algorithmic}
+\smallskip\hrule
+\end{figure}
 
 The swing equations are integrated by RK4 with step $1/640$ s.
 Numerical state/duration Jacobians use perturbations of $10^{-5}$
