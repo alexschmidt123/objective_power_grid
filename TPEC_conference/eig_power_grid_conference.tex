@@ -64,10 +64,12 @@ reduced IEEE9 and IEEE14 models under matched probing constraints.
 The primary comparison is a contrastive lower bound on information gain
 at a fixed number of design steps; training-seed variability and computational
 cost are also assessed.
-\textit{[Results: insert the main quantitative comparisons at equal probe
-counts, including uncertainty.]}
-\textit{[Conclusion: state what the results establish about acquiring more
-parameter information with a fixed probe budget.]}
+On IEEE14, DAD achieves $4.7576\pm0.0362$ nats at three design
+steps, versus $4.2907\pm0.0368$ for Myopic, with mean online
+computation of 1.22 ms versus 10.00 s per sequence.
+These results support informative probing through offline-trained designs;
+online refinement shows no clear additional benefit in this setting.
+\textit{[IEEE9 results and the final cross-system conclusion pending.]}
 \end{abstract}
 \begin{IEEEkeywords}
 Bayesian experimental design, power-system identification, adaptive probing,
@@ -343,21 +345,19 @@ not episode-level dispersion. The five-seed target (1001--1005) remains
 incomplete: current conference records contain only 1001--1003.
 Evaluation seed 1001 informed development and is not untouched test data.
 
-Offline training and online decision time are reported separately.
-Online time sums all decisions, including posterior updates and refinement,
-but excludes evaluator sPCE scoring. IEEE9 uses an RTX 5080 and IEEE14
-uses a Grace A100; runtimes are compared within each hardware platform.
-Resolved configurations, source hashes, checkpoints and episode scores
-record provenance. Code is available at
-\url{https://github.com/alexschmidt123/objective_power_grid}.
+Offline and online computation are reported separately in
+Section~V-C. IEEE14 timings use a Grace A100. IEEE9 uses an RTX 5080,
+except the final Step-DAD $T=5$ seed on a FASTER A100; hardware labels
+are retained. Configurations, source hashes and checkpoints preserve
+provenance. Code: \url{https://github.com/alexschmidt123/objective_power_grid}.
 
-% Draft reservation: two full pages; no performance values are asserted.
+% Two-page results budget: verified IEEE14 values; IEEE9 placeholders remain.
 \clearpage
 \section{Results and Discussion}
 \label{sec:results}
-\noindent\textit{Results pending. This two-page area is reserved for completed
-IEEE9/IEEE14 comparisons. All zero-valued table entries are placeholders,
-not measured results. Empty axes contain no experimental data.}
+\noindent\textit{Draft status: IEEE14 results are measured; IEEE9 table
+zeros and empty plot panels remain placeholders. Both campaigns currently
+use three evaluation seeds; the five-seed target is incomplete.}
 
 \subsection{Information Versus Number of Design Steps}
 \begin{table}[!ht]
@@ -379,62 +379,149 @@ Step-DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\\bottomrule
 \end{tabular}
 \end{table}
 \begin{table}[!ht]
-\caption{IEEE14 terminal sPCE (nats), using the same aggregation and
-contrast count as Table~\ref{tab:ieee9}. All zeros are placeholders.}
+\caption{IEEE14 terminal sPCE (nats), mean $\pm$ sample SD.
+Trained methods use three training-seed means; Random/Myopic use
+three evaluation-seed means. $L=128$; ceiling 4.8598.}
 \label{tab:ieee14}
-\centering\small
-\begin{tabular}{lccc}
+\centering\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lccc@{}}
 \toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-Fixed & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-Myopic & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-RL-sBOED & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-Step-DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\\bottomrule
-\end{tabular}
-\end{table}
+Random & $0.7541\pm0.0047$ & $0.8360\pm0.0297$ & $0.8464\pm0.0252$\\
+Fixed & $4.2623\pm0.0402$ & $4.4946\pm0.0345$ & $4.6624\pm0.0083$\\
+Myopic & $4.2907\pm0.0368$ & $4.3990\pm0.0177$ & $4.4641\pm0.0280$\\
+DAD & $4.7576\pm0.0362$ & $4.8325\pm0.0047$ & $4.8443\pm0.0026$\\
+RL-sBOED & $4.7445\pm0.0022$ & $4.8275\pm0.0112$ & $4.8383\pm0.0108$\\
+Step-DAD & $4.7527\pm0.0275$ & $4.8297\pm0.0067$ & $4.8446\pm0.0042$\\
+\bottomrule\end{tabular}\end{table}
 \resultspace{2.3in}{Reserved for approximately 250 words:\\
 IEEE9 paired comparisons, dependence on the number of design steps, and training-seed variability.
 Use completed four-update Step-DAD results only.}
 
 \newpage
-\resultspace{2.6in}{Reserved for approximately 280 words:\\
-IEEE14 paired comparisons and cross-system interpretation.
-Distinguish retraining variability from evaluation-seed variability for Random/Myopic.
-Discuss the distance to the contrastive ceiling.}
+For IEEE14, Table~\ref{tab:ieee14} shows higher mean sPCE for
+DAD, RL-sBOED and Step-DAD than for Random, Fixed or Myopic at
+every design-step count. At $T=3$, DAD exceeds Myopic by 0.4669 nats
+and Fixed by 0.4953 nats. The comparison fixes the number of probes,
+so the gain comes from selecting more informative experiments within
+the same probe budget. Fixed exceeds Myopic at $T=4,5$; observation
+adaptation alone therefore does not guarantee a stronger design.
+
+The DAD-family means are close to one another. Step-DAD changes the
+DAD mean by $-0.0049$, $-0.0028$ and $+0.0003$ nats for
+$T=3,4,5$, respectively. These small differences do not establish an
+advantage for online refinement. At $T=5$, DAD lies only 0.0155 nats
+below the 4.8598-nat estimator ceiling. Finite-contrast saturation can
+compress method differences; these scores neither measure exact EIG
+nor establish a reliable ranking within the DAD family. The SDs
+describe distinct sources of variation: retraining for learned/fitted
+methods and repeated evaluation for Random/Myopic.
 \subsection{Information Versus Online Computation}
 \begin{figure}[!ht]
 \centering
 \emptyresultplot{(a) IEEE9}{Online time (s/sequence; log scale)}{sPCE (nats)}{xmode=log,xmin=0.001,xmax=1000}
-\emptyresultplot{(b) IEEE14}{Online time (s/sequence; log scale)}{sPCE (nats)}{xmode=log,xmin=0.001,xmax=1000}
-\caption{Information and online computation on the stated hardware.
-Empty plot placeholders; numerical axis ranges, measured points and
-uncertainty will be added with the results.}
+\begin{tikzpicture}
+\begin{semilogxaxis}[width=0.98\columnwidth,height=2.0in,
+title={(b) IEEE14: $T=3,4,5$},title style={font=\small},
+xlabel={Online time (s/sequence)},ylabel={sPCE (nats)},
+xmin=0.0001,xmax=100,ymin=0,ymax=5.2,
+tick label style={font=\scriptsize},label style={font=\scriptsize},
+legend style={font=\tiny,at={(0.5,-0.35)},anchor=north,legend columns=3},
+grid=major,grid style={gray!20}]
+\addplot+[black,mark=o,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(0.00016082,0.75408529) +- (0,0.00466976) (0.00020919,0.83595225) +- (0,0.02968383) (0.00030929,0.84642699) +- (0,0.02516271)};\addlegendentry{Random}
+\addplot+[blue,mark=square,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(0.00116260,4.26229350) +- (0,0.04016309) (0.00148064,4.49461337) +- (0,0.03452018) (0.00274627,4.66237770) +- (0,0.00826762)};\addlegendentry{Fixed}
+\addplot+[orange!80!black,mark=triangle,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(9.99967671,4.29074713) +- (0,0.03682720) (13.43718091,4.39902970) +- (0,0.01767393) (16.93535403,4.46405460) +- (0,0.02801615)};\addlegendentry{Myopic}
+\addplot+[red,mark=*,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(0.00122492,4.75757614) +- (0,0.03619873) (0.00141623,4.83249166) +- (0,0.00467960) (0.00192723,4.84430296) +- (0,0.00263090)};\addlegendentry{DAD}
+\addplot+[teal,mark=diamond,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(0.00168412,4.74454216) +- (0,0.00223913) (0.00331039,4.82746201) +- (0,0.01122399) (0.00270814,4.83827537) +- (0,0.01078762)};\addlegendentry{RL-sBOED}
+\addplot+[violet,mark=x,mark size=1.8pt,error bars/.cd,y dir=both,y explicit] coordinates {(9.11275457,4.75270046) +- (0,0.02745488) (23.24278100,4.82965673) +- (0,0.00674086) (44.69260655,4.84460957) +- (0,0.00415931)};\addlegendentry{Step-DAD}
+\end{semilogxaxis}\end{tikzpicture}
+\caption{Information versus online computation. IEEE9 remains a
+placeholder. IEEE14 points connect $T=3,4,5$ for each method on
+Grace A100; vertical bars show the SD defined in Table~\ref{tab:ieee14}.}
 \label{fig:tradeoff}
 \end{figure}
 
 \clearpage
-\resultspace{2.8in}{Reserved for approximately 300 words:\\
-Interpret Fig.~\ref{fig:tradeoff}; quantify Step-DAD's incremental information
-and online cost relative to its matching DAD. Include measured offline
-training costs. Compare runtimes within each hardware platform.}
+\subsection{Measured Computational Cost}
+Online cost is the wall-clock time summed over all $T$ decisions in
+one experimental sequence, averaged over evaluation episodes and then
+training seeds where applicable. It includes action selection, posterior
+updates needed for subsequent decisions, Myopic search and Step-DAD
+refinement. It excludes the simulated physical response, observation
+acquisition and evaluator sPCE scoring. These are computational timings,
+not end-to-end physical experiment durations.
+
+\begin{table}[!ht]\caption{IEEE14 mean online computation (seconds per complete sequence), Grace A100.}\label{tab:online}\centering\small
+\begin{tabular}{lccc}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
+Random & 0.00016 & 0.00021 & 0.00031\\
+Fixed & 0.00116 & 0.00148 & 0.00275\\
+Myopic & 9.99968 & 13.43718 & 16.93535\\
+DAD & 0.00122 & 0.00142 & 0.00193\\
+RL-sBOED & 0.00168 & 0.00331 & 0.00271\\
+Step-DAD & 9.11275 & 23.24278 & 44.69261\\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[!ht]\caption{IEEE14 mean recorded offline training time (hours per training seed), Grace A100.}\label{tab:offline}\centering\small
+\begin{tabular}{lccc}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
+Random & 0.000 & 0.000 & 0.000\\
+Fixed & 1.877 & 2.750 & 3.691\\
+Myopic & 0.000 & 0.000 & 0.000\\
+DAD & 1.894 & 2.725 & 3.626\\
+RL-sBOED & 0.170 & 0.204 & 0.248\\
+Step-DAD & \multicolumn{3}{c}{Reuses matching DAD checkpoint}\\
+\bottomrule\end{tabular}\end{table}
+
+The offline timer includes initialization selection, optimization,
+periodic validation and checkpoint writes. DAD's reported stage time
+excludes the separately incurred Fixed training used for initialization;
+a joint Fixed--DAD workflow must include both costs. Step-DAD reuses
+that DAD checkpoint and incurs its additional work online.
+
+At $T=5$, DAD requires 1.93 ms online per sequence, compared with
+16.94 s for Myopic and 44.69 s for Step-DAD
+(Table~\ref{tab:online}). Thus the near-identical DAD/Step-DAD scores
+have markedly different computational costs. Offline training amortizes
+design computation over repeated experiments, but this benefit depends
+on how often a trained policy is reused and on the physical deadline.
+The current simulation assumes zero decision latency; it does not
+demonstrate real-time feasibility for the online planners.
+
+\newpage
 \subsection{Optimization and Estimator Diagnostics}
 \begin{figure}[!ht]
 \centering
 \emptyresultplot{(a) IEEE9}{Training update}{Validation sPCE (nats)}{xmin=0,xmax=2000}
-\emptyresultplot{(b) IEEE14}{Training update}{Validation sPCE (nats)}{xmin=0,xmax=2000}
-\caption{Optimization histories for the completed campaigns.
-Empty plot placeholders; validation curves, training-seed variation and
-selected-checkpoint markers remain to be inserted.}
+\begin{tikzpicture}
+\begin{axis}[width=0.98\columnwidth,height=1.9in,
+title={(b) IEEE14, $T=3$},title style={font=\small},
+xlabel={Training update},ylabel={Validation sPCE (nats)},
+xmin=0,xmax=2000,ymin=0,ymax=5.2,
+tick label style={font=\scriptsize},label style={font=\scriptsize},
+legend style={font=\tiny,at={(0.5,-0.35)},anchor=north,legend columns=3},
+grid=major,grid style={gray!20}]
+\addplot+[blue,mark=square,mark size=1pt,error bars/.cd,y dir=both,y explicit] coordinates {(0,3.9061991) +- (0,0.0868147) (100,3.9333902) +- (0,0.0815965) (200,3.9522837) +- (0,0.0757670) (300,3.9610601) +- (0,0.0915069) (400,3.9833604) +- (0,0.1241011) (500,4.0042730) +- (0,0.1325330) (600,4.0226995) +- (0,0.1328080) (700,4.0379336) +- (0,0.1157790) (800,4.0610399) +- (0,0.1248890) (900,4.0814990) +- (0,0.1344850) (1000,4.1060193) +- (0,0.1368746) (1100,4.1201481) +- (0,0.1297757) (1200,4.1532199) +- (0,0.0953707) (1300,4.1884867) +- (0,0.0552903) (1400,4.2186252) +- (0,0.0552328) (1500,4.2471761) +- (0,0.0691570) (1600,4.2561537) +- (0,0.0835177) (1700,4.2595591) +- (0,0.0746662) (1800,4.2709001) +- (0,0.0674634) (1900,4.2849761) +- (0,0.0785196) (2000,4.2892776) +- (0,0.1112231) };\addlegendentry{Fixed}
+\addplot+[red,mark=*,mark size=1pt,error bars/.cd,y dir=both,y explicit] coordinates {(0,4.3056310) +- (0,0.0884842) (100,4.6054699) +- (0,0.0767474) (200,4.6520299) +- (0,0.0178238) (300,4.6521123) +- (0,0.0278241) (400,4.7250247) +- (0,0.0379395) (500,4.7386363) +- (0,0.0514131) (600,4.7362601) +- (0,0.0626278) (700,4.7335787) +- (0,0.0552164) (800,4.7646153) +- (0,0.0631625) (900,4.7214585) +- (0,0.0810713) (1000,4.6818032) +- (0,0.1175679) (1100,4.7152211) +- (0,0.0437546) (1200,4.7163271) +- (0,0.0298613) (1300,4.6454681) +- (0,0.0969027) (1400,4.7256597) +- (0,0.0457552) (1500,4.7385533) +- (0,0.0717775) (1600,4.7130738) +- (0,0.0640673) (1700,4.7142996) +- (0,0.0706896) (1800,4.7187608) +- (0,0.0691741) (1900,4.7196770) +- (0,0.0741207) (2000,4.7302000) +- (0,0.0571390) };\addlegendentry{DAD}
+\addplot+[teal,mark=diamond,mark size=1pt,error bars/.cd,y dir=both,y explicit] coordinates {(0,0.1056154) +- (0,0.0204537) (100,4.7388674) +- (0,0.0478719) (200,4.7293038) +- (0,0.0659883) (300,4.6940668) +- (0,0.0199181) (400,4.7216434) +- (0,0.0343805) (500,4.7266305) +- (0,0.0307746) (600,4.7609060) +- (0,0.0450490) (700,4.7450431) +- (0,0.0291426) (800,4.7624977) +- (0,0.0252877) (900,4.7691974) +- (0,0.0307367) (1000,4.7762294) +- (0,0.0428594) (1100,4.7618579) +- (0,0.0174054) (1200,4.7378003) +- (0,0.0191420) (1300,4.7180765) +- (0,0.0289507) (1400,4.6884590) +- (0,0.0365092) (1500,4.6927760) +- (0,0.0455855) (1600,4.6892406) +- (0,0.0165945) (1700,4.6720824) +- (0,0.0198717) (1800,4.6598243) +- (0,0.0835648) (1900,4.6492609) +- (0,0.0205563) (2000,4.6478596) +- (0,0.0817302) };\addlegendentry{RL-sBOED}
+\end{axis}\end{tikzpicture}
+\caption{Validation histories. IEEE9 remains a placeholder.
+IEEE14 $T=3$ curves show mean $\pm$ sample SD across three training
+seeds at each checkpoint. Step-DAD reuses the trained DAD policy.}
 \label{fig:convergence}
 \end{figure}
 
-\newpage
-\resultspace{3.2in}{Reserved for approximately 350 words:\\
-Interpret Fig.~\ref{fig:convergence}, initialization effects and optimization
-stability. Report contrast-count or planner-particle sensitivity only when
-verified measurements exist. A score below the ceiling does not by itself
-establish estimator accuracy.}
+Figure~\ref{fig:convergence} reports the saved validation histories
+for IEEE14 at $T=3$. Policies are evaluated using their best validation
+checkpoint, rather than necessarily the last update. DAD begins from
+a validation-selected initialization, which can reuse the separately
+trained Fixed design. The plotted DAD update axis therefore omits
+that preceding cost; Table~\ref{tab:offline} reports it separately.
+
+For training seed 101, the selected DAD and RL-sBOED checkpoints
+occur at updates 1,200 and 1,000, respectively, whereas Fixed selects
+update 2,000. Later updates need not improve validation utility.
+Neither a fixed update budget nor these curves establish convergence.
+Contrast-count and planner-particle sensitivity remain to be tested;
+being below the sPCE ceiling does not establish estimator accuracy.
+
 \subsection{Scope and Limitations}
 The reduced lossless network, independent priors and scalar sensor restrict
 the conclusions to the stated simulation model. Parameter distributions
@@ -447,10 +534,8 @@ alongside its validation history.
 The reported score is a finite-contrast lower bound, so estimator saturation
 can conceal information differences. Online inference also uses a finite
 particle population. These approximation errors differ from ODE integration
-error and should not be conflated. Finally, zero decision latency is a
-simulation assumption. A method's online runtime must be compared with
-the intended physical deadline before deployment; information gain alone
-does not establish terminal-control safety or field performance.
+error and should not be conflated. Information gain alone establishes
+neither terminal-control safety nor field performance.
 
 \clearpage
 \section{Conclusion}
@@ -463,7 +548,12 @@ information and online decision time makes the costs and benefits of
 adaptation explicit. The resulting framework supports reproducible
 assessment on reduced IEEE9 and IEEE14 systems without equating a high
 contrastive score with exact information gain or operational readiness.
-Extensions include robustness to model mismatch and decision latency.
+On IEEE14, the offline-trained DAD family yields higher mean sPCE
+than the three baselines at equal design-step counts. Four-update
+Step-DAD provides no clear gain over DAD while adding substantial
+online computation. Near-ceiling scores and the incomplete five-seed
+evaluation target limit the conclusions; the final IEEE9 comparison
+remains pending. Extensions include model mismatch and decision latency.
 Mixture-of-experts sequential design (MoE-sBOED) is optional future work
 outside the present six-method comparison.
 
