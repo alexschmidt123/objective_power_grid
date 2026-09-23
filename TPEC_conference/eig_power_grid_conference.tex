@@ -85,43 +85,52 @@ IEEE14, examining the benefit of adaptive decisions and planning over the
 complete sequence. Online runtime is a separate trade-off.
 
 \section{Problem Formulation}\label{sec:problem}
-We seek probe durations that reveal the unknown inertia and effective
-frequency-response coefficients with a fixed budget of $T$ experiments.
-Each experiment supplies one observation, which can inform the next
-duration. The model below specifies what is unknown, how a probe produces
-data, and which information objective the design policy maximizes.
+Our objective is to learn unknown power-system parameters by choosing
+informative probes within a fixed budget of $T$ design steps. At each
+step, a probe is applied, its response is observed, and the accumulated
+data can guide the next design. Throughout this section, $t=1,\ldots,T$
+indexes design steps, whereas $s$ denotes physical time within a probe
+window. The design variable $\tau_t$ is the duration of probe $t$.
 
-\subsection{Unknown Parameters and Grid Dynamics}
-Let $m$ denote the number of retained machines and define
-$\theta=(M_1,\ldots,M_m,K_1,\ldots,K_m)$.
-The parameters remain fixed throughout an experimental sequence, with
-independent priors $M_i\sim\mathcal U(0.7\bar M_i,1.3\bar M_i)$ and
-$K_i\sim\mathcal U(0.1\bar K_i,\bar K_i)$. The reduced dynamics are
-\begin{align}
-\dot\delta_i &= \omega_i,\label{eq:angle}\\
-M_i\dot\omega_i &= v_i-\left(D_i+\frac{K_i}{2\pi}\right)\omega_i
- \nonumber\\[-1pt]
-&\quad-\sum_{j=1}^{m}B_{ij}\sin(\delta_i-\delta_j).
+\subsection{Unknown Parameters and Power-System Model}
+For a reduced network with $m$ machines, the unknown parameter vector is
+$\theta=(M_1,\ldots,M_m,K_1,\ldots,K_m)$, where $M_i$ and $K_i$
+are inertia and effective frequency-response coefficients. The prior
+$p_0(\theta)$ has independent components
+$M_i\sim\mathcal U(0.7\bar M_i,1.3\bar M_i)$ and
+$K_i\sim\mathcal U(0.1\bar K_i,\bar K_i)$.
+One draw of $\theta$ remains fixed throughout all $T$ probes.
+
+Let $\delta_i$ be rotor angle, $\omega_i$ angular-speed deviation,
+and $v_i$ the applied probing power. The reduced swing model is
+\begin{equation}
+\begin{aligned}
+\dot\delta_i &= \omega_i,\\
+M_i\dot\omega_i
+ &= v_i-\left(D_i+\frac{K_i}{2\pi}\right)\omega_i\\
+ &\quad-\sum_{j=1}^{m}B_{ij}\sin(\delta_i-\delta_j).
+\end{aligned}
 \label{eq:swing}
-\end{align}
-Here $\delta_i$ is rotor angle, $\omega_i$ is angular-speed deviation,
-and $\Delta f_i=\omega_i/(2\pi)$ is frequency deviation in Hz.
-The input $v_i$ is probing power; $D_i$ is known damping.
-The units of $M_i$, $K_i$ and $D_i$ are pu$\,\mathrm{s}^2$/rad,
-pu/Hz and pu$\,\mathrm{s}$/rad, respectively, on a 100-MVA base
-at nominal frequency 60 Hz. All initial angles and speed deviations
-are zero. Net mechanical injections are zero in this deviation model,
-so the initial unforced state is an equilibrium.
+\end{equation}
+Dots denote physical-time derivatives. The damping $D_i$ and network
+couplings $B_{ij}$ are known; frequency deviation is
+$\Delta f_i=\omega_i/(2\pi)$ in Hz. The units of $M_i$, $K_i$ and
+$D_i$ are pu$\,\mathrm{s}^2$/rad, pu/Hz and pu$\,\mathrm{s}$/rad,
+respectively, on a 100-MVA base at nominal frequency 60 Hz.
+All angles and speed deviations start at zero. Net mechanical injections
+are zero in this deviation model, making the initial unforced state an
+equilibrium.
 
 IEEE9 retains buses 1, 2 and 3; IEEE14 retains buses 1, 2, 3, 6 and 8.
-Reactances from the test cases~\cite{zimmerman2011matpower} define a
-lossless Laplacian $L$. Eliminating algebraic buses $l$ and retaining
-machines $g$ gives $L_{\mathrm r}=L_{gg}-L_{gl}L_{ll}^{-1}L_{lg}$,
-with $B_{ij}=-(L_{\mathrm r})_{ij}$ for $i\ne j$ and $B_{ii}=0$.
+Test-case reactances~\cite{zimmerman2011matpower} define a lossless
+Laplacian $\mathbf L$. Eliminating algebraic buses $l$ while retaining
+machines $g$ gives
+$\mathbf L_{\mathrm{red}}=\mathbf L_{gg}-\mathbf L_{gl}\mathbf L_{ll}^{-1}\mathbf L_{lg}$,
+with $B_{ij}=-(\mathbf L_{\mathrm{red}})_{ij}$ for $i\ne j$ and $B_{ii}=0$.
 Resistance, voltage dynamics and transformer tap effects are omitted.
-Table~\ref{tab:physical} gives the prior scales and fixed damping,
-rounded for display; configurations retain full precision.
-Training and evaluation draw independent systems from the same prior.
+Table~\ref{tab:physical} lists the prior scales and damping, rounded
+for display; configurations retain full precision. Training and evaluation
+sample independent parameter realizations from the same prior.
 \begin{table}[t]
 \caption{Machine-specific prior scales and fixed damping.}
 \label{tab:physical}
@@ -138,102 +147,124 @@ IEEE14 & 1 & 0.0212207 & 0.0784314 & 0.0021221\\
 \end{tabular*}
 \end{table}
 
-\subsection{Experiments and Conditional Observations}
-At design step $t$, the input at bus 1 is a raised-cosine pulse with
-duration $\tau_t$ and fixed amplitude $A=0.05$ pu. In local window time
-$r\in[0,W]$, it is
+\subsection{Probe Design and Observation Model}
+Each experiment applies a raised-cosine power pulse at bus 1 with fixed
+amplitude $A=0.05$ pu and selected duration $\tau_t$:
 \begin{equation}
-v_{1,t}(r)=
+v_{1,t}(s)=
 \begin{cases}
-\dfrac A2[1-\cos(2\pi r/\tau_t)],&0\le r\le\tau_t,\\
-0,&\tau_t<r\le W.
+\dfrac{A}{2}\bigl[1-\cos(2\pi s/\tau_t)\bigr],&0\le s\le\tau_t,\\
+0,&\tau_t<s\le W.
 \end{cases}
 \label{eq:probe}
 \end{equation}
-All other probing inputs are zero. Every window lasts $W=3.5$ s.
-Writing $\mathbf x=(\boldsymbol\delta,\boldsymbol\omega)$, the
-window-end state is $\mathbf x_t=\Phi_\theta(\mathbf x_{t-1},\tau_t;W)$,
-with $\mathbf x_0=\mathbf0$. The next window starts immediately from
-$\mathbf x_t$; the system is initialized only once.
+All other probing inputs are zero. Each observation window lasts
+$W=3.5$ s. The full angle and speed state at its end becomes the initial
+state of the next window, without resetting the system. Consequently,
+the response to probe $t$ depends on the complete duration sequence
+$\tau_{1:t}=(\tau_1,\ldots,\tau_t)$.
 
-Let $f_{1,t}(r;\theta,\tau_{1:t})$ denote the simulated frequency
-deviation within window $t$, including the state left by earlier probes.
-The sensor measures signed endpoint rate of change of frequency (RoCoF):
-\begin{align}
-g_t(\theta,\tau_{1:t})
- &=\frac{f_{1,t}(W)-f_{1,t}(W-\Delta r)}{\Delta r},\label{eq:sensor}\\
-y_t&=g_t(\theta,\tau_{1:t})+e_t,
-\quad e_t\sim\mathcal N(0,\sigma^2).\label{eq:noise}
-\end{align}
-The frequency arguments in the numerator are suppressed for readability;
-$\Delta r=0.025$ s and $\sigma=0.005$ Hz/s. Noise is independent across
-windows. Thus $p(y_t\mid\theta,h_{t-1},\tau_t)$ is Gaussian with mean
-$g_t$ and variance $\sigma^2$. It depends on the complete duration
-history through the carried physical state. Observations arrive at window
-end; decision latency is idealized as zero in simulated time.
-
-\subsection{Feasible Adaptive Designs}
-The ordered history is $h_t=((\tau_k,y_k))_{k=1}^{t}$, with
-$h_0=\varnothing$. A causal policy chooses $\tau_t$ from $h_{t-1}$;
-it cannot observe $\theta$ or the true physical state.
-Durations must lie in $[0.2,3]$ s and increase by at least
-$\varepsilon=0.01$ s. Define
+Write $\Delta f_{1,t}(s;\theta,\tau_{1:t})$ for the resulting bus-1
+frequency deviation. The noise-free observation is the signed endpoint
+rate of change of frequency (RoCoF), denoted by $\mu_t$:
 \begin{equation}
-a_t=\begin{cases}0.2,&t=1,\\\tau_{t-1}+\varepsilon,&t>1,\end{cases}
-\qquad b_t=3-(T-t)\varepsilon.
+\mu_t(\theta,\tau_{1:t})=
+\frac{\Delta f_{1,t}(W)-\Delta f_{1,t}(W-\Delta s)}{\Delta s}.
+\label{eq:sensor}
+\end{equation}
+The frequency arguments $\theta,\tau_{1:t}$ are suppressed in the
+numerator. With sampling interval $\Delta s=0.025$ s, the measured
+response follows
+\begin{equation}
+y_t=\mu_t(\theta,\tau_{1:t})+\epsilon_t,
+\qquad \epsilon_t\sim\mathcal N(0,\sigma^2),
+\label{eq:noise}
+\end{equation}
+where $\sigma=0.005$ Hz/s and noise is independent across windows.
+Each observation becomes available at window end. Decision latency is
+idealized as zero in simulated time.
+
+\subsection{Sequential Decisions and Bayesian Updating}
+The available data after step $t$ are the ordered design--observation
+history $h_t=((\tau_k,y_k))_{k=1}^{t}$, with $h_0=\varnothing$.
+A policy $\pi$ selects each duration using only $h_{t-1}$; it has no
+access to the true parameters or physical state. Feasible durations satisfy
+\begin{equation}
+\begin{aligned}
+0.2&\le\tau_t\le3, &&t=1,\ldots,T,\\
+\tau_t-\tau_{t-1}&\ge d_{\min}, &&t=2,\ldots,T,
+\end{aligned}
 \label{eq:bounds}
 \end{equation}
-All methods use $\tau_t=a_t+(b_t-a_t)u_t$, where $u_t\in[0,1]$.
-This map reserves room for the remaining design steps without sorting
-completed histories or discretizing durations. Let $\Pi$ be the class
-of causal policies satisfying these constraints; any policy randomization
-is independent of the unknown parameters.
+where $d_{\min}=0.01$ s. At step $t$, the upper limit is tightened to
+$3-(T-t)d_{\min}$ to leave room for the remaining probes; the lower
+limit is $0.2$ initially and $\tau_{t-1}+d_{\min}$ thereafter.
+All methods map a unit action into this interval without sorting or
+discretizing durations. Let $\Pi$ denote the policies satisfying these constraints;
+any policy randomness is independent of $\theta$.
 
-\subsection{Information Objective and Its Approximation}
-After observing $h_t$, Bayesian updating gives
+The observation model defines a Gaussian likelihood
+$p(y_t\mid\theta,h_{t-1},\tau_t)$ with mean
+$\mu_t(\theta,\tau_{1:t})$ and variance $\sigma^2$.
+Bayes' rule updates parameter uncertainty after each measurement:
 \begin{equation}
-p(\theta\mid h_t)\propto p_0(\theta)
-\prod_{k=1}^{t}p(y_k\mid\theta,h_{k-1},\tau_k).
+p(\theta\mid h_t)=
+\frac{p(y_t\mid\theta,h_{t-1},\tau_t)\,p(\theta\mid h_{t-1})}
+{p(y_t\mid h_{t-1},\tau_t)}.
 \label{eq:posterior}
 \end{equation}
-Each candidate parameter vector propagates its own state under the
-observed durations when evaluating this likelihood. Policy action
-probabilities cancel in the posterior because, conditional on the
-observed history, actions contain no additional access to $\theta$.
+The denominator is the predictive density, obtained by integrating the
+numerator over $\theta$, and $p(\theta\mid h_0)=p_0(\theta)$.
+Each candidate parameter vector propagates its own physical state under
+the observed durations to evaluate the likelihood. Conditional on the
+history, design selection provides no additional knowledge of $\theta$;
+policy probabilities therefore cancel from the Bayesian update.
 
-The design objective is the expected information gained about $\theta$
-after all $T$ observations:
-\begin{align}
-J_T(\pi)&=\E_{\theta,h_T\mid\pi}
- \left[\log\frac{p(\theta\mid h_T)}{p_0(\theta)}\right],
- \label{eq:eig}\\
-\pi^\star&\in\operatorname*{arg\,max}_{\pi\in\Pi}\,J_T(\pi).
+\subsection{Expected Information Gain and Design Objective}
+We measure the information supplied by a complete experiment through
+the Kullback--Leibler divergence of the posterior from the prior.
+The expected information gain (EIG) of policy $\pi$ is
+\begin{equation}
+\mathcal I_T(\pi)=\E_{h_T\mid\pi}
+\!\left[D_{\mathrm{KL}}\bigl(p(\theta\mid h_T)\,\|\,p_0(\theta)\bigr)\right].
+\label{eq:eig}
+\end{equation}
+Here $D_{\mathrm{KL}}(p\|q)=\int p(\theta)\log[p(\theta)/q(\theta)]\,d\theta$;
+natural logarithms express information in nats. The expectation averages
+over parameter draws, measurement noise and any policy randomness.
+The sequential Bayesian design problem is
+\begin{equation}
+\pi^\star\in\operatorname*{arg\,max}_{\pi\in\Pi}\mathcal I_T(\pi).
 \label{eq:design_problem}
-\end{align}
-The expectation averages parameter, observation and policy randomness.
-This is an objective for the complete sequence: every method receives
-the same $T$ probes, while its offline and online computational costs
-are assessed separately.
+\end{equation}
+Thus all methods receive the same number of probes and seek greater
+expected reduction in parameter uncertainty. Offline and online
+computation are measured separately from this information objective.
 
-The marginal likelihood required by exact EIG is not tractable here.
-We therefore use the sequential prior-contrastive (sPCE) lower
-bound~\cite{foster2021dad}. Draw $\theta^{(0)}$ from the prior to
-generate a trajectory and draw $L$ independent prior contrasts
-$\theta^{(1)},\ldots,\theta^{(L)}$. Define their trajectory likelihoods
-and the resulting score by
-\begin{align}
-q_t^{(n)}&=\prod_{k=1}^{t}
- p(y_k\mid\theta^{(n)},h_{k-1},\tau_k),\\
-\widehat I_t&=\log\frac{q_t^{(0)}}
- {\frac{1}{L+1}\sum_{n=0}^{L}q_t^{(n)}}.
+Exact EIG requires intractable marginal likelihoods. We use the sequential
+prior-contrastive (sPCE) lower bound~\cite{foster2021dad} for training and
+evaluation. Let $\theta^{(0)}\sim p_0$ generate the observed history and
+let $\theta^{(1)},\ldots,\theta^{(L)}$ be independent prior contrasts.
+For any candidate $\theta$, define the observation likelihood along the
+realized sequence as
+\begin{equation}
+\mathcal L_t(\theta)=\prod_{k=1}^{t}
+p(y_k\mid\theta,h_{k-1},\tau_k).
+\label{eq:likelihood}
+\end{equation}
+The sampled information score is then
+\begin{equation}
+\widehat I_t=\log\frac{\mathcal L_t(\theta^{(0)})}
+{\frac{1}{L+1}\sum_{\ell=0}^{L}\mathcal L_t(\theta^{(\ell)})}.
 \label{eq:spce}
-\end{align}
-Likelihoods are computed in the log domain. The mean score estimates
-a lower bound on $J_T$, whereas an individual score can be negative.
-The score cannot exceed $\log(L+1)$: with the conference setting
-$L=128$, this ceiling is 4.8598 nats. Near-ceiling scores can conceal
-differences in true EIG. The generating parameter appears in the
-evaluator's denominator only; it is never supplied to an online planner.
+\end{equation}
+Likelihoods are evaluated in the log domain. Averaging $\widehat I_T$
+over simulated sequences estimates a lower bound on $\mathcal I_T(\pi)$;
+it does not estimate exact EIG. Individual scores can be negative but
+cannot exceed $\log(L+1)$. With $L=128$, this ceiling is 4.8598 nats,
+so near-ceiling scores can conceal differences in true EIG.
+The generating parameter is used only by the evaluator, never supplied
+to an online planner.
 
 \section{Compared Design Methods}
 All six methods select the same continuous probe duration from the
@@ -284,8 +315,8 @@ Fixed training; the full workflow incurs both costs.
 
 RL-sBOED uses a REDQ-style actor--critic adaptation with ten critics
 and five replay updates per trajectory batch. The actor has two
-128-unit ReLU layers. Its rewards are
-$r_t=\widehat I_t-\widehat I_{t-1}$, with $\widehat I_0=0$ and
+128-unit ReLU layers. Its per-step information rewards are
+$R_t=\widehat I_t-\widehat I_{t-1}$, with $\widehat I_0=0$ and
 discount $\gamma=1$, so their sum is terminal sPCE. Training therefore
 accounts for future design steps without differentiating through the
 simulator. Entropy regularization uses normalized tanh actions and
