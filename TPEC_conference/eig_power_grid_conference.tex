@@ -91,8 +91,9 @@ to the stated models and sensor.
 
 \section{Problem Formulation}\label{sec:problem}
 We seek informative probes within a budget of $T$ design steps.
-Here $t=1,\ldots,T$ indexes decisions, $s$ denotes physical time within
-a probe window, and $\tau_t$ is the selected probe duration.
+Here $t=1,\ldots,T$ indexes decisions, $t_{\mathrm{loc}}$ is elapsed
+physical time since the start of the current probe window, and $\tau_t$
+is the selected probe duration.
 
 \subsection{Unknown Parameters and Power-System Model}
 For a reduced network with $m$ machines, the unknown parameter vector is
@@ -114,7 +115,7 @@ M_i\dot\omega_i
 \end{aligned}
 \label{eq:swing}
 \end{equation}
-Dots denote physical-time derivatives. The damping $D_i$ and network
+Dots denote derivatives with respect to physical time $t_{\mathrm{loc}}$. The damping $D_i$ and network
 couplings $B_{ij}$ are known; frequency deviation is
 $\Delta f_i=\omega_i/(2\pi)$ in Hz. The units of $M_i$, $K_i$ and
 $D_i$ are pu$\,\mathrm{s}^2$/rad, pu/Hz and pu$\,\mathrm{s}$/rad,
@@ -166,10 +167,10 @@ To obtain information about these parameters, each experiment applies a
 raised-cosine power pulse at bus 1 with fixed
 amplitude $A=0.05$ pu and selected duration $\tau_t$:
 \begin{equation}
-v_{1,t}(s)=
+v_{1,t}(t_{\mathrm{loc}})=
 \begin{cases}
-\dfrac{A}{2}\bigl[1-\cos(2\pi s/\tau_t)\bigr],&0\le s\le\tau_t,\\
-0,&\tau_t<s\le W.
+\dfrac{A}{2}\bigl[1-\cos(2\pi t_{\mathrm{loc}}/\tau_t)\bigr],&0\le t_{\mathrm{loc}}\le\tau_t,\\
+0,&\tau_t<t_{\mathrm{loc}}\le W.
 \end{cases}
 \label{eq:probe}
 \end{equation}
@@ -179,16 +180,16 @@ state of the next window, without resetting the system. Consequently,
 the response to probe $t$ depends on the complete duration sequence
 $\tau_{1:t}=(\tau_1,\ldots,\tau_t)$.
 
-Write $\Delta f_{1,t}(s;\theta,\tau_{1:t})$ for the resulting bus-1
+Write $\Delta f_{1,t}(t_{\mathrm{loc}};\theta,\tau_{1:t})$ for the resulting bus-1
 frequency deviation. The noise-free observation is the signed endpoint
 rate of change of frequency (RoCoF), denoted by $\mu_t$:
 \begin{equation}
 \mu_t(\theta,\tau_{1:t})=
-\frac{\Delta f_{1,t}(W)-\Delta f_{1,t}(W-\Delta s)}{\Delta s}.
+\frac{\Delta f_{1,t}(W)-\Delta f_{1,t}(W-\Delta t_{\mathrm{samp}})}{\Delta t_{\mathrm{samp}}}.
 \label{eq:sensor}
 \end{equation}
 The frequency arguments $\theta,\tau_{1:t}$ are suppressed in the
-numerator. With sampling interval $\Delta s=0.025$ s, the measured
+numerator. With sampling interval $\Delta t_{\mathrm{samp}}=0.025$ s, the measured
 response follows
 \begin{equation}
 y_t=\mu_t(\theta,\tau_{1:t})+\epsilon_t,
