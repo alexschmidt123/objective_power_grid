@@ -359,9 +359,14 @@ not episode-level dispersion. The five-seed target (1001--1005) remains
 incomplete: current conference records contain only 1001--1003.
 Evaluation seed 1001 informed development and is not untouched test data.
 
-Computation is reported in Section~\ref{sec:cost}. IEEE9 training seed
-101 uses an A100; seeds 202/303 and current online timings use an RTX
-5080. IEEE14 uses A100s. We keep these timing groups separate.
+The project uses NVIDIA GeForce RTX 5080 and RTX 4090 workstations
+and NVIDIA A100 cluster GPUs for development and experiments.
+The reported grid timing runs use RTX 5080 and A100 GPUs; the RTX 4090
+is the development platform. Computation is reported in
+Section~\ref{sec:cost}. IEEE9 offline times average runs across RTX 5080
+and A100 GPUs, while IEEE14 uses A100s. Current online timings use
+RTX 5080 for IEEE9 and A100 for IEEE14. These are recorded workflow
+costs, not a controlled comparison of runtime between networks.
 Configurations, source hashes and checkpoints preserve provenance.
 Code: \url{https://github.com/alexschmidt123/objective_power_grid}.
 
@@ -439,38 +444,25 @@ not end-to-end physical experiment durations.
 
 \begin{figure*}[t]
 \centering
-\begin{minipage}{0.325\textwidth}\centering
-\begin{tikzpicture}\begin{axis}[width=\linewidth,height=1.75in,
-title={(a) IEEE9: training seed 101},title style={font=\small},
+\begin{minipage}{0.49\textwidth}\centering
+\begin{tikzpicture}\begin{axis}[width=0.94\linewidth,height=1.75in,
+title={(a) IEEE9},title style={font=\small},
 xlabel={Number of design steps $T$},ylabel={Offline training (h)},
 xmin=2.8,xmax=5.2,xtick={3,4,5},ymin=0,ymax=4,ytick={0,1,2,3,4},
 tick label style={font=\footnotesize},label style={font=\footnotesize},
 grid=major,grid style={gray!20},legend columns=3,
 legend style={font=\footnotesize},legend to name=offlinelegend]
-\addplot[blue!75!black,mark=o,mark size=3.4pt,thick,dashed] coordinates {(3,0.55417601) (4,0.80200089) (5,1.06261734)};
+\addplot[blue!75!black,mark=o,mark size=3.4pt,thick,dashed] coordinates {(3,0.96043018) (4,1.39614438) (5,1.82729535)};
 \addlegendentry{Fixed}
-\addplot[red!75!black,mark=square*,mark size=2.4pt,thick] coordinates {(3,0.56186976) (4,0.80561770) (5,1.07650202)};
+\addplot[red!75!black,mark=square*,mark size=2.4pt,thick] coordinates {(3,0.95653613) (4,1.39262961) (5,1.83098319)};
 \addlegendentry{DAD}
-\addplot[teal!80!black,mark=triangle*,mark size=2.4pt,thick] coordinates {(3,0.10000015) (4,0.11689896) (5,0.12863530)};
+\addplot[teal!80!black,mark=triangle*,mark size=2.4pt,thick] coordinates {(3,0.12018501) (4,0.15151291) (5,0.18039754)};
 \addlegendentry{RL-sBOED}
 \end{axis}\end{tikzpicture}\end{minipage}
 \hfill
-\begin{minipage}{0.325\textwidth}\centering
-\begin{tikzpicture}\begin{axis}[width=\linewidth,height=1.75in,
-title={(b) IEEE9: seeds 202/303},title style={font=\small},
-xlabel={Number of design steps $T$},ylabel={Offline training (h)},
-xmin=2.8,xmax=5.2,xtick={3,4,5},ymin=0,ymax=4,ytick={0,1,2,3,4},
-tick label style={font=\footnotesize},label style={font=\footnotesize},
-grid=major,grid style={gray!20},legend columns=3,
-legend style={font=\footnotesize},]
-\addplot[blue!75!black,mark=o,mark size=3.4pt,thick,dashed] coordinates {(3,1.16355727) (4,1.69321612) (5,2.20963435)};
-\addplot[red!75!black,mark=square*,mark size=2.4pt,thick] coordinates {(3,1.15386932) (4,1.68613556) (5,2.20822377)};
-\addplot[teal!80!black,mark=triangle*,mark size=2.4pt,thick] coordinates {(3,0.13027744) (4,0.16881989) (5,0.20627866)};
-\end{axis}\end{tikzpicture}\end{minipage}
-\hfill
-\begin{minipage}{0.325\textwidth}\centering
-\begin{tikzpicture}\begin{axis}[width=\linewidth,height=1.75in,
-title={(c) IEEE14: three training seeds},title style={font=\small},
+\begin{minipage}{0.49\textwidth}\centering
+\begin{tikzpicture}\begin{axis}[width=0.94\linewidth,height=1.75in,
+title={(b) IEEE14},title style={font=\small},
 xlabel={Number of design steps $T$},ylabel={Offline training (h)},
 xmin=2.8,xmax=5.2,xtick={3,4,5},ymin=0,ymax=4,ytick={0,1,2,3,4},
 tick label style={font=\footnotesize},label style={font=\footnotesize},
@@ -481,10 +473,9 @@ legend style={font=\footnotesize},]
 \addplot[teal!80!black,mark=triangle*,mark size=2.4pt,thick] coordinates {(3,0.16963987) (4,0.20441651) (5,0.24838703)};
 \end{axis}\end{tikzpicture}\end{minipage}
 \par\smallskip\pgfplotslegendfromname{offlinelegend}
-\caption{Offline training cost at $T=3,4,5$. Panel (a) reports IEEE9 seed 101; (b) averages seeds 202/303;
-(c) averages three IEEE14 training seeds. Lines show recorded stage-time
-means, not confidence intervals. Random/Myopic require no offline training;
-Step-DAD reuses DAD. DAD stage time excludes the preceding Fixed training:
+\caption{Mean recorded offline training time across three training seeds
+at $T=3,4,5$. Random/Myopic require no offline training; Step-DAD
+reuses DAD. DAD stage time excludes the preceding Fixed training:
 add Fixed and DAD costs for the complete initialization/training workflow.}
 \label{fig:offline}
 \end{figure*}
@@ -538,8 +529,7 @@ each panel.}
 \end{figure*}
 
 Figures~\ref{fig:offline} and~\ref{fig:online} separate offline training
-from online computation across all three design-step counts. IEEE9
-training times are split by hardware rather than pooled across hosts.
+from online computation across all three design-step counts.
 The offline timer includes initialization selection, optimization,
 periodic validation and checkpoint writes. DAD's reported stage time
 excludes the separately incurred Fixed training used for initialization;
