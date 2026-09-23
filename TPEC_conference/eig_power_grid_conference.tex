@@ -91,8 +91,8 @@ to the stated models and sensor.
 
 \section{Problem Formulation}\label{sec:problem}
 We seek informative probes within a budget of $T$ design steps.
-Here $t=1,\ldots,T$ indexes design steps, $t_{\mathrm{probe}}$ denotes
-elapsed time within each probe window, and $d_t$ is the selected
+Here $t=1,\ldots,T$ indexes design steps, $d$ denotes
+elapsed time within each probe window, and $D_t$ is the selected
 pulse duration.
 
 \subsection{Unknown Parameters and Power-System Model}
@@ -115,7 +115,7 @@ M_i\dot\omega_i
 \end{aligned}
 \label{eq:swing}
 \end{equation}
-Dots denote derivatives with respect to physical time $t_{\mathrm{probe}}$. The damping $D_i$ and network
+Dots denote derivatives with respect to physical time $d$. The damping $D_i$ and network
 couplings $B_{ij}$ are known; frequency deviation is
 $\Delta f_i=\omega_i/(2\pi)$ in Hz. The units of $M_i$, $K_i$ and
 $D_i$ are pu$\,\mathrm{s}^2$/rad, pu/Hz and pu$\,\mathrm{s}$/rad,
@@ -163,31 +163,31 @@ IEEE14 & 1 & 0.0212207 & 0.0784314 & 0.0021221\\
 \end{table}
 
 \subsection{Probe Design and Observation Model}
-The probe design is $\xi_t=(\mathrm{amp}_t,b_t,d_t)$: amplitude,
-injection bus and pulse duration. This study fixes $\mathrm{amp}_t=0.05$ pu
-and $b_t=1$; only $d_t$ is optimized. The raised-cosine input for
-$0\le t_{\mathrm{probe}}\le d_t$ is
+The probe design is $\xi_t=(A_t,B_t,D_t)$: amplitude,
+injection bus and pulse duration. This study fixes $A_t=0.05$ pu
+and $B_t=1$; only $D_t$ is optimized. The raised-cosine input for
+$0\le d\le D_t$ is
 \begin{equation}
-v_{b_t,t}(t_{\mathrm{probe}})
- =\frac{\mathrm{amp}_t}{2}\bigl[1-\cos(2\pi t_{\mathrm{probe}}/d_t)\bigr].
+v_{B_t,t}(d)
+ =\frac{A_t}{2}\bigl[1-\cos(2\pi d/D_t)\bigr].
 \label{eq:probe}
 \end{equation}
-The input is zero for $d_t<t_{\mathrm{probe}}\le T_{\mathrm{probe}}$
-and at all other buses. The observation window is $T_{\mathrm{probe}}=3.5$ s. The full angle and speed state at its end becomes the initial
+The input is zero for $D_t<d\le D_{\mathrm{obs}}$
+and at all other buses. The observation window is $D_{\mathrm{obs}}=3.5$ s. The full angle and speed state at its end becomes the initial
 state of the next window, without resetting the system. Consequently,
 the response depends on the complete design sequence
 $\xi_{1:t}=(\xi_1,\ldots,\xi_t)$.
 
-Write $\Delta f_{1,t}(t_{\mathrm{probe}};\theta,\xi_{1:t})$ for the resulting bus-1
+Write $\Delta f_{1,t}(d;\theta,\xi_{1:t})$ for the resulting bus-1
 frequency deviation. The noise-free observation is the signed endpoint
 rate of change of frequency (RoCoF), denoted by $\mu_t$:
 \begin{equation}
 \mu_t(\theta,\xi_{1:t})=
-\frac{\Delta f_{1,t}(T_{\mathrm{probe}})-\Delta f_{1,t}(T_{\mathrm{probe}}-\Delta t_{\mathrm{samp}})}{\Delta t_{\mathrm{samp}}}.
+\frac{\Delta f_{1,t}(D_{\mathrm{obs}})-\Delta f_{1,t}(D_{\mathrm{obs}}-\Delta d_{\mathrm{samp}})}{\Delta d_{\mathrm{samp}}}.
 \label{eq:sensor}
 \end{equation}
 The frequency arguments $\theta,\xi_{1:t}$ are suppressed in the
-numerator. With sampling interval $\Delta t_{\mathrm{samp}}=0.025$ s, the measured
+numerator. With sampling interval $\Delta d_{\mathrm{samp}}=0.025$ s, the measured
 response follows
 \begin{equation}
 y_t=\mu_t(\theta,\xi_{1:t})+\epsilon_t,
@@ -207,14 +207,14 @@ with amplitude and bus fixed as above. It has no access to true parameters
 or physical state. Feasible durations satisfy
 \begin{equation}
 \begin{aligned}
-0.2&\le d_t\le3, &&t=1,\ldots,T,\\
-d_t-d_{t-1}&\ge \Delta d_{\min}, &&t=2,\ldots,T,
+0.2&\le D_t\le3, &&t=1,\ldots,T,\\
+D_t-D_{t-1}&\ge \Delta D_{\min}, &&t=2,\ldots,T,
 \end{aligned}
 \label{eq:bounds}
 \end{equation}
-where $\Delta d_{\min}=0.01$ s. At step $t$, the upper limit is tightened to
-$3-(T-t)\Delta d_{\min}$ to leave room for the remaining probes; the lower
-limit is $0.2$ initially and $d_{t-1}+\Delta d_{\min}$ thereafter.
+where $\Delta D_{\min}=0.01$ s. At step $t$, the upper limit is tightened to
+$3-(T-t)\Delta D_{\min}$ to leave room for the remaining probes; the lower
+limit is $0.2$ initially and $D_{t-1}+\Delta D_{\min}$ thereafter.
 All methods map a unit action into this interval without sorting or
 discretizing durations. Let $\Pi$ denote the policies satisfying these constraints;
 any policy randomness is independent of $\theta$.
@@ -287,7 +287,7 @@ to an online planner.
 The objective in~\eqref{eq:design_problem} motivates three comparisons:
 optimized versus random probing, adaptive versus fixed designs, and
 offline policy learning versus online optimization. The six existing
-methods below select $\xi_t=(0.05,1,d_t)$ using the same feasible
+methods below select $\xi_t=(0.05,1,D_t)$ using the same feasible
 duration interval~\eqref{eq:bounds} and observation model.
 Table~\ref{tab:methods} distinguishes adaptation to observations from
 myopic optimization of only the next probe. Fixed optimizes the full
@@ -313,9 +313,9 @@ Step-DAD~\cite{hedman2025stepdad} & Yes & No & Both\\
 
 \subsection{Nonadaptive Designs: Random and Fixed}
 Random draws $u_t\sim\mathcal U(0,1)$ independently at each step and
-sets $d_t=d_t^{\min}+(d_t^{\max}-d_t^{\min})u_t$.
-Here $d_1^{\min}=0.2$, $d_t^{\min}=d_{t-1}+\Delta d_{\min}$ for $t>1$,
-and $d_t^{\max}=3-(T-t)\Delta d_{\min}$. Thus sampling is uniform within
+sets $D_t=D_t^{\min}+(D_t^{\max}-D_t^{\min})u_t$.
+Here $D_1^{\min}=0.2$, $D_t^{\min}=D_{t-1}+\Delta D_{\min}$ for $t>1$,
+and $D_t^{\max}=3-(T-t)\Delta D_{\min}$. Thus sampling is uniform within
 the remaining feasible interval, not over complete ordered sequences.
 It ignores observations and requires no offline training.
 
@@ -408,7 +408,7 @@ designs use the resulting history to select later probes.
  flow/.style={-{Latex[length=2mm]},thick,draw=black!75},
  note/.style={font=\footnotesize,align=center,fill=white,inner sep=2pt}]
 \node[box,fill=blue!5] (select) at (0,0)
- {Choose design $\xi_t$ (optimize $d_t$)\\Selected design method\\Start at $t=1$, $h_0=\varnothing$};
+ {Choose design $\xi_t$ (select $D_t$)\\Selected design method\\Start at $t=1$, $h_0=\varnothing$};
 \node[box,fill=blue!5] (grid) at (5.8,0)
  {Apply pulse to the power grid\\Unknown, fixed $\theta=(\mathbf M,\mathbf K)$\\Physical state carries between probes};
 \node[box,fill=blue!5] (observe) at (11.6,0)
