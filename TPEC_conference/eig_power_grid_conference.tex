@@ -32,28 +32,29 @@ email@example.com}}
 \maketitle
 \begin{abstract}
 Understanding power-system dynamics requires knowledge of latent parameters
-such as inertia and effective frequency response. Active probing provides
-a practical means of inferring these parameters by applying controlled
-inputs and measuring the resulting frequency response. The information
-obtained, however, depends on the probing signals selected. This paper
-investigates sequential Bayesian optimal experimental design for acquiring
-more information about latent parameters with the same number of probes.
-We formulate the selection of probe durations as an expected-information-gain
-maximization problem, allowing each decision to use observations from
-previous probes while accounting for the evolving system state. We apply
-and compare six existing approaches: deep adaptive design,
-reinforcement-learning-based sequential design, Step-DAD online refinement,
-myopic optimization, fixed design, and random design. The evaluation uses
-reduced IEEE9 and IEEE14 models under matched probing constraints.
-The primary comparison is a contrastive lower bound on information gain
-at a fixed number of design steps; training-seed variability and computational
-cost are also assessed.
-On IEEE14, DAD achieves $4.7576\pm0.0362$ nats at three design
-steps, versus $4.2907\pm0.0368$ for Myopic, with mean online
-computation of 1.22 ms versus 10.00 s per sequence.
-These results support informative probing through offline-trained designs;
-online refinement shows no clear additional benefit in this setting.
-On IEEE9 at five design steps, Step-DAD achieves $2.6621\pm0.0145$ nats, compared with DAD at $2.6351\pm0.0179$ nats, a modest mean gain accompanied by additional online computation.
+such as inertia and effective frequency response. Active probing can reveal
+these parameters, but the information obtained depends on which inputs
+are applied. This paper investigates sequential Bayesian optimal experimental
+design to acquire more information with the same number of probes.
+We formulate probe-duration selection as an expected-information-gain
+maximization problem, using previous observations to guide subsequent
+probes while accounting for the evolving physical state. We compare six
+existing methods on reduced IEEE9 and IEEE14 models with three, four and
+five design steps: deep adaptive design (DAD), reinforcement-learning-based
+sequential design (RL-sBOED), Step-DAD, Myopic, Fixed and Random.
+Performance is assessed through a contrastive lower bound on information
+gain, seed variability, and offline and online computation.
+On both networks, DAD, RL-sBOED and Step-DAD achieve higher mean information
+scores than the three baselines at every tested design-step count.
+At three design steps, DAD exceeds Myopic by
+0.163 nats on IEEE9 and 0.467 nats on IEEE14. Its mean online computation
+per sequence is 0.54 and 1.22 ms, respectively, compared with 9.31 and
+10.00 s for Myopic. Step-DAD provides modest additional mean gains over
+DAD on IEEE9 but no consistent gain on IEEE14, with substantially greater
+online cost. IEEE14 scores approach the estimator ceiling, limiting
+comparisons among the strongest methods. These results support offline-trained
+sequential design as an effective approach to informative probing with
+low online computation under the studied conditions.
 \end{abstract}
 \begin{IEEEkeywords}
 Bayesian experimental design, power-system identification, adaptive probing,
@@ -641,6 +642,7 @@ particle population. These approximation errors differ from ODE integration
 error and should not be conflated. Information gain alone establishes
 neither terminal-control safety nor field performance.
 
+\balance
 \subsection{Supplementary SIR-ODE Benchmark}
 SIR-ODE provides an additional benchmark for sequential measurement
 selection. Its susceptible--infected--recovered model uses a population
@@ -678,7 +680,6 @@ incompletely recorded historical hardware. It is not pooled with the
 grid decision timings. Full configurations, model files and per-run
 timings are retained in the companion result collection.
 
-\balance
 \section{Conclusion}
 This paper formulates sequential power-grid probing as an information-driven
 design problem in which each observation informs the next duration and the
