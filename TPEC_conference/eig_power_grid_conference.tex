@@ -338,7 +338,9 @@ seeds. Fixed remains independently optimized for each training seed.
 
 For trained methods, we average evaluation-seed means within each training
 seed and report mean $\pm$ sample standard deviation across three trainings.
-Episode uncertainty is reported separately from retraining variation.
+Random/Myopic report mean $\pm$ sample SD of evaluation-seed means,
+not episode-level dispersion. The five-seed target (1001--1005) remains
+incomplete: current conference records contain only 1001--1003.
 Evaluation seed 1001 informed development and is not untouched test data.
 
 Offline training and online decision time are reported separately.
@@ -360,15 +362,17 @@ not measured results. Empty axes contain no experimental data.}
 \subsection{Information Versus Number of Design Steps}
 \begin{table}[!ht]
 \caption{IEEE9 terminal sPCE (nats). Trained methods: mean $\pm$ sample
-SD across three training seeds. $L=128$; ceiling 4.8598.
+SD across three training seeds. Random/Myopic: mean $\pm$ sample SD
+across evaluation-seed means (five planned; three currently complete).
+$L=128$; ceiling 4.8598.
 All zeros are placeholders, not results.}
 \label{tab:ieee9}
 \centering\small
 \begin{tabular}{lccc}
 \toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & \pending & \pending & \pending\\
+Random & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
 Fixed & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-Myopic & \pending & \pending & \pending\\
+Myopic & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
 DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
 RL-sBOED & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
 Step-DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\\bottomrule
@@ -381,9 +385,9 @@ contrast count as Table~\ref{tab:ieee9}. All zeros are placeholders.}
 \centering\small
 \begin{tabular}{lccc}
 \toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & \pending & \pending & \pending\\
+Random & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
 Fixed & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
-Myopic & \pending & \pending & \pending\\
+Myopic & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
 DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
 RL-sBOED & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\
 Step-DAD & $0.00\pm0.00$ & $0.00\pm0.00$ & $0.00\pm0.00$\\\bottomrule
@@ -396,7 +400,7 @@ Use completed four-update Step-DAD results only.}
 \newpage
 \resultspace{2.6in}{Reserved for approximately 280 words:\\
 IEEE14 paired comparisons and cross-system interpretation.
-Distinguish retraining variability from episode uncertainty for Random/Myopic.
+Distinguish retraining variability from evaluation-seed variability for Random/Myopic.
 Discuss the distance to the contrastive ceiling.}
 \subsection{Information Versus Online Computation}
 \begin{figure}[!ht]

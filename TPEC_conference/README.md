@@ -19,4 +19,15 @@ A locally generated layout preview is stored at `output/pdf/eig_power_grid_confe
 
 The local `sir ode result/` folder holds supplementary benchmark outputs. Generated result collections and build artifacts are excluded from GitHub.
 
-Result tables use zero-valued placeholders (including zero mean/SD for trained methods), explicitly labeled as unmeasured. Figures contain empty IEEE9/IEEE14 axes with no data series. Algorithm 1 summarizes the shared sequential design workflow and the Step-DAD refinement branch. Plot axes are drawn in LaTeX with PGFPlots; no external image files are required.
+Result tables use zero-valued placeholders (including zero mean/SD for every method), explicitly labeled as unmeasured. Figures contain empty IEEE9/IEEE14 axes with no data series. Algorithm 1 summarizes the shared sequential design workflow and the Step-DAD refinement branch. Plot axes are drawn in LaTeX with PGFPlots; no external image files are required.
+
+Random and Myopic use the mean and sample SD of evaluation-seed means.
+They have no training seeds; shared copies must not count as extra replicates.
+Trained methods instead average evaluation-seed means within each training,
+then report the mean and sample SD across three training seeds.
+The current IEEE9/IEEE14 conference records have seeds 1001--1003; the
+five-seed target requires 1004 and 1005 before it can be described as complete.
+`python tools/summarize_baseline_eig.py --run PATH` checks the five-seed target
+and outputs Random/Myopic mean +/- SD. For explicitly partial historical
+reporting, add `--allow-incomplete`; missing seeds and actual counts are retained.
+This is a reporting tool, not a simulator or a full campaign compatibility audit.
