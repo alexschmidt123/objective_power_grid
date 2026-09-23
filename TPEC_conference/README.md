@@ -9,8 +9,10 @@ The paper flows naturally across six pages, without forced page or column breaks
 
 - Problem formulation: unknown M/K and grid dynamics, probe/observation model, feasible adaptive policies, then EIG and its finite-contrast approximation.
 - Results: aligned IEEE9/IEEE14 information tables and measured online/offline computation, followed by limitations and the supplementary SIR-ODE comparison.
-- Figure 1: directly labeled information and runtime panels at T=3, with the same method order throughout. Information panels show mean ± SD; runtime panels use a logarithmic axis and labels in ms/s. Tables retain T=3,4,5. Hardware is identified separately for each system.
-- The former Figure 2 is an optional optimization diagnostic, preserved as [validation histories](results/diagnostics/validation_histories.pdf) in the local result collection. It is omitted from the main six-page paper.
+- Figure 1: offline training-time plots for T=3,4,5. IEEE9 training seed 101 and seeds 202/303 appear separately because their execution platforms differ; IEEE14 uses three training seeds. DAD stage time excludes preceding Fixed initialization cost; Step-DAD reuses DAD.
+- Figure 2: online computation plots for all six methods at T=3,4,5, with directly labeled method rows and a logarithmic time axis. IEEE9 Step-DAD T=5 remains omitted pending completion. Computation tables have been removed.
+- Hardware details are confined to the experimental-settings note, not plot titles/captions. The archived measurements are not all A100 measurements.
+- Optional [validation histories](results/diagnostics/validation_histories.pdf) remain in the local result collection, outside the main paper.
 
 All result tables use Random, Fixed, Myopic, DAD, RL-sBOED, Step-DAD row order and T=3,4,5 columns. IEEE9 Step-DAD T=5 remains pending until all three training-seed evaluations finish. Grid results currently contain three evaluation seeds; the five-seed target is incomplete. SIR has five evaluation seeds and a different finite-particle entropy estimator and historical training protocol, explicitly disclosed in the supplementary subsection. SIR Fixed uses evaluation-seed SD; grid Fixed uses training-seed SD.
 

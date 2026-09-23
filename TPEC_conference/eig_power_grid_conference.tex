@@ -359,11 +359,11 @@ not episode-level dispersion. The five-seed target (1001--1005) remains
 incomplete: current conference records contain only 1001--1003.
 Evaluation seed 1001 informed development and is not untouched test data.
 
-Offline and online computation are reported separately in
-Section~\ref{sec:cost}. IEEE14 timings use a Grace A100. IEEE9 uses an RTX 5080,
-except the final Step-DAD $T=5$ seed on a FASTER A100; hardware labels
-are retained. Configurations, source hashes and checkpoints preserve
-provenance. Code: \url{https://github.com/alexschmidt123/objective_power_grid}.
+Computation is reported in Section~\ref{sec:cost}. IEEE9 training seed
+101 uses an A100; seeds 202/303 and current online timings use an RTX
+5080. IEEE14 uses A100s. We keep these timing groups separate.
+Configurations, source hashes and checkpoints preserve provenance.
+Code: \url{https://github.com/alexschmidt123/objective_power_grid}.
 
 % Measured results; incomplete cells remain explicitly marked.
 \section{Results and Discussion}
@@ -403,17 +403,8 @@ at $T=3,4,5$, respectively. The observed Step-DAD gains over DAD
 are 0.0105 and 0.0287 nats at $T=3,4$; the three-training-seed
 $T=5$ comparison remains incomplete. IEEE9 scores stay farther from
 the estimator ceiling than IEEE14 scores. Runtime is reported within
-each platform: Table~\ref{tab:ieee9time} uses Ubuntu's RTX 5080;
-the pending migrated Step-DAD cell will require a separate hardware label.
-\begin{table}[!ht]\caption{IEEE9 mean online computation (seconds per complete sequence), Ubuntu RTX 5080.}\label{tab:ieee9time}\centering\small\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lccc@{}}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & 0.00007 & 0.00009 & 0.00012\\
-Fixed & 0.00052 & 0.00062 & 0.00077\\
-Myopic & 9.30817 & 12.57734 & 15.89200\\
-DAD & 0.00054 & 0.00068 & 0.00084\\
-RL-sBOED & 0.00049 & 0.00063 & 0.00076\\
-Step-DAD & 6.34247 & 15.80823 & \textit{Pending}\\
-\bottomrule\end{tabular}\end{table}
+each system in Figure~\ref{fig:online}.
+
 
 
 For IEEE14, Table~\ref{tab:ieee14} shows higher mean sPCE for
@@ -433,128 +424,6 @@ compress method differences; these scores neither measure exact EIG
 nor establish a reliable ranking within the DAD family. The SDs
 describe distinct sources of variation: retraining for learned/fitted
 methods and repeated evaluation for Random/Myopic.
-\subsection{Information Versus Online Computation}
-Figure~\ref{fig:tradeoff} separates information gain and computation
-at $T=3$, using the same method order in every panel. Tables give the
-complete $T=3,4,5$ results. Reading the two rows together shows the
-small information differences between DAD and Step-DAD alongside their
-large difference in online cost.
-\begin{figure*}[t]
-\centering
-\begin{minipage}{0.49\textwidth}
-\centering
-\begin{tikzpicture}
-\begin{axis}[width=0.95\linewidth,height=1.85in,
-title={IEEE9 (RTX 5080)},xlabel={Information score (nats): higher is better},
-ymin=-0.6,ymax=5.6,y dir=reverse,ytick={0,1,2,3,4,5},
-yticklabels={Random,Fixed,Myopic,DAD,RL-sBOED,Step-DAD},
-tick label style={font=\footnotesize},label style={font=\footnotesize},
-title style={font=\small},xmajorgrids,grid style={gray!20},
-clip=false,xmin=0,xmax=6.0,xtick={0,1,2,3,4,5}]
-\addplot[only marks,blue!65!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(0.43214422,0) +- (0.03096603,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:0.43214422,0) {0.432};
-\addplot[only marks,blue!65!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(2.01122652,1) +- (0.01164503,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:2.01122652,1) {2.011};
-\addplot[only marks,blue!65!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(1.97360205,2) +- (0.0438258,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:1.97360205,2) {1.974};
-\addplot[only marks,red!70!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(2.13656963,3) +- (0.01614446,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:2.13656963,3) {2.137};
-\addplot[only marks,red!70!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(2.12573521,4) +- (0.00273759,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:2.12573521,4) {2.126};
-\addplot[only marks,red!70!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(2.1471126,5) +- (0.01095406,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:2.1471126,5) {2.147};
-\end{axis}
-\end{tikzpicture}
-\end{minipage}
-\hfill
-\begin{minipage}{0.49\textwidth}
-\centering
-\begin{tikzpicture}
-\begin{axis}[width=0.95\linewidth,height=1.85in,
-title={IEEE14 (Grace A100)},xlabel={Information score (nats): higher is better},
-ymin=-0.6,ymax=5.6,y dir=reverse,ytick={0,1,2,3,4,5},
-yticklabels={Random,Fixed,Myopic,DAD,RL-sBOED,Step-DAD},
-tick label style={font=\footnotesize},label style={font=\footnotesize},
-title style={font=\small},xmajorgrids,grid style={gray!20},
-clip=false,xmin=0,xmax=6.0,xtick={0,1,2,3,4,5}]
-\addplot[only marks,blue!65!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(0.75408529,0) +- (0.00466976,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:0.75408529,0) {0.754};
-\addplot[only marks,blue!65!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(4.2622935,1) +- (0.04016309,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:4.2622935,1) {4.262};
-\addplot[only marks,blue!65!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(4.29074713,2) +- (0.0368272,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:4.29074713,2) {4.291};
-\addplot[only marks,red!70!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(4.75757614,3) +- (0.03619873,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:4.75757614,3) {4.758};
-\addplot[only marks,red!70!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(4.74454216,4) +- (0.00223913,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:4.74454216,4) {4.745};
-\addplot[only marks,red!70!black,mark=*,mark options={solid},mark size=2.2pt,error bars/.cd,x dir=both,x explicit] coordinates {(4.75270046,5) +- (0.02745488,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:4.75270046,5) {4.753};
-\end{axis}
-\end{tikzpicture}
-\end{minipage}
-\par\medskip
-\begin{minipage}{0.49\textwidth}
-\centering
-\begin{tikzpicture}
-\begin{axis}[width=0.95\linewidth,height=1.85in,
-title={IEEE9 (RTX 5080)},xlabel={Online time (s/sequence): lower is better},
-ymin=-0.6,ymax=5.6,y dir=reverse,ytick={0,1,2,3,4,5},
-yticklabels={Random,Fixed,Myopic,DAD,RL-sBOED,Step-DAD},
-tick label style={font=\footnotesize},label style={font=\footnotesize},
-title style={font=\small},xmajorgrids,grid style={gray!20},
-clip=false,xmode=log,xmin=0.00004,xmax=200,xtick={0.0001,0.001,0.01,0.1,1,10},xticklabels={0.0001,0.001,0.01,0.1,1,10}]
-\addplot[only marks,blue!65!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(7.145e-05,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:7.145e-05,0) {0.07 ms};
-\addplot[only marks,blue!65!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(0.00052316,1)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:0.00052316,1) {0.52 ms};
-\addplot[only marks,blue!65!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(9.30816641,2)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:9.30816641,2) {9.31 s};
-\addplot[only marks,red!70!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(0.00053701,3)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:0.00053701,3) {0.54 ms};
-\addplot[only marks,red!70!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(0.00049159,4)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:0.00049159,4) {0.49 ms};
-\addplot[only marks,red!70!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(6.3424741,5)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:6.3424741,5) {6.34 s};
-\end{axis}
-\end{tikzpicture}
-\end{minipage}
-\hfill
-\begin{minipage}{0.49\textwidth}
-\centering
-\begin{tikzpicture}
-\begin{axis}[width=0.95\linewidth,height=1.85in,
-title={IEEE14 (Grace A100)},xlabel={Online time (s/sequence): lower is better},
-ymin=-0.6,ymax=5.6,y dir=reverse,ytick={0,1,2,3,4,5},
-yticklabels={Random,Fixed,Myopic,DAD,RL-sBOED,Step-DAD},
-tick label style={font=\footnotesize},label style={font=\footnotesize},
-title style={font=\small},xmajorgrids,grid style={gray!20},
-clip=false,xmode=log,xmin=0.00004,xmax=200,xtick={0.0001,0.001,0.01,0.1,1,10},xticklabels={0.0001,0.001,0.01,0.1,1,10}]
-\addplot[only marks,blue!65!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(0.00016082,0)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:0.00016082,0) {0.16 ms};
-\addplot[only marks,blue!65!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(0.0011626,1)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:0.0011626,1) {1.16 ms};
-\addplot[only marks,blue!65!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(9.99967671,2)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:9.99967671,2) {10.00 s};
-\addplot[only marks,red!70!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(0.00122492,3)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:0.00122492,3) {1.22 ms};
-\addplot[only marks,red!70!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(0.00168412,4)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:0.00168412,4) {1.68 ms};
-\addplot[only marks,red!70!black,mark=square*,mark options={solid},mark size=2.2pt] coordinates {(9.11275457,5)};
-\node[anchor=west,font=\scriptsize,xshift=5pt] at (axis cs:9.11275457,5) {9.11 s};
-\end{axis}
-\end{tikzpicture}
-\end{minipage}
-\par\medskip
-\caption{Six-method comparison at three design steps. Top: mean terminal
-sPCE with sample-SD bars (some are smaller than the markers); uncertainty
-definitions follow Tables~\ref{tab:ieee9} and~\ref{tab:ieee14}.
-Bottom: mean online computation, shown on a logarithmic axis and labeled
-in milliseconds or seconds. Method names are repeated for direct lookup;
-compare runtime within each system, since the hardware differs.}
-\label{fig:tradeoff}
-\end{figure*}
-
-
 \subsection{Measured Computational Cost}\label{sec:cost}
 Online cost is the wall-clock time summed over all $T$ decisions in
 one experimental sequence, averaged over evaluation episodes and then
@@ -564,26 +433,113 @@ refinement. It excludes the simulated physical response, observation
 acquisition and evaluator sPCE scoring. These are computational timings,
 not end-to-end physical experiment durations.
 
-\begin{table}[!ht]\caption{IEEE14 mean online computation (seconds per complete sequence), Grace A100.}\label{tab:online}\centering\small
-\begin{tabular}{lccc}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & 0.00016 & 0.00021 & 0.00031\\
-Fixed & 0.00116 & 0.00148 & 0.00275\\
-Myopic & 9.99968 & 13.43718 & 16.93535\\
-DAD & 0.00122 & 0.00142 & 0.00193\\
-RL-sBOED & 0.00168 & 0.00331 & 0.00271\\
-Step-DAD & 9.11275 & 23.24278 & 44.69261\\
-\bottomrule\end{tabular}\end{table}
 
-\begin{table}[!ht]\caption{IEEE14 mean recorded offline training time (hours per training seed), Grace A100.}\label{tab:offline}\centering\small
-\begin{tabular}{lccc}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & 0.000 & 0.000 & 0.000\\
-Fixed & 1.877 & 2.750 & 3.691\\
-Myopic & 0.000 & 0.000 & 0.000\\
-DAD & 1.894 & 2.725 & 3.626\\
-RL-sBOED & 0.170 & 0.204 & 0.248\\
-Step-DAD & \multicolumn{3}{c}{Reuses matching DAD checkpoint}\\
-\bottomrule\end{tabular}\end{table}
 
+
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}{0.325\textwidth}\centering
+\begin{tikzpicture}\begin{axis}[width=\linewidth,height=1.75in,
+title={(a) IEEE9: training seed 101},title style={font=\small},
+xlabel={Number of design steps $T$},ylabel={Offline training (h)},
+xmin=2.8,xmax=5.2,xtick={3,4,5},ymin=0,ymax=4,ytick={0,1,2,3,4},
+tick label style={font=\footnotesize},label style={font=\footnotesize},
+grid=major,grid style={gray!20},legend columns=3,
+legend style={font=\footnotesize},legend to name=offlinelegend]
+\addplot[blue!75!black,mark=o,mark size=3.4pt,thick,dashed] coordinates {(3,0.55417601) (4,0.80200089) (5,1.06261734)};
+\addlegendentry{Fixed}
+\addplot[red!75!black,mark=square*,mark size=2.4pt,thick] coordinates {(3,0.56186976) (4,0.80561770) (5,1.07650202)};
+\addlegendentry{DAD}
+\addplot[teal!80!black,mark=triangle*,mark size=2.4pt,thick] coordinates {(3,0.10000015) (4,0.11689896) (5,0.12863530)};
+\addlegendentry{RL-sBOED}
+\end{axis}\end{tikzpicture}\end{minipage}
+\hfill
+\begin{minipage}{0.325\textwidth}\centering
+\begin{tikzpicture}\begin{axis}[width=\linewidth,height=1.75in,
+title={(b) IEEE9: seeds 202/303},title style={font=\small},
+xlabel={Number of design steps $T$},ylabel={Offline training (h)},
+xmin=2.8,xmax=5.2,xtick={3,4,5},ymin=0,ymax=4,ytick={0,1,2,3,4},
+tick label style={font=\footnotesize},label style={font=\footnotesize},
+grid=major,grid style={gray!20},legend columns=3,
+legend style={font=\footnotesize},]
+\addplot[blue!75!black,mark=o,mark size=3.4pt,thick,dashed] coordinates {(3,1.16355727) (4,1.69321612) (5,2.20963435)};
+\addplot[red!75!black,mark=square*,mark size=2.4pt,thick] coordinates {(3,1.15386932) (4,1.68613556) (5,2.20822377)};
+\addplot[teal!80!black,mark=triangle*,mark size=2.4pt,thick] coordinates {(3,0.13027744) (4,0.16881989) (5,0.20627866)};
+\end{axis}\end{tikzpicture}\end{minipage}
+\hfill
+\begin{minipage}{0.325\textwidth}\centering
+\begin{tikzpicture}\begin{axis}[width=\linewidth,height=1.75in,
+title={(c) IEEE14: three training seeds},title style={font=\small},
+xlabel={Number of design steps $T$},ylabel={Offline training (h)},
+xmin=2.8,xmax=5.2,xtick={3,4,5},ymin=0,ymax=4,ytick={0,1,2,3,4},
+tick label style={font=\footnotesize},label style={font=\footnotesize},
+grid=major,grid style={gray!20},legend columns=3,
+legend style={font=\footnotesize},]
+\addplot[blue!75!black,mark=o,mark size=3.4pt,thick,dashed] coordinates {(3,1.87695743) (4,2.74980712) (5,3.69127591)};
+\addplot[red!75!black,mark=square*,mark size=2.4pt,thick] coordinates {(3,1.89364550) (4,2.72537289) (5,3.62632765)};
+\addplot[teal!80!black,mark=triangle*,mark size=2.4pt,thick] coordinates {(3,0.16963987) (4,0.20441651) (5,0.24838703)};
+\end{axis}\end{tikzpicture}\end{minipage}
+\par\smallskip\pgfplotslegendfromname{offlinelegend}
+\caption{Offline training cost at $T=3,4,5$. Panel (a) reports IEEE9 seed 101; (b) averages seeds 202/303;
+(c) averages three IEEE14 training seeds. Lines show recorded stage-time
+means, not confidence intervals. Random/Myopic require no offline training;
+Step-DAD reuses DAD. DAD stage time excludes the preceding Fixed training:
+add Fixed and DAD costs for the complete initialization/training workflow.}
+\label{fig:offline}
+\end{figure*}
+\begin{figure*}[t]
+\centering
+\begin{minipage}{0.49\textwidth}\centering
+\begin{tikzpicture}\begin{axis}[width=0.94\linewidth,height=2.6in,
+title={(a) IEEE9},title style={font=\small},
+xlabel={Online time per sequence (log scale)},
+xmode=log,xmin=0.00004,xmax=100,
+xtick={0.0001,0.001,0.01,0.1,1,10,100},
+xticklabels={0.1 ms,1 ms,10 ms,0.1 s,1 s,10 s,100 s},
+ymin=-0.5,ymax=5.7,y dir=reverse,ytick={0,1,2,3,4,5},
+yticklabels={Random,Fixed,Myopic,DAD,RL-sBOED,Step-DAD},
+tick label style={font=\footnotesize},label style={font=\footnotesize},
+x tick label style={font=\scriptsize},xmajorgrids,grid style={gray!20},
+legend columns=3,legend style={font=\footnotesize},legend to name=onlinelegend]
+\addplot[only marks,blue!75!black,mark=*,mark size=2.6pt] coordinates {(0.0000714512,-0.2) (0.0005231610,0.8) (9.3081664146,1.8) (0.0005370064,2.8) (0.0004915917,3.8) (6.3424740984,4.8)};
+\addlegendentry{$T=3$}
+\addplot[only marks,red!75!black,mark=square*,mark size=2.6pt] coordinates {(0.0000944526,0) (0.0006227741,1) (12.5773369221,2) (0.0006831865,3) (0.0006262626,4) (15.8082283992,5)};
+\addlegendentry{$T=4$}
+\addplot[only marks,teal!80!black,mark=triangle*,mark size=2.6pt] coordinates {(0.0001211939,0.2) (0.0007659563,1.2) (15.8919999258,2.2) (0.0008380620,3.2) (0.0007639059,4.2)};
+\addlegendentry{$T=5$}
+\node[font=\scriptsize,anchor=east] at (axis cs:65,5.35) {$T=5$: pending};
+\end{axis}\end{tikzpicture}\end{minipage}
+\hfill
+\begin{minipage}{0.49\textwidth}\centering
+\begin{tikzpicture}\begin{axis}[width=0.94\linewidth,height=2.6in,
+title={(b) IEEE14},title style={font=\small},
+xlabel={Online time per sequence (log scale)},
+xmode=log,xmin=0.00004,xmax=100,
+xtick={0.0001,0.001,0.01,0.1,1,10,100},
+xticklabels={0.1 ms,1 ms,10 ms,0.1 s,1 s,10 s,100 s},
+ymin=-0.5,ymax=5.7,y dir=reverse,ytick={0,1,2,3,4,5},
+yticklabels={Random,Fixed,Myopic,DAD,RL-sBOED,Step-DAD},
+tick label style={font=\footnotesize},label style={font=\footnotesize},
+x tick label style={font=\scriptsize},xmajorgrids,grid style={gray!20},
+legend columns=3,legend style={font=\footnotesize},]
+\addplot[only marks,blue!75!black,mark=*,mark size=2.6pt] coordinates {(0.0001608165,-0.2) (0.0011626002,0.8) (9.9996767119,1.8) (0.0012249183,2.8) (0.0016841190,3.8) (9.1127545684,4.8)};
+\addplot[only marks,red!75!black,mark=square*,mark size=2.6pt] coordinates {(0.0002091893,0) (0.0014806398,1) (13.4371809120,2) (0.0014162264,3) (0.0033103949,4) (23.2427810012,5)};
+\addplot[only marks,teal!80!black,mark=triangle*,mark size=2.6pt] coordinates {(0.0003092860,0.2) (0.0027462690,1.2) (16.9353540299,2.2) (0.0019272283,3.2) (0.0027081450,4.2) (44.6926065520,5.2)};
+\end{axis}\end{tikzpicture}\end{minipage}
+\par\smallskip\pgfplotslegendfromname{onlinelegend}
+\caption{Mean online computation for one complete probe sequence.
+Each method has separate markers for $T=3,4,5$, ordered from top to
+bottom within its row. Lower time is better. The logarithmic axis spans
+sub-millisecond policy evaluation and multi-second online planning.
+IEEE9 Step-DAD $T=5$ is incomplete and omitted. Compare methods within
+each panel.}
+\label{fig:online}
+\end{figure*}
+
+Figures~\ref{fig:offline} and~\ref{fig:online} separate offline training
+from online computation across all three design-step counts. IEEE9
+training times are split by hardware rather than pooled across hosts.
 The offline timer includes initialization selection, optimization,
 periodic validation and checkpoint writes. DAD's reported stage time
 excludes the separately incurred Fixed training used for initialization;
@@ -592,7 +548,7 @@ that DAD checkpoint and incurs its additional work online.
 
 At $T=5$, DAD requires 1.93 ms online per sequence, compared with
 16.94 s for Myopic and 44.69 s for Step-DAD
-(Table~\ref{tab:online}). Thus the near-identical DAD/Step-DAD scores
+(Fig.~\ref{fig:online}). Thus the near-identical DAD/Step-DAD scores
 have markedly different computational costs. Offline training amortizes
 design computation over repeated experiments, but this benefit depends
 on how often a trained policy is reused and on the physical deadline.
@@ -605,7 +561,7 @@ demonstrate real-time feasibility for the online planners.
 Validation histories are retained in the companion result collection.
 Evaluation uses each policy's best validation checkpoint. DAD can
 initialize from the separately trained Fixed design; its update axis
-omits that preceding cost, reported separately in Table~\ref{tab:offline}.
+omits that preceding cost, reported separately in Fig.~\ref{fig:offline}.
 
 For IEEE14 training seed 101, the DAD and RL-sBOED checkpoints
 occur at updates 1,200 and 1,000, respectively, whereas Fixed selects
