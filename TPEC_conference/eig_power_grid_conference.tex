@@ -484,8 +484,11 @@ describe distinct sources of variation: retraining for learned/fitted
 methods and repeated evaluation for Random/Myopic.
 \subsection{Measured Computational Cost}\label{sec:cost}
 Online cost is the wall-clock time summed over all $T$ decisions in
-one experimental sequence, averaged over evaluation episodes and then
-training seeds where applicable. It includes action selection, posterior
+one experimental sequence. For each evaluation seed, we average 512
+episodes per trained policy and then average the three training seeds
+where applicable. Tables report the mean and sample SD across the three
+evaluation-seed means; this SD describes evaluation variability, not
+retraining variability or episode-level dispersion. Online cost includes action selection, posterior
 updates needed for subsequent decisions, Myopic search and Step-DAD
 refinement. It excludes the simulated physical response, observation
 acquisition and evaluator sPCE scoring. These are computational timings,
@@ -496,62 +499,62 @@ not end-to-end physical experiment durations.
 
 
 \begin{table}[!ht]
-\caption{IEEE9 mean offline training time (hours per training seed).}
+\caption{IEEE9 offline training time (hours), mean $\pm$ sample SD across three training seeds.}
 \label{tab:ieee9_offline}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
 \toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & 0.000 & 0.000 & 0.000\\
-Fixed & 0.960 & 1.396 & 1.827\\
-Myopic & 0.000 & 0.000 & 0.000\\
-DAD & 0.957 & 1.393 & 1.831\\
-RL-sBOED & 0.120 & 0.152 & 0.180\\
-Step-DAD & \multicolumn{3}{c}{Reuses matching DAD model}\\
+Random & 0 & 0 & 0\\
+Fixed & $0.960\pm0.352$ & $1.396\pm0.515$ & $1.827\pm0.662$\\
+Myopic & 0 & 0 & 0\\
+DAD & $0.957\pm0.342$ & $1.393\pm0.509$ & $1.831\pm0.654$\\
+RL-sBOED & $0.120\pm0.017$ & $0.152\pm0.030$ & $0.180\pm0.045$\\
+Step-DAD & $0.957\pm0.342$ & $1.393\pm0.509$ & $1.831\pm0.654$\\
 \bottomrule\end{tabular*}
 \end{table}
 
 \begin{table}[!ht]
-\caption{IEEE14 mean offline training time (hours per training seed).}
+\caption{IEEE14 offline training time (hours), mean $\pm$ sample SD across three training seeds.}
 \label{tab:ieee14_offline}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
 \toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & 0.000 & 0.000 & 0.000\\
-Fixed & 1.877 & 2.750 & 3.691\\
-Myopic & 0.000 & 0.000 & 0.000\\
-DAD & 1.894 & 2.725 & 3.626\\
-RL-sBOED & 0.170 & 0.204 & 0.248\\
-Step-DAD & \multicolumn{3}{c}{Reuses matching DAD model}\\
+Random & 0 & 0 & 0\\
+Fixed & $1.877\pm0.011$ & $2.750\pm0.002$ & $3.691\pm0.050$\\
+Myopic & 0 & 0 & 0\\
+DAD & $1.894\pm0.032$ & $2.725\pm0.018$ & $3.626\pm0.068$\\
+RL-sBOED & $0.170\pm0.008$ & $0.204\pm0.001$ & $0.248\pm0.001$\\
+Step-DAD & $1.894\pm0.032$ & $2.725\pm0.018$ & $3.626\pm0.068$\\
 \bottomrule\end{tabular*}
 \end{table}
 
 \begin{table}[!ht]
-\caption{IEEE9 mean online computation (seconds per complete sequence).}
+\caption{IEEE9 online computation (ms per complete sequence), mean $\pm$ sample SD across three evaluation-seed means.}
 \label{tab:ieee9_online}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
 \toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & 0.00007 & 0.00009 & 0.00012\\
-Fixed & 0.00052 & 0.00062 & 0.00077\\
-Myopic & 9.30817 & 12.57734 & 15.89200\\
-DAD & 0.00054 & 0.00068 & 0.00084\\
-RL-sBOED & 0.00049 & 0.00063 & 0.00076\\
-Step-DAD & 6.34247 & 15.80823 & 24.34984\\
+Random & $0.0715\pm0.0001$ & $0.09445\pm0.00003$ & $0.121\pm0.001$\\
+Fixed & $0.523\pm0.038$ & $0.623\pm0.002$ & $0.766\pm0.002$\\
+Myopic & $9308\pm4$ & $12577\pm2$ & $15892\pm2$\\
+DAD & $0.537\pm0.002$ & $0.683\pm0.002$ & $0.838\pm0.004$\\
+RL-sBOED & $0.492\pm0.003$ & $0.626\pm0.001$ & $0.764\pm0.002$\\
+Step-DAD & $6342\pm2$ & $15808\pm9$ & $24350\pm50$\\
 \bottomrule\end{tabular*}
 \end{table}
 
 \begin{table}[!ht]
-\caption{IEEE14 mean online computation (seconds per complete sequence).}
+\caption{IEEE14 online computation (ms per complete sequence), mean $\pm$ sample SD across three evaluation-seed means.}
 \label{tab:ieee14_online}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
 \toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
-Random & 0.00016 & 0.00021 & 0.00031\\
-Fixed & 0.00116 & 0.00148 & 0.00275\\
-Myopic & 9.99968 & 13.43718 & 16.93535\\
-DAD & 0.00122 & 0.00142 & 0.00193\\
-RL-sBOED & 0.00168 & 0.00331 & 0.00271\\
-Step-DAD & 9.11275 & 23.24278 & 44.69261\\
+Random & $0.161\pm0.004$ & $0.209\pm0.002$ & $0.309\pm0.049$\\
+Fixed & $1.16\pm0.14$ & $1.48\pm0.04$ & $2.75\pm1.73$\\
+Myopic & $10000\pm2$ & $13437\pm9$ & $16935\pm35$\\
+DAD & $1.22\pm0.09$ & $1.42\pm0.02$ & $1.93\pm0.20$\\
+RL-sBOED & $1.68\pm0.29$ & $3.31\pm1.33$ & $2.71\pm0.69$\\
+Step-DAD & $9113\pm7$ & $23243\pm24$ & $44693\pm32$\\
 \bottomrule\end{tabular*}
 \end{table}
 
@@ -563,7 +566,10 @@ The offline timer includes initialization selection, optimization,
 periodic validation and checkpoint writes. DAD's reported stage time
 excludes the separately incurred Fixed training used for initialization;
 a joint Fixed--DAD workflow must include both costs. Step-DAD reuses
-that DAD checkpoint and incurs its additional work online.
+the matching DAD model: its offline entries repeat the DAD training
+cost, with no additional training run; refinement costs are online.
+Offline means and sample SDs use three training seeds. Random and Myopic
+require no offline training, so their entries are zero.
 
 At $T=5$, DAD requires 1.93 ms online per sequence, compared with
 16.94 s for Myopic and 44.69 s for Step-DAD
