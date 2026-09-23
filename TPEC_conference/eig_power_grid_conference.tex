@@ -273,24 +273,49 @@ observations, optimize online, or learn a policy offline. The following
 subsections specify how each decision is obtained; Figure~\ref{fig:probing}
 in the experimental settings illustrates how probing provides parameter information. These are application-specific adaptations
 of existing methods, not a new design algorithm.
+Table~\ref{tab:methods} distinguishes adaptation to observations from
+myopic optimization of only the next probe.
+
+\begin{table}[t]
+\caption{Design-method comparison. Adaptive means using observed responses;
+myopic means optimizing only the next probe. Fixed optimizes the full
+sequence; Random has no information objective (N/A).}
+\label{tab:methods}\papertablestyle
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
+\toprule Method & Adaptive & Myopic & Optimization\\\midrule
+Random & No & N/A & None\\
+Fixed~\cite{foster2021dad} & No & No & Offline\\
+Myopic~\cite{foster2021dad} & Yes & Yes & Online\\
+DAD~\cite{foster2021dad} & Yes & No & Offline\\
+RL-sBOED~\cite{blau2022rlsboed} & Yes & No & Offline\\
+Step-DAD~\cite{hedman2025stepdad} & Yes & No & Both\\
+\bottomrule\end{tabular*}
+\end{table}
+
 
 
 
 \subsection{Nonadaptive Designs: Random and Fixed}
-Random samples a unit action uniformly and applies the common feasible
-duration map. This is uniform sampling within the remaining interval,
-not over complete ordered sequences. It requires no offline training
-and ignores observations when selecting durations.
+Random draws $u_t\sim\mathcal U(0,1)$ independently at each step and
+sets $\tau_t=\tau_t^{\min}+(\tau_t^{\max}-\tau_t^{\min})u_t$.
+Here $\tau_1^{\min}=0.2$, $\tau_t^{\min}=\tau_{t-1}+d_{\min}$ for $t>1$,
+and $\tau_t^{\max}=3-(T-t)d_{\min}$. Thus sampling is uniform within
+the remaining feasible interval, not over complete ordered sequences.
+It ignores observations and requires no offline training.
 
-Fixed optimizes an entire ordered sequence offline using terminal sPCE.
+Fixed is a static Bayesian design: all durations are optimized jointly
+before observations are collected~\cite[Sec.~2]{foster2021dad}.
+Our implementation optimizes the ordered sequence using terminal sPCE.
 It compares short, central, long and spread interior initializations
 using validation, then optimizes the selected initialization. Each
 training seed yields a separately fitted sequence. During evaluation,
 Fixed executes that sequence without adapting to observations.
 
 \subsection{Online One-Step Design: Myopic}
-Myopic maintains a weighted particle approximation to the parameter
-posterior. Before each decision after the first, particles propagate
+Myopic follows conventional adaptive BOED, maximizing the expected
+information from the next observation under the current
+posterior~\cite[Sec.~2.1]{foster2021dad}. Our implementation maintains
+a weighted particle approximation to this posterior. Before each decision after the first, particles propagate
 their own states under the preceding duration and update likelihood
 weights using the latest observation. Continuous search then maximizes
 expected information from the next probe only, using 16 proposals,
@@ -305,7 +330,7 @@ masked. They do not receive true parameters or physical states.
 At evaluation, a forward pass produces the action without online
 optimization or an explicit particle-posterior update.
 
-DAD uses a deterministic two-layer, 64-unit tanh network, a trainable
+DAD~\cite{foster2021dad} uses a deterministic two-layer, 64-unit tanh network, a trainable
 stage bias and a sigmoid action map. Offline training maximizes terminal
 sPCE by differentiating through the complete simulated sequence,
 including observations and carried states. In the joint Fixed/DAD
@@ -313,7 +338,7 @@ campaign, validation selects between random and interior Fixed-based
 initialization. The reported DAD stage timer excludes the preceding
 Fixed training; the full workflow incurs both costs.
 
-RL-sBOED uses a REDQ-style actor--critic adaptation with ten critics
+RL-sBOED~\cite{blau2022rlsboed} uses a REDQ-style actor--critic adaptation with ten critics
 and five replay updates per trajectory batch. The actor has two
 128-unit ReLU layers. Its per-step information rewards are
 $R_t=\widehat I_t-\widehat I_{t-1}$, with $\widehat I_0=0$ and
@@ -324,7 +349,7 @@ target entropy $-1$; reported information scores exclude entropy bonuses.
 Evaluation uses the actor's deterministic output.
 
 \subsection{Online Policy Refinement: Step-DAD}
-Step-DAD begins each episode with the matching selected DAD checkpoint
+Step-DAD~\cite{hedman2025stepdad} begins each episode with the matching selected DAD checkpoint
 and uses it unchanged for the first probe. Before each subsequent
 decision, it assimilates the latest observation into its 128-particle
 posterior. It then samples candidate parameters and their carried
@@ -361,59 +386,42 @@ Adaptive methods use the resulting history to select later durations.
 \centering
 \begin{tikzpicture}[x=1cm,y=1cm,
  box/.style={draw=black!65,rounded corners=2pt,align=center,
- font=\small,inner sep=5pt,minimum height=1.15cm,text width=3.15cm},
+ font=\small,inner sep=5pt,minimum height=1.15cm,text width=4.0cm},
  flow/.style={-{Latex[length=2mm]},thick,draw=black!75},
  note/.style={font=\footnotesize,align=center,fill=white,inner sep=2pt}]
 \node[box,fill=blue!5] (select) at (0,0)
- {Select probe duration\\$\tau_t\in[a_t,b_t]$\\Using the chosen design method};
-\node[box,fill=blue!5] (pulse) at (4.25,0)
- {Apply a power pulse\\Fixed bus and amplitude\\Duration $\tau_t$};
-\node[box,fill=blue!5] (grid) at (8.5,0)
- {Power-grid response\\Unknown, fixed $M$ and $K$\\State carries between probes};
-\node[box,fill=blue!5] (observe) at (12.75,0)
- {Measure the response\\Noisy endpoint RoCoF $y_t$\\One observation per probe};
-\draw[flow] (select) -- (pulse);
-\draw[flow] (pulse) -- (grid);
+ {Choose a feasible duration $\tau_t$\\Selected design method\\Start at $t=1$, $h_0=\varnothing$};
+\node[box,fill=blue!5] (grid) at (5.8,0)
+ {Apply pulse to the power grid\\Unknown, fixed $\theta=(\mathbf M,\mathbf K)$\\Physical state carries between probes};
+\node[box,fill=blue!5] (observe) at (11.6,0)
+ {Measure the response\\Observe noisy endpoint RoCoF $y_t$\\Response depends on $\theta$};
+\node[box,fill=gray!5] (history) at (11.6,-2.3)
+ {Append design and observation\\$h_t=(h_{t-1},(\tau_t,y_t))$\\History retains all preceding probes};
+\node[box,fill=green!5,minimum height=1.5cm] (posterior) at (5.8,-2.3)
+ {Update parameter uncertainty\\$p(\theta\mid h_t)\propto$\\
+ $p(y_t\mid\theta,h_{t-1},\tau_t)$\\$\times\,p(\theta\mid h_{t-1})$\\Initial belief: $p_0(\theta)$};
+\node[box,fill=orange!6,minimum height=1.5cm] (next) at (0,-2.3)
+ {Next adaptive design\\DAD, RL-sBOED: history\\Myopic, Step-DAD: history\\and particle posterior};
+\draw[flow] (select) -- (grid);
 \draw[flow] (grid) -- (observe);
-% Only observed history feeds back to the design method, never simulator truth.
-\draw[flow,dashed] (observe.south) -- (12.75,-1.4)
- -- node[note,pos=.5] {Append $(\tau_t,y_t)$ to history $h_t$; use it for the next adaptive decision} (0,-1.4)
- -- (select.south);
-\node[box,text width=3.15cm,minimum height=2.65cm,anchor=north,fill=gray!5] (prior) at (0,-2.05) {};
-\node[font=\small,align=center,anchor=north] at (0,-2.18)
- {Prior uncertainty\\$p_0(\theta)$, $\theta=(\mathbf M,\mathbf K)$};
-\draw[thin,->] (-1.1,-4.03) -- (1.12,-4.03) node[right,font=\scriptsize] {$\theta_j$};
-\draw[thin,->] (-1.1,-4.03) -- (-1.1,-3.2);
-\draw[thick,gray!80!black] (-.92,-4.03) -- (-.92,-3.53) -- (.86,-3.53) -- (.86,-4.03);
-\node[box,text width=5.1cm,minimum height=2.65cm,anchor=north,fill=orange!6] (update) at (6.25,-2.05)
- {Bayesian parameter update\\[3pt]
- Compare predicted and observed responses\\[3pt]
- $p(\theta\mid h_t)\propto$\\
- $p(y_t\mid\theta,h_{t-1},\tau_t)\,p(\theta\mid h_{t-1})$\\[3pt]
- Downweight values inconsistent with the data};
-\node[box,text width=3.4cm,minimum height=2.65cm,anchor=north,fill=green!5] (posterior) at (12.75,-2.05) {};
-\node[font=\small,align=center,anchor=north] at (12.75,-2.18)
- {Posterior uncertainty\\$p(\theta\mid h_t)$};
-\draw[thin,->] (11.65,-4.03) -- (13.87,-4.03) node[right,font=\scriptsize] {$\theta_j$};
-\draw[thin,->] (11.65,-4.03) -- (11.65,-3.2);
-\draw[thick,green!40!black,domain=-1:1,samples=60]
- plot ({12.7+\x},{-4.03+.77*exp(-\x*\x/.10)});
-\draw[flow] (prior.east) -- (update.west);
-\draw[flow] (update.east) -- (posterior.west);
-\draw[flow] (6.25,-1.4) -- (update.north);
-\node[note,anchor=north] at (6.25,-5.10)
- {Aim: greater expected uncertainty reduction about $M$ and $K$ with the same $T$ probes.};
+\draw[flow] (observe) -- (history);
+\draw[flow] (history) -- (posterior);
+\draw[flow] (posterior) -- node[note,above,text width=1.1cm] {Posterior} (next);
+\draw[flow] (history.south) -- (11.6,-3.65)
+ -- node[note,pos=.5] {Observed history $h_t$} (0,-3.65) -- (next.south);
+\draw[flow] (next.north) -- node[note,left] {$t\leftarrow t+1$} (select.south);
+\node[note,anchor=north] at (5.8,-4.05)
+ {Repeat while $t<T$. Aim: greater expected reduction in uncertainty about $M$ and $K$ at the same probe budget.};
 \end{tikzpicture}
-\caption{How sequential probing provides information about latent grid
-parameters. The physical response depends on $M$ and $K$; observations
-update their relative plausibility through the likelihood. The dashed
-feedback path is used by adaptive methods; Random and Fixed do not
-condition their designs on observations. The lower row explains Bayesian
-information acquisition, not an explicit posterior calculation required
-of every policy: DAD and RL-sBOED act directly on history. Marginal-density
-sketches are illustrative, not measured results. Uncertainty reduction is
-an expectation over experiments, not guaranteed for every observation.
-Terminal sPCE and computation time are evaluated separately.}
+\caption{Sequential probing and information feedback. Each response extends
+the history, which determines the posterior through the likelihood.
+The next adaptive design uses this history directly (DAD/RL-sBOED), or
+the history and its particle posterior for online planning (Myopic/Step-DAD).
+DAD/RL-sBOED do not explicitly compute a posterior. Random and Fixed use
+the same physical experiment but bypass adaptive feedback. Stop after
+$T$ observations; terminal sPCE is scored separately, without requiring a
+final planner update. Uncertainty reduction is expected over experiments,
+not guaranteed for every observation.}
 \label{fig:probing}
 \end{figure*}
 
