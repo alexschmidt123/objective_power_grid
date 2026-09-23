@@ -250,85 +250,117 @@ differences in true EIG. The generating parameter appears in the
 evaluator's denominator only; it is never supplied to an online planner.
 
 \section{Compared Design Methods}
+All six methods select the same continuous probe duration from the
+feasible interval in~\eqref{eq:bounds}. They differ in whether they use
+observations, optimize online, or learn a policy offline. Algorithm~\ref{alg:probing}
+summarizes their evaluation procedure; the following subsections specify
+how each decision is obtained. These are application-specific adaptations
+of existing methods, not a new design algorithm.
 
-Algorithm~\ref{alg:probing} summarizes the common online procedure after
-method-specific offline training. It is an application workflow for the
-existing methods, not an additional design algorithm.
-\begin{minipage}{\columnwidth}
+\begin{figure}[t]
 \small
 \refstepcounter{algorithm}\label{alg:probing}
 \hrule\smallskip
-\textbf{Algorithm \thealgorithm: Sequential power-system probing}
+\textbf{Algorithm \thealgorithm: Evaluate one probe sequence}
 \smallskip\hrule\smallskip
 \begin{algorithmic}[1]
-\REQUIRE Method, prior $p_0$, design steps $T$, trained policy/sequence if used
-\STATE Initialize $h_0=\varnothing$; initialize the system once.
-\STATE For Myopic/Step-DAD, draw prior particles and initialize their states.
-\STATE For Step-DAD, copy the matching DAD policy.
-\FOR{$t=1,\ldots,T$}
-\IF{Step-DAD and $t>1$}
-\STATE Refine the current policy on posterior fantasies (4 updates); retain the validation-best candidate.
+\REQUIRE Method $\mathsf M$, prior $p_0$, steps $T$, selected offline model if needed
+\STATE Set $h_0=\varnothing$; initialize the physical system once.
+\IF{$\mathsf M\in\{\mathrm{Myopic},\mathrm{Step\mbox{-}DAD}\}$}
+\STATE Initialize 128 prior particles, their states and equal weights.
 \ENDIF
-\STATE Select $\tau_t\in[a_t,b_t]$ using the chosen method and $h_{t-1}$.
-\STATE Apply the probe, carry the system state, and observe $y_t$.
-\STATE Append $(\tau_t,y_t)$ to obtain $h_t$.
-\STATE For Myopic/Step-DAD, propagate each particle under $\tau_t$ and update its likelihood weight using $y_t$.
+\IF{$\mathsf M=\mathrm{Step\mbox{-}DAD}$}
+\STATE Set episode policy $\phi$ to the matching DAD checkpoint.
+\ENDIF
+\FOR{$t=1,\ldots,T$}
+\IF{$t>1$ and $\mathsf M\in\{\mathrm{Myopic},\mathrm{Step\mbox{-}DAD}\}$}
+\STATE Propagate particles under $\tau_{t-1}$; update their weights with $y_{t-1}$.
+\ENDIF
+\IF{$\mathsf M=\mathrm{Random}$}
+\STATE Draw $u_t\sim\mathcal U(0,1)$ and map it to $\tau_t\in[a_t,b_t]$.
+\ELSIF{$\mathsf M=\mathrm{Myopic}$}
+\STATE Search feasible durations for maximum expected one-step information.
+\ELSE
+\IF{$\mathsf M=\mathrm{Step\mbox{-}DAD}$ and $t>1$}
+\STATE Refine $\phi$ on posterior future simulations for four updates; keep the conditional-validation-best candidate, including the unchanged policy.
+\ENDIF
+\STATE Evaluate the Fixed/DAD/RL-sBOED model or $\phi$; map its output to $\tau_t\in[a_t,b_t]$.
+\ENDIF
+\STATE Apply the pulse; carry the physical state to window end and observe $y_t$.
+\STATE Append $(\tau_t,y_t)$ to form $h_t$.
 \ENDFOR
-\ENSURE History $h_T$; evaluator computes sPCE separately.
+\ENSURE History $h_T$; score terminal sPCE separately.
 \end{algorithmic}
 \smallskip\hrule
-\end{minipage}
+\end{figure}
 
-\subsection{Common History and Offline Policies}
-Policy inputs contain the stage index and ordered slots for past durations,
-scaled observations and availability masks. Future slots are masked.
-True parameters and simulator states are not policy inputs.
+\subsection{Nonadaptive Designs: Random and Fixed}
+Random samples a unit action uniformly and applies the common feasible
+duration map. This is uniform sampling within the remaining interval,
+not over complete ordered sequences. It requires no offline training
+and ignores observations when selecting durations.
 
-\textbf{DAD} uses a deterministic two-layer, 64-unit tanh network with a
-trainable stage bias and sigmoid output. sPCE training over all $T$ design steps propagates
-gradients through actions, observations and carried states. Joint Fixed/DAD
-training selects between random and interior Fixed-based initialization
-using validation only. Offline DAD cost includes this Fixed initialization
-when used; Step-DAD inherits the selected matching DAD checkpoint.
-The selected DAD policy requires no online weight updates.
+Fixed optimizes an entire ordered sequence offline using terminal sPCE.
+It compares short, central, long and spread interior initializations
+using validation, then optimizes the selected initialization. Each
+training seed yields a separately fitted sequence. During evaluation,
+Fixed executes that sequence without adapting to observations.
 
-\textbf{RL-sBOED} uses a REDQ-style continuous actor--critic adaptation with
-ten critics and five replay updates per trajectory batch. Prefix rewards
-$r_t=\widehat I_t-\widehat I_{t-1}$ telescope to terminal sPCE with
-$\gamma=1$. Thus stepwise rewards do not make it myopic. The actor has two
-128-unit ReLU layers. Entropy uses the normalized tanh action with target
-entropy $-1$; evaluation scores exclude entropy bonuses. This adaptation
-does not require derivatives through the simulator.
+\subsection{Online One-Step Design: Myopic}
+Myopic maintains a weighted particle approximation to the parameter
+posterior. Before each decision after the first, particles propagate
+their own states under the preceding duration and update likelihood
+weights using the latest observation. Continuous search then maximizes
+expected information from the next probe only, using 16 proposals,
+three search rounds and 32 simulated observations per proposal.
+Candidate durations obey the same constraints as all other methods.
+No offline policy is trained.
 
-\subsection{Step-DAD Online Refinement}
-Step-DAD starts each episode from the matching DAD checkpoint. The first
-action uses that policy unchanged. Following each observation, 128 planning
-particles update likelihood weights and carry their own states under the
-observed action sequence. Fantasy truths and contrasts are sampled from
-this posterior to optimize the conditional objective over the remaining design steps.
+\subsection{Offline-Trained Adaptive Policies: DAD and RL-sBOED}
+Both policies receive the stage index and ordered slots containing past
+durations, scaled observations and availability masks; future slots are
+masked. They do not receive true parameters or physical states.
+At evaluation, a forward pass produces the action without online
+optimization or an explicit particle-posterior update.
 
-Each refinement performs \textbf{four gradient updates}, using batch size
-32 and learning rate $10^{-3}$. A separate fixed conditional validation
-batch compares the initial and updated policies; the best candidate is
-retained. Adapted weights carry to the next stage, while the optimizer is
-reinitialized at each refinement. Episodes do not share adapted weights.
-There are $4(T-1)$ updates per episode: 8, 12 and 16 for $T=3,4,5$, respectively.
+DAD uses a deterministic two-layer, 64-unit tanh network, a trainable
+stage bias and a sigmoid action map. Offline training maximizes terminal
+sPCE by differentiating through the complete simulated sequence,
+including observations and carried states. In the joint Fixed/DAD
+campaign, validation selects between random and interior Fixed-based
+initialization. The reported DAD stage timer excludes the preceding
+Fixed training; the full workflow incurs both costs.
 
+RL-sBOED uses a REDQ-style actor--critic adaptation with ten critics
+and five replay updates per trajectory batch. The actor has two
+128-unit ReLU layers. Its rewards are
+$r_t=\widehat I_t-\widehat I_{t-1}$, with $\widehat I_0=0$ and
+discount $\gamma=1$, so their sum is terminal sPCE. Training therefore
+accounts for future design steps without differentiating through the
+simulator. Entropy regularization uses normalized tanh actions and
+target entropy $-1$; reported information scores exclude entropy bonuses.
+Evaluation uses the actor's deterministic output.
 
-\subsection{Baselines}
-\textbf{Fixed} optimizes one ordered, observation-independent sequence
-offline, comparing interior short, central, long and spread initializations.
-\textbf{Myopic} maximizes expected one-step information through continuous
-search with 16 proposals, three rounds and 32 fantasies per proposal.
-\textbf{Random} samples uniformly from each remaining feasible interval;
-this is not uniform sampling over complete ordered sequences.
+\subsection{Online Policy Refinement: Step-DAD}
+Step-DAD begins each episode with the matching selected DAD checkpoint
+and uses it unchanged for the first probe. Before each subsequent
+decision, it assimilates the latest observation into its 128-particle
+posterior. It then samples candidate parameters and their carried
+states from that posterior to simulate the remaining design steps.
+These future simulations condition on the actual observed history.
 
-\subsection{Numerical Verification}
-RK4 integration uses step $1/640$ s. Numerical state/duration Jacobians
-use perturbations of $10^{-5}$ and include carried-state derivatives.
-The verification suite compares policy and conditional-refinement gradients
-with end-to-end finite differences. The six methods are documented
-adaptations of existing approaches.
+At each refinement, a fresh Adam optimizer performs four gradient
+updates with batch size 32 and learning rate $10^{-3}$. A fixed
+conditional validation batch compares the unchanged policy and all
+updated candidates; the best is retained. Retained weights carry to
+the next design step within the episode, but not to another episode.
+The total refinement budget is $4(T-1)$ updates: 8, 12 and 16 for
+$T=3,4,5$. The planner never receives the evaluator's true parameters.
+
+For both Myopic and Step-DAD, assimilation is performed only when a
+subsequent decision requires it. No final planner update is needed
+after $y_T$ for this EIG experiment; terminal information is computed
+separately by the evaluator using~\eqref{eq:spce}.
 
 \section{Experimental Settings}
 All six methods are compared at $T=3,4,5$ design steps on IEEE9 and
@@ -336,6 +368,12 @@ IEEE14. Each step applies one probe and collects one observation.
 Equal design-step counts define the common probe budget. The systems
 share sensor and design constraints but use separate physical parameters
 and trained policies.
+
+The swing equations are integrated by RK4 with step $1/640$ s.
+Numerical state/duration Jacobians use perturbations of $10^{-5}$
+and include carried-state derivatives. The verification suite compares
+policy and conditional-refinement gradients with end-to-end finite
+differences.
 
 Offline training uses 2,000 updates with batch size 32 and three independent
 training seeds (101, 202 and 303). The DAD and Fixed learning rate is

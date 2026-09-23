@@ -7,6 +7,9 @@ Build from this folder with pdfLaTeX, BibTeX, then pdfLaTeX twice. The source us
 
 The paper flows naturally across six pages, without forced page or column breaks. IEEEtran margins and font sizes remain unchanged; display spacing is not stretched to fill columns, and the last page uses balanced columns.
 
+- Methods: nonadaptive Random/Fixed, online Myopic, offline-trained DAD/RL-sBOED, and online-refined Step-DAD. Pseudocode uses a floating block so it does not reserve an unfillable space in the preceding column.
+- The evaluation pseudocode was checked against the archived IEEE14 conference `continuous_eig.py` (`evaluate`, `refine`, `myopic_duration`) and the current implementation. Planner assimilation occurs before the next action; no terminal planner update is required for EIG. Step-DAD retains within-episode refinements and starts each episode from DAD.
+- Final-page columns are balanced. Unused space below the final text is intentional; no margins, fonts or equation spacing are enlarged to fill it.
 - Problem formulation: unknown M/K and grid dynamics, probe/observation model, feasible adaptive policies, then EIG and its finite-contrast approximation.
 - Results: aligned IEEE9/IEEE14 information tables and measured online/offline computation, followed by limitations and the supplementary SIR-ODE comparison.
 - Figure 1: offline training-time plots for IEEE9 and IEEE14 at T=3,4,5, averaged across three training seeds. DAD stage time excludes preceding Fixed initialization cost; Step-DAD reuses DAD.
