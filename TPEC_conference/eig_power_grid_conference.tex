@@ -32,29 +32,28 @@ email@example.com}}
 \maketitle
 \begin{abstract}
 Understanding power-system dynamics requires knowledge of latent parameters
-such as inertia and effective frequency response. Active probing can reveal
-these parameters, but the information obtained depends on which inputs
-are applied. This paper investigates sequential Bayesian optimal experimental
-design to acquire more information with the same number of probes.
-We formulate probe-duration selection as an expected-information-gain
-maximization problem, using previous observations to guide subsequent
-probes while accounting for the evolving physical state. We compare six
-existing methods on reduced IEEE9 and IEEE14 models with three, four and
-five design steps: deep adaptive design (DAD), reinforcement-learning-based
-sequential design (RL-sBOED), Step-DAD, Myopic, Fixed and Random.
-Performance is assessed through a contrastive lower bound on information
-gain, seed variability, and offline and online computation.
-On both networks, DAD, RL-sBOED and Step-DAD achieve higher mean information
-scores than the three baselines at every tested design-step count.
-At three design steps, DAD exceeds Myopic by
-0.163 nats on IEEE9 and 0.467 nats on IEEE14. Its mean online computation
-per sequence is 0.54 and 1.22 ms, respectively, compared with 9.31 and
-10.00 s for Myopic. Step-DAD provides modest additional mean gains over
-DAD on IEEE9 but no consistent gain on IEEE14, with substantially greater
-online cost. IEEE14 scores approach the estimator ceiling, limiting
-comparisons among the strongest methods. These results support offline-trained
-sequential design as an effective approach to informative probing with
-low online computation under the studied conditions.
+such as inertia and effective frequency response. Active probing provides
+information about these parameters through controlled inputs and measured
+responses, but its effectiveness depends on the experiments selected.
+This paper investigates sequential Bayesian optimal experimental design
+for obtaining more information with a fixed number of probes. We formulate
+probe-duration selection as an expected-information-gain maximization
+problem, allowing observed responses to guide subsequent designs while
+accounting for the evolving physical state. Six existing methods are
+compared on reduced IEEE9 and IEEE14 models: deep adaptive design (DAD),
+reinforcement-learning-based sequential design (RL-sBOED), Step-DAD,
+Myopic, Fixed and Random. The evaluation considers three, four and five
+design steps and reports a contrastive lower bound on information gain,
+seed variability, and offline and online computational costs.
+Across both networks, DAD, RL-sBOED and Step-DAD achieve higher mean
+information scores than Random, Fixed and Myopic at every tested design-step
+budget. DAD and RL-sBOED require substantially less online computation
+than Myopic and Step-DAD. Refining DAD online provides modest additional
+mean gains on IEEE9 but no consistent improvement on IEEE14, where
+estimator saturation limits discrimination among the strongest methods.
+These findings support offline-trained sequential design for obtaining
+more informative power-system measurements within a fixed probe budget
+while keeping online computation low.
 \end{abstract}
 \begin{IEEEkeywords}
 Bayesian experimental design, power-system identification, adaptive probing,
