@@ -132,7 +132,7 @@ Table~\ref{tab:physical} lists the prior scales and damping, rounded
 for display; configurations retain full precision. Training and evaluation
 sample independent parameter realizations from the same prior.
 \begin{table}[t]
-\caption{Machine-specific prior scales and fixed damping.}
+\caption{Prior scales and damping coefficients}
 \label{tab:physical}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}llrrr@{}}
@@ -272,12 +272,12 @@ feasible interval in~\eqref{eq:bounds}. They differ in whether they use
 observations, optimize online, or learn a policy offline. Figure~\ref{fig:probing} illustrates the experimental workflow.
 These are application-specific adaptations of existing methods.
 Table~\ref{tab:methods} distinguishes adaptation to observations from
-myopic optimization of only the next probe.
+myopic optimization of only the next probe. Fixed optimizes the full
+sequence without observation feedback. Random optimizes no information
+objective, so its myopia entry is N/A.
 
 \begin{table}[t]
-\caption{Design-method comparison. Adaptive means using observed responses;
-myopic means optimizing only the next probe. Fixed optimizes the full
-sequence; Random has no information objective (N/A).}
+\caption{Comparison of experimental design methods}
 \label{tab:methods}\papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
 \toprule Method & Adaptive & Myopic & Optimization\\\midrule
@@ -468,7 +468,11 @@ Code: \url{https://github.com/alexschmidt123/objective_power_grid}.
 \label{sec:results}
 
 \subsection{Information Versus Number of Design Steps}
-\begin{table}[!ht]\caption{IEEE9 terminal sPCE (nats), mean $\pm$ sample SD. Trained methods: three training-seed means; Random/Myopic: three evaluation-seed means. $L=128$; ceiling 4.8598.}\label{tab:ieee9}\papertablestyle
+Tables~\ref{tab:ieee9} and~\ref{tab:ieee14} report terminal sPCE in
+nats as mean $\pm$ sample SD. Trained methods use three training-seed
+means; Random and Myopic use three evaluation-seed means. Both networks
+use $L=128$ contrasts, giving a 4.8598-nat estimator ceiling.
+\begin{table}[!ht]\caption{IEEE9 terminal sPCE}\label{tab:ieee9}\papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
 Random & $0.4321\pm0.0310$ & $0.4924\pm0.0342$ & $0.5392\pm0.0471$\\
 Fixed & $2.0112\pm0.0116$ & $2.3192\pm0.0004$ & $2.5066\pm0.0013$\\
@@ -479,9 +483,7 @@ Step-DAD & $2.1471\pm0.0110$ & $2.4382\pm0.0048$ & $2.6621\pm0.0145$\\
 \bottomrule\end{tabular*}\end{table}
 
 \begin{table}[!ht]
-\caption{IEEE14 terminal sPCE (nats), mean $\pm$ sample SD.
-Trained methods use three training-seed means; Random/Myopic use
-three evaluation-seed means. $L=128$; ceiling 4.8598.}
+\caption{IEEE14 terminal sPCE}
 \label{tab:ieee14}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
@@ -520,6 +522,9 @@ nor establish a reliable ranking within the DAD family. The SDs
 describe distinct sources of variation: retraining for learned/fitted
 methods and repeated evaluation for Random/Myopic.
 \subsection{Measured Computational Cost}\label{sec:cost}
+Tables~\ref{tab:ieee9_offline} and~\ref{tab:ieee14_offline} report offline
+training in hours; Tables~\ref{tab:ieee9_online} and~\ref{tab:ieee14_online}
+report online computation in milliseconds per complete sequence.
 Online cost is the wall-clock time summed over all $T$ decisions in
 one experimental sequence. For each evaluation seed, we average 512
 episodes per trained policy and then average the three training seeds
@@ -536,7 +541,7 @@ not end-to-end physical experiment durations.
 
 
 \begin{table}[!ht]
-\caption{IEEE9 offline training time (hours), mean $\pm$ sample SD across three training seeds.}
+\caption{IEEE9 offline training time}
 \label{tab:ieee9_offline}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
@@ -551,7 +556,7 @@ Step-DAD & $0.957\pm0.342$ & $1.393\pm0.509$ & $1.831\pm0.654$\\
 \end{table}
 
 \begin{table}[!ht]
-\caption{IEEE14 offline training time (hours), mean $\pm$ sample SD across three training seeds.}
+\caption{IEEE14 offline training time}
 \label{tab:ieee14_offline}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
@@ -566,7 +571,7 @@ Step-DAD & $1.894\pm0.032$ & $2.725\pm0.018$ & $3.626\pm0.068$\\
 \end{table}
 
 \begin{table}[!ht]
-\caption{IEEE9 online computation (ms per complete sequence), mean $\pm$ sample SD across three evaluation-seed means.}
+\caption{IEEE9 online computation time}
 \label{tab:ieee9_online}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
@@ -581,7 +586,7 @@ Step-DAD & $6342\pm2$ & $15808\pm9$ & $24350\pm50$\\
 \end{table}
 
 \begin{table}[!ht]
-\caption{IEEE14 online computation (ms per complete sequence), mean $\pm$ sample SD across three evaluation-seed means.}
+\caption{IEEE14 online computation time}
 \label{tab:ieee14_online}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
@@ -665,7 +670,11 @@ training uses a behavioral-cloning warm start and different optimizers
 from the grid experiment; checkpoint selection also includes a configured
 sequence-diversity preference. SIR is therefore a supplementary historical
 comparison, not a matched replication of the grid implementations.
-\begin{table}[!ht]\caption{SIR-ODE entropy reduction (nats), mean $\pm$ sample SD. DAD/RL-sBOED/Step-DAD: three training-seed means. Random/Myopic/Fixed: five evaluation-seed means after deduplicating identical copies across training seeds.}\label{tab:sir}\papertablestyle
+Table~\ref{tab:sir} reports entropy reduction in nats as mean $\pm$
+sample SD. DAD, RL-sBOED and Step-DAD use three training-seed means;
+Random, Myopic and Fixed use five evaluation-seed means, with identical
+copies across training seeds counted only once.
+\begin{table}[!ht]\caption{SIR-ODE posterior entropy reduction}\label{tab:sir}\papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
 Random & $3.7783\pm0.0167$ & $3.8593\pm0.0167$ & $3.9241\pm0.0167$\\
 Fixed & $6.2816\pm0.0101$ & $6.4501\pm0.0091$ & $6.5360\pm0.0044$\\
