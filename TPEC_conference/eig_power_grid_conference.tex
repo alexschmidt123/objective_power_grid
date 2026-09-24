@@ -41,7 +41,7 @@ the evolving grid state. On IEEE9 and IEEE14 reduced models, we compare
 offline-trained adaptive policies (DAD and RL-sBOED), online policy refinement
 (Step-DAD), one-step Bayesian design (Myopic), an optimized fixed sequence,
 and random probing. With three to five probes, the learned
-methods achieve higher mean EIG estimates than the three
+methods achieve higher mean EIG than the three
 baselines. DAD and RL-sBOED also require substantially less online computation
 than Myopic and Step-DAD. Online refinement gives modest additional gains
 on IEEE9 but no consistent improvement on IEEE14, where estimator saturation
@@ -83,7 +83,7 @@ information acquisition, and does online refinement justify its cost?
 We address this question by formulating continuous probe-duration
 selection with a shared sensor model and physical state carried between
 experiments. Six existing methods are compared on reduced IEEE9 and
-IEEE14 systems at equal probe budgets. We report EIG estimates, seed variability, and offline and online computation. Our
+IEEE14 systems at equal probe budgets. We report EIG, seed variability, and offline and online computation. Our
 contribution is the power-system design formulation and matched evaluation;
 the policy algorithms are existing methods, and conclusions are limited
 to the stated models and sensor.
@@ -276,7 +276,8 @@ The sampled information score is then
 \end{equation}
 Likelihoods are evaluated in the log domain. Averaging $\widehat I_T$
 over simulated sequences estimates a lower bound on $\mathcal I_T(\pi)$;
-We report this bound estimate as estimated EIG, rather than exact EIG. Individual scores can be negative but
+Throughout the paper, reported EIG values are estimated using this sPCE
+lower bound; they are not exact EIG values. Individual scores can be negative but
 cannot exceed $\log(L+1)$. With $L=128$, this ceiling is 4.8598 nats,
 so near-ceiling scores can conceal differences in true EIG.
 The generating parameter is used only by the evaluator, never supplied
@@ -320,7 +321,7 @@ It ignores observations and requires no offline training.
 
 Fixed is a static Bayesian design: all durations are optimized jointly
 before observations are collected~\cite[Sec.~2.4]{huan2016sequential}.
-Our implementation optimizes the ordered sequence using estimated EIG for the full sequence.
+Our implementation optimizes the ordered sequence using EIG for the full sequence.
 It compares short, central, long and spread interior initializations
 using validation, then optimizes the selected initialization. Each
 training seed yields a separately fitted sequence. During evaluation,
@@ -349,8 +350,7 @@ At evaluation, a forward pass produces the action without online
 optimization or an explicit particle-posterior update.
 
 DAD~\cite{foster2021dad} uses a deterministic two-layer, 64-unit tanh network, a trainable
-stage bias and a sigmoid action map. Offline training maximizes estimated
-EIG by differentiating through the complete simulated sequence,
+stage bias and a sigmoid action map. Offline training maximizes EIG by differentiating through the complete simulated sequence,
 including observations and carried states. In the joint Fixed/DAD
 campaign, validation selects between random and interior Fixed-based
 initialization. The reported DAD stage timer excludes the preceding
@@ -484,11 +484,11 @@ the computation required to obtain it. Optimization diagnostics and
 estimator limitations qualify the resulting comparisons.
 
 \subsection{Information Versus Number of Design Steps}
-Tables~\ref{tab:ieee9} and~\ref{tab:ieee14} report EIG estimates in
+Tables~\ref{tab:ieee9} and~\ref{tab:ieee14} report EIG in
 nats as mean $\pm$ sample SD. Trained methods use three training-seed
 means; Random and Myopic use three evaluation-seed means. Both networks
 use $L=128$ contrasts, giving a 4.8598-nat estimator ceiling.
-\begin{table}[!ht]\caption{IEEE9 EIG estimates}\label{tab:ieee9}\papertablestyle
+\begin{table}[!ht]\caption{IEEE9 EIG}\label{tab:ieee9}\papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
 Random & $0.4321\pm0.0310$ & $0.4924\pm0.0342$ & $0.5392\pm0.0471$\\
 Fixed & $2.0112\pm0.0116$ & $2.3192\pm0.0004$ & $2.5066\pm0.0013$\\
@@ -499,7 +499,7 @@ Step-DAD & $2.1471\pm0.0110$ & $2.4382\pm0.0048$ & $2.6621\pm0.0145$\\
 \bottomrule\end{tabular*}\end{table}
 
 \begin{table}[!ht]
-\caption{IEEE14 EIG estimates}
+\caption{IEEE14 EIG}
 \label{tab:ieee14}
 \papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
@@ -519,7 +519,7 @@ IEEE9 scores remain well below the estimator ceiling.
 
 
 
-For IEEE14, Table~\ref{tab:ieee14} shows higher mean EIG estimates for
+For IEEE14, Table~\ref{tab:ieee14} shows higher mean EIG for
 DAD, RL-sBOED and Step-DAD than for Random, Fixed or Myopic at
 every design-step count. At $T=3$, DAD exceeds Myopic by 0.4669 nats
 and Fixed by 0.4953 nats. The comparison fixes the number of probes,
@@ -663,7 +663,7 @@ neither terminal-control safety nor field performance.
 
 \section{Conclusion}
 Under the specified IEEE9 and IEEE14 models, DAD, RL-sBOED and
-Step-DAD achieve higher mean EIG estimates than Random, Fixed and Myopic at
+Step-DAD achieve higher mean EIG than Random, Fixed and Myopic at
 equal budgets of three to five probes. Offline-trained DAD and RL-sBOED
 also require low online computation. Four-update Step-DAD gives modest
 mean gains over DAD on IEEE9, but no consistent improvement on IEEE14,
