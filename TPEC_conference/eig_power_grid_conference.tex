@@ -276,7 +276,7 @@ The sampled information score is then
 \end{equation}
 Likelihoods are evaluated in the log domain. Averaging $\widehat I_T$
 over simulated sequences estimates a lower bound on $\mathcal I_T(\pi)$;
-Throughout the paper, reported EIG values are estimated using this sPCE
+For IEEE9 and IEEE14, reported EIG values are estimated using this sPCE
 lower bound; they are not exact EIG values. Individual scores can be negative but
 cannot exceed $\log(L+1)$. With $L=128$, this ceiling is 4.8598 nats,
 so near-ceiling scores can conceal differences in true EIG.
@@ -682,11 +682,12 @@ remains outside this six-method comparison.
 These historical results are retained for reference only; they do not
 support the power-grid conclusions. SIR-ODE uses a population of 500,
 two initial infections, 100 candidate measurement times, observation
-noise SD 1.0, and a precomputed simulation bank. Its 1,024-particle
-posterior entropy reduction has ceiling $\log(1024)=6.9315$ nats and
-differs from the grid EIG estimator.
+noise SD 1.0, and a precomputed simulation bank. The objective remains
+EIG, estimated here by averaging prior-to-posterior entropy reductions
+over a 1,024-particle representation. This estimator has ceiling
+$\log(1024)=6.9315$ nats; the grid experiments instead use sPCE.
 
-Table~\ref{tab:sir} reports mean $\pm$ sample SD in nats.
+Table~\ref{tab:sir} reports EIG as mean $\pm$ sample SD in nats.
 DAD/RL-sBOED/Step-DAD use three training-seed means; Random/Myopic/Fixed
 use five evaluation-seed means after deduplication. Each evaluation
 uses 512 systems; Random averages 32 design replicates per system.
@@ -694,7 +695,7 @@ Fixed is calibrated once. Historical training uses a behavioral-cloning
 warm start, different optimizers, and checkpoint selection with a
 sequence-diversity preference. Full settings, models and results remain
 in the companion collection.
-\par\medskip\noindent\begin{minipage}{\columnwidth}\makeatletter\def\@captype{table}\makeatother\caption{SIR-ODE posterior entropy reduction}\label{tab:sir}\papertablestyle
+\par\medskip\noindent\begin{minipage}{\columnwidth}\makeatletter\def\@captype{table}\makeatother\caption{SIR-ODE EIG}\label{tab:sir}\papertablestyle
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}\toprule Method & $T=3$ & $T=4$ & $T=5$\\\midrule
 Random & $3.7783\pm0.0167$ & $3.8593\pm0.0167$ & $3.9241\pm0.0167$\\
 Fixed & $6.2816\pm0.0101$ & $6.4501\pm0.0091$ & $6.5360\pm0.0044$\\
