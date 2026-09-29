@@ -47,14 +47,13 @@ RUN_METADATA_FILENAME = "run_metadata.json"
 # MMDDYYYY_HHMMSS_config_Uctrl|EIG_Tnum_NobsN_sigma0p005
 RESULT_DIR_RE = re.compile(
     r"^(?P<stamp>\d{8}_\d{6})_(?P<config>.+)_"
-    r"(?P<label>Uctrl|EIG|MSC)_T(?P<T>\d+)_Nobs(?P<nobs>\d+)_"
+    r"(?P<label>CostUtility|EIG)_T(?P<T>\d+)_Nobs(?P<nobs>\d+)_"
     r"sigma(?P<sigma>\d+(?:p\d+)?)$"
 )
-EXPERIMENT_TYPES = ("objective_based", "eig_based", "msc_based")
+EXPERIMENT_TYPES = ("cost_utility", "eig_based")
 EXPERIMENT_FOLDER_LABELS = {
-    "objective_based": "Uctrl",
+    "cost_utility": "CostUtility",
     "eig_based": "EIG",
-    "msc_based": "MSC",
 }
 
 
@@ -91,7 +90,7 @@ def make_experiment_dir_name(
         raise ValueError(f"Invalid config name for result folder: {config_name!r}")
     # The following objective label already carries this information.  Strip
     # only a terminal objective suffix and retain legacy parsing compatibility.
-    name = re.sub(r"_(?:eig|mocu|msc)$", "", name, flags=re.IGNORECASE)
+    name = re.sub(r"_(?:eig|cost_utility)$", "", name, flags=re.IGNORECASE)
     if stamp is None:
         stamp = datetime.now().strftime("%m%d%Y_%H%M%S")
     if int(n_obs) < 0:
@@ -136,7 +135,7 @@ def make_plots_dir_name(
         raise ValueError(f"Invalid config name for visualization folder: {config_name!r}")
     # Core config stems encode the objective for config lookup, while the
     # following EIG/Uctrl token already records it in the folder identity.
-    system_name = re.sub(r"_(?:eig|mocu|msc)$", "", name, flags=re.IGNORECASE)
+    system_name = re.sub(r"_(?:eig|cost_utility)$", "", name, flags=re.IGNORECASE)
     stamp_text = str(stamp).strip()
     if not re.fullmatch(r"\d{8}_\d{6}", stamp_text):
         raise ValueError(f"Invalid plots stamp {stamp!r}; expected MMDDYYYY_HHMMSS")
@@ -144,7 +143,7 @@ def make_plots_dir_name(
         raise ValueError(f"N_obs must be non-negative, got {n_obs}")
     # Visualization folders name the scientific objective. Individual result
     # folders retain Uctrl for backward-compatible discovery.
-    label = {"objective_based": "MOCU", "msc_based": "MSC", "eig_based": "EIG"}[et]
+    label = {"cost_utility": "Cost utility", "eig_based": "EIG"}[et]
     sigma = str(sigma_token).strip() if sigma_token else _folder_sigma(noise_sigma)
     prefix = (
         f"{stamp_text}_visualization_{system_name}_{label}_"
@@ -170,7 +169,7 @@ def parse_result_dir_name(name: str) -> dict[str, Any] | None:
         "config": m.group("config"),
         "label": m.group("label"),
         "experiment_type": (
-            {"EIG": "eig_based", "MSC": "msc_based", "Uctrl": "objective_based"}[m.group("label")]
+            {"EIG": "eig_based", "CostUtility": "cost_utility"}[m.group("label")]
         ),
         "step_number": t,
         "T": t,
@@ -258,7 +257,7 @@ def find_latest_result_dir(
     if not experiments.is_dir():
         return None
     et = str(experiment_type).strip().lower().replace("-", "_")
-    want_config = re.sub(r"_(?:eig|mocu|msc)$", "", cfg.run_slug, flags=re.IGNORECASE)
+    want_config = re.sub(r"_(?:eig|cost_utility)$", "", cfg.run_slug, flags=re.IGNORECASE)
     want_T = int(cfg.step_number)
     want_n_obs, want_sigma = _cfg_observation_values(cfg)
     matches: list[Path] = []
@@ -367,7 +366,7 @@ def resolve_eval_seed(exp_dir: Path | None, cli_seed: int | None = None) -> int:
             return int(doc["seed"])
     if cli_seed is not None and str(cli_seed).strip() != "":
         return int(cli_seed)
-    from src.objectives.mocu.context import GLOBAL_SEED
+    from src.context import GLOBAL_SEED
 
     return int(GLOBAL_SEED)
 
@@ -473,7 +472,7 @@ def write_run_config(
             extra_doc.get("experiment_type")
             or prev.get("experiment_type")
             or (cfg.raw.get("experiment") or {}).get("experiment_type")
-            or "objective_based"
+            or "eig_based"
         )
         .strip()
         .lower()
@@ -712,7 +711,7 @@ def _canonical_run_methods(raw: Any) -> list[str]:
         items = [str(item).strip() for item in list(raw) if str(item).strip()]
     if not items:
         return []
-    from src.objectives.mocu.context import normalize_method_key
+    from src.context import normalize_method_key
 
     aliases = {
         "dad_eig": "dad",

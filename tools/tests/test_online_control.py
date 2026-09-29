@@ -23,14 +23,14 @@ class PosteriorControlTests(unittest.TestCase):
             select_control([0,.1],[[False,True],[False,False]],[.5,.5],.9)
 
     def test_evaluator_truth_is_excluded_from_control_posterior(self):
-        from src.objectives.msc.continuous_msc import OnlineControl
+        from src.objectives.cost_utility.online import OnlineControl
         engine=object.__new__(OnlineControl)
-        engine.objective='msc'
+        engine.objective='cost_utility'
         seen=[]
         def requirements(theta,states,**kwargs):
             seen.append((theta.copy(),states.copy()))
             return np.full(len(theta),.3)
-        engine.control=SimpleNamespace(requirements=requirements,coverage=.9,tolerance=1e-5,
+        engine.control=SimpleNamespace(requirements=requirements,coverage=.9,tolerance=1e-5,bounds=(0.,.5),
             metrics=lambda t,s,u:(None,None,np.ones(len(t),bool)))
         theta=np.arange(18).reshape(1,3,6)
         states=theta+100
@@ -52,7 +52,7 @@ class PosteriorControlTests(unittest.TestCase):
     @unittest.skipUnless(torch.cuda.is_available(),'CUDA required')
     def test_carried_control_matches_independent_cpu_integration(self):
         from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
-        cfg=load_config(ROOT/'configs/ieee9_mocu.yaml')
+        cfg=load_config(ROOT/'configs/ieee9_cost_utility.yaml')
         observer=CudaContinuousSwingObserver(cfg,duration_bounds=(.2,3.),injection_bus=1,amplitude=.05)
         control=CarriedStateControl(cfg,observer.sim)
         sw=cfg.swing
@@ -108,26 +108,32 @@ class ContinuousDecisionTests(unittest.TestCase):
         self.assertAlmostEqual(row['u_ctrl'],.371234,delta=c.tolerance)
         self.assertGreaterEqual(row['posterior_safe_mass'],.9)
 
-    def test_msc_keeps_infeasible_particle_mass_without_discarding_it(self):
+    def test_infeasible_particle_mass_is_not_discarded(self):
         from src.control.continuous_control import continuous_decision
-        row=continuous_decision([.3,np.inf],[.95,.05],.9,'msc')
+        row=continuous_decision([.3,np.inf],[.95,.05],.9,.5)
         self.assertEqual(row['u_ctrl'],.3)
+        self.assertAlmostEqual(row['cost_utility'],-.6)
         self.assertAlmostEqual(row['posterior_safe_mass'],.95)
         with self.assertRaisesRegex(ValueError,'infeasible'):
-            continuous_decision([.3,np.inf],[.95,.05],.99,'msc')
-        with self.assertRaises(ValueError):
-            continuous_decision([.3,np.inf],[.95,.05],.9,'mocu')
+            continuous_decision([.3,np.inf],[.95,.05],.99,.5)
 
-    def test_mocu_uses_continuous_requirements_and_zero_when_known(self):
+    def test_known_system_still_pays_control_cost(self):
         from src.control.continuous_control import continuous_decision
-        row=continuous_decision([.371234],[1.],.9,'mocu')
-        self.assertEqual(row['u_ctrl'],.371234)
-        self.assertEqual(row['posterior_mocu'],0.)
-        row=continuous_decision([.2,.4],[.95,.05],.9,'mocu')
-        self.assertAlmostEqual(row['posterior_mocu'],.09)
+        row=continuous_decision([.2],[1.],.9,.5)
+        self.assertAlmostEqual(row['cost_utility'],-.4)
+        self.assertAlmostEqual(row['normalized_control_cost'],.4)
+        larger=continuous_decision([.3],[1.],.9,.5)
+        self.assertGreater(row['cost_utility'],larger['cost_utility'])
+
+    def test_invalid_normalizer_and_support_rejected(self):
+        from src.control.continuous_control import continuous_decision
+        for upper in [0.,-1.,np.nan,np.inf]:
+            with self.assertRaises(ValueError):continuous_decision([.2],[1.],.9,upper)
+        for req,w in [([],[]),([.6],[1.]),([np.nan],[1.]),([.2],[-1.])]:
+            with self.assertRaises(ValueError):continuous_decision(req,w,.9,.5)
 
     def test_numerical_optimizer_keeps_deterministic_policy_and_correct_sign(self):
-        from src.objectives.msc.continuous_numerical import improve_numerical
+        from src.objectives.cost_utility.numerical import improve_numerical
         policy=torch.nn.Module()
         policy.sequence=torch.nn.Parameter(torch.tensor([.2]))
         def rollout(policy,rng,batch,*,stochastic):
@@ -138,7 +144,7 @@ class ContinuousDecisionTests(unittest.TestCase):
         self.assertAlmostEqual(float(policy.sequence),.36,delta=.02)
 
     def test_numerical_optimizer_restores_parameters_after_failed_rollout(self):
-        from src.objectives.msc.continuous_numerical import improve_numerical
+        from src.objectives.cost_utility.numerical import improve_numerical
         policy=torch.nn.Module();policy.sequence=torch.nn.Parameter(torch.tensor([.2]))
         before=policy.sequence.detach().clone()
         def rollout(*args,**kwargs):raise ValueError('infeasible')
@@ -147,12 +153,12 @@ class ContinuousDecisionTests(unittest.TestCase):
         torch.testing.assert_close(before,policy.sequence)
 
 class RLObjectiveTests(unittest.TestCase):
-    def test_redq_rewards_telescope_for_all_three_objectives(self):
+    def test_redq_rewards_telescope_for_both_objectives(self):
         from src.objectives.eig.continuous_eig import DurationPolicy,OnlineEIG
         from src.objectives.eig.continuous_redq import REDQPolicy,REDQTrainer
         args=SimpleNamespace(T=3,N_obs=5,seed=101,redq_critics=2,redq_updates_per_batch=1)
         engine=SimpleNamespace(horizon=3,features=lambda a,o,b,t:torch.zeros((b,22)))
-        for values in [[.2,.4,.7],[-.4,-.37,-.38],[-.04,-.03,-.01]]:
+        for values in [[.2,.4,.7],[-.8,-.74,-.76]]:
             trainer=REDQTrainer(REDQPolicy(3,5),args)
             result={'info':np.array([values]),'actions':[np.array([1.])]*3,
                     'observations':[np.zeros((1,5))]*3,'unit_actions':[np.array([.5])]*3}

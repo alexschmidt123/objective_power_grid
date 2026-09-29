@@ -23,7 +23,7 @@ class SubmissionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);(root/'data').mkdir();archive=root/'source.tar'
             names=['run.sh','sweep_run.sh','scripts/audit.sh','scripts/check.sh',
-                   'hprc/master_audit.slurm','configs/ieee9_mocu.yaml']
+                   'hprc/master_audit.slurm','configs/ieee9_cost_utility.yaml']
             with tarfile.open(archive,'w') as t:
                 for name in names:
                     m=tarfile.TarInfo(name);m.size=1;t.addfile(m,io.BytesIO(b'\n'))

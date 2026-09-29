@@ -1,10 +1,4 @@
-"""Particle Bayes and explicit terminal decision rules.
-
-Finite-loss MOCU uses Q_(1-alpha)(U|history) for
-C(u,U)=u+(U-u)_+/alpha. The optional ibr_max rule instead takes the
-maximum over particles above a numerical weight cutoff. It approximates a
-hard-support safety assumption and may remain constant under Gaussian noise.
-"""
+"""Particle Bayes helpers and shared posterior control quantiles."""
 
 from __future__ import annotations
 
@@ -402,30 +396,8 @@ def posterior_u_raw(
     ).u_raw
 
 
-def ocu(
-    psi_theta_star: float | np.ndarray,
-    psi_star: float,
-) -> float | np.ndarray:
-    """Yoon OCU: C(ψ*) - C(ψ_θ*) under hard-safety cost (= ψ* - ψ_θ*)."""
-    return np.asarray(psi_star, dtype=np.float64) - np.asarray(
-        psi_theta_star, dtype=np.float64
-    )
 
 
-def belief_mocu(
-    psi_star_bank: np.ndarray,
-    weights: np.ndarray,
-    psi_star: float,
-) -> float:
-    """Yoon belief MOCU = E_w[OCU] = E_w[ψ* - ψ_θ*] for fixed robust operator ψ*."""
-    v = np.asarray(psi_star_bank, dtype=np.float64).reshape(-1)
-    w = np.asarray(weights, dtype=np.float64).reshape(-1)
-    w = np.clip(w, 0.0, None)
-    s = float(np.sum(w))
-    if s <= 0.0:
-        raise ValueError("weights must sum to a positive value")
-    w = w / s
-    return float(np.sum(w * ocu(v, float(psi_star))))
 
 
 def posterior_ess(weights: np.ndarray) -> float:

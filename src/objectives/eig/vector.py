@@ -15,7 +15,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from src.objectives.mocu.context import (
+from src.context import (
     GLOBAL_SEED,
     ExperimentContext,
     update_posterior_vector,
@@ -295,12 +295,12 @@ def _policy_tensors(
     """Build an information-only EIG policy state.
 
     The shared objective-policy encoder also exposes posterior summaries of
-    ``U`` and the derived control decision.  Those are valid for MOCU design
+    ``U`` and the derived control decision.  Those are valid for retired control-objective design
     but would blur the intended separation of the pure-EIG baseline.  Keep the
     common tensor shapes, while masking every objective-specific feature:
 
     * belief[7:29] -- U quantiles, u_ctrl, and U-level posterior masses;
-    * legacy 3-column particles[..., 2] -- standardized MOCU-only U.
+    * legacy 3-column particles[..., 2] -- standardized retired control-objective-only U.
 
     New EIG contexts contain only the full machine-wise [M..., K...] latent
     vector, so no particle coordinate is masked in that representation.
@@ -556,7 +556,7 @@ def train_vector_eig_policy(
             lr=float(training.get("eig_moe_critic_lr", 1e-3)),
             weight_decay=1e-4,
         )
-    # Soft unique floor for EIG checkpointing (same idea as MOCU MoE).
+    # Soft unique floor for EIG checkpointing (same idea as retired control-objective MoE).
     min_unique_frac = float(training.get("eig_min_unique_sequence_fraction", 0.05))
     unique_eig_slack = float(training.get("eig_unique_floor_slack", 0.02))
     prefer_unique_floor = bool(training.get("eig_prefer_unique_sequence_floor", True))
@@ -1332,7 +1332,7 @@ def _frozen_fixed_sequence(
 
 
 def _validate_eig_evaluation_data(ctx: ExperimentContext) -> dict[str, Any]:
-    """Cheap EIG-specific quality gate that does not depend on MOCU artifacts."""
+    """Cheap EIG-specific quality gate that does not depend on retired control-objective artifacts."""
     support = np.asarray(ctx.centres_support)
     if support.ndim != 3 or support.shape[0] != int(ctx.n_actions):
         raise RuntimeError(

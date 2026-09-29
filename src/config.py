@@ -24,7 +24,7 @@ IEEE_SYSTEM_LABELS: dict[str, str] = {
 # Horizon when CLI does not pass ``-T`` (see ``run.sh`` / ``src.experiment``).
 DEFAULT_STEP_NUMBER = 5
 
-EXPERIMENT_TYPES = ("objective_based", "eig_based", "msc_based")
+EXPERIMENT_TYPES = ("cost_utility", "eig_based")
 
 # Top-level training keys shared by both experiment types (merged into the
 # active subtree). Everything else is type-specific.
@@ -75,15 +75,15 @@ def resolve_training_block(
 ) -> dict[str, Any]:
     """Return training knobs for one experiment type only.
 
-    Preferred YAML shape (independent MOCU vs EIG)::
+    Preferred YAML shape (independent cost_utility vs EIG)::
 
         training:
           device: auto
-          objective_based: {updates: ..., trajectories_per_update: ...}
+          cost_utility: {updates: ..., trajectories_per_update: ...}
           eig_based: {eig_epochs: ..., batch_size: ...}
 
     Legacy flat ``training:`` is still accepted: ``eig_*`` keys go to EIG only;
-    MOCU keys never leak into EIG and vice versa.
+    cost_utility keys never leak into EIG and vice versa.
     """
     raw = dict(training or {})
     et = normalize_experiment_type(experiment_type)
@@ -95,12 +95,10 @@ def resolve_training_block(
         out.update(dict(nested))
         return out
 
-    if et == "msc_based" and any(k in raw for k in EXPERIMENT_TYPES):
-        raise ValueError("MSC requires an independent training.msc_based block")
 
     # Legacy flat block: strip the other experiment family's keys.
     out = dict(shared)
-    if et in {"objective_based", "msc_based"}:
+    if et == "cost_utility":
         for key, value in raw.items():
             if key in EXPERIMENT_TYPES or key in _TRAINING_SHARED_KEYS:
                 continue
@@ -125,62 +123,29 @@ class SBOEDConfig:
     config_path: Path
 
     def __post_init__(self) -> None:
-        """Resolve the optional single-parameter finite-loss MOCU interface.
+        et = (self.raw.get("experiment") or {}).get("experiment_type", "eig_based")
+        normalize_experiment_type(et)
+        # Full control validation happens before execution; pending network
+        # specifications may be loaded for topology/model inspection.
 
-        posterior_coverage is posterior coverage, not an engineering safety guarantee.
-        It takes precedence over legacy derived keys in resolved run records.
-        Configurations without it retain their existing behavior.
-        """
-        if (self.raw.get("experiment") or {}).get("experiment_type") == "msc_based":
-            self.validate_msc()
-        control = self.raw.get("control") or {}
-        if "posterior_coverage" not in control:
-            return
-        value = control["posterior_coverage"]
-        if isinstance(value, bool):
-            raise ValueError("control.posterior_coverage must be a finite number in (0, 1)")
-        q = float(value)
-        if not np.isfinite(q) or not 0.0 < q < 1.0:
-            raise ValueError("control.posterior_coverage must be a finite number in (0, 1)")
-        training = self.raw.setdefault("training", {})
-        nested = any(key in training for key in EXPERIMENT_TYPES)
-        objective = training.setdefault("objective_based", {}) if nested else training
-        if control.get("robust_rule", "quantile") != "quantile":
-            raise ValueError("control.posterior_coverage requires robust_rule: quantile")
-        if float(control.get("safety_margin", 0.0)) != 0.0:
-            raise ValueError("control.posterior_coverage requires zero safety_margin")
-        if float(objective.get("violation_penalty", 0.0)) != 0.0:
-            raise ValueError("control.posterior_coverage requires zero violation_penalty")
-        control.update(posterior_coverage=q, alpha=1.0-q, robust_rule="quantile",
-                       enforce_bayes_loss_alignment=True)
-        objective.update(undercontrol_penalty=1.0/(1.0-q),
-                         violation_penalty=0.0)
-        protocol = self.raw.setdefault("poster_mocu_protocol", {})
-        protocol.update(alpha=1.0-q)
-
-    def validate_msc(self) -> None:
-        """Validate the declared posterior safety constraint before bank/run work."""
-        if self.topology.lower() not in {"ieee9", "ieee14", "ieee30"}:
-            raise ValueError("MSC is supported only for IEEE9, IEEE14 and IEEE30")
+    def validate_cost_utility(self) -> None:
+        """Validate the shared joint-safety constraint and normalized effort cost."""
         c = self.raw.get("control") or {}
         q = c.get("posterior_coverage")
         if isinstance(q, bool) or q is None or not np.isfinite(float(q)) or not 0 < float(q) < 1:
-            raise ValueError("MSC requires control.posterior_coverage in (0, 1)")
+            raise ValueError("cost_utility requires posterior_coverage in (0, 1)")
+        bounds = np.asarray(c.get("u_bounds", []), dtype=float)
+        if bounds.shape != (2,) or not np.isfinite(bounds).all() or not 0 <= bounds[0] < bounds[1]:
+            raise ValueError("cost_utility requires finite nonnegative continuous u_bounds")
+        for key in ("rocof_limit_hz_s", "delta_f_nadir_hz"):
+            if c.get(key) is None or not np.isfinite(float(c[key])):
+                raise ValueError("cost_utility requires finite " + key)
+        if float(c["rocof_limit_hz_s"]) <= 0:
+            raise ValueError("RoCoF limit must be positive")
         if c.get("robust_rule", "quantile") != "quantile" or float(c.get("safety_margin", 0)) != 0:
-            raise ValueError("MSC requires a quantile decision with zero safety margin")
-        if (self.raw.get("experiment") or {}).get("mode") == "continuous_duration_no_reset":
-            bounds = np.asarray(c.get("u_bounds", []), dtype=float)
-            if bounds.shape != (2,) or not np.isfinite(bounds).all() or not 0 <= bounds[0] < bounds[1]:
-                raise ValueError("MSC requires finite continuous control u_bounds")
-            if "u_candidates" in c or "snap_up" in c:
-                raise ValueError("Non-reset control is continuous; remove discrete control settings")
-        else:
-            g = np.asarray(c.get("u_candidates", []), dtype=float)
-            if g.size == 0 or not np.isfinite(g).all() or np.any(g < 0) or np.any(np.diff(g) <= 0):
-                raise ValueError("Invalid legacy control grid")
-        cal = self.raw.get("control_safety_calibration") or {}
-        if cal.get("enabled", False) or cal.get("mode", "config") != "config":
-            raise ValueError("MSC uses the declared coverage; empirical rule calibration is unsupported")
+            raise ValueError("cost_utility uses the minimum joint-safe control without an added margin")
+        if "u_candidates" in c or "snap_up" in c:
+            raise ValueError("cost_utility uses continuous control bounds")
 
     @property
     def name(self) -> str:
@@ -346,11 +311,11 @@ class SBOEDConfig:
 
     @property
     def training(self) -> dict[str, Any]:
-        """Full ``training:`` block (may contain both objective_based and eig_based)."""
+        """Full ``training:`` block (may contain both cost_utility and eig_based)."""
         return dict(self.raw.get("training") or {})
 
     def training_for(self, experiment_type: str) -> dict[str, Any]:
-        """Training knobs for one experiment type (MOCU and EIG stay independent)."""
+        """Training knobs for one experiment type (cost_utility and EIG stay independent)."""
         return resolve_training_block(self.training, experiment_type)
 
     @property
@@ -478,9 +443,9 @@ def repo_root() -> Path:
 
 # Canonical study-system config stems under configs/ (no experiment package import).
 SYSTEM_CONFIGS = {
-    "ieee9": "ieee9_mocu",
-    "ieee14": "ieee14_mocu",
-    "ieee30": "ieee30_mocu",
+    "ieee9": "ieee9_cost_utility",
+    "ieee14": "ieee14_cost_utility",
+    "ieee30": "ieee30_cost_utility",
 }
 DEFAULT_N_OBS = 5
 

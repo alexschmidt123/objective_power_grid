@@ -118,7 +118,7 @@ class ContinuousEIGTests(unittest.TestCase):
         torch.testing.assert_close(a.mean,b.mean)
 
     def test_legacy_bank_path_rejects_no_reset_before_bank_loading(self):
-        from src.objectives.mocu.context import build_context_from_config
+        from src.context import build_context_from_config
         cfg=self.config()
         cfg.raw['swing_equation']['reset_after_probe']=False
         with self.assertRaisesRegex(ValueError,'equilibrium-bank experiment pipeline is retired'):

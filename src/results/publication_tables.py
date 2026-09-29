@@ -14,6 +14,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from src.results.online import cost_run_identity, cost_run_rows
 from src.layout import load_run_config_doc, parse_result_dir_name
 
 TRAIN_SEEDS = (101, 202, 303)
@@ -71,20 +72,35 @@ def _evaluation_seed(path: Path, row: dict[str, Any]) -> int:
 
 
 def collect(
-    exp_dirs: list[Path], *, eig: bool, msc: bool = False
+    exp_dirs: list[Path], *, eig: bool
 ) -> tuple[dict[tuple[str, int], Crossed], dict[tuple[str, int], dict[int, float]], dict[int, set[int]]]:
     crossed: dict[tuple[str, int], Crossed] = defaultdict(lambda: defaultdict(list))
     offline: dict[tuple[str, int], dict[int, float]] = defaultdict(dict)
     coverage: dict[int, set[int]] = defaultdict(set)
     filename = "terminal_eig_summary.csv" if eig else "summary.csv"
-    metric_keys = ("terminal_eig_mean", "mean_eig", "ΔH") if eig else (("mean_msc",) if msc else ("mean_posterior_mocu",))
+    metric_keys = ("terminal_eig_mean", "mean_eig", "ΔH") if eig else ("mean_cost_utility",)
     for exp_dir in exp_dirs:
+        identity=cost_run_identity(exp_dir)
+        if identity is not None:
+            if eig:raise ValueError('Cannot put cost utility in an EIG table')
+            horizon,train_seed=identity['T'],identity['seed']
+            records=cost_run_rows(exp_dir)
+            if not records:raise ValueError('Cost-utility run is incomplete')
+            coverage[horizon].add(train_seed)
+            for row in records:
+                method=LABELS.get(row['method'])
+                if method not in METHOD_ORDER:continue
+                key=(train_seed,row['eval_seed'])
+                crossed[(method,horizon)][key].append(row['mean_cost_utility'])
+                crossed[(method+'::online',horizon)][key].append(row['online_seconds_per_rollout'])
+                offline[(method,horizon)][train_seed]=row['training_time_seconds']
+            continue
         parsed = parse_result_dir_name(exp_dir.name)
         if parsed is None:
             raise ValueError(f"invalid result folder name: {exp_dir.name}")
-        expected_type = "eig_based" if eig else ("msc_based" if msc else "objective_based")
+        expected_type = "eig_based" if eig else "cost_utility"
         if parsed["experiment_type"] != expected_type:
-            raise ValueError("Cannot mix MSC, MOCU and EIG runs in one objective table")
+            raise ValueError("Cannot mix cost_utility and EIG runs in one objective table")
         horizon = int(parsed["T"])
         train_seed = _training_seed(exp_dir)
         coverage[horizon].add(train_seed)
@@ -159,8 +175,8 @@ def write_table(
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def generate(exp_dirs: list[Path], output_dir: Path, *, eig: bool, msc: bool = False) -> None:
-    crossed, offline, coverage = collect(exp_dirs, eig=eig, msc=msc)
+def generate(exp_dirs: list[Path], output_dir: Path, *, eig: bool) -> None:
+    crossed, offline, coverage = collect(exp_dirs, eig=eig)
     horizons = sorted(coverage)
     output_dir.mkdir(parents=True, exist_ok=True)
     metric: dict[tuple[str, int], list[float] | None] = {}
@@ -174,9 +190,9 @@ def generate(exp_dirs: list[Path], output_dir: Path, *, eig: bool, msc: bool = F
             offline_cells[(method, horizon)] = (
                 [run_values[s] for s in TRAIN_SEEDS] if set(run_values) == set(TRAIN_SEEDS) else None
             )
-    metric_name = "EIG" if eig else ("MSC" if msc else "MOCU")
-    write_table(output_dir / f"{metric_name.lower()}_table.md", metric_name, horizons, metric,
-                digits=4, higher_is_better=eig)
+    metric_name = "EIG" if eig else "Cost utility (higher is better)"
+    write_table(output_dir / f"{('eig' if eig else 'cost_utility')}_table.md", metric_name, horizons, metric,
+                digits=4, higher_is_better=True)
     write_table(output_dir / "offline_time_table.md", "Offline time (seconds)", horizons,
                 offline_cells, digits=2, higher_is_better=False)
     write_table(output_dir / "online_time_table.md", "Online time (seconds per rollout)", horizons,
@@ -185,11 +201,11 @@ def generate(exp_dirs: list[Path], output_dir: Path, *, eig: bool, msc: bool = F
 
 def main() -> None:
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--experiment-type", choices=("eig_based", "objective_based", "msc_based"), required=True)
+    parser.add_argument("--experiment-type", choices=("eig_based", "cost_utility"), required=True)
     parser.add_argument("--exp-dir", action="append", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     args=parser.parse_args()
-    generate(args.exp_dir, args.output_dir, eig=args.experiment_type == "eig_based", msc=args.experiment_type == "msc_based")
+    generate(args.exp_dir, args.output_dir, eig=args.experiment_type == "eig_based")
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 # Durations strictly increase at every horizon, with a minimum 0.01-second gap.
 # Non-reset only. u_bounds is continuous; solver_scan_points only brackets roots.
 system:
-  name: ieee14
-N: 5
+  name: ieee9
+N: 3
 data:
   observation_backend: online_continuous_swing
   uses_probe_bank: false
@@ -13,20 +13,16 @@ observation:
   noise_sigma: 0.005  # Hz/s; noise is added after extracting the clean peak.
   sampling: max_absolute_rocof_over_fixed_recording_window
 swing_equation:
-  topology: ieee14
-  physical_bus_count: 14
+  topology: ieee9
+  physical_bus_count: 9
   dynamic_machine_buses:
   - 1
   - 2
   - 3
-  - 6
-  - 8
   retained_bus_map:
   - 1
   - 2
   - 3
-  - 6
-  - 8
   bus_label_conventions:
     physical_bus_numbering: one_based_ieee
     probe_bus_indexing: zero_based_physical
@@ -36,8 +32,6 @@ swing_equation:
       0: 1
       1: 2
       2: 3
-      3: 6
-      4: 8
   observation_bus: 1
   base_frequency_hz: 60.0
   base_power_mva: 100.0
@@ -45,39 +39,27 @@ swing_equation:
   damping: 0.0
   latent_model: machinewise_mk
   M_lower_nodes:
-  - 0.01485446
-  - 0.024138498
-  - 0.018568076
-  - 0.018568076
-  - 0.018568076
+  - 0.0877898665
+  - 0.0237671385
+  - 0.0111779822
   M_upper_nodes:
-  - 0.027586856
-  - 0.044828642
-  - 0.034483236
-  - 0.034483236
-  - 0.034483236
+  - 0.1630383235
+  - 0.0441389715
+  - 0.0207591098
   K_lower_nodes:
-  - 0.0078431373
-  - 0.012745098
-  - 0.0098039216
-  - 0.0098039216
-  - 0.0098039216
+  - 0.029375
+  - 0.013125
+  - 0.0075
   K_upper_nodes:
-  - 0.0784313725
-  - 0.1274509804
-  - 0.0980392157
-  - 0.0980392157
-  - 0.0980392157
+  - 0.29375
+  - 0.13125
+  - 0.075
   use_node_specific_damping: true
   D_nodes:
-  - 0.002122066
-  - 0.003448357
-  - 0.002652582
-  - 0.002652582
-  - 0.002652582
+  - 0.01254141
+  - 0.003395306
+  - 0.001596855
   P_m_nodes:
-  - 0.0
-  - 0.0
   - 0.0
   - 0.0
   - 0.0
@@ -85,11 +67,7 @@ swing_equation:
   - 0.0
   - 0.0
   - 0.0
-  - 0.0
-  - 0.0
   omega0_nodes:
-  - 0.0
-  - 0.0
   - 0.0
   - 0.0
   - 0.0
@@ -111,7 +89,7 @@ prior:
   mc_support_seed: 1
 experiment:
   mode: continuous_duration_no_reset
-  experiment_type: objective_based
+  experiment_type: cost_utility
   step_number: 3
   methods:
   - dad
@@ -126,7 +104,7 @@ control:
   rocof_limit_hz_s: 22.0
   delta_f_nadir_hz: -0.2
   T_obs_sec: 10.0
-  ode_dt: 0.00625
+  ode_dt: 0.0015625
   fs_hz: 40.0
   contingency:
     bus: 0
@@ -146,14 +124,11 @@ control:
   - 0.5
   solver_scan_points: 33
   solver_tolerance: 1.0e-05
-nonreset_backend_status: eig_implemented_validation_required_msc_mocu_inactive
+nonreset_backend_status: implemented_ieee9
 training:
   eig_based:
     updates: 2000
     batch_size: 64
-  msc_based:
-    updates: 2000
-    batch_size: 64
-  objective_based:
+  cost_utility:
     updates: 2000
     batch_size: 64

@@ -776,7 +776,7 @@ def analyze_myopic_trap(
     """Detect the classic Myopic trap.
 
     Trap structure (user definition):
-      - ξ1 is best one-step (largest immediate expected u / MOCU reduction);
+      - ξ1 is best one-step (largest immediate expected control-cost reduction);
       - ξ1 overlaps other useful designs (high fingerprint correlation);
       - optimal T≥2 combo prefers a different first design / excludes ξ1;
       - so greedy always starts with ξ1 and is suboptimal for T>1.

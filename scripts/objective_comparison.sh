@@ -1,11 +1,11 @@
 #!/bin/bash
-# Frozen, sequential three-objective pilot on one host/GPU. No submission side effects.
+# Frozen, sequential two-objective pilot on one host/GPU. No submission side effects.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/run.sh"
 if [[ "${1:---help}" == --help ]]; then
   echo 'Usage: bash scripts/objective_comparison.sh --output experiments/<campaign> [common run.sh arguments]'
-  echo 'Runs EIG, MSC and MOCU sequentially from a frozen committed source, continuing independent objectives after a failure.'
+  echo 'Runs EIG and cost_utility sequentially from a frozen committed source, continuing independent objectives after a failure.'
   exit 0
 fi
 [[ "${1:-}" == --output && -n "${2:-}" ]] || { echo 'Provide --output first' >&2; exit 2; }
@@ -28,8 +28,8 @@ git -C "$ROOT" archive HEAD src configs scripts tools hprc run.sh sweep_run.sh R
   tar -xf - -C "$CAMPAIGN/source"
 printf '%s\n' "$@" > "$CAMPAIGN/common_arguments.txt"
 overall=0
-for objective in eig msc mocu; do
-  config=ieee9_mocu
+for objective in eig cost_utility; do
+  config=ieee9_cost_utility
   [[ "$objective" != eig ]] || config=ieee9_eig
   printf '%s\n' "$objective" > "$CAMPAIGN/current_objective.txt"
   echo "Starting $objective at $(date -Is)"

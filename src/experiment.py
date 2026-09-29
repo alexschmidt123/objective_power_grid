@@ -31,16 +31,14 @@ from src.banks.power_grid import (
     generate_physical_bank,
     resolve_dataset_dir,
 )
-from src.objectives.mocu.context import (
+from src.context import (
     ALL_METHOD_KEYS,
     EXTENDED_METHOD_KEYS,
     build_context_from_config,
-    context_report_meta,
     method_display_name,
     methods_from_args,
     normalize_method_key,
 )
-from src.results.summary import write_objective_summary_md
 from src.layout import (
     allocate_result_dir,
     ensure_result_layout,
@@ -48,8 +46,8 @@ from src.layout import (
     write_run_config,
 )
 
-ExperimentType = Literal["objective_based", "eig_based", "msc_based"]
-EXPERIMENT_TYPES: tuple[str, ...] = ("objective_based", "eig_based", "msc_based")
+ExperimentType = Literal["eig_based"]
+EXPERIMENT_TYPES: tuple[str, ...] = ("eig_based",)
 
 
 def load_experiment_config(
@@ -93,7 +91,7 @@ def load_experiment_config(
 
 
 def resolve_experiment_type(raw: str | None) -> ExperimentType:
-    t = (raw or "objective_based").strip().lower().replace("-", "_")
+    t = (raw or "eig_based").strip().lower().replace("-", "_")
     if t not in EXPERIMENT_TYPES:
         raise SystemExit(
             f"Invalid --experiment-type {raw!r} "
@@ -122,9 +120,9 @@ def _add_experiment_type(parser: argparse.ArgumentParser) -> None:
         "--experiment-type",
         "--experiment_type",
         dest="experiment_type",
-        default="objective_based",
+        default="eig_based",
         choices=EXPERIMENT_TYPES,
-        help="objective_based (MOCU), msc_based (posterior MSC), or eig_based (EIG)",
+        help="eig_based (SIR EIG); grid objectives use run.sh",
     )
 
 
@@ -248,7 +246,7 @@ def _evaluate_run_identity(
     args: argparse.Namespace,
 ) -> tuple[Any, str, Path, dict[str, Any], int]:
     """Load eval config from --exp-dir run_config when present."""
-    from src.objectives.mocu.context import GLOBAL_SEED
+    from src.context import GLOBAL_SEED
     from src.layout import (
         load_run_config_doc,
         method_checkpoint_available,
@@ -283,8 +281,6 @@ def _evaluate_run_identity(
         n_obs=n_obs,
         noise_sigma=sigma,
     )
-    if exp_type == "msc_based":
-        cfg.validate_msc()
     exp_dir = _resolve_exp_dir(cfg, exp_type, args.exp_dir, create_new=False)
     run_doc = load_run_config_doc(exp_dir) or run_doc
     train_seed = int(
@@ -298,13 +294,6 @@ def _evaluate_run_identity(
         if explicit_eval_seed is not None
         else resolve_eval_seed(exp_dir, getattr(args, "seed", None))
     )
-    if exp_type in {"objective_based", "msc_based"}:
-        # Training seeds measure optimizer variability.  Evaluation noise must
-        # remain fixed across those seeds or the reported variance conflates two
-        # unrelated sources.  This also supplies common random numbers across T.
-        evaluation = dict(cfg.raw.get("evaluation") or {})
-        if explicit_eval_seed is None:
-            eval_seed = int(evaluation.get("objective_eval_seed", eval_seed))
     if args.method:
         method_keys = methods_from_args(cfg, args.method)
     else:
@@ -354,8 +343,6 @@ def cmd_generate_data(args: argparse.Namespace) -> None:
         noise_sigma=args.noise_sigma,
     )
     exp_type = resolve_experiment_type(args.experiment_type)
-    if exp_type == "msc_based":
-        cfg.validate_msc()
     exp_dir = _resolve_exp_dir(
         cfg, exp_type, args.exp_dir, create_new=args.exp_dir is None
     )
@@ -371,7 +358,7 @@ def cmd_generate_data(args: argparse.Namespace) -> None:
         if exp_type != "eig_based":
             raise SystemExit(
                 "SIR ODE supports --experiment-type eig_based only "
-                "(no MOCU/control track yet)."
+                "(no control track)."
             )
         from src.domains.sir.banks import generate_sir_bank, sir_bank_is_complete
 
@@ -431,7 +418,7 @@ def cmd_generate_data(args: argparse.Namespace) -> None:
         print(f"EXP_DIR={exp_dir}")
         return
 
-    if exp_type in {"objective_based", "msc_based"} or _use_vector_eig_pipeline(
+    if _use_vector_eig_pipeline(
         cfg, exp_type, int(args.n_obs)
     ):
         from src.banks.power_grid import bank_has_max_rocof, bank_is_complete
@@ -568,47 +555,12 @@ def cmd_train(args: argparse.Namespace) -> None:
             f"train only supports dad|rl_sboed|moe_sboed|matched_dense, got {args.method!r}"
         )
 
-    if exp_type == "msc_based":
-        cfg.validate_msc()
     exp_dir = _resolve_exp_dir(
         cfg, exp_type, args.exp_dir, create_new=False
     )
     prev_methods = load_run_config_doc(exp_dir).get("methods")
     train_record_methods = list(prev_methods) if prev_methods else [key]
 
-    if exp_type in {"objective_based", "msc_based"}:
-        ctx = build_context_from_config(
-            cfg,
-            ensure_bank=True,
-            smoke=args.smoke,
-            out_dir=exp_dir,
-            experiment_type=exp_type,
-        )
-        write_run_config(
-            exp_dir,
-            cfg,
-            ctx.data_dir,
-            experiment_type=exp_type,
-            extra=_run_record_extra(
-                args, methods=train_record_methods, N_obs=ctx.n_obs, seed=train_seed
-            ),
-        )
-        display = method_display_name(key)
-        print(
-            f"[train] type={exp_type} {display} "
-            f"config={cfg.config_path} N_obs={ctx.n_obs} exp_dir={exp_dir}"
-        )
-        from src.objectives.mocu.train import train_policy
-
-        result = train_policy(
-            ctx, method=display, seed=int(train_seed), smoke=args.smoke
-        )
-        print(
-            f"[train] {display} "
-            f"{float((result or {}).get('elapsed_seconds') or 0.0):.0f}s"
-        )
-        print(f"EXP_DIR={exp_dir}")
-        return
 
     if _use_vector_eig_pipeline(cfg, exp_type, int(n_obs)):
         from src.objectives.eig.vector import train_vector_eig_policy
@@ -686,8 +638,8 @@ def cmd_train(args: argparse.Namespace) -> None:
 
     if key == "moe_sboed":
         raise SystemExit(
-            "moe_sboed (BeliefConditionedMoE) is trained on the MOCU path "
-            "(`--experiment_type objective_based`) or the vector-EIG path "
+            "moe_sboed (BeliefConditionedMoE) is unavailable in this legacy pipeline "
+            "or the vector-EIG path "
             "(eig_based with N_obs>0 or continuous-duration). "
             "This table-EIG entrypoint has no MoE trainer."
         )
@@ -712,56 +664,6 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
     cfg, exp_type, exp_dir, identity, eval_seed = _evaluate_run_identity(args)
     method_keys = list(identity["methods"])
 
-    if exp_type in {"objective_based", "msc_based"}:
-        ctx = build_context_from_config(
-            cfg,
-            ensure_bank=True,
-            smoke=args.smoke,
-            out_dir=exp_dir,
-            experiment_type=exp_type,
-        )
-        meta = context_report_meta(ctx)
-        write_run_config(
-            exp_dir,
-            cfg,
-            ctx.data_dir,
-            experiment_type=exp_type,
-            extra=_run_record_extra(
-                args,
-                methods=method_keys,
-                seed=int(identity["train_seed"]),
-                eval_seed=eval_seed,
-                smoke=bool(args.smoke),
-                eval_meta=meta,
-            ),
-        )
-        print(
-            f"[evaluate] type={exp_type} methods={method_keys} "
-            f"eval_seed={eval_seed} N_obs={ctx.n_obs} "
-            f"mode={ctx.observation_mode} exp_dir={exp_dir}"
-        )
-        from src.objectives.mocu.evaluate import run_full_evaluation
-
-        eval_meta = run_full_evaluation(
-            ctx,
-            methods=method_keys,
-            smoke=args.smoke,
-            skip_cuda_safety=bool(args.smoke),
-            eval_seed=eval_seed,
-        )
-        summary_path = write_objective_summary_md(
-            ctx.out_dir,
-            system=ctx.system,
-            eval_meta={
-                **eval_meta,
-                "T": int(cfg.step_number),
-                "config_path": str(ctx.cfg.config_path),
-            },
-        )
-        print(f"Summary → {summary_path}")
-        print(f"Done → {ctx.out_dir}")
-        print(f"EXP_DIR={exp_dir}")
-        return
 
     n_obs = int(dict(cfg.raw.get("observation") or {}).get("N_obs", 0))
     if _use_vector_eig_pipeline(cfg, exp_type, n_obs):
@@ -833,47 +735,6 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
     print(f"EXP_DIR={exp_dir}")
 
 
-def _diagnostic_context(args: argparse.Namespace):
-    cfg = load_experiment_config(
-        args.config,
-        moe_variant=getattr(args, "moe_variant", None),
-        step_number=args.step_number,
-        n_obs=args.n_obs,
-        noise_sigma=args.noise_sigma,
-    )
-    exp_type = resolve_experiment_type(args.experiment_type)
-    if exp_type not in {"objective_based", "msc_based"}:
-        raise SystemExit("Policy diagnostics only support objective_based experiments")
-    if exp_type == "msc_based":
-        cfg.validate_msc()
-    exp_dir = _resolve_exp_dir(cfg, exp_type, args.exp_dir, create_new=False)
-    ctx = build_context_from_config(
-        cfg,
-        ensure_bank=True,
-        smoke=False,
-        out_dir=exp_dir,
-        experiment_type=exp_type,
-    )
-    return ctx, exp_dir
-
-
-def cmd_diagnose_collapse(args: argparse.Namespace) -> None:
-    from src.objectives.mocu.diagnostics import (
-        diagnose_conditional_action_diversity,
-    )
-
-    ctx, exp_dir = _diagnostic_context(args)
-    report = diagnose_conditional_action_diversity(
-        ctx,
-        method=method_display_name(normalize_method_key(args.method)),
-        n_rollouts=int(args.rollouts),
-        seed=int(args.seed),
-        device=str(args.device),
-    )
-    print(json.dumps(report, indent=2))
-    print(f"EXP_DIR={exp_dir}")
-
-
 def cmd_moe_mechanism(args: argparse.Namespace) -> None:
     exp_type = resolve_experiment_type(args.experiment_type)
     if exp_type == "eig_based":
@@ -902,64 +763,6 @@ def cmd_moe_mechanism(args: argparse.Namespace) -> None:
         print(json.dumps(report, indent=2))
         print(f"EXP_DIR={exp_dir}")
         return
-    from src.objectives.mocu.moe_diagnostics import moe_mechanism_report
-
-    ctx, exp_dir = _diagnostic_context(args)
-    report = moe_mechanism_report(
-        ctx,
-        n_rollouts=int(args.rollouts),
-        seed=int(args.seed),
-        device=str(args.device),
-    )
-    print(json.dumps(report, indent=2))
-    print(f"EXP_DIR={exp_dir}")
-
-
-def cmd_step_dad(args: argparse.Namespace) -> None:
-    from src.objectives.mocu.step_dad import StepDADConfig, step_dad_report
-
-    ctx, exp_dir = _diagnostic_context(args)
-    report = step_dad_report(
-        ctx,
-        n_rollouts=int(args.rollouts),
-        config=StepDADConfig(
-            refinement_steps=int(args.refinement_steps),
-            fantasy_rollouts=int(args.fantasy_rollouts),
-            learning_rate=float(args.learning_rate),
-            refine_from_step=args.refine_from_step,
-        ),
-        seed=int(args.seed),
-        device=str(args.device),
-        skip_cuda_safety=bool(args.smoke),
-    )
-    print(json.dumps(report, indent=2))
-    print(f"EXP_DIR={exp_dir}")
-
-
-def cmd_distill_myopic(args: argparse.Namespace) -> None:
-    from src.objectives.mocu.diagnostics import (
-        DistillationConfig,
-        distill_myopic_policy,
-    )
-
-    ctx, exp_dir = _diagnostic_context(args)
-    report = distill_myopic_policy(
-        ctx,
-        DistillationConfig(
-            epochs=int(args.epochs),
-            train_rollouts=int(args.train_rollouts),
-            validation_rollouts=int(args.validation_rollouts),
-            batch_size=int(args.batch_size),
-            learning_rate=float(args.learning_rate),
-            weight_decay=float(args.weight_decay),
-            seed=int(args.seed),
-            device=str(args.device),
-        ),
-    )
-    print(json.dumps(report, indent=2))
-    print(f"EXP_DIR={exp_dir}")
-
-
 def cmd_bank_structure_audit(args: argparse.Namespace) -> None:
     """Compatibility route to the standalone audit tooling."""
     from tools.audits.bank_cli import cmd_bank_structure_audit as run_audit
@@ -1060,23 +863,6 @@ def build_parser() -> argparse.ArgumentParser:
     ev.add_argument("--smoke", action="store_true")
     ev.set_defaults(func=cmd_evaluate)
 
-    collapse = sub.add_parser(
-        "diagnose-collapse",
-        help="Measure deterministic conditional action diversity",
-    )
-    collapse.add_argument("--config", "-c", required=True)
-    collapse.add_argument(
-        "--method", "-m", default="dad", choices=("dad", "rl_sboed", "DAD", "RL-sBOED")
-    )
-    _add_experiment_type(collapse)
-    _add_exp_dir(collapse)
-    _add_T(collapse)
-    _add_observation_overrides(collapse)
-    collapse.add_argument("--rollouts", type=int, default=128)
-    collapse.add_argument("--seed", type=int, default=101)
-    collapse.add_argument("--device", default="cpu", help="cpu|auto|cuda")
-    collapse.set_defaults(func=cmd_diagnose_collapse)
-
     mech = sub.add_parser(
         "moe-mechanism",
         help="MoE router/expert specialization diagnostics (belief-regime evidence)",
@@ -1090,47 +876,6 @@ def build_parser() -> argparse.ArgumentParser:
     mech.add_argument("--seed", type=int, default=101)
     mech.add_argument("--device", default="auto", help="cpu|auto|cuda")
     mech.set_defaults(func=cmd_moe_mechanism)
-
-    sdad = sub.add_parser(
-        "step-dad",
-        help="Evaluate the semi-amortized Step-DAD baseline (refines trained DAD)",
-    )
-    sdad.add_argument("--config", "-c", required=True)
-    _add_experiment_type(sdad)
-    _add_exp_dir(sdad)
-    _add_T(sdad)
-    _add_observation_overrides(sdad)
-    sdad.add_argument("--rollouts", type=int, default=48)
-    sdad.add_argument("--refinement-steps", type=int, default=4)
-    sdad.add_argument("--fantasy-rollouts", type=int, default=16)
-    sdad.add_argument("--learning-rate", type=float, default=3e-4)
-    sdad.add_argument(
-        "--refine-from-step", type=int, default=None,
-        help="0-based refinement step; default is the midpoint",
-    )
-    sdad.add_argument("--seed", type=int, default=101)
-    sdad.add_argument("--device", default="auto", help="cpu|auto|cuda")
-    sdad.add_argument("--smoke", action="store_true")
-    sdad.set_defaults(func=cmd_step_dad)
-
-    distill = sub.add_parser(
-        "distill-myopic",
-        help="Behaviorally clone the myopic baseline with the DAD architecture",
-    )
-    distill.add_argument("--config", "-c", required=True)
-    _add_experiment_type(distill)
-    _add_exp_dir(distill)
-    _add_T(distill)
-    _add_observation_overrides(distill)
-    distill.add_argument("--epochs", type=int, default=50)
-    distill.add_argument("--train-rollouts", type=int, default=512)
-    distill.add_argument("--validation-rollouts", type=int, default=128)
-    distill.add_argument("--batch-size", type=int, default=256)
-    distill.add_argument("--learning-rate", type=float, default=3e-4)
-    distill.add_argument("--weight-decay", type=float, default=1e-5)
-    distill.add_argument("--seed", type=int, default=101)
-    distill.add_argument("--device", default="auto", help="cpu|auto|cuda")
-    distill.set_defaults(func=cmd_distill_myopic)
 
     audit = sub.add_parser(
         "bank-structure-audit",

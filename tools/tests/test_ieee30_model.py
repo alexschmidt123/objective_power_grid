@@ -8,7 +8,7 @@ from src.domains.swing.design import build_simulator
 from src.domains.swing.simulator import ieee30_physical_input_map,generate_ieee30_coupling_matrix
 ROOT=Path(__file__).resolve().parents[2]
 class Tests(unittest.TestCase):
- def setUp(self):self.cfg=load_config_for_run('configs/ieee30_mocu.yaml',ROOT);self.d=self.cfg.raw
+ def setUp(self):self.cfg=load_config_for_run('configs/ieee30_cost_utility.yaml',ROOT);self.d=self.cfg.raw
  def test_published_machine_and_governor_parameters(self):
   machines=self.d['dynamic_machines']
   self.assertEqual(self.cfg.N,6)

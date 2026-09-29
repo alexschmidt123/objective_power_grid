@@ -64,7 +64,7 @@ name does not activate MOCU when --objective eig is supplied. No extra YAML is
 required. IEEE14 MSC/MOCU and IEEE30 remain inactive in the continuous CLI.
 
 ~~~bash
-bash run.sh --config configs/ieee14_mocu.yaml --objective eig \
+bash run.sh --config configs/ieee14_cost_utility.yaml --objective eig \
   --method fixed,dad,rl_sboed,step_dad,myopic,random,moe_sboed \
   --moe-training-mode policy_pathwise --T 3 --N_obs 0 \
   --observation-kind endpoint_rocof --window 3.5 --noise_sigma .005 \

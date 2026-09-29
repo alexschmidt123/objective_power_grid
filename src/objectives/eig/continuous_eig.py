@@ -507,7 +507,9 @@ def evaluate(engine,policies,args,record_path=None):
                 row['counterfactual_control_scoring_seconds']=sum(result['controller_seconds'][:-1])
                 decision_start=time.monotonic()
                 r,f,safe=engine.control.metrics(theta[system,:1],result['states'][0,:1], [row['u_ctrl']])
-                row.update(safe=bool(safe[0]),rocof_max_hz_s=float(r[0]),delta_f_nadir_hz=float(f[0]))
+                row.update(safe=bool(safe[0]),rocof_max_hz_s=float(r[0]),delta_f_nadir_hz=float(f[0]),
+                    frequency_safe=bool(f[0]>=engine.control.spec.delta_f_nadir_hz),
+                    rocof_safe=bool(r[0]<=engine.control.spec.rocof_limit_hz_s))
                 row.update(engine.control.oracle(theta[system,0],result['states'][0,0]))
                 row['evaluation_safety_oracle_seconds']=time.monotonic()-decision_start
                 logw=result['log_likelihood'][0,1:]
@@ -531,8 +533,8 @@ def protocol_name(args):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--config',default='configs/ieee9_eig.yaml')
-    p.add_argument('--objective',choices=['eig','msc','mocu'],default=None)
-    p.add_argument('--experiment_type','--experiment-type',choices=['eig_based','msc_based','objective_based'],default=None)
+    p.add_argument('--objective',choices=['eig','cost_utility'],default=None)
+    p.add_argument('--experiment_type','--experiment-type',choices=['eig_based','cost_utility'],default=None)
     p.add_argument('--coverage',type=float,default=None)
     p.add_argument('--numerical-gradient-scale',type=float,default=.01)
     p.add_argument('--numerical-gradient-directions',type=int,default=4)
@@ -583,12 +585,12 @@ def main():
     args=p.parse_args()
     from src.config import resolve_config_path
     args.config=str(resolve_config_path(args.config))
-    requested={'eig_based':'eig','msc_based':'msc','objective_based':'mocu'}.get(args.experiment_type)
+    requested={'eig_based':'eig','cost_utility':'cost_utility'}.get(args.experiment_type)
     if args.objective is not None and requested is not None and args.objective!=requested:
         p.error('Objective and experiment_type disagree')
-    args.objective=args.objective or requested or {'eig_based':'eig','msc_based':'msc','objective_based':'mocu'}[load_config(args.config).raw['experiment']['experiment_type']]
+    args.objective=args.objective or requested or {'eig_based':'eig','cost_utility':'cost_utility'}[load_config(args.config).raw['experiment']['experiment_type']]
     if str(load_config(args.config).raw.get('system',{}).get('name','')).lower()=='ieee14' and args.objective!='eig':
-        p.error('IEEE14 continuous support is enabled for EIG only; MSC/MOCU remain inactive')
+        p.error('IEEE14 continuous support is enabled for EIG only; cost_utility remain inactive')
     if args.output is None:
         now=datetime.now()
         sigma_token=format(args.noise_sigma,'.12g').replace('.','p')
@@ -647,7 +649,7 @@ def main():
     run_started=time.monotonic()
     cfg=load_config(args.config)
     cfg.raw=copy.deepcopy(cfg.raw)
-    for key in ['poster_eig_protocol','poster_mocu_protocol','bank_quality','control_safety_calibration']:
+    for key in ['poster_eig_protocol','bank_quality','control_safety_calibration']:
         cfg.raw.pop(key,None)
     for key in ['alpha','enforce_bayes_loss_alignment']:
         cfg.raw.get('control',{}).pop(key,None)
@@ -661,6 +663,7 @@ def main():
     if args.objective!='eig':
         if 'control' not in cfg.raw or 'posterior_coverage' not in cfg.raw['control']:
             raise ValueError('Control objective requires a declared control scenario and coverage')
+        cfg.validate_cost_utility()
         args.coverage=float(cfg.raw['control']['posterior_coverage'])
         if not 0 < args.coverage < 1: raise ValueError('Coverage must be in (0,1)')
     cfg.raw['swing_equation'].update(reset_after_probe=False,T_obs_sec=args.window,
@@ -668,7 +671,7 @@ def main():
         probe_duration_bounds=[args.duration_min,args.duration_max])
     cfg.raw['swing_equation'].pop('probe_durations',None)
     cfg.raw['data']={'observation_backend':'online_continuous_swing','uses_probe_bank':False,'uses_control_bank':False}
-    cfg.raw['experiment']={'mode':'continuous_duration_no_reset','experiment_type':{'eig':'eig_based','msc':'msc_based','mocu':'objective_based'}[args.objective],
+    cfg.raw['experiment']={'mode':'continuous_duration_no_reset','experiment_type':{'eig':'eig_based','cost_utility':'cost_utility'}[args.objective],
                            'step_number':args.T,'methods':args.methods.split(',')}
     from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
     observer_kwargs=dict(duration_bounds=(args.duration_min,args.duration_max),
@@ -683,7 +686,7 @@ def main():
         engine=OnlineEIG(cfg,observer,horizon=args.T,sigma=args.noise_sigma,contrasts=args.contrasts,
                          min_separation=args.min_duration_separation)
     else:
-        from src.objectives.msc.continuous_msc import OnlineControl
+        from src.objectives.cost_utility.online import OnlineControl
         engine=OnlineControl(cfg,observer,objective=args.objective,horizon=args.T,sigma=args.noise_sigma,
                              contrasts=args.contrasts,min_separation=args.min_duration_separation)
     if hasattr(engine,'control'):
@@ -735,6 +738,12 @@ def main():
             control_safety_window_s=engine.control.spec.T_obs_sec,
             oracle_kind='continuous bracketed minimum for true M/K and actual terminal state')
         metadata.pop('bound_ceiling_nats')
+        metadata.update(utility_definition='cost_utility = -u_ctrl / u_max; maximize',
+            safety_definition='joint frequency nadir and maximum absolute RoCoF across modeled dynamic buses over the complete terminal control window, including initial frequency',
+            control_cost_normalizer=engine.control.bounds[1],
+            infeasibility_behavior='raise error; preserve failure record; no clipping, particle dropping or resampling',
+            probe_safety_constraint_enforced=False,
+            coverage_interpretation='posterior model probability; not a certified held-out safety rate')
         metadata['method_implementations'].update(
             dad='deterministic adaptive policy optimizing terminal utility; antithetic zeroth-order numerical training adaptation',
             fixed='validation-selected deterministic ordered sequence with numerical optimization',
@@ -761,7 +770,7 @@ def main():
         metadata['moe_architecture']='history_soft_moe_pathwise_v2'
         metadata['gradient_backend']='pathwise chain rule; numerical state/duration Jacobians (1e-5)'
     metadata['control_action_space']='continuous bounded magnitude' if hasattr(engine,'control') else None
-    metadata['optimization_caveat']='MSC/MOCU numerical training estimates a Gaussian-smoothed parameter objective; validation and evaluation use the unperturbed deterministic policy and exact numerically refined controller. Check scale/direction sensitivity before publication.' if hasattr(engine,'control') else None
+    metadata['optimization_caveat']='cost_utility numerical training estimates a Gaussian-smoothed parameter objective; validation and evaluation use the unperturbed deterministic policy and exact numerically refined controller. Check scale/direction sensitivity before publication.' if hasattr(engine,'control') else None
     for path in (root/'src').rglob('*.py'):
 
         metadata['source_hashes'][str(path.relative_to(root))]=hashlib.sha256(path.read_bytes()).hexdigest()
@@ -888,7 +897,7 @@ def main():
     (output/'rollouts.json').write_text(json.dumps(rows,indent=2)+'\n')
     summary=[]
     for method in args.methods.split(','):
-        metric={'eig':'terminal_spce_nats','msc':'msc','mocu':'posterior_mocu'}[args.objective]
+        metric={'eig':'terminal_spce_nats','cost_utility':'cost_utility'}[args.objective]
         values=np.asarray([r[metric] for r in rows if r['method']==method])
         summary.append({'method':method,'mean_spce_nats':float(values.mean()),
             'sd_across_systems_nats':float(values.std(ddof=1)) if len(values)>1 else None,
@@ -904,9 +913,13 @@ def main():
             item['mean_u_ctrl']=float(np.mean([r['u_ctrl'] for r in selected]))
             item['safety_rate']=float(np.mean([r['safe'] for r in selected]))
             item['safe_count']=sum(r['safe'] for r in selected)
+            item['frequency_safety_rate']=float(np.mean([r['frequency_safe'] for r in selected]))
+            item['rocof_safety_rate']=float(np.mean([r['rocof_safe'] for r in selected]))
+            item['mean_normalized_control_cost']=-float(values.mean())
+            item['higher_utility_is_better']=True
             item['oracle_infeasible_count']=sum(not r['oracle_feasible'] for r in selected)
-            oracle=[r['oracle_msc'] for r in selected if r['oracle_feasible']]
-            item['mean_oracle_msc']=float(np.mean(oracle)) if len(oracle)==len(selected) else None
+            oracle=[r['oracle_u_ctrl'] for r in selected if r['oracle_feasible']]
+            item['mean_oracle_u_ctrl']=float(np.mean(oracle)) if len(oracle)==len(selected) else None
             item['safety_rate_sd_across_seeds']=None
             item['note']='System dispersion is not a run-level SD; seed SD requires multiple evaluation seeds. Oracle is conditional on each method actual terminal state.'
         selected=[r for r in rows if r['method']==method]
@@ -917,6 +930,9 @@ def main():
             seed_safety=[float(np.mean([r['safe'] for r in selected if r['evaluation_seed']==seed])) for seed in eval_seeds]
             summary[-1]['safety_rate_sd_across_seeds']=float(np.std(seed_safety,ddof=1)) if len(seed_safety)>1 else None
     (output/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+    if args.objective=='cost_utility':
+        from src.results.summary import write_cost_utility_summary
+        write_cost_utility_summary(output,summary,coverage=engine.control.coverage,u_max=engine.control.bounds[1])
     (output/'completion.json').write_text(json.dumps({'objective':args.objective,'methods':args.methods.split(','),'evaluation_seeds':eval_seeds,'records':len(rows),'wall_seconds':time.monotonic()-run_started,'smoke_only':args.smoke,'evaluation_only':bool(reuse)},indent=2)+'\n')
     (output/'exit_code').write_text('0\n')
     sys.excepthook=original_hook

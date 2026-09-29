@@ -1,11 +1,11 @@
 #!/bin/bash
 # Launch one experiment; outputs use experiments/MMDDYYYY/MMDDYYYY_<time>_<objective_parameters>/.
 #
-#   bash run.sh --config configs/ieee9_mocu.yaml
-#   bash run.sh --config configs/ieee9_mocu.yaml --T 8
+#   bash run.sh --config configs/ieee9_cost_utility.yaml
+#   bash run.sh --config configs/ieee9_cost_utility.yaml --T 8
 #   bash run.sh --config configs/ieee9_eig.yaml --experiment_type eig_based
 #   bash run.sh --config configs/sir_ode_eig.yaml
-#   bash run.sh --config configs/ieee9_mocu.yaml --method dad --force
+#   bash run.sh --config configs/ieee9_cost_utility.yaml --method dad --force
 #
 # Result folder (allocated once, reused for all steps):
 #   experiments/MMDDYYYY/MMDDYYYY_HHMMSS_config_objective_Tnum_NobsN_sigmaX
@@ -49,7 +49,7 @@ _prepend_mocu_optimized
 unset -f _prepend_mocu_optimized
 export PYTHONPATH="${ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
-EXPERIMENT_TYPE_DEFAULT="objective_based"
+EXPERIMENT_TYPE_DEFAULT="eig_based"
 DEFAULT_STEP_NUMBER=3
 DEFAULT_N_OBS=0
 DEFAULT_NOISE_SIGMA=0.005
@@ -63,12 +63,12 @@ validate_experiment_type() {
     local t="${1,,}"
     t="${t//-/_}"
     case "$t" in
-        objective_based|eig_based|msc_based)
+        cost_utility|eig_based)
             echo "$t"
             return 0
             ;;
         *)
-            echo "Invalid --experiment_type: $1 (allowed: objective_based|eig_based|msc_based)" >&2
+            echo "Invalid --experiment_type: $1 (allowed: cost_utility|eig_based)" >&2
             return 1
             ;;
     esac
@@ -86,7 +86,7 @@ resolve_experiment_method_keys() {
     python3 -c '
 import sys
 from src.experiment import load_experiment_config
-from src.objectives.mocu.context import methods_from_args
+from src.context import methods_from_args
 
 cfg = load_experiment_config(
     sys.argv[1],
@@ -109,7 +109,7 @@ resolve_training_method_keys() {
     python3 -c '
 import sys
 from src.experiment import load_experiment_config
-from src.objectives.mocu.context import methods_from_args, training_method_keys
+from src.context import methods_from_args, training_method_keys
 
 cfg = load_experiment_config(
     sys.argv[1],

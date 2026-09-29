@@ -13,8 +13,8 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 def check():
-    expected={'ieee9_eig.yaml','ieee9_mocu.yaml','ieee14_mocu.yaml',
-              'ieee30_mocu.yaml','sir_ode_eig.yaml'}
+    expected={'ieee9_eig.yaml','ieee9_cost_utility.yaml','ieee14_cost_utility.yaml',
+              'ieee30_cost_utility.yaml','sir_ode_eig.yaml'}
     actual={p.name for p in (ROOT/'configs').iterdir()}
     assert actual==expected, ('Unexpected configs layout',actual ^ expected)
     expected_docs={'objective_driven_boed_manuscript_framework.tex',
@@ -23,8 +23,7 @@ def check():
     assert {p.name for p in (ROOT/'documents').iterdir()}==expected_docs, 'Unexpected documents root'
     manuscripts=[(ROOT/'documents'/n).read_text() for n in sorted(expected_docs) if n.endswith('.tex')]
     assert len(manuscripts)==1, 'Expected one canonical manuscript'
-    blocks=re.findall(r'% BEGIN FINITE-LOSS MOCU\n(.*?)% END FINITE-LOSS MOCU',manuscripts[0],re.S)
-    assert len(blocks)==1 and blocks[0].strip(), 'Expected one finite-loss MOCU formulation'
+    assert {p.name for p in (ROOT/'src/objectives').iterdir() if p.is_dir() and p.name != '__pycache__'} == {'eig','cost_utility'}
     conference=(ROOT/'TPEC_conference/eig_power_grid_conference.tex').read_text()
     assert r'\documentclass[conference]{IEEEtran}' in conference
     assert r'\bibliographystyle{IEEEtran}' in conference
@@ -41,7 +40,6 @@ def check():
         assert len(labels)==len(set(labels)), 'Duplicate equation labels'
         refs=set(re.findall(r'\\(?:eqref|ref)\{([^}]+)\}',text))
         assert refs<=set(labels), ('Missing labels',refs-set(labels))
-        assert '\\input{mocu_finite_loss_formulation}' not in text
     manifest=json.loads((ROOT/'documents/papers/manifest.json').read_text())
     for key in set().union(*[{k.strip() for group in re.findall(r'\\cite\w*\{([^}]+)\}',s) for k in group.split(',')} for s in manuscripts]):
         entry=manifest['references'][key]
@@ -56,9 +54,9 @@ def check():
                 names=([n.module] if isinstance(n,ast.ImportFrom) and not n.level and n.module
                        else [a.name for a in n.names] if isinstance(n,ast.Import) else [])
                 for name in names:
-                    if name.startswith('tools.'):
+                    if name.startswith(('tools.','src.')):
                         path=ROOT/Path(*name.split('.'))
-                        assert path.is_dir() or path.with_suffix('.py').is_file(), ('Broken tools import',p,name)
+                        assert path.is_dir() or path.with_suffix('.py').is_file(), ('Broken local import',p,name)
     assert {p.name for p in (ROOT/'hprc').iterdir()}=={'environment.sh','cache.sh','experiment.slurm','master_audit.slurm'}
     print('Repository layout, manuscript references, PDF provenance, and tools imports: OK')
 

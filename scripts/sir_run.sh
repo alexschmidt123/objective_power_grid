@@ -22,7 +22,7 @@ SEED="$DEFAULT_SEED"
 EVAL_SEEDS="$DEFAULT_EVAL_SEEDS"
 
 usage() {
-    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seeds <csv>] [--experiment_type objective_based|eig_based|msc_based] [--method <methods>] [--exp-dir <path>] [--force] [--bank-structure-audit] [--moe-variant learned|uniform|matched_dense] [--smoke]" >&2
+    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seeds <csv>] [--experiment_type eig_based] [--method <methods>] [--exp-dir <path>] [--force] [--bank-structure-audit] [--moe-variant learned|uniform|matched_dense] [--smoke]" >&2
     echo "" >&2
     echo "  --method  optional; comma-separated list (default: experiment.methods in yaml)" >&2
     echo "            e.g. --method dad,random  (skips training when all selected are baselines)" >&2
@@ -35,8 +35,8 @@ usage() {
     echo "  --bank-structure-audit  run Myopic-trap / redundancy audit after data gen; fail if not ready" >&2
     echo "Result folders: date_time_configname_Uctrl|EIG_Tnum_NobsN_sigmaX" >&2
     echo "Examples:" >&2
-    echo "  bash run.sh --config configs/ieee9_mocu.yaml" >&2
-    echo "  bash run.sh --config configs/ieee9_mocu.yaml --T 8 --seed 101" >&2
+    echo "  bash run.sh --config configs/ieee9_cost_utility.yaml" >&2
+    echo "  bash run.sh --config configs/ieee9_cost_utility.yaml --T 8 --seed 101" >&2
     echo "  bash run.sh --config configs/sir_ode_eig.yaml" >&2
 }
 

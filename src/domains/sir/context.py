@@ -10,7 +10,7 @@ import numpy as np
 from src.config import SBOEDConfig, repo_root
 from src.control.posterior_ctrl import log_prior_uniform_discrete
 from src.banks.power_grid import resolve_dataset_dir, system_name_from_cfg
-from src.objectives.mocu.context import (
+from src.context import (
     ExperimentContext,
     config_sha256,
     resolve_oracle_tolerance,
@@ -49,7 +49,7 @@ def build_sir_context(
     if str(experiment_type).lower().replace("-", "_") != "eig_based":
         raise ValueError(
             "SIR ODE currently supports experiment_type=eig_based only "
-            "(no MOCU/control track)."
+            "(no retired control-objective/control track)."
         )
     root = project_root or repo_root()
     system = system_name_from_cfg(cfg)
@@ -130,7 +130,7 @@ def build_sir_context(
     n_actions = int(centres_support.shape[0])
 
     if out_dir is None:
-        from src.objectives.mocu.context import experiment_out_dir
+        from src.context import experiment_out_dir
 
         out_dir = experiment_out_dir(
             cfg, root, experiment_type="eig_based", create_new=False

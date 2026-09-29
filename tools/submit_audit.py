@@ -22,7 +22,7 @@ def extract_source(archive, destination):
                 raise ValueError('Unsupported archive member: ' + member.name)
         source.extractall(str(destination))
     for relative in ('run.sh', 'scripts/audit.sh', 'scripts/check.sh',
-                     'hprc/master_audit.slurm', 'configs/ieee9_mocu.yaml'):
+                     'hprc/master_audit.slurm', 'configs/ieee9_cost_utility.yaml'):
         if not (destination / relative).is_file():
             raise ValueError('Incomplete source archive: ' + relative)
 

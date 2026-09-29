@@ -1,7 +1,7 @@
 """Write a single experiment-root ``summary.md`` comparison table.
 
 Observation mode follows ``N_obs`` (max_rocof if 0, sampled Δf otherwise).
-Primary metric: ``mean_posterior_mocu`` for objective_based, ``mean_eig`` for eig_based.
+Primary metric: ``mean_cost_utility`` for cost_utility, ``mean_eig`` for eig_based.
 """
 
 from __future__ import annotations
@@ -91,68 +91,23 @@ def write_summary_md(
     return out
 
 
-def write_objective_summary_md(
-    exp_dir: Path,
-    *,
-    system: str | None = None,
-    eval_meta: dict[str, Any] | None = None,
-) -> Path:
-    """Build objective_based table from ``eval/summary.csv`` (+ Oracle)."""
-    exp_dir = Path(exp_dir)
-    eval_dir = exp_dir / "eval"
-    summary_csv = eval_dir / "summary.csv"
-    meta: dict[str, Any] = {}
-    meta_path = eval_dir / "eval_meta.json"
-    if meta_path.is_file():
-        meta.update(json.loads(meta_path.read_text(encoding="utf-8")))
-    if eval_meta:
-        meta.update(eval_meta)
-
-    system = system or str(meta.get("system") or exp_dir.name)
-    if "T" not in meta and "step_number" not in meta:
-        from src.layout import parse_result_dir_name
-
-        parsed = parse_result_dir_name(exp_dir.name)
-        if parsed and parsed.get("step_number") is not None:
-            meta["T"] = parsed["step_number"]
-
-    parsed_rows = []
-    if summary_csv.is_file():
-        with summary_csv.open(encoding="utf-8") as handle:
-            parsed_rows = [r for r in csv.DictReader(handle)
-                           if r.get("method") != "Oracle"
-                           and not r.get("method", "").endswith("_stochastic")]
-    is_msc = meta.get("experiment_type") == "msc_based"
-    primary = "mean_msc" if is_msc else "mean_posterior_mocu"
-    rows = [[str(r["method"]), _fmt(r.get(primary))]
-            for r in parsed_rows]
-    extra = ["", "## Empirical safety rate", "",
-             "| Method | Safety rate | Safe outcomes / evaluated outcomes | Physical systems |",
-             "|---|---:|---:|---:|"]
-    for r in parsed_rows:
-        rate = r.get("safety_rate")
-        rate_text = f"{100 * float(rate):.2f}%" if rate not in (None, "") else "—"
-        safe = r.get("safety_safe_outcomes", "—")
-        total = r.get("safety_n_outcomes", r.get("n_design_replicates", "—"))
-        systems = r.get("safety_n_systems", r.get("n", "—"))
-        extra.append(f"| {r['method']} | {rate_text} | {safe} / {total} | {systems} |")
-    extra.extend(["", "## Selected control and oracle MSC", "",
-                  "| Method | Selected control | Oracle MSC |", "|---|---:|---:|"])
-    for r in parsed_rows:
-        extra.append(f"| {r['method']} | {_fmt(r.get('mean_u_ctrl'))} | {_fmt(r.get('mean_oracle_msc', r.get('mean_u_ctrl_opt')))} |")
-    coverage = next((r.get("posterior_coverage") for r in parsed_rows
-                     if r.get("posterior_coverage") not in (None, "")), "not recorded")
-    extra.extend(["", f"Posterior coverage: {coverage}.", "",
-        f"Safety evaluation: {meta.get('safety_evaluation', 'not recorded')}.",
-        ("Posterior MSC is primary; physical safety is independently evaluated and is not certified by coverage." if is_msc else "Posterior MOCU is primary; safety rate and control magnitude are physical diagnostics."),
-        "Safety requires both physical frequency and RoCoF limits to hold in the declared scenario.",
-        "Rates average repeats within each physical system before averaging across systems.",
-        "These are single-run estimates; across-seed standard deviations require multiple runs.",
-        "Coverage is a decision preference, not a measured safety rate or engineering acceptance threshold."])
-    return write_summary_md(
-        exp_dir, system=system, experiment_type="msc_based" if is_msc else "objective_based", meta=meta,
-        table_headers=["Method", "Posterior MSC" if is_msc else "Terminal posterior MOCU"],
-        table_rows=rows or [["(summary.csv missing)", "—"]], extra_lines=extra)
+def write_cost_utility_summary(exp_dir, summary, *, coverage, u_max):
+    """Plain-text report for the continuous controller, without LaTeX."""
+    lines = ["# Cost utility", "", "Utility = -u_ctrl / u_max. Higher is better.",
+        f"u_max = {u_max:g}; required posterior joint safety probability = {coverage:g}.",
+        "Safety requires BOTH the frequency nadir and maximum absolute RoCoF limits.",
+        "Coverage is model-based; the safety rates below are independently evaluated.", "",
+        "| Method | Mean utility | Mean control | Joint safety | Frequency safety | RoCoF safety |",
+        "|---|---:|---:|---:|---:|---:|"]
+    for r in summary:
+        lines.append("| " + " | ".join([r['method']] + [_fmt(r[k]) for k in
+            ['mean_cost_utility','mean_u_ctrl','safety_rate','frequency_safety_rate','rocof_safety_rate']]) + " |")
+    lines += ["", "No infeasible case is silently capped, dropped, or resampled.",
+        "The terminal control window is checked; probe-period safety is not enforced by this implementation.",
+        "The oracle uses each method's actual terminal state. It is a diagnostic, not subtracted from utility.", ""]
+    path=Path(exp_dir)/'summary.md'
+    path.write_text('\n'.join(lines))
+    return path
 
 
 def write_eig_summary_md(

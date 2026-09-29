@@ -29,7 +29,7 @@ def main():
         raise SystemExit('--evaluate-from is per-run; use run.sh with one matching source run')
     argv.remove('--sweep')
     p=argparse.ArgumentParser(description='Explicit Cartesian sweep; each cell starts a fresh run.sh experiment with its own training and evaluations.')
-    p.add_argument('--configs','--config',default='ieee9_mocu')
+    p.add_argument('--configs','--config',default='ieee9_eig')
     p.add_argument('--T',default='3')
     p.add_argument('--N_obs','--N-obs',default='0')
     p.add_argument('--noise_sigma','--noise-sigma',default='0.005')

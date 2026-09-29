@@ -1,9 +1,9 @@
-"""Application-agnostic T-sweep plot bundles (EIG and MOCU).
+"""Application-agnostic T-sweep plot bundles (EIG and cost_utility).
 
 Written only by ``sweep_run.sh``. Works for any config stem in the result
 folder name (ieee9, ieee14, sir_ode, …) and both ``eig_based`` (terminal EIG)
-and ``objective_based`` (MOCU). Do not put a copy under ``objectives/eig`` or
-``objectives/mocu`` — those packages are optimization goals, not plotting.
+and ``cost_utility`` (cost_utility). Do not put a copy under ``objectives/eig`` or
+``objectives/cost_utility`` — those packages are optimization goals, not plotting.
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from src.config import repo_root
+from src.results.online import cost_run_identity, cost_run_rows
 from src.layout import (
     horizon_token,
     load_run_config_doc,
@@ -132,11 +133,11 @@ def _online_seconds(row: dict[str, Any]) -> float:
     return 0.0
 
 
-def _metric_value(row: dict[str, Any], *, eig: bool, msc: bool = False) -> float | None:
+def _metric_value(row: dict[str, Any], *, eig: bool) -> float | None:
     keys = (
         ("terminal_eig_mean", "mean_eig", "ΔH")
         if eig
-        else (("mean_msc",) if msc else ("mean_posterior_mocu",))
+        else ("mean_cost_utility",)
     )
     for key in keys:
         raw = row.get(key)
@@ -150,6 +151,8 @@ def _metric_value(row: dict[str, Any], *, eig: bool, msc: bool = False) -> float
 
 
 def _load_summary_rows(exp_dir: Path, *, eig: bool) -> list[dict[str, Any]]:
+    if not eig and cost_run_identity(exp_dir) is not None:
+        return cost_run_rows(exp_dir)
     filename = "terminal_eig_summary.csv" if eig else "summary.csv"
     paths = [exp_dir / "eval" / filename]
     crossed = sorted((exp_dir / "evaluations").glob(f"seed_*/eval/{filename}"))
@@ -194,7 +197,7 @@ def group_completed_runs(
         path = Path(raw)
         if not path.is_dir():
             continue
-        parsed = parse_result_dir_name(path.name)
+        parsed = cost_run_identity(path) or parse_result_dir_name(path.name)
         if parsed is None:
             continue
         etype = str(parsed["experiment_type"])
@@ -206,7 +209,7 @@ def group_completed_runs(
             skipped_no_summary += 1
             continue
         doc = load_run_config_doc(path)
-        seed = doc.get("seed")
+        seed = doc.get("seed", doc.get("settings", {}).get("seed"))
         if seed is None or str(seed).strip() == "":
             skipped_no_seed += 1
             continue
@@ -262,7 +265,7 @@ def discover_seed_runs(
     for path in sorted(experiments.iterdir()):
         if not path.is_dir():
             continue
-        parsed = parse_result_dir_name(path.name)
+        parsed = cost_run_identity(path) or parse_result_dir_name(path.name)
         if parsed is None:
             continue
         if parsed["config"] not in want_configs:
@@ -331,7 +334,6 @@ def _collect_cells(
     by_t: dict[int, dict[int, Path]],
     *,
     eig: bool,
-    msc: bool = False,
 ) -> tuple[
     dict[str, dict[int, list[float]]],
     dict[str, dict[int, list[float]]],
@@ -346,7 +348,7 @@ def _collect_cells(
                 label = _poster_label(row.get("method") or row.get("Method"))
                 if label is None:
                     continue
-                value = _metric_value(row, eig=eig, msc=msc)
+                value = _metric_value(row, eig=eig)
                 if value is None:
                     continue
                 metric[label][t].append(value)
@@ -560,7 +562,7 @@ def write_sweep_plot_bundle(
     """Write three comparison tables, three plots, and provenance metadata."""
     root = root or repo_root()
     eig = experiment_type == "eig_based"
-    metric, offline, online = _collect_cells(by_t, eig=eig, msc=experiment_type == "msc_based")
+    metric, offline, online = _collect_cells(by_t, eig=eig)
     paired_eig = _collect_hierarchical_eig_pairs(by_t) if eig else []
     methods = _ordered_methods(set(metric))
     horizons = sorted(by_t)
@@ -584,8 +586,8 @@ def write_sweep_plot_bundle(
             f"{PERFORMANCE_TABLE_SEEDS} seed values per method/T cell; {details}"
         )
     n_seeds = PERFORMANCE_TABLE_SEEDS
-    metric_name = "terminal EIG" if eig else ("MSC" if experiment_type == "msc_based" else "MOCU")
-    better = "higher better" if eig else "lower better"
+    metric_name = "terminal EIG" if eig else "Cost utility (higher is better)"
+    better = "higher better"
     title_metric = f"Mean {metric_name} ± std (n = {n_seeds} seeds) ({better})"
     title_offline = f"Offline time: mean ± sample SD (n = {n_seeds} seeds)"
     title_online = f"Online time: mean ± sample SD (n = {n_seeds} seeds)"
@@ -847,7 +849,7 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Write stamped T-sweep plot folders (called from sweep_run.sh). "
-            "Works for EIG and MOCU on any application config."
+            "Works for EIG and cost_utility on any application config."
         ),
     )
     parser.add_argument(
@@ -858,7 +860,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument(
         "--experiment-type",
         default=None,
-        choices=("eig_based", "objective_based", "msc_based"),
+        choices=("eig_based", "cost_utility"),
     )
     parser.add_argument("--exp-dir", action="append", default=[], dest="exp_dirs")
     parser.add_argument(

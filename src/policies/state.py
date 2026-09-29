@@ -2,7 +2,7 @@
 from __future__ import annotations
 import numpy as np
 import torch
-from src.objectives.mocu.context import ExperimentContext, belief_summary
+from src.context import ExperimentContext, belief_summary
 
 
 def _tensors_from_state(

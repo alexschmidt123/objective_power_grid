@@ -23,22 +23,23 @@ def select_control(grid, safe, weights, coverage):
     return dict(u_ctrl=float(grid[i]),posterior_safe_mass=float(mass[i]),control_index=i)
 
 
-def continuous_decision(requirements,weights,coverage,objective):
+def continuous_decision(requirements,weights,coverage,u_max):
+    """Smallest posterior-safe control; higher normalized utility is better."""
+    if not np.isfinite(u_max) or u_max <= 0: raise ValueError("u_max must be finite and positive")
     requirements,weights=np.asarray(requirements,float),np.asarray(weights,float)
     if requirements.shape!=weights.shape or not np.isfinite(weights).all() or np.any(weights<0) or weights.sum()<=0:
         raise ValueError('Invalid posterior weights')
-    if np.isnan(requirements).any() or np.any(requirements<0) or (objective=='mocu' and not np.isfinite(requirements).all()) or not 0<coverage<1:
+    if np.isnan(requirements).any() or np.any(requirements<0) or not 0<coverage<1:
         raise ValueError('Continuous requirement model infeasible or invalid coverage')
+    if requirements.ndim != 1 or not requirements.size: raise ValueError("Empty or non-vector requirements")
+    if np.any(requirements[np.isfinite(requirements)] > u_max): raise ValueError("Requirement exceeds u_max; use infinity for infeasible particles")
     weights=weights/weights.sum()
     order=np.argsort(requirements,kind='stable')
     k=min(int(np.searchsorted(np.cumsum(weights[order]),coverage,side='left')),len(order)-1)
     u=float(requirements[order[k]])
     if not np.isfinite(u):raise ValueError('Posterior control infeasible within continuous bounds')
-    row={'u_ctrl':u,'msc':u,'posterior_ess':float(1/np.sum(weights**2)),
+    row={'u_ctrl':u,'normalized_control_cost':u/u_max,'cost_utility':-u/u_max,'posterior_ess':float(1/np.sum(weights**2)),
          'posterior_safe_mass':float(weights[requirements<=u].sum())}
-    if objective=='mocu':
-        row['posterior_mocu']=float(weights@(u+np.maximum(requirements-u,0)/(1-coverage)-requirements))
-    elif objective!='msc':raise ValueError('Unknown control objective')
     return row
 
 
@@ -96,9 +97,9 @@ class CarriedStateControl:
         hi[~feasible]=np.inf
         return hi
 
-    def decision(self,theta,states,weights,objective='msc'):
-        req=self.requirements(theta,states,allow_infeasible=objective=='msc')
-        row=continuous_decision(req,weights,self.coverage,objective)
+    def decision(self,theta,states,weights):
+        req=self.requirements(theta,states,allow_infeasible=True)
+        row=continuous_decision(req,weights,self.coverage,self.bounds[1])
         # Independent direct safety calculation at selected continuous action.
         _,_,safe=self.metrics(theta,states,np.full(len(theta),row['u_ctrl']))
         mass=float(np.average(safe,weights=weights))
@@ -109,7 +110,7 @@ class CarriedStateControl:
 
     def oracle(self,theta,state):
         req=self.requirements(np.asarray(theta)[None],np.asarray(state)[None],allow_infeasible=True)[0]
-        return {'oracle_msc':float(req) if np.isfinite(req) else None,
+        return {'oracle_u_ctrl':float(req) if np.isfinite(req) else None,
                 'oracle_feasible':bool(np.isfinite(req)),
                 'oracle_kind':'continuous_bracketed_minimum_at_actual_terminal_state',
                 'oracle_tolerance':self.tolerance}

@@ -117,7 +117,7 @@ def reference_graph(config):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--config', type=Path, default=Path('configs/ieee30_mocu.yaml'))
+    parser.add_argument('--config', type=Path, default=Path('configs/ieee30_cost_utility.yaml'))
     parser.add_argument('--output', type=Path, default=Path('documents/images/ieee30_diagram.png'))
     args = parser.parse_args()
     import yaml

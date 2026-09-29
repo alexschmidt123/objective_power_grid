@@ -2,7 +2,7 @@
 
 Ordered histories replace the exchangeable summary for the non-reset model.
 Actions are feasible-interval coordinates in [0,1]; rewards telescope to the
-terminal utility: sPCE, negative MSC or negative posterior MOCU.
+terminal utility: sPCE, normalized negative control effort.
 Uses replay, an ensemble of target critics, random-subset minimum targets and
 an entropy-regularized tanh-Gaussian actor. Numerical budgets are study settings.
 """

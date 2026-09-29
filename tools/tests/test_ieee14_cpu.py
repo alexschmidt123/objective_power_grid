@@ -10,7 +10,7 @@ from src.domains.swing.simulator import generate_ieee14_coupling_matrix,ieee14_p
 
 ROOT=Path(__file__).resolve().parents[2]
 def config():
-    return load_config(ROOT/'configs/ieee14_mocu.yaml')
+    return load_config(ROOT/'configs/ieee14_cost_utility.yaml')
 
 def reference_network():
     text=(ROOT/'tools/reference_data/case14.m').read_text()

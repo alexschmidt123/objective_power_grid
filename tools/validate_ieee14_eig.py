@@ -46,7 +46,7 @@ def sensitivity(output):
     from src.domains.swing.continuous_rocof import EndpointRocofObserver
     from src.domains.swing.continuous import ContinuousParticleBelief
     from src.objectives.eig.continuous_eig import OnlineEIG,DurationPolicy
-    cfg=load_config(ROOT/'configs/ieee14_mocu.yaml')
+    cfg=load_config(ROOT/'configs/ieee14_cost_utility.yaml')
     obs=EndpointRocofObserver(cfg,duration_bounds=(.2,3),injection_bus=1,amplitude=.05,window=3.5)
     lo=np.r_[cfg.swing['M_lower_nodes'],cfg.swing['K_lower_nodes']]
     hi=np.r_[cfg.swing['M_upper_nodes'],cfg.swing['K_upper_nodes']]
@@ -107,7 +107,7 @@ def main():
             execute('gpu_tests',[sys.executable,'-m','unittest','tools.tests.test_ieee14_gpu',
                 'tools.tests.test_direct_moe_physics','tools.tests.test_endpoint_rocof.EndpointRocofTests',
                 'tools.tests.test_continuous_swing','-v'])
-            common=['bash','run.sh','--config','configs/ieee14_mocu.yaml','--objective','eig',
+            common=['bash','run.sh','--config','configs/ieee14_cost_utility.yaml','--objective','eig',
                 '--method',','.join(METHODS),'--moe-training-mode','policy_pathwise','--T','3',
                 '--N_obs','0','--observation-kind','endpoint_rocof','--window','3.5','--noise_sigma','.005',
                 '--seed','101','--eval-seeds','900125']

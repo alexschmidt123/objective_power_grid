@@ -8,8 +8,10 @@ from src.control.continuous_control import CarriedStateControl, continuous_decis
 
 
 class OnlineControl(OnlineEIG):
-    def __init__(self,cfg,observer,*,objective='msc',**kwargs):
+    def __init__(self,cfg,observer,*,objective='cost_utility',**kwargs):
+        cfg.validate_cost_utility()
         super().__init__(cfg,observer,**kwargs)
+        if objective != 'cost_utility': raise ValueError('Expected cost_utility')
         self.objective=objective
         self.control=CarriedStateControl(cfg,observer.sim)
 
@@ -20,8 +22,8 @@ class OnlineControl(OnlineEIG):
         batch,count=weights.shape
         posterior_theta=theta[:,1:].reshape(-1,theta.shape[-1])
         posterior_states=states[:,1:].reshape(-1,states.shape[-1])
-        req=self.control.requirements(posterior_theta,posterior_states,allow_infeasible=self.objective=='msc').reshape(batch,count)
-        decisions=[continuous_decision(r,w,self.control.coverage,self.objective) for r,w in zip(req,weights)]
+        req=self.control.requirements(posterior_theta,posterior_states,allow_infeasible=True).reshape(batch,count)
+        decisions=[continuous_decision(r,w,self.control.coverage,self.control.bounds[1]) for r,w in zip(req,weights)]
         chosen=np.repeat([r['u_ctrl'] for r in decisions],count)
         _,_,safe=self.control.metrics(posterior_theta,posterior_states,chosen)
         masses=(weights*safe.reshape(batch,count)).sum(axis=1)
@@ -30,11 +32,10 @@ class OnlineControl(OnlineEIG):
         for row,mass in zip(decisions,masses):
             row['posterior_safe_mass']=float(mass)
             row['control_solver_tolerance']=self.control.tolerance
-        key='msc' if self.objective=='msc' else 'posterior_mocu'
-        return -np.asarray([r[key] for r in decisions]), decisions
+        return np.asarray([r['cost_utility'] for r in decisions]), decisions
 
     def improve(self,policy,optimizer,rng,batch,**kwargs):
-        from src.objectives.msc.continuous_numerical import improve_numerical
+        from src.objectives.cost_utility.numerical import improve_numerical
         return improve_numerical(self,policy,optimizer,rng,batch,
             scale=self.numerical_gradient_scale,directions=self.numerical_gradient_directions,**kwargs)
 
@@ -55,9 +56,9 @@ class ControlParticleBelief(ContinuousParticleBelief):
         loglike=-.5*np.sum(((y[:,None]-means[None])/self.sigma)**2,axis=-1)
         logw=loglike+self.log_weights
         weights=np.exp(logw-logsumexp(logw,axis=1,keepdims=True))
-        req=self.control.requirements(self.particles,prediction.terminal_state,allow_infeasible=self.objective=='msc')
+        req=self.control.requirements(self.particles,prediction.terminal_state,allow_infeasible=True)
         scores=[]
         for w in weights:
-            row=continuous_decision(req,w,self.control.coverage,self.objective)
-            scores.append(-row['msc' if self.objective=='msc' else 'posterior_mocu'])
+            row=continuous_decision(req,w,self.control.coverage,self.control.bounds[1])
+            scores.append(row['cost_utility'])
         return float(np.mean(scores))
