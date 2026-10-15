@@ -1,0 +1,78 @@
+system:
+  name: sir_ode
+N: 1
+experiment:
+  experiment_type: eig_based
+  step_number: 5
+  methods:
+  - random
+  - fixed
+  - dad
+  - rl_sboed
+  - vsoed
+  - scorebed
+  - moe_sboed
+observation:
+  noise_sigma: 1.0
+  sampling: infected_count_at_continuous_time
+sir_ode:
+  population: 500.0
+  i0: 2.0
+  t_end: 100.0
+  beta_mean: 0.5
+  gamma_mean: 0.1
+  log_std: 0.5
+  min_spacing: 0.1
+  integration_steps_per_stage: 512
+research:
+  enabled: true
+  settings:
+    eval_systems: 2048
+    eval_contrasts: 16384
+    moe_revision: 4
+    moe_router_temperature: 1.0
+    moe_specialist_budget_fraction: 0.25
+    moe_density_updates: 4
+    updates: 31250
+    batch_size: 32
+    learning_rate: 0.0003
+    training_bound: 1
+    primary_episode_budget: 1
+    contrasts: 1024
+    evaluation_population_systems: 2048
+    evaluation_batch_size: 8
+    evaluation_contrast_chunk: 128
+    validation_systems: 128
+    validation_contrasts: 1024
+    rl_batch_size: 32
+    rl_replay_batch: 256
+    rl_replay_capacity: 100000
+    rl_min_buffer: 1024
+    rl_gradient_steps: 2
+    rl_log_every: 10
+    scorebed_batch_size: 64
+    threads: 2
+  plan:
+    source: User-provided ChatGPT research plan
+    horizons:
+    - 5
+    - 10
+    training_repetitions: 5
+    test_trajectories: 2048
+    routing: four-expert DSelect1 sparse MoE
+    training_criterion: sPCE
+    online_policy_refinement: false
+    primary_metric: common explicit-likelihood held-out EIG (sPCE)
+    secondary_metric: parameter_MSE
+    exclusions:
+    - step_dad
+    - myopic
+    - mocu
+    - msc
+    - cost_utility
+    - growing_tree
+    moe_architecture: same sPCE-only sparse policy as location; no auxiliary networks
+    data_source: on-the-fly deterministic SIR ODE; no finite latent bank
+    legacy_results: Separate provenance only; discrete bank metrics not pooled
+    scope: implementation and bounded CPU validation; full training not launched
+  training_episode_cap: 1000000
