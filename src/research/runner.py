@@ -90,7 +90,7 @@ def freeze_source(root,output):
     write_json(output/'source_manifest.json',dict(git_commit=commit,sha256=hashes))
 
 
-def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper=False):
+def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper=False,*,infer_parameters=True):
     # Identity pairing is independent of training/decision RNG and batch partition.
     rng = generator(seed)
     population=settings.get('evaluation_population_systems',settings['eval_systems']) if paper else settings['eval_systems']
@@ -135,10 +135,12 @@ def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper
                 result['info'],upper = contrast_scores(benchmark,result,contrasts,settings['evaluation_contrast_chunk'])
             else:
                 upper = result['log_likelihood'][:,0]-logmeanexp(result['log_likelihood'][:,1:])
-            inference,posterior_artifacts = posterior_metrics(benchmark,result,settings,seed+start*97451+8000009,
-                                                             return_artifacts=True)
-            np.savez_compressed(output/'eval'/f'{method}_seed{seed}_posterior_batch{start}.npz',
-                                **posterior_artifacts)
+            if infer_parameters:
+                inference,posterior_artifacts = posterior_metrics(benchmark,result,settings,seed+start*97451+8000009,
+                                                                 return_artifacts=True)
+                np.savez_compressed(output/'eval'/f'{method}_seed{seed}_posterior_batch{start}.npz',
+                                    **posterior_artifacts)
+            else:inference=[None]*(end-start)
         if streamed and (start==0 or end%128==0 or end==len(truth)):
             print(f'{method} paper evaluation: {end}/{len(truth)} trajectories, L={settings["eval_contrasts"]}',flush=True)
         for i in range(end-start):
@@ -155,22 +157,25 @@ def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper
                              routing=[dict(weights=r['weights'][i],proposals=r['proposals'][i],stage=r.get('stage'),selected_expert=None if r.get('selected_expert') is None else r['selected_expert'][i],**({'strategy':{k:v[i] for k,v in r['strategy'].items()}} if 'strategy' in r else {})) for r in result['routing']],
                              mean_decision_seconds_per_trajectory=sum(result['decision_seconds'])/(horizon*(end-start))))
     scores=np.array([r['spce'] for r in rows])
-    mse=np.array([r['inference']['mse'] for r in rows])
+    def inference_mean(key):
+        return float(np.mean([r['inference'][key] for r in rows])) if infer_parameters else None
     summary=dict(method=method,eval_seed=seed,systems=len(rows),mean_spce=float(scores.mean()),
                  spce_mc_standard_error=float(scores.std(ddof=1)/math.sqrt(len(rows))) if len(rows)>1 else None,
                  mean_nmc_upper_estimate=float(np.mean([r['nmc_upper_estimate'] for r in rows])),
-                 mean_mse=float(mse.mean()),mean_normalized_mse=float(np.mean([r['inference']['normalized_mse'] for r in rows])),
-                 mean_importance_ess=float(np.mean([r['inference']['importance_ess'] for r in rows])),
+                 mean_mse=inference_mean('mse'),mean_normalized_mse=inference_mean('normalized_mse'),
+                 mean_importance_ess=inference_mean('importance_ess'),
                  mean_decision_seconds=float(np.mean([r['mean_decision_seconds_per_trajectory'] for r in rows])),
                  evaluation_seconds=time.perf_counter()-started,forward_particle_stages=benchmark.calls-calls,
                  grid_particle_propagations_including_jacobians=getattr(benchmark,'physical_calls',0)-physical_start,
-                 inference_degenerate_fraction=float(np.mean([r['inference']['inference_degenerate'] for r in rows])),
+                 inference_degenerate_fraction=inference_mean('inference_degenerate'),
                  contrasts=settings['eval_contrasts'],spce_ceiling_nats=math.log(settings['eval_contrasts']+1),
                  eig_estimate_gap=float(np.mean([r['nmc_upper_estimate']-r['spce'] for r in rows])),
                  spce_near_ceiling_fraction=float(np.mean(scores>math.log(settings['eval_contrasts']+1)-.01)),
                  training_seconds=training.get('training_seconds',0.),
                  note='Monte Carlo estimator uncertainty within this training; not training-seed uncertainty')
-    if getattr(benchmark,'corrected_location',False):
+    summary['parameter_inference_enabled']=bool(infer_parameters)
+    if not infer_parameters:summary['mse_inference']='not_run_EIG_only; no MSE value is implied'
+    elif getattr(benchmark,'corrected_location',False):
         summary['mse_inference']='two_independent_tempered_resample_move_SMC_populations'
         summary['ess_note']='Uniform weights after resampling; ESS is not a convergence certificate'
         summary['mean_replica_disagreement']=float(np.mean([r['inference']['independent_replica_mean_disagreement'] for r in rows]))
@@ -183,11 +188,14 @@ def main(argv=None):
     parser.add_argument('--T','--step-number',type=int)
     parser.add_argument('--variant',choices=FAMILY_METHODS)
     parser.add_argument('--training-episodes',type=int,help='Explicit additional primary-episode budget for a family timing/pilot run')
+    parser.add_argument('--continuation-seconds',type=float,help='Elapsed training budget for explicit DAD-MLP continuation; stop after the first completed update reaching the target')
+    parser.add_argument('--continuation-max-episodes',type=int,default=5000000,help='Safety cap for timed continuation, not its actual training budget')
     parser.add_argument('--dad-mlp-continue-from',help='Explicit pretrained base for matched additional-training sum_single control')
     parser.add_argument('--base-checkpoint',help='Explicit pretrained complete DAD-MLP base for residual training')
     parser.add_argument('--base-finetune',action='store_true',help='Separate controlled setting; default frozen base')
     parser.add_argument('--family-evaluate-from',help='Frozen family/legacy checkpoint; no training')
     parser.add_argument('--relaxed-routing',action='store_true',help='Diagnostic inference, not deployed hard policy')
+    parser.add_argument('--eig-only',action='store_true',help='Keep common EIG evaluation; omit secondary posterior/MSE inference and record it as not run')
     parser.add_argument('--residual-scale',type=float,default=1.)
     parser.add_argument('--residual-initial-std',type=float,default=.001)
     parser.add_argument('--method','--methods',dest='methods')
@@ -248,6 +256,15 @@ def main(argv=None):
         if args.methods:parser.error('Choose --variant or --methods')
         methods=[args.variant]
     if args.dad_mlp_continue_from and methods!=['sum_single']:parser.error('DAD-MLP continuation requires --method sum_single')
+    if args.continuation_seconds is not None:
+        if not args.dad_mlp_continue_from or methods!=['sum_single'] or args.smoke or args.pilot or args.journal or args.training_episodes is not None:
+            parser.error('--continuation-seconds requires an explicit development sum_single continuation')
+        if not math.isfinite(args.continuation_seconds) or args.continuation_seconds<=0 or args.continuation_max_episodes<1:
+            parser.error('Timed continuation needs a finite positive duration and episode safety cap')
+        raw['research'].setdefault('paper_protocol',{})['nominal_training_trajectories']=args.continuation_max_episodes
+        raw['research']['training_episode_cap']=args.continuation_max_episodes
+        raw['research']['continuation_time_budget_seconds']=args.continuation_seconds
+        raw['research']['training_budget_unit']='additional_elapsed_seconds'
     if args.family_evaluate_from and not args.variant:parser.error('Frozen family evaluation requires --variant')
     if args.base_checkpoint and not args.variant:parser.error('Base checkpoint requires a residual --variant')
     if args.variant in {'resmoe','switchresmoe'} and not (args.base_checkpoint or args.family_evaluate_from):parser.error('Residual training requires --base-checkpoint')
@@ -399,6 +416,10 @@ def main(argv=None):
         metadata['training_bound']='Full-horizon sPCE; unchanged mild selector/load penalties; no switch penalty or auxiliary networks'
         metadata['history']='Permutation-invariant corrected sum history plus stage; differentiable previous strategy distribution supplied to switching gate'
         metadata['strategy_protocol']=dict(mode=settings['strategy_routing_mode'],initial_reroute_probability=settings['strategy_initial_reroute_probability'],hard_switch_threshold=.5,switch_schedule='none',minimum_duration=None,available_strategies=['S0','S1','S2','S3'],training_state='q=(1-b)q_previous+b*p',evaluation_seed_role='1001 is development data',checkpoint_selection='final')
+    metadata['parameter_inference_enabled']=not args.eig_only
+    if args.eig_only:
+        metadata['secondary_metric']=None
+        metadata['mse_inference']='not_run_EIG_only; primary common EIG evaluator and all its settings are unchanged'
     write_json(output/'run_config.json',metadata)
     if set(methods)&set(ABLATIONS):
         metadata['architecture_control_protocol']=dict(controls=methods,encoder_comparison='Identical 772-input, 64/64 dense head; native DAD sum16 fixed-zero-padded versus full attention context',routing_algorithm='Existing DSelect1 unchanged',checkpoint_selection='final',simulation_cap=raw['research']['paper_protocol']['nominal_training_trajectories'],validation_seed=10000120,validation_eig_contrasts=65536,final_eig_contrasts=settings['eval_contrasts'])
@@ -442,7 +463,7 @@ def main(argv=None):
                 else:
                     train_settings=settings|raw['research'].get('training_profiles',{}).get('adaptive',{})
                     with torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'):
-                        policy,training=train_control(benchmark,horizon,train_settings,args.seed,output/'models',method,trajectory_budget=None if args.smoke else raw['research'].get('paper_protocol',{}).get('nominal_training_trajectories',settings['updates']*settings['batch_size']),initial_checkpoint=args.dad_mlp_continue_from)
+                        policy,training=train_control(benchmark,horizon,train_settings,args.seed,output/'models',method,trajectory_budget=None if args.smoke else raw['research'].get('paper_protocol',{}).get('nominal_training_trajectories',settings['updates']*settings['batch_size']),initial_checkpoint=args.dad_mlp_continue_from,time_budget_seconds=args.continuation_seconds)
                     policy=policy.cpu().eval()
             elif method=='strategy_moe_sboed':
                 from src.research.strategy_training import train_strategy_moe
@@ -512,18 +533,22 @@ def main(argv=None):
             if checkpoint.exists():training['checkpoint_sha256']=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
             if settings.get('primary_episode_budget',0) and not args.smoke and method not in {'random','existing_moe_hard','existing_moe_relaxed'} and not args.family_evaluate_from:
                 required=raw['research'].get('paper_protocol',{}).get('nominal_training_trajectories',raw['research'].get('training_episode_cap'))
-                if training.get('generated_training_trajectories')!=required:
+                if args.continuation_seconds is not None:
+                    if not training.get('time_budget_reached'):raise ValueError('Timed control did not reach its declared training budget')
+                    training['training_budget_unit']='additional_elapsed_seconds'
+                elif training.get('generated_training_trajectories')!=required:
                     raise ValueError(f'{method}: expected {required} primary episodes, got '+str(training.get('generated_training_trajectories')))
-                training['training_budget_unit']='primary_episodes'
+                if args.continuation_seconds is None:training['training_budget_unit']='primary_episodes'
             write_json(output/'models'/f'{method}_training.json',training)
             for seed in seeds:
-                rows,summary=evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper=paper)
+                rows,summary=evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper=paper,infer_parameters=not args.eig_only)
                 write_json(output/'eval'/f'{method}_seed{seed}.json',rows)
                 if method in FAMILY_METHODS and horizon>1:
                     from tools.report_moe_family import summarize_rows
                     write_json(output/'eval'/f'{method}_seed{seed}_strategy_management.json',summarize_rows(rows))
                 summaries.append(summary);all_rows[(method,seed)]=rows
-                print(f"{method} seed {seed}: sPCE={summary['mean_spce']:.6f}; normalized MSE={summary['mean_normalized_mse']:.6f}",flush=True)
+                mse_label='not run (EIG-only)' if args.eig_only else f"{summary['mean_normalized_mse']:.6f}"
+                print(f"{method} seed {seed}: sPCE={summary['mean_spce']:.6f}; normalized MSE={mse_label}",flush=True)
         write_json(output/'summary.json',summaries)
         with (output/'summary.csv').open('w',newline='') as handle:
             writer=csv.DictWriter(handle,fieldnames=list(summaries[0]));writer.writeheader();writer.writerows(summaries)

@@ -140,7 +140,10 @@ def validation(b,p,h,seed,systems=128,contrasts=65536):
     p.routing_override=None;p.to(device).train()
     return dict(seed=seed,systems=systems,contrasts=contrasts,ceiling=math.log(contrasts+1),scores=reports)
 
-def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_checkpoint=None):
+def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_checkpoint=None,time_budget_seconds=None):
+    if time_budget_seconds is not None:
+        if method!='sum_single' or not initial_checkpoint:raise ValueError('Time budget requires explicit sum_single continuation')
+        if not math.isfinite(time_budget_seconds) or time_budget_seconds<=0:raise ValueError('Time budget must be finite and positive')
     torch.manual_seed(seed)
     if method=='dad':
         from src.research.policies import make_policy
@@ -195,7 +198,9 @@ def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_che
                  clip_scale=(min(1.,5./(float(norm)+1e-6)) if s.get('moe_gradient_clip_mode','global')=='global' else None),gradient_clip_mode=s.get('moe_gradient_clip_mode','global'),gamma=None if p.dense else p.router.gamma,
                  collapse_penalty=float(load.detach()),selector_entropy=float(entropy.detach()))
         row['training_score_distribution']=dict(mean=float(r['info'][:,-1].mean()),quantiles=torch.quantile(r['info'][:,-1].detach(),torch.tensor([0.,.1,.5,.9,.99,1.],device=eig.device,dtype=eig.dtype)).cpu().tolist(),fraction_within_01_of_ceiling=float((r['info'][:,-1].detach()>math.log(L+1)-.1).double().mean()),fraction_within_05_of_ceiling=float((r['info'][:,-1].detach()>math.log(L+1)-.5).double().mean()))
-        if step%s['validate_every']==0 or count==budget:row['training_scores']=r['info'][:,-1].detach().cpu().tolist()
+        time_finished=time_budget_seconds is not None and time.perf_counter()-started>=time_budget_seconds
+        if time_budget_seconds is not None:row['elapsed_training_seconds']=time.perf_counter()-started
+        if step%s['validate_every']==0 or count==budget or time_finished:row['training_scores']=r['info'][:,-1].detach().cpu().tolist()
         if routes:
             w=torch.stack(routes);hard=torch.nn.functional.one_hot(w.argmax(-1),4).to(w.dtype)
             row.update(router_probabilities_by_stage=w.mean(1).cpu().tolist(),
@@ -207,7 +212,7 @@ def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_che
                        routing_entropy_by_stage=(-(w*w.clamp_min(1e-15).log()).sum(-1)).mean(1).cpu().tolist(),
                        routing_entropy=float((-(w*w.clamp_min(1e-15).log()).sum(-1)).mean()))
         with trace_path.open('a') as f:f.write(json.dumps(row,allow_nan=False)+'\n')
-        if step%s['validate_every']==0 or count==budget:
+        if step%s['validate_every']==0 or count==budget or time_finished:
             records.append(row);print(method,{k:v for k,v in row.items() if not k.endswith('_by_stage')},flush=True)
         if budget>=100000 and count>=next_validation and method!='sum_single_193' and not initial_checkpoint:
             st=time.perf_counter();val=validation(b,p,h,10000120)
@@ -215,11 +220,15 @@ def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_che
             val.update(primary_episodes=count,validation_seconds=time.perf_counter()-st)
             validation_records.append(val);print(method,'held-out learning curve',val,flush=True)
             next_validation+=budget/4
+        if time_finished:break
+    elapsed=time.perf_counter()-started-validation_seconds
+    if time_budget_seconds is not None and elapsed<time_budget_seconds:
+        raise RuntimeError('Episode safety cap reached before elapsed-time budget')
     sparse=method=='attention_sparse_moe'
     p.eval()
     torch.save(dict(kind=method,architecture=p.architecture,method=method,horizon=h,hidden=s['hidden'],
                     gamma=None if p.dense else p.router.gamma,state_dict=p.state_dict()),directory/(method+'.pt'))
-    return p,dict(training='pathwise_sPCE_architecture_control',base_pretraining=base_provenance,additional_training_episodes=count,total_training_episodes=count+base_provenance.get('training_episodes',0),base_training_seconds=base_provenance.get('training_seconds',0.),training_seconds=time.perf_counter()-started-validation_seconds,
+    return p,dict(training='pathwise_sPCE_architecture_control',time_budget_seconds=time_budget_seconds,time_budget_reached=(elapsed>=time_budget_seconds if time_budget_seconds is not None else None),episode_safety_cap=budget if time_budget_seconds is not None else None,stop_rule='first_completed_update_at_elapsed_budget' if time_budget_seconds is not None else 'primary_episodes',base_pretraining=base_provenance,additional_training_episodes=count,total_training_episodes=count+base_provenance.get('training_episodes',0),base_training_seconds=base_provenance.get('training_seconds',0.),training_seconds=time.perf_counter()-started-validation_seconds,
                   diagnostic_validation_seconds=validation_seconds,generated_training_trajectories=count,
                   contrast_training_trajectories=count*L,training_forward_trajectories=count*(L+1),
                   history=records,validation_history=validation_records,validation_not_used_for_checkpoint_selection=True,
