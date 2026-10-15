@@ -30,3 +30,16 @@ def test_control_checkpoint_rejects_different_physical_benchmark(method,tmp_path
     _,_,path=make_saved(tmp_path,method)
     wrong=LocationFinding({'location_finding':{'design_bounds':[-3,3]},'observation':{'noise_sigma':.5}})
     with pytest.raises(ValueError,match='benchmark'):load_single_policy(path,wrong)
+
+
+def test_frozen_evaluation_reads_actual_elapsed_budget_episode_count():
+    from tools.early_family_eig import validate_training_budget
+    t=dict(generated_training_trajectories=2345600,time_budget_seconds=1736.,time_budget_reached=True,training_seconds=1736.1,episode_safety_cap=5000000)
+    assert validate_training_budget({},t)==2345600
+    with pytest.raises(ValueError,match='not reached'):validate_training_budget({},dict(t,time_budget_reached=False))
+
+
+def test_frozen_evaluation_rejects_incomplete_episode_budget():
+    from tools.early_family_eig import validate_training_budget
+    cfg=dict(benchmark=dict(research=dict(paper_protocol=dict(nominal_training_trajectories=1000000))))
+    with pytest.raises(ValueError,match='not reached'):validate_training_budget(cfg,dict(generated_training_trajectories=8))

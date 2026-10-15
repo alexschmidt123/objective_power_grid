@@ -40,7 +40,7 @@ def normalize_routes(rows):
     return rows
 
 def training_diagnostics(path,budget):
-    points=[];groups={};phase={};logged=[];near=0.;total=0;last_count=0
+    points=[];groups={};phase={};logged=[];near=0.;total=0;last_count=0;window_peak={}
     if not path.exists():return None
     with path.open() as f:
         for line in f:
@@ -51,6 +51,7 @@ def training_diagnostics(path,budget):
             if dist:
                 near+=n*dist.get('fraction_within_01_of_ceiling',0.);total+=n
             for key,value in r.get('gradient_before',{}).items():
+                window_peak[key]=max(window_peak.get(key,0.),value)
                 g=groups.setdefault(key,dict(raw=[],post=[],late=[]));g['raw'].append(value);g['post'].append(r['gradient_after'][key])
                 if frac>.8:g['late'].append(r['gradient_after'][key])
             if r.get('training_scores'):logged.extend(r['training_scores'])
@@ -58,8 +59,10 @@ def training_diagnostics(path,budget):
                 points.append(dict(episodes=count,eig=r['training_eig'],gamma=r.get('gamma'),
                     usage=r.get('router_probabilities'),hard_usage=r.get('hard_choice_frequency'),
                     gradient=r.get('gradient_after'),raw_gradient=r.get('gradient_before'),
+                    raw_gradient_window_max=window_peak.copy(),routing_entropy=r.get('routing_entropy'),
                     score_quantiles=dist.get('quantiles'),near=dist.get('fraction_within_01_of_ceiling'),
                     reroute_probability=r.get('strategy_reroute_probability_mean')))
+                window_peak.clear()
     exposure={}
     for key,g in groups.items():
         a=np.asarray(g['post']);late=np.asarray(g['late']);raw=np.asarray(g['raw'])
@@ -152,6 +155,19 @@ def plots(items,out):
         bx=axes[i,1];bx.hist(d['logged_trajectory_scores'],bins=60,density=True,color=COLORS[list(NAMES).index(x['kind'])]);bx.axvline(math.log(1025),ls='--',color='black')
         bx.set(title='Logged trajectory training scores',xlabel='sPCE (nats)',ylabel='Density')
     savefig(fig,out,'training_curves_score_distributions')
+    fig,axes=plt.subplots(len(done),3,figsize=(15,3*len(done)),squeeze=False)
+    for x,(a,b,c) in zip(done,axes):
+        points=x['diagnostics']['points'];ep=np.array([p['episodes'] for p in points])/1e6
+        for group,color in [('router','#3569a8'),('switching_gate','#e1812c')]:
+            if group not in x['diagnostics']['gradient_exposure']:continue
+            a.semilogy(ep,[max(p['raw_gradient_window_max'].get(group,0.),1e-12) for p in points],label=group,color=color,lw=.8)
+        a.axhline(5,ls='--',color='black',lw=.7,label='Component clip limit');a.set(title=x['label'],xlabel='Training episodes (millions)',ylabel='Raw norm: max per50 updates');a.legend(fontsize=7)
+        for j in range(4):b.semilogy(ep,[max(p['gradient'].get(f'expert_{j}',0.),1e-12) for p in points],label=EXPERTS[j],color=COLORS[j],lw=.7)
+        b.set(xlabel='Training episodes (millions)',ylabel='Expert norm after clipping (sampled)');b.legend(ncol=4,fontsize=7)
+        valid=[(p['episodes']/1e6,p['routing_entropy']) for p in points if p['routing_entropy'] is not None]
+        if valid:c.plot(*zip(*valid),label='Mean routing entropy',color='#32956c')
+        c.set(xlabel='Training episodes (millions)',ylabel='Routing entropy (nats)');d=c.twinx();d.plot(ep,[p['gamma'] for p in points],color='black',ls='--',lw=.8);d.set(ylabel='DSelect gamma',ylim=(0,1.05))
+    savefig(fig,out,'routing_gradient_entropy_sharpening')
     switches=[x for x in done if x['kind'].startswith('switch')]
     if switches:
         fig,axes=plt.subplots(len(switches),1,figsize=(8,3*len(switches)),squeeze=False)
@@ -250,6 +266,17 @@ def mechanism_evidence(root,out):
                 b.plot([int(s) for s in stages],[100*obs[s]['gate_flip_fraction'] for s in stages],label='Rerouting request');b.legend(fontsize=8)
             b.set(title='Likelihood-resampled observation diagnostic',xlabel='Measurement',ylabel='Changed hard decisions (%)')
         savefig(fig,out,'expert_disagreement_observation_sensitivity')
+        fig,axes=plt.subplots(len(geometries),4,figsize=(15,3.1*len(geometries)),squeeze=False)
+        for (v,g),row in zip(geometries,axes):
+            p=g['proposals'];region=np.asarray(p['positive_coordinate_frequency_by_expert'])
+            im=row[0].imshow(region,vmin=0,vmax=1,cmap='viridis',aspect='auto');row[0].set(title=NAMES[v]+' proposed regions',xticks=[0,1],xticklabels=['x>0','y>0'],yticks=range(4),yticklabels=EXPERTS)
+            fig.colorbar(im,ax=row[0],label='Frequency')
+            for stage,ax in zip([5,15,25],row[1:]):
+                entries=[x for x in p['conditional_observable_usage'] if x['stage']==stage]
+                if not entries:continue
+                values=np.asarray(entries[0]['selection_frequency_by_quartile']).T
+                ax.imshow(values,vmin=0,vmax=1,cmap='viridis',aspect='auto');ax.set(title=f'Measurement {stage}: observable association',xticks=range(4),xticklabels=['Q1','Q2','Q3','Q4'],yticks=range(4),yticklabels=EXPERTS,xlabel='Latest log-signal quartile (within stage)')
+        savefig(fig,out,'expert_regions_observable_usage')
     residuals=[(v,d['geometry']['residual_relative_to_base']) for v,d in evidence.items() if d.get('geometry',{}).get('residual_relative_to_base')]
     if residuals:
         fig,axes=plt.subplots(len(residuals),2,figsize=(11,3.2*len(residuals)),squeeze=False)
@@ -288,6 +315,9 @@ def conclusions(family,items):
         result.append(f"Against equal-additional-budget continued DAD-MLP, the paired development difference is {d['mean']:+.5f} nats, conditional trajectory 95% interval {ci}. This excludes training-seed variability.")
     else:result.append('Equal-additional-budget continued DAD-MLP is pending, so extra training remains an unresolved explanation.')
     result.append('ResMoE learned routing and forced dominant-expert routing currently match within paired uncertainty. Proposal disagreement or higher overall EIG alone does not establish beneficial expert specialization. Forced routing may induce unfamiliar histories.')
+    matched=next(x for x in items if x['kind']=='matched')
+    if matched['status']=='complete':
+        result.append(f"The matched193-input single policy achieves {matched['eig']['mean']:.5f} nats with one million training episodes. Ordinary MoE and historical SwitchMoE remain below it, so the full-expert deficit cannot be explained solely by the original772-versus193 input convention. Residual variants include an additional pretrained policy budget and greater model capacity.")
     return result
 
 
@@ -311,6 +341,10 @@ def intervention_diagnostics(best,improved,out):
         assert summary['contrast_bank_sha256']==improved['bank_sha256']
         soft=np.array([r['spce'] for r in read(path/'scores.json')]);hard=np.array([r['spce'] for r in improved['rows']])
         result['intervention_hard_relaxed']=dict(hard=stats(hard),relaxed=stats(soft),hard_minus_relaxed=stats(hard-soft))
+    routing=Path(improved['run']).parent/(improved['method']+'_router_contribution')/'report.json'
+    if routing.exists():result['intervention_routing_contribution']=read(routing)
+    geometry=Path(improved['run']).parent/(improved['method']+'_geometry')/'geometry.json'
+    if geometry.exists():result['intervention_geometry']=read(geometry)
     write(out/'controlled_intervention_diagnostics.json',result)
     return result
 
@@ -356,6 +390,7 @@ def main():
             'Residual models include pretrained base effort; continued DAD-MLP is required for attribution',
             'DAD-MLP input772 versus full-MoE input193; matched193 control reported separately',
             'Repeated seed101 training uses the established step-seed convention; generated episode counts do not assert unique samples across pretraining and additional-training phases',
+            'GPU posterior inference overlaps parts of the fairness training campaign; actual elapsed times are not isolated speed benchmarks',
             'External RL-sBOED is an existing documented two-Q adaptation; exact published reproduction is not established',
             'Forced-routing failures may reflect out-of-distribution histories'],items=items,improvement=improvement)
     all_items=items+([improvement] if improvement else [])
@@ -380,7 +415,7 @@ def main():
     body+=parameter_table(family,root)
     body+='<h2>B. External algorithms and strong single-policy controls</h2>'+table([x for x in items if x['kind'] not in NAMES])
     body+='<h2>C. Mechanism diagnostics</h2><p>The first learned measurement is excluded from expert usage. Gradient exposure thresholds and all stage-wise data are retained in machine-readable outputs. Training sPCE values are not held-out EIG.</p>'
-    for name in ['four_variant_eig','expert_utilization_gradient_exposure','stage_utilization_switching','strategy_durations','training_curves_score_distributions','hard_relaxed_eig','expert_disagreement_observation_sensitivity','residual_magnitude_direction','contrast_resolution_diagnostic']:
+    for name in ['four_variant_eig','expert_utilization_gradient_exposure','stage_utilization_switching','strategy_durations','training_curves_score_distributions','routing_gradient_entropy_sharpening','hard_relaxed_eig','expert_disagreement_observation_sensitivity','expert_regions_observable_usage','residual_magnitude_direction','contrast_resolution_diagnostic']:
         if (out/(name+'.png')).exists():body+=f'<p><a href="{name}.svg"><img src="{name}.png" alt="{name}"></a></p>'
     body+='<h2>D. Controlled improvement</h2>'+(table([best,improvement]+[x for x in items if x['kind']=='contrast_control']) if improvement else '<p>Not run yet. Selection and cost preflight are recorded separately; no performance is assumed.</p>')
     if (out/'controlled_intervention_training.png').exists():body+='<p><a href="controlled_intervention_training.svg"><img src="controlled_intervention_training.png" alt="Controlled intervention training diagnostics"></a></p>'

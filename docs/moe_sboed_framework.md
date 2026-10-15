@@ -4,6 +4,8 @@ MoE-sBOED is both the family name and the original per-step full-expert variant.
 The four canonical methods are listed below. This implementation adds no new EIG
 estimator, inference network, critic, teacher loss, or MSE training objective.
 
+The two full residual experiments and equal-additional-budget DAD controls are now complete. See the [controlled comparison](equal_budget_dad_control.md) for exact checkpoint paths, commands, paired uncertainty and cost accounting. Results remain development evidence from one training seed.
+
 | Component | MoE-sBOED (`moe`) | ResMoE-sBOED (`resmoe`) | SwitchMoE-sBOED (`switchmoe`) | SwitchResMoE-sBOED (`switchresmoe`) |
 |---|---|---|---|---|
 | Shared pretrained policy base | No | Yes | No | Yes |
@@ -22,7 +24,7 @@ estimator, inference network, critic, teacher loss, or MSE training objective.
 | Historical Strategy-MoE | `src/research/strategy_moe.py` | Working, requested relaxed recurrence | Preserved unchanged; canonical adapter exposes SwitchMoE |
 | Switching gate and StrategyManager | Same file | Differentiable previous state, sigmoid gate; no duration constraint | Reused in both switching variants |
 | Strong DAD-MLP control | `src/research/moe_architecture_controls.py:ArchitectureControl` | Working sum_single; native head input772 | Entire encoder/head/first experiment restored |
-| Matched-input single control | `src/research/matched_sum_single.py` | Implemented; full performance experiment not run | Retained as separate193-input control |
+| Matched-input single control | `src/research/matched_sum_single.py` | Complete development evaluation; EIG10.74011 | Retained as separate193-input control |
 | Residual variants | `src/research/moe_family.py` | Previously missing | Implemented, independently initialized64/64 tanh corrections |
 | Shared family factory, names, loading | Same file | Previously missing | Four IDs, aliases, checkpoint-contained base weights, physics checks |
 | Common family trainer | `src/research/family_training.py` | Previously missing | One loop for all four, existing rollout/sPCE/clipping reused |
@@ -57,7 +59,7 @@ an explicit separate setting. Thus residual training does not silently replace
 or independently train a second base representation.
 
 Residual action logits are `base_logits + alpha * weighted_residual`, alpha1 by
-default (unvalidated experimental setting). Final residual layers have independent
+default (initial controlled setting). Final residual layers have independent
 normal initialization std0.001, including biases. They are small and nonidentical.
 The simulator applies the existing feasible transform exactly once. Location
 uses its original sigmoid map to [-4,4]². The base first experiment receives no
@@ -83,18 +85,19 @@ an incompatible location base. PK is deferred by the user.
 ## Historical performance: no full training during framework validation
 
 Location T30, two-source standard-normal prior, noiseSD0.5, bounds[-4,4]²,
-training1million primary episodes/L1024, evaluation2000/L1million, seed1001.
+training1million primary episodes/L1024 for the from-scratch methods, evaluation2000/L1million, seed1001. Residual variants additionally inherit1million base-pretraining episodes and train1million residual episodes; base cost is not omitted.
 Each reported model has one training seed. These are development results, not
 untouched publication results or evidence of superiority across training seeds.
 
-| Method | Historical held-out EIG (nats) | Status |
+| Method | Verified held-out EIG (nats) | Status |
 |---|---:|---|
 | DAD reference | 9.76665 | Preserved |
-| DAD-MLP / sum_single | 10.66260 | Strongest reported control; native input772 |
+| DAD-MLP / sum_single | 10.66260 | Original strong control; native input772 |
 | MoE-sBOED, sum + slower sharpening | 9.82944 | Preserved |
 | SwitchMoE-sBOED, historical Strategy-MoE | 10.23554 | Preserved; below DAD-MLP by0.42706 |
-| ResMoE-sBOED | Not evaluated at full budget | Implementation/smoke only |
-| SwitchResMoE-sBOED | Not evaluated at full budget | Implementation/smoke only |
+| ResMoE-sBOED | 10.84765 | Complete; frozen base plus1million additional episodes |
+| SwitchResMoE-sBOED | 10.83468 | Complete; frozen base plus1million additional episodes |
+| Matched193-input single control | 10.74011 | Complete;1million from-scratch episodes |
 
 Other baseline implementations and their historical results remain unchanged;
 this table is the focused architecture comparison, not a new all-method study.
@@ -199,12 +202,12 @@ never flipped. These are **counterfactual routing diagnostics, not rollout EIG**
 The evidence currently supports expert starvation and an almost-always-rerouting
 gate, rather than four meaningful persistent observation-adaptive strategies.
 
-## Reproducible commands (prepared, not full-scale launched)
+## Reproducible commands
 
 Run at the repository root. The base path is a historical local artifact; model
 binaries/results are intentionally not committed. The four commands below each
 train1million primary episodes then use the same common2000/L1million evaluation.
-They are separate proposed runs, not an instruction to launch all four together.
+They define separate runs, not an instruction to launch all four together. Existing full-expert checkpoints are reused, and the two residual full-budget runs are complete.
 Use `--smoke` first. New family defaults are sum/64/64/tanh, batch64,
 Adam5e-5/(0.8,0.998), decay0.98 every1000, component norm5, existing1e-4 routing
 regularizers, gamma1 through30% then cosine to0.001 at95%, L1024, gate init0.99.
@@ -261,30 +264,15 @@ is explicitly separate from hard decisions. Models save code snapshots/manifests
 benchmark physics, encoder dimensions, optimizer/budget, base provenance, routing,
 switch settings, checkpoint hashes, and development-seed status.
 
-## One next controlled experiment
+## Equal-budget control and one next replication
 
-Test **frozen-base ResMoE versus continued DAD-MLP**, initialized from the same
-10.66260 checkpoint, each with the same additional primary training budget and
-unchangedT30/L1024 objective and common paired held-out evaluator. Hypothesis:
-small sparse residual corrections add useful design flexibility beyond additional
-single-policy training. Hold switching absent so this comparison isolates the
-residual mechanism. Report total pretraining+additional episodes and wall costs,
-hard/relaxed EIG, expert exposure, residual directions, score saturation and paired
-uncertainty. Because the initial bound is nearly saturated, first inspect its
-already-supported gradient/saturation diagnostics during a bounded pilot before
-committing to the full budget. Do not change contrast counts or add balancing
-losses simultaneously. No performance outcome is assumed. This experiment is
-prepared, **not launched**. The four-way full training campaign remains unstarted.
+The requested same-base control is complete. The one-million-additional-episode DAD-MLP continuation gives EIG10.56285. The elapsed-time-matched continuation gives EIG10.94265537, using 2,385,408 additional episodes in 1736.874s. ResMoE gives10.84765. The ResMoE-minus-time-matched difference is-0.09501003 nats, conditional paired95% interval[-0.18707707,-0.00294300]. See the [complete report](equal_budget_dad_control.md) for matching limitations and exact commands. These intervals do not measure variation across independently trained models.
 
-After this implementation/validation report, the user explicitly requested
-performance tests of the two remaining residual variants. Their separate
-seed101/1001 full-budget runs are authorized for sequential execution, with
-unchanged L1024 and common2000/L1million evaluation. Timing probes on6400
-additional episodes measured12.82seconds (ResMoE) and13.45seconds (SwitchResMoE),
-approximately33–35minutes training each when extrapolated. Allow roughly two
-hours for both sequential runs including evaluation/diagnostics. The6400-episode
-timing models are not reused as full-run initializations. Full-run results remain
-pending; no result is inferred from their smoke/timing scores.
+The elapsed-time-matched continued DAD-MLP exceeds ResMoE on the paired development cases. This comparison does not establish that sparse routing or expert specialization causes an advantage: frozen dominant-expert routing matches learned ResMoE within uncertainty, and residual capacity, frozen-base optimization and stage representation also differ from continued DAD. Historical residual timing overlapped CUDA posterior inference, so elapsed-time matching is approximate computational matching; episode/likelihood-matched results are reported separately.
+
+The next recommended experiment is a paired replication for independent training seeds102 and103, with a shared independently pretrained base within each seed, frozen hyperparameters/budget rules, isolated training-time accounting, and untouched paired evaluation after checkpoint freezing. It has not been launched. The previously considered L4096 sensitivity is on hold; no full-budget contrast-change trial or architecture search was launched for this control.
+
+The earlier6400-episode timing probes and failed pre-launch attempts remain preserved. Their checkpoints were not reused as initializations and their low-budget EIG scores are not performance evidence.
 
 `--training-episodes N` explicitly bounds additional episodes for development
 family timing/pilot runs; it is not accepted with smoke/pilot/journal modes.

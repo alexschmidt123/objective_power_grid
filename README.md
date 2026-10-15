@@ -13,7 +13,7 @@ The family contains four configurable variants:
 
 SwitchMoE-sBOED retains compatibility with historical Strategy-MoE checkpoints. Location finding is the primary four-variant benchmark. SIR ODE supports validated model rollouts; residual SIR performance experiments require a compatible pretrained base. Existing power-grid experiments remain available through their benchmark configurations. Comparisons include DAD and the stronger DAD-MLP single-policy control; architectural changes alone do not establish an EIG advantage.
 
-See the [framework report](docs/moe_sboed_framework.md) for architecture details, compatibility checks, diagnostics, and experiment commands.
+See the [framework report](docs/moe_sboed_framework.md) for architecture details, compatibility checks, diagnostics, and experiment commands. The [equal-budget DAD-MLP control](docs/equal_budget_dad_control.md) reports paired development EIG, exact checkpoint provenance and training costs.
 
 ## Install
 
@@ -55,6 +55,16 @@ bash run.sh --config configs/location_finding_eig.yaml --variant switchresmoe --
 ```
 
 The base is frozen by default. Full location runs use one million additional primary training episodes, training contrasts L=1,024, and common held-out evaluation on 2,000 trajectories with L=1,000,000. Residual training reports the base pretraining effort separately. Evaluation seed 1001 is development data.
+
+Continue the same DAD-MLP base under an explicit elapsed-training budget:
+
+```bash
+bash run.sh --config configs/location_finding_eig.yaml --method sum_single \
+  --dad-mlp-continue-from "$BASE" --continuation-seconds 1736.8317570788786 \
+  --continuation-max-episodes 5000000 --seed 101 --eval-seeds 1001 --eig-only
+```
+
+The duration applies to training only; actual episodes and likelihood counts are recorded. The episode cap is a safety limit. `--eig-only` omits secondary posterior/MSE inference while retaining the same common EIG evaluator. Default evaluation still includes MSE. This example uses the measured ResMoE training duration; historical runtime overlap is documented in the control report.
 
 Train a DAD-MLP base or run other benchmark smoke tests:
 

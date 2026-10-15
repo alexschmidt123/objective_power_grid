@@ -27,6 +27,19 @@ def load_single_policy(path,benchmark):
   p.load_state_dict(saved['state_dict'],strict=True);return p.eval()
  raise ValueError('Expected complete sum_single or sum_single_193 checkpoint')
 
+def validate_training_budget(cfg,training):
+ count=training['generated_training_trajectories']
+ if count<1:raise ValueError('Missing completed primary training episodes')
+ target=training.get('time_budget_seconds')
+ if target is not None:
+  if not math.isfinite(target) or target<=0 or training.get('time_budget_reached') is not True or training['training_seconds']<target:
+   raise ValueError('Elapsed training budget not reached')
+  if count>training['episode_safety_cap']:raise ValueError('Exceeded episode safety cap')
+ else:
+  nominal=cfg.get('benchmark',{}).get('research',{}).get('paper_protocol',{}).get('nominal_training_trajectories',training.get('training_trajectory_budget',1000000))
+  if count!=nominal:raise ValueError('Primary training episode budget not reached')
+ return count
+
 @torch.no_grad()
 def main():
  ap=argparse.ArgumentParser();ap.add_argument('--run',required=True);group=ap.add_mutually_exclusive_group(required=True);group.add_argument('--variant',choices=['moe','resmoe','switchmoe','switchresmoe']);group.add_argument('--control-method',choices=['sum_single','sum_single_193']);ap.add_argument('--paired-source',required=True);ap.add_argument('--output',required=True);args=ap.parse_args();torch.set_num_threads(1)
@@ -36,7 +49,7 @@ def main():
   if (run/'failure.json').exists():raise RuntimeError((run/'failure.json').read_text())
   time.sleep(15)
  cfg=json.loads((run/'run_config.json').read_text());training=json.loads((run/'models'/f'{method}_training.json').read_text())
- assert training['generated_training_trajectories']==1000000
+ training_episodes=validate_training_budget(cfg,training)
  checkpoint=run/'models'/f'{method}.pt';b=make_benchmark(cfg['benchmark']);p=load_policy(checkpoint,b) if args.variant else load_single_policy(checkpoint,b)
  native_source=json.loads((source/'eval/sum_single_seed1001.json').read_text())
  assert len(native_source)==cfg['settings']['eval_systems']==2000
@@ -61,7 +74,7 @@ def main():
     spce=score,spce_by_stage=info[i].tolist(),nmc_upper_estimate=float(upper[i]),actions=[x[i].tolist() for x in r['actions']],observations=[x[i].tolist() for x in r['observations']],
     routing=[dict(stage=z['stage'],weights=z['weights'][i],selected_expert=int(np.argmax(z['weights'][i])),strategy={k:v[i] for k,v in z['strategy'].items()}) for z in routes]))
   if start%256==0:print(method,start+n,flush=True)
- summary=dict(canonical_variant=args.variant,single_policy_control=args.control_method,eig=stats(scores),systems=2000,contrasts=1000000,training_episodes=1000000,
+ summary=dict(canonical_variant=args.variant,single_policy_control=args.control_method,eig=stats(scores),systems=2000,contrasts=1000000,training_episodes=training_episodes,
   case_identity_sha256=identity,bank_sha256=bank_sha,checkpoint_sha256=hashlib.sha256(checkpoint.read_bytes()).hexdigest(),seconds=time.perf_counter()-started,
   paired_difference_from_base=stats(np.asarray(scores)-np.array([x['spce'] for x in native_source])),native_root_replay_verified=False,
   note='Common EIG-only stage complete; native root posterior diagnostics and score-equality check may still be pending; one training seed')
