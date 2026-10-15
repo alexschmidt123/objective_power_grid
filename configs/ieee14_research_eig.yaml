@@ -1,0 +1,142 @@
+system:
+  name: ieee14
+N: 5
+swing_equation:
+  topology: ieee14
+  physical_bus_count: 14
+  dynamic_machine_buses:
+  - 1
+  - 2
+  - 3
+  - 6
+  - 8
+  retained_bus_map:
+  - 1
+  - 2
+  - 3
+  - 6
+  - 8
+  bus_label_conventions:
+    physical_bus_numbering: one_based_ieee
+    probe_bus_indexing: zero_based_physical
+    observation_bus_field: one_based_physical
+    control_bus_indexing: zero_based_reduced_dynamic
+    reduced_index_to_physical_bus:
+      0: 1
+      1: 2
+      2: 3
+      3: 6
+      4: 8
+  observation_bus: 1
+  base_frequency_hz: 60.0
+  base_power_mva: 100.0
+  coupling_strength: 1.0
+  damping: 0.0
+  latent_model: machinewise_mk
+  M_lower_nodes:
+  - 0.01485446
+  - 0.024138498
+  - 0.018568076
+  - 0.018568076
+  - 0.018568076
+  M_upper_nodes:
+  - 0.027586856
+  - 0.044828642
+  - 0.034483236
+  - 0.034483236
+  - 0.034483236
+  K_lower_nodes:
+  - 0.0078431373
+  - 0.012745098
+  - 0.0098039216
+  - 0.0098039216
+  - 0.0098039216
+  K_upper_nodes:
+  - 0.0784313725
+  - 0.1274509804
+  - 0.0980392157
+  - 0.0980392157
+  - 0.0980392157
+  use_node_specific_damping: true
+  D_nodes:
+  - 0.002122066
+  - 0.003448357
+  - 0.002652582
+  - 0.002652582
+  - 0.002652582
+  P_m_nodes:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  theta0_nodes:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  omega0_nodes:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  enforce_initial_equilibrium: true
+  probe_buses:
+  - 0
+  probe_amplitudes:
+  - 0.05
+  reset_after_probe: false
+  T_obs_sec: 3.0
+  ode_dt: 0.0015625
+  fs_hz: 40.0
+  sigma: 0.2
+  probe_duration_bounds:
+  - 0.2
+  - 3.0
+observation:
+  N_obs: 0
+  noise_sigma: 0.005
+  sampling: signed_rocof_at_window_end
+experiment:
+  experiment_type: eig_based
+  step_number: 3
+  methods:
+  - random
+  - fixed
+  - dad
+  - vsoed
+  min_duration_separation: 0.01
+research:
+  enabled: true
+  observation_kind: endpoint_rocof
+  window: 3.5
+  settings:
+    eval_systems: 2048
+    eval_contrasts: 16384
+    moe_revision: 4
+    moe_router_temperature: 1.0
+    moe_specialist_budget_fraction: 0.25
+    moe_density_updates: 4
+  plan:
+    source: User-provided ChatGPT research plan
+    horizons:
+    - 3
+    - 5
+    training_repetitions: 5
+    test_trajectories: 2048
+    routing: four_expert_dense_soft
+    training_criterion: sPCE
+    online_policy_refinement: false
+    primary_metric: independent_total_EIG_estimate
+    secondary_metric: parameter_MSE
+    exclusions:
+    - rl_sboed
+    - step_dad
+    - mocu
+    - msc
+    - cost_utility
+    - growing_tree
+    - myopic
+    moe_architecture: retired; sparse prototype validation only
