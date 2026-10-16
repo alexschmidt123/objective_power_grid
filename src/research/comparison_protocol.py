@@ -2,6 +2,7 @@
 
 def validate_protocol(raw,settings,horizon,methods,train_seed,eval_seeds,journal=False,smoke=False,pilot=False):
     research=raw['research'];protocol=research.get('journal_protocol')
+    if not journal and research.get('legacy_fixed_budget_protocol'):protocol=research['legacy_fixed_budget_protocol']
     if (journal or pilot) and not protocol:raise ValueError('No frozen journal protocol for this benchmark')
     record=dict(enforced=bool((journal or pilot) and not smoke),workability_only=bool(smoke),
                 study='development' if smoke else ('pilot' if pilot else ('publication_candidate' if journal else 'development')),

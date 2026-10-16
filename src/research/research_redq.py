@@ -77,7 +77,7 @@ class Replay:
 def incremental_rewards(info):
     return info-torch.cat((torch.zeros_like(info[:,:1]),info[:,:-1]),1)
 
-def train_rl_sboed(b,h,s,seed,directory,trajectory_budget=None):
+def train_rl_sboed(b,h,s,seed,directory,trajectory_budget=None,observer=None):
     if b.name not in {'location_finding','sir_ode'}:raise ValueError('RL-sBOED adapter supports location/SIR only')
     if not getattr(b,'likelihood_available',True):raise ValueError('PCE RL-sBOED needs explicit likelihood')
     torch.manual_seed(seed);started=time.perf_counter()
@@ -144,10 +144,12 @@ def train_rl_sboed(b,h,s,seed,directory,trajectory_budget=None):
                 replay_transitions=replay.count,gradient_updates=gradupdates,alpha=float(logalpha.exp().detach()),
                 policy_kl=lastkl,rejected_actor_steps=rejected,maximum_rollout_action=float(a.abs().max()))
             records.append(row);print(f'rl_sboed update {update}: training EIG={row["training_EIG"]:.6f}; forward={spent}; gradient_updates={gradupdates}',flush=True)
+        if observer is not None and observer.check(p,generated,update,actoropt,force=update==maxupdates):break
+    journal=observer.finish(p) if observer is not None else {}
     p.stochastic=False
     torch.save(dict(kind='rl_sboed',architecture=p.architecture,horizon=h,state_dict=p.state_dict(),selected_update=update),directory/'rl_sboed.pt')
     return p,dict(training='RL-sBOED-I SAC_REDQ_two_critic_adaptation',policy_architecture=p.architecture,
-        reward='incremental PCE; rewards telescope to terminal PCE',gamma=1.,checkpoint_selection='final',
+        reward='incremental PCE; rewards telescope to terminal PCE',gamma=1.,checkpoint_selection=journal.pop('checkpoint_selection','final'),
         generated_training_trajectories=generated,contrast_training_trajectories=generated*contrast,training_forward_trajectories=generated*(contrast+1),
         training_trajectory_budget=trajectory_budget,training_budget_unit='primary_episodes' if s.get('primary_episode_budget',0) else 'forward_including_contrasts',training_seconds=time.perf_counter()-started,history=records,
         actual_updates=update,gradient_updates=gradupdates,critic_count=2,target_subset=2,
@@ -158,4 +160,4 @@ def train_rl_sboed(b,h,s,seed,directory,trajectory_budget=None):
         policy_parameters=sum(x.numel() for x in p.parameters()),simulator_gradients_required=False,
         upstream='https://github.com/csiro-mlai/RL-BOED',upstream_commit='54fdc7b6d23849ab1df8fd85d42af7c8961f930e',
         adaptations=['gamma1 undiscounted EIG','common L and forward cap','shared fixed history normalization with stage index','stochastic evaluation with independent decision RNG','standalone Torch implementation without Garage'],
-        publication_algorithm_equivalence=False)
+        publication_algorithm_equivalence=False,**journal)

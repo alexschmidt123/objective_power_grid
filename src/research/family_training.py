@@ -6,7 +6,7 @@ The new switching gate is clipped as its own disjoint parameter group.
 import torch
 from src.research.sparse_moe import routing_gamma,stabilize_gradients
 
-def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune=False,trajectory_budget=None):
+def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune=False,trajectory_budget=None,observer=None):
     import math,time,json
     from src.research.moe_architecture_controls import grad_norm
     from src.research.moe_family import MoESBOEDPolicy,component_groups,NAMES
@@ -26,7 +26,7 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
     records=[];count=0;step=0;contrasts=int(s['contrasts'])
     groups=component_groups(p);trace=directory/(variant+'_diagnostics.jsonl')
     while count<budget:
-        n=min(s['batch_size'],budget-count);fraction=count/budget
+        n=min(s['batch_size'],budget-count);fraction=min(count/s.get('router_schedule_episodes',budget),1.)
         # Smooth homotopy to binary DSelect routing; terminal phase uses sparse
         # selectors. The sPCE objective remains the information criterion.
         p.router.gamma=routing_gamma(fraction,s.get('moe_router_warmup_fraction',0.),s.get('moe_router_finish_fraction',.8))
@@ -65,6 +65,8 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
         with trace.open('a') as f:f.write(json.dumps(row,allow_nan=False)+'\n')
         if step%s['validate_every']==0 or count==budget:
             records.append(row);print(variant,{k:v for k,v in row.items() if not k.endswith('_by_stage')},flush=True)
+        if observer is not None and observer.check(p,count,step,opt,scheduler,force=count>=budget):break
+    journal=observer.finish(p) if observer is not None else {}
     if p.manager is not None:p.manager.reset()
     p.eval()
     from src.research.moe_family import measured_parameters
@@ -89,6 +91,6 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
         routing_warmup_fraction=s.get('moe_router_warmup_fraction',.3),
         routing_finish_fraction=s.get('moe_router_finish_fraction',.95),
         switching_schedule='none; preserves existing sigmoid gate',
-        settings=p.config,checkpoint_selection='final',training_objective='full_horizon_sPCE',
+        settings=p.config,checkpoint_selection=journal.pop('checkpoint_selection','final'),training_objective='full_horizon_sPCE',
         contrasts=contrasts,expert_ids=['E1','E2','E3','E4'],
-        gradient_clip_mode='component',load_penalty_weight=1e-4,selector_entropy_weight_max=1e-4)
+        gradient_clip_mode='component',load_penalty_weight=1e-4,selector_entropy_weight_max=1e-4,**journal)

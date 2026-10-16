@@ -29,7 +29,7 @@ def select_checkpoint(benchmark,policy,horizon,settings,seed):
         return float(result['info'][:,-1].mean())
 
 
-def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=False,trajectory_budget=None,policy=None):
+def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=False,trajectory_budget=None,policy=None,observer=None):
     torch.manual_seed(seed)
     policy = policy if policy is not None else make_policy(benchmark,horizon,kind,settings['hidden'],settings)
     betas=(settings.get('spce_adam_beta1',.9),settings.get('spce_adam_beta2',.999))
@@ -158,9 +158,13 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
             print(f'{kind} update {update}: {label}={display:.6f}',flush=True)
             if value is not None and value > best:
                 best,best_state,best_update = value,copy.deepcopy(policy.state_dict()),update
+        if observer is not None and observer.check(policy,primary_count,update,optimizer,scheduler,force=update==updates):break
     if final_checkpoint:
         best_state,best_update=copy.deepcopy(policy.state_dict()),actual_update
         best=records[-1]['validation_spce']
+    journal=observer.finish(policy) if observer is not None else {}
+    if observer is not None:
+        best_state=copy.deepcopy(policy.state_dict());best_update=journal['selected_checkpoint']['update'];best=journal['selected_checkpoint']['eig']
     policy.load_state_dict(best_state)
     torch.save(dict(kind=kind,architecture=getattr(policy,'architecture',type(policy).__name__),horizon=horizon,state_dict=best_state,
                     hidden=settings['hidden'],selected_update=best_update,
@@ -175,12 +179,12 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
                        training_trajectory_budget=trajectory_budget,training_budget_unit='primary_episodes' if settings.get('primary_episode_budget',0) else 'forward_including_contrasts',
                        expert_refresh_every=settings.get('moe_expert_refresh_every',0),primary_trajectories_by_contrast=contrast_counts,spce_curriculum=settings.get('spce_curriculum',1),
                        moe_revision=settings.get('moe_revision',1),moe_router_temperature=settings.get('moe_router_temperature',.5),
-                       checkpoint_selection='final' if final_checkpoint else 'best_validation',
+                       checkpoint_selection=journal.pop('checkpoint_selection','final' if final_checkpoint else 'best_validation'),
                        initial_learning_rate=settings['learning_rate'],lr_decay=settings.get('spce_lr_decay',1.),
                        adam_betas=list(betas),
                        lr_schedule_every=settings.get('spce_lr_schedule_every',1000),batch_size=settings['batch_size'],
                        forward_particle_stages=benchmark.calls-calls,
-                       grid_particle_propagations_including_jacobians=getattr(benchmark,'physical_calls',0)-physical_start)
+                       grid_particle_propagations_including_jacobians=getattr(benchmark,'physical_calls',0)-physical_start,**journal)
 
 
 def train_vsoed(benchmark,horizon,settings,seed,directory,actor_kind="vsoed",trajectory_budget=None,actor=None,final_checkpoint=False):

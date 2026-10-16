@@ -66,7 +66,8 @@ def run(args):
     budget=34 if tiny else args.budget
     remaining=budget-initialization
     if remaining<2:raise ValueError('ScoreBED cap cannot cover initialization')
-    score_count=8 if tiny else int(.7*remaining)
+    journal_plan=json.loads(pathlib.Path(args.journal_plan).read_text()) if args.journal_plan else None
+    score_count=8 if tiny else (min(int(journal_plan['score_pretraining_episodes']),remaining-1) if journal_plan else int(.7*remaining))
     policy_count=remaining-score_count
     cfg=config(args.horizon,math.ceil(score_count/batch),batch)
     cfg['bed_model']['init_seed']=args.seed
@@ -103,10 +104,16 @@ def run(args):
         policy.training_state,metrics,_=policy.train_step(policy.training_state)
         check_tree(metrics,'policy metrics')
         policy_spent+=n;step=int(policy.training_state.step)
+        if args.journal_plan:
+            from src.research.journal_scorebed_bridge import maybe_validate
+            if maybe_validate(policy.training_state.params,args.journal_plan,initialization+score_spent+policy_spent,step,start,force=policy_spent>=policy_count):break
         if step%50==0 or policy_spent==policy_count:
             row=dict(phase='policy',step=step,episodes=policy_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
             records.append(row);print('ScoreBED official',row,flush=True)
     params=policy.training_state.params
+    if args.journal_plan:
+        from src.research.journal_scorebed_bridge import restored_params
+        params=restored_params(params,args.journal_plan)
     check_tree(params,'policy parameters')
     arrays={}
     for section,leaves in params.items():
@@ -144,8 +151,8 @@ def run(args):
         adaptations='1million total primary episodes including normalization and initialization; one fresh policy; 70percent remaining budget score pretraining; smaller minibatches under capped budget; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions',
         design_bounds=[0.,target.end],bounded_mapping='chronological feasible-time sigmoid with minimum spacing',sir_configuration=sir,
         runtime=dict(jax=jax.__version__,devices=[str(d) for d in jax.devices()]))
-    if data['generated_training_trajectories']!=budget:raise AssertionError('Episode accounting mismatch')
+    if not args.journal_plan and data['generated_training_trajectories']!=budget:raise AssertionError('Episode accounting mismatch')
     (out/'scorebed_official_training.json').write_text(json.dumps(data,indent=2))
     print('SCOREBED_OFFICIAL_TRAINING_COMPLETE',flush=True)
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('--output',required=True);ap.add_argument('--budget',type=int,default=1000000);ap.add_argument('--horizon',type=int,default=30);ap.add_argument('--seed',type=int,default=101);ap.add_argument('--batch-size',type=int,default=64);ap.add_argument('--smoke',action='store_true');ap.add_argument('--sir-config',required=True);run(ap.parse_args())
+    ap=argparse.ArgumentParser();ap.add_argument('--output',required=True);ap.add_argument('--journal-plan');ap.add_argument('--budget',type=int,default=1000000);ap.add_argument('--horizon',type=int,default=30);ap.add_argument('--seed',type=int,default=101);ap.add_argument('--batch-size',type=int,default=64);ap.add_argument('--smoke',action='store_true');ap.add_argument('--sir-config',required=True);run(ap.parse_args())

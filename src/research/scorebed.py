@@ -53,13 +53,16 @@ def verify_bridge(policy,arrays):
         max_error=max(max_error,float(np.max(np.abs(a-expected[:,t]))))
     return max_error
 
-def train_scorebed(b,h,s,seed,directory,trajectory_budget=None):
+def train_scorebed(b,h,s,seed,directory,trajectory_budget=None,observer=None):
     if b.name!='location_finding':
         raise ValueError('Official ScoreBED integration supports location finding only')
     root=Path(__file__).resolve().parents[2];directory=Path(directory).resolve()
     python=root/'.venv_scorebed/bin/python'
     if not python.is_file():raise RuntimeError('Official ScoreBED isolated environment is missing')
     command=[str(python),str(root/'src/research/scorebed_worker.py'),'--output',str(directory),'--horizon',str(h),'--seed',str(seed),'--budget',str(int(trajectory_budget or 1000000)),'--batch-size',str(int(s.get('scorebed_batch_size',64)))]
+    if observer is not None:
+     from src.research.journal_scorebed_bridge import write_plan
+     command+=['--journal-plan',str(write_plan(observer,observer.validator.raw,h,s,directory))]
     if b.design_bounds is not None:command+=['--design-bounds',*map(str,b.design_bounds)]
     if s['updates']<=2:command.append('--smoke')
     env=dict(os.environ,XLA_PYTHON_CLIENT_PREALLOCATE='false',WANDB_MODE='disabled')
@@ -72,4 +75,7 @@ def train_scorebed(b,h,s,seed,directory,trajectory_budget=None):
     data=json.loads((directory/'scorebed_official_training.json').read_text())
     data.update(training_seconds=time.perf_counter()-start,policy_bridge_max_absolute_error=error,policy_parameters=sum(v.numel() for v in p.parameters()),reported_eig='shared held-out explicit-likelihood evaluator, never score network estimates')
     torch.save(dict(kind='scorebed',architecture=p.architecture,state_dict=p.state_dict(),horizon=h,upstream_commit=data['upstream_commit'],design_bounds=b.design_bounds),directory/'scorebed.pt')
+    if observer is not None:
+     from src.research.journal_scorebed_bridge import attach_summary
+     data.update(attach_summary(p,observer,directory))
     return p,data

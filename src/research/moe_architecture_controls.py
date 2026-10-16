@@ -140,7 +140,7 @@ def validation(b,p,h,seed,systems=128,contrasts=65536):
     p.routing_override=None;p.to(device).train()
     return dict(seed=seed,systems=systems,contrasts=contrasts,ceiling=math.log(contrasts+1),scores=reports)
 
-def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_checkpoint=None,time_budget_seconds=None):
+def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_checkpoint=None,time_budget_seconds=None,observer=None):
     if time_budget_seconds is not None:
         if method!='sum_single' or not initial_checkpoint:raise ValueError('Time budget requires explicit sum_single continuation')
         if not math.isfinite(time_budget_seconds) or time_budget_seconds<=0:raise ValueError('Time budget must be finite and positive')
@@ -150,6 +150,9 @@ def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_che
         p=make_policy(b,h,'dad',s['hidden'],s).train()
         p.control_method='dad';p.dense=True;p.routing_override=None
         p.architecture='original_location_dad_sum_encoder_linear_emitter'
+    elif method=='sum_single' and b.name=='sir_ode':
+        from src.research.sir_dad import SIRSumMLP
+        p=SIRSumMLP(h).train()
     elif method=='sum_single_193':
         from src.research.matched_sum_single import MatchedSumSingle193
         p=MatchedSumSingle193(h,s['hidden'],b.action_scale,b.obs_scale).train()
@@ -214,19 +217,21 @@ def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_che
         with trace_path.open('a') as f:f.write(json.dumps(row,allow_nan=False)+'\n')
         if step%s['validate_every']==0 or count==budget or time_finished:
             records.append(row);print(method,{k:v for k,v in row.items() if not k.endswith('_by_stage')},flush=True)
-        if budget>=100000 and count>=next_validation and method!='sum_single_193' and not initial_checkpoint:
+        if budget>=100000 and count>=next_validation and method!='sum_single_193' and not initial_checkpoint and observer is None:
             st=time.perf_counter();val=validation(b,p,h,10000120)
             validation_seconds+=time.perf_counter()-st
             val.update(primary_episodes=count,validation_seconds=time.perf_counter()-st)
             validation_records.append(val);print(method,'held-out learning curve',val,flush=True)
             next_validation+=budget/4
+        if observer is not None and observer.check(p,count,step,opt,scheduler,force=count>=budget):break
         if time_finished:break
     elapsed=time.perf_counter()-started-validation_seconds
     if time_budget_seconds is not None and elapsed<time_budget_seconds:
         raise RuntimeError('Episode safety cap reached before elapsed-time budget')
+    journal=observer.finish(p) if observer is not None else {}
     sparse=method=='attention_sparse_moe'
     p.eval()
-    torch.save(dict(kind=method,architecture=p.architecture,method=method,horizon=h,hidden=s['hidden'],
+    torch.save(dict(kind=getattr(p,'checkpoint_kind',method),architecture=p.architecture,method=method,horizon=h,hidden=s['hidden'],
                     gamma=None if p.dense else p.router.gamma,state_dict=p.state_dict()),directory/(method+'.pt'))
     return p,dict(training='pathwise_sPCE_architecture_control',time_budget_seconds=time_budget_seconds,time_budget_reached=(elapsed>=time_budget_seconds if time_budget_seconds is not None else None),episode_safety_cap=budget if time_budget_seconds is not None else None,stop_rule='first_completed_update_at_elapsed_budget' if time_budget_seconds is not None else 'primary_episodes',base_pretraining=base_provenance,additional_training_episodes=count,total_training_episodes=count+base_provenance.get('training_episodes',0),base_training_seconds=base_provenance.get('training_seconds',0.),training_seconds=time.perf_counter()-started-validation_seconds,
                   diagnostic_validation_seconds=validation_seconds,generated_training_trajectories=count,
@@ -239,5 +244,5 @@ def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_che
                   gradient_clip_mode=s.get('moe_gradient_clip_mode','global'),
                   parameter_groups={k:sum(v.numel() for v in params) for k,params in groups.items()},
                   matched_target_parameters=getattr(p,'matched_target_parameters',None),
-                  checkpoint_selection='final',architecture=p.architecture,
-                  routing_algorithm='unchanged_DSelect1' if sparse else 'dense_softmax' if routes else 'none')
+                  checkpoint_selection=journal.pop('checkpoint_selection','final'),architecture=p.architecture,
+                  routing_algorithm='unchanged_DSelect1' if sparse else 'dense_softmax' if routes else 'none',**journal)
