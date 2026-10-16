@@ -120,10 +120,10 @@ class SIR(Benchmark):
         return self.inverse(z)
 
     def transform(self, theta):
-        return (theta.log() - self.log_mean) / self.log_std
+        return (theta.log() - self.log_mean.to(theta)) / self.log_std
 
     def inverse(self, z):
-        return (z*self.log_std + self.log_mean).exp()
+        return (z*self.log_std + self.log_mean.to(z)).exp()
 
     def initial(self, shape):
         out = torch.zeros(*shape, 4, dtype=DTYPE)

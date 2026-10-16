@@ -218,6 +218,7 @@ def main(argv=None):
         flags=['--'+key.replace('_','-')]
         if '_' in key:flags.append('--'+key)
         parser.add_argument(*flags,dest=key,type=type(default),default=None)
+    parser.add_argument('--journal-phase',choices=['development','confirmation'],default='development')
     parser.add_argument('--journal',action='store_true',help='Enforce frozen aligned location publication protocol')
     parser.add_argument('--pilot',action='store_true',help='Enforce aligned settings for one train101/eval1001 pilot')
     args=parser.parse_args(argv)
@@ -233,6 +234,9 @@ def main(argv=None):
     raw=yaml.safe_load(config_path.read_text())
     raw['_config_path']=str(config_path.resolve())
     raw.setdefault('research',{})
+    if args.journal and raw['research'].get('journal_protocol',{}).get('version')=='validation_convergence_v1':
+        from src.research.journal_run import main as journal_main
+        return journal_main(args,raw,root)
     paper = bool(raw['research'].get('paper_protocol'))
     journal_cfg=raw['research'].get('journal_protocol',{})
     default_train_seed=journal_cfg.get('training_seeds',[55101])[0] if args.journal and not args.smoke else 101

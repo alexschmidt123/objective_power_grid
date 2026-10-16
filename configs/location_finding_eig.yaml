@@ -97,8 +97,8 @@ research:
     variant: vsOED-G-I
     updates: 980
     paper_reference_updates: 10001
-    budget_note: 20000 warmup plus 980*1000 new episodes equals 1000000; bounded
-      designs with published incremental discount0.9.
+    budget_note: 20000 warmup plus 980*1000 new episodes equals 1000000; bounded designs
+      with published incremental discount0.9.
     new_trajectories: 1000
     replay_batch: 10000
     initial_replay: 20000
@@ -134,6 +134,110 @@ research:
       map
     design_space: common [-4,4]^2 for every method
   journal_protocol:
+    version: validation_convergence_v1
+    status: development_calibration_not_frozen
+    comparison: validation_converged_policy_EIG
+    budget_unit: method_specific_resource_safety_caps
+    checkpoint_selection: best_predeclared_validation_EIG
+    claim_limit: No confirmation until readiness, precision and settings are frozen;
+      historical results are separate.
+    development_training_seeds:
+    - 201
+    training_seeds:
+    - 70101
+    - 70102
+    - 70103
+    - 70104
+    - 70105
+    evaluation_seeds:
+    - 8831001
+    previously_used_evaluation_seeds:
+    - 1001
+    validation:
+      seed: 771001
+      systems: 512
+      contrasts: 1000000
+      batch_size: 16
+      chunk: 16384
+    stopping_rule:
+      minimum_episodes: 500000
+      minimum_checkpoints: 8
+      validation_every_episodes: 125000
+      patience: 6
+      minimum_improvement: 0.01
+      noise_multiplier: 1.96
+      maximum_episodes: 10000000
+      maximum_training_seconds: 7200.0
+    common_pathwise_settings:
+      hidden: 64
+      contrasts: 1024
+      moe_gradient_clip_mode: component
+      moe_router_warmup_fraction: 0.3
+      moe_router_finish_fraction: 0.95
+      strategy_routing_mode: learned_switch
+      strategy_initial_reroute_probability: 0.99
+    method_settings:
+      moe:
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        router_schedule_episodes: 1000000
+      resmoe:
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        router_schedule_episodes: 1000000
+      switchmoe:
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        router_schedule_episodes: 1000000
+      switchresmoe:
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        router_schedule_episodes: 1000000
+      sum_single:
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        router_schedule_episodes: 1000000
+    method_stopping:
+      moe:
+        minimum_episodes: 1000000
+      resmoe:
+        minimum_episodes: 1000000
+      switchmoe:
+        minimum_episodes: 1000000
+      switchresmoe:
+        minimum_episodes: 1000000
+    final_evaluation:
+      systems: 2000
+      contrasts: 1000000
+      resolution_status: established_reference_but_validation_sensitivity_required
+      seed: 8831001
+    residual_base:
+      method: sum_single
+      seed_specific: true
+      share_within_seed: true
+      initially_frozen: true
+      total_cost_includes_base: true
+    independent_seeds_required: 5
+    development_resource_gate: bounded cost probes only until measured estimates and
+      total resource budget recorded
+    native_fidelity_required: true
+  rl_execution_limit_seconds: 2400
+  legacy_fixed_budget_protocol:
     version: bounded_primary_episode_pilot_v4
     comparison: equal_primary_training_episode_budget
     budget_unit: primary_episodes
@@ -170,4 +274,3 @@ research:
     random_design_distribution: truncated_standard_normal
     training_episode_cap: 1000000
     full_study_training_episode_cap: 10000000
-  rl_execution_limit_seconds: 2400

@@ -39,11 +39,14 @@ def verify_bridge(p,arrays):
   max_error=max(max_error,float(np.abs(actual-expected).max()))
  return max_error
 
-def train_scorebed(b,h,s,seed,directory,trajectory_budget=None):
+def train_scorebed(b,h,s,seed,directory,trajectory_budget=None,observer=None):
  root=Path(__file__).resolve().parents[2];directory=Path(directory).resolve()
  config=dict(population=b.population,i0=b.i0,t_end=b.end,min_spacing=b.gap,integration_steps_per_stage=b.steps,beta_mean=float(b.log_mean[0].exp()),gamma_mean=float(b.log_mean[1].exp()),log_std=b.log_std,sigma=b.sigma)
  config_path=directory/'scorebed_sir_configuration.json';config_path.write_text(json.dumps(config,indent=2))
  command=[str(root/'.venv_scorebed/bin/python'),str(root/'src/research/sir_scorebed_worker.py'),'--output',str(directory),'--horizon',str(h),'--seed',str(seed),'--budget',str(int(trajectory_budget or 1000000)),'--batch-size',str(s.get('scorebed_batch_size',64)),'--sir-config',str(config_path)]
+ if observer is not None:
+  from src.research.journal_scorebed_bridge import write_plan
+  command+=['--journal-plan',str(write_plan(observer,observer.validator.raw,h,s,directory))]
  env=dict(os.environ,XLA_PYTHON_CLIENT_PREALLOCATE='false',WANDB_MODE='disabled')
  if s['updates']<=2:command+=['--smoke'];env['JAX_PLATFORMS']='cpu'
  start=time.perf_counter();subprocess.run(command,cwd=root,env=env,check=True)
@@ -53,4 +56,7 @@ def train_scorebed(b,h,s,seed,directory,trajectory_budget=None):
  data=json.loads((directory/'scorebed_official_training.json').read_text())
  data.update(training_seconds=time.perf_counter()-start,policy_bridge_max_absolute_error=error,policy_parameters=sum(p.numel() for p in policy.parameters()),implementation='Official ScoreBED method with independently verified deterministic SIR ODE adapter; not original published SIR results')
  torch.save(dict(kind='scorebed',architecture=policy.architecture,horizon=h,state_dict=policy.state_dict(),sir_configuration=config),directory/'scorebed.pt')
+ if observer is not None:
+  from src.research.journal_scorebed_bridge import attach_summary
+  data.update(attach_summary(policy,observer,directory))
  return policy,data

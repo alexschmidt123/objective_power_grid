@@ -104,16 +104,19 @@ class BasePolicy(nn.Module):
     @classmethod
     def from_checkpoint(cls,path,benchmark,horizon,finetune=False):
         path=Path(path).resolve();saved=torch.load(path,map_location='cpu',weights_only=False)
-        if saved.get('kind')!='sum_single' or saved['horizon']!=horizon:
-            raise ValueError('Base requires a compatible complete sum_single checkpoint')
-        if benchmark.name!='location_finding':
-            raise ValueError('No pretrained SIR DAD-MLP base registered; provide a validated benchmark-specific base')
+        if saved.get('kind') not in {'sum_single','sir_sum_single_v1'} or saved['horizon']!=horizon:
+            raise ValueError('Base requires a compatible complete single-policy checkpoint')
         config=json.loads((path.parent.parent/'run_config.json').read_text())
         from src.research.benchmarks import make_benchmark
         source=make_benchmark(config['benchmark'])
-        if source.design_bounds!=benchmark.design_bounds or source.sigma!=benchmark.sigma:
-            raise ValueError('Base benchmark bounds/noise do not match')
-        p=ArchitectureControl('sum_single',horizon,saved['hidden'],source.action_scale,source.obs_scale)
+        if benchmark_signature(source)!=benchmark_signature(benchmark):raise ValueError('Base benchmark physics/prior/noise do not match')
+        if saved['kind']=='sir_sum_single_v1':
+            if benchmark.name!='sir_ode':raise ValueError('SIR base requires SIR benchmark')
+            from src.research.sir_dad import SIRSumMLP
+            p=SIRSumMLP(horizon)
+        else:
+            if benchmark.name!='location_finding':raise ValueError('Location base cannot be used for SIR')
+            p=ArchitectureControl('sum_single',horizon,saved['hidden'],source.action_scale,source.obs_scale)
         p.load_state_dict(saved['state_dict'],strict=True)
         record=json.loads(path.with_name('sum_single_training.json').read_text())
         return cls(p,dict(pretrained=True,path=str(path),sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
@@ -133,13 +136,14 @@ class _ResidualCore(nn.Module):
         self.router=DSelect1Router(193,1).double()
         self.experts=nn.ModuleList([ResidualExpert(193,self.action_dim,initial_std) for _ in range(4)])
         # Share the complete base encoder, without registering a second copy.
-        self.extra_encoder=None if getattr(base.policy,'control_method',None)=='sum_single' else HistoryEncoder(self.action_dim,self.obs_dim,horizon)
+        self.extra_encoder=None if getattr(base.policy,'control_method',None) in {'sum_single','sir_sum_single'} else HistoryEncoder(self.action_dim,self.obs_dim,horizon)
         self.manager=StrategyManager(193,legacy_mode(mode),initial_probability) if switching else None
         if self.manager is not None:self.manager.available_strategies=EXPERT_IDS
         self.routing_override=None;self.last_route=None
         self.double()
     def context(self,features):
         p=self.base.policy
+        if hasattr(p,'residual_context'):return p.residual_context(features)[:,None].expand(-1,4,-1)
         if self.extra_encoder is not None:return self.extra_encoder(features)
         slots=features[:,1:].reshape(len(features),self.horizon,self.action_dim+self.obs_dim+1)
         raw=torch.cat((slots[...,:self.action_dim]*p.action_scale,slots[...,self.action_dim:-1]*p.obs_scale),-1)
@@ -250,8 +254,11 @@ def load_policy(path,benchmark,*,mode='learned_switch',relaxed=False):
         if saved.get('base_provenance'):
             # Reconstruct the complete native base from checkpoint-contained weights;
             # no dependency on the original base file after training.
-            if benchmark.name!='location_finding':raise ValueError('SIR base serialization requires a registered native base type')
-            base=BasePolicy(ArchitectureControl('sum_single',saved['horizon'],64,benchmark.action_scale,benchmark.obs_scale),saved['base_provenance'],saved['config']['base_finetune'])
+            if benchmark.name=='sir_ode':
+                from src.research.sir_dad import SIRSumMLP
+                native=SIRSumMLP(saved['horizon'])
+            else:native=ArchitectureControl('sum_single',saved['horizon'],64,benchmark.action_scale,benchmark.obs_scale)
+            base=BasePolicy(native,saved['base_provenance'],saved['config']['base_finetune'])
         p=MoESBOEDPolicy(saved['variant'],benchmark,saved['horizon'],base=base,**saved['config'])
         p.load_state_dict(saved['state_dict'],strict=True)
     elif saved.get('kind')=='strategy_moe_sboed':
