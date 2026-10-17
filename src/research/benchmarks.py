@@ -104,6 +104,9 @@ class SIR(Benchmark):
         self.end = float(cfg.get('t_end', 100.))
         self.gap = float(cfg.get('min_spacing', .1))
         self.steps = int(cfg.get('integration_steps_per_stage', 512))
+        self.execution_backend = cfg.get('execution_backend', 'eager')
+        if self.execution_backend not in {'eager', 'compiled_rk4', 'fused_rk4'}:
+            raise ValueError('Unknown SIR execution backend')
         self.log_mean = torch.tensor([math.log(cfg.get('beta_mean', .5)),
                                       math.log(cfg.get('gamma_mean', .1))], dtype=DTYPE)
         self.log_std = float(cfg.get('log_std', .5))
@@ -150,6 +153,13 @@ class SIR(Benchmark):
                                torch.ceil(duration.detach()*theta.detach().sum(-1)/.2).long())
         if torch.any(duration < 0) or int(counts.max()) > 20000:
             raise ValueError('SIR invalid time or excessively stiff prior draw')
+        if self.execution_backend == 'fused_rk4' and theta.is_cuda:
+            from src.research.sir_fused import fused_rk4
+            current = fused_rk4(theta,state[..., :3],duration,counts,
+                                self.population,int(counts.max()))
+            if not torch.isfinite(current).all() or torch.any(current < -1e-7):
+                raise FloatingPointError('SIR integration failed; particles are not dropped')
+            return current[..., 1:2], torch.cat((current,action),-1)
         dt = duration / counts
         current = state[..., :3]
         beta, gamma = theta[..., 0], theta[..., 1]
@@ -170,6 +180,11 @@ class SIR(Benchmark):
                     d = rhs(y + step*c)
                     y = y + step*(a+2*b+2*c+d)/6
                 return y
+            if self.execution_backend == 'compiled_rk4':
+                from src.research.sir_execution import compiled_block
+                def block(y, interval, start=start, stop=stop):
+                    return compiled_block(y, interval, counts, beta, gamma,
+                                          self.population, start, stop)
             if torch.is_grad_enabled() and (current.requires_grad or dt.requires_grad):
                 from torch.utils.checkpoint import checkpoint
                 current = checkpoint(block,current,dt,use_reentrant=False)

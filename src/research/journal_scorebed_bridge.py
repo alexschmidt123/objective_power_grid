@@ -56,7 +56,7 @@ def score(args):
   else:
    from src.research.scorebed import OfficialScorePolicy
    p=OfficialScorePolicy(arrays,plan['horizon'],b.action_scale,b.obs_scale)
-  v=plan['validation'];validator=CommonValidation(plan['raw'],plan['horizon'],v['seed'],v['systems'],v['contrasts'],v['batch_size'],v['chunk'])
+  v=plan['validation'];validator=CommonValidation(plan['raw'],plan['horizon'],v['seed'],v['systems'],v['contrasts'],v['batch_size'],v['chunk'],device=v.get('device','cpu'))
   values,cost=validator(p)
  rule=StoppingRule(**plan['rule']);plateau=Plateau(rule);plateau.records=state['records'];plateau.best=state.get('best');plateau.anchor=None if state.get('anchor') is None else np.array(state['anchor']);plateau.stale=state.get('stale',0)
  row=plateau.update(values,args.episodes,args.elapsed);row.update(update=args.update,validation=cost)
@@ -70,7 +70,7 @@ def write_plan(observer,raw,h,s,directory):
  from dataclasses import asdict
  import sys
  directory=Path(directory);path=directory/'scorebed_journal_plan.json';v=observer.validator
- plan=dict(selection_mode=observer.selection_mode,root=str(Path(__file__).resolve().parents[2]),torch_python=sys.executable,raw=raw,horizon=h,threads=s.get('threads',4),rule=asdict(observer.rule),validation=dict(seed=v.seed,systems=v.systems,contrasts=v.contrasts,batch_size=v.batch,chunk=v.chunk),score_pretraining_episodes=s.get('scorebed_pretraining_episodes',700000))
+ plan=dict(selection_mode=observer.selection_mode,root=str(Path(__file__).resolve().parents[2]),torch_python=sys.executable,raw=raw,horizon=h,threads=s.get('threads',4),rule=asdict(observer.rule),validation=dict(seed=v.seed,systems=v.systems,contrasts=v.contrasts,batch_size=v.batch,chunk=v.chunk,device=v.device),score_pretraining_episodes=s.get('scorebed_pretraining_episodes',700000))
  path.write_text(json.dumps(plan,indent=2)+'\n');return path
 
 def attach_summary(policy,observer,directory):

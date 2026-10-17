@@ -57,10 +57,13 @@ def apply_selection_mode(row,episodes,rule,selection_mode):
 
 class CommonValidation:
     """Uses existing streamed explicit-likelihood scorers and fixed paired draws."""
-    def __init__(self,raw,horizon,seed,systems,contrasts,batch=16,chunk=16384):
+    def __init__(self,raw,horizon,seed,systems,contrasts,batch=16,chunk=16384,device='cpu'):
         if seed==8831001:raise ValueError('Reserved final evaluation seed cannot be used for validation')
         from src.research.benchmarks import make_benchmark
         self.raw=copy.deepcopy(raw);self.horizon=horizon;self.seed=seed;self.systems=systems;self.contrasts=contrasts;self.batch=batch;self.chunk=chunk
+        self.device=str(device)
+        if self.device.startswith('cuda') and not torch.cuda.is_available():
+            raise ValueError('CUDA validation requested without a CUDA device')
         with torch.device('cpu'):
             b=make_benchmark(raw);g=torch.Generator().manual_seed(seed)
             self.truth=b.sample((systems,),g);self.noise=torch.randn(systems,horizon,b.obs_dim,generator=g,dtype=torch.float64);self.bank=b.sample((contrasts,),g)
@@ -72,9 +75,9 @@ class CommonValidation:
         from src.research.location_evaluation import contrast_scores as location_scores
         from src.research.sir_evaluation import contrast_scores as sir_scores
         started=time.perf_counter()
-        with torch.device('cpu'):
+        with torch.device(self.device):
             buffer=io.BytesIO();torch.save(policy,buffer);buffer.seek(0)
-            p=torch.load(buffer,map_location='cpu',weights_only=False).eval();b=make_benchmark(self.raw)
+            p=torch.load(buffer,map_location=self.device,weights_only=False).eval();b=make_benchmark(self.raw)
             if hasattr(p,'set_routing'):p.set_routing(getattr(getattr(p,'manager',None),'mode','learned_switch'),False)
             if hasattr(p,'stochastic'):p.stochastic=False
             bank=self.bank[:contrasts] if contrasts is not None else self.bank
@@ -82,10 +85,10 @@ class CommonValidation:
             scorer=sir_scores if b.name=='sir_ode' else location_scores
             for start in range(0,self.systems,self.batch):
                 n=min(self.batch,self.systems-start)
-                r=rollout(b,p,self.horizon,n,self.seed+start*97451,0,truth=self.truth[start:start+n],noise=self.noise[start:start+n],method='rl_sboed' if getattr(p,'kind',None)=='rl_sboed' else None)
+                r=rollout(b,p,self.horizon,n,self.seed+start*97451,0,truth=self.truth[start:start+n].to(self.device),noise=self.noise[start:start+n].to(self.device),method='rl_sboed' if getattr(p,'kind',None)=='rl_sboed' else None)
                 info,_=scorer(b,r,bank,self.chunk);values.extend(info[:,-1].tolist())
             return np.asarray(values),dict(seed=self.seed,systems=self.systems,contrasts=len(bank),paired_draws_sha256=self.identity,
-                seconds=time.perf_counter()-started,forward_particle_stages=b.calls-calls,mode='native_stochastic_policy' if getattr(p,'kind',None)=='rl_sboed' else 'hard_deployed_policy',secondary_parameter_inference=False)
+                seconds=time.perf_counter()-started,forward_particle_stages=b.calls-calls,device=self.device,mode='native_stochastic_policy' if getattr(p,'kind',None)=='rl_sboed' else 'hard_deployed_policy',secondary_parameter_inference=False)
 
 class ValidationObserver:
     def __init__(self,validator,rule,directory,method,selection_mode="best_validation"):

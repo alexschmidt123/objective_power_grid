@@ -43,7 +43,9 @@ def main(args,raw,root):
     metadata=dict(protocol='journal_validation_convergence_v1',phase=phase,smoke=args.smoke,workability_only=args.smoke,train_seed=seed,eval_seeds=evaluation_seeds,horizon=h,methods=methods,settings=settings,benchmark=raw,hardware=hardware_info(),checkpoint_selection='final_predeclared_fixed_budget' if protocol.get('checkpoint_selection_mode')=='final_fixed_budget' else 'best_predeclared_validation_EIG',untouched_final_evaluation=False,parameter_inference_enabled=False)
     write_json(out/'run_config.json',metadata);freeze_source(root,out)
     try:
-        validator=CommonValidation(raw,h,validation_cfg['seed'],validation_cfg['systems'],validation_cfg['contrasts'],validation_cfg['batch_size'],validation_cfg['chunk'])
+        validation_device=validation_cfg.get('device','cpu')
+        if validation_device=='cuda_if_available':validation_device='cuda:0' if torch.cuda.is_available() else 'cpu'
+        validator=CommonValidation(raw,h,validation_cfg['seed'],validation_cfg['systems'],validation_cfg['contrasts'],validation_cfg['batch_size'],validation_cfg['chunk'],device=validation_device)
         write_json(out/'validation_draws.json',dict(seed=validator.seed,sha256=validator.identity,systems=validator.systems,contrasts=validator.contrasts))
         summaries=[];results={}
         for method in methods:
