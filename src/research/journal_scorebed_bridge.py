@@ -10,13 +10,24 @@ import numpy as np
 def export_arrays(params):
  return {f'{section}/{layer}/{name}':np.asarray(value) for section,layers in params.items() for layer,values in layers.items() for name,value in values.items()}
 
+def export_candidate(params,plan):
+ """Preserve benchmark feasibility metadata in native validation IPC."""
+ arrays=export_arrays(params)
+ bounds=plan['raw'].get('location_finding',{}).get('design_bounds')
+ if bounds is not None:
+  bounds=np.asarray(bounds,dtype=float)
+  if bounds.shape!=(2,) or not np.isfinite(bounds).all() or bounds[0]>=bounds[1]:
+   raise ValueError('Invalid location design bounds')
+  arrays['common_design_bounds']=bounds
+ return arrays
+
 def maybe_validate(params,plan_path,episodes,update,started,force=False):
  if not plan_path:return False
  plan_path=Path(plan_path);plan=json.loads(plan_path.read_text());out=plan_path.parent;progress=out/'scorebed_journal_progress.json'
  previous=json.loads(progress.read_text()) if progress.exists() else dict(records=[],validation_seconds=0.,next_check=plan['rule']['validation_every_episodes'])
  elapsed=time.perf_counter()-started-previous['validation_seconds']
  if not (force or episodes>=previous['next_check'] or elapsed>=plan['rule']['maximum_training_seconds']):return False
- candidate=out/'scorebed_journal_candidate.npz';np.savez(candidate,**export_arrays(params))
+ candidate=out/'scorebed_journal_candidate.npz';np.savez(candidate,**export_candidate(params,plan))
  command=[plan['torch_python'],'-m','src.research.journal_scorebed_bridge','--score','--plan',str(plan_path),'--candidate',str(candidate),'--episodes',str(episodes),'--update',str(update),'--elapsed',str(elapsed)]
  before=time.perf_counter();subprocess.run(command,cwd=plan['root'],check=True);wall=time.perf_counter()-before
  state=json.loads(progress.read_text());state['validation_seconds']=previous['validation_seconds']+wall

@@ -1,0 +1,31 @@
+{
+  "user_instruction": "Reset code and rerun only MoE103,SwitchMoE103,ScoreBED102",
+  "tasks": [
+    {
+      "method": "moe",
+      "seed": 103
+    },
+    {
+      "method": "switchmoe",
+      "seed": 103
+    },
+    {
+      "method": "scorebed",
+      "seed": 102
+    }
+  ],
+  "training_settings": "Original frozen1M campaign; gammafloor0.001 with30%/95% schedule; no candidate gamma or other optimization changes",
+  "scorebed_exception": "Validated bounds metadata repair only; native score/policy training unchanged",
+  "primary_training_episodes_per_model": 1000000,
+  "evaluation": {
+    "systems": 2000,
+    "contrasts": 1000000,
+    "seed": 1001
+  },
+  "selection": "final_budget",
+  "original_results_preserved": true,
+  "no_replacement_without_reporting": true,
+  "only_three_runs": true,
+  "sir_deferred": true,
+  "git_commit": "6bc64e72be7b04a8b5992c23c04e0e5efcb5acad"
+}

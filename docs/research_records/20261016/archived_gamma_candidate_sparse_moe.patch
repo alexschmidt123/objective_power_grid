@@ -1,0 +1,30 @@
+--- /home/grads/g/g.lin/Documents/objective_power_grid/src/research/sparse_moe.py	2026-10-14 16:37:10.655999513 -0500
++++ /home/grads/g/g.lin/Documents/objective_power_grid/experiments/10162026/10162026_location_stability_correction/source/src/research/sparse_moe.py	2026-10-16 16:04:07.007215089 -0500
+@@ -116,14 +116,15 @@
+         return self.head(self.context(features).flatten(1))
+ 
+ 
+-def routing_gamma(fraction, warmup=0., finish=.8):
++def routing_gamma(fraction, warmup=0., finish=.8, minimum=.001):
+     """Preserve legacy homotopy by default; delayed cosine schedule is optional."""
+     import math
+     if not 0 <= warmup < finish <= 1:raise ValueError('Invalid routing schedule')
++    if not 0 < minimum <= 1:raise ValueError('Invalid minimum gamma')
+     if warmup==0. and finish==.8:
+-        return max(.001,(1-min(fraction/.8,1))**2)
++        return max(minimum,(1-min(fraction/.8,1))**2)
+     progress=min(max((fraction-warmup)/(finish-warmup),0.),1.)
+-    return .001+.999*.5*(1+math.cos(math.pi*progress))
++    return minimum+(1-minimum)*.5*(1+math.cos(math.pi*progress))
+ 
+ 
+ def stabilize_gradients(policy, groups, mode='global', limit=5.):
+@@ -159,7 +160,7 @@
+         n=min(s['batch_size'],budget-count);fraction=count/budget
+         # Smooth homotopy to binary DSelect routing; terminal phase uses sparse
+         # selectors. The sPCE objective remains the information criterion.
+-        p.router.gamma=routing_gamma(fraction,s.get('moe_router_warmup_fraction',0.),s.get('moe_router_finish_fraction',.8))
++        p.router.gamma=routing_gamma(fraction,s.get('moe_router_warmup_fraction',0.),s.get('moe_router_finish_fraction',.8),s.get('moe_router_minimum_gamma',.001))
+         penalties=[];routes=[]
+         def capture(module,inputs,output):
+             penalties.append(module.regularizers())

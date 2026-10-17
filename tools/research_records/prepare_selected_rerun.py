@@ -1,0 +1,25 @@
+import pathlib,json,shutil,hashlib,subprocess,os,yaml,time
+R=pathlib.Path(os.environ.get('MOE_PROJECT_ROOT',pathlib.Path(__file__).resolve().parents[2]));C=R/'experiments/10162026/10162026_selected_seed_original_rerun_v1';S=C/'source';OLD=R/'experiments/10152026/10152026_journal_five_seed_fixed_budget'
+if C.exists():raise RuntimeError('Existing campaign preserved')
+C.mkdir(parents=True);S.mkdir()
+for n in ['src','tools','configs','scripts']:shutil.copytree(R/n,S/n,ignore=shutil.ignore_patterns('__pycache__','*.pyc','.git'))
+for n in ['run.sh','sweep_run.sh','requirements.txt']:shutil.copy2(R/n,S/n)
+(S/'.venv_scorebed').symlink_to(R/'.venv_scorebed',target_is_directory=True)
+# Original code never contained candidate gamma changes. Keep metadata bug repair only.
+fixed=R/'src/research/journal_scorebed_bridge.py';shutil.copy2(fixed,S/'src/research/journal_scorebed_bridge.py')
+assert 'minimum=.001'not in(S/'src/research/sparse_moe.py').read_text()
+assert 'moe_router_minimum_gamma'not in(S/'src/research/family_training.py').read_text()
+raw=yaml.safe_load((R/'configs/location_selected_seed_repeats.yaml').read_text());raw['research']['journal_protocol']['status']='requested_selected_seed_original_settings_repeat';raw['research']['journal_protocol']['evaluation_seeds']=[1001];(C/'location_original_settings.yaml').write_text(yaml.safe_dump(raw,sort_keys=False));(C/'run_selected.py').write_text(pathlib.Path(__file__).with_name('selected_seed_rerun.py').read_text())
+proto=dict(user_instruction='Reset code and rerun only MoE103,SwitchMoE103,ScoreBED102',tasks=[dict(method=m,seed=s)for m,s in [('moe',103),('switchmoe',103),('scorebed',102)]],training_settings='Original frozen1M campaign; gammafloor0.001 with30%/95% schedule; no candidate gamma or other optimization changes',scorebed_exception='Validated bounds metadata repair only; native score/policy training unchanged',primary_training_episodes_per_model=1000000,evaluation=dict(systems=2000,contrasts=1000000,seed=1001),selection='final_budget',original_results_preserved=True,no_replacement_without_reporting=True,only_three_runs=True,sir_deferred=True,git_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip())
+(C/'protocol.json').write_text(json.dumps(proto,indent=2));(C/'protocol.md').write_text('''# Selected-seed original-setting reruns
+
+Exactly MoE103,SwitchMoE103,ScoreBED102, from scratch,1M total primary episodes each. Original frozen architecture, training objective, optimization and gamma0.001/30%/95% restored by copying original source. Only ScoreBED diagnostic validation bounds metadata fix retained. Existing main source, historical checkpoints and candidate negative results are not overwritten. Common2000/L1M/1001 evaluator, final-budget checkpoints, paired cases/bank hashes checked. No additional seeds, ScoreBED training modifications, best-repeat selection, or SIR auto-start. Selected-seed repeats are diagnostic and do not establish reduced across-seed variance.
+''')
+files=list((S/'src').rglob('*.py'))+[S/'run.sh',S/'sweep_run.sh']+list((S/'configs').rglob('*.yaml'));manifest={str(p.relative_to(S)):hashlib.sha256(p.read_bytes()).hexdigest()for p in files};(C/'source_manifest.json').write_text(json.dumps(dict(sha256=manifest),indent=2));(C/'campaign_seal.json').write_text(json.dumps({n:hashlib.sha256((C/n).read_bytes()).hexdigest()for n in ['protocol.json','protocol.md','location_original_settings.yaml','run_selected.py']},indent=2))
+# Regression test focuses on the unchanged family/validation machinery.
+log=(C/'correctness_tests.log').open('w');subprocess.run(['/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/bin/python3','-m','pytest','-q','tools/tests/test_moe_family.py','tools/tests/test_journal_validation.py'],cwd=S,env=dict(os.environ,CUDA_VISIBLE_DEVICES=''),stdout=log,stderr=subprocess.STDOUT,check=True);log.close()
+with (C/'coordinator.log').open('w')as log:
+ p=subprocess.Popen(['/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/bin/python3',str(C/'run_selected.py')],cwd=S,env=dict(os.environ,OMP_NUM_THREADS='2',MKL_NUM_THREADS='2'),stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+(C/'coordinator_pid.json').write_text(json.dumps(dict(pid=p.pid)));a=R/'AGENTS.md';a.write_text(f'''## Latest authorization: exactly three ORIGINAL-setting repeats
+
+User restarted work after termination: reset code; run ONLY moe103,switchmoe103,scorebed102. New campaign {C.relative_to(R)}; new isolatedsource copied original, terminalgamma0.001 restored, no gamma0.01 candidate. ScoreBED validated bounds metadata fix retained only, no training adjustment. 1M episodes each,2000/L1M/1001,finalbudget, originals/candidate negative preserved. Coordinator PID{p.pid}; live status.json. Runs sequential in thatorder; no additional seeds or autoSIR. Do not restart terminated broad campaigns. Selected-seed results diagnostic; neverreplace originaltable/select favorable repeat. Source/config/runner sealed, tests logfile.\n\n'''+a.read_text());print('STARTED',p.pid,C)

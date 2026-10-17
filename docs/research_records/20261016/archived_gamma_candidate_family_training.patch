@@ -1,0 +1,19 @@
+--- /home/grads/g/g.lin/Documents/objective_power_grid/src/research/family_training.py	2026-10-15 16:20:36.066361320 -0500
++++ /home/grads/g/g.lin/Documents/objective_power_grid/experiments/10162026/10162026_location_stability_correction/source/src/research/family_training.py	2026-10-16 16:04:07.007215089 -0500
+@@ -29,7 +29,7 @@
+         n=min(s['batch_size'],budget-count);fraction=min(count/s.get('router_schedule_episodes',budget),1.)
+         # Smooth homotopy to binary DSelect routing; terminal phase uses sparse
+         # selectors. The sPCE objective remains the information criterion.
+-        p.router.gamma=routing_gamma(fraction,s.get('moe_router_warmup_fraction',0.),s.get('moe_router_finish_fraction',.8))
++        p.router.gamma=routing_gamma(fraction,s.get('moe_router_warmup_fraction',0.),s.get('moe_router_finish_fraction',.8),s.get('moe_router_minimum_gamma',.001))
+         penalties=[];routes=[];strategies=[]
+         def capture(module,inputs,output):
+             penalties.append(module.regularizers())
+@@ -90,6 +90,7 @@
+         history_encoder_revision=2,encoder_input_dim=193,base_input_dim=pre.get('input_dim'),
+         routing_warmup_fraction=s.get('moe_router_warmup_fraction',.3),
+         routing_finish_fraction=s.get('moe_router_finish_fraction',.95),
++        routing_minimum_gamma=s.get('moe_router_minimum_gamma',.001),
+         switching_schedule='none; preserves existing sigmoid gate',
+         settings=p.config,checkpoint_selection=journal.pop('checkpoint_selection','final'),training_objective='full_horizon_sPCE',
+         contrasts=contrasts,expert_ids=['E1','E2','E3','E4'],
