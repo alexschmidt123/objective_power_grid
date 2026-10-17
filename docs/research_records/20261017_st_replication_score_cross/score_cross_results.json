@@ -1,0 +1,107 @@
+{
+  "status": "complete",
+  "records": [
+    {
+      "score_bundle_seed": 102,
+      "policy_training_seed": 102,
+      "eig": 7.18907179517535,
+      "mc_se": 0.0622569183251182,
+      "new_generated_episodes": 297006,
+      "training_seconds": 37.432582535082474,
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10162026/10162026_location_root_cause_v4/source/experiments/10162026/10162026_root_cause_v4/score_model102_policy102",
+      "historical_control": false,
+      "native_training_allocation_episodes": 1000000,
+      "additional_reused_policy_normalization_episodes": 0,
+      "total_distinct_training_data_dependency_episodes": 1000000,
+      "equal_1M_primary_comparison_eligible": true,
+      "budget_scope": "Native1M control",
+      "complete_model_episodes": 1000000,
+      "policy_target_normalization_is_inert": true
+    },
+    {
+      "score_bundle_seed": 103,
+      "policy_training_seed": 102,
+      "eig": 10.346294708353389,
+      "mc_se": 0.05156589487129709,
+      "new_generated_episodes": 297006,
+      "training_seconds": 37.6885960851796,
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10162026/10162026_location_root_cause_v4/source/experiments/10162026/10162026_root_cause_v4/score_model103_policy102",
+      "historical_control": false,
+      "native_training_allocation_episodes": 1000000,
+      "additional_reused_policy_normalization_episodes": 0,
+      "total_distinct_training_data_dependency_episodes": 1000000,
+      "equal_1M_primary_comparison_eligible": false,
+      "budget_scope": "1M matched frozen-score causal diagnostic; not primary seed replacement",
+      "complete_model_episodes": 1000000,
+      "policy_target_normalization_is_inert": true
+    },
+    {
+      "score_bundle_seed": 103,
+      "policy_training_seed": 103,
+      "eig": 10.131358266961454,
+      "mc_se": 0.05284794089170628,
+      "new_generated_episodes": null,
+      "training_seconds": 211.86712071718648,
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_journal_five_seed_fixed_budget/location/seed103/scorebed",
+      "historical_control": true,
+      "native_training_allocation_episodes": 1000000,
+      "additional_reused_policy_normalization_episodes": 0,
+      "total_distinct_training_data_dependency_episodes": 1000000,
+      "equal_1M_primary_comparison_eligible": true,
+      "budget_scope": "Native1M control",
+      "complete_model_episodes": 1000000,
+      "policy_target_normalization_is_inert": true
+    },
+    {
+      "score_bundle_seed": 102,
+      "policy_training_seed": 103,
+      "eig": 4.87567492087308,
+      "mc_se": 0.06149946786094774,
+      "new_generated_episodes": 297006,
+      "training_seconds": 37.662151225842535,
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10172026/10172026_st_replication_score_reverse_cross/runs/score102_policy103",
+      "historical_control": false,
+      "native_training_allocation_episodes": 1000000,
+      "additional_reused_policy_normalization_episodes": 0,
+      "total_distinct_training_data_dependency_episodes": 1000000,
+      "equal_1M_primary_comparison_eligible": false,
+      "budget_scope": "1M matched frozen-score causal diagnostic; not primary seed replacement",
+      "complete_model_episodes": 1000000,
+      "policy_target_normalization_is_inert": true
+    }
+  ],
+  "paired_comparisons": {
+    "bundle103_minus102_policy102": {
+      "difference": 3.1572229131780385,
+      "mc_se": 0.07619775946140914,
+      "ci95": [
+        3.007875304633677,
+        3.3065705217224
+      ]
+    },
+    "bundle103_minus102_policy103": {
+      "difference": 5.255683346088376,
+      "mc_se": 0.0768302637162242,
+      "ci95": [
+        5.105096029204577,
+        5.406270662972175
+      ]
+    },
+    "bundle_by_policy_interaction": {
+      "difference": 2.098460432910337,
+      "mc_se": 0.09437737446068144,
+      "ci95": [
+        1.9134807789674015,
+        2.2834400868532727
+      ]
+    }
+  },
+  "evaluation_seed": 1001,
+  "systems": 2000,
+  "contrast_samples": 1000000,
+  "contrast_bank_sha256": "eec9aa96835135ff2626f1da6d989d1d4cab09222c5be8fdef170ad0dfa72123",
+  "primary_results_replaced": false,
+  "reserved_final_seed_used": false,
+  "limitation": "Two crossed policy initializations; bundle includes score normalization. MC intervals are conditional on trained policies, not training-seed uncertainty.",
+  "budget_caveat": "Verified1M total. Policy-target calibration fields are unused by native DADNet initialization, physical simulator and score-gradient path. Replacing them with NaNs preserves initial parameters and native gradients bitwise. Only the frozen score network reads its source normalization, already included in702994 reused pretraining episodes. No second calibration dataset is required."
+}
