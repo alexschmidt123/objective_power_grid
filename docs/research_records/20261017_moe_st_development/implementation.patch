@@ -1,0 +1,122 @@
+--- original/src/research/sparse_moe.py
++++ controlled/src/research/sparse_moe.py
+@@ -29,6 +29,25 @@
+         mix=self.mixing(context).softmax(-1)
+         weights=(selectors*mix[:,:,None]).sum(1)
+         return weights,selectors,bits
++
++    def straight_through(self,context):
++        """Hard DSelect-1 forward, native relaxed-selector surrogate backward.
++
++        Return relaxed weights separately for unchanged routing regularization.
++        Native >=0 logit tie convention is retained exactly. No extra RNG draws.
++        """
++        if self.k!=1:raise ValueError('Straight-through mode requires DSelect-1')
++        logits=self.bits(context).reshape(-1,1,2)
++        t=(logits/self.gamma).clamp(-.5,.5)
++        bits=-2*t.pow(3)+1.5*t+.5
++        selectors=torch.where(self.codes[None,None].bool(),bits[:,:,None],1-bits[:,:,None]).prod(-1)
++        mix=self.mixing(context).softmax(-1)
++        soft=(selectors*mix[:,:,None]).sum(1)
++        hard_bits=(logits>=0).to(logits.dtype)
++        hard_selectors=torch.where(self.codes[None,None].bool(),hard_bits[:,:,None],1-hard_bits[:,:,None]).prod(-1)
++        hard=(hard_selectors*mix[:,:,None]).sum(1)
++        weights=hard.detach()+(soft-soft.detach())
++        return weights,soft,selectors,bits
+ 
+ class SparseMoESBOED(MoEPolicy):
+     architecture='spce_only_shared_encoder_dselect_v1'
+@@ -91,7 +110,7 @@
+         if self.last_route is None:
+             zero=next(self.parameters()).sum()*0
+             return zero,zero
+-        w=self.last_route['weights'];load=(w.mean(0)-collapse_threshold).clamp_min(0).square().sum()
++        w=self.last_route.get('regularization_weights',self.last_route['weights']);load=(w.mean(0)-collapse_threshold).clamp_min(0).square().sum()
+         q=self.last_route['selectors']
+         entropy=w.sum()*0 if q is None else -(q*q.clamp_min(1e-15).log()).sum(-1).mean()
+         return load,entropy
+--- original/src/research/moe_family.py
++++ controlled/src/research/moe_family.py
+@@ -172,12 +172,17 @@
+     """Single public interface; original full-policy cores are reused verbatim."""
+     kind='sparse_moe_prototype'
+     def __init__(self,variant,benchmark,horizon,*,base=None,base_checkpoint=None,base_finetune=False,
+-                 routing_mode='learned_switch',initial_reroute_probability=.99,residual_scale=1.,residual_initial_std=.001,core=None):
++                 routing_mode='learned_switch',initial_reroute_probability=.99,residual_scale=1.,residual_initial_std=.001,core=None,training_routing_mode='relaxed'):
+         super().__init__()
+         self.variant=canonical_variant(variant);self.canonical_name=NAMES[self.variant]
+         self.horizon=horizon;self.benchmark_name=benchmark.name;self.benchmark_signature=benchmark_signature(benchmark)
+         self.config=dict(routing_mode=routing_mode,initial_reroute_probability=initial_reroute_probability,
+             residual_scale=residual_scale,residual_initial_std=residual_initial_std,base_finetune=base_finetune)
++        if training_routing_mode not in ('relaxed','straight_through'):
++            raise ValueError('Unknown MoE training routing mode')
++        if training_routing_mode!='relaxed':
++            if self.variant!='moe':raise ValueError('Straight-through experiment is restricted to moe')
++            self.config['training_routing_mode']=training_routing_mode
+         switching=self.variant.startswith('switch');residual='resmoe' in self.variant
+         if core is not None:self.core=core
+         elif residual:
+@@ -212,7 +217,16 @@
+         return self
+     def forward(self,features,stage):
+         if stage==0:self._stats=None
+-        if isinstance(self.core,SparseMoESBOED) and not isinstance(self.core,ExistingRoutingView) and getattr(self.core,'routing_override',None) is not None and stage>0:
++        if stage>0 and self.training and self.config.get('training_routing_mode','relaxed')=='straight_through':
++            c=self.core.context(features)
++            w,soft,s,b=self.router.straight_through(c.mean(1))
++            self.core.last_route=dict(weights=w,regularization_weights=soft,selectors=s,bits=b)
++            # Compute ALL expert proposals for router surrogate gradients. Do not
++            # use sparse dispatch here: it removes unselected expert contributions
++            # to the routing derivative. Only the hard-selected action is emitted.
++            proposals=torch.stack([expert(c[:,j]) for j,expert in enumerate(self.experts)],1)
++            action=(proposals*w[:,:,None]).sum(1)
++        elif isinstance(self.core,SparseMoESBOED) and not isinstance(self.core,ExistingRoutingView) and getattr(self.core,'routing_override',None) is not None and stage>0:
+             c=self.core.context(features);w,s,b=self.core.gate(c,hard=self.core.routing_override=='hard')
+             self.core.last_route=dict(weights=w,selectors=s,bits=b);action=self.core.dispatch(c,w)
+         else:action=self.core(features,stage)
+--- original/src/research/family_training.py
++++ controlled/src/research/family_training.py
+@@ -20,7 +20,8 @@
+     p=MoESBOEDPolicy(variant,b,h,base_checkpoint=base_checkpoint,base_finetune=base_finetune,
+         routing_mode=s.get('strategy_routing_mode','learned_switch'),
+         initial_reroute_probability=s.get('strategy_initial_reroute_probability',.99),
+-        residual_scale=s.get('residual_scale',1.),residual_initial_std=s.get('residual_initial_std',.001))
++        residual_scale=s.get('residual_scale',1.),residual_initial_std=s.get('residual_initial_std',.001),
++        training_routing_mode=s.get('moe_training_routing_mode','relaxed'))
+     opt=torch.optim.Adam((v for v in p.parameters() if v.requires_grad),lr=s['learning_rate'],betas=(s.get('spce_adam_beta1',.8),s.get('spce_adam_beta2',.998)))
+     scheduler=torch.optim.lr_scheduler.ExponentialLR(opt,s.get('spce_lr_decay',.98))
+     records=[];count=0;step=0;contrasts=int(s['contrasts'])
+@@ -34,11 +35,12 @@
+         # Smooth homotopy to binary DSelect routing; terminal phase uses sparse
+         # selectors. The sPCE objective remains the information criterion.
+         p.router.gamma=routing_gamma(fraction,s.get('moe_router_warmup_fraction',0.),s.get('moe_router_finish_fraction',.8))
+-        penalties=[];routes=[];strategies=[]
++        penalties=[];routes=[];strategies=[];soft_routes=[]
+         def capture(module,inputs,output):
+             penalties.append(module.regularizers())
+             if module.last_route is not None:
+                 routes.append(module.last_route['weights'].detach())
++                if 'regularization_weights' in module.last_route:soft_routes.append(module.last_route['regularization_weights'].detach())
+                 strategies.append({k:v.detach() for k,v in module.last_route['strategy'].items()})
+         handle=p.register_forward_hook(capture)
+         if diagnostic is not None:diagnostic.begin(count,n)
+@@ -64,6 +66,9 @@
+         if routes:
+             w=torch.stack(routes);choices=torch.nn.functional.one_hot(w.argmax(-1),4).to(w.dtype)
+             row.update(router_probabilities_by_stage=w.mean(1).cpu().tolist(),hard_choice_frequency_by_stage=choices.mean(1).cpu().tolist(),execution_utilization_by_stage=(w>0).double().mean(1).cpu().tolist(),router_probabilities=w.mean((0,1)).cpu().tolist(),hard_choice_frequency=choices.mean((0,1)).cpu().tolist(),execution_utilization=(w>0).double().mean((0,1)).cpu().tolist(),routing_entropy=float((-(w*w.clamp_min(1e-15).log()).sum(-1)).mean()))
++        if soft_routes:
++            sw=torch.stack(soft_routes)
++            row.update(relaxed_router_probabilities=sw.mean((0,1)).cpu().tolist(),relaxed_router_probabilities_by_stage=sw.mean(1).cpu().tolist(),training_routing_mode='straight_through',training_expert_proposal_execution='all_four_for_router_surrogate',execution_utilization_interpretation='nonzero forward weights; all four proposals computed for backward')
+         if strategies and (step%int(s.get('strategy_diagnostics_every',1))==0 or count==budget):
+             for key in ['reroute_probability','reroute_requested','actual_strategy_change','consecutive_duration']:
+                 values=torch.stack([v[key].double() for v in strategies])
+--- original/src/research/moe_diagnostic_logging.py
++++ controlled/src/research/moe_diagnostic_logging.py
+@@ -18,6 +18,7 @@
+         self.start=int(settings.get('diagnostic_start_episodes',750000))
+         self.targets=sorted(set(range(750000,1000001,12500))|{832000,883200})
+         if self.start==0:self.targets=[64,128,192,256]
++        if 'diagnostic_checkpoint_episodes' in settings:self.targets=sorted(set(map(int,settings['diagnostic_checkpoint_episodes'])))
+         self.next=0;self.saved=[]
+ 
+     def begin(self,count,n):

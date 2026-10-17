@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "tests": [
+    "hard_forward_exact_at_three_gammas",
+    "native_zero_logit_tie_convention",
+    "router_surrogate_gradient_exactly_matches_relaxed_gradient",
+    "identical_initial_weights_no_rng_change",
+    "complete_hard_forward_rollout_equivalence_1e_minus12",
+    "native_relaxed_routing_regularization_unchanged",
+    "selected_expert_receives_gradient_and_unselected_proposals_reach_router",
+    "other_variants_explicitly_excluded",
+    "historical_103_105_hard_and_relaxed_predictions_unchanged",
+    "hard_inference_executes_one_expert_per_case",
+    "straight_through_checkpoint_roundtrip",
+    "real_batch64_L1024_finite_full_horizon_sPCE_and_encoder_router_gradients",
+    "native_training_interface_two_update_smoke"
+  ],
+  "real_size_probe_seconds": 0.29478475102223456,
+  "probe_device": "cuda",
+  "forward_max_errors": {
+    "actions": 8.881784197001252e-16,
+    "observations": 1.0658141036401503e-14,
+    "latents": 3.0531133177191805e-16
+  },
+  "numerical_tolerance": "weights bitwise; complete rollout rtol=atol=1e-12 (dense-vs-sparse batched GEMM); fixed-context surrogate gradient bitwise",
+  "diagnostic_primary_episodes": 144,
+  "optimizer_smoke_episodes": 16,
+  "full_training_launched": false
+}
