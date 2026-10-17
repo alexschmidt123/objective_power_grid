@@ -172,12 +172,17 @@ class MoESBOEDPolicy(nn.Module):
     """Single public interface; original full-policy cores are reused verbatim."""
     kind='sparse_moe_prototype'
     def __init__(self,variant,benchmark,horizon,*,base=None,base_checkpoint=None,base_finetune=False,
-                 routing_mode='learned_switch',initial_reroute_probability=.99,residual_scale=1.,residual_initial_std=.001,core=None):
+                 routing_mode='learned_switch',initial_reroute_probability=.99,residual_scale=1.,residual_initial_std=.001,core=None,training_routing_mode='relaxed'):
         super().__init__()
         self.variant=canonical_variant(variant);self.canonical_name=NAMES[self.variant]
         self.horizon=horizon;self.benchmark_name=benchmark.name;self.benchmark_signature=benchmark_signature(benchmark)
         self.config=dict(routing_mode=routing_mode,initial_reroute_probability=initial_reroute_probability,
             residual_scale=residual_scale,residual_initial_std=residual_initial_std,base_finetune=base_finetune)
+        if training_routing_mode not in ('relaxed','straight_through'):
+            raise ValueError('Unknown MoE training routing mode')
+        if training_routing_mode!='relaxed':
+            if self.variant!='moe':raise ValueError('Straight-through experiment is restricted to moe')
+            self.config['training_routing_mode']=training_routing_mode
         switching=self.variant.startswith('switch');residual='resmoe' in self.variant
         if core is not None:self.core=core
         elif residual:
@@ -212,7 +217,16 @@ class MoESBOEDPolicy(nn.Module):
         return self
     def forward(self,features,stage):
         if stage==0:self._stats=None
-        if isinstance(self.core,SparseMoESBOED) and not isinstance(self.core,ExistingRoutingView) and getattr(self.core,'routing_override',None) is not None and stage>0:
+        if stage>0 and self.training and self.config.get('training_routing_mode','relaxed')=='straight_through':
+            c=self.core.context(features)
+            w,soft,s,b=self.router.straight_through(c.mean(1))
+            self.core.last_route=dict(weights=w,regularization_weights=soft,selectors=s,bits=b)
+            # Compute ALL expert proposals for router surrogate gradients. Do not
+            # use sparse dispatch here: it removes unselected expert contributions
+            # to the routing derivative. Only the hard-selected action is emitted.
+            proposals=torch.stack([expert(c[:,j]) for j,expert in enumerate(self.experts)],1)
+            action=(proposals*w[:,:,None]).sum(1)
+        elif isinstance(self.core,SparseMoESBOED) and not isinstance(self.core,ExistingRoutingView) and getattr(self.core,'routing_override',None) is not None and stage>0:
             c=self.core.context(features);w,s,b=self.core.gate(c,hard=self.core.routing_override=='hard')
             self.core.last_route=dict(weights=w,selectors=s,bits=b);action=self.core.dispatch(c,w)
         else:action=self.core(features,stage)
