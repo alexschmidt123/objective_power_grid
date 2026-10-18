@@ -16,7 +16,8 @@ def test_explicit_draws_reproduce_existing_evaluator_exactly(tmp_path):
  with torch.no_grad():
   old,old_s=evaluate(b,p,'dad',h,s,1001,dict(training_seconds=0.),a,paper=True,infer_parameters=False)
   new,new_s=evaluate(b,p,'dad',h,s,1001,dict(training_seconds=0.),z,paper=True,infer_parameters=False,evaluation_draws=draws)
- assert old==new and old_s['mean_spce']==new_s['mean_spce']
+ assert [{k:v for k,v in row.items() if k!='mean_decision_seconds_per_trajectory'} for row in old]==[{k:v for k,v in row.items() if k!='mean_decision_seconds_per_trajectory'} for row in new]
+ assert old_s['mean_spce']==new_s['mean_spce']
  np.testing.assert_array_equal(np.load(a/'eval/contrast_bank_seed1001.npy'),np.load(z/'eval/contrast_bank_seed1001.npy'))
  bad=dict(draws,contrasts=draws['contrasts'][:2])
  with pytest.raises(ValueError,match='shape mismatch'):evaluate(b,p,'dad',h,s,1001,{},z,paper=True,infer_parameters=False,evaluation_draws=bad)

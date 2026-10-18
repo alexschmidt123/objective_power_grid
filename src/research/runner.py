@@ -95,10 +95,11 @@ def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper
     rng = generator(seed)
     population=settings.get('evaluation_population_systems',settings['eval_systems']) if paper else settings['eval_systems']
     if population<settings['eval_systems']:raise ValueError('Evaluation population smaller than requested subset')
-    truth = benchmark.sample((population,),rng)[:settings['eval_systems']]
-    noise = torch.randn(population,horizon,benchmark.obs_dim,generator=rng,dtype=torch.float64)[:settings['eval_systems']]
-    contrasts = benchmark.sample((settings['eval_contrasts'],) if paper or benchmark.name=='sir_ode' else
-                                (settings['eval_systems'],settings['eval_contrasts']),rng)
+    if evaluation_draws is None:
+        truth = benchmark.sample((population,),rng)[:settings['eval_systems']]
+        noise = torch.randn(population,horizon,benchmark.obs_dim,generator=rng,dtype=torch.float64)[:settings['eval_systems']]
+        contrasts = benchmark.sample((settings['eval_contrasts'],) if paper or benchmark.name=='sir_ode' else
+                                    (settings['eval_systems'],settings['eval_contrasts']),rng)
     streamed = paper or benchmark.name=='sir_ode'
     if evaluation_draws is not None:
         if not paper:raise ValueError('Explicit paired banks require the common streamed evaluator')
