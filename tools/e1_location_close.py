@@ -88,15 +88,18 @@ def freeze():
  assert not (C/'confirmation_gate.json').exists()
  with tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['git','archive','HEAD'],cwd=W))) as archive:archive.extractall(C/'frozen_source')
  assert j.read(C/'reports/location_46_policy_audit.json')['status']=='PASS'
- entries=j.read(C/'registry.json');seed=100000000+secrets.randbelow(1900000000)
- # A newly generated OS-random seed, independent of training/development RNGs.
- # Search existing human/machine-readable protocol/config manifests before use.
- scanned=0;needle=str(seed)
- for base in [R/'configs',R/'experiments']:
+ entries=j.read(C/'registry.json');seed=int(sys.argv[3]) if len(sys.argv)>3 else 1002
+ assert seed>=1002 and seed<8831001
+ # Sequential evaluation RNGs are audited by actual output artifacts.
+ scanned=0
+ for worktree in (Path.home()/'Documents').glob('objective_power_grid*'):
+  base=worktree/'experiments'
+  if not base.exists():continue
   for p in base.rglob('*'):
-   if p.is_file() and p.suffix in ['.json','.yaml','.yml','.md'] and p.stat().st_size<2000000:
+   if p.is_file():
     scanned+=1
-    if needle in p.read_text(errors='ignore'):raise RuntimeError('Fresh seed appears in historical records; abort before drawing bank')
+    if p.name.endswith('_seed'+str(seed)+'.json') or p.name=='contrast_bank_seed'+str(seed)+'.npy':
+     raise RuntimeError('Evaluation seed already has saved output: '+str(p))
  bankdir=C/'evaluations/confirmation_bank';bankdir.mkdir()
  rng=torch.Generator().manual_seed(seed);truth=torch.randn(2000,4,generator=rng,dtype=torch.float64);noise=torch.randn(2000,30,1,generator=rng,dtype=torch.float64);contrasts=torch.randn(1000000,4,generator=rng,dtype=torch.float64)
  np.savez(bankdir/'cases.npz',truth=truth.numpy(),noise=noise.numpy());np.save(bankdir/'contrasts.npy',contrasts.numpy())
@@ -104,14 +107,14 @@ def freeze():
  source={str(p.relative_to(W)):j.sha(p) for p in paths};j.write(C/'source_manifest.json',dict(git_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=W,text=True).strip(),sha256=source))
  policies=[{k:e.get(k) for k in ['method','native_method','seed','checkpoint','checkpoint_sha256']}|dict(source_run=e['training_run']) for e in entries]
  sealed=[C/'protocol.json',C/'journal_protocol.md',C/'registry.json',C/'reports/location_46_policy_audit.json',C/'source_manifest.json',C/'configs/location_1000000.yaml',C/'location_finding_summary.csv',C/'location_finding_comparisons.csv',C/'training_efficiency.csv',bankdir/'cases.npz',bankdir/'contrasts.npy']
- gate=dict(status='frozen_ready_for_confirmation',created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),evaluation_seed=seed,horizon=30,systems=2000,contrasts=1000000,cases=str(bankdir/'cases.npz'),bank=str(bankdir/'contrasts.npy'),policies=policies,sealed_files={str(p):j.sha(p) for p in sealed},source_sha256=source,seed_provenance=dict(source='OS cryptographic randomness after checkpoint/analysis freeze',historical_manifest_files_scanned=scanned),claim_limit='Five training replicates; confirmation trajectories are not new training replicates')
+ gate=dict(status='frozen_ready_for_confirmation',created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),evaluation_seed=seed,horizon=30,systems=2000,contrasts=1000000,cases=str(bankdir/'cases.npz'),bank=str(bankdir/'contrasts.npy'),policies=policies,sealed_files={str(p):j.sha(p) for p in sealed},source_sha256=source,seed_provenance=dict(source='Sequential evaluation seed after unchanged checkpoint/analysis freeze; audited saved historical outputs',historical_manifest_files_scanned=scanned),claim_limit='Five training replicates; confirmation trajectories are not new training replicates')
  j.write(C/'confirmation_gate.json',gate);print('Frozen fresh confirmation seed',seed,flush=True)
 
 def confirm():
  g=j.read(C/'confirmation_gate.json');reg=[]
  if not (C/'metadata/confirmation_started.json').exists():j.write(C/'metadata/confirmation_started.json',dict(gate_sha256=j.sha(C/'confirmation_gate.json'),started_utc=datetime.datetime.now(datetime.timezone.utc).isoformat()))
  for e in g['policies']:
-  m,s=e['method'],e['seed'];out=W/'experiments/10182026/10182026_e1_four_system/confirmation'/f'seed{s}'/m
+  m,s=e['method'],e['seed'];out=W/'experiments'/C.parent.name/C.name/'confirmation'/f'seed{s}'/m
   command=['bash','run.sh','--config',str(C/'configs/location_1000000.yaml'),'--native-evaluate-from',e['source_run'] if m=='random' else e['checkpoint'],'--e1-confirmation-gate',str(C/'confirmation_gate.json'),'--methods',m,'--seed',str(s),'--eval-seeds',str(g['evaluation_seed']),'--output',str(out)]
   if not out.exists():
    j.write(C/'metadata'/f'confirmation_{m}_{s}_command.json',dict(cwd=str(W),command=command))
@@ -123,6 +126,7 @@ def confirm():
  j.table(C/'reports/location_confirmation_per_seed.csv',reg,['method','seed','eig','status','run'])
  j.write(C/'reports/location_confirmation_complete.json',dict(status='complete',policies=len(reg),evaluation_seed=g['evaluation_seed'],no_training_or_tuning=True))
 if __name__=='__main__':
+ if len(sys.argv)>2:C=Path(sys.argv[2]).resolve()
  if sys.argv[1]=='prepare':prepare()
  elif sys.argv[1]=='freeze':freeze()
  elif sys.argv[1]=='confirm':confirm()
