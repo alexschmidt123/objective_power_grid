@@ -90,7 +90,7 @@ def freeze_source(root,output):
     write_json(output/'source_manifest.json',dict(git_commit=commit,sha256=hashes))
 
 
-def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper=False,*,infer_parameters=True):
+def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper=False,*,infer_parameters=True,evaluation_draws=None):
     # Identity pairing is independent of training/decision RNG and batch partition.
     rng = generator(seed)
     population=settings.get('evaluation_population_systems',settings['eval_systems']) if paper else settings['eval_systems']
@@ -100,6 +100,12 @@ def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper
     contrasts = benchmark.sample((settings['eval_contrasts'],) if paper or benchmark.name=='sir_ode' else
                                 (settings['eval_systems'],settings['eval_contrasts']),rng)
     streamed = paper or benchmark.name=='sir_ode'
+    if evaluation_draws is not None:
+        if not paper:raise ValueError('Explicit paired banks require the common streamed evaluator')
+        truth,noise,contrasts=[evaluation_draws[k] for k in ('truth','noise','contrasts')]
+        if truth.shape!=(settings['eval_systems'],benchmark.param_dim) or noise.shape!=(settings['eval_systems'],horizon,benchmark.obs_dim) or contrasts.shape!=(settings['eval_contrasts'],benchmark.param_dim):
+            raise ValueError('Frozen evaluation cases/bank shape mismatch')
+        if any(not torch.isfinite(x).all() for x in (truth,noise,contrasts)):raise ValueError('Nonfinite frozen evaluation inputs')
     if streamed:
         bank_path = output/'eval'/f'contrast_bank_seed{seed}.npy'
         if not bank_path.exists():np.save(bank_path,contrasts.numpy())
@@ -204,6 +210,9 @@ def main(argv=None):
     parser.add_argument('--output')
     parser.add_argument('--smoke',action='store_true')
     parser.add_argument('--evaluate-from',help='Explicit completed upstream vsOED run; evaluation only')
+    parser.add_argument('--native-evaluate-from',help='Evaluation-only native checkpoint; never trains a policy')
+    parser.add_argument('--evaluation-cases',help='Frozen NPZ truth/noise arrays for portable pairing')
+    parser.add_argument('--evaluation-bank',help='Frozen NPY contrastive parameter bank')
     parser.add_argument('--objective',choices=['eig'],default='eig')
     parser.add_argument('--experiment_type',choices=['eig_based'],default='eig_based')
     parser.add_argument('--ablations',action='store_true')
@@ -234,6 +243,9 @@ def main(argv=None):
     raw=yaml.safe_load(config_path.read_text())
     raw['_config_path']=str(config_path.resolve())
     raw.setdefault('research',{})
+    if args.native_evaluate_from:
+        from src.research.native_checkpoint_evaluation import main as evaluate_native
+        return evaluate_native(args,raw,root)
     if args.journal and raw['research'].get('journal_protocol',{}).get('version')=='validation_convergence_v1':
         from src.research.journal_run import main as journal_main
         return journal_main(args,raw,root)
