@@ -53,7 +53,7 @@ def main(args,raw,root):
             if args.smoke:s.update(rl_min_buffer=1,rl_batch_size=4,rl_replay_batch=8,rl_gradient_steps=1,rl_replay_capacity=64)
             this_rule=dict(rule_cfg)|protocol.get('method_stopping',{}).get(method,{})
             if args.smoke:this_rule=dict(rule_cfg)
-            if args.smoke and method=='scorebed':this_rule['maximum_episodes']=34
+            if args.smoke and method=='scorebed':this_rule['maximum_episodes']=24+10*int(s.get('scorebed_restarts',1))
             rule=StoppingRule(**this_rule);observer=ValidationObserver(validator,rule,out/'models',method,selection_mode=protocol.get('checkpoint_selection_mode','best_validation'))
             cap=rule.maximum_episodes
             if method in {'resmoe','switchresmoe'} and not args.base_checkpoint:raise ValueError('Provide the same benchmark/seed-specific base checkpoint for residual variants')
@@ -84,10 +84,12 @@ def main(args,raw,root):
                 if args.smoke:profile.update(updates=2,new_trajectories=2,initial_replay=4,replay_batch=4,replay_capacity=32,posterior_updates=1,critic_updates=1,log_every=1)
                 p,t=train_upstream_vsoed(b,h,s,seed,out/'models',profile,observer=observer)
             elif method=='rl_sboed':
-                from src.research.research_redq import train_rl_sboed
+                if s.get('rl_original_reference',False):
+                    from src.research.native_rl_reference import train_native_rl as train_rl_sboed
+                else:from src.research.research_redq import train_rl_sboed
                 with torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'):
                     p,t=train_rl_sboed(b,h,s,seed,out/'models',cap,observer=observer)
-                t['baseline_fidelity']='documented_two_Q_Torch_adaptation_not_claimed_exact_published_reproduction'
+                t['baseline_fidelity']='pinned_native_source_networks_and_update_kernels' if s.get('rl_original_reference',False) else 'documented_two_Q_Torch_adaptation_not_claimed_exact_published_reproduction'
             else:
                 from src.research.training import train_spce
                 with torch.device(train_device):

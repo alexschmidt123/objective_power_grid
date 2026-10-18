@@ -27,7 +27,10 @@ def load_checkpoint(path,benchmark):
   p=Policy(1+h*(benchmark.action_dim+benchmark.obs_dim+1),benchmark.action_dim,h,'fixed',saved.get('hidden',64))
  elif kind=='rl_sboed':
   from src.research.research_redq import RLPolicy
-  p=RLPolicy(benchmark,h)
+  if saved.get('architecture')=='published_RL_BOED_source_REDQ_native_v1':
+   from src.research.native_rl_reference import NativeRLPolicy
+   p=NativeRLPolicy(h)
+  else:p=RLPolicy(benchmark,h)
  elif kind=='scorebed':
   arrays=np.load(path.with_name('scorebed_official_policy.npz'))
   if benchmark.name=='sir_ode':

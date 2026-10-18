@@ -51,6 +51,7 @@ class StrategyManager(nn.Module):
 
     def reset(self):
         self.state=None
+        self.relaxed_weights=None
         self.active=None
         self.previous_active=None
         self.duration=None
@@ -58,7 +59,7 @@ class StrategyManager(nn.Module):
         self.request_count=None
         self.last_diagnostics=None
 
-    def forward(self,context,router,hard=False):
+    def forward(self,context,router,hard=False,straight_through=False):
         n=len(context);initial=self.state is None
         if not initial and len(self.state)!=n:
             raise ValueError('Batch changed without resetting strategy state')
@@ -73,7 +74,15 @@ class StrategyManager(nn.Module):
         else:
             b=self.switching_gate(context,previous)
             requested=b[:,0]>=.5
-        if hard:
+        if straight_through:
+            if hard:raise ValueError('Choose native hard inference or ST training, not both')
+            # One native DSelect call: hard-forward proposal, relaxed selector surrogate.
+            proposal,p,selectors,bits=router.straight_through(context)
+            soft=p if initial or self.mode=='always_reroute' else ((1-b)*previous+b*p)
+            actual=proposal.detach() if initial else torch.where(requested[:,None],proposal.detach(),previous.detach())
+            q=actual+(soft-soft.detach())
+            self.relaxed_weights=soft
+        elif hard:
             # Do not invoke DSelect for continued rows. Carried p entries are
             # state probabilities, marked router_evaluated=False in the record.
             p=context.new_zeros(n,4) if initial else previous.clone()
@@ -101,7 +110,8 @@ class StrategyManager(nn.Module):
             consecutive_duration=duration,strategy_changes=changes,reroute_requests=requests,
             initialized=torch.full_like(requested,initial),
             router_evaluated=requested if hard else torch.full_like(requested,not (not initial and self.mode=='always_continue')),
-            hard_state=torch.full_like(requested,hard))
+            hard_state=torch.full_like(requested,hard or straight_through),
+            straight_through_training=torch.full_like(requested,straight_through))
         return q,selectors,bits
 
 

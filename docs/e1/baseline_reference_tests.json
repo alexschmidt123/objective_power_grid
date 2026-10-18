@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "tests": [
+    {
+      "test": "DAD_actions_physics_loss_gradients_update",
+      "status": "PASS",
+      "evidence": {
+        "actions_likelihood_loss_gradients_one_Adam_step": true,
+        "rtol": 1e-08,
+        "atol": 1e-09,
+        "scope": "Exact upstream class/loss bodies; deterministic trace harness replaces stochastic trace construction only; common bounded mapping applied to both"
+      }
+    },
+    {
+      "test": "RL_native_Pyro_physics",
+      "status": "PASS",
+      "evidence": {
+        "native_Pyro_source_likelihood": true,
+        "max_absolute_error": 9.571444614664415e-08,
+        "prior": "four independent standard-normal coordinates"
+      }
+    },
+    {
+      "test": "RL_networks_rewards_native_update",
+      "status": "PASS",
+      "evidence": {
+        "native_network_outputs_distribution_logprob_and_one_full_update": true,
+        "native_factorized_reward": true,
+        "updated_parameters_bitwise_equal": true,
+        "discount": 0.9,
+        "critics": 2,
+        "subset": 2
+      }
+    },
+    {
+      "test": "vsOED_native_full_update",
+      "status": "PASS",
+      "evidence": {
+        "native_model_actor_critic_GMM_posterior_one_update": true,
+        "all_parameters_bitwise_equal": true,
+        "model_discrepancy": "Executable upstream SOURCE applies natural log to signal; shared benchmark follows executable source"
+      }
+    }
+  ],
+  "ScoreBED": {
+    "status": "PASS",
+    "arrays": 289,
+    "max_absolute_error": 0.0,
+    "policy_EMA_Torch_bridge_error": 0.0
+  },
+  "switching_tests": {
+    "passed": 43,
+    "skipped": 1,
+    "reason": "Optional historical fixture; specific reused checkpoints verified separately"
+  },
+  "scope": "CPU deterministic fixtures and native one-update comparisons, not convergence certification"
+}
