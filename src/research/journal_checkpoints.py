@@ -17,8 +17,9 @@ def load_checkpoint(path,benchmark):
  if kind=='dad':
   if benchmark.name=='sir_ode':
    from src.research.sir_dad import SIRSumDAD
-   if saved.get('architecture')!='DAD_sum_encoder_256_16_SIR_normalized_history':raise ValueError('Historical generic SIR policy is not silently relabelled as sum DAD')
-   p=SIRSumDAD(h)
+   architecture=saved.get('architecture')
+   if architecture not in {'DAD_sum_encoder_256_16_SIR_normalized_history','DAD_sum_encoder_256_16_SIR_shared_empty_history'}:raise ValueError('Historical generic SIR policy is not silently relabelled as sum DAD')
+   p=SIRSumDAD(h,first_design_revision=2 if architecture=='DAD_sum_encoder_256_16_SIR_normalized_history' else 1)
   else:
    from src.research.dad_location_policy import LocationDAD
    p=LocationDAD(h,benchmark.action_scale,benchmark.obs_scale,first_design_revision=saved.get('policy_settings',{}).get('first_design_revision',1))
