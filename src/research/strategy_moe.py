@@ -37,7 +37,8 @@ class SwitchingGate(nn.Module):
 class StrategyManager(nn.Module):
     """Four neutral strategy slots; ephemeral state is reset at each rollout.
 
-    Hard requests use b>=0.5 (no sampling/straight-through estimator). Relaxed
+    Hard requests use b>=0.5. ST training uses separate expert and switching
+    surrogates, with a graph-connected hard-forward carried state. Relaxed
     decisions use q=(1-b)q_previous+b*p without detaching either occurrence of
     q_previous. Rerouting requests and actual expert changes are distinct.
     """
@@ -52,6 +53,7 @@ class StrategyManager(nn.Module):
     def reset(self):
         self.state=None
         self.relaxed_weights=None
+        self.last_switch_weight=None
         self.active=None
         self.previous_active=None
         self.duration=None
@@ -78,9 +80,20 @@ class StrategyManager(nn.Module):
             if hard:raise ValueError('Choose native hard inference or ST training, not both')
             # One native DSelect call: hard-forward proposal, relaxed selector surrogate.
             proposal,p,selectors,bits=router.straight_through(context)
-            soft=p if initial or self.mode=='always_reroute' else ((1-b)*previous+b*p)
-            actual=proposal.detach() if initial else torch.where(requested[:,None],proposal.detach(),previous.detach())
-            q=actual+(soft-soft.detach())
+            # Keep hard-forward state and genuinely relaxed regularization state
+            # distinct. Neither recurrence is detached within the episode.
+            previous_relaxed=self.relaxed_weights
+            switch=requested[:,None].to(b.dtype)+(b-b.detach())
+            if initial or self.mode=='always_reroute':
+                q=proposal
+                soft=p
+            elif self.mode=='always_continue':
+                q=previous
+                soft=previous_relaxed
+            else:
+                q=(1-switch)*previous+switch*proposal
+                soft=(1-b)*previous_relaxed+b*p
+            self.last_switch_weight=switch
             self.relaxed_weights=soft
         elif hard:
             # Do not invoke DSelect for continued rows. Carried p entries are

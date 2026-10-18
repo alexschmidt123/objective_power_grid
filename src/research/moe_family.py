@@ -256,6 +256,7 @@ class MoESBOEDPolicy(nn.Module):
     def checkpoint(self):
         return dict(kind='moe_sboed_family_v1',variant=self.variant,canonical_name=self.canonical_name,
             horizon=self.horizon,benchmark=self.benchmark_name,benchmark_signature=self.benchmark_signature,config=self.config,gamma=self.router.gamma,
+            switching_training_revision=(2 if self.manager is not None and self.config.get('training_routing_mode')=='straight_through' else None),
             state_dict=self.state_dict(),base_provenance=getattr(getattr(self.core,'base',None),'provenance',None))
 
 

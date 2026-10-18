@@ -33,7 +33,11 @@ def test_hard_training_inference_rollout_and_episode_reset(variant,mode):
     (-a2['info'][:,-1].mean()).backward()
     assert any(v.grad is not None and v.grad.abs().sum()>0 for v in p.experts.parameters())
     if mode=='learned_switch':
-        assert sum(float(v.grad.abs().sum()) for v in p.manager.switching_gate.parameters() if v.grad is not None)>0
+        assert all(v.grad is not None and torch.isfinite(v.grad).all() for v in p.manager.switching_gate.parameters())
+        # A hard proposal identical to the carried expert has zero switch
+        # derivative. Informative different-expert cases are tested separately.
+        if sum(float(v.grad.abs().sum()) for v in p.manager.switching_gate.parameters())==0:
+            assert (p.manager.change_count==0).all()
     assert all(torch.isfinite(v.grad).all() for v in p.parameters() if v.grad is not None)
 
 @pytest.mark.parametrize('variant,plain',[('switchmoe','moe'),('switchresmoe','resmoe')])

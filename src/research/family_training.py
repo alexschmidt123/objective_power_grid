@@ -35,7 +35,7 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
         # Smooth homotopy to binary DSelect routing; terminal phase uses sparse
         # selectors. The sPCE objective remains the information criterion.
         p.router.gamma=routing_gamma(fraction,s.get('moe_router_warmup_fraction',0.),s.get('moe_router_finish_fraction',.8))
-        penalties=[];routes=[];strategies=[];soft_routes=[]
+        penalties=[];routes=[];strategies=[];soft_routes=[];selector_logits=[]
         def capture(module,inputs,output):
             penalties.append(module.regularizers())
             if module.last_route is not None:
@@ -43,10 +43,11 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
                 if 'regularization_weights' in module.last_route:soft_routes.append(module.last_route['regularization_weights'].detach())
                 strategies.append({k:v.detach() for k,v in module.last_route['strategy'].items()})
         handle=p.register_forward_hook(capture)
+        logit_handle=p.router.bits.register_forward_hook(lambda module,inputs,output:selector_logits.append(output.detach()))
         if diagnostic is not None:diagnostic.begin(count,n)
         try:r=rollout(b,p,h,n,seed+(step+1)*104729,contrasts)
         finally:
-            handle.remove()
+            handle.remove();logit_handle.remove()
             if diagnostic is not None:diagnostic.end_rollout()
         eig=r['info'][:,-1].mean()
         load=sum(v[0] for v in penalties)/h;entropy=sum(v[1] for v in penalties)/h
@@ -66,6 +67,10 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
         if routes:
             w=torch.stack(routes);choices=torch.nn.functional.one_hot(w.argmax(-1),4).to(w.dtype)
             row.update(router_probabilities_by_stage=w.mean(1).cpu().tolist(),hard_choice_frequency_by_stage=choices.mean(1).cpu().tolist(),execution_utilization_by_stage=(w>0).double().mean(1).cpu().tolist(),router_probabilities=w.mean((0,1)).cpu().tolist(),hard_choice_frequency=choices.mean((0,1)).cpu().tolist(),execution_utilization=(w>0).double().mean((0,1)).cpu().tolist(),routing_entropy=float((-(w*w.clamp_min(1e-15).log()).sum(-1)).mean()))
+        if selector_logits:
+            logits=torch.stack(selector_logits)
+            row['selector_saturated_fraction']=float((logits.abs()>=p.router.gamma/2).double().mean())
+            row['selector_logit_quantiles']=torch.quantile(logits.flatten(),logits.new_tensor([0.,.1,.5,.9,1.])).cpu().tolist()
         if soft_routes:
             sw=torch.stack(soft_routes)
             row.update(relaxed_router_probabilities=sw.mean((0,1)).cpu().tolist(),relaxed_router_probabilities_by_stage=sw.mean(1).cpu().tolist(),training_routing_mode='straight_through',training_expert_proposal_execution='all_four_for_router_surrogate',execution_utilization_interpretation='nonzero forward weights; all four proposals computed for backward')
@@ -74,7 +79,7 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
                 values=torch.stack([v[key].double() for v in strategies])
                 row['strategy_'+key+'_by_stage']=values.mean(1).cpu().tolist()
                 row['strategy_'+key+'_mean']=float(values.mean())
-            row['strategy_state_interpretation']='relaxed state and argmax proxies; actual hard behavior evaluated separately'
+            row['strategy_state_interpretation']=('hard-forward ST expert/switch state; separate relaxed regularization state' if p.config.get('training_routing_mode')=='straight_through' else 'relaxed state and argmax proxies; actual hard behavior evaluated separately')
         with trace.open('a') as f:f.write(json.dumps(row,allow_nan=False)+'\n')
         if step%s['validate_every']==0 or count==budget:
             records.append(row);print(variant,{k:v for k,v in row.items() if not k.endswith('_by_stage')},flush=True)
