@@ -27,12 +27,16 @@ def main(args,raw,root):
  settings.update(eval_systems=len(draws['truth']),eval_contrasts=len(bank),evaluation_population_systems=len(draws['truth']),evaluation_batch_size=16,evaluation_contrast_chunk=16384,threads=2)
  if not args.smoke and (len(draws['truth'])!=2000 or len(bank)!=1000000):raise ValueError('Full location development reevaluation requires2000/L1M')
  if b.name!='location_finding':raise ValueError('Portable SIR evaluation requires its separate readiness gate')
- torch.set_num_threads(2);p=load_checkpoint(path,b).cpu().eval();before=hashlib.sha256(path.read_bytes()).hexdigest()
+ torch.set_num_threads(2);p=load_checkpoint(path,b).cpu().eval()
+ if getattr(args,'evaluation_relaxed_routing',False):
+  if method not in {'moe','resmoe','switchmoe','switchresmoe'}:raise ValueError('Relaxed routing is a family-only diagnostic')
+  p.set_routing(relaxed=True)
+ before=hashlib.sha256(path.read_bytes()).hexdigest()
  out=Path(args.output).resolve();rel=out.relative_to(root/'experiments')
  if len(rel.parts)<2 or len(rel.parts[0])!=8 or not rel.parts[1].startswith(rel.parts[0]+'_'):raise ValueError('Use the dated campaign hierarchy')
  out.mkdir(parents=True,exist_ok=False)
  for name in ['models','logs','eval']:(out/name).mkdir()
- metadata=copy.deepcopy(cfg);metadata.update(evaluation_only=True,settings=settings,eval_seeds=[1001],workability_only=args.smoke,source_training_run=str(source),source_checkpoint_sha256=before,new_training_episodes=0,evaluation_cases_sha256=hashlib.sha256(cases_path.read_bytes()).hexdigest(),evaluation_bank_sha256=hashlib.sha256(bank_path.read_bytes()).hexdigest())
+ metadata=copy.deepcopy(cfg);metadata.update(evaluation_only=True,settings=settings,eval_seeds=[1001],workability_only=args.smoke,source_training_run=str(source),source_checkpoint_sha256=before,new_training_episodes=0,routing_diagnostic=('relaxed' if getattr(args,'evaluation_relaxed_routing',False) else 'hard'),evaluation_cases_sha256=hashlib.sha256(cases_path.read_bytes()).hexdigest(),evaluation_bank_sha256=hashlib.sha256(bank_path.read_bytes()).hexdigest())
  write_json(out/'run_config.json',metadata);freeze_source(root,out)
  # Reference existing trained parameters and records; do not duplicate weights.
  for file in (source/'models').iterdir():

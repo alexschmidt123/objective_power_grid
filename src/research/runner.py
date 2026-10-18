@@ -212,6 +212,7 @@ def main(argv=None):
     parser.add_argument('--smoke',action='store_true')
     parser.add_argument('--evaluate-from',help='Explicit completed upstream vsOED run; evaluation only')
     parser.add_argument('--native-evaluate-from',help='Evaluation-only native checkpoint; never trains a policy')
+    parser.add_argument('--evaluation-relaxed-routing',action='store_true',help='Diagnostic relaxed family routing on the same saved evaluation bank')
     parser.add_argument('--evaluation-cases',help='Frozen NPZ truth/noise arrays for portable pairing')
     parser.add_argument('--evaluation-bank',help='Frozen NPY contrastive parameter bank')
     parser.add_argument('--objective',choices=['eig'],default='eig')
