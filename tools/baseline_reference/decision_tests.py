@@ -50,6 +50,13 @@ def serialization():
    a=p.sample(f,deterministic=True)[0];b=q.sample(f,deterministic=True)[0]
   else:a=p(f,0);b=q(f,0)
   torch.testing.assert_close(a,b,atol=0,rtol=0)
+def native_launcher_dispatch():
+ import yaml
+ config=yaml.safe_load((Path(__file__).resolve().parents[2]/'configs/e1_location_original_methods.yaml').read_text())
+ assert config['research']['journal_protocol']['version']=='validation_convergence_v1'
+ assert config['research']['journal_protocol']['checkpoint_selection_mode']=='final_fixed_budget'
+ assert config['research']['journal_protocol']['method_settings']['scorebed']['scorebed_restarts']==1
+check('E1_existing_journal_launcher_dispatch',native_launcher_dispatch)
 check('DAD_and_native_RL_checkpoint_roundtrip',serialization)
 check('DAD_independent_first_design_not_equivalent',dad_first)
 check('ScoreBED_native_EMA_export_and_independent_restart_selection',ema)
