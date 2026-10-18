@@ -10,6 +10,21 @@ C=R/'experiments/10182026/10182026_e1_four_system'
 A=R/'experiments/10182026/10182026_e1_original_methods_v2'
 S=R/'experiments/10182026/10182026_e1_st_switching_corrected'
 
+def analysis():
+ # The public registry has46 evaluation entries. Five reused internal bases
+ # are supplied only to the existing cost/learning-curve analysis helper.
+ j.C=C;j.ROOT=W;j.NAMES['rl_sboed']='Native RL-sBOED (resource-adapted)'
+ original=j.read
+ def read_with_internal_bases(path):
+  data=original(path)
+  if Path(path)==C/'registry.json':
+   bases=[dict(method='base',native_method='sum_single',benchmark='location',seed=seed,status='complete',run=str(Path(original(S/'metadata/base_checkpoints.json')[str(seed)]['original_path']).parent.parent),provenance='shared_internal500k_base_not_main_method') for seed in range(101,106)]
+   return data+bases
+  return data
+ j.read=read_with_internal_bases
+ try:j.report();j.figures()
+ finally:j.read=original
+
 def prepare():
  assert not C.exists(),'Never overwrite a frozen campaign'
  assert j.read(S/'metadata/master_import_verified.json')['status']=='PASS'
@@ -64,13 +79,14 @@ def prepare():
  j.write(C/'registry.json',entries);j.write(C/'reports/location_46_policy_audit.json',dict(status='PASS',evaluations=46,entries=audits))
  protocol=dict(methods=list(j.METHODS),systems=['location_T30','sir_T5','ieee9_T3','ieee14_T3'],training_seeds=list(range(101,106)),primary_episodes=1000000,selection='final_budget',moe_training='straight_through',residual_allocation=[500000,500000],development_seed=1001,consumed_confirmation_seed=8831001,location_status='development_verified_confirmation_pending',other_systems_status='readiness_pending',scope='E1 only; no ablations, E2, E3 or other horizons',analysis='paired seed differences; t95 with4df; simultaneous Bonferroni95 over six declared family contrasts; trajectory MC intervals separate')
  j.write(C/'protocol.json',protocol);(C/'journal_protocol.md').write_text('# Four-system E1\n\n'+json.dumps(protocol,indent=2)+'\n\nSelected procedures and checkpoints are frozen before fresh confirmation. Original and resource-adapted baseline fidelity evidence is retained in the source campaigns. No guarantee of a method ranking. Random is one untrained reference, not five training replicates.\n')
- j.C=C;j.ROOT=W;j.NAMES['rl_sboed']='Native RL-sBOED (resource-adapted)';j.report();j.figures()
+ analysis()
  (C/'plotting/regenerate.txt').write_text(f'cd {W}\npython -m tools.e1_location_close report\n')
  with tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['git','archive','HEAD'],cwd=W))) as archive:archive.extractall(C/'frozen_source')
  print('Verified and aggregated46 development policies',flush=True)
 
 def freeze():
  assert not (C/'confirmation_gate.json').exists()
+ with tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['git','archive','HEAD'],cwd=W))) as archive:archive.extractall(C/'frozen_source')
  assert j.read(C/'reports/location_46_policy_audit.json')['status']=='PASS'
  entries=j.read(C/'registry.json');seed=100000000+secrets.randbelow(1900000000)
  # A newly generated OS-random seed, independent of training/development RNGs.
@@ -87,7 +103,7 @@ def freeze():
  paths=list((W/'src').rglob('*.py'))+[W/'run.sh',W/'sweep_run.sh',W/'tools/e1_location_close.py',W/'tools/journal_campaign.py']
  source={str(p.relative_to(W)):j.sha(p) for p in paths};j.write(C/'source_manifest.json',dict(git_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=W,text=True).strip(),sha256=source))
  policies=[{k:e.get(k) for k in ['method','native_method','seed','checkpoint','checkpoint_sha256']}|dict(source_run=e['training_run']) for e in entries]
- sealed=[C/'protocol.json',C/'journal_protocol.md',C/'registry.json',C/'reports/location_46_policy_audit.json',C/'source_manifest.json',C/'configs/location_1000000.yaml',bankdir/'cases.npz',bankdir/'contrasts.npy']
+ sealed=[C/'protocol.json',C/'journal_protocol.md',C/'registry.json',C/'reports/location_46_policy_audit.json',C/'source_manifest.json',C/'configs/location_1000000.yaml',C/'location_finding_summary.csv',C/'location_finding_comparisons.csv',C/'training_efficiency.csv',bankdir/'cases.npz',bankdir/'contrasts.npy']
  gate=dict(status='frozen_ready_for_confirmation',created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),evaluation_seed=seed,horizon=30,systems=2000,contrasts=1000000,cases=str(bankdir/'cases.npz'),bank=str(bankdir/'contrasts.npy'),policies=policies,sealed_files={str(p):j.sha(p) for p in sealed},source_sha256=source,seed_provenance=dict(source='OS cryptographic randomness after checkpoint/analysis freeze',historical_manifest_files_scanned=scanned),claim_limit='Five training replicates; confirmation trajectories are not new training replicates')
  j.write(C/'confirmation_gate.json',gate);print('Frozen fresh confirmation seed',seed,flush=True)
 
@@ -110,4 +126,4 @@ if __name__=='__main__':
  if sys.argv[1]=='prepare':prepare()
  elif sys.argv[1]=='freeze':freeze()
  elif sys.argv[1]=='confirm':confirm()
- elif sys.argv[1]=='report':j.C=C;j.ROOT=W;j.report();j.figures()
+ elif sys.argv[1]=='report':analysis()
