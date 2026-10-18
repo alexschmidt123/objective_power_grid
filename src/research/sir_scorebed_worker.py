@@ -78,7 +78,9 @@ def run(args):
     # Use the official standardisation routine and charge its simulations.
     target=SIRScoreModel(T=args.horizon,init_seed=args.seed,**sir)
     target.compute_standardisation(stats_count)
-    key=jax.random.key(args.seed)
+    np.savez(out/'scorebed_normalization.npz',**{k:np.asarray(v) for k,v in target.get_std_stats_dict().items()})
+    from policy_learning.utils.jax import derive_key
+    key=derive_key(args.seed,'score_trainer')
     score,key=load_score_trainer(key,cfg,target,callbacks=[])
     score_spent=0;records=[]
     while score_spent<score_count:
@@ -94,6 +96,7 @@ def run(args):
     check_tree(score.training_state.params,'score parameters')
     data_score,design_score=score.get_unbatched_score_fns()
     net=SIRScorePolicyNet(encoder_shapes=[256],encoding_dim=16,enc_act='relu',emit_act='relu',emitter_shapes=[],shape=(args.horizon,1),zero_init_final_layer=True,time_scale=target.end,count_scale=target.population)
+    key=derive_key(args.seed,'policy_trainer',0)
     policy,key=load_policy_trainer(key,cfg,target,grad_fn=noop,callbacks=[],policy_net=net)
     policy_spent=0;last_n=None
     while policy_spent<policy_count:
@@ -106,11 +109,12 @@ def run(args):
         policy_spent+=n;step=int(policy.training_state.step)
         if args.journal_plan:
             from src.research.journal_scorebed_bridge import maybe_validate
-            if maybe_validate(policy.training_state.params,args.journal_plan,initialization+score_spent+policy_spent,step,start,force=policy_spent>=policy_count):break
+            if maybe_validate(policy.training_state.params_ema,args.journal_plan,initialization+score_spent+policy_spent,step,start,force=policy_spent>=policy_count):break
         if step%50==0 or policy_spent==policy_count:
             row=dict(phase='policy',step=step,episodes=policy_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
             records.append(row);print('ScoreBED official',row,flush=True)
-    params=policy.training_state.params
+    from src.research.baseline_fidelity import scorebed_reported_params
+    params=scorebed_reported_params(policy.training_state,True)
     if args.journal_plan:
         from src.research.journal_scorebed_bridge import restored_params
         params=restored_params(params,args.journal_plan)
@@ -141,6 +145,7 @@ def run(args):
     from flax import serialization
     (out/'scorebed_official_score.msgpack').write_bytes(serialization.to_bytes(score._score_variables_from_state()))
     data=dict(training='official_ScoreBED_JAX_score_matching_and_score_EIG_gradient',upstream_commit=COMMIT,
+        reported_policy_parameters='params_ema',random_streams='native derive_key score_trainer and policy_trainer/restart0',
         generated_training_trajectories=initialization+score_spent+policy_spent,training_forward_trajectories=initialization+score_spent+policy_spent,
         contrast_training_trajectories=0,training_trajectory_budget=budget,training_budget_unit='primary_episodes',
         initialization_trajectories=initialization,standardisation_trajectories=stats_count,

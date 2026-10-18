@@ -85,7 +85,10 @@ def main(args,raw,root):
                 p,t=train_upstream_vsoed(b,h,s,seed,out/'models',profile,observer=observer)
             elif method=='rl_sboed':
                 if s.get('rl_original_reference',False):
-                    from src.research.native_rl_reference import train_native_rl as train_rl_sboed
+                    if b.name=='sir_ode':
+                        from src.research.sir_native_rl import train_sir_native_rl as train_rl_sboed
+                    else:
+                        from src.research.native_rl_reference import train_native_rl as train_rl_sboed
                 else:from src.research.research_redq import train_rl_sboed
                 with torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'):
                     p,t=train_rl_sboed(b,h,s,seed,out/'models',cap,observer=observer)
