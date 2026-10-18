@@ -212,6 +212,7 @@ def main(argv=None):
     parser.add_argument('--smoke',action='store_true')
     parser.add_argument('--evaluate-from',help='Explicit completed upstream vsOED run; evaluation only')
     parser.add_argument('--native-evaluate-from',help='Evaluation-only native checkpoint; never trains a policy')
+    parser.add_argument('--e1-confirmation-gate',help='Sealed checkpoint, source, analysis and untouched-bank registry')
     parser.add_argument('--evaluation-relaxed-routing',action='store_true',help='Diagnostic relaxed family routing on the same saved evaluation bank')
     parser.add_argument('--evaluation-cases',help='Frozen NPZ truth/noise arrays for portable pairing')
     parser.add_argument('--evaluation-bank',help='Frozen NPY contrastive parameter bank')
@@ -245,6 +246,9 @@ def main(argv=None):
     raw=yaml.safe_load(config_path.read_text())
     raw['_config_path']=str(config_path.resolve())
     raw.setdefault('research',{})
+    if args.e1_confirmation_gate:
+        from src.research.e1_confirmation import main as confirmed_evaluation
+        return confirmed_evaluation(args,raw,root)
     if args.native_evaluate_from:
         from src.research.native_checkpoint_evaluation import main as evaluate_native
         return evaluate_native(args,raw,root)
