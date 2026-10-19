@@ -38,7 +38,7 @@ research:
     moe_specialist_budget_fraction: 0.25
     moe_density_updates: 4
     updates: 31250
-    batch_size: 32
+    batch_size: 64
     learning_rate: 0.0003
     training_bound: 1
     primary_episode_budget: 1
@@ -61,7 +61,6 @@ research:
     source: User-provided ChatGPT research plan
     horizons:
     - 5
-    - 10
     training_repetitions: 5
     test_trajectories: 2048
     routing: four-expert DSelect1 sparse MoE
@@ -79,7 +78,7 @@ research:
     moe_architecture: same sPCE-only sparse policy as location; no auxiliary networks
     data_source: on-the-fly deterministic SIR ODE; no finite latent bank
     legacy_results: Separate provenance only; discrete bank metrics not pooled
-    scope: implementation and bounded CPU validation; full training not launched
+    scope: E1 T5 fixed-budget development followed by replication
   training_episode_cap: 1000000
   journal_protocol:
     version: validation_convergence_v1
@@ -98,7 +97,7 @@ research:
     - 104
     - 105
     evaluation_seeds:
-    - 8831001
+    - 1002
     previously_used_evaluation_seeds:
     - 1001
     validation:
@@ -188,8 +187,7 @@ research:
       initially_frozen: true
       total_cost_includes_base: true
     independent_seeds_required: 5
-    development_resource_gate: bounded cost probes only until measured estimates and
-      total resource budget recorded
+    development_resource_gate: measured GPU forward/backward 0.798 seconds per batch64; seed101 approved
     native_fidelity_required: true
     native_vsoed_profile:
       updates: 7810

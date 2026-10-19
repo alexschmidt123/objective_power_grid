@@ -145,6 +145,7 @@ def run(args):
     from flax import serialization
     (out/'scorebed_official_score.msgpack').write_bytes(serialization.to_bytes(score._score_variables_from_state()))
     data=dict(training='official_ScoreBED_JAX_score_matching_and_score_EIG_gradient',upstream_commit=COMMIT,
+        logical_primary_ODE_stage_evaluations=(initialization+score_spent+policy_spent)*args.horizon,minimum_primary_RK4_steps=(initialization+score_spent+policy_spent)*args.horizon*sir['integration_steps_per_stage'],solver_work_note='Lower bound on primal solver work; adaptive subdivisions and autodiff extra work are not claimed as exact FLOPs',
         reported_policy_parameters='params_ema',random_streams='native derive_key score_trainer and policy_trainer/restart0',
         generated_training_trajectories=initialization+score_spent+policy_spent,training_forward_trajectories=initialization+score_spent+policy_spent,
         contrast_training_trajectories=0,training_trajectory_budget=budget,training_budget_unit='primary_episodes',

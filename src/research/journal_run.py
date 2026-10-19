@@ -107,6 +107,10 @@ def main(args,raw,root):
             if 'optimization_seconds' in t:
                 t['native_elapsed_seconds']=t['training_seconds'];t['training_seconds']=t['optimization_seconds'];t['total_offline_seconds']=t['training_seconds']+t['validation_seconds']
             t['journal_protocol']=protocol['version'];t['training_cap_is_not_target']=protocol.get('checkpoint_selection_mode')!='final_fixed_budget'
+            if b.name=='sir_ode':
+                t['ode_forward_steps']=None if method=='scorebed' else b.ode_forward_steps
+                t['ode_forward_steps_scope']='actual adaptive RK4 primal steps in shared Torch simulator; gradient/replay work reported separately' if method!='scorebed' else 'JAX worker uses a separate solver; adaptive step counter unavailable, never reported as zero'
+                t['minimum_RK4_steps_per_stage']=b.steps
             t['effective_training_settings']=s
             t['resume_scope']='Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed'
             t['historical_runtime_overlap']='New runs are serialized; historical timings require separate provenance'
@@ -115,7 +119,13 @@ def main(args,raw,root):
             if checkpoint.exists():t['checkpoint_sha256']=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
             write_json(out/'models'/f'{method}_training.json',t)
             for es in evaluation_seeds:
-                rows,summary=evaluate(b,p,method,h,settings,es,t,out,paper=True,infer_parameters=False)
+                saved_draws=None
+                if args.evaluation_cases or args.evaluation_bank:
+                    if not args.evaluation_cases or not args.evaluation_bank or es!=1001:raise ValueError('Provide both frozen development arrays and seed1001')
+                    import numpy as np
+                    case_arrays=np.load(args.evaluation_cases)
+                    saved_draws=dict(truth=torch.from_numpy(case_arrays['truth']).double(),noise=torch.from_numpy(case_arrays['noise']).double(),contrasts=torch.from_numpy(np.load(args.evaluation_bank)).double())
+                rows,summary=evaluate(b,p,method,h,settings,es,t,out,paper=True,infer_parameters=False,evaluation_draws=saved_draws)
                 summary.update(convergence_status=t['convergence_status'],phase=phase,workability_only=args.smoke)
                 write_json(out/'eval'/f'{method}_seed{es}.json',rows);summaries.append(summary);results[(method,es)]=rows
         write_json(out/'summary.json',summaries);plot_results(out,results,methods,evaluation_seeds,h)

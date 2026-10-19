@@ -115,6 +115,7 @@ class SIR(Benchmark):
         self.prior_variance = ((math.exp(self.log_std**2)-1)
                                * (2*self.log_mean+self.log_std**2).exp())
         self.calls = 0
+        self.ode_forward_steps = 0
         if self.steps < 1 or not 0 < self.i0 < self.population or self.gap <= 0:
             raise ValueError('Invalid SIR integration/initial/spacing settings')
 
@@ -151,6 +152,7 @@ class SIR(Benchmark):
         duration = action[..., 0] - state[..., 3]
         counts = torch.maximum(torch.full_like(duration, self.steps, dtype=torch.long),
                                torch.ceil(duration.detach()*theta.detach().sum(-1)/.2).long())
+        self.ode_forward_steps += int(counts.sum())
         if torch.any(duration < 0) or int(counts.max()) > 20000:
             raise ValueError('SIR invalid time or excessively stiff prior draw')
         if self.execution_backend == 'fused_rk4' and theta.is_cuda:
