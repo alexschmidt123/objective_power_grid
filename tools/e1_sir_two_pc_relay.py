@@ -63,22 +63,7 @@ wrapper='import subprocess,pathlib; p=subprocess.run('+repr(cmd)+'); pathlib.Pat
 f=log.open('x');p=subprocess.Popen([str(Path.home()/'miniconda3/envs/mocu_optimized/bin/python'),'-u','-c',wrapper],cwd=r,stdout=f,stderr=subprocess.STDOUT,stdin=subprocess.DEVNULL,start_new_session=True)
 (c/'metadata/{stem}_pid.json').write_text(json.dumps(dict(pid=p.pid,command=cmd)));print('E1JSON='+json.dumps(dict(pid=p.pid,command=cmd)))''')
 def main():
- note('waiting_corrected_ScoreBED101')
- score=wait('ubuntu-pc',OLDW['ubuntu-pc']+'/'+COR+'/metadata/score101_complete.json')
- assert score['status']=='complete',score
- info=transfer('ubuntu-pc','labpc',OLDW['ubuntu-pc']+'/'+COR,'sir_corrected101_worker_complete')
- result=extract('labpc',OLDW['labpc']+'/'+COR+'/worker_ubuntu','sir_corrected101_worker_complete',info)
- remote('labpc',f'''from pathlib import Path
-import json
-c=Path({W['labpc']+'/'+REL!r});s=Path({OLDW['labpc']+'/'+COR+'/worker_ubuntu/sir/seed101/scorebed'!r});t=json.loads((s/'models/scorebed_training.json').read_text());assert t['generated_training_trajectories']==1000000 and t['sir_score_adapter_revision']==2
-(c/'metadata/corrected_score101_import_verified.json').write_text(json.dumps(dict(status='PASS',run=str(s),transfer={result!r})))
-old=c/'seed101_sources/scorebed.json';old.rename(c/'seed101_sources/scorebed_original_development.json');__import__('shutil').copy2(s/'eval/scorebed_seed1001.json',old)''')
- # Worker uses a clean checkout of the exact source already approved on LabPC.
- note('launching_worker_precision_check');launch('ubuntu-pc','worker-resolution','worker_precision')
- check=wait('ubuntu-pc',W['ubuntu-pc']+'/'+REL+'/metadata/worker_precision_exit.json',max_hours=12);assert check['exit_code']==0,check
- paths=['metadata/worker_precision_complete.json','reports/sir_1m_4m_resolution.csv','reports/sir_1m_4m_pairs.csv']+[f'evaluations/{m}_N128_1m_4m.npz' for m in ['random','fixed','dad','rl_sboed','vsoed','scorebed','moe','resmoe','switchmoe','switchresmoe']]
- info=transfer('ubuntu-pc','labpc',W['ubuntu-pc']+'/'+REL,'sir_worker_precision',paths)
- extract('labpc',W['labpc']+'/'+REL,'sir_worker_precision',info,merge=True)
+ note('E1_1M_resume_corrected_score_already_imported_4M_deferred')
  note('waiting_full2048_precision')
  p=HOME['labpc']+'/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/metadata/resolution_N2048_complete.json'
  wait('labpc',p,max_hours=12)
@@ -88,6 +73,8 @@ from pathlib import Path
 p=subprocess.run([str(Path.home()/'miniconda3/envs/mocu_optimized/bin/python'),'tools/e1_sir_replication.py','freeze'],cwd={W['labpc']!r});assert p.returncode==0''')
  assert read('labpc',W['labpc']+'/'+REL+'/metadata/replication_gate.json')['status']=='PASS'
  info=transfer('labpc','ubuntu-pc',W['labpc']+'/'+REL,'sir_frozen_replication')
+ # Preserve the old prepared4M bank manifest before master-authoritative E1 import.
+ remote('ubuntu-pc',f"from pathlib import Path; p=Path({W['ubuntu-pc']+'/'+REL+'/metadata/bank_manifest.json'!r}); p.rename(p.with_name('bank_manifest_before_E1_1m_freeze.json')) if p.exists() else None")
  # Preserve superseded worker coordinator status before the master-authoritative freeze import.
  remote('ubuntu-pc',f"from pathlib import Path; p=Path({W['ubuntu-pc']+'/'+REL+'/metadata/master_status.json'!r}); p.rename(p.with_name('master_status_before_freeze.json')) if p.exists() else None")
  extract('ubuntu-pc',W['ubuntu-pc']+'/'+REL,'sir_frozen_replication',info,merge=True)
