@@ -41,6 +41,9 @@ def main(args,raw,root):
     handle=(out/'logs/run_log.log').open('w');sys.stdout=Tee(sys.stdout,handle);sys.stderr=Tee(sys.stderr,handle)
     raw=copy.deepcopy(raw);raw['experiment'].update(step_number=h,methods=methods)
     metadata=dict(protocol='journal_validation_convergence_v1',phase=phase,smoke=args.smoke,workability_only=args.smoke,train_seed=seed,eval_seeds=evaluation_seeds,horizon=h,methods=methods,settings=settings,benchmark=raw,hardware=hardware_info(),checkpoint_selection='final_predeclared_fixed_budget' if protocol.get('checkpoint_selection_mode')=='final_fixed_budget' else 'best_predeclared_validation_EIG',untouched_final_evaluation=False,parameter_inference_enabled=False)
+    if args.evaluation_cases or args.evaluation_bank:
+        if not args.evaluation_cases or not args.evaluation_bank:raise ValueError('Both paired evaluation files are required')
+        metadata['paired_evaluation_files']={key:dict(path=str(Path(path).resolve()),sha256=hashlib.sha256(Path(path).read_bytes()).hexdigest()) for key,path in [('cases',args.evaluation_cases),('contrasts',args.evaluation_bank)]}
     write_json(out/'run_config.json',metadata);freeze_source(root,out)
     try:
         validation_device=validation_cfg.get('device','cpu')

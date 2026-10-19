@@ -75,11 +75,13 @@ def freeze():
  for p in source:
   dst=C/'frozen_source'/p.relative_to(R);dst.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,dst)
  j.write(C/'location_freeze.json',dict(protocol_sha256=sha(C/'protocol.json'),written_protocol_sha256=sha(C/'journal_protocol.md')))
- j.write(C/'metadata/replication_gate.json',dict(status='PASS',contrasts=L,systems=2048,precision=proof,scientific_source='native algorithms plus verified SIR adapters; original seed101 source checked',score101_correction_complete=True));status('frozen_ready_for_replication')
+ j.write(C/'metadata/replication_gate.json',dict(status='PASS',bank_manifest_sha256=sha(C/'metadata/bank_manifest.json'),contrasts=L,systems=2048,precision=proof,scientific_source='native algorithms plus verified SIR adapters; original seed101 source checked',score101_correction_complete=True));status('frozen_ready_for_replication')
 
 def run(host):
  lock=(C/'metadata'/f'{host}.lock').open('w');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
- assert j.read(C/'metadata/replication_gate.json')['status']=='PASS';j.C=C;j.NAMES['rl_sboed']='Native RL-sBOED';j.guard()
+ gate=j.read(C/'metadata/replication_gate.json');assert gate['status']=='PASS' and gate['bank_manifest_sha256']==sha(C/'metadata/bank_manifest.json')
+ bank_manifest=j.read(C/'metadata/bank_manifest.json');assert all(sha(C/'evaluations'/p)==v for p,v in bank_manifest['sha256'].items())
+ j.C=C;j.NAMES['rl_sboed']='Native RL-sBOED';j.guard()
  assert not subprocess.check_output(['nvidia-smi','--query-compute-apps=pid','--format=csv,noheader'],text=True).strip()
  for seed in [102,103,104,105]:
   base=None
