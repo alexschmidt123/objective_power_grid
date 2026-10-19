@@ -69,7 +69,8 @@ def run(args):
     journal_plan=json.loads(pathlib.Path(args.journal_plan).read_text()) if args.journal_plan else None
     score_count=8 if tiny else (min(int(journal_plan['score_pretraining_episodes']),remaining-1) if journal_plan else int(.7*remaining))
     policy_count=remaining-score_count
-    cfg=config(args.horizon,math.ceil(score_count/batch),batch)
+    from src.research.sir_scorebed_compat import sir_score_config
+    cfg=sir_score_config(config(args.horizon,math.ceil(score_count/batch),batch))
     cfg['bed_model']['init_seed']=args.seed
     sir=json.loads(pathlib.Path(args.sir_config).read_text())
     cfg['bed_model']=dict(sir,name='sir_ode',T=args.horizon)
@@ -146,6 +147,7 @@ def run(args):
     (out/'scorebed_official_score.msgpack').write_bytes(serialization.to_bytes(score._score_variables_from_state()))
     data=dict(training='official_ScoreBED_JAX_score_matching_and_score_EIG_gradient',upstream_commit=COMMIT,
         logical_primary_ODE_stage_evaluations=(initialization+score_spent+policy_spent)*args.horizon,minimum_primary_RK4_steps=(initialization+score_spent+policy_spent)*args.horizon*sir['integration_steps_per_stage'],solver_work_note='Lower bound on primal solver work; adaptive subdivisions and autodiff extra work are not claimed as exact FLOPs',
+        sir_score_adapter_revision=2,potential_hidden_dim=cfg['score_network']['potential_hidden_dim'],score_dimension_compatibility='Pinned native potential_hidden_dim avoids scalar-data/scalar-time LayerNorm degeneracy; unchanged Transformer, loss, optimizers and training allocation',
         reported_policy_parameters='params_ema',random_streams='native derive_key score_trainer and policy_trainer/restart0',
         generated_training_trajectories=initialization+score_spent+policy_spent,training_forward_trajectories=initialization+score_spent+policy_spent,
         contrast_training_trajectories=0,training_trajectory_budget=budget,training_budget_unit='primary_episodes',
