@@ -71,7 +71,8 @@ def main():
  remote('labpc',f'''from pathlib import Path
 import json
 c=Path({W['labpc']+'/'+REL!r});s=Path({OLDW['labpc']+'/'+COR+'/worker_ubuntu/sir/seed101/scorebed'!r});t=json.loads((s/'models/scorebed_training.json').read_text());assert t['generated_training_trajectories']==1000000 and t['sir_score_adapter_revision']==2
-(c/'metadata/corrected_score101_import_verified.json').write_text(json.dumps(dict(status='PASS',run=str(s),transfer={result!r})))''')
+(c/'metadata/corrected_score101_import_verified.json').write_text(json.dumps(dict(status='PASS',run=str(s),transfer={result!r})))
+old=c/'seed101_sources/scorebed.json';old.rename(c/'seed101_sources/scorebed_original_development.json');__import__('shutil').copy2(s/'eval/scorebed_seed1001.json',old)''')
  # Worker uses a clean checkout of the exact source already approved on LabPC.
  note('launching_worker_precision_check');launch('ubuntu-pc','worker-resolution','worker_precision')
  check=wait('ubuntu-pc',W['ubuntu-pc']+'/'+REL+'/metadata/worker_precision_exit.json',max_hours=12);assert check['exit_code']==0,check
@@ -87,7 +88,8 @@ from pathlib import Path
 p=subprocess.run([str(Path.home()/'miniconda3/envs/mocu_optimized/bin/python'),'tools/e1_sir_replication.py','freeze'],cwd={W['labpc']!r});assert p.returncode==0''')
  assert read('labpc',W['labpc']+'/'+REL+'/metadata/replication_gate.json')['status']=='PASS'
  info=transfer('labpc','ubuntu-pc',W['labpc']+'/'+REL,'sir_frozen_replication')
- # Existing worker precision artifacts must match; differing registry metadata is an error.
+ # Preserve superseded worker coordinator status before the master-authoritative freeze import.
+ remote('ubuntu-pc',f"from pathlib import Path; p=Path({W['ubuntu-pc']+'/'+REL+'/metadata/master_status.json'!r}); p.rename(p.with_name('master_status_before_freeze.json')) if p.exists() else None")
  extract('ubuntu-pc',W['ubuntu-pc']+'/'+REL,'sir_frozen_replication',info,merge=True)
  for host in HOME:
   remote(host,f'''import sys
