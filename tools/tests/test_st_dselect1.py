@@ -67,10 +67,10 @@ def test_st_computes_unselected_proposals_for_router_but_does_not_train_them():
     for h in hooks:h.remove()
     assert calls==[3]
 
-@pytest.mark.parametrize('variant',['resmoe','switchmoe','switchresmoe'])
-def test_st_not_enabled_for_other_variants(variant):
-    with pytest.raises(ValueError,match='restricted to moe'):
-        MoESBOEDPolicy(variant,benchmark(),5,training_routing_mode='straight_through')
+def test_st_switching_extension_is_available():
+    p=MoESBOEDPolicy('switchmoe',benchmark(),5,training_routing_mode='straight_through')
+    assert p.config['training_routing_mode']=='straight_through'
+
 
 def test_unselected_expert_changes_router_surrogate_without_changing_hard_action():
     _,p=pair();p.train()

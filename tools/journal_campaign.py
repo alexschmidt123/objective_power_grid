@@ -204,7 +204,7 @@ def sample_gpu(path,stop):
         except Exception:pass
         stop.wait(10)
 
-def run_phase(benchmark,seed,method,base=None):
+def run_phase(benchmark,seed,method,base=None,timeout_seconds=None,evaluation_cases=None,evaluation_bank=None):
     registry=read(C/'registry.json');found=next((e for e in registry if e['benchmark']==benchmark and e['seed']==seed and e['method']==method),None)
     if found:return found
     guard();out=C/benchmark/f'seed{seed}'/method;out.parent.mkdir(parents=True,exist_ok=True)
@@ -223,12 +223,15 @@ def run_phase(benchmark,seed,method,base=None):
     if method in FAMILY:command+=['--variant',method]
     else:command+=['--methods',native_method(method)]
     if base:command+=['--base-checkpoint',str(base)]
+    if evaluation_cases or evaluation_bank:
+        if not evaluation_cases or not evaluation_bank:raise ValueError('Both saved evaluation arrays are required')
+        command+=['--evaluation-cases',str(evaluation_cases),'--evaluation-bank',str(evaluation_bank)]
     write(out.parent/(method+'_command.json'),dict(command=command,training_cap=cap))
     stop=threading.Event();watch=threading.Thread(target=sample_gpu,args=(out.parent/(method+'_gpu.csv'),stop),daemon=True)
     started=time.monotonic();watch.start();status='failed';failure=None
     try:
         with (out.parent/(method+'_launcher.log')).open('w') as log:
-            subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=10800 if benchmark=='location' else 90000)
+            subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=timeout_seconds if timeout_seconds is not None else (10800 if benchmark=='location' else 90000))
         name=native_method(method);t=read(out/'models'/(name+'_training.json'))
         if method!='random':
             assert t['generated_training_trajectories']==cap and t['checkpoint_selection']=='final_predeclared_fixed_budget'

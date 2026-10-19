@@ -60,8 +60,10 @@ def run(args):
     tiny=args.smoke;batch=4 if tiny else args.batch_size
     if batch<1:raise ValueError('Positive minibatch required')
     stats_count=4 if tiny else 10000
-    initialization=stats_count+4+10
-    budget=34 if tiny else args.budget
+    restarts=args.restarts
+    if restarts<1:raise ValueError('Positive restart count required')
+    initialization=stats_count+4+10*restarts
+    budget=initialization+16 if tiny else args.budget
     remaining=budget-initialization
     if remaining<2:raise ValueError('ScoreBED cap cannot cover initialization')
     journal_plan=json.loads(pathlib.Path(args.journal_plan).read_text()) if args.journal_plan else None
@@ -70,12 +72,20 @@ def run(args):
     cfg=config(args.horizon,math.ceil(score_count/batch),batch)
     cfg['bed_model']['init_seed']=args.seed
     cfg['common_design_bounds']=args.design_bounds
+    cfg['n_restarts']=restarts
+    if args.reference_sampler:
+        cfg['score']['design_sampler_type']='time_corr_random_scale_gaussian'
+        cfg['score']['design_sampler_kwargs']={'scale_min':.2,'scale_max':5.,'time_corr_rho_min':.7,'time_corr_rho_max':1.}
     (out/'scorebed_environment.txt').write_text(subprocess.check_output([sys.executable,'-m','pip','freeze'],text=True))
     (out/'scorebed_official_config.json').write_text(json.dumps(cfg,indent=2))
     # Use the official standardisation routine and charge its simulations.
     target=CompatibleLocationFinding(T=args.horizon,d=2,k=2,init_seed=args.seed,sigma=.5,standardise=False,design_bounds=args.design_bounds)
     target.compute_standardisation(stats_count)
+    np.savez(out/'scorebed_normalization.npz',**{k:np.asarray(v) for k,v in target.get_std_stats_dict().items()})
     key=jax.random.key(args.seed)
+    if args.reference_sampler:
+        from policy_learning.utils.jax import derive_key
+        key=derive_key(args.seed,'score_trainer')
     score,key=load_score_trainer(key,cfg,target,callbacks=[])
     score_spent=0;records=[]
     while score_spent<score_count:
@@ -90,25 +100,45 @@ def run(args):
             records.append(row);print('ScoreBED official',row,flush=True)
     check_tree(score.training_state.params,'score parameters')
     data_score,design_score=score.get_unbatched_score_fns()
-    policy,key=load_policy_trainer(key,cfg,target,grad_fn=noop,callbacks=[])
-    policy_spent=0;last_n=None
-    while policy_spent<policy_count:
-        n=min(batch,policy_count-policy_spent)
-        if n!=last_n:
-            grad_fn=get_grad_estimate_fn(policy.policy_network,target,data_score,design_score,N=n,outer_batch_size=n,M=1024,estimate_type='score')
-            policy.update_grad_fn(grad_fn);last_n=n
-        policy.training_state,metrics,_=policy.train_step(policy.training_state)
-        check_tree(metrics,'policy metrics')
-        policy_spent+=n;step=int(policy.training_state.step)
-        if args.journal_plan:
+    restart_records=[];restart_params=[];policy_spent=0;policy_updates=0
+    for restart in range(restarts):
+        if args.reference_sampler:key=derive_key(args.seed,'policy_trainer',restart)
+        policy,key=load_policy_trainer(key,cfg,target,grad_fn=noop,callbacks=[])
+        quota=policy_count//restarts+int(restart<policy_count%restarts)
+        local_spent=0;last_n=None
+        while local_spent<quota:
+            n=min(batch,quota-local_spent)
+            if n!=last_n:
+                grad_fn=get_grad_estimate_fn(policy.policy_network,target,data_score,design_score,N=n,outer_batch_size=n,M=1024,estimate_type='score')
+                policy.update_grad_fn(grad_fn);last_n=n
+            policy.training_state,metrics,_=policy.train_step(policy.training_state)
+            check_tree(metrics,'policy metrics')
+            policy_spent+=n;local_spent+=n;step=int(policy.training_state.step);policy_updates+=1
+            if step%50==0 or local_spent==quota:
+                row=dict(phase='policy',restart=restart,step=step,episodes=policy_spent,restart_episodes=local_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
+                records.append(row);print('ScoreBED official',row,flush=True)
+        from src.research.baseline_fidelity import scorebed_reported_params
+        params=scorebed_reported_params(policy.training_state,args.reference_sampler)
+        restart_params.append(params)
+        flat={f'{section}/{layer}/{name}':np.asarray(value) for section,leaves in params.items() for layer,values in leaves.items() for name,value in values.items()}
+        np.savez(out/f'scorebed_restart{restart}_policy.npz',**flat)
+        result=dict(restart=restart,primary_policy_episodes=quota,final_update=step)
+        if args.journal_plan and restarts>1:
+            # Native best-of-final-restarts reporting, selected on independent
+            # diagnostic validation, never development/final evaluation draws.
+            from src.research.baseline_fidelity import scorebed_restart_validation
+            plan=dict(journal_plan);plan['validation']=scorebed_restart_validation(plan,tiny)
+            folder=out/f'restart{restart}_validation';folder.mkdir(exist_ok=False)
+            plan_path=folder/'plan.json';plan_path.write_text(json.dumps(plan,indent=2))
             from src.research.journal_scorebed_bridge import maybe_validate
-            if maybe_validate(policy.training_state.params,args.journal_plan,initialization+score_spent+policy_spent,step,start,force=policy_spent>=policy_count):break
-        if step%50==0 or policy_spent==policy_count:
-            row=dict(phase='policy',step=step,episodes=policy_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
-            records.append(row);print('ScoreBED official',row,flush=True)
-    params=policy.training_state.params
+            maybe_validate(params,str(plan_path),initialization+score_spent+policy_spent,step,start,force=True)
+            state=json.loads((folder/'scorebed_journal_progress.json').read_text());result['validation_eig']=state['records'][-1]['eig']
+        restart_records.append(result)
+    chosen=max(range(restarts),key=lambda i:restart_records[i].get('validation_eig',-i))
+    params=restart_params[chosen]
     if args.journal_plan:
-        from src.research.journal_scorebed_bridge import restored_params
+        from src.research.journal_scorebed_bridge import maybe_validate,restored_params
+        maybe_validate(params,args.journal_plan,initialization+score_spent+policy_spent,policy_updates,start,force=True)
         params=restored_params(params,args.journal_plan)
     check_tree(params,'policy parameters')
     arrays={}
@@ -139,14 +169,18 @@ def run(args):
         contrast_training_trajectories=0,training_trajectory_budget=budget,training_budget_unit='primary_episodes',
         initialization_trajectories=initialization,standardisation_trajectories=stats_count,
         score_training_trajectories=score_spent,policy_training_trajectories=policy_spent,
-        score_batch=batch,actual_score_updates=int(score.training_state.step),actual_policy_updates=int(policy.training_state.step),
+        reported_policy_parameters='params_ema' if args.reference_sampler else 'params',
+        policy_ema_rate=float(policy.training_state.ema_rate),
+        random_streams='official derive_key: score_trainer, policy_trainer/restart' if args.reference_sampler else 'historical sequential split keys',
+        restart_selection='best independent-validation EIG among final EMA policies' if restarts>1 else 'single final policy',
+        score_batch=batch,actual_score_updates=int(score.training_state.step),actual_policy_updates=policy_updates,policy_restarts=restart_records,selected_restart=chosen,reference_sampler=args.reference_sampler,
         training_seconds=time.perf_counter()-start,history=records,checkpoint_selection='final',
         architecture='official_4layer_256dim_8head_RFF_conservative_transformer',policy_architecture='official_DADNet_256_16_sum_encoder',
-        adaptations='1million total primary episodes including normalization and initialization; one fresh policy; 70percent remaining budget score pretraining; smaller minibatches under capped budget; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions',
+        adaptations='1million total primary episodes including normalization and initialization; predeclared native final-policy restarts and paper AR1 sampler when enabled; capped score/policy allocation; independent validation restart selection; smaller minibatches under capped budget; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions',
         design_bounds=args.design_bounds,bounded_mapping='lo+(hi-lo)*sigmoid(raw_policy_output); teacher design sampler mapped into same box' if args.design_bounds else None,
         runtime=dict(jax=jax.__version__,devices=[str(d) for d in jax.devices()]))
     if not args.journal_plan and data['generated_training_trajectories']!=budget:raise AssertionError('Episode accounting mismatch')
     (out/'scorebed_official_training.json').write_text(json.dumps(data,indent=2))
     print('SCOREBED_OFFICIAL_TRAINING_COMPLETE',flush=True)
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('--output',required=True);ap.add_argument('--journal-plan');ap.add_argument('--budget',type=int,default=1000000);ap.add_argument('--horizon',type=int,default=30);ap.add_argument('--seed',type=int,default=101);ap.add_argument('--batch-size',type=int,default=64);ap.add_argument('--smoke',action='store_true');ap.add_argument('--design-bounds',type=float,nargs=2);run(ap.parse_args())
+    ap=argparse.ArgumentParser();ap.add_argument('--output',required=True);ap.add_argument('--journal-plan');ap.add_argument('--budget',type=int,default=1000000);ap.add_argument('--horizon',type=int,default=30);ap.add_argument('--seed',type=int,default=101);ap.add_argument('--batch-size',type=int,default=64);ap.add_argument('--smoke',action='store_true');ap.add_argument('--design-bounds',type=float,nargs=2);ap.add_argument('--reference-sampler',action='store_true');ap.add_argument('--restarts',type=int,default=1);run(ap.parse_args())

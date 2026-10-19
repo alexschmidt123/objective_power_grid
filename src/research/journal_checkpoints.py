@@ -17,8 +17,9 @@ def load_checkpoint(path,benchmark):
  if kind=='dad':
   if benchmark.name=='sir_ode':
    from src.research.sir_dad import SIRSumDAD
-   if saved.get('architecture')!='DAD_sum_encoder_256_16_SIR_normalized_history':raise ValueError('Historical generic SIR policy is not silently relabelled as sum DAD')
-   p=SIRSumDAD(h)
+   architecture=saved.get('architecture')
+   if architecture not in {'DAD_sum_encoder_256_16_SIR_normalized_history','DAD_sum_encoder_256_16_SIR_shared_empty_history'}:raise ValueError('Historical generic SIR policy is not silently relabelled as sum DAD')
+   p=SIRSumDAD(h,first_design_revision=2 if architecture=='DAD_sum_encoder_256_16_SIR_normalized_history' else 1)
   else:
    from src.research.dad_location_policy import LocationDAD
    p=LocationDAD(h,benchmark.action_scale,benchmark.obs_scale,first_design_revision=saved.get('policy_settings',{}).get('first_design_revision',1))
@@ -27,7 +28,13 @@ def load_checkpoint(path,benchmark):
   p=Policy(1+h*(benchmark.action_dim+benchmark.obs_dim+1),benchmark.action_dim,h,'fixed',saved.get('hidden',64))
  elif kind=='rl_sboed':
   from src.research.research_redq import RLPolicy
-  p=RLPolicy(benchmark,h)
+  if saved.get('architecture')=='published_RL_BOED_REDQ_SIR_ODE_native_v1':
+   from src.research.sir_native_rl import NativeSIRRLPolicy
+   p=NativeSIRRLPolicy(h,benchmark)
+  elif saved.get('architecture')=='published_RL_BOED_source_REDQ_native_v1':
+   from src.research.native_rl_reference import NativeRLPolicy
+   p=NativeRLPolicy(h)
+  else:p=RLPolicy(benchmark,h)
  elif kind=='scorebed':
   arrays=np.load(path.with_name('scorebed_official_policy.npz'))
   if benchmark.name=='sir_ode':

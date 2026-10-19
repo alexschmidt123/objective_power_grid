@@ -113,7 +113,7 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
         loss.backward()
         if refresh is not None and hasattr(policy,'first_design'):
             policy.first_design.grad=None
-        grad = torch.nn.utils.clip_grad_norm_(policy.policy_parameters() if hasattr(policy,'policy_parameters') else policy.parameters(),5.)
+        grad = torch.nn.utils.clip_grad_norm_(policy.policy_parameters() if hasattr(policy,'policy_parameters') else policy.parameters(),float('inf') if settings.get('spce_gradient_clip',5.) is None else settings.get('spce_gradient_clip',5.))
         if not torch.isfinite(grad):
             raise FloatingPointError('Nonfinite sPCE policy gradient')
         # Initially learn the gate against stable specialist proposals. Setting

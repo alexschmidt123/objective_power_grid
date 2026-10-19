@@ -19,7 +19,8 @@ g=jax.jit(jax.grad(lambda z:m.means(z,th).sum()))(x).block_until_ready()
 ref=a['time_jacobian'].sum((0,1,2))
 np.testing.assert_allclose(y,a['means'],rtol=1e-10,atol=1e-9)
 np.testing.assert_allclose(g,ref,rtol=2e-6,atol=1e-7)
-out=ROOT/'experiments/10162026/10162026_ubuntu_sir_execution/jax_gpu_equivalence.json'
+out=Path(sys.argv[1]) if len(sys.argv)>1 else ROOT/'experiments/10162026/10162026_ubuntu_sir_execution/jax_gpu_equivalence.json'
+out.parent.mkdir(parents=True,exist_ok=True)
 out.write_text(json.dumps(dict(status='passed',devices=[str(d) for d in jax.devices()],
     mean_max_absolute_error=float(np.max(abs(np.asarray(y)-a['means']))),
     gradient_max_absolute_error=float(np.max(abs(np.asarray(g)-ref))),
