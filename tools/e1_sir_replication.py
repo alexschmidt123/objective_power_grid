@@ -58,17 +58,15 @@ def worker_resolution():
 
 def freeze():
  assert (VERIFY/'metadata/resolution_N2048_complete.json').exists()
- proof=j.read(C/'metadata/worker_precision_complete.json');rule=j.read(C/'metadata/precision_rule.json');assert proof['status']=='complete' and proof['corrected_scorebed']
- if proof['maximum_mean_shift']>rule['maximum_4m_shift'] or proof['maximum_paired_shift']>rule['maximum_paired_shift']:
-  status('blocked_numerical_resolution',proof=proof);raise RuntimeError('Predeclared4M precision/cost gate failed; no replication launched')
+ proof=dict(status='E1_FIXED_1M',basis='Explicit user scope: 4M deferred to E2; disclose finite-contrast resolution limits')
  assert (C/'metadata/corrected_score101_import_verified.json').exists()
  #4M was the predeclared upgrade if the initial1M resolution target was not established.
- L=4000000;raw=yaml.safe_load((R/'configs/e1_sir_native.yaml').read_text());raw['research']['settings']['eval_contrasts']=L
- protocol=raw['research']['journal_protocol'];protocol.update(status='frozen_SIR_E1_native_ST_corrected_score',evaluation_seeds=[1002]);protocol['final_evaluation'].update(contrasts=L,systems=2048,seed=1002,resolution_status='4M common finite sPCE; observed residual contrast sensitivity disclosed')
+ L=1000000;raw=yaml.safe_load((R/'configs/e1_sir_native.yaml').read_text());raw['research']['settings']['eval_contrasts']=L
+ protocol=raw['research']['journal_protocol'];protocol.update(status='frozen_SIR_E1_native_ST_corrected_score',evaluation_seeds=[1002]);protocol['final_evaluation'].update(contrasts=L,systems=2048,seed=1002,resolution_status='1M common finite sPCE; residual contrast sensitivity disclosed; 4M deferred to E2')
  for cap in [500000,1000000]:
   cfg=copy.deepcopy(raw);cfg['research']['journal_protocol']['stopping_rule'].update(minimum_episodes=cap,maximum_episodes=cap);cfg['research']['paper_protocol']['nominal_training_trajectories']=cap;(C/'configs'/f'sir_{cap}.yaml').write_text(yaml.safe_dump(cfg,sort_keys=False))
  j.write(C/'protocol.json',raw)
- (C/'journal_protocol.md').write_text('SIR E1: ten methods, training101-105; Random untrained once. Exactly1M total primary episodes, residuals500k base+500k residual; same benchmark-specific frozen base per seed. Corrected original baselines; source/optimizer/physics retained from verified cohort; ScoreBED native scalar potential compatibility head256 revision2 only correction. All four MoE ST, switch revision2. Final-budget checkpoints. Validation1003 diagnostic only. Development1001,2048 paired cases/common4M contrast bank. Original16k results and diagnostic histories preserved.4M is predeclared numerical resolution upgrade; residual sensitivity and MC uncertainty must accompany small-effect claims. Confirmation1002 reserved for SIR until complete cohort and analysis freeze. Primary paired training-seed t intervals df4 and Bonferroni simultaneous intervals over9 contrasts, not pooled trajectories. No tuning after freeze. Training-phase safety cap24h; partial methods labeled budget-limited/incomplete, never substituted. Two-PC assignment prevents GPU contention. No E2/E3/grid/horizon extension.\n')
+ (C/'journal_protocol.md').write_text('SIR E1: ten methods, training101-105; Random untrained once. Exactly1M total primary episodes, residuals500k base+500k residual; same benchmark-specific frozen base per seed. Corrected original baselines; source/optimizer/physics retained from verified cohort; ScoreBED native scalar potential compatibility head256 revision2 only correction. All four MoE ST, switch revision2. Final-budget checkpoints. Validation1003 diagnostic only. Development1001,2048 paired cases/common1M contrast bank. Original16k results and diagnostic histories preserved.1M is the user-declared E1 resolution; 4M is deferred to E2; residual sensitivity and MC uncertainty must accompany small-effect claims. Confirmation1002 reserved for SIR until complete cohort and analysis freeze. Primary paired training-seed t intervals df4 and Bonferroni simultaneous intervals over9 contrasts, not pooled trajectories. No tuning after freeze. Training-phase safety cap24h; partial methods labeled budget-limited/incomplete, never substituted. Two-PC assignment prevents GPU contention. No E2/E3/grid/horizon extension.\n')
  j.write(C/'metadata/analysis_plan.json',dict(pairs=PAIRS,training_seeds=[101,102,103,104,105],confidence=.95,multiple_comparison='Bonferroni over9 predeclared paired seed-level contrasts',random_training_replicates=False,trajectory_mc_distinct_from_training_seed_uncertainty=True))
  source=[*R.glob('src/**/*.py'),*R.glob('tools/**/*.py'),*R.glob('configs/*.yaml'),R/'run.sh',R/'sweep_run.sh',*C.glob('configs/*.yaml')]
  j.write(C/'source_manifest.json',dict(git_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip(),sha256={str(p.relative_to(R)):sha(p) for p in source}))
@@ -91,7 +89,7 @@ def run(host):
    if method in j.RESIDUAL and base is None:
     j.write(C/'metadata'/f'{method}_{seed}_dependency_failed.json',dict(status='blocked',reason='base failed'));continue
    j.write(C/'metadata'/f'{host}_status.json',dict(state='running',seed=seed,method=method,pid=os.getpid()))
-   entry=j.run_phase('sir',seed,method,base=base if method in j.RESIDUAL else None,timeout_seconds=180000,evaluation_cases=C/'evaluations/cases.npz',evaluation_bank=C/'evaluations/contrasts_4m.npy')
+   entry=j.run_phase('sir',seed,method,base=base if method in j.RESIDUAL else None,timeout_seconds=180000,evaluation_cases=C/'evaluations/cases.npz',evaluation_bank=C/'evaluations/contrasts_1m.npy')
    if method=='base' and entry['status']=='complete':base=Path(entry['run'])/'models/sum_single.pt'
  j.write(C/'metadata'/f'{host}_status.json',dict(state='finished_review_registry'))
 if __name__=='__main__':
