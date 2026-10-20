@@ -16,7 +16,7 @@ from src.research.vendor.vsoed.utils import set_random_seed
 COMMIT = 'd0884f9ba30fbddc56618841c68af2f3bfe16539'
 
 
-from src.research.resource_ledger import with_training_ledger
+from src.research.resource_ledger import with_training_ledger,progress_ledger
 def compress_input(module,args):
     return (torch.asinh(args[0]),*args[1:])
 
@@ -194,6 +194,8 @@ def train_upstream_vsoed(benchmark, horizon, settings, seed, directory, profile,
                     if completed<=last_observed[0]:return
                     last_observed[0]=completed
                     episodes=cfg['initial_replay']+completed*cfg['new_trajectories']
+                    if completed%100==0 or completed==1:
+                        progress_ledger(directory,'vsOED',episodes,0,horizon,completed,time.perf_counter()-started,actor_optimizer_updates=native_updates['actor'],critic_optimizer_updates=native_updates['critic'],posterior_optimizer_updates=native_updates['posterior'],replay_batch_size=cfg['replay_batch'])
                     candidate=wrap(algorithm.actor_net)
                     if observer.check(candidate,episodes,completed,actor_opt,algorithm.actor_lr_scheduler,force=completed>=cfg['updates']):raise JournalStop()
                 logger.journal_callback=on_iteration

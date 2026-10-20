@@ -41,6 +41,11 @@ def with_training_ledger(record,horizon):
     vs="vsOED" in record.get("training","")
     replay=record.get("gradient_updates");batch=record.get("replay_batch")
     record["resource_ledger"]={"schema":2,"scope":"current training phase; base cost separately attributed","counts":{"fresh_complete_episodes":n,"true_parameter_stage_propagations":n*horizon,"contrast_parameter_stage_propagations":c*horizon,"scalar_conditional_log_density_evaluations":None if score else 0 if vs else (n+c)*horizon},"optimizer_updates":updates,"replay_transition_samples":replay*batch if replay is not None and batch is not None else None,"offline_seconds":record.get("training_seconds"),"validation_seconds":record.get("validation_seconds"),"base_training_seconds":record.get("base_training_seconds"),"ode_rhs_evaluations":None,"solver_backward_work":None,"gpu_occupancy_seconds":None,"nle_equivalent_proxy":None,"basis":"derived from native executed counters, not direct hardware measurement","limitations":["score-target and backward recomputation not counted","Unknown fields are not zero; walltime is not GPU occupancy"]}
+    ledger=record["resource_ledger"]
+    ledger["likelihood_gradient_work"]={"scalar_stage_terms":record.get("score_training_trajectories",0)*horizon if score and "score_training_trajectories" in record else None,"basis":"model-derived conditional-score target terms; excludes compiler/autodiff recomputation"}
+    if score and "score_training_trajectories" in record:
+        ledger["nle_equivalent_proxy"]={"value":record["score_training_trajectories"]*horizon,"unit":"conditional Gaussian stage terms differentiated for score targets","basis":"model estimate, not equal-cost hardware work"}
+    if vs:ledger["replay_work"]={"minibatch_trajectories":record.get("replay_batch_size"),"optimizer_steps":updates,"note":"Posterior steps may include stage-specific nets; stored data are not fresh episodes"}
     return record
 
 def progress_ledger(directory,method,episodes,contrasts,horizon,updates,seconds,**components):
