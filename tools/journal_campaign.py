@@ -214,8 +214,12 @@ def run_phase(benchmark,seed,method,base=None,timeout_seconds=None,evaluation_ca
         if (out/'exit_code').exists() and (out/'exit_code').read_text().strip()=='0':
             t=read(out/'models'/(native_method(method)+'_training.json'))
             expected=pilot_cfg['episodes'] if pilot_cfg else 0 if method=='random' else 500000 if method in (*RESIDUAL,'base') else 1000000
-            assert t['generated_training_trajectories']==expected
-            if method!='random':assert t['checkpoint_selection']=='final_predeclared_fixed_budget'
+            if t.get('compute_budget') is None:
+                assert t['generated_training_trajectories']==expected
+                if method!='random':assert t['checkpoint_selection']=='final_predeclared_fixed_budget'
+            else:
+                assert t['checkpoint_selection']=='latest_budget_eligible_checkpoint'
+                assert t['selected_checkpoint']['compute_checkpoint']['eligible']
             entry=dict(method=method,native_method=native_method(method),benchmark=benchmark,seed=seed,run=str(out),status='complete',provenance='recovered_completed_phase_after_coordinator_interruption')
             registry.append(entry);write(C/'registry.json',registry);return entry
         raise RuntimeError('Partial/unregistered phase exists; preserve and inspect before any resume: '+str(out))
@@ -233,14 +237,18 @@ def run_phase(benchmark,seed,method,base=None,timeout_seconds=None,evaluation_ca
     started=time.monotonic();watch.start();status='failed';failure=None
     try:
         with (out.parent/(method+'_launcher.log')).open('w') as log:
-            subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=timeout_seconds if timeout_seconds is not None else (10800 if benchmark=='location' else 90000))
+            subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,env=dict(os.environ,BOED_TRAINING_START_MONOTONIC=str(time.monotonic())),timeout=timeout_seconds if timeout_seconds is not None else (10800 if benchmark=='location' else 90000))
         name=native_method(method);t=read(out/'models'/(name+'_training.json'))
         if method!='random':
-            assert t['generated_training_trajectories']==cap and t['checkpoint_selection']=='final_predeclared_fixed_budget'
-            assert t['selected_checkpoint']['episodes']==cap
+            if t.get('compute_budget') is not None:
+                assert t['checkpoint_selection']=='latest_budget_eligible_checkpoint'
+                assert t['selected_checkpoint']['compute_checkpoint']['eligible']
+            else:assert t['generated_training_trajectories']==cap and t['checkpoint_selection']=='final_predeclared_fixed_budget'
+            if t.get('compute_budget') is None:assert t['selected_checkpoint']['episodes']==cap
         else:assert t['generated_training_trajectories']==0
         if method in RESIDUAL:
-            assert t['total_training_episodes']==1000000 and t['base_checkpoint']['sha256']==sha(base)
+            if t.get('compute_budget') is None:assert t['total_training_episodes']==1000000
+            assert t['base_checkpoint']['sha256']==sha(base)
             from src.research.moe_family import load_policy,BasePolicy
             from src.research.benchmarks import make_benchmark
             b=make_benchmark(yaml.safe_load(config.read_text()));policy=load_policy(out/'models'/(name+'.pt'),b);reference=BasePolicy.from_checkpoint(base,b,policy.horizon).policy

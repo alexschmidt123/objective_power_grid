@@ -32,6 +32,7 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
         from src.research.moe_diagnostic_logging import DevelopmentTrace
         diagnostic=DevelopmentTrace(p,b,h,s,directory,observer)
     while count<budget:
+        if observer is not None and not observer.allow_next_unit(p,count,step,opt,scheduler):break
         n=min(s['batch_size'],budget-count);fraction=min(count/s.get('router_schedule_episodes',budget),1.)
         # Smooth homotopy to binary DSelect routing; terminal phase uses sparse
         # selectors. The sPCE objective remains the information criterion.
@@ -99,7 +100,7 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
     base=getattr(p.core,'base',None)
     pre=base.provenance if base is not None else {}
     return p,with_training_ledger(dict(training='pathwise_full_horizon_sPCE',variant=variant,canonical_name=NAMES[variant],
-        training_seconds=time.perf_counter()-start,measured_parameters=measured,generated_training_trajectories=count,
+        training_seconds=time.perf_counter()-start,optimizer_scope='one shared Adam step for encoder, experts, router and switching gate; per-component gradient exposure separate',measured_parameters=measured,generated_training_trajectories=count,
         contrast_training_trajectories=count*contrasts,training_trajectory_budget=budget,
         training_budget_unit='primary_episodes',history=records,diagnostic_trace=str(trace),
         base_checkpoint=pre,additional_training_episodes=count,

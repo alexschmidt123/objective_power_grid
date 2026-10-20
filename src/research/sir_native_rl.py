@@ -59,6 +59,7 @@ def train_sir_native_rl(b,h,s,seed,directory,trajectory_budget,observer=None):
  if s.get('updates',3)<=2:batch=2;rb=4;gs=1;warm=1
  episodes=updates=gradients=0;records=[]
  while episodes<trajectory_budget:
+  if observer is not None and not observer.allow_next_unit(p,episodes,updates,a._policy_optimizer):break
   n=min(batch,trajectory_budget-episodes);updates+=1
   with torch.no_grad():r=rollout(b,p,h,n,seed+updates*104729,L)
   info=r['info'];reward=info-torch.cat((torch.zeros_like(info[:,:1]),info[:,:-1]),1)

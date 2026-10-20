@@ -75,7 +75,7 @@ def run(args):
         if journal_plan and int(journal_plan['score_pretraining_episodes'])!=allocation['score']:raise ValueError('Frozen ScoreBED plan disagrees with published allocation')
         score_count,policy_count=allocation['score'],allocation['policy']
     from src.research.sir_scorebed_compat import sir_score_config
-    cfg=sir_score_config(config(args.horizon,math.ceil(score_count/batch),batch))
+    cfg=sir_score_config(config(args.horizon,int(journal_plan.get('score_schedule_reference_steps',math.ceil(score_count/batch))) if journal_plan else math.ceil(score_count/batch),batch))
     cfg['score']['design_sampler_type']='random_sampler'
     cfg['score']['design_sampler_kwargs']={}
     cfg['bed_model']['init_seed']=args.seed
@@ -90,14 +90,22 @@ def run(args):
     from policy_learning.utils.jax import derive_key
     key=derive_key(args.seed,'score_trainer')
     score,key=load_score_trainer(key,cfg,target,callbacks=[])
+    from src.research.journal_scorebed_bridge import compute_clock_from_plan
+    compute_clock=compute_clock_from_plan(journal_plan or {});native_unit_bound=0.
     score_spent=0;records=[]
     while score_spent<score_count:
+        if compute_clock is not None and not compute_clock.can_start(native_unit_bound):
+            from src.research.jax_checkpoint import save_state
+            save_state(out/'score_pretraining_budget_exhausted.msgpack',score.training_state)
+            raise RuntimeError('Whole-method compute quota exhausted before SIR score pretraining completed; no trained policy')
+        unit_start=time.perf_counter()
         n=min(batch,score_count-score_spent)
         y,x,theta,aux,score.key=score._sample_target(score.key,(n,),use_fast_sampler=True)
         score.training_state,metrics=score.train_step(score.training_state,(y,x,theta,aux))
         # Synchronize for finite checks and honest wall timing.
         check_tree(metrics,'score metrics')
         score_spent+=n;step=int(score.training_state.step)
+        native_unit_bound=max(native_unit_bound,time.perf_counter()-unit_start)
         if step%50==0 or score_spent==score_count:
             row=dict(phase='score',step=step,episodes=score_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
             records.append(row);print('ScoreBED official',row,flush=True)
@@ -108,6 +116,8 @@ def run(args):
     policy,key=load_policy_trainer(key,cfg,target,grad_fn=noop,callbacks=[],policy_net=net)
     policy_spent=0;last_n=None
     while policy_spent<policy_count:
+        if compute_clock is not None and not compute_clock.can_start(native_unit_bound):break
+        unit_start=time.perf_counter()
         n=min(batch,policy_count-policy_spent)
         if n!=last_n:
             grad_fn=get_grad_estimate_fn(policy.policy_network,target,data_score,design_score,N=n,outer_batch_size=min(256,n),M=1024,estimate_type='score_chunked')
@@ -115,12 +125,14 @@ def run(args):
         policy.training_state,metrics,_=policy.train_step(policy.training_state)
         check_tree(metrics,'policy metrics')
         policy_spent+=n;step=int(policy.training_state.step)
+        native_unit_bound=max(native_unit_bound,time.perf_counter()-unit_start)
         if args.journal_plan:
             from src.research.journal_scorebed_bridge import maybe_validate
             if maybe_validate(policy.training_state.params_ema,args.journal_plan,initialization+score_spent+policy_spent,step,start,force=policy_spent>=policy_count):break
         if step%50==0 or policy_spent==policy_count:
             row=dict(phase='policy',step=step,episodes=policy_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
             records.append(row);print('ScoreBED official',row,flush=True)
+    if compute_clock is not None and policy_spent==0:raise RuntimeError('SIR ScoreBED produced no native policy update within compute quota')
     from src.research.baseline_fidelity import scorebed_reported_params
     params=scorebed_reported_params(policy.training_state,True)
     if args.journal_plan:

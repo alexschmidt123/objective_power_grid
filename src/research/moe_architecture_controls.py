@@ -171,6 +171,7 @@ def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_che
     validation_seconds=0.;next_validation=budget/4
     trace_path=directory/(method+'_diagnostics.jsonl')
     while count<budget:
+        if observer is not None and not observer.allow_next_unit(p,count,step,opt,scheduler):break
         n=min(s['batch_size'],budget-count);fraction=count/budget
         if not p.dense:p.router.gamma=routing_gamma(fraction,s.get('moe_router_warmup_fraction',0.),s.get('moe_router_finish_fraction',.8))
         routes=[];penalties=[]

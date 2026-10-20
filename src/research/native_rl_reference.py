@@ -93,6 +93,7 @@ def train_native_rl(b,h,s,seed,directory,trajectory_budget,observer=None):
  if s.get('updates',3)<=2:batch=2;replay_batch=4;grad_steps=1;min_buffer=1
  episodes=updates=gradient_updates=0;history=[]
  while episodes<trajectory_budget:
+  if observer is not None and not observer.allow_next_unit(p,episodes,updates,algo._policy_optimizer):break
   n=min(batch,trajectory_budget-episodes);updates+=1
   with torch.no_grad():r=rollout(b,p,h,n,seed+updates*104729,L)
   info=r['info'];reward=info-torch.cat((torch.zeros_like(info[:,:1]),info[:,:-1]),1)

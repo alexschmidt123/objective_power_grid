@@ -89,6 +89,7 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
     contrast_counts={}
     calibration=max(0,min(.5,settings.get('moe_router_calibration_fraction',0.)))
     for update in range(1,updates+1):
+        if observer is not None and not observer.allow_next_unit(policy,primary_count,actual_update,optimizer,scheduler):break
         fraction=(primary_count if settings.get('primary_episode_budget',0) else primary_count+contrast_count)/trajectory_budget if trajectory_budget is not None else (update-1)/updates
         contrast=training_contrasts(settings,fraction)
         batch=settings['batch_size']

@@ -74,8 +74,8 @@ def run(args):
         allocation=score_allocation(budget,'location_finding',initialization,batch)
         if journal_plan and int(journal_plan['score_pretraining_episodes'])!=allocation['score']:raise ValueError('Frozen ScoreBED plan disagrees with published allocation')
         score_count,policy_count=allocation['score'],allocation['policy']
-    cfg=config(args.horizon,math.ceil(score_count/batch),batch)
-    cfg['policy']['num_iters']=math.ceil(policy_count/batch)
+    cfg=config(args.horizon,int(journal_plan.get('score_schedule_reference_steps',math.ceil(score_count/batch))) if journal_plan else math.ceil(score_count/batch),batch)
+    cfg['policy']['num_iters']=int(journal_plan.get('policy_schedule_reference_steps',math.ceil(policy_count/batch))) if journal_plan else math.ceil(policy_count/batch)
     cfg['bed_model']['init_seed']=args.seed
     cfg['common_design_bounds']=args.design_bounds
     cfg['n_restarts']=restarts
@@ -93,23 +93,31 @@ def run(args):
         from policy_learning.utils.jax import derive_key
         key=derive_key(args.seed,'score_trainer')
     score,key=load_score_trainer(key,cfg,target,callbacks=[])
+    from src.research.journal_scorebed_bridge import compute_clock_from_plan
+    compute_clock=compute_clock_from_plan(journal_plan or {})
+    native_unit_bound=0.
     score_spent=0;records=[]
     while score_spent<score_count:
+        if compute_clock is not None and not compute_clock.can_start(native_unit_bound):
+            from src.research.jax_checkpoint import save_state
+            save_state(out/'score_pretraining_budget_exhausted.msgpack',score.training_state)
+            raise RuntimeError('Whole-method compute budget exhausted during score pretraining: no trained policy available')
+        unit_start=time.perf_counter()
         n=min(batch,score_count-score_spent)
         y,x,theta,aux,score.key=score._sample_target(score.key,(n,),use_fast_sampler=True)
         score.training_state,metrics=score.train_step(score.training_state,(y,x,theta,aux))
         # Synchronize for finite checks and honest wall timing.
         check_tree(metrics,'score metrics')
         score_spent+=n;step=int(score.training_state.step)
+        native_unit_bound=max(native_unit_bound,time.perf_counter()-unit_start)
         if step%50==0 or score_spent==score_count:
             row=dict(phase='score',step=step,episodes=score_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
             records.append(row);print('ScoreBED official',row,flush=True)
             from src.research.resource_ledger import progress_ledger
             progress_ledger(out,'ScoreBED',initialization+score_spent,0,args.horizon,0,time.perf_counter()-start,actual_score_updates=step)
         if step%10000==0:
-            from flax import serialization
-            temp=out/f'score_training_state_{step}.partial'
-            temp.write_bytes(serialization.to_bytes(score.training_state));temp.rename(out/f'score_training_state_{step}.msgpack')
+            from src.research.jax_checkpoint import save_state
+            save_state(out/f'score_training_state_{step}.msgpack',score.training_state)
     check_tree(score.training_state.params,'score parameters')
     data_score,design_score=score.get_unbatched_score_fns()
     restart_records=[];restart_params=[];policy_spent=0;policy_updates=0
@@ -119,6 +127,8 @@ def run(args):
         quota=policy_count//restarts+int(restart<policy_count%restarts)
         local_spent=0;last_n=None
         while local_spent<quota:
+            if compute_clock is not None and not compute_clock.can_start(native_unit_bound):break
+            unit_start=time.perf_counter()
             n=min(batch,quota-local_spent)
             if n!=last_n:
                 grad_fn=get_grad_estimate_fn(policy.policy_network,target,data_score,design_score,N=n,outer_batch_size=n,M=1024,estimate_type='score')
@@ -126,11 +136,17 @@ def run(args):
             policy.training_state,metrics,_=policy.train_step(policy.training_state)
             check_tree(metrics,'policy metrics')
             policy_spent+=n;local_spent+=n;step=int(policy.training_state.step);policy_updates+=1
+            native_unit_bound=max(native_unit_bound,time.perf_counter()-unit_start)
             if step%50==0 or local_spent==quota:
                 row=dict(phase='policy',restart=restart,step=step,episodes=policy_spent,restart_episodes=local_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
                 records.append(row);print('ScoreBED official',row,flush=True)
             from src.research.resource_ledger import progress_ledger
-            progress_ledger(out,'ScoreBED',initialization+score_spent,0,args.horizon,0,time.perf_counter()-start,actual_score_updates=step)
+            progress_ledger(out,'ScoreBED',initialization+score_spent+policy_spent,0,args.horizon,policy_updates,time.perf_counter()-start,actual_score_updates=int(score.training_state.step),actual_policy_updates=policy_updates)
+            if compute_clock is not None:
+                from src.research.baseline_fidelity import scorebed_reported_params
+                from src.research.journal_scorebed_bridge import maybe_validate
+                if maybe_validate(scorebed_reported_params(policy.training_state,args.reference_sampler),args.journal_plan,initialization+score_spent+policy_spent,policy_updates,start):break
+        if compute_clock is not None and policy_updates==0:raise RuntimeError('Compute quota produced no native policy update; do not report a trained ScoreBED policy')
         from src.research.baseline_fidelity import scorebed_reported_params
         params=scorebed_reported_params(policy.training_state,args.reference_sampler)
         restart_params.append(params)
@@ -190,7 +206,7 @@ def run(args):
         budget_reconciliation=allocation if not tiny else dict(smoke=True),score_batch=batch,actual_score_updates=int(score.training_state.step),actual_policy_updates=policy_updates,policy_restarts=restart_records,selected_restart=chosen,reference_sampler=args.reference_sampler,
         training_seconds=time.perf_counter()-start,history=records,checkpoint_selection='final',
         architecture='official_4layer_256dim_8head_RFF_conservative_transformer',policy_architecture='official_DADNet_256_16_sum_encoder',
-        adaptations='1million total primary episodes including normalization and initialization; predeclared native final-policy restarts and paper AR1 sampler when enabled; capped score/policy allocation; independent validation restart selection; native batch1024, P1 location95:5 allocation; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions',
+        adaptations='Declared native phase allocation including normalization and initialization; predeclared native final-policy restarts and paper AR1 sampler when enabled; capped score/policy allocation; independent validation restart selection; native batch1024, P1 location95:5 allocation; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions',
         design_bounds=args.design_bounds,bounded_mapping='lo+(hi-lo)*sigmoid(raw_policy_output); teacher design sampler mapped into same box' if args.design_bounds else None,
         runtime=dict(jax=jax.__version__,devices=[str(d) for d in jax.devices()]))
     if not args.journal_plan and data['generated_training_trajectories']!=budget:raise AssertionError('Episode accounting mismatch')
