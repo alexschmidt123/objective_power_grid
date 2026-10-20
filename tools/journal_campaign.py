@@ -205,20 +205,22 @@ def sample_gpu(path,stop):
         stop.wait(10)
 
 def run_phase(benchmark,seed,method,base=None,timeout_seconds=None,evaluation_cases=None,evaluation_bank=None):
+    pilot_plan=read(C/'pilot_plan.json') if (C/'pilot_plan.json').exists() else None
+    pilot_cfg=pilot_plan['methods'][method] if pilot_plan else None
     registry=read(C/'registry.json');found=next((e for e in registry if e['benchmark']==benchmark and e['seed']==seed and e['method']==method),None)
     if found:return found
     guard();out=C/benchmark/f'seed{seed}'/method;out.parent.mkdir(parents=True,exist_ok=True)
     if out.exists():
         if (out/'exit_code').exists() and (out/'exit_code').read_text().strip()=='0':
             t=read(out/'models'/(native_method(method)+'_training.json'))
-            expected=0 if method=='random' else 500000 if method in (*RESIDUAL,'base') else 1000000
+            expected=pilot_cfg['episodes'] if pilot_cfg else 0 if method=='random' else 500000 if method in (*RESIDUAL,'base') else 1000000
             assert t['generated_training_trajectories']==expected
             if method!='random':assert t['checkpoint_selection']=='final_predeclared_fixed_budget'
             entry=dict(method=method,native_method=native_method(method),benchmark=benchmark,seed=seed,run=str(out),status='complete',provenance='recovered_completed_phase_after_coordinator_interruption')
             registry.append(entry);write(C/'registry.json',registry);return entry
         raise RuntimeError('Partial/unregistered phase exists; preserve and inspect before any resume: '+str(out))
-    cap=500000 if method in (*RESIDUAL,'base') else 1000000
-    config=C/'configs'/f'{benchmark}_{cap}.yaml'
+    cap=pilot_cfg['episodes'] if pilot_cfg else 500000 if method in (*RESIDUAL,'base') else 1000000
+    config=C/pilot_cfg['config'] if pilot_cfg else C/'configs'/f'{benchmark}_{cap}.yaml'
     command=['bash','run.sh','--config',str(config),'--journal','--seed',str(seed),'--eval-seeds','1001','--eig-only','--source-check-manifest',str(C/'source_manifest.json'),'--output',str(out)]
     if method in FAMILY:command+=['--variant',method]
     else:command+=['--methods',native_method(method)]
@@ -250,7 +252,9 @@ def run_phase(benchmark,seed,method,base=None,timeout_seconds=None,evaluation_ca
     entry=dict(method=method,native_method=native_method(method),benchmark=benchmark,seed=seed,run=str(out),status=status,failure=failure,serialized_wall_seconds=time.monotonic()-started,provenance='new_fixed_configuration_training')
     if status=='complete':entry['checkpoint_sha256']=sha(out/'models'/(native_method(method)+'.pt')) if method!='random' else None
     registry.append(entry);write(C/'registry.json',registry);write(out.parent/(method+'_completion.json'),entry)
-    print(benchmark,seed,method,status,flush=True);report();return entry
+    print(benchmark,seed,method,status,flush=True)
+    if not pilot_plan:report()
+    return entry
 
 def run_location():
     guard()
@@ -486,7 +490,17 @@ def sir_resolution_and_figures():
         plt.close(fig)
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['prepare','seal','location','report','sir-readiness','sir']);args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['prepare','seal','location','report','sir-readiness','sir','pilots']);parser.add_argument('--campaign');parser.add_argument('--methods',default='dad,rl_sboed,vsoed,scorebed,moe');args=parser.parse_args()
+    global C
+    if args.campaign:C=Path(args.campaign).resolve()
+    if args.action=='pilots':
+        guard();lock=(C/'device.lock').open('w');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+        plan=read(C/'pilot_plan.json')
+        for method in args.methods.split(','):
+            proof=read(C/'readiness'/('location_'+method+'_ready.json'))
+            if proof.get('status')!='PASS':raise RuntimeError('Readiness not passed: '+method)
+            run_phase('location',101,method,timeout_seconds=plan['methods'][method]['safety_seconds']+3600,evaluation_cases=C/'evaluations/location_cases.npz',evaluation_bank=C/'evaluations/location_contrasts.npy')
+        return
     if args.action=='prepare':prepare()
     elif args.action=='seal':seal()
     elif args.action=='location':run_location()

@@ -75,6 +75,7 @@ def run(args):
         if journal_plan and int(journal_plan['score_pretraining_episodes'])!=allocation['score']:raise ValueError('Frozen ScoreBED plan disagrees with published allocation')
         score_count,policy_count=allocation['score'],allocation['policy']
     cfg=config(args.horizon,math.ceil(score_count/batch),batch)
+    cfg['policy']['num_iters']=math.ceil(policy_count/batch)
     cfg['bed_model']['init_seed']=args.seed
     cfg['common_design_bounds']=args.design_bounds
     cfg['n_restarts']=restarts
@@ -103,6 +104,12 @@ def run(args):
         if step%50==0 or score_spent==score_count:
             row=dict(phase='score',step=step,episodes=score_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
             records.append(row);print('ScoreBED official',row,flush=True)
+            from src.research.resource_ledger import progress_ledger
+            progress_ledger(out,'ScoreBED',initialization+score_spent,0,args.horizon,0,time.perf_counter()-start,actual_score_updates=step)
+        if step%10000==0:
+            from flax import serialization
+            temp=out/f'score_training_state_{step}.partial'
+            temp.write_bytes(serialization.to_bytes(score.training_state));temp.rename(out/f'score_training_state_{step}.msgpack')
     check_tree(score.training_state.params,'score parameters')
     data_score,design_score=score.get_unbatched_score_fns()
     restart_records=[];restart_params=[];policy_spent=0;policy_updates=0
@@ -122,6 +129,8 @@ def run(args):
             if step%50==0 or local_spent==quota:
                 row=dict(phase='policy',restart=restart,step=step,episodes=policy_spent,restart_episodes=local_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
                 records.append(row);print('ScoreBED official',row,flush=True)
+            from src.research.resource_ledger import progress_ledger
+            progress_ledger(out,'ScoreBED',initialization+score_spent,0,args.horizon,0,time.perf_counter()-start,actual_score_updates=step)
         from src.research.baseline_fidelity import scorebed_reported_params
         params=scorebed_reported_params(policy.training_state,args.reference_sampler)
         restart_params.append(params)
@@ -185,6 +194,8 @@ def run(args):
         design_bounds=args.design_bounds,bounded_mapping='lo+(hi-lo)*sigmoid(raw_policy_output); teacher design sampler mapped into same box' if args.design_bounds else None,
         runtime=dict(jax=jax.__version__,devices=[str(d) for d in jax.devices()]))
     if not args.journal_plan and data['generated_training_trajectories']!=budget:raise AssertionError('Episode accounting mismatch')
+    from src.research.resource_ledger import with_training_ledger
+    data=with_training_ledger(data,args.horizon)
     (out/'scorebed_official_training.json').write_text(json.dumps(data,indent=2))
     print('SCOREBED_OFFICIAL_TRAINING_COMPLETE',flush=True)
 if __name__=='__main__':

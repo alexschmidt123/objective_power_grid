@@ -114,6 +114,8 @@ class ValidationObserver:
         gamma=getattr(getattr(policy,'router',None),'gamma',None)
         resume=dict(policy_state=state,optimizer_state=None if optimizer is None else optimizer.state_dict(),scheduler_state=None if scheduler is None else scheduler.state_dict(),episodes=episodes,update=update,rng_cpu=cpu_rng,rng_cuda=gpu_rng,gamma=gamma,rule=asdict(self.rule),selection=row)
         torch.save(resume,self.directory/(self.method+'_journal_last.pt'))
+        if getattr(self.validator,'preserve_progress_checkpoints',False):
+            target=self.directory/(self.method+f'_progress_{update}.pt');tmp=target.with_suffix('.partial');torch.save(resume,tmp);tmp.replace(target)
         if row['selected']:
             self.best_state=state;self.best_gamma=gamma
             torch.save(resume,self.directory/(self.method+'_journal_best.pt'))

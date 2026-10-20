@@ -77,6 +77,9 @@ def rollout(benchmark, policy, horizon, batch, seed, contrasts, *, truth=None,
         if contrasts:
             infos.append(cumulative[:,0]-logmeanexp(cumulative))
         features.append(f); latents.append(latent); actions.append(action); observations.append(y)
+    from src.research.resource_ledger import active_ledger
+    ledger=active_ledger()
+    if ledger is not None: ledger.record_paths(batch,count-1,len(actions),track_likelihood)
     return dict(truth=theta0,particles=particles,actions=actions,observations=observations,
                 features=features,latents=latents,log_likelihood=cumulative,
                 info=torch.stack(infos,1) if infos else None,

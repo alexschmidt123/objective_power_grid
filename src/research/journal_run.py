@@ -49,6 +49,7 @@ def main(args,raw,root):
         validation_device=validation_cfg.get('device','cpu')
         if validation_device=='cuda_if_available':validation_device='cuda:0' if torch.cuda.is_available() else 'cpu'
         validator=CommonValidation(raw,h,validation_cfg['seed'],validation_cfg['systems'],validation_cfg['contrasts'],validation_cfg['batch_size'],validation_cfg['chunk'],device=validation_device)
+        validator.preserve_progress_checkpoints=protocol.get('preserve_progress_checkpoints',False)
         write_json(out/'validation_draws.json',dict(seed=validator.seed,sha256=validator.identity,systems=validator.systems,contrasts=validator.contrasts))
         summaries=[];results={}
         for method in methods:
@@ -114,6 +115,9 @@ def main(args,raw,root):
                 t['ode_forward_steps']=None if method=='scorebed' else b.ode_forward_steps
                 t['ode_forward_steps_scope']='actual adaptive RK4 primal steps in shared Torch simulator; gradient/replay work reported separately' if method!='scorebed' else 'JAX worker uses a separate solver; adaptive step counter unavailable, never reported as zero'
                 t['minimum_RK4_steps_per_stage']=b.steps
+            if 'resource_ledger' not in t and method!='random':
+                from src.research.resource_ledger import with_training_ledger
+                t=with_training_ledger(t,h)
             t['effective_training_settings']=s
             t['resume_scope']='Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed'
             t['historical_runtime_overlap']='New runs are serialized; historical timings require separate provenance'

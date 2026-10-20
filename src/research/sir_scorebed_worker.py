@@ -162,6 +162,8 @@ def run(args):
         design_bounds=[0.,target.end],bounded_mapping='chronological feasible-time sigmoid with minimum spacing',sir_configuration=sir,
         runtime=dict(jax=jax.__version__,devices=[str(d) for d in jax.devices()]))
     if not args.journal_plan and data['generated_training_trajectories']!=budget:raise AssertionError('Episode accounting mismatch')
+    from src.research.resource_ledger import with_training_ledger
+    data=with_training_ledger(data,args.horizon)
     (out/'scorebed_official_training.json').write_text(json.dumps(data,indent=2))
     print('SCOREBED_OFFICIAL_TRAINING_COMPLETE',flush=True)
 if __name__=='__main__':

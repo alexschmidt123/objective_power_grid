@@ -16,6 +16,7 @@ from src.research.vendor.vsoed.utils import set_random_seed
 COMMIT = 'd0884f9ba30fbddc56618841c68af2f3bfe16539'
 
 
+from src.research.resource_ledger import with_training_ledger
 def compress_input(module,args):
     return (torch.asinh(args[0]),*args[1:])
 
@@ -234,7 +235,7 @@ def train_upstream_vsoed(benchmark, horizon, settings, seed, directory, profile,
             (directory/'vsoed_upstream_history.json').write_text(json.dumps(logger.history,indent=2)+'\n')
     finally:
         torch.set_default_dtype(old_dtype)
-    return wrap(actor), dict(training='official_vsOED_GMM_SIR_ODE_adapter' if sir else 'official_vsOED_GMM_I', upstream_commit=COMMIT,
+    return wrap(actor), with_training_ledger(dict(training='official_vsOED_GMM_SIR_ODE_adapter' if sir else 'official_vsOED_GMM_I', upstream_commit=COMMIT,
         profile=cfg, device=device, selected_update=journal.get('selected_checkpoint',{}).get('update',completed), checkpoint_selection=journal.pop('checkpoint_selection','final, as upstream'),
         policy_parameters=sum(p.numel() for p in actor.parameters()), history=logger.history,
         training_seconds=time.perf_counter()-started,
@@ -246,4 +247,4 @@ def train_upstream_vsoed(benchmark, horizon, settings, seed, directory, profile,
         actor_update_trust_radius=cfg.get('actor_trust_radius') if unbounded else None,
         actor_backtracks=getattr(actor_opt,'backtracks',0),
         replay_batch_size=cfg['replay_batch'],actor_optimizer_updates=completed,
-        forward_particle_stages=horizon*generated,native_optimizer_updates=native_updates if observer is not None else None,auxiliary_checkpoint_role='last_training_state; selected actor is separately validated',benchmark_adaptation='Explicit ODE and Gaussian-noise sampler, native log-rate coordinates and upstream training prior convention, native percentage-time history; hidden ODE states never exposed; published SIR used a stochastic data bank' if sir else 'bounded location physics unchanged',**journal)
+        forward_particle_stages=horizon*generated,native_optimizer_updates=native_updates if observer is not None else None,auxiliary_checkpoint_role='last_training_state; selected actor is separately validated',benchmark_adaptation='Explicit ODE and Gaussian-noise sampler, native log-rate coordinates and upstream training prior convention, native percentage-time history; hidden ODE states never exposed; published SIR used a stochastic data bank' if sir else 'bounded location physics unchanged',**journal),horizon)

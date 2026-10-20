@@ -15,6 +15,7 @@ from torch.nn import functional as F
 from src.research.baseline_fidelity import rl_optimizer_epoch_completed
 VENDOR=Path(__file__).parent/'vendor/rl_boed'
 
+from src.research.resource_ledger import with_training_ledger,progress_ledger
 def load_classes(path,names,env):
  tree=ast.parse(Path(path).read_text());nodes=[n for n in tree.body if isinstance(n,ast.ClassDef) and n.name in names]
  if {n.name for n in nodes}!=set(names):raise ValueError('Reference class missing')
@@ -108,7 +109,8 @@ def train_native_rl(b,h,s,seed,directory,trajectory_budget,observer=None):
   if updates%100==0 or episodes==trajectory_budget:
    row=dict(primary_episodes=episodes,collection_iterations=updates,gradient_updates=gradient_updates,training_spce=float(info[:,-1].mean()),alpha=float(algo._log_alpha.exp().detach()),target_entropy=algo._target_entropy)
    history.append(row);print('native RL-BOED',row,flush=True)
+   progress_ledger(directory,'rl_sboed',episodes,episodes*L,h,gradient_updates,time.perf_counter()-started,actor_updates=gradient_updates,critic_updates=2*gradient_updates,temperature_updates=gradient_updates,gradient_updates=gradient_updates,replay_batch=replay_batch)
   if observer is not None and observer.check(p,episodes,updates,algo._policy_optimizer,force=episodes==trajectory_budget):break
  journal=observer.finish(p) if observer is not None else {}
  p.eval();torch.save(dict(kind='rl_sboed',architecture=p.architecture,horizon=h,state_dict=p.state_dict()),directory/'rl_sboed.pt')
- return p,dict(training='pinned_original_RL_BOED_source_SAC_REDQ',publication_algorithm_equivalence='reference_kernels_and_native_networks; see executable tests',generated_training_trajectories=episodes,training_forward_trajectories=episodes,contrast_training_trajectories=episodes*L,forward_particle_stages=episodes*h*(L+1),training_seconds=time.perf_counter()-started,history=history,gradient_updates=gradient_updates,critic_updates=2*gradient_updates,actor_updates=gradient_updates,temperature_updates=gradient_updates,gamma=.9,target_rate=.001,policy_lr=.0001,critic_lr=.0003,gradient_steps_per_collection=grad_steps,replay_batch=replay_batch,replay_capacity=capacity,contrasts=L,resource_departures=['total1M versus source README about2M primary episodes; contrasts and replay capacity preserved'],stochastic_deployment='native source.py policy evaluation samples tanh Gaussian; independent decision RNG',**journal)
+ return p,with_training_ledger(dict(training='pinned_original_RL_BOED_source_SAC_REDQ',publication_algorithm_equivalence='reference_kernels_and_native_networks; see executable tests',generated_training_trajectories=episodes,training_forward_trajectories=episodes,contrast_training_trajectories=episodes*L,forward_particle_stages=episodes*h*(L+1),training_seconds=time.perf_counter()-started,history=history,gradient_updates=gradient_updates,critic_updates=2*gradient_updates,actor_updates=gradient_updates,temperature_updates=gradient_updates,gamma=.9,target_rate=.001,policy_lr=.0001,critic_lr=.0003,gradient_steps_per_collection=grad_steps,replay_batch=replay_batch,replay_capacity=capacity,contrasts=L,resource_departures=['total1M versus source README about2M primary episodes; contrasts and replay capacity preserved'],stochastic_deployment='native source.py policy evaluation samples tanh Gaussian; independent decision RNG',**journal),h)

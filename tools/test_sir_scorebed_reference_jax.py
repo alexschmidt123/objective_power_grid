@@ -8,7 +8,7 @@ from flax.traverse_util import flatten_dict
 from policy_learning.policies import IqbalGRUNet
 from src.research.sir_scorebed_model import SIRScoreModel,SIRScoreGRUNet
 from src.research.sir_scorebed_worker import config
-out=R/'experiments/10192026/10192026_e1_original_baseline_restoration/readiness';out.mkdir(parents=True,exist_ok=True)
+out=R/'experiments/10202026/10202026_icml_e1_e2_e3_v2/readiness';out.mkdir(parents=True,exist_ok=True)
 b=SIRScoreModel(T=5);kw=dict(encoder_shapes=[256,256],encoding_dim=64,rnn_hidden_dim=64,rnn_layers=2,enc_act='relu',emit_act='relu',emitter_shapes=[256,256],shape=(5,1),deterministic=False,min_std=1e-4)
 net=SIRScoreGRUNet(**kw);native=IqbalGRUNet(**kw);keys=jax.random.split(jax.random.key(101),4)
 x=jnp.broadcast_to(jnp.linspace(1.,90.,5)[None,:,None],(3,5,1));y=jax.random.uniform(keys[0],(3,5,1))*500;z=jax.random.normal(keys[1],(3,5,1));variables=net.init(keys[2],y=y,x=x,z=z)
