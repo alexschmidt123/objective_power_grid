@@ -21,3 +21,13 @@ def test_native_sir_prior_simulator_history_and_actor():
   y=mean+.2;torch.testing.assert_close(b.log_likelihood(y,mean),torch.full((2,),-.02-.5*math.log(2*math.pi),dtype=torch.float64))
   assert torch.all(actual>=previous+.1-1e-9)
   designs.append(percent.detach());actions.append(expected.detach());observations.append(y.detach());previous=expected.detach()
+
+
+def test_original_SIR_log_coordinates_and_reward_prior_convention():
+ b=SIR({});m=SIRNativeModel(b,5,latent_coordinates='log_parameters')
+ torch.manual_seed(101);params=m.rvs(8)
+ torch.manual_seed(101);expected=b.log_mean.float()+b.log_std*torch.randn(8,2)
+ torch.testing.assert_close(params,expected);assert m.log_poi_prior(params)==0
+ design=torch.full((8,1),10.);times=physical_time(0,design,torch.zeros(8,1),5,100,.1)
+ mean=m.deterministic(0,params,design);reference,_=b.forward(params.double().exp(),b.initial((8,)),times)
+ torch.testing.assert_close(mean,reference)

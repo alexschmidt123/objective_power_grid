@@ -33,7 +33,7 @@ def verify_bridge(p,arrays):
   slots[:,:t,:1]=torch.from_numpy(arrays['reference_x'][:,:t]).double()/p.end
   slots[:,:t,1:2]=torch.from_numpy(arrays['reference_y'][:,:t]).double()/p.population
   slots[:,:t,2]=1.
-  with torch.no_grad():actual=p(f,t).numpy()
+  with torch.no_grad():actual=(p.propose(f,t,torch.from_numpy(arrays['reference_noise'][:,t])) if hasattr(p,'propose') else p(f,t)).numpy()
   expected=arrays['reference_actions'][:,t]
   np.testing.assert_allclose(actual,expected,rtol=2e-6,atol=2e-6)
   max_error=max(max_error,float(np.abs(actual-expected).max()))
@@ -52,7 +52,8 @@ def train_scorebed(b,h,s,seed,directory,trajectory_budget=None,observer=None):
  start=time.perf_counter();subprocess.run(command,cwd=root,env=env,check=True)
  arrays=np.load(directory/'scorebed_official_policy.npz')
  with torch.device('cpu'):
-  policy=SIRScorePolicy(arrays,h,b).eval();error=verify_bridge(policy,arrays)
+  from src.research.sir_scorebed_gru import SIRScoreGRUPolicy
+  policy=SIRScoreGRUPolicy(arrays,h,b).eval();error=verify_bridge(policy,arrays)
  data=json.loads((directory/'scorebed_official_training.json').read_text())
  data.update(training_seconds=time.perf_counter()-start,policy_bridge_max_absolute_error=error,policy_parameters=sum(p.numel() for p in policy.parameters()),implementation='Official ScoreBED method with independently verified deterministic SIR ODE adapter; not original published SIR results')
  torch.save(dict(kind='scorebed',architecture=policy.architecture,horizon=h,state_dict=policy.state_dict(),sir_configuration=config),directory/'scorebed.pt')

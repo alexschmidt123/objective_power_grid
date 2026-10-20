@@ -69,6 +69,11 @@ def run(args):
     journal_plan=json.loads(pathlib.Path(args.journal_plan).read_text()) if args.journal_plan else None
     score_count=8 if tiny else (min(int(journal_plan['score_pretraining_episodes']),remaining-1) if journal_plan else int(.7*remaining))
     policy_count=remaining-score_count
+    if not tiny:
+        from src.research.original_protocol import score_allocation
+        allocation=score_allocation(budget,'location_finding',initialization,batch)
+        if journal_plan and int(journal_plan['score_pretraining_episodes'])!=allocation['score']:raise ValueError('Frozen ScoreBED plan disagrees with published allocation')
+        score_count,policy_count=allocation['score'],allocation['policy']
     cfg=config(args.horizon,math.ceil(score_count/batch),batch)
     cfg['bed_model']['init_seed']=args.seed
     cfg['common_design_bounds']=args.design_bounds
@@ -173,14 +178,14 @@ def run(args):
         policy_ema_rate=float(policy.training_state.ema_rate),
         random_streams='official derive_key: score_trainer, policy_trainer/restart' if args.reference_sampler else 'historical sequential split keys',
         restart_selection='best independent-validation EIG among final EMA policies' if restarts>1 else 'single final policy',
-        score_batch=batch,actual_score_updates=int(score.training_state.step),actual_policy_updates=policy_updates,policy_restarts=restart_records,selected_restart=chosen,reference_sampler=args.reference_sampler,
+        budget_reconciliation=allocation if not tiny else dict(smoke=True),score_batch=batch,actual_score_updates=int(score.training_state.step),actual_policy_updates=policy_updates,policy_restarts=restart_records,selected_restart=chosen,reference_sampler=args.reference_sampler,
         training_seconds=time.perf_counter()-start,history=records,checkpoint_selection='final',
         architecture='official_4layer_256dim_8head_RFF_conservative_transformer',policy_architecture='official_DADNet_256_16_sum_encoder',
-        adaptations='1million total primary episodes including normalization and initialization; predeclared native final-policy restarts and paper AR1 sampler when enabled; capped score/policy allocation; independent validation restart selection; smaller minibatches under capped budget; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions',
+        adaptations='1million total primary episodes including normalization and initialization; predeclared native final-policy restarts and paper AR1 sampler when enabled; capped score/policy allocation; independent validation restart selection; native batch1024, P1 location95:5 allocation; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions',
         design_bounds=args.design_bounds,bounded_mapping='lo+(hi-lo)*sigmoid(raw_policy_output); teacher design sampler mapped into same box' if args.design_bounds else None,
         runtime=dict(jax=jax.__version__,devices=[str(d) for d in jax.devices()]))
     if not args.journal_plan and data['generated_training_trajectories']!=budget:raise AssertionError('Episode accounting mismatch')
     (out/'scorebed_official_training.json').write_text(json.dumps(data,indent=2))
     print('SCOREBED_OFFICIAL_TRAINING_COMPLETE',flush=True)
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('--output',required=True);ap.add_argument('--journal-plan');ap.add_argument('--budget',type=int,default=1000000);ap.add_argument('--horizon',type=int,default=30);ap.add_argument('--seed',type=int,default=101);ap.add_argument('--batch-size',type=int,default=64);ap.add_argument('--smoke',action='store_true');ap.add_argument('--design-bounds',type=float,nargs=2);ap.add_argument('--reference-sampler',action='store_true');ap.add_argument('--restarts',type=int,default=1);run(ap.parse_args())
+    ap=argparse.ArgumentParser();ap.add_argument('--output',required=True);ap.add_argument('--journal-plan');ap.add_argument('--budget',type=int,default=1000000);ap.add_argument('--horizon',type=int,default=30);ap.add_argument('--seed',type=int,default=101);ap.add_argument('--batch-size',type=int,default=1024);ap.add_argument('--smoke',action='store_true');ap.add_argument('--design-bounds',type=float,nargs=2);ap.add_argument('--reference-sampler',action='store_true');ap.add_argument('--restarts',type=int,default=1);run(ap.parse_args())

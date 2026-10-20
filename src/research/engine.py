@@ -48,7 +48,9 @@ def rollout(benchmark, policy, horizon, batch, seed, contrasts, *, truth=None,
         if method == 'random':
             latent = benchmark.random_latent(batch,decision_rng)
         else:
-            if policy.kind=='rl_sboed' and hasattr(policy,'design_from_unit_action'):
+            if hasattr(policy,'sample_design'):
+                latent=policy.sample_design(f,stage,decision_rng)
+            elif policy.kind=='rl_sboed' and hasattr(policy,'design_from_unit_action'):
                 latent=policy.design_from_unit_action(policy.sample(f,rng=decision_rng)[0],actions,horizon)
             else:
                 latent = (policy.sample(f,rng=decision_rng)[0]*policy.bound).double() if policy.kind=='rl_sboed' else policy(f,stage)

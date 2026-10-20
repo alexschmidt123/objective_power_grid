@@ -8,7 +8,14 @@ from pathlib import Path
 import numpy as np
 
 def export_arrays(params):
- return {f'{section}/{layer}/{name}':np.asarray(value) for section,layers in params.items() for layer,values in layers.items() for name,value in values.items()}
+ arrays={}
+ def walk(tree,path=()):
+  if hasattr(tree,'items'):
+   for key,value in tree.items():walk(value,path+(key,))
+  else:arrays['/'.join(path)]=np.asarray(tree)
+ walk(params)
+ if 'log_std' in arrays:arrays['policy_architecture']=np.asarray('official_ScoreBED_IqbalGRU_SIR_v1')
+ return arrays
 
 def export_candidate(params,plan):
  """Preserve benchmark feasibility metadata in native validation IPC."""
@@ -40,7 +47,10 @@ def restored_params(params,plan_path):
  if not plan_path:return params
  import jax.numpy as jnp
  saved=np.load(Path(plan_path).parent/'scorebed_journal_best.npz')
- return {section:{layer:{name:jnp.asarray(saved[f'{section}/{layer}/{name}']) for name in values} for layer,values in layers.items()} for section,layers in params.items()}
+ def rebuild(tree,path=()):
+  if hasattr(tree,'items'):return {key:rebuild(value,path+(key,)) for key,value in tree.items()}
+  return jnp.asarray(saved['/'.join(path)])
+ return rebuild(params)
 
 def score(args):
  import torch
@@ -52,7 +62,10 @@ def score(args):
  with torch.device('cpu'):
   if b.name=='sir_ode':
    from src.research.sir_scorebed import SIRScorePolicy
-   p=SIRScorePolicy(arrays,plan['horizon'],b)
+   if 'policy_architecture' in arrays and str(arrays['policy_architecture'])=='official_ScoreBED_IqbalGRU_SIR_v1':
+    from src.research.sir_scorebed_gru import SIRScoreGRUPolicy
+    p=SIRScoreGRUPolicy(arrays,plan['horizon'],b)
+   else:p=SIRScorePolicy(arrays,plan['horizon'],b)
   else:
    from src.research.scorebed import OfficialScorePolicy
    p=OfficialScorePolicy(arrays,plan['horizon'],b.action_scale,b.obs_scale)

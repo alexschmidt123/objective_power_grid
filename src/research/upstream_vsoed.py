@@ -136,16 +136,19 @@ def train_upstream_vsoed(benchmark, horizon, settings, seed, directory, profile,
             set_random_seed(seed)
             if sir:
                 from src.research.sir_upstream_vsoed import SIRNativeModel
-                model=SIRNativeModel(benchmark,horizon)
+                model=SIRNativeModel(benchmark,horizon,latent_coordinates=cfg.get('posterior_coordinate_reference','standard_normal'))
             else:model = SOURCE(multimodel=False, include_nuisance=False, include_goal=False)
             dim=2 if sir else 4;design_dim=1 if sir else 2
+            if sir and cfg.get('posterior_coordinate_reference')=='log_parameters':
+                mean_bounds,sigma_limits=[[-6.,4.]]*dim,[.5]*dim
+            else:mean_bounds,sigma_limits=[[-6,6]]*dim,[1.]*dim
             post = POST_APPROX(n_stage=horizon, n_design=design_dim, n_obs=1, n_pois=[dim],
                 model_weight=0, poi_weight=1, goal_weight=0, n_mixture=8,
-                mu_bounds={'poi': [[[-6, 6]]*dim]}, max_sigmas={'poi': [[1.]*dim]},
+                mu_bounds={'poi': [mean_bounds]}, max_sigmas={'poi': [sigma_limits]},
                 truncnorm_info={'poi': [None]}, prior=model, n_incre=int(cfg.get('n_incre',horizon)),
                 share_interm_net=False, use_NFs=False, activate=nn.ReLU,
-                poi_post_lrs=[cfg['posterior_lr']]*horizon,
-                poi_post_lr_scheduler_gammas=[cfg['lr_decay']]*horizon,
+                poi_post_lrs=[cfg['posterior_lr']]*int(cfg.get('n_incre',horizon)),
+                poi_post_lr_scheduler_gammas=[cfg['lr_decay']]*int(cfg.get('n_incre',horizon)),
                 log_every=cfg.get('log_every', 100), dowel=logger)
             algorithm = PGvsOED(horizon, dim, design_dim, 1, model, model, bounds,
                 model.reward_fun, post.reward_fun, phys_state_info=(1,[0.],model.xp_f) if sir else None,post_approx=post,
@@ -243,4 +246,4 @@ def train_upstream_vsoed(benchmark, horizon, settings, seed, directory, profile,
         actor_update_trust_radius=cfg.get('actor_trust_radius') if unbounded else None,
         actor_backtracks=getattr(actor_opt,'backtracks',0),
         replay_batch_size=cfg['replay_batch'],actor_optimizer_updates=completed,
-        forward_particle_stages=horizon*generated,native_optimizer_updates=native_updates if observer is not None else None,auxiliary_checkpoint_role='last_training_state; selected actor is separately validated',benchmark_adaptation='Explicit ODE and Gaussian-noise sampler, standard-normal log-rate coordinates, native percentage-time history; hidden ODE states never exposed; published SIR used a stochastic data bank' if sir else 'bounded location physics unchanged',**journal)
+        forward_particle_stages=horizon*generated,native_optimizer_updates=native_updates if observer is not None else None,auxiliary_checkpoint_role='last_training_state; selected actor is separately validated',benchmark_adaptation='Explicit ODE and Gaussian-noise sampler, native log-rate coordinates and upstream training prior convention, native percentage-time history; hidden ODE states never exposed; published SIR used a stochastic data bank' if sir else 'bounded location physics unchanged',**journal)
