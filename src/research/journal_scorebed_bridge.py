@@ -111,6 +111,8 @@ def write_plan(observer,raw,h,s,directory):
  if observer.compute_clock is not None:
   if 'score_schedule_reference_steps' not in s or 'policy_schedule_reference_steps' not in s:raise ValueError('Original ScoreBED scheduler horizons must be explicit for matched-compute training')
   plan['score_schedule_reference_steps']=int(s['score_schedule_reference_steps']);plan['policy_schedule_reference_steps']=int(s['policy_schedule_reference_steps'])
+  if 'scorebed_compute_phase_plan' not in s:raise ValueError('Measured frozen ScoreBED phase plan required in matched-compute mode')
+  plan['scorebed_compute_phase_plan']=s['scorebed_compute_phase_plan']
   state=observer.compute_clock._read();plan['compute_budget']=dict(path=str(observer.compute_clock.path),seconds=state['budget_seconds'],credit_seconds=state['credit_seconds'],hardware=state['hardware'],checkpoint_seconds=observer.compute_checkpoint_seconds)
  path.write_text(json.dumps(plan,indent=2)+'\n');return path
 

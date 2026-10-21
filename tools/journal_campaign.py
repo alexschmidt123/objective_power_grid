@@ -196,6 +196,15 @@ def guard():
     for rel,digest in read(C/'source_manifest.json')['sha256'].items():
         if sha(ROOT/rel)!=digest:raise RuntimeError('Frozen source/config changed: '+rel)
 
+def exclusive_device_lock():
+    """Host-wide lock across campaigns; reject existing unregistered GPU work."""
+    path=Path.home()/'.cache/objective_power_grid/device_0.lock'
+    path.parent.mkdir(parents=True,exist_ok=True)
+    lock=path.open('a+');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    active=subprocess.check_output(['nvidia-smi','--query-compute-apps=pid','--format=csv,noheader,nounits'],text=True).strip()
+    if active:raise RuntimeError('Device already has compute processes; preserve them and defer this queue: '+active)
+    return lock
+
 def sample_gpu(path,stop):
     while not stop.is_set():
         try:
@@ -266,7 +275,7 @@ def run_phase(benchmark,seed,method,base=None,timeout_seconds=None,evaluation_ca
 
 def run_location():
     guard()
-    lock=(C/'device.lock').open('w');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    lock=exclusive_device_lock()
     # Correct the incompatible historical SwitchMoE before the independent-seed grid.
     for seed in (101,102,103,104,105):
         for method in METHODS:
@@ -447,7 +456,7 @@ def sir_readiness():
 
 def run_sir():
     assert read(C/'location_completed.json')['completed'] and (C/'sir_readiness/ready_for_development.json').exists()
-    guard();lock=(C/'device.lock').open('w');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    guard();lock=exclusive_device_lock()
     for method in METHODS:
         base=None
         if method in RESIDUAL:
@@ -502,7 +511,7 @@ def main():
     global C
     if args.campaign:C=Path(args.campaign).resolve()
     if args.action=='pilots':
-        guard();lock=(C/'device.lock').open('w');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+        guard();lock=exclusive_device_lock()
         plan=read(C/'pilot_plan.json')
         for method in args.methods.split(','):
             proof=read(C/'readiness'/('location_'+method+'_ready.json'))

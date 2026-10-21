@@ -86,3 +86,12 @@ def test_all_baseline_entrypoints_have_budget_hooks():
 def test_hardware_time_units_cannot_be_silently_changed(tmp_path):
     t=FakeTime();p=tmp_path/"clock.json";ComputeClock(p,10,hardware="RTX4090",now=t)
     with pytest.raises(ComputeBudgetError):ComputeClock(p,10,hardware="RTX5080",now=t)
+
+
+def test_reference_schedule_not_legacy_one_million():
+    from src.research.compute_budget import effective_episode_limit,classify_stop
+    assert effective_episode_limit(1000000000,100000000)==100000000
+    assert effective_episode_limit(1000000000,2058014)>1000000
+    assert classify_stop('planned_schedule_complete_before_compute_cap',2058014,2058014,1000000000)=='reference_schedule_completion'
+    assert classify_stop('compute_budget_complete',1200000,100000000,1000000000)=='compute_budget_exhaustion'
+    assert classify_stop('training',1000000,100000000,1000000)=='episode_safety_cap_exhaustion'

@@ -64,3 +64,15 @@ def score_phase_plan(seconds,initialization_seconds,score_update_seconds,policy_
     policies=int(remaining//(score_per_policy*score_update_seconds+policy_update_seconds))
     if policies<1:raise ComputeBudgetError("No complete native score-pretraining plus policy phase fits")
     return dict(score_updates=score_per_policy*policies,policy_updates=policies,estimated_seconds=initialization_seconds+policies*(score_per_policy*score_update_seconds+policy_update_seconds),phase_ratio=score_per_policy,timing_based=True)
+
+
+def effective_episode_limit(safety_episodes,reference_episodes):
+    """Schedules remain native; a separate explicit guard may shorten them."""
+    if min(safety_episodes,reference_episodes)<=0:raise ValueError('Positive explicit schedule and safety guard required')
+    return min(int(safety_episodes),int(reference_episodes))
+
+def classify_stop(status,episodes,reference_episodes,safety_episodes):
+    if status in {'compute_budget_complete','compute_budget_exceeded'}:return 'compute_budget_exhaustion'
+    if episodes>=reference_episodes:return 'reference_schedule_completion'
+    if episodes>=safety_episodes:return 'episode_safety_cap_exhaustion'
+    return 'incomplete_or_interrupted'
