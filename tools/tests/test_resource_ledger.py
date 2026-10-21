@@ -49,3 +49,9 @@ def test_shared_rollout_accounting_preserves_outputs():
     torch.testing.assert_close(a["info"],z["info"],rtol=0,atol=0)
     torch.testing.assert_close(torch.stack(a["actions"]),torch.stack(z["actions"]),rtol=0,atol=0)
     assert l.counts["scalar_conditional_log_density_evaluations"]==2*5*3
+
+
+def test_base_optimizer_updates_are_attributed():
+    from src.research.resource_ledger import with_training_ledger
+    row=with_training_ledger(dict(training='pathwise_sPCE_architecture_control',generated_training_trajectories=4096,contrast_training_trajectories=4096*1024,actual_updates=64),30)
+    assert row['resource_ledger']['optimizer_updates']['policy']==64

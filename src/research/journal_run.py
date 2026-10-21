@@ -84,7 +84,7 @@ def main(args,raw,root):
             this_rule=dict(rule_cfg)|protocol.get('method_stopping',{}).get(method,{})
             if args.smoke:this_rule=dict(rule_cfg)
             if args.smoke and method=='scorebed':this_rule['maximum_episodes']=24+10*int(s.get('scorebed_restarts',1))
-            rule=StoppingRule(**this_rule);observer=ValidationObserver(validator,rule,out/'models',method,selection_mode=protocol.get('checkpoint_selection_mode','best_validation'),compute_clock=compute_clock,compute_checkpoint_seconds=900. if not compute_cfg else compute_cfg.get('checkpoint_seconds',900.))
+            rule=StoppingRule(**this_rule);observer=ValidationObserver(validator,rule,out/'models',method,selection_mode='final_fixed_budget' if method=='random' else protocol.get('checkpoint_selection_mode','best_validation'),compute_clock=compute_clock,compute_checkpoint_seconds=900. if not compute_cfg else compute_cfg.get('checkpoint_seconds',900.))
             cap=rule.maximum_episodes
             reference_episodes=None
             if compute_cfg:
