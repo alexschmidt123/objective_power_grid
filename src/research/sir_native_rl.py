@@ -11,6 +11,7 @@ from torch import nn
 from src.research.native_rl_reference import TYPES
 from src.research.baseline_fidelity import rl_optimizer_epoch_completed
 
+from src.research.resource_ledger import with_training_ledger
 def spec(h):return SimpleNamespace(observation_space=SimpleNamespace(flat_dim=2),action_space=SimpleNamespace(flat_dim=1,shape=(1,1,1,1),is_discrete=False),max_episode_length=h)
 def history(f,h):
  slots=f[:,1:].reshape(len(f),h,3)
@@ -54,10 +55,11 @@ def train_sir_native_rl(b,h,s,seed,directory,trajectory_budget,observer=None):
  from src.research.engine import rollout
  if b.name!='sir_ode':raise ValueError('SIR-only native adapter')
  torch.manual_seed(seed);np.random.seed(seed);start=time.perf_counter();p=NativeSIRRLPolicy(h,b);a=algorithm(p,h);replay=Replay(int(s.get('rl_native_replay_capacity',1000000)),1+3*h)
- batch=100;rb=4096;gs=64;warm=100000;L=int(s.get('rl_native_contrasts',1024))
+ batch=100;rb=4096;gs=64;warm=100000;L=int(s.get('rl_native_contrasts',100000))
  if s.get('updates',3)<=2:batch=2;rb=4;gs=1;warm=1
  episodes=updates=gradients=0;records=[]
  while episodes<trajectory_budget:
+  if observer is not None and not observer.allow_next_unit(p,episodes,updates,a._policy_optimizer):break
   n=min(batch,trajectory_budget-episodes);updates+=1
   with torch.no_grad():r=rollout(b,p,h,n,seed+updates*104729,L)
   info=r['info'];reward=info-torch.cat((torch.zeros_like(info[:,:1]),info[:,:-1]),1)
@@ -74,4 +76,4 @@ def train_sir_native_rl(b,h,s,seed,directory,trajectory_budget,observer=None):
    row=dict(primary_episodes=episodes,collection_iterations=updates,gradient_updates=gradients,training_spce=float(info[:,-1].mean()),alpha=float(a._log_alpha.exp().detach()),target_entropy=a._target_entropy);records.append(row);print('native SIR RL-BOED',row,flush=True)
   if observer is not None and observer.check(p,episodes,updates,a._policy_optimizer,force=episodes==trajectory_budget):break
  journal=observer.finish(p) if observer else {};p.eval();torch.save(dict(kind='rl_sboed',architecture=p.architecture,horizon=h,state_dict=p.state_dict()),directory/'rl_sboed.pt')
- return p,dict(training='pinned_original_RL_BOED_REDQ_SIR_ODE_adaptation',generated_training_trajectories=episodes,training_forward_trajectories=episodes,contrast_training_trajectories=episodes*L,forward_particle_stages=episodes*h*(L+1),training_seconds=time.perf_counter()-start,history=records,gradient_updates=gradients,critic_updates=2*gradients,actor_updates=gradients,temperature_updates=gradients,gamma=.9,target_rate=.001,gradient_steps_per_collection=gs,replay_batch=rb,replay_capacity=replay.capacity,contrasts=L,adaptations='Observed normalized time/count history; native tanh action maps affinely to remaining feasible chronological interval; replay retains unit action; native REDQ update kernels unchanged; not a published SIR reproduction',resource_departures=['L1024 rather than source-location100000','replay1M rather than source-location10M'],**journal)
+ return p,with_training_ledger(dict(training='pinned_original_RL_BOED_REDQ_SIR_ODE_adaptation',generated_training_trajectories=episodes,training_forward_trajectories=episodes,contrast_training_trajectories=episodes*L,forward_particle_stages=episodes*h*(L+1),training_seconds=time.perf_counter()-start,history=records,gradient_updates=gradients,critic_updates=2*gradients,actor_updates=gradients,temperature_updates=gradients,gamma=.9,target_rate=.001,gradient_steps_per_collection=gs,replay_batch=rb,replay_capacity=replay.capacity,contrasts=L,adaptations='Observed normalized time/count history; native tanh action maps affinely to remaining feasible chronological interval; replay retains unit action; native REDQ update kernels unchanged; not a published SIR reproduction',resource_departures=['source-location native hyperparameters transferred to deterministic SIR ODE; total1M episodes'],**journal),h)

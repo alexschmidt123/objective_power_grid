@@ -39,7 +39,10 @@ def load_checkpoint(path,benchmark):
   arrays=np.load(path.with_name('scorebed_official_policy.npz'))
   if benchmark.name=='sir_ode':
    from src.research.sir_scorebed import SIRScorePolicy
-   p=SIRScorePolicy(arrays,h,benchmark)
+   if saved.get('architecture')=='official_ScoreBED_IqbalGRU_SIR_v1':
+    from src.research.sir_scorebed_gru import SIRScoreGRUPolicy
+    p=SIRScoreGRUPolicy(arrays,h,benchmark)
+   else:p=SIRScorePolicy(arrays,h,benchmark)
   else:
    from src.research.scorebed import OfficialScorePolicy
    p=OfficialScorePolicy(arrays,h,benchmark.action_scale,benchmark.obs_scale)

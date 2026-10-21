@@ -6,6 +6,7 @@ The new switching gate is clipped as its own disjoint parameter group.
 import torch
 from src.research.sparse_moe import routing_gamma,stabilize_gradients
 
+from src.research.resource_ledger import with_training_ledger,progress_ledger
 def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune=False,trajectory_budget=None,observer=None):
     import math,time,json
     from src.research.moe_architecture_controls import grad_norm
@@ -31,6 +32,7 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
         from src.research.moe_diagnostic_logging import DevelopmentTrace
         diagnostic=DevelopmentTrace(p,b,h,s,directory,observer)
     while count<budget:
+        if observer is not None and not observer.allow_next_unit(p,count,step,opt,scheduler):break
         n=min(s['batch_size'],budget-count);fraction=min(count/s.get('router_schedule_episodes',budget),1.)
         # Smooth homotopy to binary DSelect routing; terminal phase uses sparse
         # selectors. The sPCE objective remains the information criterion.
@@ -82,7 +84,8 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
             row['strategy_state_interpretation']=('hard-forward ST expert/switch state; separate relaxed regularization state' if p.config.get('training_routing_mode')=='straight_through' else 'relaxed state and argmax proxies; actual hard behavior evaluated separately')
         with trace.open('a') as f:f.write(json.dumps(row,allow_nan=False)+'\n')
         if step%s['validate_every']==0 or count==budget:
-            records.append(row);print(variant,{k:v for k,v in row.items() if not k.endswith('_by_stage')},flush=True)
+            records.append(row)
+        progress_ledger(directory,variant,count,count*contrasts,h,step,time.perf_counter()-start);print(variant,{k:v for k,v in row.items() if not k.endswith('_by_stage')},flush=True)
         if diagnostic is not None:diagnostic.after_update(row,r,groups,opt,scheduler)
         if observer is not None and observer.check(p,count,step,opt,scheduler,force=count>=budget):break
     journal=observer.finish(p) if observer is not None else {}
@@ -96,8 +99,8 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
     torch.save(p.checkpoint(),directory/(variant+'.pt'))
     base=getattr(p.core,'base',None)
     pre=base.provenance if base is not None else {}
-    return p,dict(training='pathwise_full_horizon_sPCE',variant=variant,canonical_name=NAMES[variant],
-        training_seconds=time.perf_counter()-start,measured_parameters=measured,generated_training_trajectories=count,
+    return p,with_training_ledger(dict(training='pathwise_full_horizon_sPCE',variant=variant,canonical_name=NAMES[variant],
+        training_seconds=time.perf_counter()-start,optimizer_scope='one shared Adam step for encoder, experts, router and switching gate; per-component gradient exposure separate',measured_parameters=measured,generated_training_trajectories=count,
         contrast_training_trajectories=count*contrasts,training_trajectory_budget=budget,
         training_budget_unit='primary_episodes',history=records,diagnostic_trace=str(trace),
         base_checkpoint=pre,additional_training_episodes=count,
@@ -113,4 +116,4 @@ def train_family(b,h,s,seed,directory,variant,base_checkpoint=None,base_finetune
         development_diagnostic_seconds=0. if diagnostic is None else diagnostic.seconds,
         settings=p.config,checkpoint_selection=journal.pop('checkpoint_selection','final'),training_objective='full_horizon_sPCE',
         contrasts=contrasts,expert_ids=['E1','E2','E3','E4'],
-        gradient_clip_mode='component',load_penalty_weight=1e-4,selector_entropy_weight_max=1e-4,**journal)
+        gradient_clip_mode='component',load_penalty_weight=1e-4,selector_entropy_weight_max=1e-4,actual_updates=step,**journal),h)

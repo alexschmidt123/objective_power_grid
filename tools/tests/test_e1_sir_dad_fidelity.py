@@ -38,3 +38,26 @@ def test_legacy_and_native_sir_checkpoint_predictions_preserved(tmp_path):
   torch.save(dict(kind='dad',horizon=5,architecture=p.architecture,state_dict=p.state_dict()),path)
   q=load_checkpoint(path,b)
   for stage in range(5):torch.testing.assert_close(p(f,stage),q(f,stage),atol=0,rtol=0)
+
+def test_native_sir_spce_gradient_and_one_adam_step():
+ from src.research.engine import rollout
+ torch.manual_seed(105);torch.set_num_threads(2);n=native_types();enc=n['EncoderNetwork']((1,1),1,256,16).double();emit=n['EmitterNetwork'](16,(1,1)).double();ref=n['SetEquivariantDesignNetwork'](enc,emit,torch.zeros(1,1,dtype=torch.float64));p=SIRSumDAD(3)
+ with torch.no_grad():
+  for a,b in [(p.encoder[0],enc.linear1),(p.encoder[2],enc.output_layer),(p.emitter,emit.linear)]:a.weight.copy_(b.weight);a.bias.copy_(b.bias)
+ class Reference(nn.Module):
+  kind='dad';outputs_design=False
+  def __init__(self):super().__init__();self.ref=ref
+  def forward(self,f,stage):
+   slots=f[:,1:].reshape(len(f),3,3);pairs=[(slots[:,t,:1,None],slots[:,t,1:2]) for t in range(stage)]
+   return self.ref(*pairs).reshape(-1,1).expand(len(f),-1)
+ q=Reference();b=SIR({'sir_ode':{'integration_steps_per_stage':32}})
+ opt1=torch.optim.Adam(p.parameters(),lr=.0003,betas=(.8,.998));opt2=torch.optim.Adam(q.parameters(),lr=.0003,betas=(.8,.998))
+ r1=rollout(b,p,3,2,101,3);r2=rollout(b,q,3,2,101,3)
+ for x,y in zip(r1['actions'],r2['actions']):torch.testing.assert_close(x,y,atol=1e-11,rtol=1e-11)
+ loss1=-r1['info'][:,-1].mean();loss2=-r2['info'][:,-1].mean();torch.testing.assert_close(loss1,loss2,atol=1e-10,rtol=1e-10)
+ loss1.backward();loss2.backward()
+ for a,bb in [(p.encoder[0],enc.linear1),(p.encoder[2],enc.output_layer),(p.emitter,emit.linear)]:
+  for x,y in zip(a.parameters(),bb.parameters()):torch.testing.assert_close(x.grad,y.grad,atol=1e-8,rtol=1e-8)
+ opt1.step();opt2.step()
+ for a,bb in [(p.encoder[0],enc.linear1),(p.encoder[2],enc.output_layer),(p.emitter,emit.linear)]:
+  for x,y in zip(a.parameters(),bb.parameters()):torch.testing.assert_close(x,y,atol=1e-10,rtol=1e-10)
