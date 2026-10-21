@@ -516,7 +516,12 @@ def main():
         for method in args.methods.split(','):
             proof=read(C/'readiness'/('location_'+method+'_ready.json'))
             if proof.get('status')!='PASS':raise RuntimeError('Readiness not passed: '+method)
-            run_phase('location',101,method,timeout_seconds=plan['methods'][method]['safety_seconds']+3600,evaluation_cases=C/'evaluations/location_cases.npz',evaluation_bank=C/'evaluations/location_contrasts.npy')
+            base=None
+            if method in RESIDUAL:
+                bases=[e for e in read(C/'registry.json') if e['benchmark']=='location' and e['seed']==101 and e['method']=='base' and e['status']=='complete']
+                if not bases:raise RuntimeError('Complete seed-specific base required before residual pilot')
+                base=Path(bases[-1]['run'])/'models/sum_single.pt'
+            run_phase('location',101,method,base=base,timeout_seconds=plan['methods'][method]['safety_seconds']+3600,evaluation_cases=C/'evaluations/location_cases.npz',evaluation_bank=C/'evaluations/location_contrasts.npy')
         return
     if args.action=='prepare':prepare()
     elif args.action=='seal':seal()

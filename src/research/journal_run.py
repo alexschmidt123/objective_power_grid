@@ -175,6 +175,9 @@ def main(args,raw,root):
                 t['reference_schedule_episodes']=reference_episodes
                 t['primary_episode_safety_cap']=rule.maximum_episodes
                 t['stop_reason']=classify_stop(t.get('convergence_status'),t['generated_training_trajectories'],reference_episodes,rule.maximum_episodes)
+                if t['generated_training_trajectories']>=reference_episodes:
+                    t['stop_reason']='reference_schedule_completion'
+                    if method=='scorebed' and t.get('actual_policy_updates',0)<s['policy_schedule_reference_steps']:t['stop_reason']='predeclared_compute_phase_schedule_completion'
                 t['compute_budget']['overrun_seconds']=max(0.,t['compute_budget']['charged_seconds']-t['compute_budget']['budget_seconds'])
             t['effective_training_settings']=s
             t['resume_scope']='Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed'
