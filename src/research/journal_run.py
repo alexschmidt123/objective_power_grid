@@ -92,6 +92,9 @@ def main(args,raw,root):
                 if 'reference_schedule_episodes' not in s:raise ValueError('Matched-compute mode requires an explicit reference schedule, separate from episode safety guard')
                 reference_episodes=int(s['reference_schedule_episodes'])
                 cap=effective_episode_limit(rule.maximum_episodes,reference_episodes)
+                if method in {'dad','fixed'}:
+                    from src.research.compute_budget import primary_reference_schedule
+                    cap=primary_reference_schedule(s,rule.maximum_episodes)
             if method in {'resmoe','switchresmoe'} and not args.base_checkpoint:raise ValueError('Provide the same benchmark/seed-specific base checkpoint for residual variants')
             if method in {'resmoe','switchresmoe'} and not args.smoke:
                 base_run=json.loads((Path(args.base_checkpoint).resolve().parent.parent/'run_config.json').read_text())
@@ -179,6 +182,9 @@ def main(args,raw,root):
                     t['stop_reason']='reference_schedule_completion'
                     if method=='scorebed' and t.get('actual_policy_updates',0)<s['policy_schedule_reference_steps']:t['stop_reason']='predeclared_compute_phase_schedule_completion'
                 t['compute_budget']['overrun_seconds']=max(0.,t['compute_budget']['charged_seconds']-t['compute_budget']['budget_seconds'])
+                if t['stop_reason']=='incomplete_or_interrupted':
+                    write_json(out/'models'/f'{method}_training.json',t)
+                    raise RuntimeError('Premature native training termination: neither declared schedule, compute allowance nor episode safety guard reached')
             t['effective_training_settings']=s
             t['resume_scope']='Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed'
             t['historical_runtime_overlap']='New runs are serialized; historical timings require separate provenance'

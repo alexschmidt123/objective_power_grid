@@ -46,6 +46,10 @@ def make_config(benchmark,cap):
     for method in FAMILY:p['method_settings'][method]['router_schedule_episodes']=500000 if method in RESIDUAL else 1000000
     p['method_settings']['fixed']={**raw['research'].get('training_profiles',{}).get('fixed',{})}
     p['method_settings']['dad']={**raw['research'].get('training_profiles',{}).get('adaptive',{})}
+    for pathwise in ['dad','fixed']:
+        batch=2000 if pathwise=='dad' else raw['research']['settings']['batch_size']
+        updates=50000
+        p['method_settings'][pathwise].update(batch_size=batch,reference_optimizer_updates=updates,reference_training_episodes=updates*batch,spce_trajectory_budget_unit='primary_episodes')
     p['method_settings']['scorebed']=dict(scorebed_pretraining_episodes=692990,scorebed_batch_size=64)
     p['validation'].update(systems=512 if benchmark=='location' else 128,contrasts=1000000 if benchmark=='location' else 16384,batch_size=16,chunk=16384 if benchmark=='location' else 4096)
     if benchmark=='sir':
@@ -196,11 +200,11 @@ def guard():
     for rel,digest in read(C/'source_manifest.json')['sha256'].items():
         if sha(ROOT/rel)!=digest:raise RuntimeError('Frozen source/config changed: '+rel)
 
-def exclusive_device_lock():
+def exclusive_device_lock(wait=False):
     """Host-wide lock across campaigns; reject existing unregistered GPU work."""
     path=Path.home()/'.cache/objective_power_grid/device_0.lock'
     path.parent.mkdir(parents=True,exist_ok=True)
-    lock=path.open('a+');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    lock=path.open('a+');fcntl.flock(lock,fcntl.LOCK_EX if wait else fcntl.LOCK_EX|fcntl.LOCK_NB)
     active=subprocess.check_output(['nvidia-smi','--query-compute-apps=pid','--format=csv,noheader,nounits'],text=True).strip()
     if active:raise RuntimeError('Device already has compute processes; preserve them and defer this queue: '+active)
     return lock
@@ -515,11 +519,11 @@ def sir_resolution_and_figures():
         plt.close(fig)
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['prepare','seal','location','report','sir-readiness','sir','pilots']);parser.add_argument('--campaign');parser.add_argument('--methods',default='dad,rl_sboed,vsoed,scorebed,moe');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['prepare','seal','location','report','sir-readiness','sir','pilots']);parser.add_argument('--campaign');parser.add_argument('--wait-device',action='store_true');parser.add_argument('--methods',default='dad,rl_sboed,vsoed,scorebed,moe');args=parser.parse_args()
     global C
     if args.campaign:C=Path(args.campaign).resolve()
     if args.action=='pilots':
-        guard();lock=exclusive_device_lock()
+        guard();lock=exclusive_device_lock(wait=args.wait_device)
         plan=read(C/'pilot_plan.json')
         for method in args.methods.split(','):
             proof=read(C/'readiness'/('location_'+method+'_ready.json'))

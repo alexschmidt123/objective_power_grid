@@ -76,3 +76,25 @@ def classify_stop(status,episodes,reference_episodes,safety_episodes):
     if episodes>=reference_episodes:return 'reference_schedule_completion'
     if episodes>=safety_episodes:return 'episode_safety_cap_exhaustion'
     return 'incomplete_or_interrupted'
+
+
+def primary_reference_schedule(settings,safety_cap):
+    """Explicit optimizer/episode dimensions for matched-compute pathwise methods."""
+    updates=settings['reference_optimizer_updates'];batch=settings['batch_size']
+    episodes=settings['reference_training_episodes']
+    if any(not isinstance(x,int) or x<=0 for x in [updates,batch,episodes,safety_cap]):raise ValueError('Positive integer reference updates, batch, episodes and safety guard required')
+    if episodes!=updates*batch:raise ValueError('Reference training episodes must equal optimizer updates times native outer batch')
+    if settings.get('reference_schedule_episodes',episodes)!=episodes:raise ValueError('Conflicting reference episode fields')
+    if settings.get('spce_trajectory_budget_unit')!='primary_episodes':raise ValueError('Matched-compute trajectory cap must explicitly count primary episodes; contrasts are separate work')
+    return min(episodes,safety_cap)
+
+def spce_update_plan(settings,trajectory_budget):
+    import math
+    unit=settings.get('spce_trajectory_budget_unit','primary_episodes' if settings.get('primary_episode_budget',0) else 'forward_including_contrasts')
+    if unit not in {'primary_episodes','forward_including_contrasts'}:raise ValueError('Unknown sPCE trajectory budget unit')
+    if unit=='primary_episodes':
+        updates=math.ceil(trajectory_budget/settings['batch_size'])
+        if 'reference_optimizer_updates' in settings:updates=min(updates,settings['reference_optimizer_updates'])
+    else:
+        updates=min(settings['updates'],math.ceil(trajectory_budget/((settings['contrasts']+1)*settings['batch_size'])))
+    return updates,unit
