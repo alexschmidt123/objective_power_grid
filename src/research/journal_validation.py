@@ -120,23 +120,32 @@ class ValidationObserver:
         self.validation_seconds+=cost['seconds'];row=self.plateau.update(scores,episodes,seconds);row.update(update=int(update),validation=cost)
         apply_selection_mode(row,episodes,self.rule,self.selection_mode)
         if self.compute_clock is not None:
-            mark=self.compute_clock.checkpoint(str(update));row.update(compute_checkpoint=mark)
+            mark=dict(eligible=self.compute_clock.can_start());row.update(compute_checkpoint=mark)
             row['selected']=mark['eligible']
             row['status']=(('compute_budget_complete' if mark['eligible'] else 'compute_budget_exceeded') if compute_stop else 'planned_schedule_complete_before_compute_cap') if force else 'training'
             self.next_compute_check=self.compute_clock.spent()+self.compute_checkpoint_seconds
         self.next_check=episodes+self.rule.validation_every_episodes
         self.directory.mkdir(parents=True,exist_ok=True)
-        with (self.directory/(self.method+'_validation.jsonl')).open('a') as f:f.write(json.dumps(row,allow_nan=False)+'\n')
+        # Eligibility is finalized after native checkpoint serialization below.
         state={k:v.detach().cpu().clone() for k,v in policy.state_dict().items()}
         gamma=getattr(getattr(policy,'router',None),'gamma',None)
         resume=dict(policy_state=state,optimizer_state=None if optimizer is None else optimizer.state_dict(),scheduler_state=None if scheduler is None else scheduler.state_dict(),episodes=episodes,update=update,rng_cpu=cpu_rng,rng_cuda=gpu_rng,gamma=gamma,rule=asdict(self.rule),selection=row)
         torch.save(resume,self.directory/(self.method+'_journal_last.pt'))
         if getattr(self.validator,'preserve_progress_checkpoints',False) or self.compute_clock is not None:
             target=self.directory/(self.method+f'_progress_{update}.pt');tmp=target.with_suffix('.partial');torch.save(resume,tmp);tmp.replace(target)
+        np.save(self.directory/(self.method+f'_validation_scores_{update}.npy'),scores)
+        if self.compute_clock is not None:
+            mark=self.compute_clock.checkpoint(str(update));row['compute_checkpoint']=mark;row['selected']=mark['eligible']
+            if compute_stop:row['status']='compute_budget_complete' if mark['eligible'] else 'compute_budget_exceeded'
+            (self.directory/(self.method+f'_progress_{update}.cost.json')).write_text(json.dumps(mark))
         if row['selected']:
             self.best_state=state;self.best_gamma=gamma
-            torch.save(resume,self.directory/(self.method+'_journal_best.pt'))
-        np.save(self.directory/(self.method+f'_validation_scores_{update}.npy'),scores)
+            if self.compute_clock is None:torch.save(resume,self.directory/(self.method+'_journal_best.pt'))
+            else:
+                import os
+                best=self.directory/(self.method+'_journal_best.pt');temp=best.with_suffix('.link')
+                os.link(self.directory/(self.method+f'_progress_{update}.pt'),temp);os.replace(temp,best)
+        with (self.directory/(self.method+'_validation.jsonl')).open('a') as f:f.write(json.dumps(row,allow_nan=False)+'\n')
         print(self.method,'journal validation',row,flush=True)
         return row['status']!='training'
     def allow_next_unit(self,policy,episodes,update,optimizer=None,scheduler=None):

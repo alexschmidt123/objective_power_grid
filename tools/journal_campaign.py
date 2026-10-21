@@ -1,5 +1,5 @@
 """Frozen ten-method fixed-budget replication; root launchers, artifact-only reports."""
-import argparse,csv,fcntl,hashlib,json,math,os,shutil,subprocess,sys,threading,time,traceback
+import argparse,csv,fcntl,hashlib,json,math,os,shutil,signal,subprocess,sys,threading,time,traceback
 from pathlib import Path
 import numpy as np
 import torch
@@ -246,7 +246,15 @@ def run_phase(benchmark,seed,method,base=None,timeout_seconds=None,evaluation_ca
     started=time.monotonic();watch.start();status='failed';failure=None
     try:
         with (out.parent/(method+'_launcher.log')).open('w') as log:
-            subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,env=dict(os.environ,BOED_TRAINING_START_MONOTONIC=str(time.monotonic())),timeout=timeout_seconds if timeout_seconds is not None else (10800 if benchmark=='location' else 90000))
+            worker=subprocess.Popen(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,env=dict(os.environ,BOED_TRAINING_START_MONOTONIC=str(time.monotonic())),start_new_session=True)
+            try:
+                code=worker.wait(timeout=timeout_seconds if timeout_seconds is not None else (10800 if benchmark=='location' else 90000))
+                if code:raise subprocess.CalledProcessError(code,command)
+            except subprocess.TimeoutExpired:
+                os.killpg(worker.pid,signal.SIGTERM)
+                try:worker.wait(timeout=30)
+                except subprocess.TimeoutExpired:os.killpg(worker.pid,signal.SIGKILL);worker.wait()
+                raise
         name=native_method(method);t=read(out/'models'/(name+'_training.json'))
         if method!='random':
             if t.get('compute_budget') is not None:

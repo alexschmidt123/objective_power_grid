@@ -49,7 +49,9 @@ def maybe_validate(params,plan_path,episodes,update,started,force=False):
   if not(force or compute_stop or elapsed>=previous.get('next_compute_check',plan['compute_budget']['checkpoint_seconds'])):return False
  elif not (force or episodes>=previous['next_check'] or elapsed>=plan['rule']['maximum_training_seconds']):return False
  candidate=out/'scorebed_journal_candidate.npz';np.savez(candidate,**export_candidate(params,plan))
- if clock is not None:shutil.copyfile(candidate,out/f'scorebed_progress_{update}.npz')
+ if clock is not None:
+  shutil.copyfile(candidate,out/f'scorebed_progress_{update}.npz')
+  elapsed=clock.spent() # Include native checkpoint/export IO in eligibility.
  command=[plan['torch_python'],'-m','src.research.journal_scorebed_bridge','--score','--plan',str(plan_path),'--candidate',str(candidate),'--episodes',str(episodes),'--update',str(update),'--elapsed',str(elapsed)]
  if clock is not None and (compute_stop or force):command+=['--compute-stop']
  before=time.perf_counter()
@@ -57,6 +59,8 @@ def maybe_validate(params,plan_path,episodes,update,started,force=False):
  else:
   with clock.exclude('validation'):subprocess.run(command,cwd=plan['root'],check=True)
  wall=time.perf_counter()-before
+ state=json.loads(progress.read_text())
+ if clock is not None and state['records'][-1]['selected']:shutil.copyfile(candidate,out/'scorebed_journal_best.npz')
  state=json.loads(progress.read_text());state['validation_seconds']=previous['validation_seconds']+wall
  state['records'][-1]['validation']['consumer_seconds']=state['records'][-1]['validation']['seconds'];state['records'][-1]['validation']['seconds']=wall
  progress.write_text(json.dumps(state,indent=2)+'\n')
@@ -98,7 +102,7 @@ def score(args):
  if clock is not None:
   mark=clock.checkpoint(str(args.update),charged_seconds=args.elapsed);row.update(compute_checkpoint=mark);row['selected']=mark['eligible'];row['status']=('compute_budget_complete' if mark['eligible'] else 'compute_budget_exceeded') if getattr(args,'compute_stop',False) else 'training'
   state['next_compute_check']=args.elapsed+plan['compute_budget']['checkpoint_seconds']
- if row['selected']:shutil.copyfile(args.candidate,out/'scorebed_journal_best.npz')
+ if row['selected'] and clock is None:shutil.copyfile(args.candidate,out/'scorebed_journal_best.npz')
  state.update(records=plateau.records,best=plateau.best,anchor=plateau.anchor.tolist(),stale=plateau.stale,next_check=args.episodes+rule.validation_every_episodes)
  path.write_text(json.dumps(state,indent=2)+'\n');np.save(out/f'scorebed_validation_scores_{args.update}.npy',values)
  print('ScoreBED common journal validation',row,flush=True)
