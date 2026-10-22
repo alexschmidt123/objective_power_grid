@@ -49,6 +49,15 @@ _prepend_mocu_optimized
 unset -f _prepend_mocu_optimized
 export PYTHONPATH="${ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
+# Isolated predictive-density prototype; every existing launcher path is unchanged.
+for _pimoe_arg in "$@"; do
+    if [[ "$_pimoe_arg" == "--pimoe" ]]; then
+        python3 -m src.research.pimoe_experiment "$@"
+        exit $?
+    fi
+done
+unset _pimoe_arg
+
 EXPERIMENT_TYPE_DEFAULT="eig_based"
 DEFAULT_STEP_NUMBER=3
 DEFAULT_N_OBS=0
