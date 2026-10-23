@@ -44,16 +44,17 @@ class DeepSeekPolicy(LocationDAD):
         dispatch=None
         if self.router is not None and not self.ablate_routed:
             scores=self.router(z).softmax(-1);weights,indices=scores.topk(self.top_k,dim=-1)
-            routed=z.new_zeros(z.shape)
-            # Genuine sparse execution in BOTH training and deployment. A row
-            # executes exactly top_k small FFNs; unselected FFNs are not called.
-            for e in indices.unique().tolist():
-                rows,slots=(indices==e).nonzero(as_tuple=True)
-                values=self.routed[e](z[rows]);routed.index_add_(0,rows,values*weights[rows,slots,None])
+            routed=self.routed_feature_sum(z,weights,indices)
             u=u+routed;dispatch=dict(indices=indices.detach(),scores=scores.detach(),selected_weights=weights.detach())
             if self.training:self._gate_cache.append((scores,indices.detach()))
         self.last_dispatch=dispatch;self.last_features=z.detach()
         return self.emitter(u)
+    def routed_feature_sum(self,z,weights,indices):
+        routed=z.new_zeros(z.shape)
+        for e in indices.unique().tolist():
+            rows,slots=(indices==e).nonzero(as_tuple=True)
+            values=self.routed[e](z[rows]);routed.index_add_(0,rows,values*weights[rows,slots,None])
+        return routed
     def balance_loss(self):
         if not self._gate_cache:return next(self.parameters()).sum()*0
         scores=torch.cat([x[0] for x in self._gate_cache]);ids=torch.cat([x[1] for x in self._gate_cache]);N=scores.shape[-1];K=ids.shape[-1]

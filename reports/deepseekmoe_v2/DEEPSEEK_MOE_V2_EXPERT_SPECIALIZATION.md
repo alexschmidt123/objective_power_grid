@@ -1,0 +1,2 @@
+# Specialization status
+Useful specialization remains unproven. Selected experts receive full-horizon sPCE gradients through selected gates/features; shared network receives all contexts. Hard top-k membership has piecewise gradients. Uniform routing closely matched learned routing in frozen v1 diagnostics. Different parameters or functions do not establish useful specialization. Full-budget shared-only, routed-only and approximately parameter-matched dense controls are predeclared. Independent held-out diagnostics and retrained results remain pending.

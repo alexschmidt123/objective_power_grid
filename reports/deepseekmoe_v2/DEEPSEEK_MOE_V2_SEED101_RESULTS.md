@@ -1,0 +1,2 @@
+# Seed101 status at launch
+15 focused tests passed; canonical native-size two-update launcher smoke passed. Native numerical equivalence and throughput gate passed. No new official EIG exists yet. V1 historical result10.98907 +/-0.04479 nats (evaluation MC SE, one training seed). Primary fresh training has a14400-second cap. Official evaluation is conditional on predeclared independent development gates. All historical artifacts remain unchanged.

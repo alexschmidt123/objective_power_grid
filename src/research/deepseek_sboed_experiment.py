@@ -29,7 +29,7 @@ def norm(parameters):
  return float(torch.stack(values).norm()) if values else 0.
 
 def save(model,path,update,cfg,opt=None,scheduler=None):
- state=dict(method='DeepSeekMoE-sBOED' if isinstance(model,DeepSeekPolicy) else 'corrected_dense_DAD_control',horizon=30,action_scale=4.,obs_scale=3.,variant=getattr(model,'variant','dad'),balance_factor=getattr(model,'balance_factor',0.),state_dict={k:v.detach().cpu().clone() for k,v in model.state_dict().items()},training_seed=101,update=update,configuration=cfg,source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
+ state=dict(method=getattr(model,'method','DeepSeekMoE-sBOED') if isinstance(model,DeepSeekPolicy) else 'corrected_dense_DAD_control',horizon=30,action_scale=4.,obs_scale=3.,variant=getattr(model,'variant','dad'),balance_factor=getattr(model,'balance_factor',0.),state_dict={k:v.detach().cpu().clone() for k,v in model.state_dict().items()},training_seed=101,update=update,configuration=cfg,source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
  if opt is not None:state.update(optimizer=opt.state_dict(),scheduler=scheduler.state_dict())
  torch.save(state,path)
 
@@ -44,10 +44,10 @@ def diagnostics(model,result,gradient,loss,info,update,seconds):
   row.update(routing=model.routing_statistics(),shared_gradient=norm(model.shared.parameters()) if model.shared is not None else None,router_gradient=norm(model.router.parameters()) if model.router is not None else None,routed_gradient=[norm(e.parameters()) for e in model.routed],normalized_late_context_RMS=float(model.last_features.square().mean().sqrt()),raw_encoder_has_no_bounded_saturating_activation=True)
  return row
 
-def train(C,cfg,variant,updates,budget,validator,credit=0.,start=None):
+def train(C,cfg,variant,updates,budget,validator,credit=0.,start=None,policy_factory=None):
  out=C/'models'/variant;out.mkdir(parents=True,exist_ok=False);clock=ComputeClock(out/'compute_clock.json',budget,credit_seconds=credit,hardware=torch.cuda.get_device_name(0),start=start);torch.manual_seed(101)
- model=(LocationDAD(30,4.,3.,first_design_revision=1) if variant=='dad' else DeepSeekPolicy(variant=variant)).cuda();model.train();
- if variant=='full':
+ model=(LocationDAD(30,4.,3.,first_design_revision=1) if variant=='dad' else (policy_factory(variant=variant) if policy_factory is not None else DeepSeekPolicy(variant=variant))).cuda();model.train();
+ if variant=='full' and cfg.get('charge_readiness_probe',True):
   probe=json.loads((C/'readiness/native_full_minibatch_probe.json').read_text());B0=probe['batch_size'];L0=probe['contrasts']
   for unit,n in [('fresh_complete_primary_trajectories',B0),('true_parameter_stages',B0*30),('contrast_parameter_stages',B0*L0*30),('scalar_conditional_likelihood_evaluations',B0*(L0+1)*30),('policy_optimizer_updates',1)]:clock.count(unit,n,component='readiness_probe_discarded_weights')
  b=make_benchmark(cfg['benchmark']);opt=torch.optim.Adam(model.parameters(),lr=cfg['learning_rate'],betas=tuple(cfg['adam_betas']));scheduler=torch.optim.lr_scheduler.ExponentialLR(opt,cfg['lr_decay']);records=[];evaluations=[];bound=1.;completed=0;stop='incomplete';unstable=collapsed=0
@@ -58,7 +58,9 @@ def train(C,cfg,variant,updates,budget,validator,credit=0.,start=None):
    with torch.device('cuda'):
     r=rollout(b,model,30,cfg['batch_size'],101+update*104729,cfg['contrasts']);info=r['info'][:,-1].mean();balance=model.balance_loss() if isinstance(model,DeepSeekPolicy) else info*0;loss=-info+balance
     if not torch.isfinite(loss):raise FloatingPointError('Nonfinite full-horizon information objective')
-    loss.backward();gradient=norm(model.parameters())
+    loss.backward()
+    if hasattr(model,'mask_unused_gradients'):model.mask_unused_gradients()
+    gradient=norm(model.parameters())
     if not math.isfinite(gradient):raise FloatingPointError('Nonfinite native gradient')
     if variant!='dad':torch.nn.utils.clip_grad_norm_(model.parameters(),5,error_if_nonfinite=True)
     opt.step();torch.cuda.synchronize()
