@@ -151,10 +151,10 @@ def equivalence_fixture(C):
     belief.update(torch.tensor([0.,0.],dtype=DTYPE),1.);belief.update(torch.tensor([1.,-1.],dtype=DTYPE),1.4);posterior_response=responses(b,belief.theta,a).detach().cpu().numpy()
     np.savez(C/('readiness/numerical_fixture_'+os.environ.get('PIMOE_FIXTURE_DEVICE','cpu')+'.npz'),posterior_response=posterior_response,posterior_log_weights=belief.logw.cpu().numpy(),weights=z['weights'].detach().cpu().numpy(),means=z['means'].detach().cpu().numpy(),scales=z['scales'].detach().cpu().numpy(),loss=np.asarray(float(loss.detach())),gradient=grad.cpu().numpy(),updated_parameters=torch.cat([p.detach().flatten() for p in model.parameters()]).cpu().numpy(),simulator_responses=f['means'].numpy());print('FIXTURE',sha(C/('readiness/numerical_fixture_'+os.environ.get('PIMOE_FIXTURE_DEVICE','cpu')+'.npz')))
 
-def evaluate(reference,C,checkpoint,seed,model_label):
+def evaluate(reference,C,checkpoint,seed,model_label,model_loader=load_model):
     from tools.journal_campaign import exclusive_device_lock
     from src.research.sir_evaluation import contrast_scores
-    lock=exclusive_device_lock();cfg=yaml.safe_load((reference/'configs/pimoe_seed101.yaml').read_text());b=make_benchmark(cfg['benchmark']);model=load_model(checkpoint,'cuda' if torch.cuda.is_available() else 'cpu');canonical=Path(os.environ.get('PIMOE_CANONICAL_EVAL_DIR',cfg['canonical_evaluation_directory']))
+    lock=exclusive_device_lock();cfg=yaml.safe_load((reference/'configs/pimoe_seed101.yaml').read_text());b=make_benchmark(cfg['benchmark']);model=model_loader(checkpoint,'cuda' if torch.cuda.is_available() else 'cpu');canonical=Path(os.environ.get('PIMOE_CANONICAL_EVAL_DIR',cfg['canonical_evaluation_directory']))
     for name,key in [('location_cases.npz','cases_sha256'),('location_contrasts.npy','contrast_sha256')]:
         if sha(canonical/name)!=cfg[key]:raise ValueError('Canonical evaluation bank mismatch')
     out=C/'location'/f'seed{seed}'/model_label/'eval';out.mkdir(parents=True,exist_ok=True)
