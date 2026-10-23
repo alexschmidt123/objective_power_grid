@@ -11,3 +11,16 @@ Single control uses the same contexts, posterior states, full-horizon objective,
 Main/control each receive600seconds of phase allowance and at most12000updates, Adam.0004/clip5, batch8,L16384. New worker total1800second safety ceiling; indivisible complete native batches can overshoot and actual time is reported. This is ADDITIONAL COMPUTE, not an IC matched-budget improvement. No inherited model or training cost. Readiness native probe.62924seconds plus measuredtesttime and unmeasuredstartup/smokeoverhead are separately disclosed. Sourceauthoring excluded from experimentalruntime.
 
 Independent devseed1013:32trajectories/mode, L16384, learned, random-uniform routing and matchedsingle. Development resolution can saturate atlog16385; do not interpret it as exact EIG. Final checkpoint is latest phase-eligible, never primaryEIGselected. Officialevaluation seed1001 is used only afterfreeze:2000trajectories,L1000000,true-likelihood evaluator unchanged. Consumed1001 is comparison data, not untouchedconfirmation.
+
+
+## Completed seed101 development attempt
+
+Main8801updates/595.049541seconds; control11316updates/595.036776seconds, selected by latest eligible phase checkpoint. Worker measured1192.352808seconds for both training phases and development. Separate readiness/test/latency costs are retained; not all subprocess startup/smoke overhead was measured, and no GPU-active-time claim is made.
+
+Both use the same nominal phase ceiling, but simulation work differs: main34,852,876,080parameter-stage evaluations versus control44,547,803,136, plus shared conditional-posterior construction recorded separately. The control reuses main-generated conditional contexts; their physical generation happens once. Attribution of shared context-generation walltime is not separately measured (it is a subset of the main5.235672second total competence-cycle walltime). Do not interpret nominal phase equality as exact end-to-end compute equality. No pretrained model costs are inherited.
+
+Development information estimates are below prior policies; this configuration is NOT established to improve EIG. Pre-clipping gradient spikes and only3competence-refinement cycles versus8801mainupdates are documented limitations, not proven causal explanations. No posthoc retuning or best-EIG checkpoint replacement was performed. Official2000/L1M/1001evaluation remains in progress.
+
+Held-out competence: zero of4contexts has a2SE-resolved best expert. This is an unadjusted exploratory MC rule, excludesSMCbias, and cannot establish robust specialization. Full targetvalues and paired errors are saved. Future claims would require more held-out contexts, adjusted uncertainty and independent training seeds.
+
+Deployment timings: CPU2threads, histories at stages4,10,18,26,200timed repetitions each after20warmups, totalhistory-packing+encoder+router+selectedexpert0.176-0.255ms for main. These are timing samples from training-prefix contexts, not held-out information results. No numerical posterior update exists in the deployed history-encoder model. Simulator calls were actively forbidden in this benchmark.

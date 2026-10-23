@@ -53,3 +53,18 @@ def test_official_noise_is_preserved_and_never_sampled_from_test_seed():
     states=b.initial((2,1))
     for t,(action,y) in enumerate(zip(r['actions'],r['observations'])):
         mean,states=b.forward(truth[:,None],states,action[:,None]);torch.testing.assert_close(y,mean[:,0]+b.sigma*noise[:,t])
+
+
+def test_remaining_sequence_information_matches_analytic_gaussian():
+    class GaussianReference:
+        sigma=.5;obs_scale=1.;action_dim=2;obs_dim=1
+        def initial(self,shape):return None
+        def encode_action(self,a):return a/4
+        def forward(self,theta,state,action):return theta[...,:1],state
+        def log_likelihood(self,y,mean):return (-.5*((y-mean)/self.sigma).square()-math.log(self.sigma*math.sqrt(2*math.pi))).sum(-1)
+    torch.set_num_threads(2);torch.manual_seed(101);m=SAMoE().eval();g=torch.Generator().manual_seed(1015)
+    posterior=torch.randn(32768,1,generator=g,dtype=torch.float64)
+    actions=[torch.zeros(2,dtype=torch.float64)]*27;observations=[torch.tensor(0.,dtype=torch.float64)]*27
+    with torch.no_grad():values=conditional_rollout(GaussianReference(),m,actions,observations,posterior,1,1016,batch=2048,contrasts=2048)
+    expected=.5*math.log(1+3/.25);se=values.std(unbiased=True)/math.sqrt(len(values))
+    assert abs(float(values.mean())-expected)<5*float(se)+.01
