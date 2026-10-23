@@ -49,7 +49,7 @@ def prepare_data(b,cfg,seed,episodes,greedy,ledger):
     return data,dict(episodes=episodes,observation_stages=30*episodes,posterior_states=len(data),physical_forward_parameter_stage_evaluations=b.calls-initial_calls,reference_Gaussian_density_terms=reference_terms,fresh_counterfactual_training_observations=len(data)*8*128,reference_outer_observations=len(data)*8*outer,data_seed=seed,wall_seconds=time.perf_counter()-started,history=histories)
 
 def optimization(model,data,cfg,C,ledger):
-    model.to('cuda');torch.cuda.reset_peak_memory_stats();opt=torch.optim.Adam(model.parameters(),lr=.001);g=rng(101);budget=ledger.read();cap=budget['optimization_allowance_seconds']-budget['charged_optimization_seconds'];begin=time.perf_counter();bound=.05;records=[];updates=0
+    model.to('cuda');torch.cuda.reset_peak_memory_stats();opt=torch.optim.Adam(model.parameters(),lr=.001);g=rng(101);budget=ledger.read();cap=cfg.get('budget_policy',{}).get('corrected_attempt_optimizer_seconds',budget['optimization_allowance_seconds']-budget['charged_optimization_seconds']);begin=time.perf_counter();bound=.05;records=[];updates=0
     for update in range(14000):
         elapsed=time.perf_counter()-begin
         if elapsed+max(bound*1.25,.25)>=cap:break
@@ -60,7 +60,7 @@ def optimization(model,data,cfg,C,ledger):
         if updates==1 or updates%100==0:
             row.update(update=updates,optimization_seconds=time.perf_counter()-begin,gradient_norm=norm);records.append(row);print('IC_update',row,flush=True)
     if not updates:raise RuntimeError('No budget-eligible native optimizer update')
-    torch.cuda.synchronize();ckpt=dict(model='PIMoE-sBOED-IC',experts=4,width=48,components=3,state_dict={k:v.detach().cpu().clone() for k,v in model.state_dict().items()},updates=updates,training_seed=101,entropy_nodes=128,configuration=cfg)
+    torch.cuda.synchronize();ckpt=dict(training_numerics_revision=2,model='PIMoE-sBOED-IC',experts=4,width=48,components=3,state_dict={k:v.detach().cpu().clone() for k,v in model.state_dict().items()},updates=updates,training_seed=101,entropy_nodes=128,configuration=cfg)
     torch.save(ckpt,C/'models/pimoe_ic_seed101.pt');elapsed=time.perf_counter()-begin;ledger.record_optimization(elapsed)
     if elapsed>cap:raise RuntimeError('Native serialization/update overshot original optimization cap; checkpoint must not be promoted')
     result=dict(updates=updates,optimizer='Adam0.001,globalclip5',optimization_seconds=elapsed,optimization_allowance_seconds=cap,unused_seconds=cap-elapsed,checkpoint_sha256=sha(C/'models/pimoe_ic_seed101.pt'),checkpoint_selection='Latest fixed-schedule update within native time allowance; no best-EIG selection',peak_GPU_memory_bytes=torch.cuda.max_memory_allocated(),GPU_active_seconds=None,parameters=sum(p.numel() for p in model.parameters()),records=records)
@@ -102,6 +102,7 @@ def main():
         with ledger.charge('original_expert_conditional_root_cause'):root_cause(C)
     elif a.action=='train':train(C,yaml.safe_load(Path(a.config).read_text()))
     else:
+        if (C/'reports/checkpoint_validity_audit.json').exists():raise RuntimeError('Provisional candidate superseded by numerical validity audit; no official evaluation')
         gate=json.loads((C/'readiness/development_gate.json').read_text())
         if not gate['PASS']:raise RuntimeError('IC development gate failed; no official comparison or extra tuning')
         if sha(C/'models/pimoe_ic_seed101.pt')!=json.loads((C/'reports/checkpoint_freeze.json').read_text())['checkpoint_sha256']:raise ValueError('Frozen IC checkpoint changed')

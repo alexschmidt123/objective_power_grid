@@ -31,10 +31,34 @@ def test_gaussian_entropy_information_and_tie_mask():
 
 def test_source_symmetry_and_checkpoint_identity(tmp_path):
  b,p,m,item=fixture();f=item['features'];z=m(**f);p.theta=p.theta[:,[2,3,0,1]];swapped=m(**state_features(b,p,f['actions']));torch.testing.assert_close(z['means'],swapped['means'],atol=0,rtol=0)
- path=tmp_path/'ic.pt';torch.save(dict(model='PIMoE-sBOED-IC',experts=4,width=48,components=3,state_dict=m.state_dict()),path);q=load_ic_checkpoint(path);torch.testing.assert_close(q(**f)['means'],z['means'],atol=0,rtol=0)
+ path=tmp_path/'ic.pt';torch.save(dict(model='PIMoE-sBOED-IC',training_numerics_revision=2,experts=4,width=48,components=3,state_dict=m.state_dict()),path);q=load_ic_checkpoint(path);torch.testing.assert_close(q(**f)['means'],z['means'],atol=0,rtol=0)
  assert sum(p.numel() for p in q.parameters())==13800
 
 def test_budget_persistence_no_reset(tmp_path):
  p=tmp_path/'budget.json';p.write_text(json.dumps(dict(experimental_runtime_allowance_seconds=1.,optimization_allowance_seconds=.5,charged_experimental_seconds=0.,charged_optimization_seconds=0.,runtime_intervals=[])));x=ExperimentalLedger(p)
  with x.charge('test'):pass
  spent=x.read()['charged_experimental_seconds'];y=ExperimentalLedger(p);assert y.read()['charged_experimental_seconds']==spent;y.record_optimization(.1);assert y.read()['charged_optimization_seconds']==.1
+
+
+def test_conditional_ESS_is_scale_invariant_even_tiny_mass():
+ _,_,m,item=fixture()
+ with torch.no_grad():m.router[-1].weight.zero_();m.router[-1].bias.copy_(torch.tensor([0.,-100.,-500.,-800.],dtype=DTYPE))
+ loss,row,z=information_calibrated_loss(m,item,CFG)
+ for value in row['conditional_effective_samples']:assert abs(value-128)<1e-8
+ torch.testing.assert_close(z['posterior_region_weights'].sum(1),torch.ones(3,4,dtype=DTYPE),atol=1e-12,rtol=0)
+ torch.testing.assert_close(z['expert_component_weights'].sum(-1),torch.ones(3,4,dtype=DTYPE),atol=1e-12,rtol=0)
+ assert torch.isfinite(loss);loss.backward()
+ for expert in m.experts:assert sum(p.grad.abs().sum() for p in expert.parameters())>0
+
+def test_stable_regions_match_original_at_resolved_mass():
+ _,_,m,item=fixture();old=PredictiveMoE();old.load_state_dict(m.state_dict());a=m(**item['features']);b=old(**item['features'])
+ for key in ['weights','means','scales','membership','mass','region','regional_variance']:torch.testing.assert_close(a[key],b[key],rtol=1e-10,atol=1e-11)
+
+def test_old_buggy_checkpoint_cannot_be_evaluated(tmp_path):
+ _,_,m,item=fixture();p=tmp_path/'rejected.pt';torch.save(dict(model='PIMoE-sBOED-IC',experts=4,width=48,components=3,state_dict=m.state_dict()),p)
+ import pytest
+ with pytest.raises(ValueError,match='Rejected provisional'):load_ic_checkpoint(p)
+
+def test_previous_ESS_formula_demonstrably_invalid():
+ r=torch.full((128,),1e-12,dtype=DTYPE);bad=r.sum().square()/r.square().sum().clamp_min(1e-12);stable=(r.log().softmax(0).square().sum()).reciprocal()
+ assert bad<1 and abs(float(stable)-128)<1e-10
