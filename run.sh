@@ -50,6 +50,13 @@ unset -f _prepend_mocu_optimized
 export PYTHONPATH="${ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
 # Isolated predictive-density prototype; every existing launcher path is unchanged.
+for _validation_arg in "$@"; do
+    if [[ "$_validation_arg" == "--pimoe-validation" ]]; then
+        python3 -m src.research.pimoe_validation "$@"
+        exit $?
+    fi
+done
+unset _validation_arg
 for _pimoe_arg in "$@"; do
     if [[ "$_pimoe_arg" == "--pimoe" ]]; then
         python3 -m src.research.pimoe_experiment "$@"
