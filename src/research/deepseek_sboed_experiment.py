@@ -54,9 +54,14 @@ def train(C,cfg,variant,updates,budget,validator,credit=0.,start=None,policy_fac
  try:
   for update in range(1,updates+1):
    if not clock.can_start(max(2.,bound*1.5)):stop='compute_budget_exhaustion';break
-   unit=time.monotonic();opt.zero_grad()
+   unit=time.monotonic();charged_unit=clock.spent();opt.zero_grad()
    with torch.device('cuda'):
-    r=rollout(b,model,30,cfg['batch_size'],101+update*104729,cfg['contrasts']);info=r['info'][:,-1].mean();balance=model.balance_loss() if isinstance(model,DeepSeekPolicy) else info*0;loss=-info+balance
+    if cfg.get('training_likelihood_backend') == 'streamed_checkpointed':
+     from src.research.deepseek_sboed_v3 import streamed_spce
+     r=streamed_spce(b,model,30,cfg['batch_size'],101+update*104729,cfg['contrasts'],cfg['contrast_chunk'])
+    else:
+     r=rollout(b,model,30,cfg['batch_size'],101+update*104729,cfg['contrasts'])
+    info=r['info'][:,-1].mean();balance=model.balance_loss() if isinstance(model,DeepSeekPolicy) else info*0;loss=-info+balance
     if not torch.isfinite(loss):raise FloatingPointError('Nonfinite full-horizon information objective')
     loss.backward()
     if hasattr(model,'mask_unused_gradients'):model.mask_unused_gradients()
@@ -67,6 +72,9 @@ def train(C,cfg,variant,updates,budget,validator,credit=0.,start=None,policy_fac
    completed=update
    if (update-1)%1000==0:scheduler.step()
    B,L=cfg['batch_size'],cfg['contrasts'];clock.count('fresh_complete_primary_trajectories',B);clock.count('true_parameter_stages',B*30);clock.count('contrast_parameter_stages',B*L*30);clock.count('scalar_conditional_likelihood_evaluations',B*(L+1)*30);clock.count('policy_optimizer_updates',1)
+   if 'work_counts' in r:
+    for key,value in r['work_counts'].items():clock.count(key,value)
+    clock.count('contrast_recomputation_parameter_stages',r['work_counts']['executed_parameter_stage_propagations']-B*(L+1)*30)
    if isinstance(model,DeepSeekPolicy):clock.count('shared_FFN_contexts',B*30 if model.shared is not None else 0);clock.count('routed_FFN_contexts',B*30*model.top_k)
    if update==1 or update%100==0:
     row=diagnostics(model,r,gradient,loss,info,update,clock.spent());row['learning_rate']=opt.param_groups[0]['lr'];records.append(row);print(variant,row,flush=True);write(C/'costs'/f'{variant}_progress.json',dict(records=records,clock=clock.report(),forward_parameter_stages=b.calls,counts=model.counts() if isinstance(model,DeepSeekPolicy) else dict(total_parameters=sum(p.numel() for p in model.parameters()))))
@@ -80,7 +88,7 @@ def train(C,cfg,variant,updates,budget,validator,credit=0.,start=None,policy_fac
     with clock.exclude('validation'):
      values,meta=validator(model);np.save(C/'evaluations'/f'development_update{update}.npy',values);evaluations.append(dict(update=update,mean=float(values.mean()),MC_SE=float(values.std(ddof=1)/math.sqrt(len(values))),metadata=meta));write(C/'reports/full_development_curve.json',evaluations)
     model.train()
-   bound=max(bound,time.monotonic()-unit)
+   bound=max(bound,clock.spent()-charged_unit)
   else:stop='reference_schedule_completion'
   if completed==0:raise RuntimeError('No native optimizer update completed')
   # Final serialization is charged; eligibility is assessed after checkpoint IO.

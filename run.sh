@@ -54,6 +54,9 @@ for _ic_arg in "$@"; do
     if [[ "$_ic_arg" == "--sa-moe" ]]; then
         exec python3 -m src.research.sa_moe_experiment "$@"
     fi
+    if [[ "$_ic_arg" == "--deepseek-sboed-v3" ]]; then
+        exec python3 -m src.research.deepseek_sboed_v3_experiment "$@"
+    fi
     if [[ "$_ic_arg" == "--deepseek-sboed-v2" ]]; then
         exec python3 -m src.research.deepseek_sboed_v2_experiment "$@"
     fi

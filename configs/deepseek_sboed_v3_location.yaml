@@ -1,0 +1,107 @@
+method: DeepSeekMoE-sBOED-v3
+training_seed: 101
+benchmark:
+  system:
+    name: location_finding
+  N: 1
+  experiment:
+    experiment_type: eig_based
+    step_number: 30
+    methods:
+    - random
+    - fixed
+    - dad
+    - rl_sboed
+    - vsoed
+    - scorebed
+    - moe_sboed
+  observation:
+    noise_sigma: 0.5
+    sampling: normal_log_signal
+  location_finding:
+    design_bounds:
+    - -4.0
+    - 4.0
+    random_design_distribution: truncated_standard_normal
+  research:
+    paper_protocol:
+      reference: https://arxiv.org/html/2306.10430v2
+      official_code: https://github.com/wgshen/vsOED
+      upstream_commit: d0884f9ba30fbddc56618841c68af2f3bfe16539
+      case: two_source_common_bounded_box
+      regime: matched_compute_v3
+      corrected_methods: true
+      correction_note: Common unchanged physical model. Legacy1M pilot metadata removed;
+        latest compute-eligible checkpoint, no episode cap.
+      nominal_training_trajectories: null
+      evaluation: shared_prior_bank_streamed_sPCE
+      training_device: cuda
+      checkpoint_selection: final
+      observation_discrepancy: Paper Section 4.2 omits log; SOURCE.deterministic returns
+        log(signal). Follow executable code.
+      training_budget_unit: exclusive_device_training_wall_seconds
+      extensions: All fresh observed training episodes count, including MoE specialist
+        and ScoreBED score pretraining. Contrast likelihood work, replay updates,
+        validation and runtime reported separately.
+batch_size: 2000
+contrasts: 8192
+reference_optimizer_updates: 50000
+reference_training_episodes: 100000000
+episode_safety_cap: null
+learning_rate: 5.0e-05
+adam_betas:
+- 0.8
+- 0.998
+lr_decay: 0.98
+lr_schedule_every: 1000
+gradient_clip: 5
+baseline_DAD_gradient_clip: null
+main_training_seconds: 14400
+control_updates: 50000
+control_seconds: 600
+checkpoint_every: 500
+development_every: 5000
+development_seed: 1030
+development_systems: 128
+development_contrasts: 262144
+balance_factor: 0.001
+shared_experts: 1
+routed_experts: 7
+top_k: 3
+routed_FFN_hidden: 8
+shared_FFN_hidden: 8
+no_shared_control: 8routed/top4, sameFFNtotalandactivatedparameters
+parameter_matched_dense_FFN_hidden: 66
+checkpoint_selection: latest compute-eligible, never best officialEIG
+official_evaluation_gate: Numerical validity, no performance gate
+corrected_DAD_checkpoint: /home/grads/g/g.lin/Documents/objective_power_grid_dad_budget_fix_20261021/experiments/10212026/10212026_dad_primary_budget_correction/location/seed101/dad/models/dad.pt
+corrected_DAD_checkpoint_sha256: c1be0b5eda13330e5a463b853bff5e3742d75eab4d765676b3ddac3bd21cf3b7
+canonical_evaluation_directory: /home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/benchmarks/location_seed101_matched_compute/evaluations
+cases_sha256: cbd2632af41a8c6ca8cbe55066d77b98791565b7ac301b0bea1965e84ec50f5b
+contrast_sha256: 703671b0fb01ddf74dfe60d51e44914c71647c92e7e5ee51d111a9acfcecfde8
+legacy_benchmark_budget_fields: Historical metadata only, not read by this worker
+paper_reference: https://aclanthology.org/2024.acl-long.70.pdf
+DAD_reference: https://proceedings.mlr.press/v139/foster21a/foster21a.pdf
+no_pretrained_weights: true
+reference_campaign: /home/grads/g/g.lin/Documents/objective_power_grid_deepseekmoe_20261023/experiments/10232026/10232026_deepseekmoe_sboed
+training_backend: selected_expert_batched_matrix_products
+inference_backend: unchanged_v1_sparse_grouped_FFN
+charge_readiness_probe: false
+architecture_control_seconds: 14400
+control_variants: []
+control_budget_disclosure: Reuse existing v2 controls as lower-contrast references;
+  do not claim identical objective resolution
+confirmation_seed: 1043
+primary_initialization: freshseed101,no_v1weightreuse
+development_gate: Descriptive paired comparisons only; never tune on official results
+historical_evaluation_seed1001: Consumedhistoricalcomparisonbank,notuntouchedconfirmation
+pretraining_diagnostics_not_free: Allprofiling/testsreportedseparately; no optimizerupdatesin
+  nativekernelbenchmark
+parameter_count_unchanged: 8434
+activated_count_unchanged: 6898
+contrast_chunk: 1024
+training_likelihood_backend: streamed_checkpointed
+primary_improvement: Increase finite contrast resolution; preserve architecture and
+  objective family
+valid_training_cap_seconds: 14400
+v2_campaign: /home/grads/g/g.lin/Documents/objective_power_grid_deepseekmoe_v2_20261023/experiments/10232026/10232026_deepseekmoe_sboed_v2

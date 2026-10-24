@@ -1,0 +1,4 @@
+# V3 expert interpretation
+No predetermined expert roles. The shared FFN sees every context; routed experts receive selected context gradients. The router receives selected full-softmax score derivatives and mild frequency/probability balancing gradients. Hard membership is piecewise, not an unbiased boundary estimator.
+Useful specialization remains unproven. Planned frozen-model interventions reuse identical held-out histories, compare hidden functions and routing, and renormalize/scale routing appropriately. They remain distribution-shift diagnostics, not retrained architecture controls. Reuse existing control results with their lower training contrast resolution disclosed.
+V3 routing, norm ratios, optimizer participation and final development comparisons are pending. Higher utilization alone will not establish usefulness. No claim of exceeding dense DAD, vsOED, or parameter-matched dense control is supported yet.
