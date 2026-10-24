@@ -1,0 +1,92 @@
+{
+  "stop_reason": "reference_schedule_completion",
+  "executed_updates": 2,
+  "selected_update": 2,
+  "checkpoint_sha256": "e19f7c21874e1dccbfcf4f1a104289c26d0a1131b5264870b3a2efb74d88e715",
+  "clock": {
+    "version": 1,
+    "start": 151227.267178376,
+    "budget_seconds": 600.0,
+    "credit_seconds": 0.0,
+    "hardware": "NVIDIA GeForce RTX 4090",
+    "excluded": [],
+    "counts": {
+      "fresh_complete_primary_trajectories": 4000,
+      "true_parameter_stages": 120000,
+      "contrast_parameter_stages": 983040000,
+      "scalar_conditional_likelihood_evaluations": 983160000,
+      "policy_optimizer_updates": 2,
+      "shared_FFN_contexts": 120000,
+      "routed_FFN_contexts": 360000,
+      "executed_parameter_stage_propagations": 1966320000,
+      "executed_scalar_likelihood_evaluations": 1966320000
+    },
+    "components": {
+      "training": {
+        "fresh_complete_primary_trajectories": 4000,
+        "true_parameter_stages": 120000,
+        "contrast_parameter_stages": 983040000,
+        "scalar_conditional_likelihood_evaluations": 983160000,
+        "policy_optimizer_updates": 2,
+        "shared_FFN_contexts": 120000,
+        "routed_FFN_contexts": 360000,
+        "executed_parameter_stage_propagations": 1966320000,
+        "executed_scalar_likelihood_evaluations": 1966320000
+      }
+    },
+    "checkpoints": [
+      {
+        "identifier": "/home/grads/g/g.lin/Documents/objective_power_grid_integrated_information_moe/experiments/10242026/10242026_ir_moe_native_smoke/final_native/models/full/update1.pt",
+        "charged_seconds": 1.1763658359996043,
+        "eligible": true
+      },
+      {
+        "identifier": "/home/grads/g/g.lin/Documents/objective_power_grid_integrated_information_moe/experiments/10242026/10242026_ir_moe_native_smoke/final_native/models/full/update2.pt",
+        "charged_seconds": 2.2757140719913878,
+        "eligible": true
+      },
+      {
+        "identifier": "/home/grads/g/g.lin/Documents/objective_power_grid_integrated_information_moe/experiments/10242026/10242026_ir_moe_native_smoke/final_native/models/full/update2_final.pt",
+        "charged_seconds": 2.285237479984062,
+        "eligible": true
+      }
+    ],
+    "stopped_at": 151229.56140949,
+    "charged_seconds": 2.294231114006834,
+    "fraction_of_allocated_budget": 0.0038237185233447237,
+    "unused_seconds": 597.7057688859932,
+    "unit": "exclusive-device allocated training wall seconds",
+    "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+    "not_equal_to_FLOPs": true
+  },
+  "counts": {
+    "total_parameters": 8434,
+    "activated_parameters_per_context": 6898,
+    "shared_experts": 1,
+    "routed_experts": 7,
+    "top_k": 3,
+    "expert_feature_dimension": 16,
+    "routed_FFN_width": 8,
+    "shared_FFN_width": 8,
+    "FFN_linear_FLOPs_per_context": 3072,
+    "history_encoder_linear_FLOPs_per_observation": 9728,
+    "router_linear_FLOPs_per_context": 224,
+    "action_head_linear_FLOPs_per_context": 64,
+    "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs",
+    "expert_updates_with_gradient_tensor": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  "forward_parameter_stages": 1966320000,
+  "score_coefficient": 1,
+  "baseline": "previous-minibatch stage EMA .95",
+  "optimizer": "Adam",
+  "GPU_active_seconds": null,
+  "disclosure": "exclusive-device wall seconds, not GPU kernel busy time"
+}

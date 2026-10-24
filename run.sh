@@ -51,6 +51,9 @@ export PYTHONPATH="${ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
 # Isolated predictive-density prototype; every existing launcher path is unchanged.
 for _ic_arg in "$@"; do
+    if [[ "$_ic_arg" == "--ir-moe" ]]; then
+        exec python3 -m src.research.ir_moe_experiment "$@"
+    fi
     if [[ "$_ic_arg" == "--sa-moe" ]]; then
         exec python3 -m src.research.sa_moe_experiment "$@"
     fi
