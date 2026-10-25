@@ -9,3 +9,5 @@ No gate-normalization bug was found or claimed. No numerical correction to the v
 The old IR report-writer failure is unrelated and its source/checkpoints remain untouched. Frozen source/config hashes guard this new campaign. Confirmation seed96251007 is checked against existing LabPC metadata and reserved before main training. Official seed1001 is a previously consumed historical bank; no claim of untouched testing there.
 
 Limitations: score gradients at top-k rank boundaries are not defined; deterministic v1 semantics are deliberately preserved. Smoke gradient participation does not guarantee later meaningful routed contributions. Conditional posterior ESS is only a reliability screen, not a convergence proof.
+
+Preflight seed-audit correction before any main update: match complete integer tokens, not digit substrings within a decimal. An old0.7896251007808661 value falsely matched seed96251007. Failed preflight logs preserved; training settings unchanged.

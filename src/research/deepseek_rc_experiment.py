@@ -1,6 +1,6 @@
 
 """LabPC-only RC lifecycle; fresh training and frozen canonical evaluation."""
-import argparse,copy,hashlib,json,math,subprocess,time,traceback
+import argparse,copy,hashlib,json,math,re,subprocess,time,traceback
 from pathlib import Path
 import numpy as np,torch,yaml
 from src.research.deepseek_rc import RoutedCalibrationPolicy
@@ -61,7 +61,7 @@ def reserve(C,cfg):
     for p in (Path.home()/'Documents').glob('objective_power_grid*/experiments/**/*'):
         if not p.is_file() or p.suffix not in ('.json','.yaml','.yml') or p.stat().st_size>2000000 or C in p.parents:continue
         try:
-            if str(seed) in p.read_text():hits.append(str(p))
+            if re.search(r'(?<![0-9.])'+str(seed)+r'(?![0-9.])',p.read_text()):hits.append(str(p))
         except (UnicodeError,OSError):pass
     if hits:raise ValueError('Confirmation seed already present: '+str(hits))
     v=CommonValidation(cfg['benchmark'],30,seed,2000,1000000,device='cpu')

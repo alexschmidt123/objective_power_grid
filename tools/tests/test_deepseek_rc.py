@@ -74,3 +74,10 @@ def test_stable_clipped_optimizer():
   assert sum(float(p.grad.square().sum()) for p in m.parameters() if p.grad is not None)**.5<=5.000001
   o.step()
  assert all(torch.isfinite(p).all() for p in m.parameters())
+
+def test_seed_audit_complete_integer_tokens():
+ import re
+ pattern=r'(?<![0-9.])96251007(?![0-9.])'
+ assert not re.search(pattern,'0.7896251007808661')
+ assert re.search(pattern,'{"seed":96251007}')
+ assert re.search(pattern,'confirmation_seed: 96251007')
