@@ -1,0 +1,54 @@
+{
+  "method": "DeepSeekMoE-v1-context-gradient-specialization",
+  "training_seed": 101,
+  "EIG": 11.044041656598598,
+  "MC_SE": 0.04281140219464484,
+  "confirmation_EIG": 11.049824745034124,
+  "confirmation_MC_SE": 0.04480642496991665,
+  "updates": 26335,
+  "selected_update": 26335,
+  "training_seconds": 14397.157809749013,
+  "specialization_seconds_within_training": 1467.958009,
+  "specialization_adjustments": 7879,
+  "expert_effective_updates": [
+    26335,
+    26335,
+    26334,
+    26335,
+    26335,
+    26335,
+    26335
+  ],
+  "learned_minus_uniform": {
+    "difference": 0.14470255312420638,
+    "paired_MC_SE": 0.054029059945061735,
+    "CI95": [
+      0.038805595631885376,
+      0.2505995106165274
+    ],
+    "N": 512
+  },
+  "full_minus_masked_routed": {
+    "difference": 0.2408626011525236,
+    "paired_MC_SE": 0.06430946510360083,
+    "CI95": [
+      0.11481604954946595,
+      0.3669091527555812
+    ],
+    "N": 512
+  },
+  "context_reversals": [],
+  "shared_only_control_advantage": false,
+  "routed_contribution_advantage": true,
+  "meaningful_specialization_supported_on_audited_data": false,
+  "online_latency": {
+    "mean_ms": 0.45929708615100634,
+    "median_ms": 0.4614449862856418,
+    "p95_ms": 0.474054177175276,
+    "decisions": 300,
+    "frozen_forward_only": true
+  },
+  "checkpoint_sha256": "b680081479f1ca0227f250265642cea0452ce57e110d26220746d7966b50edfd",
+  "single_seed": true,
+  "scope": "Two seeds on different GPUs are not a pure seed-only replication; trajectory MC SE is not across-training-seed uncertainty"
+}
