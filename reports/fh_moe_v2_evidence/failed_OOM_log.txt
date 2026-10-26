@@ -1,0 +1,41 @@
+PILOT 10 [{"update": 10, "training_sPCE": 2.552979846006555, "preclip_norm": 32.698060412027175, "group_gradients": {"shared": 0.06384746695357428, "router": 0.001355466631232569, "routed": 0.007600606463546464, "encoder": 2.2077927508362936, "head": 10.151499906787596}, "seconds": 0.6314186190720648, "stage": 1, "reference": null}, {"update": 10, "training_sPCE": 2.552979846006555, "preclip_norm": 32.698060412027175, "group_gradients": {"shared": 0.06384746695357428, "router": 0.001355466631232569, "routed": 0.007600606463546464, "encoder": 2.2077927508362936, "head": 10.151499906787596}, "seconds": 0.7687616680050269, "stage": 1, "reference": {"active": 0, "reason": "NO_PAST_REFERENCE", "auxiliary_applied": false, "expert_coefficient": 0.0, "router_coefficient": 0.0}}]
+Traceback (most recent call last):
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/qiqi/Documents/objective_power_grid_fh_moe_v2/src/research/fh_moe_v2_pilot.py", line 139, in <module>
+    if __name__=='__main__':main()
+  File "/home/qiqi/Documents/objective_power_grid_fh_moe_v2/src/research/fh_moe_v2_pilot.py", line 138, in main
+    cfg=yaml.safe_load(Path('reports/FH_MOE_V2_CONFIG.yaml').read_text());run(C,cfg,a.phase)
+  File "/home/qiqi/Documents/objective_power_grid_fh_moe_v2/src/research/fh_moe_v2_pilot.py", line 91, in run
+    rows.append(step(models[index],opts[index],benchmarks[index],cfg,update,banks[index],index==1))
+  File "/home/qiqi/Documents/objective_power_grid_fh_moe_v2/src/research/fh_moe_v2_pilot.py", line 25, in step
+    r=rollout(b,m,30,2000,98120000+update*104729,2000)
+  File "/home/qiqi/Documents/objective_power_grid_fh_moe_v2/src/research/engine.py", line 56, in rollout
+    latent = (policy.sample(f,rng=decision_rng)[0]*policy.bound).double() if policy.kind=='rl_sboed' else policy(f,stage)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/qiqi/Documents/objective_power_grid_fh_moe_v2/src/research/deepseek_sboed.py", line 42, in forward
+    z=self.encode_context(features,stage);u=z
+  File "/home/qiqi/Documents/objective_power_grid_fh_moe_v2/src/research/deepseek_sboed.py", line 37, in encode_context
+    raw=super().encode(features,stage)
+  File "/home/qiqi/Documents/objective_power_grid_fh_moe_v2/src/research/dad_location_policy.py", line 41, in encode
+    encoding = self.encoder(raw).sum(1)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/container.py", line 253, in forward
+    input = module(input)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 134, in forward
+    return F.linear(input, self.weight, self.bias)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/utils/_device.py", line 116, in __torch_function__
+    return func(*args, **kwargs)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 76.00 MiB. GPU 0 has a total capacity of 15.47 GiB of which 14.88 MiB is free. Including non-PyTorch memory, this process has 15.34 GiB memory in use. Of the allocated memory 14.09 GiB is allocated by PyTorch, and 942.50 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
