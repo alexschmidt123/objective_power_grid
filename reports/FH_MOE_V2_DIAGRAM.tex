@@ -1,0 +1,19 @@
+\documentclass[tikz,border=8pt]{standalone}
+\usetikzlibrary{positioning,arrows.meta}
+\begin{document}
+\begin{tikzpicture}[node distance=8mm and 12mm,box/.style={draw,rounded corners,align=center,font=\small,text width=35mm,minimum height=10mm},>=Stealth]
+\node[box] (h) {Observed history};
+\node[box,right=of h] (z) {DAD history encoder};
+\node[box,above right=of z] (s) {Always active\\shared expert};
+\node[box,below right=of z] (r) {Existing router\\top 3 of 7 experts};
+\node[box,right=25mm of z] (u) {Sum feature branches\\and shared design head};
+\node[box,right=of u] (a) {Next experiment\\frozen inference};
+\draw[->] (h)--(z);\draw[->] (z)--(s);\draw[->] (z)--(r);\draw[->] (s)--(u);\draw[->] (r)--(u);\draw[->] (u)--(a);
+\node[box,below=24mm of r] (l) {Offline full trajectory\\terminal sPCE loss};
+\node[box,left=of l] (g) {Full-horizon adjoints\\past split-stream references};
+\node[box,left=of g] (q) {Stable distinct directions?\\Soft responsibilities};
+\draw[->,dashed] (a.south) |- (l.east);\draw[->,dashed] (l)--(g);\draw[->,dashed] (g)--(q);
+\draw[->,dashed] (q.north) |- node[above,font=\scriptsize] {Offline auxiliary expert and router training} (r.west);
+\node[below=6mm of l,font=\small,align=center] {Candidate pilot failed: useful specialization unestablished.\\Dashed paths are offline only; no online optimization.};
+\end{tikzpicture}
+\end{document}
