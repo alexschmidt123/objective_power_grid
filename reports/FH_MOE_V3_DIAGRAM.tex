@@ -1,0 +1,20 @@
+\documentclass[tikz,border=8pt]{standalone}
+\usetikzlibrary{positioning,arrows.meta}
+\begin{document}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\begin{tikzpicture}[node distance=9mm and 10mm,box/.style={draw,rounded corners,align=center,font=\small,text width=42mm,minimum height=12mm},>=Stealth]
+\node[box] (h) {Observed histories\\Stage and remaining\\horizon known};
+\node[box,right=of h] (s) {Offline shared-only\\v1 reference path};
+\node[box,right=of s] (g) {Complete trajectories\\terminal sPCE adjoints};
+\node[box,below=of g] (f) {History-to-demand fit\\independent fit replicate};
+\node[box,left=of f] (v) {Untouched split\\consistency and prediction};
+\node[box,left=of v] (gate) {Scientific discovery gate\\failure stops training};
+\draw[->] (h)--(s);\draw[->] (s)--(g);\draw[->] (g)--(f);\draw[->] (f)--(v);\draw[->] (v)--(gate);
+\node[box,below=20mm of v] (moe) {Conditional next stage:\\same shared expert\\7 routed feature experts\\existing top-three router};
+\draw[->,dashed] (gate.south) |- node[above,font=\scriptsize] {Only if reliable contexts exist} (moe.west);
+\node[box,right=of moe] (out) {Shared design head\\frozen next experiment};
+\draw[->] (moe)--(out);
+\node[below=8mm of moe,font=\small,align=center] {No expert indices define discovery labels.\\Deployment has no grouping fit or optimization.};
+\end{tikzpicture}
+\end{document}
