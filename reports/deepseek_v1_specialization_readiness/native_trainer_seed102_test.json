@@ -1,0 +1,106 @@
+{
+  "PASS": true,
+  "updates": 10,
+  "training_seed": 102,
+  "reason": "reference_schedule_completion",
+  "checkpoint_sha256": "53a59483289caa379f6a865645254f5e0e1d654ba00cb2e7e0f2200b8915dfd9",
+  "actual_training_cost": {
+    "stop_reason": "reference_schedule_completion",
+    "executed_updates": 10,
+    "selected_update": 10,
+    "checkpoint_sha256": "53a59483289caa379f6a865645254f5e0e1d654ba00cb2e7e0f2200b8915dfd9",
+    "selected_checkpoint": {
+      "identifier": "/home/qiqi/Documents/objective_power_grid_v1_specialization/experiments/10262026/10262026_v1_specialization_development/readiness/trainer_seed102_smoke/models/full/update10_final.pt",
+      "charged_seconds": 7.756438267999329,
+      "eligible": true
+    },
+    "clock": {
+      "version": 1,
+      "start": 873770.953814862,
+      "budget_seconds": 60.0,
+      "credit_seconds": 0.0,
+      "hardware": "NVIDIA GeForce RTX 5080",
+      "excluded": [],
+      "counts": {
+        "fresh_complete_primary_trajectories": 22000,
+        "true_parameter_stages": 660000,
+        "contrast_parameter_stages": 1320000000,
+        "scalar_conditional_likelihood_evaluations": 1320660000,
+        "policy_optimizer_updates": 11,
+        "shared_FFN_contexts": 600000,
+        "routed_FFN_contexts": 1800000,
+        "specialization_context_backward_passes": 2,
+        "specialization_steps": 1,
+        "specialization_expert_adjustments": 2,
+        "specialization_step_microseconds": 555083
+      },
+      "components": {
+        "readiness_probe_discarded_weights": {
+          "fresh_complete_primary_trajectories": 2000,
+          "true_parameter_stages": 60000,
+          "contrast_parameter_stages": 120000000,
+          "scalar_conditional_likelihood_evaluations": 120060000,
+          "policy_optimizer_updates": 1
+        },
+        "training": {
+          "fresh_complete_primary_trajectories": 20000,
+          "true_parameter_stages": 600000,
+          "contrast_parameter_stages": 1200000000,
+          "scalar_conditional_likelihood_evaluations": 1200600000,
+          "policy_optimizer_updates": 10,
+          "shared_FFN_contexts": 600000,
+          "routed_FFN_contexts": 1800000,
+          "specialization_context_backward_passes": 2,
+          "specialization_steps": 1,
+          "specialization_expert_adjustments": 2,
+          "specialization_step_microseconds": 555083
+        }
+      },
+      "checkpoints": [
+        {
+          "identifier": "/home/qiqi/Documents/objective_power_grid_v1_specialization/experiments/10262026/10262026_v1_specialization_development/readiness/trainer_seed102_smoke/models/full/update10.pt",
+          "charged_seconds": 7.752013694029301,
+          "eligible": true
+        },
+        {
+          "identifier": "/home/qiqi/Documents/objective_power_grid_v1_specialization/experiments/10262026/10262026_v1_specialization_development/readiness/trainer_seed102_smoke/models/full/update10_final.pt",
+          "charged_seconds": 7.756438267999329,
+          "eligible": true
+        }
+      ],
+      "stopped_at": 873778.715329191,
+      "charged_seconds": 7.761514329002239,
+      "fraction_of_allocated_budget": 0.12935857215003732,
+      "unused_seconds": 52.23848567099776,
+      "unit": "exclusive-device allocated training wall seconds",
+      "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+      "not_equal_to_FLOPs": true
+    },
+    "forward_parameter_stages": 1200600000,
+    "CPU_process_seconds": 11.206198603,
+    "GPU_active_seconds": null,
+    "counts": {
+      "total_parameters": 8434,
+      "activated_parameters_per_context": 6898,
+      "shared_experts": 1,
+      "routed_experts": 7,
+      "top_k": 3,
+      "expert_feature_dimension": 16,
+      "routed_FFN_width": 8,
+      "shared_FFN_width": 8,
+      "FFN_linear_FLOPs_per_context": 3072,
+      "history_encoder_linear_FLOPs_per_observation": 9728,
+      "router_linear_FLOPs_per_context": 224,
+      "action_head_linear_FLOPs_per_context": 64,
+      "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs"
+    },
+    "reference_minibatch_preserved": true,
+    "planned_updates_this_phase": 10,
+    "cheap_control_only": false,
+    "training_reference_updates": 50000,
+    "training_reference_episodes": 100000000,
+    "legacy_episode_cap": null
+  },
+  "weights_discarded": true,
+  "ledger_caveat": "Native trainer readiness counters reference the prior discarded smoke; actual new simulation is forward_parameter_stages in this cost record."
+}

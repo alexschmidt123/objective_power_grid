@@ -1,0 +1,355 @@
+{
+  "PASS": true,
+  "source_manifest": {
+    ".gitignore": "d5ce083d3d8cec1955c72b22f059838936b89bd828e40b2893ee2d95704aa114",
+    "reports/DEEPSEEK_V1_REPRODUCTION.md": "2f490ee928921f4333cf4ead3a3c55b1f83b97c417c303e728cc5e2d592569cd",
+    "reports/DEEPSEEK_V1_SOURCE_PROVENANCE.md": "7a036db25b4a371d264ef2bcd2be9fd4518f6a9d87c1c48b1b75e17cfdf76fc2",
+    "reports/DEEPSEEK_V1_SPECIALIZATION_CONFIG.yaml": "263e874835a3ea21d2c71e84340839cebccc878f112e1f378a82de2d21a9d7da",
+    "reports/DEEPSEEK_V1_SPECIALIZATION_METHOD.md": "a13b83fb08fbba62848e1a813bbd71ff05287253c12f89831b682b1b83ddd0f4",
+    "reports/DEEPSEEK_V1_SPECIALIZATION_PILOT.md": "33454d93fa7e2814d529d28163b98d5749bbc8479d319f6c6e824a7d03fa8cb2",
+    "reports/deepseek_v1_specialization_readiness/CPU_tests.md": "e7ed685b4cabfc98f0b3672caf64e5b7547dfcd66eec137a92c074e5beb26941",
+    "reports/deepseek_v1_specialization_readiness/GPU_smoke.json": "9f079db7d7434a86664b2da07115fab69d2d2f43a5d455ffa17a4500bf3d8582",
+    "reports/deepseek_v1_specialization_readiness/bank_manifests.json": "2b05b2e45c96d7577d002b9f5b4af21da5544a6db5b6ceaa2b875a6339185343",
+    "reports/deepseek_v1_specialization_readiness/native_trainer_seed102_test.json": "d2199393c7330fa9569dda74197c7116e35117278bce5e4e42ed581b99623912",
+    "reports/deepseek_v1_specialization_readiness/pilot_gate.json": "ebf215f7812f3bd62de95fed57576a1b393c8f8e472a004bba803150c3383e5c",
+    "reports/deepseek_v1_specialization_readiness/v1_reproduction.json": "1dc0aca1e93dec7185d8cc313387350f06edebe92c535cc723f2bcad7f10adf0",
+    "run.sh": "00bf01e8ce9109fcccfc597e869a1d7f4a223e16740ae2495d0577530eb77c70",
+    "src/research/context_expert_gradients.py": "4df44c90d24b89e80a9a63e997db0487a070487ef3ee203af1054b5a38d560b1",
+    "src/research/v1_specialization_evaluation.py": "a8ece7a8d34b39e6d8a588707f73c6ddca5e7a8a3ae1338cb6f548ef0b6f060a",
+    "src/research/v1_specialization_experiment.py": "f70fe217627c3ec103388ec136b397715e143dd0486ea284828028972247afc5",
+    "src/research/v1_specialization_reports.py": "72e61fefc92a0d82908b9bd6d5e19e86f356ec5a510224eaa30e034d9e936e14",
+    "src/research/v1_specialization_train.py": "f45fb2ec0ef38eff206bf85926ed4740eac5770ecfa6ad37e2c06b99bfac8e89",
+    "tools/freeze_v1_specialization_banks.py": "89d911662c9361a0d18261a21f31830bd1a06f473df76b46e49275953b523152",
+    "tools/reproduce_deepseek_v1.py": "a5273bd373381b295c0ab6acd848db8510ab5fe5f95cd3bc434cd3a012998e8b",
+    "tools/tests/test_context_expert_gradients.py": "346f94ade30933845776d1de223c8570aed8354ec887d9212457d3764cea2c5e"
+  },
+  "CPU_tests": "..................                                                       [100%]\n18 passed in 2.10s\n",
+  "reproduction": {
+    "PASS": true,
+    "source_commit": "13681d7091189a4e68056e6a2864dc58f9d5700b",
+    "checkpoint_sha256": "f110766019e3628bb02c93815becd7e5795b3abc05626eabd91b7dbeb0381ee7",
+    "architecture_source_sha256": {
+      "src/research/deepseek_sboed.py": "85069fa88b27e62c82ab2fc326d36ac1aa573b01f5e4ceef2ffe0f4fd38e7573",
+      "src/research/deepseek_sboed_experiment.py": "2ac005d655db1279c3c707d9ea2ef1daf5658bf643d39e7eb8d5fc71f9f41feb",
+      "src/research/engine.py": "110c62b2dd2838903077a2aa967826f65ac05d29a0dd176687a55a6311e83714",
+      "src/research/journal_validation.py": "9a69f6bc56c65b85d63ce1feaa9f85932f00eb9ed22cb8b580978f41920f2cff",
+      "src/research/dad_location_policy.py": "40e24b2efa1fa2e5a3e334f95ca15632331e5d44c09421ab8d91afdc77f7a1d5",
+      "src/research/benchmarks.py": "b23ec2406fde3efecf79f584be3bd145d6ea57c614c1c605be8e251e081e36ab"
+    },
+    "config_sha256": "b2c920b9830babf3cec75a6fc6c0c305e5ae1a1104744d3c9f368101f360d8b0",
+    "EIG": 10.98906589858419,
+    "MC_SE": 0.044794108684935746,
+    "saved_EIG": 10.98906589858419,
+    "maximum_per_trajectory_error": 0.0,
+    "maximum_manual_inference_error": 0.0,
+    "metadata": {
+      "seed": 1001,
+      "systems": 2000,
+      "contrasts": 1000000,
+      "paired_draws_sha256": "5545d4071aea78471408fae814302633f9ddead6da57942ffac7a28a72f07e0b",
+      "seconds": 36.85345157899428,
+      "forward_particle_stages": 60000060000,
+      "device": "cuda:0",
+      "mode": "hard_deployed_policy",
+      "secondary_parameter_inference": false
+    },
+    "wall_seconds": 37.31071729201358,
+    "hardware": "NVIDIA GeForce RTX 4090",
+    "original_checkpoint_unchanged": true,
+    "optimization_updates": 0
+  },
+  "GPU_smoke": {
+    "update": 10,
+    "SPCE": 2.4846619704806083,
+    "preclip_gradient": 36.52455108785114,
+    "post_specialization_gradient": 36.52455108785114,
+    "context_gradient": {
+      "stage": 1,
+      "coordinate": 11,
+      "threshold": -0.007218742856903846,
+      "cohort_counts": [
+        1000,
+        1000
+      ],
+      "experts": [
+        {
+          "conflict": false,
+          "adjusted": false,
+          "fallback": false,
+          "norm": 0.0027867864145154474,
+          "cosine": 0.07358531318527654,
+          "anchor": null,
+          "expert": 0,
+          "cohort_sum_max_error": 1.1926223897340549e-18,
+          "affinity": [
+            0.0,
+            0.09736609252688999
+          ]
+        },
+        {
+          "conflict": false,
+          "adjusted": false,
+          "fallback": false,
+          "norm": 0.005789505250761795,
+          "cosine": 0.9372424831270989,
+          "anchor": null,
+          "expert": 1,
+          "cohort_sum_max_error": 3.7947076036992655e-18,
+          "affinity": [
+            0.15066116860838225,
+            0.1518721318486388
+          ]
+        },
+        {
+          "conflict": false,
+          "adjusted": false,
+          "fallback": false,
+          "norm": 1.9740527935973974e-08,
+          "cosine": 0.5484142732347659,
+          "anchor": null,
+          "expert": 2,
+          "cohort_sum_max_error": 2.481541837659083e-24,
+          "affinity": [
+            0.0001437184802322276,
+            0.0
+          ]
+        },
+        {
+          "conflict": true,
+          "adjusted": true,
+          "fallback": false,
+          "norm": 0.0002528945345053308,
+          "cosine": -0.21753116873497225,
+          "anchor": 0,
+          "protected_other_dot": 3.554291694563791e-25,
+          "original_alignment": 6.395183391348438e-08,
+          "norm_after": 0.0002528945345053309,
+          "direction_change_L2": 2.7610393635780433e-06,
+          "expert": 3,
+          "cohort_sum_max_error": 1.8973538018496328e-19,
+          "affinity": [
+            0.08525345692154492,
+            0.0
+          ]
+        },
+        {
+          "conflict": false,
+          "adjusted": false,
+          "fallback": false,
+          "norm": 0.0004244987530082437,
+          "cosine": 0.8129691552070174,
+          "anchor": null,
+          "expert": 4,
+          "cohort_sum_max_error": 1.9651164376299768e-19,
+          "affinity": [
+            0.06029311946482376,
+            0.0
+          ]
+        },
+        {
+          "conflict": false,
+          "adjusted": false,
+          "fallback": false,
+          "norm": 0.0015213762396217361,
+          "cosine": 0.8203353829856327,
+          "anchor": null,
+          "expert": 5,
+          "cohort_sum_max_error": 9.75781955236954e-19,
+          "affinity": [
+            0.0574476749064055,
+            0.044352734891176755
+          ]
+        },
+        {
+          "conflict": false,
+          "adjusted": false,
+          "fallback": false,
+          "norm": 0.012788011806331462,
+          "cosine": 0.942986783935895,
+          "anchor": null,
+          "expert": 6,
+          "cohort_sum_max_error": 5.637851296924623e-18,
+          "affinity": [
+            0.084853087848539,
+            0.15026709049380604
+          ]
+        }
+      ],
+      "conflicts": 1,
+      "adjusted": 1,
+      "fallbacks": 0
+    },
+    "extra_specialization_seconds": 0.5964495009975508,
+    "seconds": 1.2497887600329705,
+    "routing": {
+      "fraction_contexts_selected": [
+        0.22558333333333336,
+        1.0,
+        0.033350000000000005,
+        0.2703666666666667,
+        0.13883333333333334,
+        0.5211666666666667,
+        0.8107000000000001
+      ],
+      "mean_softmax": [
+        0.1402541701874769,
+        0.1509160599848554,
+        0.1395448367657998,
+        0.14047888485179083,
+        0.14006632613893774,
+        0.14173524896668094,
+        0.1470044731044584
+      ],
+      "effective_gate_experts": 6.996444863277123,
+      "distinct_selected_experts": 7,
+      "mean_selected_gate_mass": 0.44050338082081786,
+      "top_k": 3
+    },
+    "expert_gradient_norms": [
+      0.0003814949472634864,
+      0.0007925497945651075,
+      2.7023641369362736e-09,
+      3.461979956620044e-05,
+      5.8111424883077675e-05,
+      0.00020826761077896684,
+      0.001750604877449686
+    ],
+    "PASS": true,
+    "counts": {
+      "total_parameters": 8434,
+      "activated_parameters_per_context": 6898,
+      "shared_experts": 1,
+      "routed_experts": 7,
+      "top_k": 3,
+      "expert_feature_dimension": 16,
+      "routed_FFN_width": 8,
+      "shared_FFN_width": 8,
+      "FFN_linear_FLOPs_per_context": 3072,
+      "history_encoder_linear_FLOPs_per_observation": 9728,
+      "router_linear_FLOPs_per_context": 224,
+      "action_head_linear_FLOPs_per_context": 64,
+      "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs"
+    },
+    "batch_size": 2000,
+    "contrasts": 2000,
+    "horizon": 30,
+    "parameter_stage_propagations": 120060000,
+    "optimizer_updates": 1,
+    "weights_discarded": true,
+    "peak_allocated_bytes": 11335644672,
+    "foundation": "13681d7091189a4e68056e6a2864dc58f9d5700b"
+  },
+  "native_trainer": {
+    "PASS": true,
+    "updates": 10,
+    "training_seed": 101,
+    "weights_discarded": true,
+    "cost": {
+      "stop_reason": "reference_schedule_completion",
+      "executed_updates": 10,
+      "selected_update": 10,
+      "checkpoint_sha256": "8902a3b07839e91b5c3db09003f2ff0256546be344e8f8adb23a95fa4e36724d",
+      "selected_checkpoint": {
+        "identifier": "/home/grads/g/g.lin/Documents/objective_power_grid_v1_specialization_integration/experiments/10262026/10262026_v1_specialization_development/readiness/trainer_seed101_smoke/models/full/update10_final.pt",
+        "charged_seconds": 5.766389261989389,
+        "eligible": true
+      },
+      "clock": {
+        "version": 1,
+        "start": 279175.524190301,
+        "budget_seconds": 60.0,
+        "credit_seconds": 0.0,
+        "hardware": "NVIDIA GeForce RTX 4090",
+        "excluded": [],
+        "counts": {
+          "fresh_complete_primary_trajectories": 22000,
+          "true_parameter_stages": 660000,
+          "contrast_parameter_stages": 1320000000,
+          "scalar_conditional_likelihood_evaluations": 1320660000,
+          "policy_optimizer_updates": 11,
+          "shared_FFN_contexts": 600000,
+          "routed_FFN_contexts": 1800000,
+          "specialization_context_backward_passes": 2,
+          "specialization_steps": 1,
+          "specialization_expert_adjustments": 1,
+          "specialization_step_microseconds": 549006
+        },
+        "components": {
+          "readiness_probe_discarded_weights": {
+            "fresh_complete_primary_trajectories": 2000,
+            "true_parameter_stages": 60000,
+            "contrast_parameter_stages": 120000000,
+            "scalar_conditional_likelihood_evaluations": 120060000,
+            "policy_optimizer_updates": 1
+          },
+          "training": {
+            "fresh_complete_primary_trajectories": 20000,
+            "true_parameter_stages": 600000,
+            "contrast_parameter_stages": 1200000000,
+            "scalar_conditional_likelihood_evaluations": 1200600000,
+            "policy_optimizer_updates": 10,
+            "shared_FFN_contexts": 600000,
+            "routed_FFN_contexts": 1800000,
+            "specialization_context_backward_passes": 2,
+            "specialization_steps": 1,
+            "specialization_expert_adjustments": 1,
+            "specialization_step_microseconds": 549006
+          }
+        },
+        "checkpoints": [
+          {
+            "identifier": "/home/grads/g/g.lin/Documents/objective_power_grid_v1_specialization_integration/experiments/10262026/10262026_v1_specialization_development/readiness/trainer_seed101_smoke/models/full/update10.pt",
+            "charged_seconds": 5.755106060008984,
+            "eligible": true
+          },
+          {
+            "identifier": "/home/grads/g/g.lin/Documents/objective_power_grid_v1_specialization_integration/experiments/10262026/10262026_v1_specialization_development/readiness/trainer_seed101_smoke/models/full/update10_final.pt",
+            "charged_seconds": 5.766389261989389,
+            "eligible": true
+          }
+        ],
+        "stopped_at": 279181.299642705,
+        "charged_seconds": 5.775452403991949,
+        "fraction_of_allocated_budget": 0.09625754006653248,
+        "unused_seconds": 54.22454759600805,
+        "unit": "exclusive-device allocated training wall seconds",
+        "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+        "not_equal_to_FLOPs": true
+      },
+      "forward_parameter_stages": 1200600000,
+      "expert_effective_updates": [
+        10,
+        10,
+        9,
+        10,
+        10,
+        10,
+        10
+      ],
+      "CPU_process_seconds": 9.710648648,
+      "GPU_active_seconds": null,
+      "counts": {
+        "total_parameters": 8434,
+        "activated_parameters_per_context": 6898,
+        "shared_experts": 1,
+        "routed_experts": 7,
+        "top_k": 3,
+        "expert_feature_dimension": 16,
+        "routed_FFN_width": 8,
+        "shared_FFN_width": 8,
+        "FFN_linear_FLOPs_per_context": 3072,
+        "history_encoder_linear_FLOPs_per_observation": 9728,
+        "router_linear_FLOPs_per_context": 224,
+        "action_head_linear_FLOPs_per_context": 64,
+        "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs"
+      },
+      "reference_minibatch_preserved": true,
+      "planned_updates_this_phase": 10,
+      "cheap_control_only": false,
+      "training_reference_updates": 50000,
+      "training_reference_episodes": 100000000,
+      "legacy_episode_cap": null
+    }
+  },
+  "original_checkpoint_saved_source_commit": "13681d7091189a4e68056e6a2864dc58f9d5700b"
+}
