@@ -85,6 +85,7 @@ def run(args):
     (out/'scorebed_official_config.json').write_text(json.dumps(cfg,indent=2))
     # Use the official standardisation routine and charge its simulations.
     target=SIRScoreModel(T=args.horizon,init_seed=args.seed,**sir)
+    initialization_clock=time.perf_counter()
     target.compute_standardisation(stats_count)
     np.savez(out/'scorebed_normalization.npz',**{k:np.asarray(v) for k,v in target.get_std_stats_dict().items()})
     from policy_learning.utils.jax import derive_key
@@ -92,6 +93,8 @@ def run(args):
     score,key=load_score_trainer(key,cfg,target,callbacks=[])
     from src.research.journal_scorebed_bridge import compute_clock_from_plan
     compute_clock=compute_clock_from_plan(journal_plan or {});native_unit_bound=0.
+    initialization_seconds=time.perf_counter()-initialization_clock
+    score_clock=time.perf_counter()
     score_spent=0;records=[]
     while score_spent<score_count:
         if compute_clock is not None and not compute_clock.can_start(native_unit_bound):
@@ -113,6 +116,8 @@ def run(args):
     data_score,design_score=score.get_unbatched_score_fns()
     net=SIRScoreGRUNet(encoder_shapes=[256,256],encoding_dim=64,rnn_hidden_dim=64,rnn_layers=2,enc_act='relu',emit_act='relu',emitter_shapes=[256,256],shape=(args.horizon,1),min_std=1e-4,deterministic=False,time_scale=target.end,count_scale=target.population)
     key=derive_key(args.seed,'policy_trainer',0)
+    score_pretraining_seconds=time.perf_counter()-score_clock
+    policy_clock=time.perf_counter()
     policy,key=load_policy_trainer(key,cfg,target,grad_fn=noop,callbacks=[],policy_net=net)
     policy_spent=0;last_n=None
     while policy_spent<policy_count:
@@ -159,7 +164,8 @@ def run(args):
     np.savez(out/'scorebed_official_policy.npz',**arrays)
     from flax import serialization
     (out/'scorebed_official_score.msgpack').write_bytes(serialization.to_bytes(score._score_variables_from_state()))
-    data=dict(training='official_ScoreBED_JAX_score_matching_and_score_EIG_gradient',upstream_commit=COMMIT,
+    policy_training_seconds=time.perf_counter()-policy_clock
+    data=dict(initialization_seconds=initialization_seconds,score_pretraining_seconds=score_pretraining_seconds,policy_training_seconds=policy_training_seconds,training='official_ScoreBED_JAX_score_matching_and_score_EIG_gradient',upstream_commit=COMMIT,
         logical_primary_ODE_stage_evaluations=(initialization+score_spent+policy_spent)*args.horizon,minimum_primary_RK4_steps=(initialization+score_spent+policy_spent)*args.horizon*sir['integration_steps_per_stage'],solver_work_note='Lower bound on primal solver work; adaptive subdivisions and autodiff extra work are not claimed as exact FLOPs',
         sir_score_adapter_revision=2,potential_hidden_dim=cfg['score_network']['potential_hidden_dim'],score_dimension_compatibility='Pinned native potential_hidden_dim avoids scalar-data/scalar-time LayerNorm degeneracy; unchanged Transformer, loss, optimizers and training allocation',
         reported_policy_parameters='params_ema',random_streams='native derive_key score_trainer and policy_trainer/restart0',

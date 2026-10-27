@@ -198,6 +198,7 @@ def main(argv=None):
     guard(sys.argv[1:] if argv is None else argv)
     parser=argparse.ArgumentParser(description='EIG research plan: common continuous benchmarks and offline design methods')
     parser.add_argument('--config',required=True)
+    parser.add_argument('--train-only',action='store_true',help='Save final native checkpoint without final evaluation; journal calibration precedes common scoring')
     parser.add_argument('--T','--step-number',type=int)
     parser.add_argument('--variant',choices=FAMILY_METHODS)
     parser.add_argument('--training-episodes',type=int,help='Explicit additional primary-episode budget for a family timing/pilot run')

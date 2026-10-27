@@ -1,0 +1,52 @@
+{
+  "study_id": "SIR_JOURNAL_CORRECTED_20261026",
+  "status": "PRETRAINING_PROTOCOL_DECLARED",
+  "cleanup_commit": "5a9f8117692fbe5e9a36ac63bd328422d1ee2b40",
+  "config_sha256": "cc2fb1a2a327f9d8034d46d72dc7dca5aea0097aa6e0fb98fd35ff6ca2ec1114",
+  "methods": [
+    "random",
+    "fixed",
+    "dad",
+    "rl_sboed",
+    "vsoed",
+    "scorebed"
+  ],
+  "physical_model": {
+    "population": 500.0,
+    "i0": 2.0,
+    "t_end": 100.0,
+    "beta_mean": 0.5,
+    "gamma_mean": 0.1,
+    "log_std": 0.5,
+    "min_spacing": 0.1,
+    "integration_steps_per_stage": 512,
+    "execution_backend": "fused_rk4"
+  },
+  "training_seed": 101,
+  "primary_episodes": 1000000,
+  "checkpoint_selection": "final_predeclared_fixed_budget",
+  "evaluation_resolution": "predeclared rule; provisional until calibrated",
+  "source_revision": "recorded in immutable experiment/source_manifest.json after commit",
+  "source_vendor_records_sha256": "fcb7471f202fa479c79ec730bda397ebe80084783c5ab7331376605ad1c0b625",
+  "numerical_gate_record": {
+    "state": "PASS",
+    "returncode": 0,
+    "GPU_locked_seconds": 9.883926724025514,
+    "source_revision": "5a9f8117692fbe5e9a36ac63bd328422d1ee2b40",
+    "command": [
+      "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "tools/tests/test_sir_execution.py",
+      "tools/tests/test_sir_offline.py",
+      "tools/tests/test_sir_nested_resolution.py"
+    ]
+  },
+  "replication_seeds_not_launched": [
+    102,
+    103,
+    104,
+    105
+  ]
+}

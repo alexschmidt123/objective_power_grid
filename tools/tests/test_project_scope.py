@@ -11,7 +11,7 @@ ROOT=Path(__file__).resolve().parents[2]
 
 def test_registry_and_no_automatic_future_registration():
  assert scope.ACTIVE==('random','fixed','dad','rl_sboed','vsoed','scorebed','moe_sboed_v1')
- for s in ['MoE-sBOED','MoE-sBOED-v1','moe_sboed']:assert scope.resolve(s)==scope.MOE
+ for s in ['MoE-sBOED','MoE-sBOED-v1']:assert scope.resolve(s)==scope.MOE
  for s in ['MoE-sBOED-v2','MoE-sBOED-v3','MoE-sBOED-v4','FH-MoE-v3']:
   with pytest.raises(ValueError):scope.resolve(s)
  for s in scope.LEGACY:

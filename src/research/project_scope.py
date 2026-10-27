@@ -7,8 +7,8 @@ import yaml
 BASELINES=('random','fixed','dad','rl_sboed','vsoed','scorebed')
 MOE='moe_sboed_v1';ACTIVE=BASELINES+(MOE,)
 LABELS=dict(random='Random',fixed='Optimized Fixed',dad='Corrected DAD',rl_sboed='Corrected RL-sBOED',vsoed='Corrected vsOED',scorebed='Corrected ScoreBED',moe_sboed_v1='MoE-sBOED-v1')
-ALIASES={'moe_sboed':MOE,'MoE-sBOED':MOE,'MoE-sBOED-v1':MOE,'moe-sboed-v1':MOE,'DeepSeekMoE-sBOED-v1':MOE}
-LEGACY={'moe','resmoe','switchmoe','switchresmoe','strategy_moe_sboed','Strategy-MoE','pimoe','pimoe_ic','sa_moe','ir_moe','rc_moe','fh_moe','sum_single','shared_only','routed_only','attention_dense_moe','attention_sparse_moe','existing_moe_hard','existing_moe_relaxed'}
+ALIASES={'MoE-sBOED':MOE,'MoE-sBOED-v1':MOE,'moe-sboed-v1':MOE}
+LEGACY={'moe_sboed','DeepSeekMoE-sBOED-v1','moe','resmoe','switchmoe','switchresmoe','strategy_moe_sboed','Strategy-MoE','pimoe','pimoe_ic','sa_moe','ir_moe','rc_moe','fh_moe','sum_single','shared_only','routed_only','attention_dense_moe','attention_sparse_moe','existing_moe_hard','existing_moe_relaxed'}
 LEGACY_FLAGS={'--dad-mlp-continue-from','--relaxed-routing','--variant','--family-evaluate-from','--moe-diagnostic-from','--base-checkpoint','--base-finetune','--residual-scale','--residual-initial-std','--ablations','--pimoe','--pimoe-ic','--pimoe-validation','--sa-moe','--fh-moe-v3-discovery'}
 class LegacyExcluded(ValueError):pass
 

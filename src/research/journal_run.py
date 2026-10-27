@@ -192,6 +192,9 @@ def main(args,raw,root):
             checkpoint=out/'models'/f'{method}.pt'
             if checkpoint.exists():t['checkpoint_sha256']=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
             write_json(out/'models'/f'{method}_training.json',t)
+            if getattr(args,'train_only',False):
+                print('TRAIN_ONLY_COMPLETE',method,flush=True)
+                continue
             for es in evaluation_seeds:
                 saved_draws=None
                 if args.evaluation_cases or args.evaluation_bank:
@@ -202,7 +205,8 @@ def main(args,raw,root):
                 rows,summary=evaluate(b,p,method,h,settings,es,t,out,paper=True,infer_parameters=False,evaluation_draws=saved_draws)
                 summary.update(convergence_status=t['convergence_status'],phase=phase,workability_only=args.smoke)
                 write_json(out/'eval'/f'{method}_seed{es}.json',rows);summaries.append(summary);results[(method,es)]=rows
-        write_json(out/'summary.json',summaries);plot_results(out,results,methods,evaluation_seeds,h)
+        write_json(out/'summary.json',summaries)
+        if not getattr(args,'train_only',False):plot_results(out,results,methods,evaluation_seeds,h)
         (out/'exit_code').write_text('0\n');print('RESULT_DIR='+str(out),flush=True)
     except BaseException as exc:
         write_json(out/'failure.json',dict(type=type(exc).__name__,message=str(exc),traceback=traceback.format_exc()));(out/'exit_code').write_text('1\n');raise
