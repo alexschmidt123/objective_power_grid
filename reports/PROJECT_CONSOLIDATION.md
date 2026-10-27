@@ -1,0 +1,21 @@
+# Project consolidation — labpc — 2026-10-27
+
+The active project roots are exactly:
+- STABLE: /home/grads/g/g.lin/Documents/objective_power_grid
+- TEMP: /home/grads/g/g.lin/Documents/objective_power_grid_temp
+
+Consolidated 46 former top-level checkouts. Permanent historical artifacts are in STABLE/experiments/_legacy_archive/labpc/. 569 historical campaign directories are indexed as excluded or incomplete. No scientific result was promoted or newly certified. Current benchmark directories location_finding/ and sir_ode/ contain no official result yet; existing historical evidence remains available for the full scientific promotion review. This storage operation does not establish the mathematical validity of any old algorithm.
+
+Original STABLE tracked working edits were copied and hash-checked into TEMP before STABLE returned to its prior committed source revision. The only new source integration is tools/storage_policy.py, its tests, and the CLI dispatch hook. Existing method-development edits remain in TEMP. Original worktree revisions are pinned under refs/archive/consolidation-20261027/. A verified shared_repository.bundle preserves Git history. Independent repositories additionally retain their Git storage and verified bundles. Verified compressed source snapshots and patches are in TEMP/development_sources/. Historical checkpoints/datasets, including embedded reference/pilot archives, reside permanently in STABLE.
+
+Each artifact move compared SHA256 manifests before and after relocation. Redundant source checkouts were removed only after complete compressed-source readback verification. The independent artifact audit passed for 181,025 regular-file entries (100,632 distinct inodes), with 0 errors. 46 compressed source snapshots passed an independent hash and member-content readback. See CONSOLIDATION_INDEPENDENT_VERIFICATION.json, consolidation_manifests/, and PROJECT_PATH_RELOCATION.json.
+
+Archive-only deduplication independently hashed both copies before replacing a duplicate with a read-only hardlink. It recovered 24,880,738,304 allocated bytes (23.17 GiB) across 79,631 duplicates. Active code, Git storage, environments, and TEMP were excluded from this hardlinking. Do not modify archived files in place. Filesystem free-space change since the recorded start is 24,963,342,336 bytes; this is recorded separately because unrelated filesystem activity can affect it.
+
+The storage-boundary and result-copy regression suite passed 12 CPU tests in STABLE and 12 in TEMP. It covers path traversal, symlink escape, duplicate/abbreviated output flags, output collisions, TEMP defaults, sweep allocation, exact frozen official command authorization, source tampering, and result-copy hash/collision checks. An unauthorized STABLE CLI launch was verified to stop before experiment execution. No GPU experiment was launched. These are storage/dispatch regressions; no claim of full scientific-method regression validation is made. See STORAGE_POLICY_REGRESSION.json.
+
+All ten requested final checks are recorded in CONSOLIDATION_FINAL_CHECKS.json: two top-level roots; STABLE results storage; TEMP scratch-only outputs; unvalidated-result exclusion; no registered official dependency on removed paths; passing integrated-code regressions; preserved unique history; verified-before-removal checkouts; measured disk recovery; and no obsolete project worker. Unrelated projects and processes were left alone.
+
+There are 2 unresolved historical archive symlinks. Their pre-move baseline manifests are recorded in the final checks so missing original target content is explicit. They are excluded historical evidence and are not registered official dependencies. Saved historical command/configuration bytes were preserved; resolve their paths through the relocation manifest rather than recreating removed top-level folders. No checkpoint or dataset was discarded as unverified data.
+
+LabPC alone may commit or push. No GitHub push, HPRC deployment, manuscript rebuild, or new experiment was performed. UbuntuPC provenance stays attached to its archived records. Future cross-PC scientific promotion requires a verified artifact transfer and explicit registration in LabPC STABLE.
