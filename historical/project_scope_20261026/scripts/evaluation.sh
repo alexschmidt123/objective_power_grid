@@ -1,0 +1,66 @@
+#!/bin/bash
+# Evaluate methods into a stamped result folder.
+#
+# Usage:
+#   ./scripts/evaluation.sh --config configs/ieee9_cost_utility.yaml --T 8
+#   ./scripts/evaluation.sh --config configs/ieee9_cost_utility.yaml --method dad,random
+#   ./scripts/evaluation.sh --config configs/ieee9_cost_utility.yaml --exp-dir experiments/...
+
+set -euo pipefail
+# shellcheck source=../run.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/run.sh"
+
+CONFIG=""
+MOE_VARIANT="learned"
+METHOD=""
+SMOKE=""
+EXPERIMENT_TYPE="$EXPERIMENT_TYPE_DEFAULT"
+EXP_DIR=""
+T=""
+N_OBS="$DEFAULT_N_OBS"
+NOISE_SIGMA="$DEFAULT_NOISE_SIGMA"
+SEED="$DEFAULT_SEED"
+EVAL_SEED=""
+
+usage() {
+    echo "Usage: $0 --config <config.yaml> [--T <horizon>] [--N_obs <count>] [--noise_sigma <sigma>] [--seed <training-seed>] [--eval-seed <evaluation-seed>] [--experiment_type eig_based] [--method <methods>] [--exp-dir <path>] [--moe-variant learned|uniform|matched_dense] [--smoke]" >&2
+    echo "" >&2
+    echo "  --method  optional comma-separated list (default excludes moe_sboed)" >&2
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --config|-config|-c) CONFIG="$2"; shift 2 ;;
+        --moe-variant) MOE_VARIANT="$2"; shift 2 ;;
+        -T|--T|--step-number|--step_number) T="$2"; shift 2 ;;
+        --N_obs|--n-obs|--n_obs) N_OBS="$2"; shift 2 ;;
+        --noise_sigma|--noise-sigma) NOISE_SIGMA="$2"; shift 2 ;;
+        --method|-method|-m) METHOD="$2"; shift 2 ;;
+        --seed) SEED="$2"; shift 2 ;;
+        --eval-seed|--eval_seed) EVAL_SEED="$2"; shift 2 ;;
+        --experiment_type|--experiment-type)
+            EXPERIMENT_TYPE="$(validate_experiment_type "$2")" || exit 1
+            shift 2
+            ;;
+        --exp-dir|--exp_dir) EXP_DIR="$2"; shift 2 ;;
+        --smoke) SMOKE="--smoke"; shift ;;
+        -h|--help) usage; exit 0 ;;
+        *) usage; exit 1 ;;
+    esac
+done
+
+[[ -n "$CONFIG" ]] || { usage; exit 1; }
+
+T="${T:-$DEFAULT_STEP_NUMBER}"
+
+echo "=== evaluation (config=$CONFIG type=$EXPERIMENT_TYPE T=$T N_obs=$N_OBS noise_sigma=$NOISE_SIGMA seed=$SEED methods=${METHOD:-config}) ==="
+ARGS=(evaluate --config "$CONFIG" --experiment-type "$EXPERIMENT_TYPE" --N_obs "$N_OBS" --noise_sigma "$NOISE_SIGMA" --seed "$SEED")
+[[ -n "$EVAL_SEED" ]] && ARGS+=(--eval-seed "$EVAL_SEED")
+ARGS+=(-T "$T")
+ARGS+=(--moe-variant "$MOE_VARIANT")
+[[ -n "$EXP_DIR" ]] && ARGS+=(--exp-dir "$EXP_DIR")
+if [[ -n "$METHOD" && "${METHOD,,}" != "all" ]]; then
+    ARGS+=(--method "$METHOD")
+fi
+[[ -n "$SMOKE" ]] && ARGS+=("$SMOKE")
+exec python3 -m src.experiment "${ARGS[@]}"

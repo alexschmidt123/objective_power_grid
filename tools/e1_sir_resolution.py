@@ -1,4 +1,6 @@
 """Evaluation-only nested-contrast sensitivity, using shared explicit SIR likelihood."""
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical result generation is archived')
 import argparse,csv,hashlib,json,math,sys,time
 from pathlib import Path
 import numpy as np,torch,yaml

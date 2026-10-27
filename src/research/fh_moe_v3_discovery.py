@@ -135,4 +135,6 @@ def main():
     except Exception as e:
         write(C/'failure.json',dict(error=str(e),traceback=traceback.format_exc(),wall_seconds=time.perf_counter()-started,ledger=ledger));raise
     finally:lock.close()
-if __name__=='__main__':main()
+if __name__=='__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: archived exploratory entry point')
+if False:main()

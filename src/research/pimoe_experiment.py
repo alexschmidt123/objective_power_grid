@@ -134,4 +134,6 @@ def main():
         training_records=[json.loads(p.read_text()) for p in (C/'reports').glob('*_training.json')]
         cost=dict(optimizer_updates_by_component={p.stem:json.loads(p.read_text())['updates'] for p in (C/'reports').glob('*_training.json')},CPU_process_seconds=time.process_time(),charged_development_training_seconds=time.monotonic()-start,allowance_seconds=cfg['allowance_seconds'],actual_forward_parameter_stage_evaluations=b.calls,counts=b.pimoe_work,GPU_active_seconds=None,backward_FLOPs=None,simulator_backward_work='none: density learning does not differentiate the physical simulator',density_and_router_optimizer_counts='one joint update per predictive optimizer step; controls separately recorded',GPU_wall_note='Exclusive-device reserved wall time, not FLOPs or hardware-active time',ODE_work='not_applicable_location_algebraic_simulator',status=status,reason=why);write(C/'reports/resource_ledger.json',cost);write(C/'registry.json',dict(method='PIMoE-sBOED',seed=101,status=status,reason=why,final_EIG=None if not (C/'reports/final_evaluation.json').exists() else json.loads((C/'reports/final_evaluation.json').read_text())))
         print('FINAL_STATUS',json.dumps(cost),flush=True)
-if __name__=='__main__':main()
+if __name__=='__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: archived exploratory entry point')
+if False:main()

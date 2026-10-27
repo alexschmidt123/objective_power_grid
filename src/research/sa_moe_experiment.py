@@ -180,4 +180,6 @@ def main():
     p=argparse.ArgumentParser();p.add_argument('--sa-moe',action='store_true');p.add_argument('--action',choices=['train','evaluate'],required=True);p.add_argument('--campaign',required=True);p.add_argument('--config',required=True);p.add_argument('--which',choices=['main','single'],default='main');a=p.parse_args();C=Path(a.campaign).resolve();cfg=yaml.safe_load(Path(a.config).read_text());torch.set_num_threads(2)
     if a.action=='train':run_train(C,cfg)
     else:official(C,cfg,a.which)
-if __name__=='__main__':main()
+if __name__=='__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: archived exploratory entry point')
+if False:main()

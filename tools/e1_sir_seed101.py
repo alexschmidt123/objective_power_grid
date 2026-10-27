@@ -1,4 +1,6 @@
 """E1 SIR seed101 assignment using the existing journal campaign and root launcher."""
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical campaign is archived')
 import argparse,copy,hashlib,json,os,shutil,subprocess,sys,time
 from pathlib import Path
 from datetime import datetime

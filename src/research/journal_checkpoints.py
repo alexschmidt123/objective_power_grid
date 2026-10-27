@@ -5,9 +5,15 @@ import numpy as np
 import torch
 from src.research.moe_family import benchmark_signature,BasePolicy,load_policy
 
-def load_checkpoint(path,benchmark):
+def load_checkpoint(path,benchmark,*,allow_legacy=False):
  from src.research.benchmarks import make_benchmark
  path=Path(path).resolve();saved=torch.load(path,map_location='cpu',weights_only=False)
+ if saved.get('method')=='DeepSeekMoE-sBOED':
+  from src.research.project_scope import load_current_policy,validate_current_benchmark
+  validate_current_benchmark(benchmark)
+  return load_current_policy(path,benchmark.name)
+ legacy=saved.get('kind') in {'moe_sboed_family_v1','strategy_moe_sboed','sum_single','sir_sum_single_v1'} or saved.get('architecture','').startswith('spce_only_sum_encoder_dselect')
+ if legacy and not allow_legacy:raise ValueError('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: explicit archive loading required')
  cfg=json.loads((path.parent.parent/'run_config.json').read_text());source=make_benchmark(cfg['benchmark'])
  if benchmark_signature(source)!=benchmark_signature(benchmark):raise ValueError('Frozen checkpoint benchmark physics/prior differ')
  kind=saved['kind'];h=saved['horizon']
@@ -34,7 +40,9 @@ def load_checkpoint(path,benchmark):
   elif saved.get('architecture')=='published_RL_BOED_source_REDQ_native_v1':
    from src.research.native_rl_reference import NativeRLPolicy
    p=NativeRLPolicy(h)
-  else:p=RLPolicy(benchmark,h)
+  else:
+   if not allow_legacy:raise ValueError('Pre-correction RL checkpoint is not an active corrected baseline')
+   p=RLPolicy(benchmark,h)
  elif kind=='scorebed':
   arrays=np.load(path.with_name('scorebed_official_policy.npz'))
   if benchmark.name=='sir_ode':

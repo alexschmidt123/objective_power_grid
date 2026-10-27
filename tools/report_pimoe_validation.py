@@ -1,4 +1,6 @@
 """Rebuild PIMoE validation reports/figures from saved arrays only."""
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical result generation is archived')
 import argparse,json,csv,math
 from pathlib import Path
 import numpy as np

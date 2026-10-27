@@ -1,4 +1,6 @@
 """Render saved FH-MoE-v3 discovery diagnostics; never trains or selects models."""
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: archived exploratory result generation')
 import argparse,json
 from pathlib import Path
 import matplotlib

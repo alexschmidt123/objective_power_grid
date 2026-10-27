@@ -1,4 +1,6 @@
 """Gated SIR E1 replication, reusing existing journal phases and root launchers."""
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical campaign is archived')
 import argparse,copy,fcntl,hashlib,json,os,shutil,subprocess,sys,time
 from pathlib import Path
 import numpy as np,torch,yaml

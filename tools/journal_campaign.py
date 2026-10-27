@@ -543,6 +543,7 @@ def main():
     else:run_sir()
 
 if __name__=='__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical campaign launcher; use current scoped workflows')
     try:main()
     except BaseException as exc:
         if C.exists():write(C/'coordinator_failure.json',dict(type=type(exc).__name__,message=str(exc),traceback=traceback.format_exc()))

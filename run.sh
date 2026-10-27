@@ -49,38 +49,6 @@ _prepend_mocu_optimized
 unset -f _prepend_mocu_optimized
 export PYTHONPATH="${ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
-# Isolated predictive-density prototype; every existing launcher path is unchanged.
-for _ic_arg in "$@"; do
-    if [[ "$_ic_arg" == "--fh-moe-v3-discovery" ]]; then
-        exec python3 -m src.research.fh_moe_v3_discovery "$@"
-    fi
-    if [[ "$_ic_arg" == "--sa-moe" ]]; then
-        exec python3 -m src.research.sa_moe_experiment "$@"
-    fi
-    if [[ "$_ic_arg" == "--deepseek-sboed" ]]; then
-        exec python3 -m src.research.deepseek_sboed_experiment "$@"
-    fi
-    if [[ "$_ic_arg" == "--pimoe-ic" ]]; then
-        python3 -m src.research.pimoe_ic_experiment "$@"
-        exit $?
-    fi
-done
-unset _ic_arg
-for _validation_arg in "$@"; do
-    if [[ "$_validation_arg" == "--pimoe-validation" ]]; then
-        python3 -m src.research.pimoe_validation "$@"
-        exit $?
-    fi
-done
-unset _validation_arg
-for _pimoe_arg in "$@"; do
-    if [[ "$_pimoe_arg" == "--pimoe" ]]; then
-        python3 -m src.research.pimoe_experiment "$@"
-        exit $?
-    fi
-done
-unset _pimoe_arg
-
 EXPERIMENT_TYPE_DEFAULT="eig_based"
 DEFAULT_STEP_NUMBER=3
 DEFAULT_N_OBS=0
@@ -179,6 +147,32 @@ start_run_logging() {
 if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
     return 0
 fi
+
+# Current project entry boundary; archived workflows cannot enter active dispatch.
+for _scope_arg in "$@"; do
+    if [[ "$_scope_arg" == "--list-current-methods" ]]; then
+        exec python3 -m src.research.project_scope list
+    fi
+done
+python3 -m src.research.project_scope guard -- "$@" || return 2 2>/dev/null || exit 2
+_scope_args=()
+for _scope_arg in "$@"; do
+    if [[ "$_scope_arg" == "--moe-sboed-v1" ]]; then
+        _scope_args+=("--deepseek-sboed")
+    else
+        _scope_args+=("$_scope_arg")
+    fi
+done
+for _scope_arg in "${_scope_args[@]}"; do
+    if [[ "$_scope_arg" == "--deepseek-sboed" ]]; then
+        exec python3 -m src.research.deepseek_sboed_experiment "${_scope_args[@]}"
+    fi
+    if [[ "$_scope_arg" == "--current-moe-evaluate" ]]; then
+        exec python3 -m src.research.current_moe_evaluation "${_scope_args[@]}"
+    fi
+done
+unset _scope_arg _scope_args
+
 
 set -euo pipefail
 echo "[run.sh] Default results: experiments/MMDDYYYY/MMDDYYYY_<time>_<objective_parameters>/"

@@ -35,7 +35,7 @@ POSTER_METHOD_ORDER = (
     "Myopic",
     "Fixed",
     "Random",
-    "MoE-sBOED",
+    "MoE-sBOED-v1",
     "MatchedDense",
 )
 
@@ -57,8 +57,8 @@ _METHOD_LABELS = {
     "Fixed": "Fixed",
     "random": "Random",
     "Random": "Random",
-    "moe_sboed": "MoE-sBOED",
-    "MoE-sBOED": "MoE-sBOED",
+    "moe_sboed_v1": "MoE-sBOED-v1",
+    "MoE-sBOED-v1": "MoE-sBOED-v1",
     "matched_dense": "MatchedDense",
     "MatchedDense": "MatchedDense",
     "Oracle": "Oracle",
@@ -82,6 +82,8 @@ _BUNDLE_FILES = (
 
 def _poster_label(method: Any) -> str | None:
     raw = str(method).strip()
+    if "moe" in raw.lower() and raw not in {"moe_sboed_v1", "MoE-sBOED-v1"}:
+        return None  # Legacy records are excluded from current figures.
     if not raw or raw.lower() in {"oracle"}:
         return None
     if raw in _METHOD_LABELS:

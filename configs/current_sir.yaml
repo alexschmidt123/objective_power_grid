@@ -1,0 +1,168 @@
+system:
+  name: sir_ode
+N: 1
+experiment:
+  experiment_type: eig_based
+  step_number: 5
+  methods:
+  - random
+  - fixed
+  - dad
+  - rl_sboed
+  - vsoed
+  - scorebed
+observation:
+  noise_sigma: 1.0
+  sampling: infected_count_at_continuous_time
+sir_ode:
+  population: 500.0
+  i0: 2.0
+  t_end: 100.0
+  beta_mean: 0.5
+  gamma_mean: 0.1
+  log_std: 0.5
+  min_spacing: 0.1
+  integration_steps_per_stage: 512
+  execution_backend: fused_rk4
+research:
+  enabled: true
+  settings:
+    eval_systems: 2048
+    eval_contrasts: 1000000
+    updates: 31250
+    batch_size: 64
+    learning_rate: 0.0003
+    training_bound: 1
+    primary_episode_budget: 1
+    contrasts: 1024
+    evaluation_population_systems: 2048
+    evaluation_batch_size: 16
+    evaluation_contrast_chunk: 4096
+    validation_systems: 128
+    validation_contrasts: 1024
+    rl_batch_size: 100
+    rl_replay_batch: 4096
+    rl_replay_capacity: 1000000
+    rl_min_buffer: 100000
+    rl_gradient_steps: 2
+    rl_log_every: 10
+    scorebed_batch_size: 64
+    threads: 2
+  training_episode_cap: 1000000
+  journal_protocol:
+    version: validation_convergence_v1
+    status: SIR_development_pending_readiness
+    comparison: one_million_total_primary_episodes
+    budget_unit: method_specific_resource_safety_caps
+    checkpoint_selection: final_predeclared_fixed_budget
+    claim_limit: No confirmation until readiness, precision and settings are frozen;
+      historical results are separate.
+    development_training_seeds:
+    - 101
+    training_seeds:
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    evaluation_seeds:
+    - 1002
+    previously_used_evaluation_seeds:
+    - 1001
+    validation:
+      seed: 1003
+      systems: 128
+      contrasts: 16384
+      batch_size: 16
+      chunk: 4096
+      device: cpu
+    stopping_rule:
+      minimum_episodes: 1000000
+      minimum_checkpoints: 8
+      validation_every_episodes: 125000
+      patience: 6
+      minimum_improvement: 0.01
+      noise_multiplier: 1.96
+      maximum_episodes: 1000000
+      maximum_training_seconds: 172800
+    common_pathwise_settings:
+      hidden: 64
+      contrasts: 1024
+    method_settings:
+      fixed: {}
+      dad:
+        first_design_revision: 1
+        spce_gradient_clip: null
+        batch_size: 2000
+        contrasts: 2000
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        primary_episode_budget: 1
+        spce_curriculum: 1
+      scorebed:
+        scorebed_pretraining_episodes: 897736
+        scorebed_batch_size: 1024
+        scorebed_reference_sampler: true
+        scorebed_restarts: 1
+      rl_sboed:
+        rl_original_reference: true
+        rl_native_replay_capacity: 1000000
+        rl_native_contrasts: 100000
+    method_stopping: {}
+    final_evaluation:
+      systems: 2048
+      contrasts: 1000000
+      resolution_status: uncalibrated
+      seed: 1002
+    independent_seeds_required: 5
+    development_resource_gate: measured GPU forward/backward 0.798 seconds per batch64;
+      seed101 approved
+    native_fidelity_required: true
+    native_vsoed_profile:
+      updates: 980
+      new_trajectories: 1000
+      replay_batch: 10000
+      initial_replay: 20000
+      replay_capacity: 1000000
+      posterior_updates: 5
+      critic_updates: 5
+      posterior_lr: 0.0005
+      actor_lr: 0.0005
+      critic_lr: 0.001
+      lr_decay: 0.9999
+      discount: 1.0
+      exploration: 5.0
+      exploration_decay: 0.9999
+      target_rate: 0.1
+      transition: 10000
+      log_every: 100
+      n_incre: 1
+      posterior_coordinate_reference: log_parameters
+    checkpoint_selection_mode: final_fixed_budget
+    training_device: cuda_if_available
+    study_id: E1_original_protocol_budget_only_20261019
+  paper_protocol:
+    nominal_training_trajectories: 1000000
+    training_budget_unit: primary_episodes
+    checkpoint_selection: final
+    regime: journal_1M_total_fixed_budget
+current_method_registry:
+- random
+- fixed
+- dad
+- rl_sboed
+- vsoed
+- scorebed
+- moe_sboed_v1
+moe_target:
+  name: MoE-sBOED-v1
+  architecture_foundation: 13681d7091189a4e68056e6a2864dc58f9d5700b
+  status: PENDING_INDEPENDENT_SIR_VALIDATION
+  legacy_fallback: false
+  native_recipe: null
+scope_note: Six conventional baselines; target MoE uses separate verified native dispatch.
+  Archived MoEs are never substituted.
+baseline_protocol_provenance: Strict restoration source16632ae4b00703ffb1cc4d9b6a956e4a953f00c7

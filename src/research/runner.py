@@ -18,10 +18,10 @@ from src.research.benchmarks import make_benchmark
 from src.research.engine import generator,rollout,posterior_metrics,logmeanexp
 from src.research.training import train_spce,train_vsoed
 
-METHODS = ['random','fixed','dad','vsoed','rl_sboed','scorebed','moe_sboed']
-STRATEGY_METHODS = ['strategy_moe_sboed']
-FAMILY_METHODS = ['moe','resmoe','switchmoe','switchresmoe']
-ABLATIONS = ['sum_single','attention_single','attention_dense_moe','attention_sparse_moe','attention_matched_dense','attention_matched_sparse','attention_uniform_moe','existing_moe_hard','existing_moe_relaxed','sum_single_193']
+METHODS = ['random','fixed','dad','vsoed','rl_sboed','scorebed']
+STRATEGY_METHODS = []  # Legacy strategies are archive-only.
+FAMILY_METHODS = []  # Current MoE uses its validated native v1 dispatcher.
+ABLATIONS = []  # Historical controls are not current benchmark methods.
 DEFAULTS = dict(strategy_routing_mode='learned',strategy_initial_reroute_probability=.99,strategy_diagnostics_every=1,moe_history_encoder_revision=1,first_design_revision=1,training_bound=1,variational_policy_lr=.0002,variational_density_lr=.001,
                 variational_density_hidden=128,variational_mixtures=16,variational_density_updates=2,variational_warmup=200,smc_moves=8,moe_revision=4,moe_router_temperature=1.,spce_curriculum=1,updates=2000,batch_size=32,learning_rate=.001,hidden=64,contrasts=1024,
                 validation_contrasts=1024,validation_systems=128,validate_every=100,
@@ -49,6 +49,8 @@ class Tee:
 
 
 def plot_results(output,all_rows,methods,seeds,horizon):
+    from src.research.project_scope import resolve
+    for method in methods: resolve(method)
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -58,8 +60,8 @@ def plot_results(output,all_rows,methods,seeds,horizon):
             values=np.array([r['spce_by_stage'] for r in all_rows[(method,seed)]])
             x=np.arange(1,horizon+1)
             mean=values.mean(0)
-            from src.research.moe_family import NAMES,ALIASES
-            ax.plot(x,mean,label=NAMES.get(ALIASES.get(method,method),method))
+            from src.research.project_scope import label
+            ax.plot(x,mean,label=label(method))
             if len(values)>1:
                 se=values.std(0,ddof=1)/math.sqrt(len(values))
                 ax.fill_between(x,mean-1.96*se,mean+1.96*se,alpha=.1)
@@ -91,6 +93,8 @@ def freeze_source(root,output):
 
 
 def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper=False,*,infer_parameters=True,evaluation_draws=None):
+    from src.research.project_scope import resolve
+    resolve(method)
     # Identity pairing is independent of training/decision RNG and batch partition.
     rng = generator(seed)
     population=settings.get('evaluation_population_systems',settings['eval_systems']) if paper else settings['eval_systems']
@@ -190,6 +194,8 @@ def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper
 
 
 def main(argv=None):
+    from src.research.project_scope import guard
+    guard(sys.argv[1:] if argv is None else argv)
     parser=argparse.ArgumentParser(description='EIG research plan: common continuous benchmarks and offline design methods')
     parser.add_argument('--config',required=True)
     parser.add_argument('--T','--step-number',type=int)
@@ -582,3 +588,6 @@ def main(argv=None):
         write_json(output/'failure.json',dict(exception=type(exc).__name__,message=str(exc),traceback=traceback.format_exc()))
         (output/'exit_code').write_text('1\n')
         raise
+
+if __name__ == '__main__':
+    main()

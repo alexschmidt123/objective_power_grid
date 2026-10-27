@@ -1,3 +1,5 @@
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical result generation is archived')
 from pathlib import Path
 import json,csv,math
 import numpy as np

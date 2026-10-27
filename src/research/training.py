@@ -31,6 +31,8 @@ def select_checkpoint(benchmark,policy,horizon,settings,seed):
 
 
 def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=False,trajectory_budget=None,policy=None,observer=None):
+    if kind not in {'dad','fixed'}:
+        raise ValueError('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: use the validated MoE-sBOED-v1 native trainer')
     torch.manual_seed(seed)
     policy = policy if policy is not None else make_policy(benchmark,horizon,kind,settings['hidden'],settings)
     betas=(settings.get('spce_adam_beta1',.9),settings.get('spce_adam_beta2',.999))

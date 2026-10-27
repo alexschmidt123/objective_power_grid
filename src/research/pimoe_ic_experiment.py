@@ -108,4 +108,6 @@ def main():
         if sha(C/'models/pimoe_ic_seed101.pt')!=json.loads((C/'reports/checkpoint_freeze.json').read_text())['checkpoint_sha256']:raise ValueError('Frozen IC checkpoint changed')
         from src.research.pimoe_validation import evaluate
         evaluate((C/'reference').resolve(),C,C/'models/pimoe_ic_seed101.pt',101,'ic',model_loader=load_ic_checkpoint)
-if __name__=='__main__':main()
+if __name__=='__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: archived exploratory entry point')
+if False:main()

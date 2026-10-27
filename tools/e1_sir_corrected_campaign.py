@@ -1,4 +1,6 @@
 """Corrected SIR phase execution through existing journal orchestration/run.sh."""
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical campaign is archived')
 import argparse,copy,hashlib,json,os,shutil,subprocess,sys
 from pathlib import Path
 import yaml

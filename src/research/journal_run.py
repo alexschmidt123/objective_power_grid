@@ -5,7 +5,7 @@ from pathlib import Path
 import torch
 from src.research.journal_validation import StoppingRule,CommonValidation,ValidationObserver
 
-METHODS=('random','fixed','dad','rl_sboed','vsoed','scorebed','sum_single','moe','resmoe','switchmoe','switchresmoe')
+METHODS=('random','fixed','dad','rl_sboed','vsoed','scorebed')
 
 def main(args,raw,root):
     from src.research.runner import DEFAULTS,FAMILY_METHODS,write_json,freeze_source,evaluate,plot_results,Tee

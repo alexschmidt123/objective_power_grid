@@ -1,4 +1,6 @@
 """Regenerate SA-MoE reports/figures from actual arrays; never hardcoded EIG."""
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: archived exploratory result generation')
 import argparse,json,csv,math
 from pathlib import Path
 import numpy as np

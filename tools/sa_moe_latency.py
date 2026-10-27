@@ -1,4 +1,6 @@
 """CPU deployment latency including feature packing; no simulator allowed."""
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: archived exploratory result generation')
 import argparse,json,time
 from pathlib import Path
 from unittest.mock import patch

@@ -1,4 +1,6 @@
 """One shared 500k base + two 500k residual learners; root launchers only."""
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical result generation is archived')
 import argparse,hashlib,json,math,shutil,subprocess,sys,time,traceback
 from pathlib import Path
 import numpy as np

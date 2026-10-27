@@ -188,4 +188,6 @@ def main():
     elif a.action=='train-replicate':train_replicate(reference,C,a.seed)
     elif a.action=='fixture':equivalence_fixture(C)
     else:evaluate(reference,C,Path(a.checkpoint),a.seed,a.model_label)
-if __name__=='__main__':main()
+if __name__=='__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: archived exploratory entry point')
+if False:main()
