@@ -48,13 +48,13 @@ research:
     rl_log_every: 10
     scorebed_batch_size: 64
     threads: 2
-  training_episode_cap: 1000000
   journal_protocol:
-    version: sir_journal_corrected_seed101_v1
-    status: FROZEN_FIXED_DATA_BUDGET
-    comparison: one_million_total_primary_episodes
-    budget_unit: method_specific_resource_safety_caps
-    checkpoint_selection: final_predeclared_fixed_budget
+    version: sir_journal_four_hour_seed101_v1
+    status: FOUR_HOUR_POLICY_FROZEN_EXECUTION_GATE_PENDING
+    comparison: Matched four-hour LabPC training-budget comparison on the SIR ODE
+      benchmark.
+    budget_unit: charged_LabPC_RTX4090_training_seconds
+    checkpoint_selection: latest_valid_compute_eligible
     claim_limit: No confirmation until readiness, precision and settings are frozen;
       historical results are separate.
     development_training_seeds:
@@ -66,7 +66,7 @@ research:
     - 104
     - 105
     evaluation_seeds:
-    - 1002
+    - 1001
     previously_used_evaluation_seeds:
     - 1001
     validation:
@@ -76,19 +76,48 @@ research:
       batch_size: 16
       chunk: 4096
       device: cuda_if_available
-    stopping_rule:
-      minimum_episodes: 1000000
-      minimum_checkpoints: 8
-      validation_every_episodes: 125000
-      patience: 6
-      minimum_improvement: 0.01
-      noise_multiplier: 1.96
-      maximum_episodes: 1000000
-      maximum_training_seconds: 172800
     common_pathwise_settings:
       hidden: 64
       contrasts: 1024
-    method_settings:
+    method_stopping: {}
+    final_evaluation:
+      systems: 2048
+      contrasts: 1000000
+      resolution_status: PROVISIONAL_PENDING_PREDECLARED_CALIBRATION
+      seed: 1001
+    independent_seeds_required: 5
+    native_fidelity_required: true
+    checkpoint_selection_mode: latest_compute_eligible
+    training_device: cuda_if_available
+    study_id: SIR_JOURNAL_FOUR_HOUR_20261026
+    preserve_progress_checkpoints: true
+    replication_seeds:
+    - 102
+    - 103
+    - 104
+    - 105
+    replication_launch_authorized: false
+    confirmation_seed: 98502691
+    reserved_historical_seed: 8831001
+    compute_budget:
+      seconds: 14400
+      hardware: NVIDIA GeForce RTX 4090
+      checkpoint_seconds: 300
+      include:
+      - method_specific_GPU_setup
+      - compilation
+      - initialization
+      - fresh_simulation_for_training
+      - all_trainable_pretraining
+      - auxiliary_optimization
+      - replay
+      - policy_optimization
+      - checkpoint_serialization
+      exclude:
+      - logged_validation
+      - final_EIG_evaluation
+      - online_latency_measurement
+    historical_method_settings:
       fixed: {}
       dad:
         first_design_revision: 1
@@ -111,15 +140,7 @@ research:
         rl_original_reference: true
         rl_native_replay_capacity: 1000000
         rl_native_contrasts: 100000
-    method_stopping: {}
-    final_evaluation:
-      systems: 2048
-      contrasts: 1000000
-      resolution_status: PROVISIONAL_PENDING_PREDECLARED_CALIBRATION
-      seed: 1001
-    independent_seeds_required: 5
-    native_fidelity_required: true
-    native_vsoed_profile:
+    historical_vsoed_profile:
       updates: 980
       new_trajectories: 1000
       replay_batch: 10000
@@ -139,23 +160,28 @@ research:
       log_every: 100
       n_incre: 1
       posterior_coordinate_reference: log_parameters
-    checkpoint_selection_mode: final_fixed_budget
-    training_device: cuda_if_available
-    study_id: SIR_JOURNAL_CORRECTED_20261026
-    preserve_progress_checkpoints: true
-    replication_seeds:
-    - 102
-    - 103
-    - 104
-    - 105
-    replication_launch_authorized: false
-    confirmation_seed: 98502691
-    reserved_historical_seed: 8831001
+    method_settings:
+      fixed:
+        native_profile_status: SOURCE_VERIFICATION_REQUIRED_BEFORE_LAUNCH
+      dad:
+        native_profile_status: SOURCE_VERIFICATION_REQUIRED_BEFORE_LAUNCH
+      rl_sboed:
+        native_profile_status: SOURCE_VERIFICATION_REQUIRED_BEFORE_LAUNCH
+      vsoed:
+        native_profile_status: SOURCE_VERIFICATION_REQUIRED_BEFORE_LAUNCH
+      scorebed:
+        native_profile_status: SOURCE_VERIFICATION_REQUIRED_BEFORE_LAUNCH
+    native_schedule_policy: Preserve verified native optimizer, objective, batch,
+      replay, LR and finite schedule; do not derive phase allocation from 1M episodes
+      or extend to fill time.
+    checkpoint_reuse_policy: Only verified same-source same-budget eligible checkpoints;
+      all others supplemental.
   paper_protocol:
-    nominal_training_trajectories: 1000000
-    training_budget_unit: primary_episodes
-    checkpoint_selection: final
-    regime: journal_1M_total_fixed_budget
+    training_budget_unit: charged_LabPC_RTX4090_seconds
+    training_seconds: 14400
+    checkpoint_selection: latest_valid_compute_eligible
+    regime: matched_four_hour_primary
+    mandatory_episode_quota: null
 study_analysis:
   methods:
   - random
@@ -181,8 +207,11 @@ study_analysis:
   final_seed: 1001
   confirmation_seed: 98502691
   curve_seed: 97402611
-  training_safety_seconds: 172800
-  per_method_phase_seconds: 259200
-  native_probe_seconds: 900
+  training_safety_seconds: 14400
+  native_probe_seconds: 1800
   latency_warmup: 20
   latency_repetitions: 200
+  primary_training_seconds: 14400
+  launch_gate: BLOCKED_UNTIL_NATIVE_SCHEDULE_AND_BUDGET_ADAPTER_VALIDATED
+  historical_campaign: 10262026_sir_journal_corrected_seed101_r2
+  historical_campaign_policy: ALLOW_UNCHANGED_TO_FINISH_SEPARATELY
