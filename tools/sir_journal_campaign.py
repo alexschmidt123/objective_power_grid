@@ -110,7 +110,7 @@ def calibrate(available):
    complete.append(L);data[L]=level;last=L
    if time.perf_counter()-start>a['calibration_gpu_seconds']:break
   chosen=complete[-1] if complete else 1000000;resolved=False;metrics=[]
-  for lower,higher in zip(complete,complete[1:]):
+  for lower,higher in [(lower,complete[-1]) for lower in complete[:-1]]:
    absolute=[];paired=[];se_values=[]
    for seed in [a['calibration_seed'],a['calibration_replicate_seed']]:
     shifts={m:data[higher][f'{seed}:{m}']-data[lower][f'{seed}:{m}'] for m in available}
