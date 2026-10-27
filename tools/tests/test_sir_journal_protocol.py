@@ -27,3 +27,13 @@ def test_train_only_dispatch_and_source_compile():
  source=(R/'src/research/journal_run.py').read_text();assert "if getattr(args,'train_only',False):" in source
  assert "if not getattr(args,'train_only',False):plot_results" in source
  for p in [R/'tools/sir_journal_campaign.py',R/'tools/sir_journal_report.py',R/'src/research/runner.py',R/'src/research/journal_run.py']:ast.parse(p.read_text())
+
+
+def test_new_journal_version_reaches_native_dispatch(monkeypatch):
+ import src.research.journal_run as journal
+ import src.research.runner as runner
+ calls=[]
+ monkeypatch.setattr(journal,'main',lambda args,raw,root:calls.append((args,raw)))
+ runner.main(['--config',str(R/'configs/sir_journal_corrected.yaml'),'--journal','--train-only','--methods','dad','--seed','101'])
+ assert len(calls)==1 and calls[0][0].train_only
+ assert calls[0][1]['research']['journal_protocol']['version']=='sir_journal_corrected_seed101_v1'

@@ -2,7 +2,7 @@
 import argparse,copy,fcntl,hashlib,json,os,signal,subprocess,threading,time
 from pathlib import Path
 import yaml,numpy as np
-R=Path(__file__).resolve().parents[1];C=R/'experiments/10262026/10262026_sir_journal_corrected_seed101'
+R=Path(__file__).resolve().parents[1];C=R/'experiments/10262026/10262026_sir_journal_corrected_seed101_r2'
 METHODS=['random','fixed','dad','rl_sboed','vsoed','scorebed'];ORDER=['dad','vsoed','scorebed','rl_sboed']
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def read(p):return json.loads(Path(p).read_text())
