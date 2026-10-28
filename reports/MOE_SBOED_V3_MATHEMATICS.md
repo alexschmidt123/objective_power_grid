@@ -1,0 +1,11 @@
+# Objective and gradient accounting
+
+For true theta_0 and L iid prior contrasts theta_1:L, terminal sPCE = log p(y_1:T|theta_0,pi) - log[(1/(L+1)) sum_l p(y_1:T|theta_l,pi)]. The existing DAD rollout computes this terminal lower-bound estimator without changing simulator, precision, prior, likelihood, horizon, or action bounds. We minimize minus mean terminal sPCE. All thirty observations contribute, with reparameterized observations and complete differentiable history paths.
+
+Conditional-density auxiliary: A=E_joint[-log q_phi(z(theta)|h_t)]/d, averaged over the thirty pre-decision histories. Under the on-policy joint distribution, single theta/history pairs estimate conditional cross-entropy in expectation; one theta is NOT a posterior for a fixed history. The physical-to-z transform is the benchmark's existing transform; its Jacobian is independent of density parameters. q is an approximation, with a fixed finite mixture capacity and coordinate dependence.
+
+Training loss: -sPCE + .01 A for v3/dense/shared; v3-noaux omits A; native v1 retains its .001 native routing balance loss. Auxiliary histories AND theta targets are detached, then the shared adapter/density head is re-evaluated. This prevents the auxiliary from explicitly steering earlier actions toward histories easier to density-fit. It still changes shared representation parameters and may conflict with EIG. The .01 coefficient is a predeclared heuristic, not an information identity or a guarantee; noaux comparison and calibration audits are required. Full sPCE gradients through uncertainty features and earlier actions remain intact. There is no density pretraining phase hidden outside the budget.
+
+Routing uses the exact derivative of selected renormalized softmax weights and selected experts conditional on top2 membership. Discrete membership has no derivative; this is a piecewise pathwise routing approximation, not an unbiased gradient estimator for randomized expert selection. Finite-difference tests hold membership locally fixed.
+
+Calibration plan: held-out NLL, marginal PIT/90% coverage, source-swap symmetry discrepancy, and synthetic bimodal learning fixture. These do not establish full multivariate posterior fidelity. Failed calibration invalidates posterior interpretations of roles, even if an empirical EIG gain survives.

@@ -1,0 +1,30 @@
+method: moe_sboed_v3
+status: DEVELOPMENT_UNVALIDATED
+training_seed: 303
+training_seconds_per_arm: 7200
+batch_size: 2000
+contrasts: 2000
+horizon: 30
+milestones: [1024, 2048, 4096, 8192]
+auxiliary_weight: 0.01
+development_seed: 97402871
+arms: [v3, v1, dense, shared, noaux]
+optimizer: Adam
+learning_rate: 0.00005
+betas: [0.8, 0.998]
+gradient_clip: 5
+lr_gamma: 0.98
+lr_schedule: after updates 1,1001,2001,...
+checkpoint_selection: highest predeclared milestone completed by all arms, never best EIG
+evaluation: paired explicit likelihood finite-contrast full-horizon sPCE
+milestone_systems: 256
+milestone_contrasts: 65536
+final_systems: 512
+final_contrasts: 262144
+confirmation_seed: 97402873
+official_seed1001: forbidden
+expert_count: 4
+top_k: 2
+mixture_components: 4
+posterior_status: approximate conditional density; empirical fit and calibration audit required
+promotion: forbidden without separate scientific validation

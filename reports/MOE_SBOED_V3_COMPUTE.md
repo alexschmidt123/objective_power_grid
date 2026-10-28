@@ -1,0 +1,7 @@
+# Development compute
+
+Maximum7200 charged training seconds per NEW arm; up to five arms, no parallel heavy GPU training. Normal exclusive locking uses BOTH STABLE/.gpu0.lock and ~/.cache/objective_power_grid/device_0.lock, then checks existing GPU processes before allocating. If busy, the worker exits GPU_BUSY_NOT_LAUNCHED rather than interrupting or preempting another experiment. No unmanaged background polling queue.
+
+Initialization, native optimizer updates, auxiliary re-evaluation, primary trajectories, contrast likelihood workload, checkpoint IO and CUDA prep are included. CPU verification and final evaluation are separately reported. Conservative wall cutoff reserves at least30seconds; an alarm aborts incomplete iterations before the boundary and preserves the previous budget-eligible checkpoint. Partial unfinished updates are not labeled completed. No process is automatically restarted on failure.
+
+Atomic status: scratch campaign/status.json and reports/MOE_SBOED_V3_CURRENT.json. JSONL curves per arm include update, wall time, sPCE, auxiliary NLL, gradient norm and learning rate. Checkpoint sidecars contain SHA256, counts and charged time including serialization. Frozen complete source/config hashes, source archive, Git revision/dirty state, effective configuration and seed accompany the run. Evaluation reports contain separately metered seconds and likelihood work. GPU throughput latency is batch16 per-decision throughput, not single-item latency.
