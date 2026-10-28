@@ -3,13 +3,21 @@ import torch
 from torch import nn
 class SIRSumDAD(nn.Module):
  kind='dad';architecture='DAD_sum_encoder_256_16_SIR_normalized_history'
- def __init__(self,horizon):
+ def __init__(self,horizon,first_design_revision=1):
   super().__init__();self.horizon=horizon
-  self.first_design=nn.Parameter(torch.zeros(1,dtype=torch.float64))
+  if first_design_revision not in (1,2):raise ValueError('Unknown SIR DAD first-design revision')
+  self.first_design_revision=first_design_revision
+  # Revision2 is historical checkpoint compatibility only. Native DAD also
+  # applies its shared emitter to an empty (zero) history embedding.
+  self.architecture=('DAD_sum_encoder_256_16_SIR_shared_empty_history' if first_design_revision==1
+                     else 'DAD_sum_encoder_256_16_SIR_normalized_history')
+  if first_design_revision==2:self.first_design=nn.Parameter(torch.zeros(1,dtype=torch.float64))
   self.encoder=nn.Sequential(nn.Linear(2,256),nn.ReLU(),nn.Linear(256,16))
   self.emitter=nn.Linear(16,1);self.double()
  def forward(self,features,stage):
-  if stage==0:return self.first_design[None].expand(len(features),-1)
+  if stage==0:
+   if self.first_design_revision==2:return self.first_design[None].expand(len(features),-1)
+   return self.emitter(features.new_zeros(len(features),16))
   slots=features[:,1:].reshape(len(features),self.horizon,3)
   return self.emitter(self.encoder(slots[:,:stage,:2]).sum(1))
 

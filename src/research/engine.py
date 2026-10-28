@@ -48,7 +48,12 @@ def rollout(benchmark, policy, horizon, batch, seed, contrasts, *, truth=None,
         if method == 'random':
             latent = benchmark.random_latent(batch,decision_rng)
         else:
-            latent = (policy.sample(f,rng=decision_rng)[0]*policy.bound).double() if policy.kind=='rl_sboed' else policy(f,stage)
+            if hasattr(policy,'sample_design'):
+                latent=policy.sample_design(f,stage,decision_rng)
+            elif policy.kind=='rl_sboed' and hasattr(policy,'design_from_unit_action'):
+                latent=policy.design_from_unit_action(policy.sample(f,rng=decision_rng)[0],actions,horizon)
+            else:
+                latent = (policy.sample(f,rng=decision_rng)[0]*policy.bound).double() if policy.kind=='rl_sboed' else policy(f,stage)
             if exploration:
                 latent = latent+exploration*torch.randn(latent.shape,generator=decision_rng,dtype=torch.float64)
             if policy.kind in {'moe_sboed','uniform_moe','matched_dense'}:
@@ -72,6 +77,9 @@ def rollout(benchmark, policy, horizon, batch, seed, contrasts, *, truth=None,
         if contrasts:
             infos.append(cumulative[:,0]-logmeanexp(cumulative))
         features.append(f); latents.append(latent); actions.append(action); observations.append(y)
+    from src.research.resource_ledger import active_ledger
+    ledger=active_ledger()
+    if ledger is not None: ledger.record_paths(batch,count-1,len(actions),track_likelihood)
     return dict(truth=theta0,particles=particles,actions=actions,observations=observations,
                 features=features,latents=latents,log_likelihood=cumulative,
                 info=torch.stack(infos,1) if infos else None,

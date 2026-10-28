@@ -5,9 +5,15 @@ import numpy as np
 import torch
 from src.research.moe_family import benchmark_signature,BasePolicy,load_policy
 
-def load_checkpoint(path,benchmark):
+def load_checkpoint(path,benchmark,*,allow_legacy=False):
  from src.research.benchmarks import make_benchmark
  path=Path(path).resolve();saved=torch.load(path,map_location='cpu',weights_only=False)
+ if saved.get('method')=='DeepSeekMoE-sBOED':
+  from src.research.project_scope import load_current_policy,validate_current_benchmark
+  validate_current_benchmark(benchmark)
+  return load_current_policy(path,benchmark.name)
+ legacy=saved.get('kind') in {'moe_sboed_family_v1','strategy_moe_sboed','sum_single','sir_sum_single_v1'} or saved.get('architecture','').startswith('spce_only_sum_encoder_dselect')
+ if legacy and not allow_legacy:raise ValueError('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: explicit archive loading required')
  cfg=json.loads((path.parent.parent/'run_config.json').read_text());source=make_benchmark(cfg['benchmark'])
  if benchmark_signature(source)!=benchmark_signature(benchmark):raise ValueError('Frozen checkpoint benchmark physics/prior differ')
  kind=saved['kind'];h=saved['horizon']
@@ -17,8 +23,9 @@ def load_checkpoint(path,benchmark):
  if kind=='dad':
   if benchmark.name=='sir_ode':
    from src.research.sir_dad import SIRSumDAD
-   if saved.get('architecture')!='DAD_sum_encoder_256_16_SIR_normalized_history':raise ValueError('Historical generic SIR policy is not silently relabelled as sum DAD')
-   p=SIRSumDAD(h)
+   architecture=saved.get('architecture')
+   if architecture not in {'DAD_sum_encoder_256_16_SIR_normalized_history','DAD_sum_encoder_256_16_SIR_shared_empty_history'}:raise ValueError('Historical generic SIR policy is not silently relabelled as sum DAD')
+   p=SIRSumDAD(h,first_design_revision=2 if architecture=='DAD_sum_encoder_256_16_SIR_normalized_history' else 1)
   else:
    from src.research.dad_location_policy import LocationDAD
    p=LocationDAD(h,benchmark.action_scale,benchmark.obs_scale,first_design_revision=saved.get('policy_settings',{}).get('first_design_revision',1))
@@ -27,12 +34,23 @@ def load_checkpoint(path,benchmark):
   p=Policy(1+h*(benchmark.action_dim+benchmark.obs_dim+1),benchmark.action_dim,h,'fixed',saved.get('hidden',64))
  elif kind=='rl_sboed':
   from src.research.research_redq import RLPolicy
-  p=RLPolicy(benchmark,h)
+  if saved.get('architecture')=='published_RL_BOED_REDQ_SIR_ODE_native_v1':
+   from src.research.sir_native_rl import NativeSIRRLPolicy
+   p=NativeSIRRLPolicy(h,benchmark)
+  elif saved.get('architecture')=='published_RL_BOED_source_REDQ_native_v1':
+   from src.research.native_rl_reference import NativeRLPolicy
+   p=NativeRLPolicy(h)
+  else:
+   if not allow_legacy:raise ValueError('Pre-correction RL checkpoint is not an active corrected baseline')
+   p=RLPolicy(benchmark,h)
  elif kind=='scorebed':
   arrays=np.load(path.with_name('scorebed_official_policy.npz'))
   if benchmark.name=='sir_ode':
    from src.research.sir_scorebed import SIRScorePolicy
-   p=SIRScorePolicy(arrays,h,benchmark)
+   if saved.get('architecture')=='official_ScoreBED_IqbalGRU_SIR_v1':
+    from src.research.sir_scorebed_gru import SIRScoreGRUPolicy
+    p=SIRScoreGRUPolicy(arrays,h,benchmark)
+   else:p=SIRScorePolicy(arrays,h,benchmark)
   else:
    from src.research.scorebed import OfficialScorePolicy
    p=OfficialScorePolicy(arrays,h,benchmark.action_scale,benchmark.obs_scale)
