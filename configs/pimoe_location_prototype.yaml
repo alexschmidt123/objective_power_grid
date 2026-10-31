@@ -1,0 +1,70 @@
+benchmark:
+  system:
+    name: location_finding
+  N: 1
+  experiment:
+    experiment_type: eig_based
+    step_number: 30
+    methods:
+    - random
+    - fixed
+    - dad
+    - rl_sboed
+    - vsoed
+    - scorebed
+    - moe_sboed
+  observation:
+    noise_sigma: 0.5
+    sampling: normal_log_signal
+  location_finding:
+    design_bounds:
+    - -4.0
+    - 4.0
+    random_design_distribution: truncated_standard_normal
+  research:
+    paper_protocol:
+      reference: https://arxiv.org/html/2306.10430v2
+      official_code: https://github.com/wgshen/vsOED
+      upstream_commit: d0884f9ba30fbddc56618841c68af2f3bfe16539
+      case: two_source_common_bounded_box
+      regime: one_million_episode_pilot
+      corrected_methods: true
+      correction_note: All methods train and evaluate in [-4,4]^2. Random uses standard
+        normal conditioned on the box; source prior remains iid standard normal. Equal1million
+        primary training episodes. ScoreBED uses feasibility-only sigmoid adapter.
+      nominal_training_trajectories: 1000000
+      evaluation: shared_prior_bank_streamed_sPCE
+      training_device: cuda
+      checkpoint_selection: final
+      observation_discrepancy: Paper Section 4.2 omits log; SOURCE.deterministic returns
+        log(signal). Follow executable code.
+      training_budget_unit: primary_episodes
+      extensions: All fresh observed training episodes count, including MoE specialist
+        and ScoreBED score pretraining. Contrast likelihood work, replay updates,
+        validation and runtime reported separately.
+training_seed: 101
+allowance_seconds: 14400
+training_episodes: 6
+validation_episodes: 3
+particles: 2048
+posterior_validation_particles: 4096
+move_steps: 8
+candidate_actions: 8
+reference_outer: 512
+predictive_samples: 128
+pilot_updates: 2000
+full_additional_updates: 12000
+learning_rate: 0.001
+planner_particles: 4096
+allow_final_evaluation: true
+canonical_evaluation_directory: /home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/benchmarks/location_seed101_matched_compute/evaluations
+cases_sha256: cbd2632af41a8c6ca8cbe55066d77b98791565b7ac301b0bea1965e84ec50f5b
+contrast_sha256: 703671b0fb01ddf74dfe60d51e44914c71647c92e7e5ee51d111a9acfcecfde8
+gate_thresholds:
+  posterior_EIG_tolerance: 0.15
+  predictive_EIG_RMSE: 0.15
+  ranking_accuracy: 0.75
+  KS: 0.1
+  NLL_excess: 0.1
+project_scope: LEGACY_EXCLUDED_FROM_CURRENT_PROJECT
+current_scope_replacement: configs/current_location.yaml or configs/current_sir.yaml

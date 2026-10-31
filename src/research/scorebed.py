@@ -60,6 +60,8 @@ def train_scorebed(b,h,s,seed,directory,trajectory_budget=None,observer=None):
     python=root/'.venv_scorebed/bin/python'
     if not python.is_file():raise RuntimeError('Official ScoreBED isolated environment is missing')
     command=[str(python),str(root/'src/research/scorebed_worker.py'),'--output',str(directory),'--horizon',str(h),'--seed',str(seed),'--budget',str(int(trajectory_budget or 1000000)),'--batch-size',str(int(s.get('scorebed_batch_size',64)))]
+    if s.get('scorebed_reference_sampler',False):command+=['--reference-sampler']
+    if s.get('scorebed_restarts',1)!=1:command+=['--restarts',str(int(s['scorebed_restarts']))]
     if observer is not None:
      from src.research.journal_scorebed_bridge import write_plan
      command+=['--journal-plan',str(write_plan(observer,observer.validator.raw,h,s,directory))]

@@ -1,0 +1,307 @@
+system:
+  name: sir_ode
+N: 1
+experiment:
+  experiment_type: eig_based
+  step_number: 5
+  methods:
+  - random
+  - fixed
+  - dad
+  - rl_sboed
+  - vsoed
+  - scorebed
+observation:
+  noise_sigma: 1.0
+  sampling: infected_count_at_continuous_time
+sir_ode:
+  population: 500.0
+  i0: 2.0
+  t_end: 100.0
+  beta_mean: 0.5
+  gamma_mean: 0.1
+  log_std: 0.5
+  min_spacing: 0.1
+  integration_steps_per_stage: 512
+  execution_backend: fused_rk4
+research:
+  enabled: true
+  settings:
+    eval_systems: 2048
+    eval_contrasts: 1000000
+    updates: 50000
+    batch_size: 64
+    learning_rate: 0.0003
+    training_bound: 1
+    primary_episode_budget: 1
+    contrasts: 1024
+    evaluation_population_systems: 2048
+    evaluation_batch_size: 16
+    evaluation_contrast_chunk: 4096
+    validation_systems: 128
+    validation_contrasts: 1024
+    rl_batch_size: 100
+    rl_replay_batch: 4096
+    rl_replay_capacity: 1000000
+    rl_min_buffer: 100000
+    rl_gradient_steps: 2
+    rl_log_every: 10
+    scorebed_batch_size: 64
+    threads: 2
+  journal_protocol:
+    version: sir_seed101_native_fourhour_20261027_v1
+    status: VALIDATED_FROZEN_SOURCE
+    comparison: Matched four-hour LabPC training-budget comparison on the SIR ODE
+      benchmark.
+    budget_unit: charged_LabPC_RTX4090_training_seconds
+    checkpoint_selection: latest_fully_serialized_compute_eligible
+    claim_limit: No confirmation until readiness, precision and settings are frozen;
+      historical results are separate.
+    development_training_seeds:
+    - 101
+    training_seeds:
+    - 101
+    evaluation_seeds:
+    - 1001
+    previously_used_evaluation_seeds:
+    - 1001
+    validation:
+      seed: 97402611
+      systems: 128
+      contrasts: 65536
+      batch_size: 16
+      chunk: 4096
+      device: cuda_if_available
+    common_pathwise_settings:
+      hidden: 64
+      contrasts: 1024
+    final_evaluation:
+      systems: 2048
+      contrasts: 1000000
+      seed: 1001
+      resolution_status: COMMON_1M_FROZEN_LOWER_BOUND_TAIL_UNCERTAINTY_DISCLOSED
+    independent_seeds_required: 5
+    native_fidelity_required: true
+    checkpoint_selection_mode: final_compute_budget
+    training_device: cuda_if_available
+    study_id: SIR_JOURNAL_FOUR_HOUR_20261026
+    preserve_progress_checkpoints: true
+    replication_launch_authorized: false
+    confirmation_seed: 98502691
+    reserved_historical_seed: 8831001
+    compute_budget:
+      seconds: 14400.0
+      hardware: NVIDIA GeForce RTX 4090
+      checkpoint_seconds: 300.0
+      include:
+      - method_specific_GPU_setup
+      - compilation
+      - initialization
+      - fresh_simulation_for_training
+      - all_trainable_pretraining
+      - auxiliary_optimization
+      - replay
+      - policy_optimization
+      - checkpoint_serialization
+      exclude:
+      - logged_validation
+      - final_EIG_evaluation
+      - online_latency_measurement
+      finalization_reserve_seconds: 60.0
+      require_prelaunch_start: true
+      safety_cap_is_measured_compute_limit: true
+    native_schedule_policy: Preserve verified finite native schedules; safe measured
+      update guards and whole-method charged time are both explicit
+    checkpoint_reuse_policy: Only verified same-source same-budget eligible checkpoints;
+      all others supplemental.
+    stopping_rule:
+      minimum_episodes: 1
+      minimum_checkpoints: 1
+      validation_every_episodes: 1000000000
+      patience: 1000000
+      minimum_improvement: 0.01
+      noise_multiplier: 1.96
+      maximum_episodes: 100000000
+      maximum_training_seconds: 14400.0
+    method_settings:
+      dad:
+        reference_optimizer_updates: 50000
+        reference_schedule_episodes: 100000000
+        reference_training_episodes: 100000000
+        batch_size: 2000
+        updates: 50000
+        spce_trajectory_budget_unit: primary_episodes
+        primary_episode_budget: 1
+        safety_cap_is_measured_compute_limit: true
+        native_timing_plan:
+          reference_updates: 50000
+          maximum_updates: 316
+          safe_max_updates: 316
+          measured_unit_seconds: 36.24572172196349
+          initialization_seconds: 0.0023066189605742693
+          finalization_reserve_seconds: 60.0
+          safety_factor: 1.25
+          estimated_charged_seconds: 14377.06238679454
+          training_status: COMPUTE_LIMITED_NATIVE_IMPLEMENTATION
+          selection_basis: measured_native_unit_wall_time_without_EIG
+        native_profile_status: VERIFIED_PINNED_SOURCE_AND_MEASURED_RTX4090_UNITS
+        learning_rate: 5.0e-05
+        contrasts: 2000
+        first_design_revision: 1
+        spce_gradient_clip: null
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        spce_curriculum: 1
+      fixed:
+        reference_optimizer_updates: 50000
+        reference_schedule_episodes: 100000000
+        reference_training_episodes: 100000000
+        batch_size: 2000
+        updates: 50000
+        spce_trajectory_budget_unit: primary_episodes
+        primary_episode_budget: 1
+        safety_cap_is_measured_compute_limit: true
+        native_timing_plan:
+          reference_updates: 50000
+          maximum_updates: 294
+          safe_max_updates: 294
+          measured_unit_seconds: 38.927652767975815
+          initialization_seconds: 0.0009595970041118562
+          finalization_reserve_seconds: 60.0
+          safety_factor: 1.25
+          estimated_charged_seconds: 14365.913351828116
+          training_status: COMPUTE_LIMITED_NATIVE_IMPLEMENTATION
+          selection_basis: measured_native_unit_wall_time_without_EIG
+        native_profile_status: VERIFIED_PINNED_SOURCE_AND_MEASURED_RTX4090_UNITS
+        learning_rate: 0.0001
+        contrasts: 2000
+        first_design_revision: 1
+        spce_gradient_clip: null
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        spce_curriculum: 1
+      rl_sboed:
+        reference_optimizer_updates: 20001
+        reference_schedule_episodes: 2000100
+        reference_training_episodes: 2000100
+        batch_size: 100
+        updates: 20001
+        spce_trajectory_budget_unit: primary_episodes
+        primary_episode_budget: 1
+        safety_cap_is_measured_compute_limit: true
+        native_timing_plan:
+          reference_updates: 20001
+          maximum_updates: 616
+          safe_max_updates: 616
+          measured_unit_seconds: 18.61109047901118
+          initialization_seconds: 0.0129558359622024
+          finalization_reserve_seconds: 60.0
+          safety_factor: 1.25
+          estimated_charged_seconds: 14390.552624674572
+          training_status: COMPUTE_LIMITED_NATIVE_IMPLEMENTATION
+          selection_basis: measured_native_unit_wall_time_without_EIG
+        native_profile_status: VERIFIED_PINNED_SOURCE_AND_MEASURED_RTX4090_UNITS
+        rl_original_reference: true
+        rl_native_replay_capacity: 10000000
+        rl_native_contrasts: 100000
+      vsoed:
+        reference_optimizer_updates: 10001
+        reference_schedule_episodes: 10021000
+        reference_training_episodes: 10021000
+        batch_size: 1000
+        updates: 10001
+        spce_trajectory_budget_unit: primary_episodes
+        primary_episode_budget: 1
+        safety_cap_is_measured_compute_limit: true
+        native_timing_plan:
+          reference_updates: 10001
+          maximum_updates: 10001
+          safe_max_updates: 10001
+          measured_unit_seconds: 0.06494323100196198
+          initialization_seconds: 0.11063089699018747
+          finalization_reserve_seconds: 60.0
+          safety_factor: 1.25
+          estimated_charged_seconds: 871.9821974602673
+          training_status: NATIVE_FINITE_SCHEDULE
+          selection_basis: measured_native_unit_wall_time_without_EIG
+        native_profile_status: VERIFIED_PINNED_SOURCE_AND_MEASURED_RTX4090_UNITS
+      scorebed:
+        scorebed_batch_size: 1024
+        scorebed_reference_sampler: true
+        scorebed_restarts: 1
+        scorebed_compute_phase_plan:
+          score_updates: 800
+          policy_updates: 8
+          score_reference_steps: 50000
+          policy_reference_steps: 500
+          phase_ratio: 100
+          measured_initialization_seconds: 36.42403586197179
+          measured_score_update_seconds: 13.424879010010045
+          measured_policy_update_seconds: 0.5344272020156495
+          safety_factor: 1.25
+          finalization_reserve_seconds: 60.0
+          estimated_charged_seconds: 13526.647317892173
+          training_status: COMPUTE_LIMITED_NATIVE_IMPLEMENTATION
+          selection_basis: native_phase_ratio_and_measured_wall_time_without_EIG
+          scheduler_horizons_preserved: true
+          hardware: NVIDIA GeForce RTX 4090
+          score_schedule_reference_steps: 50000
+          policy_schedule_reference_steps: 500
+        scorebed_pretraining_episodes: 819200
+        score_schedule_reference_steps: 50000
+        policy_schedule_reference_steps: 500
+        reference_schedule_episodes: 51812014
+        safety_cap_is_measured_compute_limit: true
+        native_profile_status: PINNED_DOUBLE_PEND_50K_SCORE_500_POLICY_SIR_ADAPTER
+      random: {}
+    method_stopping:
+      dad:
+        maximum_episodes: 632000
+      fixed:
+        maximum_episodes: 588000
+      rl_sboed:
+        maximum_episodes: 61600
+      vsoed:
+        maximum_episodes: 10021000
+      scorebed:
+        maximum_episodes: 927406
+    native_vsoed_profile:
+      updates: 10001
+      new_trajectories: 1000
+      replay_batch: 10000
+      initial_replay: 20000
+      replay_capacity: 1000000
+      posterior_updates: 5
+      critic_updates: 5
+      posterior_lr: 0.001
+      actor_lr: 0.0003
+      critic_lr: 0.001
+      lr_decay: 0.9999
+      discount: 1.0
+      exploration: 5.0
+      exploration_decay: 0.9999
+      target_rate: 0.1
+      transition: 10000
+      log_every: 10
+      n_incre: 1
+      posterior_coordinate_reference: log_parameters
+  paper_protocol:
+    training_budget_unit: charged_LabPC_RTX4090_seconds
+    training_seconds: 14400
+    checkpoint_selection: latest_valid_compute_eligible
+    regime: matched_four_hour_primary
+    mandatory_episode_quota: null
+study_analysis:
+  training_seed: 101
+  primary_training_seconds: 14400
+  development_evaluation_seed: 1001
+  final_systems: 2048
+  final_contrasts: 1000000
+  reserved_confirmation_seed: 98502691
+  reserved_historical_seed: 8831001
+  native_timing_file: /home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/10272026/10272026_sir_fourhour_readiness/native_timing.json
+  matched_update_count_across_methods: false

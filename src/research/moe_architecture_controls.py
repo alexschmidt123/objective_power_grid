@@ -171,6 +171,7 @@ def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_che
     validation_seconds=0.;next_validation=budget/4
     trace_path=directory/(method+'_diagnostics.jsonl')
     while count<budget:
+        if observer is not None and not observer.allow_next_unit(p,count,step,opt,scheduler):break
         n=min(s['batch_size'],budget-count);fraction=count/budget
         if not p.dense:p.router.gamma=routing_gamma(fraction,s.get('moe_router_warmup_fraction',0.),s.get('moe_router_finish_fraction',.8))
         routes=[];penalties=[]
@@ -234,7 +235,7 @@ def train_control(b,h,s,seed,directory,method,trajectory_budget=None,initial_che
     torch.save(dict(kind=getattr(p,'checkpoint_kind',method),architecture=p.architecture,method=method,horizon=h,hidden=s['hidden'],
                     gamma=None if p.dense else p.router.gamma,state_dict=p.state_dict()),directory/(method+'.pt'))
     return p,dict(training='pathwise_sPCE_architecture_control',time_budget_seconds=time_budget_seconds,time_budget_reached=(elapsed>=time_budget_seconds if time_budget_seconds is not None else None),episode_safety_cap=budget if time_budget_seconds is not None else None,stop_rule='first_completed_update_at_elapsed_budget' if time_budget_seconds is not None else 'primary_episodes',base_pretraining=base_provenance,additional_training_episodes=count,total_training_episodes=count+base_provenance.get('training_episodes',0),base_training_seconds=base_provenance.get('training_seconds',0.),training_seconds=time.perf_counter()-started-validation_seconds,
-                  diagnostic_validation_seconds=validation_seconds,generated_training_trajectories=count,
+                  diagnostic_validation_seconds=validation_seconds,generated_training_trajectories=count,actual_updates=step,
                   contrast_training_trajectories=count*L,training_forward_trajectories=count*(L+1),
                   history=records,validation_history=validation_records,validation_not_used_for_checkpoint_selection=True,
                   diagnostic_trace=str(trace_path),policy_parameters=sum(v.numel() for v in p.parameters()),

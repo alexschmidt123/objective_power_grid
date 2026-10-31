@@ -16,8 +16,6 @@ METHOD_ALIASES = {
     "dad": "DAD",
     "rl_sboed": "RL-sBOED",
     "rl-sboed": "RL-sBOED",
-    "moe_sboed": "MoE-sBOED",
-    "moe-sboed": "MoE-sBOED",
     "matched_dense": "MatchedDense",
     "matched-dense": "MatchedDense",
     "step_dad": "Step-DAD",
@@ -32,7 +30,6 @@ METHOD_ALIASES = {
 ALL_METHOD_KEYS = (
     "dad",
     "rl_sboed",
-    "moe_sboed",
     "myopic",
     "fixed",
     "random",
@@ -44,7 +41,6 @@ EXTENDED_METHOD_KEYS = ALL_METHOD_KEYS + ("matched_dense", "step_dad")
 TRAINABLE_METHOD_KEYS = (
     "dad",
     "rl_sboed",
-    "moe_sboed",
     "matched_dense",
 )
 
@@ -130,6 +126,8 @@ def config_sha256(cfg: SBOEDConfig) -> str:
 
 
 def normalize_method_key(method: str) -> str:
+    if "moe" in str(method).lower():
+        raise ValueError("Legacy MoE dispatch excluded; MoE-sBOED-v1 uses the verified native research path")
     raw = str(method).strip()
     key = raw.lower().replace("-", "_")
     compact = "".join(ch for ch in key if ch.isalnum())
@@ -198,8 +196,7 @@ def methods_from_args(
         out.insert(2 if "rl_sboed" in out else len(out), "moe_sboed")
     if not explicit and set(out) == {
         "dad",
-        "moe_sboed",
-        "myopic",
+            "myopic",
         "fixed",
         "random",
     }:

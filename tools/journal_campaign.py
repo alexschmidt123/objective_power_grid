@@ -1,5 +1,5 @@
 """Frozen ten-method fixed-budget replication; root launchers, artifact-only reports."""
-import argparse,csv,fcntl,hashlib,json,math,os,shutil,subprocess,sys,threading,time,traceback
+import argparse,csv,fcntl,hashlib,json,math,os,shutil,signal,subprocess,sys,threading,time,traceback
 from pathlib import Path
 import numpy as np
 import torch
@@ -46,6 +46,10 @@ def make_config(benchmark,cap):
     for method in FAMILY:p['method_settings'][method]['router_schedule_episodes']=500000 if method in RESIDUAL else 1000000
     p['method_settings']['fixed']={**raw['research'].get('training_profiles',{}).get('fixed',{})}
     p['method_settings']['dad']={**raw['research'].get('training_profiles',{}).get('adaptive',{})}
+    for pathwise in ['dad','fixed']:
+        batch=2000 if pathwise=='dad' else raw['research']['settings']['batch_size']
+        updates=50000
+        p['method_settings'][pathwise].update(batch_size=batch,reference_optimizer_updates=updates,reference_training_episodes=updates*batch,spce_trajectory_budget_unit='primary_episodes')
     p['method_settings']['scorebed']=dict(scorebed_pretraining_episodes=692990,scorebed_batch_size=64)
     p['validation'].update(systems=512 if benchmark=='location' else 128,contrasts=1000000 if benchmark=='location' else 16384,batch_size=16,chunk=16384 if benchmark=='location' else 4096)
     if benchmark=='sir':
@@ -196,6 +200,15 @@ def guard():
     for rel,digest in read(C/'source_manifest.json')['sha256'].items():
         if sha(ROOT/rel)!=digest:raise RuntimeError('Frozen source/config changed: '+rel)
 
+def exclusive_device_lock(wait=False):
+    """Host-wide lock across campaigns; reject existing unregistered GPU work."""
+    path=Path.home()/'.cache/objective_power_grid/device_0.lock'
+    path.parent.mkdir(parents=True,exist_ok=True)
+    lock=path.open('a+');fcntl.flock(lock,fcntl.LOCK_EX if wait else fcntl.LOCK_EX|fcntl.LOCK_NB)
+    active=subprocess.check_output(['nvidia-smi','--query-compute-apps=pid','--format=csv,noheader,nounits'],text=True).strip()
+    if active:raise RuntimeError('Device already has compute processes; preserve them and defer this queue: '+active)
+    return lock
+
 def sample_gpu(path,stop):
     while not stop.is_set():
         try:
@@ -204,38 +217,59 @@ def sample_gpu(path,stop):
         except Exception:pass
         stop.wait(10)
 
-def run_phase(benchmark,seed,method,base=None):
+def run_phase(benchmark,seed,method,base=None,timeout_seconds=None,evaluation_cases=None,evaluation_bank=None):
+    pilot_plan=read(C/'pilot_plan.json') if (C/'pilot_plan.json').exists() else None
+    pilot_cfg=pilot_plan['methods'][method] if pilot_plan else None
     registry=read(C/'registry.json');found=next((e for e in registry if e['benchmark']==benchmark and e['seed']==seed and e['method']==method),None)
     if found:return found
     guard();out=C/benchmark/f'seed{seed}'/method;out.parent.mkdir(parents=True,exist_ok=True)
     if out.exists():
         if (out/'exit_code').exists() and (out/'exit_code').read_text().strip()=='0':
             t=read(out/'models'/(native_method(method)+'_training.json'))
-            expected=0 if method=='random' else 500000 if method in (*RESIDUAL,'base') else 1000000
-            assert t['generated_training_trajectories']==expected
-            if method!='random':assert t['checkpoint_selection']=='final_predeclared_fixed_budget'
+            expected=pilot_cfg['episodes'] if pilot_cfg else 0 if method=='random' else 500000 if method in (*RESIDUAL,'base') else 1000000
+            if t.get('compute_budget') is None:
+                assert t['generated_training_trajectories']==expected
+                if method!='random':assert t['checkpoint_selection']=='final_predeclared_fixed_budget'
+            else:
+                assert t['checkpoint_selection']=='latest_budget_eligible_checkpoint'
+                assert t['selected_checkpoint']['compute_checkpoint']['eligible']
             entry=dict(method=method,native_method=native_method(method),benchmark=benchmark,seed=seed,run=str(out),status='complete',provenance='recovered_completed_phase_after_coordinator_interruption')
             registry.append(entry);write(C/'registry.json',registry);return entry
         raise RuntimeError('Partial/unregistered phase exists; preserve and inspect before any resume: '+str(out))
-    cap=500000 if method in (*RESIDUAL,'base') else 1000000
-    config=C/'configs'/f'{benchmark}_{cap}.yaml'
+    cap=pilot_cfg['episodes'] if pilot_cfg else 500000 if method in (*RESIDUAL,'base') else 1000000
+    config=C/pilot_cfg['config'] if pilot_cfg else C/'configs'/f'{benchmark}_{cap}.yaml'
     command=['bash','run.sh','--config',str(config),'--journal','--seed',str(seed),'--eval-seeds','1001','--eig-only','--source-check-manifest',str(C/'source_manifest.json'),'--output',str(out)]
     if method in FAMILY:command+=['--variant',method]
     else:command+=['--methods',native_method(method)]
     if base:command+=['--base-checkpoint',str(base)]
+    if evaluation_cases or evaluation_bank:
+        if not evaluation_cases or not evaluation_bank:raise ValueError('Both saved evaluation arrays are required')
+        command+=['--evaluation-cases',str(evaluation_cases),'--evaluation-bank',str(evaluation_bank)]
     write(out.parent/(method+'_command.json'),dict(command=command,training_cap=cap))
     stop=threading.Event();watch=threading.Thread(target=sample_gpu,args=(out.parent/(method+'_gpu.csv'),stop),daemon=True)
     started=time.monotonic();watch.start();status='failed';failure=None
     try:
         with (out.parent/(method+'_launcher.log')).open('w') as log:
-            subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=10800 if benchmark=='location' else 90000)
+            worker=subprocess.Popen(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,env=dict(os.environ,BOED_TRAINING_START_MONOTONIC=str(time.monotonic())),start_new_session=True)
+            try:
+                code=worker.wait(timeout=timeout_seconds if timeout_seconds is not None else (10800 if benchmark=='location' else 90000))
+                if code:raise subprocess.CalledProcessError(code,command)
+            except subprocess.TimeoutExpired:
+                os.killpg(worker.pid,signal.SIGTERM)
+                try:worker.wait(timeout=30)
+                except subprocess.TimeoutExpired:os.killpg(worker.pid,signal.SIGKILL);worker.wait()
+                raise
         name=native_method(method);t=read(out/'models'/(name+'_training.json'))
         if method!='random':
-            assert t['generated_training_trajectories']==cap and t['checkpoint_selection']=='final_predeclared_fixed_budget'
-            assert t['selected_checkpoint']['episodes']==cap
+            if t.get('compute_budget') is not None:
+                assert t['checkpoint_selection']=='latest_budget_eligible_checkpoint'
+                assert t['selected_checkpoint']['compute_checkpoint']['eligible']
+            else:assert t['generated_training_trajectories']==cap and t['checkpoint_selection']=='final_predeclared_fixed_budget'
+            if t.get('compute_budget') is None:assert t['selected_checkpoint']['episodes']==cap
         else:assert t['generated_training_trajectories']==0
         if method in RESIDUAL:
-            assert t['total_training_episodes']==1000000 and t['base_checkpoint']['sha256']==sha(base)
+            if t.get('compute_budget') is None:assert t['total_training_episodes']==1000000
+            assert t['base_checkpoint']['sha256']==sha(base)
             from src.research.moe_family import load_policy,BasePolicy
             from src.research.benchmarks import make_benchmark
             b=make_benchmark(yaml.safe_load(config.read_text()));policy=load_policy(out/'models'/(name+'.pt'),b);reference=BasePolicy.from_checkpoint(base,b,policy.horizon).policy
@@ -247,11 +281,13 @@ def run_phase(benchmark,seed,method,base=None):
     entry=dict(method=method,native_method=native_method(method),benchmark=benchmark,seed=seed,run=str(out),status=status,failure=failure,serialized_wall_seconds=time.monotonic()-started,provenance='new_fixed_configuration_training')
     if status=='complete':entry['checkpoint_sha256']=sha(out/'models'/(native_method(method)+'.pt')) if method!='random' else None
     registry.append(entry);write(C/'registry.json',registry);write(out.parent/(method+'_completion.json'),entry)
-    print(benchmark,seed,method,status,flush=True);report();return entry
+    print(benchmark,seed,method,status,flush=True)
+    if not pilot_plan:report()
+    return entry
 
 def run_location():
     guard()
-    lock=(C/'device.lock').open('w');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    lock=exclusive_device_lock()
     # Correct the incompatible historical SwitchMoE before the independent-seed grid.
     for seed in (101,102,103,104,105):
         for method in METHODS:
@@ -432,7 +468,7 @@ def sir_readiness():
 
 def run_sir():
     assert read(C/'location_completed.json')['completed'] and (C/'sir_readiness/ready_for_development.json').exists()
-    guard();lock=(C/'device.lock').open('w');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    guard();lock=exclusive_device_lock()
     for method in METHODS:
         base=None
         if method in RESIDUAL:
@@ -483,7 +519,22 @@ def sir_resolution_and_figures():
         plt.close(fig)
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['prepare','seal','location','report','sir-readiness','sir']);args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['prepare','seal','location','report','sir-readiness','sir','pilots']);parser.add_argument('--campaign');parser.add_argument('--wait-device',action='store_true');parser.add_argument('--methods',default='dad,rl_sboed,vsoed,scorebed,moe');args=parser.parse_args()
+    global C
+    if args.campaign:C=Path(args.campaign).resolve()
+    if args.action=='pilots':
+        guard();lock=exclusive_device_lock(wait=args.wait_device)
+        plan=read(C/'pilot_plan.json')
+        for method in args.methods.split(','):
+            proof=read(C/'readiness'/('location_'+method+'_ready.json'))
+            if proof.get('status')!='PASS':raise RuntimeError('Readiness not passed: '+method)
+            base=None
+            if method in RESIDUAL:
+                bases=[e for e in read(C/'registry.json') if e['benchmark']=='location' and e['seed']==101 and e['method']=='base' and e['status']=='complete']
+                if not bases:raise RuntimeError('Complete seed-specific base required before residual pilot')
+                base=Path(bases[-1]['run'])/'models/sum_single.pt'
+            run_phase('location',101,method,base=base,timeout_seconds=plan['methods'][method]['safety_seconds']+3600,evaluation_cases=C/'evaluations/location_cases.npz',evaluation_bank=C/'evaluations/location_contrasts.npy')
+        return
     if args.action=='prepare':prepare()
     elif args.action=='seal':seal()
     elif args.action=='location':run_location()
@@ -492,6 +543,7 @@ def main():
     else:run_sir()
 
 if __name__=='__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical campaign launcher; use current scoped workflows')
     try:main()
     except BaseException as exc:
         if C.exists():write(C/'coordinator_failure.json',dict(type=type(exc).__name__,message=str(exc),traceback=traceback.format_exc()))

@@ -12,6 +12,7 @@ from src.research.engine import rollout,generator
 from src.research.policies import Posterior,mlp,make_policy,parameter_count
 
 
+from src.research.resource_ledger import with_training_ledger,progress_ledger
 def training_contrasts(settings,fraction):
     """Predeclared schedule using training expenditure only, never evaluation."""
     maximum=int(settings['contrasts'])
@@ -30,6 +31,8 @@ def select_checkpoint(benchmark,policy,horizon,settings,seed):
 
 
 def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=False,trajectory_budget=None,policy=None,observer=None):
+    if kind not in {'dad','fixed'}:
+        raise ValueError('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: use the validated MoE-sBOED-v1 native trainer')
     torch.manual_seed(seed)
     policy = policy if policy is not None else make_policy(benchmark,horizon,kind,settings['hidden'],settings)
     betas=(settings.get('spce_adam_beta1',.9),settings.get('spce_adam_beta2',.999))
@@ -81,18 +84,23 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
     records.append(dict(update=0,validation_spce=None if final_checkpoint else best))
     primary_count=contrast_count=0
     updates=settings['updates']
+    primary_budget=bool(settings.get('primary_episode_budget',0))
     if trajectory_budget is not None:
-        minimum_contrasts=training_contrasts(settings,0.)
-        updates=math.ceil(trajectory_budget/settings['batch_size']) if settings.get('primary_episode_budget',0) else min(updates,math.ceil(trajectory_budget/((minimum_contrasts+1)*settings['batch_size'])))
+        from src.research.compute_budget import spce_update_plan
+        planned_settings=dict(settings,contrasts=training_contrasts(settings,0.))
+        updates,budget_unit=spce_update_plan(planned_settings,trajectory_budget)
+        primary_budget=budget_unit=='primary_episodes'
+        if observer is not None and observer.compute_clock is not None and not primary_budget:raise ValueError('Matched-compute sPCE cannot use the legacy forward-path episode cap')
     actual_update=0
     contrast_counts={}
     calibration=max(0,min(.5,settings.get('moe_router_calibration_fraction',0.)))
     for update in range(1,updates+1):
-        fraction=(primary_count if settings.get('primary_episode_budget',0) else primary_count+contrast_count)/trajectory_budget if trajectory_budget is not None else (update-1)/updates
+        if observer is not None and not observer.allow_next_unit(policy,primary_count,actual_update,optimizer,scheduler):break
+        fraction=(primary_count if primary_budget else primary_count+contrast_count)/trajectory_budget if trajectory_budget is not None else (update-1)/updates
         contrast=training_contrasts(settings,fraction)
         batch=settings['batch_size']
         if trajectory_budget is not None:
-            batch=min(batch,trajectory_budget-primary_count) if settings.get('primary_episode_budget',0) else min(batch,(trajectory_budget-primary_count-contrast_count)//(contrast+1))
+            batch=min(batch,trajectory_budget-primary_count) if primary_budget else min(batch,(trajectory_budget-primary_count-contrast_count)//(contrast+1))
         if batch<1:break
         refresh=None
         every=settings.get('moe_expert_refresh_every',0)
@@ -113,12 +121,12 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
         loss.backward()
         if refresh is not None and hasattr(policy,'first_design'):
             policy.first_design.grad=None
-        grad = torch.nn.utils.clip_grad_norm_(policy.policy_parameters() if hasattr(policy,'policy_parameters') else policy.parameters(),5.)
+        grad = torch.nn.utils.clip_grad_norm_(policy.policy_parameters() if hasattr(policy,'policy_parameters') else policy.parameters(),float('inf') if settings.get('spce_gradient_clip',5.) is None else settings.get('spce_gradient_clip',5.))
         if not torch.isfinite(grad):
             raise FloatingPointError('Nonfinite sPCE policy gradient')
         # Initially learn the gate against stable specialist proposals. Setting
         # gradients to None also prevents Adam momentum/weight decay updates.
-        fraction=(primary_count if settings.get('primary_episode_budget',0) else primary_count+contrast_count)/trajectory_budget if trajectory_budget is not None else update/updates
+        fraction=(primary_count if primary_budget else primary_count+contrast_count)/trajectory_budget if trajectory_budget is not None else update/updates
         router_calibration=hasattr(policy,'branch_tokens') and policy.fixed_expert is None and fraction<=calibration
         if router_calibration:
             stable=list(policy.branch_tokens.parameters())+list(policy.experts.parameters() if hasattr(policy,'experts') else policy.network.parameters())+[policy.queries,policy.branch_empty]
@@ -148,6 +156,7 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
         if refresh is not None:policy.select_expert(None)
         if (update-1)%settings.get('spce_lr_schedule_every',1000)==0:scheduler.step()
         if update%settings['validate_every']==0 or update==updates:
+            progress_ledger(directory,kind,primary_count,contrast_count,horizon,actual_update,time.perf_counter()-started)
             value = select_checkpoint(benchmark,policy,horizon,settings,validation_seed) if not final_checkpoint else None
             records.append(dict(update=update,train_spce=-float(loss.detach()),validation_spce=value,
                                 posterior_nll=None if posterior_loss is None else float(posterior_loss.detach()),critic_mse=None if critic_loss is None else float(critic_loss.detach()),gradient_norm=float(grad),learning_rate=optimizer.param_groups[0]['lr'],
@@ -169,14 +178,14 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
     torch.save(dict(kind=kind,architecture=getattr(policy,'architecture',type(policy).__name__),horizon=horizon,state_dict=best_state,
                     hidden=settings['hidden'],selected_update=best_update,
                     policy_settings={k:settings[k] for k in ['moe_revision','moe_router_temperature','spce_curriculum','first_design_revision'] if k in settings}),directory/f'{kind}.pt')
-    return policy,dict(training='pathwise_sPCE',policy_architecture=getattr(policy,'architecture',type(policy).__name__),policy_parameters=parameter_count(policy),
+    return policy,with_training_ledger(dict(training='pathwise_sPCE',policy_architecture=getattr(policy,'architecture',type(policy).__name__),policy_parameters=parameter_count(policy),
                        selected_update=best_update,validation_spce=best,history=records,
                        initialization_candidates=initializations,training_seconds=time.perf_counter()-started,
-                       actual_updates=actual_update,
+                       actual_updates=actual_update,planned_optimizer_updates=updates,reference_optimizer_updates=settings.get('reference_optimizer_updates'),reference_training_episodes=settings.get('reference_training_episodes'),
                        generated_training_trajectories=primary_count,
                        contrast_training_trajectories=contrast_count,
                        training_forward_trajectories=primary_count+contrast_count,
-                       training_trajectory_budget=trajectory_budget,training_budget_unit='primary_episodes' if settings.get('primary_episode_budget',0) else 'forward_including_contrasts',
+                       training_trajectory_budget=trajectory_budget,training_budget_unit='primary_episodes' if primary_budget else 'forward_including_contrasts',
                        expert_refresh_every=settings.get('moe_expert_refresh_every',0),primary_trajectories_by_contrast=contrast_counts,spce_curriculum=settings.get('spce_curriculum',1),
                        moe_revision=settings.get('moe_revision',1),moe_router_temperature=settings.get('moe_router_temperature',.5),
                        checkpoint_selection=journal.pop('checkpoint_selection','final' if final_checkpoint else 'best_validation'),
@@ -184,7 +193,7 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
                        adam_betas=list(betas),
                        lr_schedule_every=settings.get('spce_lr_schedule_every',1000),batch_size=settings['batch_size'],
                        forward_particle_stages=benchmark.calls-calls,
-                       grid_particle_propagations_including_jacobians=getattr(benchmark,'physical_calls',0)-physical_start,**journal)
+                       grid_particle_propagations_including_jacobians=getattr(benchmark,'physical_calls',0)-physical_start,**journal),horizon)
 
 
 def train_vsoed(benchmark,horizon,settings,seed,directory,actor_kind="vsoed",trajectory_budget=None,actor=None,final_checkpoint=False):

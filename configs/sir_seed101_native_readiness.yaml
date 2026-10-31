@@ -1,0 +1,237 @@
+system:
+  name: sir_ode
+N: 1
+experiment:
+  experiment_type: eig_based
+  step_number: 5
+  methods:
+  - random
+  - fixed
+  - dad
+  - rl_sboed
+  - vsoed
+  - scorebed
+observation:
+  noise_sigma: 1.0
+  sampling: infected_count_at_continuous_time
+sir_ode:
+  population: 500.0
+  i0: 2.0
+  t_end: 100.0
+  beta_mean: 0.5
+  gamma_mean: 0.1
+  log_std: 0.5
+  min_spacing: 0.1
+  integration_steps_per_stage: 512
+  execution_backend: fused_rk4
+research:
+  enabled: true
+  settings:
+    eval_systems: 2048
+    eval_contrasts: 1000000
+    updates: 31250
+    batch_size: 64
+    learning_rate: 0.0003
+    training_bound: 1
+    primary_episode_budget: 1
+    contrasts: 1024
+    evaluation_population_systems: 2048
+    evaluation_batch_size: 16
+    evaluation_contrast_chunk: 4096
+    validation_systems: 128
+    validation_contrasts: 1024
+    rl_batch_size: 100
+    rl_replay_batch: 4096
+    rl_replay_capacity: 1000000
+    rl_min_buffer: 100000
+    rl_gradient_steps: 2
+    rl_log_every: 10
+    scorebed_batch_size: 64
+    threads: 2
+  journal_protocol:
+    version: sir_journal_four_hour_seed101_v1
+    status: FOUR_HOUR_POLICY_FROZEN_EXECUTION_GATE_PENDING
+    comparison: Matched four-hour LabPC training-budget comparison on the SIR ODE
+      benchmark.
+    budget_unit: charged_LabPC_RTX4090_training_seconds
+    checkpoint_selection: latest_valid_compute_eligible
+    claim_limit: No confirmation until readiness, precision and settings are frozen;
+      historical results are separate.
+    development_training_seeds:
+    - 101
+    training_seeds:
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    evaluation_seeds:
+    - 1001
+    previously_used_evaluation_seeds:
+    - 1001
+    validation:
+      seed: 97402611
+      systems: 128
+      contrasts: 65536
+      batch_size: 16
+      chunk: 4096
+      device: cuda_if_available
+    common_pathwise_settings:
+      hidden: 64
+      contrasts: 1024
+    method_stopping: {}
+    final_evaluation:
+      systems: 2048
+      contrasts: 1000000
+      resolution_status: PROVISIONAL_PENDING_PREDECLARED_CALIBRATION
+      seed: 1001
+    independent_seeds_required: 5
+    native_fidelity_required: true
+    checkpoint_selection_mode: latest_compute_eligible
+    training_device: cuda_if_available
+    study_id: SIR_JOURNAL_FOUR_HOUR_20261026
+    preserve_progress_checkpoints: true
+    replication_seeds:
+    - 102
+    - 103
+    - 104
+    - 105
+    replication_launch_authorized: false
+    confirmation_seed: 98502691
+    reserved_historical_seed: 8831001
+    compute_budget:
+      seconds: 14400
+      hardware: NVIDIA GeForce RTX 4090
+      checkpoint_seconds: 300
+      include:
+      - method_specific_GPU_setup
+      - compilation
+      - initialization
+      - fresh_simulation_for_training
+      - all_trainable_pretraining
+      - auxiliary_optimization
+      - replay
+      - policy_optimization
+      - checkpoint_serialization
+      exclude:
+      - logged_validation
+      - final_EIG_evaluation
+      - online_latency_measurement
+    historical_method_settings:
+      fixed: {}
+      dad:
+        first_design_revision: 1
+        spce_gradient_clip: null
+        batch_size: 2000
+        contrasts: 2000
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        primary_episode_budget: 1
+        spce_curriculum: 1
+      scorebed:
+        scorebed_pretraining_episodes: 897736
+        scorebed_batch_size: 1024
+        scorebed_reference_sampler: true
+        scorebed_restarts: 1
+      rl_sboed:
+        rl_original_reference: true
+        rl_native_replay_capacity: 1000000
+        rl_native_contrasts: 100000
+    historical_vsoed_profile:
+      updates: 980
+      new_trajectories: 1000
+      replay_batch: 10000
+      initial_replay: 20000
+      replay_capacity: 1000000
+      posterior_updates: 5
+      critic_updates: 5
+      posterior_lr: 0.0005
+      actor_lr: 0.0005
+      critic_lr: 0.001
+      lr_decay: 0.9999
+      discount: 1.0
+      exploration: 5.0
+      exploration_decay: 0.9999
+      target_rate: 0.1
+      transition: 10000
+      log_every: 100
+      n_incre: 1
+      posterior_coordinate_reference: log_parameters
+    method_settings:
+      fixed:
+        native_profile_status: SOURCE_VERIFICATION_REQUIRED_BEFORE_LAUNCH
+      dad:
+        native_profile_status: SOURCE_VERIFICATION_REQUIRED_BEFORE_LAUNCH
+      rl_sboed:
+        native_profile_status: SOURCE_VERIFICATION_REQUIRED_BEFORE_LAUNCH
+      vsoed:
+        native_profile_status: SOURCE_VERIFICATION_REQUIRED_BEFORE_LAUNCH
+      scorebed:
+        native_profile_status: SOURCE_VERIFICATION_REQUIRED_BEFORE_LAUNCH
+    native_schedule_policy: Preserve verified native optimizer, objective, batch,
+      replay, LR and finite schedule; do not derive phase allocation from 1M episodes
+      or extend to fill time.
+    checkpoint_reuse_policy: Only verified same-source same-budget eligible checkpoints;
+      all others supplemental.
+    native_vsoed_profile:
+      updates: 10001
+      new_trajectories: 1000
+      replay_batch: 10000
+      initial_replay: 20000
+      replay_capacity: 1000000
+      posterior_updates: 5
+      critic_updates: 5
+      posterior_lr: 0.001
+      actor_lr: 0.0003
+      critic_lr: 0.001
+      lr_decay: 0.9999
+      discount: 1.0
+      exploration: 5.0
+      exploration_decay: 0.9999
+      target_rate: 0.1
+      transition: 10000
+      log_every: 10
+      n_incre: 1
+      posterior_coordinate_reference: log_parameters
+  paper_protocol:
+    training_budget_unit: charged_LabPC_RTX4090_seconds
+    training_seconds: 14400
+    checkpoint_selection: latest_valid_compute_eligible
+    regime: matched_four_hour_primary
+    mandatory_episode_quota: null
+study_analysis:
+  methods:
+  - random
+  - fixed
+  - dad
+  - rl_sboed
+  - vsoed
+  - scorebed
+  calibration_seed: 97402621
+  calibration_replicate_seed: 97402622
+  calibration_systems: 256
+  calibration_contrasts:
+  - 16384
+  - 65536
+  - 262144
+  - 1000000
+  - 4000000
+  calibration_gpu_seconds: 7200
+  absolute_sensitivity: 0.02
+  paired_sensitivity: 0.01
+  shift_MC_SE_target: 0.005
+  final_systems: 2048
+  final_seed: 1001
+  confirmation_seed: 98502691
+  curve_seed: 97402611
+  training_safety_seconds: 14400
+  native_probe_seconds: 1800
+  latency_warmup: 20
+  latency_repetitions: 200
+  primary_training_seconds: 14400
+  launch_gate: BLOCKED_UNTIL_NATIVE_SCHEDULE_AND_BUDGET_ADAPTER_VALIDATED
+  historical_campaign: 10262026_sir_journal_corrected_seed101_r2
+  historical_campaign_policy: ALLOW_UNCHANGED_TO_FINISH_SEPARATELY

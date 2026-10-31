@@ -11,6 +11,9 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def main():
     argv=sys.argv[1:]
+    from tools.storage_policy import enforce_storage_policy
+    argv = enforce_storage_policy(ROOT, argv)
+    sys.argv = [sys.argv[0], *argv]
     for arg in argv:
         flag=arg.split('=',1)[0].replace('_','-')
         if flag.startswith(('--reuse','--resume','--checkpoint','--load-checkpoint','--skip-training')):

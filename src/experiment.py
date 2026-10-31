@@ -80,6 +80,7 @@ def load_experiment_config(
     obs["noise_sigma"] = float(noise_sigma)
     cfg.raw["observation"] = obs
     if moe_variant is not None:
+        raise ValueError("LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: legacy MoE variants cannot enter current dispatch")
         if moe_variant not in {"learned", "uniform", "matched_dense"}:
             raise ValueError(f"Invalid MoE variant: {moe_variant}")
         if not str(cfg.raw.get("system", {}).get("name", "")).startswith("sir"):
@@ -234,7 +235,6 @@ VECTOR_EIG_METHOD_MAP = {
     "step_dad": "step_dad",
     "dad": "dad_eig",
     "rl_sboed": "rl_sboed_eig",
-    "moe_sboed": "moe_sboed",
     "matched_dense": "matched_dense",
     "myopic": "myopic_delta_h",
     "fixed": "fixed_open_loop",
@@ -736,6 +736,7 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
 
 
 def cmd_moe_mechanism(args: argparse.Namespace) -> None:
+    raise ValueError("LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: archived legacy MoE mechanism")
     exp_type = resolve_experiment_type(args.experiment_type)
     if exp_type == "eig_based":
         cfg = load_experiment_config(

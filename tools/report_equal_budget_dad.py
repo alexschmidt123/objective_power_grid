@@ -2,6 +2,8 @@
 
 Reads completed artifacts only; no training, posterior inference or EIG estimation.
 """
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical result generation is archived')
 import argparse,csv,hashlib,json,math,shlex
 from pathlib import Path
 import numpy as np

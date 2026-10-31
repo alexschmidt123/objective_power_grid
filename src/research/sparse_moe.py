@@ -30,6 +30,25 @@ class DSelectGate(nn.Module):
         weights=(selectors*mix[:,:,None]).sum(1)
         return weights,selectors,bits
 
+    def straight_through(self,context):
+        """Hard DSelect-1 forward, native relaxed-selector surrogate backward.
+
+        Return relaxed weights separately for unchanged routing regularization.
+        Native >=0 logit tie convention is retained exactly. No extra RNG draws.
+        """
+        if self.k!=1:raise ValueError('Straight-through mode requires DSelect-1')
+        logits=self.bits(context).reshape(-1,1,2)
+        t=(logits/self.gamma).clamp(-.5,.5)
+        bits=-2*t.pow(3)+1.5*t+.5
+        selectors=torch.where(self.codes[None,None].bool(),bits[:,:,None],1-bits[:,:,None]).prod(-1)
+        mix=self.mixing(context).softmax(-1)
+        soft=(selectors*mix[:,:,None]).sum(1)
+        hard_bits=(logits>=0).to(logits.dtype)
+        hard_selectors=torch.where(self.codes[None,None].bool(),hard_bits[:,:,None],1-hard_bits[:,:,None]).prod(-1)
+        hard=(hard_selectors*mix[:,:,None]).sum(1)
+        weights=hard.detach()+(soft-soft.detach())
+        return weights,soft,selectors,bits
+
 class SparseMoESBOED(MoEPolicy):
     architecture='spce_only_shared_encoder_dselect_v1'
     kind='sparse_moe_prototype'
@@ -91,7 +110,7 @@ class SparseMoESBOED(MoEPolicy):
         if self.last_route is None:
             zero=next(self.parameters()).sum()*0
             return zero,zero
-        w=self.last_route['weights'];load=(w.mean(0)-collapse_threshold).clamp_min(0).square().sum()
+        w=self.last_route.get('regularization_weights',self.last_route['weights']);load=(w.mean(0)-collapse_threshold).clamp_min(0).square().sum()
         q=self.last_route['selectors']
         entropy=w.sum()*0 if q is None else -(q*q.clamp_min(1e-15).log()).sum(-1).mean()
         return load,entropy

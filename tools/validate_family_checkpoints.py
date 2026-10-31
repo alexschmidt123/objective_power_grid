@@ -1,4 +1,6 @@
 """Read-only compatibility replay and measured parameter counts; never trains."""
+if __name__ == '__main__':
+    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical result generation is archived')
 import argparse,hashlib,json
 from pathlib import Path
 import numpy as np
