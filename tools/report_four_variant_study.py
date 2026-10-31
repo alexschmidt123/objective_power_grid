@@ -3,8 +3,6 @@
 No training or EIG estimation occurs here. Missing runs stay explicitly pending.
 Trajectory-level intervals are conditional on the one trained checkpoint.
 """
-if __name__ == '__main__':
-    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical result generation is archived')
 import argparse,csv,hashlib,html,json,math
 from pathlib import Path
 import numpy as np

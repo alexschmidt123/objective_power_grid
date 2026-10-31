@@ -4,8 +4,6 @@ This overlaps only the root runner's secondary posterior-inference stage. Cases,
 noise and the whole bank are copied by identity from the existing development
 population. Results must later match the completed root evaluator per trajectory.
 """
-if __name__ == '__main__':
-    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical result generation is archived')
 import argparse,hashlib,json,math,time
 from pathlib import Path
 import numpy as np

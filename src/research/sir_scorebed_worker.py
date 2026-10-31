@@ -69,27 +69,13 @@ def run(args):
     journal_plan=json.loads(pathlib.Path(args.journal_plan).read_text()) if args.journal_plan else None
     score_count=8 if tiny else (min(int(journal_plan['score_pretraining_episodes']),remaining-1) if journal_plan else int(.7*remaining))
     policy_count=remaining-score_count
-    native_timing=getattr(args,'native_timing',False)
-    if native_timing and (tiny or journal_plan):raise ValueError('Native timing is a standalone full-minibatch diagnostic')
-    if native_timing:
-        score_count=2*batch;policy_count=2*batch
-        allocation=dict(initialization=initialization,score=score_count,policy=policy_count,total=initialization+score_count+policy_count,native_timing_only=True)
-    elif not tiny and journal_plan and journal_plan.get('compute_budget'):
-        from src.research.compute_budget import validate_native_score_phase_plan
-        frozen=journal_plan['scorebed_compute_phase_plan']
-        if frozen.get('hardware')!=journal_plan['compute_budget']['hardware']:raise ValueError('ScoreBED native timing hardware mismatch')
-        allocation=validate_native_score_phase_plan(frozen,int(journal_plan['score_schedule_reference_steps']),int(journal_plan['policy_schedule_reference_steps']),initialization,batch,budget)
-        score_count,policy_count=allocation['score'],allocation['policy']
-    elif not tiny:
+    if not tiny:
         from src.research.original_protocol import score_allocation
         allocation=score_allocation(budget,'sir_ode',initialization,batch)
         if journal_plan and int(journal_plan['score_pretraining_episodes'])!=allocation['score']:raise ValueError('Frozen ScoreBED plan disagrees with published allocation')
         score_count,policy_count=allocation['score'],allocation['policy']
     from src.research.sir_scorebed_compat import sir_score_config
-    score_horizon=50000 if native_timing else int(journal_plan.get('score_schedule_reference_steps',math.ceil(score_count/batch))) if journal_plan else math.ceil(score_count/batch)
-    cfg=sir_score_config(config(args.horizon,score_horizon,batch))
-    if native_timing:cfg['policy']['num_iters']=500
-    elif journal_plan and journal_plan.get('compute_budget'):cfg['policy']['num_iters']=int(journal_plan['policy_schedule_reference_steps'])
+    cfg=sir_score_config(config(args.horizon,int(journal_plan.get('score_schedule_reference_steps',math.ceil(score_count/batch))) if journal_plan else math.ceil(score_count/batch),batch))
     cfg['score']['design_sampler_type']='random_sampler'
     cfg['score']['design_sampler_kwargs']={}
     cfg['bed_model']['init_seed']=args.seed
@@ -109,7 +95,7 @@ def run(args):
     compute_clock=compute_clock_from_plan(journal_plan or {});native_unit_bound=0.
     initialization_seconds=time.perf_counter()-initialization_clock
     score_clock=time.perf_counter()
-    score_spent=0;records=[];score_unit_seconds=[];policy_unit_seconds=[]
+    score_spent=0;records=[]
     while score_spent<score_count:
         if compute_clock is not None and not compute_clock.can_start(native_unit_bound):
             from src.research.jax_checkpoint import save_state
@@ -122,7 +108,7 @@ def run(args):
         # Synchronize for finite checks and honest wall timing.
         check_tree(metrics,'score metrics')
         score_spent+=n;step=int(score.training_state.step)
-        unit_seconds=time.perf_counter()-unit_start;score_unit_seconds.append(unit_seconds);native_unit_bound=max(native_unit_bound,unit_seconds)
+        native_unit_bound=max(native_unit_bound,time.perf_counter()-unit_start)
         if step%50==0 or score_spent==score_count:
             row=dict(phase='score',step=step,episodes=score_spent,metrics={k:float(np.asarray(v)) for k,v in metrics.items() if np.asarray(v).size==1})
             records.append(row);print('ScoreBED official',row,flush=True)
@@ -144,7 +130,7 @@ def run(args):
         policy.training_state,metrics,_=policy.train_step(policy.training_state)
         check_tree(metrics,'policy metrics')
         policy_spent+=n;step=int(policy.training_state.step)
-        unit_seconds=time.perf_counter()-unit_start;policy_unit_seconds.append(unit_seconds);native_unit_bound=max(native_unit_bound,unit_seconds)
+        native_unit_bound=max(native_unit_bound,time.perf_counter()-unit_start)
         if args.journal_plan:
             from src.research.journal_scorebed_bridge import maybe_validate
             if maybe_validate(policy.training_state.params_ema,args.journal_plan,initialization+score_spent+policy_spent,step,start,force=policy_spent>=policy_count):break
@@ -190,14 +176,13 @@ def run(args):
         budget_reconciliation=allocation if not tiny else dict(smoke=True),score_batch=batch,actual_score_updates=int(score.training_state.step),actual_policy_updates=int(policy.training_state.step),
         training_seconds=time.perf_counter()-start,history=records,checkpoint_selection='final',
         architecture='official_4layer_256dim_8head_RFF_conservative_transformer',policy_architecture='official_IqbalGRUNet_256_256_64_two_GRU_64_256_256',
-        adaptations=('Matched charged-time native sequential score/policy phases; predeclared equal-fraction compute truncation, native50000/500 scheduler horizons, full batch1024; all initialization, standardisation and compilation charged; one fresh policy; chronological SIR ODE adapter; no estimator/objective substitutions' if journal_plan and journal_plan.get('compute_budget') else 'Historical primary-episode-capped native algorithm adaptation; normalization and initialization included; one fresh policy; transferred phase allocation; fast-sampler keyword compatibility; no architecture or estimator substitutions'),
+        adaptations='1million total primary episodes including normalization and initialization; one fresh policy; published dynamical-system P1 99.75:0.25 allocation transferred to SIR; original batch1024; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions',
         design_bounds=[0.,target.end],bounded_mapping='chronological feasible-time sigmoid with minimum spacing',sir_configuration=sir,
         runtime=dict(jax=jax.__version__,devices=[str(d) for d in jax.devices()]))
-    data['native_unit_timing_seconds']=dict(score_updates=score_unit_seconds,policy_updates=policy_unit_seconds,initialization=initialization_seconds,score_scheduler_reference_steps=score_horizon,policy_scheduler_reference_steps=cfg['policy']['num_iters'],native_timing_only=native_timing)
-    if not args.journal_plan and not native_timing and data['generated_training_trajectories']!=budget:raise AssertionError('Episode accounting mismatch')
+    if not args.journal_plan and data['generated_training_trajectories']!=budget:raise AssertionError('Episode accounting mismatch')
     from src.research.resource_ledger import with_training_ledger
     data=with_training_ledger(data,args.horizon)
     (out/'scorebed_official_training.json').write_text(json.dumps(data,indent=2))
     print('SCOREBED_OFFICIAL_TRAINING_COMPLETE',flush=True)
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('--output',required=True);ap.add_argument('--journal-plan');ap.add_argument('--budget',type=int,default=1000000);ap.add_argument('--horizon',type=int,default=30);ap.add_argument('--seed',type=int,default=101);ap.add_argument('--batch-size',type=int,default=1024);ap.add_argument('--smoke',action='store_true');ap.add_argument('--native-timing',action='store_true');ap.add_argument('--sir-config',required=True);run(ap.parse_args())
+    ap=argparse.ArgumentParser();ap.add_argument('--output',required=True);ap.add_argument('--journal-plan');ap.add_argument('--budget',type=int,default=1000000);ap.add_argument('--horizon',type=int,default=30);ap.add_argument('--seed',type=int,default=101);ap.add_argument('--batch-size',type=int,default=1024);ap.add_argument('--smoke',action='store_true');ap.add_argument('--sir-config',required=True);run(ap.parse_args())

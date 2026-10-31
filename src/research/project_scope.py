@@ -20,7 +20,7 @@ def resolve(method):
 
 def label(method):return LABELS[resolve(method)]
 def describe():
- return [dict(id=m,name=LABELS[m],family='conventional_baseline' if m in BASELINES else 'DeepSeekMoE',location='registered' if m in BASELINES else 'validated_v1',sir='corrected_baseline_protocol' if m in BASELINES else 'PENDING_INDEPENDENT_SIR_VALIDATION') for m in ACTIVE]+[dict(id='moe_sboed_v3',name='MoE-sBOED-v3',family='process_specialized_moe',location='DEVELOPMENT_UNVALIDATED',sir='INTERFACE_ONLY_NO_TRAINING',grid='INTERFACE_ONLY_NO_TRAINING',dispatch='--moe-sboed-v3-development in TEMP only')]+[dict(id='moe_sboed_v4',name='MoE-sBOED-v4',family='four_information_roles',location='DEVELOPMENT_UNVALIDATED',sir='INTERFACE_TESTED_NO_TRAINING',grid='INTERFACE_TESTED_NO_TRAINING',dispatch='--moe-sboed-v4-development in TEMP only')]
+ return [dict(id=m,name=LABELS[m],family='conventional_baseline' if m in BASELINES else 'DeepSeekMoE',location='registered' if m in BASELINES else 'validated_v1',sir='corrected_baseline_protocol' if m in BASELINES else 'PENDING_INDEPENDENT_SIR_VALIDATION') for m in ACTIVE]
 
 def value(argv,flag):
  for i,x in enumerate(argv):

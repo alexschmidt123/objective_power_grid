@@ -154,6 +154,5 @@ def main():
            completed_main_methods=sum(x['status']=='complete' and x['method']!='base' for x in rows),
            final_test_seed_used=False,development_only=True)
 if __name__=='__main__':
-    raise SystemExit('LEGACY_EXCLUDED_FROM_CURRENT_PROJECT: historical campaign launcher; use current scoped workflows')
     try:main()
     except Exception as exc:status('stopped_requires_review',error=str(exc),traceback=traceback.format_exc());raise

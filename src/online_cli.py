@@ -14,6 +14,11 @@ def main():
     from tools.storage_policy import enforce_storage_policy
     argv = enforce_storage_policy(ROOT, argv)
     sys.argv = [sys.argv[0], *argv]
+    if '--moe-v2-development' in argv:
+        argv.remove('--moe-v2-development')
+        from src.research.moe_v2_research import main as development
+        development(argv)
+        return
     for arg in argv:
         flag=arg.split('=',1)[0].replace('_','-')
         if flag.startswith(('--reuse','--resume','--checkpoint','--load-checkpoint','--skip-training')):

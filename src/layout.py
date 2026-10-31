@@ -382,6 +382,7 @@ def run_methods_from_doc(doc: dict[str, Any] | None) -> list[str]:
 TRAINED_METHOD_CHECKPOINTS: dict[str, tuple[str, ...]] = {
     "dad": ("dad_eig.pth", "dad.pth"),
     "rl_sboed": ("rl_sboed_eig.pth", "rl_sboed.pth"),
+    "moe_sboed": ("moe_sboed.pth",),
     "matched_dense": ("matched_dense.pth",),
     "step_dad": ("dad_eig.pth", "dad.pth"),
 }
@@ -635,7 +636,7 @@ def _filter_run_body(
         for key in ("control", "control_safety_calibration", "oracle", "bank_quality"):
             body.pop(key, None)
     selected = set(methods)
-    trainable = {"dad", "rl_sboed", "matched_dense"}
+    trainable = {"dad", "rl_sboed", "moe_sboed", "matched_dense"}
     if not selected & trainable:
         body.pop("training", None)
     return body
@@ -653,7 +654,7 @@ def _filter_training_block(
     if not isinstance(training, dict) or not training:
         return None
     selected = set(methods)
-    trainable = {"dad", "rl_sboed", "matched_dense"}
+    trainable = {"dad", "rl_sboed", "moe_sboed", "matched_dense"}
     if not selected & trainable:
         return None
     resolved = resolve_training_block(training, experiment_type)

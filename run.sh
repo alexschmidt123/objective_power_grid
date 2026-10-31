@@ -148,42 +148,17 @@ if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
     return 0
 fi
 
-# Current project entry boundary; archived workflows cannot enter active dispatch.
-for _scope_arg in "$@"; do
-    if [[ "$_scope_arg" == "--list-current-methods" ]]; then
-        exec python3 -m src.research.project_scope list
+for _t3_arg in "$@"; do
+    if [[ "$_t3_arg" == "--sir-t3-scorebed-profile" ]]; then
+        exec "$ROOT/../objective_power_grid/.venv_scorebed/bin/python" -m src.research.sir_t3_scorebed_profile "$@"
+    fi
+    if [[ "$_t3_arg" == "--sir-t3-profile" ]]; then
+        exec python3 -m src.research.sir_t3_profile "$@"
+    fi
+    if [[ "$_t3_arg" == "--sir-t3-campaign" ]]; then
+        exec python3 -m src.research.sir_t3_campaign "$@"
     fi
 done
-python3 -m src.research.project_scope guard -- "$@" || return 2 2>/dev/null || exit 2
-for _v4_arg in "$@"; do
-    if [[ "$_v4_arg" == "--moe-sboed-v4-development" ]]; then
-        exec python3 -m src.research.moe_v4_pilot "$@"
-    fi
-done
-for _scope_arg in "$@"; do
-    if [[ "$_scope_arg" == "--moe-sboed-v3-development" ]]; then
-        exec python3 -m src.research.moe_sboed_v3_experiment "$@"
-    fi
-done
-_scope_args=()
-for _scope_arg in "$@"; do
-    if [[ "$_scope_arg" == "--moe-sboed-v1" ]]; then
-        _scope_args+=("--deepseek-sboed")
-    else
-        _scope_args+=("$_scope_arg")
-    fi
-done
-for _scope_arg in "${_scope_args[@]}"; do
-    if [[ "$_scope_arg" == "--deepseek-sboed" ]]; then
-        exec python3 -m src.research.deepseek_sboed_experiment "${_scope_args[@]}"
-    fi
-    if [[ "$_scope_arg" == "--current-moe-evaluate" ]]; then
-        exec python3 -m src.research.current_moe_evaluation "${_scope_args[@]}"
-    fi
-done
-unset _scope_arg _scope_args
-
-
 set -euo pipefail
 echo "[run.sh] Default results: experiments/MMDDYYYY/MMDDYYYY_<time>_<objective_parameters>/"
 exec python3 -m src.online_cli "$@"

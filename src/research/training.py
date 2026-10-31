@@ -155,7 +155,8 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
             torch.nn.utils.clip_grad_norm_(aux_params,5.);auxiliary.step()
         if refresh is not None:policy.select_expert(None)
         if (update-1)%settings.get('spce_lr_schedule_every',1000)==0:scheduler.step()
-        if update%settings['validate_every']==0 or update==updates:
+        # Final-checkpoint observers own wall-time validation; no update cadence is required.
+        if (not final_checkpoint and update%settings['validate_every']==0) or update==updates:
             progress_ledger(directory,kind,primary_count,contrast_count,horizon,actual_update,time.perf_counter()-started)
             value = select_checkpoint(benchmark,policy,horizon,settings,validation_seed) if not final_checkpoint else None
             records.append(dict(update=update,train_spce=-float(loss.detach()),validation_spce=value,
@@ -173,7 +174,7 @@ def train_spce(benchmark,kind,horizon,settings,seed,directory,final_checkpoint=F
         best=records[-1]['validation_spce']
     journal=observer.finish(policy) if observer is not None else {}
     if observer is not None:
-        best_state=copy.deepcopy(policy.state_dict());best_update=journal['selected_checkpoint']['update'];best=journal['selected_checkpoint']['eig']
+        best_state=copy.deepcopy(policy.state_dict());best_update=journal['selected_checkpoint']['update'];best=journal['selected_checkpoint'].get('eig')
     policy.load_state_dict(best_state)
     torch.save(dict(kind=kind,architecture=getattr(policy,'architecture',type(policy).__name__),horizon=horizon,state_dict=best_state,
                     hidden=settings['hidden'],selected_update=best_update,

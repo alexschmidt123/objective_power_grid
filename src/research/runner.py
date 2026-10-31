@@ -259,7 +259,7 @@ def main(argv=None):
     if args.native_evaluate_from:
         from src.research.native_checkpoint_evaluation import main as evaluate_native
         return evaluate_native(args,raw,root)
-    if args.journal and raw['research'].get('journal_protocol',{}).get('version') in {'validation_convergence_v1','sir_journal_corrected_seed101_v1','sir_seed101_native_fourhour_20261027_v1'}:
+    if args.journal and raw['research'].get('journal_protocol',{}).get('version') in {'validation_convergence_v1','sir_journal_corrected_seed101_v1'}:
         from src.research.journal_run import main as journal_main
         return journal_main(args,raw,root)
     paper = bool(raw['research'].get('paper_protocol'))
