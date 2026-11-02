@@ -1,0 +1,2 @@
+# Computational efficiency
+Track actual fresh episodes, observation stages, true/contrast parameter-stage propagations, scalar conditional log densities, optimization by component, validation/evaluation, walltime and hardware separately. Replay is computational work but not fresh data. Unknown solver/backward counts are null, not zero. Model-derived NLE proxies must be labeled and never equated with GPU runtime. Compare only measured overlapping cost ranges, hardware separately. Include all shared-base and score pretraining.

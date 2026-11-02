@@ -1,0 +1,3 @@
+# Runtime caveats
+
+The copied training_efficiency.csv retains original generated accounting fields. A serialized campaign means our jobs were sequential; it does not certify exclusive GPU ownership. External-user GPU contention was observed during seed104 residual/full-expert training, and historical records may overlap other work. Do not interpret these rows as a controlled equal-hardware latency/training-speed experiment. Model EIG comparisons use the declared common evaluator; no evidence establishes contention as their cause. The cost file also contains the completed SIR Random reference; SIR trained-method results remain deferred.

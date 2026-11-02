@@ -1,0 +1,2 @@
+# ICML experiment plan v2
+E1 assesses final policy EIG and training stability; E2 assesses measured computation; E3 assesses mechanisms. Location T30 and SIR T5 come first. Historical 1M runs are pilots, not converged references. Native objectives, architectures, optimizers, batches and schedules are preserved. Five training seeds101–105. No full study until fidelity, accounting and pilot gates pass. Existing run.sh/sweep_run.sh and campaign controllers remain mandatory.

@@ -1,0 +1,20 @@
+# IR-MoE-sBOED-v2: predeclared method
+
+Source: published IR commit 19a97b4bcc93f47fa8c9a90e1d87cc4395c1c886, fetched from GitHub into a NEW UbuntuPC worktree. One always-active shared width8 SwiGLU expert, seven routed width8 experts, top3, shared 3-256-ReLU-16 sum history encoder, shared action head, original bounded two-source simulator. No teacher or competitor weights are used.
+
+Primary loss remains full-horizon sequential DAD sPCE at L8192, plus the exact ordered Plackett-Luce selection score term with coefficient ONE and the existing mild .001 detached-frequency balancing surrogate. Current-selection rewards and previous-minibatch stage EMA baselines are stopped. Direct conditional scores detach physical histories; the explicit zero-value full-minus-conditional correction restores only required earlier-action-to-future-routing credit. Exact enumerable sequential gradients agree with finite differences.
+
+The new auxiliary uses independent OFFLINE observed histories. It discards their generating hidden theta. Two independent standard-normal prior importance banks, each65536 particles, are weighted by the complete observed-prefix likelihood. Draw posterior-predictive parameters,8192 independent conditional contrast samples per fantasy, and paired future noise. Compare one selected set with one uniformly sampled single-expert swap on the SAME history, under a common frozen snapshot of this SAME MoE as stochastic continuation. Evaluate all remaining stages, not just immediate gain.
+
+Only posterior ESS>=64 in BOTH banks, consistent advantage signs, and a paired2.58-SE screening threshold admit a preference. This is a conservative finite-reference screen, not proof of posterior convergence. Reward/reference values and the preference gate are stopped. No simulated generating theta is treated as the complete posterior.
+
+For admitted fixed reference data, the explicitly DIFFERENT conditional improvement surrogate is
+  w[-log sigmoid(log P_eta(winner|h)-log P_eta(loser|h))
+    - Q_eta(winner; frozen continuation) + stop(Q_reference(winner))]
+where w=min(abs(measured advantage),.1), and unordered set probability sums all six ordered PL outcomes. The current winning action remains differentiable through the live shared encoder, shared expert, selected routed features, router gate weights and action head. Future snapshot parameters are frozen, but future routing HISTORY scores must remain in the conditional Q gradient. The exact conditional hybrid gradient is verified against complete two-stage enumeration and finite differences.
+
+The auxiliary is not claimed to be another unbiased estimator of the primary objective. It is a separately declared frozen-data policy-improvement surrogate. Its coefficient is at most.05 and its applied gradient norm is capped at10% of the primary gradient norm. The primary score coefficient staysONE. Combined gradients are clipped to5, as in original IR. Queries occur every50 updates, cycling stages1,5,15,25, with independent random swap choice and32 fantasies per bank. Independent fresh fantasy randomness supplies the live gradient after reference screening. No artificial feature-diversity objective, hard equal-use constraint, or hand-assigned expert roles is used.
+
+Finite-particle posterior approximation, low-ESS withholding, small conditional advantages, stochastic-training versus deterministic-deployment mismatch, and one training seed are material limitations. Useful information specialization must be demonstrated by held-out conditional information advantages AND routing exploitation AND full-horizon EIG; different features or utilization do not suffice.
+
+All extra counterfactual simulation, posterior calculations, backward recomputation, logging and optimizer work are charged INSIDE the14400-second main allowance. CPU/GPU readiness and post-freeze evaluation are separately recorded. Fresh seed101 initialization discards smoke weights. Latest compute-eligible checkpoint only; no official-data checkpoint selection. Deployment is deterministic sparse neural inference with bounds, no online search/simulation/teacher/updates.
