@@ -1,0 +1,2236 @@
+                       Bayesian Experimental Design via Score Matching
+
+
+
+                Angus Phillips1                         Gavin Kerrigan1                        Tom Rainforth1
+
+                                       1
+                                           Department of Statistics, University of Oxford
+
+
+
+
+                        Abstract                                   2020; McMichael et al., 2021), psychology (Watson, 2017),
+                                                                   quantum computing (Sarra and Marquardt, 2023), machine
+                                                                   learning (Gal et al., 2017) and beyond. Typically, BED
+    Policy-based approaches to Bayesian experimental               is performed by maximising the expected information
+    design (BED) allow the learning of deep policy                 gain (EIG) of the experiment(s) (Lindley, 1956), where
+    networks that adaptively make intelligent design               the information gain is given by the reduction in Shannon
+    decisions based on previously collected data. How-             entropy (Shannon, 1948) from our prior to posterior beliefs
+    ever, the training of such policies is often held back         in some target quantities of interest, and the expectation is
+    by a fundamental challenge: the double intractab-              over possible data we might see.
+    ility of the expected information gain (EIG). This
+    necessitates expensive or complex approximations               Of particular importance in many applications is the ability
+    that restrict the effort one can invest in optimising          to propose the next design in real time, such as conducting
+    the policy itself. To address this, we show that the           a live survey with human participants (Pasek and Krosnick,
+    double intractability of the EIG can be isolated               2010; Vincent and Rainforth, 2017) or learning via control
+    from the policy learning by first solving a score              of a live dynamical system (Iollo et al., 2025). Unfortunately,
+    matching problem that is independent of the policy             this can be difficult in practice, as the EIG is a doubly intract-
+    used, then using the learned score approximation               able quantity that is very challenging to optimise (Rainforth
+    to train the policy in a singly intractable manner.            et al., 2018, 2024), while the need to repeatedly do inference
+    This turns the key multiplicative cost into an ad-             between iterations can also be problematic.
+    ditive one and reduces the computational burden                Policy-based BED (Blau et al., 2022; Bracher et al., 2025;
+    on the policy training itself, making it far cheaper           Foster et al., 2021; Hedman et al., 2025; Iqbal et al., 2024;
+    to train the policy multiple times when needed,                Ivanova et al., 2021; Shen and Huan, 2023) offers the most
+    e.g. for architecture search, hyperparameter tuning,           viable approach to overcoming this, by amortising adapt-
+    or avoiding local optima. In our experiments we                ive design decisions into a pre-trained policy which can be
+    train multiple competitive policies without indu-              deployed in a single forward pass. However, the problem
+    cing a multiplicative cost in likelihood evaluations,          of optimising a doubly intractable objective is now trans-
+    which can increase performance by allowing us                  ferred to the policy training itself, where the challenges can
+    to select the best policy even without performing              actually be compounded due to the complexity of policy
+    hyperparameter or architecture searches.                       learning, which often forms a significantly harder optimisa-
+                                                                   tion than just optimising designs (Blau et al., 2022). Fur-
+1   INTRODUCTION                                                   thermore, variational approaches to side-stepping the double
+                                                                   intractability (Foster et al., 2019, 2020; Kleinegesse and Gut-
+The optimal design of experiments is critical for conducting       mann, 2019) are often challenging to apply due to the dif-
+informative and cost-effective scientific experiments in           ficulty of learning accurate variational distributions in high-
+any field. Bayesian Experimental Design (BED) (Chaloner            dimensional settings. Existing approaches often thus simply
+and Verdinelli, 1995; Huan et al., 2024; Lindley, 1956;            resort to nested or contrastive sampling of the EIG gradient,
+Rainforth et al., 2024) offers a theoretically principled          accepting the substantial computational costs this induces.
+approach to selecting experimental designs grounded                To address this, we show that it is possible to disentangle
+in Bayesian decision theory that has found successful              the double intractability of the EIG from the training of a
+application in fields as broad as physics (Dushenko et al.,
+
+
+         Proceedings of the 42nd Conference on Uncertainty in Artificial Intelligence (UAI 2026), PMLR 337:5393–5426.
+policy, utilising the fact that the information gain itself de-    trained to propose the optimal next design given ht−1 on
+pends on the policy only through the chosen designs and not        the fly. There are several advantages of such a policy-based
+the policy parameters themselves. Specifically, we derive a        approach (Foster et al., 2021; Rainforth et al., 2024), in-
+reparameterised form of the EIG gradient where the double          cluding significantly faster deployment times versus greedy
+intractability is isolated in two terms with no direct depend-     approaches, avoiding the need for potentially inaccurate in-
+ency on the policy: the Stein score and Fisher score of the        ference at each time step, and making non-myopic decisions
+marginal likelihood given the full design rollout. We then         by optimising up front for the total information gain over
+use this to introduce a score matching approach to BED,            the entire experiment. In this policy-based setting, we will
+which we call S CORE BED. S CORE BED first learns a single         write the data generating
+                                                                                      R        process under the policy πϕ 1 as
+network which approximates both of these scores using an           pϕ (y1:T , ξ1:T ) = p(θ)pϕ (y1:T , ξ1:T | θ)dθ where
+objective we call marginal score matching, then substitutes
+                                                                                               T
+the learned score network into our reparameterised EIG                                         Y
+                                                                      pϕ (y1:T , ξ1:T | θ) =         πϕ (ξt | ht−1 )p(yt | θ, ξt , ht−1 ).
+gradient, yielding a singly intractable estimator that can be
+                                                                                               t=1
+used to train the policy via stochastic gradient descent.
+                                                                   Foster et al. (2021) propose optimising the total expected in-
+A key benefit of our two-stage setup is that it transforms
+                                                                   formation gain over the whole experiment, therefore giving
+the typically multiplicative cost of nested sampling proced-
+                                                                   the policy-based EIG objective:
+ures into an additive cost of two singly intractable problems,
+allowing gradient-based policy training without expensive                    IT (ϕ) = Epϕ (y1:T ,ξ1:T ) {IGθ (y1:T , ξ1:T )},           (1)
+nested sampling. Critically, the approximations we learn
+are entirely independent of any policy and thus the same           where IGθ (y1:T , ξ1:T ) = H[p(θ)] − H[p(θ | y1:T , ξ1:T )].
+upfront approximation can be reused repeatedly to allow            Policy-based BED is therefore concerned with finding the
+sample-efficient and scalable training for any number of           optimal policy ϕ∗ = arg maxϕ IT (ϕ). We take a stochastic
+policies. This provides substantial benefits to policy train-      gradient-based approach to this problem, although previous
+ing by allowing cheaper hyperparameter and architecture            works have also searched for designs using Bayesian op-
+searches, longer policy training, or multiple retrainings to       timisation (Snoek et al., 2012), such as Foster et al. (2019);
+avoid local optima, all of which can be important in practice      Kleinegesse and Gutmann (2019).
+due to the difficulty of policy training (Ivanova et al., 2021).
+                                                                   Approximating the EIG. A key challenge in BED comes
+Experimentally, we find that, when matching total budgets,         from the double intractability of the objective. The EIG can
+S CORE BED provides competitive performance compared to            be written either as an expected KL divergence between the
+existing approaches that simultaneously deal with double in-       posterior and prior:
+tractability of the EIG and policy training. Moreover, as only
+a small proportion of the budget in S CORE BED is on the               Ep(θ)pϕ (y1:T ,ξ1:T |θ) {log p(θ | y1:T , ξ1:T ) − log p(θ)},
+policy training itself, it can cheaply train multiple such com-
+petitive policies, thereby paving the way for more nuanced         or as the mutual information between y1:T and θ given ξ1:T :
+and computationally intensive policy training schemes.                                            
+                                                                                                       p(y1:T | θ, ξ1:T )
+                                                                                                                          
+                                                                           Ep(θ)pϕ (y1:T ,ξ1:T |θ) log                      .
+                                                                                                        p(y1:T | ξ1:T )
+2   BACKGROUND
+                                                                   In both cases it is clear the objective is doubly intractable as
+Bayesian Experimental Design. In BED, one assumes a                it involves evaluating the posterior or marginal distributions
+Bayesian model for an experiment consisting of prior p(θ)          which appear non-linearly within the outer expectation.
+and likelihood p(y | θ, ξ) where ξ denotes the design, y is        Foster et al. (2020) introduce the Prior Contrastive Estima-
+the experiment outcome, and θ are the target variables we          tion (PCE) bound which lower bounds the EIG. This bound
+wish to learn about. The goal is to select ξ to maximise some      uses M contrastive samples from the prior to approximate
+expected utility function under the data generating process.       the intractable marginal distribution:
+The standard choice of utility function in BED literature                           (                                       )
+is the information gain on model parameters, defined by                                           p(y1:T | θ0 , ξ1:T )
+Lindley (1956) as the reduction in Shannon’s entropy from            IT (ξ1:T ) ≥ E log 1 PM                                  .
+                                                                                           M +1    m=0 p(y1:T | θm , ξ1:T )
+the prior to the posterior, IGθ (y, ξ) = H[p(θ)] − H[p(θ |
+y, ξ)]. Taking expectation under the data generating process       The inclusion of θ0 in the estimate of the intractable mar-
+yields the EIG objective I(ξ) = Ep(y|ξ) {IGθ (y, ξ)}.              ginal reduces the variance of the estimate compared with or-
+We consider a sequential setting with T rounds of exper-           dinary nested Monte Carlo (NMC). The PCE estimator can
+iments, therefore let ht = {ys , ξs }ts=1 denote the experi-            1
+                                                                        When πϕ (ht−1 ) is deterministic, this distribution becomes
+mental history to time t. Following Foster et al. (2021), we       degenerate. We ignore the measure-theoretic considerations in this
+learn an adaptive policy network πϕ (ξt | ht−1 ) which is          case and continue to write p(y | ξ) even when ξ is deterministic.
+
+
+                                                               5394
+be differentiated using a reparameterisation trick (Kingma        intractabilities can be naturally approximated with a score
+and Welling, 2013) or a REINFORCE gradient estim-                 network trained on a specific score matching loss. Combin-
+ator (Williams, 1992), allowing gradient-based optimisation.      ing these facts leads to our S CORE BED approach, where
+                                                                  we first learn an accurate and computationally favourable
+An alternative approach is to construct a functional or vari-
+                                                                  approximation of the EIG gradient upfront, then use this
+ational approximation of the intractability in the EIG. Foster
+                                                                  learned approximation for training policies. This transforms
+et al. (2019) propose replacing the intractable posterior with
+                                                                  the computationally challenging, doubly intractable EIG
+a variational approximation q(θ | y1:T , ξ1:T ), which they
+                                                                  objective into two sequential singly intractable problems.
+show results in a lower bound of the EIG due to the Barber-
+Agakov bound (Barber and Agakov, 2003). Alternatively,            The importance of this separation is that it can offer signific-
+they show that using a variational approximation of the in-       ant computational benefits by replacing a multiplicative cost
+tractable marginal q(y1:T | ξ1:T ) leads to an upper bound        (number of training steps times number of inner samples)
+on the EIG. Foster et al. (2020) further propose a unified        with an additive cost (cost of training the score network plus
+procedure which co-optimises the variational approximation        cost of the resulting singly intractable policy training). By
+and the designs, meaning the approximation is specialised         substantially reducing the burden on the policy training part
+to the particular policy network.                                 of the overall procedure, this gives scope to perform architec-
+                                                                  ture adjustments, hyperparameter tuning, and even multiple
+Score Matching. Score matching (Hyvärinen, 2005)
+                                                                  training restarts to obtain a good policy network (Rainforth
+refers to techniques used to approximate the Stein score
+                                                                  et al., 2024). Historically this required all the computation of
+∇z log p(z) of a distribution with density p(z) by minim-
+                                                                  the full procedure to be repeated again; for our score match-
+ising the explicit score matching objective 12 Ez {∥sψ (z) −
+                                                                  ing approach it only requires the now singly intractable
+∇ log p(z)∥2 }. Being typically intractable, the target score
+                                                                  policy training to be repeated, providing substantial gains.
+is unavailable to us, therefore equivalent tractable objectives
+                                                                  This is particularly important if likelihood evaluations are
+have been proposed (Hyvärinen, 2005; Song et al., 2019;
+                                                                  expensive, and is expected to be increasingly beneficial as
+Vincent, 2011) such as the sliced score matching objective:
+                                                                  the problems we work with require more complex policies
+                                   1                              and training mechanisms (Blau et al., 2022).
+  JSSM (ψ) = Eν Ez v T ∇z sψ (z)v + (v T sψ (z))2
+                    
+                                                           (2)
+                                   2
+                                                                  Separating intractabilities from policies. We begin with
+which only requires samples of z.                                 an important observation that, to the best of our know-
+Score matching has achieved particular success in denois-         ledge, has not previously been noted in the context of
+ing diffusion generative models (Ho et al., 2020; Song            policy-based BED: the information gain IGθ (y1:T , ξ1:T ) =
+and Ermon, 2019), where a variant known as denoising              H[p(θ)] − H[p(θ | y1:T , ξ1:T )] itself has no direct depend-
+score matching (Vincent, 2011) is used to learn the noise-        ence on the design policy but is simply a function of the
+conditional score function of the generative process. This        data (y1:T , ξ1:T ), i.e. for given data it is independent of how
+has proved successful even in high-dimensional and con-           that data was collected (see Appendix A.1 for proof). The
+ditional settings (Dhariwal and Nichol, 2021; Rombach             policy dependence of the EIG only enters through the outer
+et al., 2022). Denoising score matching considers a noisy         expectation over data, thus the double intractability of the
+observation z̃R of z, according to the Gaussian convolu-          information gain is completely separable from the policy.
+tion p(z̃) = p(z)p(z̃ | z)dz where p(z̃ | z) is a nois-           The upshot of this is that any approximation of the intractab-
+ing kernel. The score of theR noised distribution is shown        ilities in the information gain has a global optimum that is
+to satisfy ∇z log p(z̃) =     ∇ log p(z̃ | z)p(z | z̃)dz          independent of the policy (assuming our approximator has
+which is the unique  minimiser  of the regression objective       infinite capacity). We can thus learn approximation schemes
+                  
+JDSM (ψ) = Ez,z̃ ∥sψ (z̃) − ∇ log p(z̃ | z)∥2 .                   upfront that are policy-independent, then apply them as
+                                                                  fixed approximations for training any policy.
+
+3   METHOD                                                        EIG gradient expression. The critical quantity required
+                                                                  for gradient-based training of policies is the gradient of the
+We contribute three significant observations and results in       EIG objective with respect to policy parameters, ∇ϕ IT (ϕ).
+the following section, which culminate in our score-based         Existing approaches typically only consider estimating this
+method for EIG optimisation of policies. Firstly, we observe      quantity indirectly, by differentiating through an estimate
+that the information gain is fundamentally independent of         or bound of the EIG itself. However, variational bounds
+how the observed data was collected, so approximations            may be uninformative if the variational approximation is
+to deal with the double intractability do not necessarily         not accurate and differentiating such an approximation does
+have to depend on the policy. Secondly, we derive a precise       not guarantee an accurate approximation of its gradient. We
+EIG gradient expression that shows the exact source of the        therefore sidestep these potential challenges by choosing to
+double intractability which we aim to resolve in a way that       approximate the gradient of the EIG directly.
+is detached from the policy. Thirdly, we show how these
+
+
+                                                              5395
+To that end, we present an exact EIG gradient expression            Algorithm 1 S CORE BED
+which clearly highlights the exact nested intractabilities that             Input: prior p(θ), likelihood p(y1:T | ξ1:T , θ), re-
+are present, as well as how the policy parameters ϕ enter the               parameterisation map (y1:T , ξ1:T ) = g(ϵ, θ, ϕ), design
+expression independently of those intractabilities.                         sampler q(ξ1:T ), policies {πϕ1 , . . . , πϕP }
+Theorem 1 (Reparameterised EIG Gradient Expression).                        Output: trained policies {πϕ1 , . . . , πϕP }
+The following expression for the gradient of the EIG holds:
+                                                                           Stage 1: Learn intractable score (policy-independent).
+                            d                                          1: for score budget do
+   ∇ϕ IT (ϕ) = Ep(θ)q(ϵ)       log p(y1:T | ξ1:T , θ)−                                      b
+                           dϕ                                          2: Sample batch {ξ1:T  ∼ q(ξ1:T ), θb ∼ p(θ), y1:T
+                                                                                                                      b
+                                                                                                                          ∼
+                                                                                      b
+                 ∂                        ∂y1:T                             p(y1:T | ξ1:T , θb )}B
+                                                                                                 b=1
+                      log p(y1:T | ξ1:T )       −       (3)                                          1 PB        b      b
+               ∂y1:T                       ∂ϕ                          3:    JMSM (ψ)         ←            ∥sψ (y1:T , ξ1:T )        −
+                                                                                                    B b=1
+                 ∂                        ∂ξ1:T                                       b      b      b 2
+                                                                          ∇y,ξ log p(y1:T | ξ1:T , θ )∥
+                      log p(y1:T | ξ1:T )
+               ∂ξ1:T                       ∂ϕ                          4: ψ ← U PDATE(ψ, ∇ψ JMSM (ψ))
+                                                                       5: end for
+where the data and designs are obtained by reparameterisa-
+tion, (y1:T , ξ1:T ) = g(ϵ, θ, ϕ), with g the reparameterisa-
+                                                                            Stage 2: Train each policy with the fixed score sψ .
+tion map of the data-generating process and ϵ ∼ q(ϵ) a set
+                                                                       6: for p = 1, . . . , P do
+of noise variables independent of ϕ, so that (y1:T , ξ1:T ) ∼
+                                                                       7: for policy budget do
+pϕ (·, · | θ). The explicit form of g is deferred to Appendix
+                                                                       8:    Sample batch {θn ∼ p(θ), ϵn ∼ q(ϵ)}N
+                                                                                                                n=1
+A.2 for brevity. In the specific case of static (batch) designs,               n      n
+                                                                       9:    (y1:T , ξ1:T ) ← g(ϵn , θhn , ϕp )
+the expression simplifies to:                                                                   PN                    n      n
+                                                                   10:        ∇
+                                                                               \ ϕ IT (ϕp ) ←     n=1    dϕp log p(y1:T   | ξ1:T , θn )
+                                    d                                                                                     i
+ ∇ξ1:T IT (ξ1:T ) = Ep(θ)q(ϵ)           log p(y1:T | θ, ξ1:T )−                            n
+                                                                                    − sψ (y1:T    n
+                                                                                               , ξ1:T         n
+                                                                                                      ) ∂ϕp (y1:T    n
+                                                                                                                  , ξ1:T ) /N (eq. 3)
+                                  dξ1:T
+                                                                           ϕp ← U PDATE(ϕp , ∇      ϕ IT (ϕp ))
+                                                                                                   \
+                       ∂                         ∂y1:T              11:
+                             log p(y1:T | ξ1:T )                    12: end for
+                     ∂y1:T                       ∂ξ1:T
+                                                              (4)   13: end for
+                                                                    14: return {πϕ1 , . . . , πϕP }
+where again y1:T = g(ϵ, θ, ξ1:T ) via reparameterisation.
+
+Proof. See Appendix A.2.
+                                                                    BED via score-matching. Theorem 1 makes clear that we
+                                                                    need to estimate or approximate ∂y∂1:T log p(y1:T | ξ1:T )
+The expression in Equation (3) now reveals the inner struc-
+ture of the nested intractabilities and dependence on policy        and ∂ξ∂1:T log p(y1:T | ξ1:T ) (whether this is done implicitly
+parameters ϕ in the EIG gradient. In particular, the intract-       or directly) as part of an overall scheme for estimating the
+able terms are the Stein score function ∂y∂1:T log p(y1:T |         EIG gradient. Previous work has either done this through
+                                                                    estimates of the marginal likelihood that are recalculated for
+ξ1:T ) and the Fisher score function ∂ξ∂1:T log p(y1:T | ξ1:T ).
+                                                                    each new (y1:T , ξ1:T ), or using a variational approximation
+Importantly, these terms are evaluated at data and designs
+                                                                    of either the marginal likelihood or posterior, with gradients
+(y1:T , ξ1:T ) which are functions of the policy parameter ϕ
+                                                                    then taken of the approximation itself.
+due to reparameterisation, but the terms themselves are en-
+tirely conditionally independent of ϕ given the designs.            We propose to instead learn these terms directly using score
+                                                                    matching. We argue that score matching is a natural choice
+A key intuition here that has not been highlighted by previ-
+                                                                    in this scenario for a number of reasons. Firstly, it expli-
+ous work is that the marginal likelihood term p(y1:T | ξ1:T )
+                                                                    citly targets accuracy on the intractable score, which as we
+that appears in the EIG and its gradient is not the same as the
+                                                                    have shown is the key quantity in the EIG gradient. While
+marginal distribution on data for a given policy p(y1:T ; πϕ ).
+                                                                    one could instead take any density estimator or variational
+Thus, even though the data distribution obviously depends
+                                                                    approximation of the intractable marginal and differentiate
+on our policy, the actual intractable term we are dealing with
+                                                                    its log density to approximate the score, such an approach
+is given by Ep(θ) [p(y1:T | ξ1:T , θ)], which does not depend
+                                                                    may not be accurate in practice. Indeed, the score function
+on the policy given the designs.
+                                                                    can be expressed as ∇z log p(z) = ∇z p(z)/p(z) and dens-
+Additionally, Theorem 1 shows analytically that the Fisher          ity estimation or variational approximations do not control
+score term disappears in the case of static designs. This res-      gradient values. In other words, p → ∇ log p is not continu-
+ult reduces bias and variance of our gradient approximation         ous in the metrics used for density estimation or variational
+in this case, and could also be used to improve EIG gradient        approximation. Secondly, the score function is independent
+estimation when not using our score-based approach.                 of the normalisation constant and therefore the expressivity
+
+
+                                                                5396
+of a score network is not limited by the restrictions imposed    joint q̃(ξ, y, θ) = q(ξ)p(θ)p(y | ξ, θ), where q(ξ) is simply
+by normalisation which are found in variational approaches.      chosen to reflect where we most want the score network
+Finally, score matching is simply a supervised regression        to be accurate. In our experiments we found that sampling
+problem which scales well with dimension and is not com-         ξ1:T from a simple design distribution (e.g. uniform over
+plicated by gradient variance in the same way as variational     the design space) was usually sufficient and maintained
+methods (Kingma and Welling, 2013).                              independence of the approximation from the policy. We
+                                                                 experiment with different choices of q(ξ) in Appendix E.3.
+To guarantee the accuracy of our EIG gradient approxim-
+ation in practice, we show in Appendix B that if the re-         We also point out that we could alternatively train the score
+parameterisation map ϕ 7→ (y1:T , ξ1:T ) is L-Lipschitz, the     network by minimising an implicit score matching loss such
+ℓ2 error of our gradient estimator is bounded above by L         as the sliced score matching (SSM) loss (Song et al., 2019),
+times the mean score error. Achieving accurate EIG gradient      which does not rely on the model likelihood. We found the
+estimates is therefore simply a question of score network        MSM loss performed better, however the SSM loss is useful
+capacity, training budget, and avoiding local optima, noting     for settings with implicit or expensive likelihoods.
+we have access to unlimited model samples during training.
+                                                                 Score network architecture. We provide full details of
+Marginal score matching. We propose a score match-               our score network architecture in Appendix D.4, how-
+ing objective which directly recovers the intractable score      ever we remark on two important points in the following.
+functions from the likelihood of the model. Removing de-         Firstly, in learning ∇y,ξ log p(y | ξ) we simultaneously re-
+                                                                                                             ∂
+pendence on t for ease of notation, we
+                                     R are required to learn     cover each of the required score terms ∂y      log p(y | ξ) and
+∇y,ξ log p(y | ξ) where p(y | ξ) = p(y | ξ, θ)p(θ)dθ. A           ∂
+                                                                     log p(y  | ξ) from  the same     score network.  We found
+                                                                  ∂ξ
+simple score identity is as follows:                             that a shared backbone with separate prediction heads for
+                                 Z                             each score component was the most efficient architecture.
+   ∇y,ξ log p(y | ξ) = ∇y,ξ log      p(y | ξ, θ)p(θ)dθ           Secondly, when observations yt are conditionally i.i.d. given
+           Z                                                     (θ, ξ), the marginal likelihood p(y1:T | ξ1:T ) is exchange-
+        = ∇y,ξ [log p(y | ξ, θ)] p(θ | ξ, y)dθ           (5)     able with respect to pairs (yt , ξt ). We encode this permuta-
+                                                                 tion equivariance as an inductive bias by using a TNP-style
+This identity has been considered by Ao and Li (2024);           architecture with self-attention (Nguyen and Grover, 2022;
+Brehmer et al. (2020) as the basis for Monte Carlo score         Vaswani et al., 2017) and add positional encodings to (yt , ξt )
+approximations, but has not been used for training score         in non-exchangeable cases.
+networks. This inspires the following regression objective,      Applicability. S CORE BED relies on explicit likelihoods
+which we refer to as marginal score matching (MSM):              with differentiable reparameterisations, however these are
+                                                                 typical assumptions in alternative approaches (Ao and Li,
+  JMSM (ψ) = Eξ,y,θ {∥sψ (y, ξ) − ∇y,ξ log p(y | ξ, θ)∥2 },      2024; Foster et al., 2021; Goda et al., 2022; Iollo et al., 2025).
+                                                           (6)   Our method also requires continuous design and observation
+where the expectation is taken over the joint distribution of    spaces in order for the Stein and Fisher score functions to
+the designs ξ, observations y and parameters θ, and sψ (y, ξ)    exist. We highlight that a large number of BED problems
+is a deep neural network with parameters ψ which we will         satisfy these assumptions, meaning that our method is still a
+use as an approximation to the intractable score functions. It   practical BED approach for a wide class of problems.
+is easy to show that the parameters ψ ∗ minimising eq. (6) are
+such that sψ∗ (y, ξ) = ∇y,ξ log p(y | ξ) ∀(y, ξ); q(y, ξ) > 0
+where q is the distribution used to sample (y, ξ). Critic-       4    RELATED WORK
+ally, the objective requires no direct sampling from the
+                                                                 The main body of BED literature has revolved around es-
+posterior, only the joint on ξ, y, θ. Consequently, our ap-
+                                                                 timating or bounding the EIG itself, for instance contrastive
+proach is suitable in models with high-dimensional para-
+                                                                 estimation (Foster et al., 2021) and variational approaches
+meter spaces where nested sampling approaches suffer expo-
+                                                                 (see e.g. Rainforth et al. (2024) and the references therein).
+nential sample complexity with parameter space dimension.
+                                                                 Some recent works have further explored direct EIG gradi-
+Our regression targets live in the design and output spaces
+                                                                 ent estimation. Goda et al. (2022) introduce an unbiased
+which are unaffected in complexity by parameter dimension.
+                                                                 estimate of the EIG gradient based on multi-level Monte
+Moreover, assuming a sufficiently powerful score network         Carlo (Rhee and Glynn, 2015), which acts as a de-biasing
+architecture, we are free to take the expectation over ξ with    scheme in finite samples, at the cost of increased variance.
+respect to any distribution that has support over all pos-       Ao and Li (2024) also directly target the EIG gradient using
+sible designs, because we are simply regressing from (y, ξ)      expressions similar to eq. (3) and eq. (5). Contrary to our
+pairs to scores and sψ∗ (y, ξ) for any given ξ is independent    amortisation approach, they use MCMC to sample the pos-
+of our distribution on ξ. Thus, we do not need to sample         terior and estimate eq. (5) via Monte Carlo, leading to a high
+according to the policy and can instead sample from the          cost per gradient update when training policies and poor
+
+
+                                                             5397
+sample complexity in high parameter dimensions. A final          ing sections and include an additional task in Appendix E.2.
+direct EIG gradient approach is Iollo et al. (2025), who use     Full experimental details are included in Appendix D.
+sampling as optimisation to roll the nested sampling prob-
+                                                                 Procedure. In order to ensure a fair comparison, each task
+lem into a single loop, although they do not train policies.
+                                                                 has the same fixed computational budget across methods,
+A closely related family of approaches is the variational        specified through the allowed number of likelihood evalu-
+methods introduced by Foster et al. (2019, 2020) and fur-        ations (NLE). For each approach, we obtain a final policy
+ther adopted by Bracher et al. (2025); Dong et al. (2025);       network through two distinct procedures. First, we train a
+Huang et al. (2026b). The original work of Foster et al.         singular policy network and report its achieved EIG bounds
+(2019) applied a two-stage procedure in the case of static       with standard errors reporting variation over re-runs of a
+designs, learning the variational approximation up front and     single policy training. Second, we instead consider training
+using the resulting bound on the EIG to optimise designs.        P restarts of the policy network and report the EIG bounds
+However, subsequent policy-based variational approaches          of the best-performing policy of the P candidates (estim-
+(Bracher et al., 2025; Dong et al., 2025; Huang et al., 2026b)   ated on a held-out test set), reporting standard errors across
+co-train the policy and the variational approximation rather     re-runs of the best-of-P procedure. The configuration of
+than recognising the variational approximation as a global       each baseline is adjusted in order to train P policies with
+approximation independent of the policy. Furthermore, the        the same total NLE budget. Our two-stage approach means
+BED literature typically considers a policy-dependent data       that training multiple policies can be done cheaply, there-
+distribution p(y1:T ; πϕ ) and thus considers the posterior to   fore the score training budget is only modestly reduced to
+be dependent on the policy πϕ . We instead emphasise—as          accommodate increased P . On the other hand, approaches
+shown in Appendix A.1—that the posterior never depends           which do not amortise the intractabilities of the EIG must
+on the policy, nor more generally on any sampling or ob-         reduce their budget per policy proportionally to P . In prac-
+servation mechanism (Rubin, 1976) under appropriate as-          tice, training P policies allows for architecture searches and
+sumptions. As such, variational methods can be applied           hyperparameter tuning to increase performance, but we con-
+in the same two-stage procedure which we adopt, and we           sidered a fixed policy configuration to isolate the quality of
+demonstrate this in our experiments in Section 5.                each method on a consistent policy training task.
+Concurrent work by Huang et al. (2026a) also reduces the         Baselines. We compare S CORE BED to several established
+cost of policy training, leveraging belief representations       BED baselines which cover both contrastive sampling and
+from a foundation model pre-trained independently of             variational approaches. First, we compare against PCE
+any policy, thereby relieving policy training from learning      (Foster et al., 2021). In some cases we also include PCE∗ ,
+representations. They approximate the EIG using PCE, so          which uses a 10× larger-budget variant of PCE since related
+their cost saving is complementary to ours. Finally, Ivanova     works sometimes consider larger M than our original
+et al. (2021); Kleinegesse and Gutmann (2020) take an            budgets. Second, we compare against two pre-trained policy-
+amortised approach for implicit models using critics to          based extensions of the variational approaches of Foster
+build functional approximations which bound the mutual           et al. (2019), the variational marginal (VarMarg) and vari-
+information, while Hedman et al. (2025) consider periodic        ational posterior (VarPost), where we pre-train variational
+retraining of the policy during the experiment. We also          approximations of the intractable marginal and posterior
+note connections to gradient estimators for implicit models,     distributions, and then train the policy using these fixed
+particularly those leveraging score matching as proposed         approximations (resulting in upper and lower bounds on
+by Song et al. (2019). One such work is Lim et al. (2020),       the EIG respectively). We emphasise that these approaches
+who approximate the gradient of the entropy of an implicit       do not currently appear in the literature as variational
+distribution using denoising autoencoders (Vincent, 2011).       approaches are typically co-trained alongside the policy
+Alternative entropy gradient estimation techniques can also      network. Finally, we compare to the co-trained variational
+be derived from Stein’s identity (Li and Turner, 2018; Shi       posterior approach of Foster et al. (2020) (JointVarPost),
+et al., 2018; Wen et al., 2021).                                 in which the policy is co-trained with the variational
+                                                                 approximation by maximising the Barber-Agakov lower
+5   EXPERIMENTS                                                  bound on the EIG. On the dynamical systems tasks, we also
+                                                                 include IO-SMC2 (Iqbal et al., 2024). VarMarg and VarPost
+We empirically validate S CORE BED on a wide selection           represent two-stage approaches which share computation
+of common experimental design tasks against several com-         across multiple policies similarly to S CORE BED, while
+petitive baseline approaches. In each task we train adaptive     PCE, JointVarPost and IO-SMC2 must repeat all computa-
+design policies using S CORE BED and baselines and report        tions for each policy. Details of each baseline are included
+upper and lower bounds on the attained EIG of the final          in Appendix D.5. We also tested MLMC (Goda et al., 2022)
+policy. Our experiments span tasks with varying properties,      but found that the wall-clock cost was prohibitive and the
+including non-Markovian likelihoods and high-dimensional         results were not competitive, see Appendix E.1.
+parameter spaces. We present four BED tasks in the follow-
+
+
+                                                             5398
+Table 1: Results for the source location finding task. Every method used a total NLE budget of 6.144 × 109 , except for
+PCE∗ which used 10× the budget. Results show mean ± one standard error over 4 policy repeats, bold indicates statistically
+indistinguishable from the best lower bound at 95% confidence.
+
+                                                         d = 2, K = 2                                   d = 3, K = 10
+                          Method                Lower Bound            Upper Bound               Lower Bound      Upper Bound
+                          S CORE BED (P=1)       10.81 ± 0.06          10.95 ± 0.07               9.45 ± 0.03        9.74 ± 0.05
+                          S CORE BED (P=5)       10.98 ± 0.04          11.12 ± 0.04               9.37 ± 0.04        9.65 ± 0.07
+                          PCE (P=1)              10.12 ± 0.11          10.16 ± 0.11               8.82 ± 0.02        8.97 ± 0.03
+                          PCE (P=5)               9.61 ± 0.06           9.64 ± 0.06               8.49 ± 0.04        8.61 ± 0.04
+                          PCE∗ (P=1)             10.83 ± 0.03          10.92 ± 0.04               9.14 ± 0.08        9.33 ± 0.09
+                          JointVarPost (P=1)     11.52 ± 0.05          11.78 ± 0.06               8.18 ± 0.04        8.44 ± 0.05
+                          JointVarPost (P=5)     11.25 ± 0.06          11.48 ± 0.08               7.86 ± 0.04        8.00 ± 0.04
+                          VarMarg (P=1)           4.51 ± 0.08           4.51 ± 0.08               3.31 ± 0.06        3.31 ± 0.06
+                          VarMarg (P=5)           5.02 ± 0.08           5.03 ± 0.08               3.57 ± 0.02        3.57 ± 0.02
+                          VarPost (P=1)          11.11 ± 0.04          11.23 ± 0.05               7.08 ± 0.21        7.14 ± 0.22
+                          VarPost (P=5)          11.18 ± 0.02          11.31 ± 0.03               7.37 ± 0.10        7.46 ± 0.11
+
+                         10                                                             10
+                          8
+                                                                                         8
+            EIG Bounds
+
+
+
+
+                                                                           EIG Bounds
+
+                          6
+                                                        ScoreBED                                                              Lower
+                          4                             VarMarg                          6                                    Upper
+                                                        VarPost
+                          2                 Lower       JointVarPost                                                       ScoreBED
+                                            Upper       PCE                              4                                 PCE
+                          0
+                              0        2            4            6                           0      5000     10000     15000     20000
+                                           NLE (P=1)             1e9                                Policy Training Iterations
+Figure 1: Left: EIG vs NLE (P = 1) curves for each method on the d = 3, K = 10 location finding setting. Right:
+Comparing policy training curves for S CORE BED and PCE on the same problem.
+
+The exact NLE cost of each method is calculated in Ap-                        trained variational approximation while JointVarPost trains
+pendix D.7 and the configurations of each baseline to respect                 entirely from scratch for each policy.
+the exact budget are detailed in Appendix D.8. In order to
+                                                                              Results are reported in Table 1. For the d = 2, K = 2
+accommodate different numbers of policies P while respect-
+                                                                              setting we observe that each of the two-stage approaches
+ing the same total budget, we varied the upfront training
+                                                                              exhibits marginally improved performance at the P = 5
+budget for S CORE BED, VarMarg and VarPost, the total
+                                                                              protocol, while PCE and the co-trained variational posterior
+training budget for JointVarPost and the number of inner
+                                                                              see better performance under P = 1. This highlights that
+samples and particles for PCE and IO-SMC2 respectively.
+                                                                              pre-training of the EIG intractabilities enables cheap training
+                                                                              of multiple policies without sacrificing the performance
+5.1   SOURCE LOCATION FINDING                                                 of each individual policy. We emphasise that in practical
+                                                                              applications, we expect more significant gains by using these
+The first experiment is a long-standing BED benchmark                         P policies to search over architectures and hyperparameters.
+problem (Foster et al., 2021; Sheng and Hu, 2005) where                       Here the overall best-performing approach was JointVarPost,
+one places designs in a d-dimensional space and makes a                       closely followed by VarPost and S CORE BED.
+noisy observation of the superimposed signals propagating
+from K unknown sources. We consider the typical d =                           For the d = 3, K = 10 setting, Table 1 clearly shows that
+2, K = 2 setting and a more challenging d = 3, K = 10                         S CORE BED outperforms all competing methods at both the
+setting. In each case we perform T = 30 experiments and                       P = 1 and P = 5 protocols. The parameter space in this
+train a permutation-invariant DAD network (Foster et al.,                     task is 30-dimensional, which we believe particularly suits
+2021). We highlight that in each setting, a single pre-trained                S CORE BED (and challenges nested or variational posterior
+score network was used to train all the score-based policies                  approaches) due to the behaviour of the score-matching
+reported. Similarly, VarMarg and VarPost use a single pre-                    objective in high parameter dimensions, as discussed in
+
+
+                                                                        5399
+Table 2: Results for dynamical systems. All tasks have a common NLE budget of 1.024 × 1010 . S CORE BED selects policies
+across three score network seeds each receiving one third of the budget. The NLE cost of IO-SMC2 is random due to extra
+steps following degeneracy criteria; exact values are presented in Appendix Table 11. Results show mean ± one standard
+error over 4 policy repeats, bold indicates statistically indistinguishable from the best lower bound at 95% confidence.
+
+                               Stochastic pendulum                         Cart-pole                        Double link
+ Method                   Lower Bound        Upper Bound      Lower Bound        Upper Bound      Lower Bound      Upper Bound
+ S CORE BED (P=3)           3.91 ± 0.02       3.91 ± 0.02          6.94 ± 0.01     6.96 ± 0.00     11.01 ± 0.07     11.59 ± 0.12
+ S CORE BED (P=50)          3.95 ± 0.02       3.95 ± 0.02          7.17 ± 0.02     7.19 ± 0.02     11.78 ± 0.01     13.04 ± 0.05
+ PCE (P=1)                  3.91 ± 0.01       3.91 ± 0.01          7.22 ± 0.01     7.23 ± 0.01     11.57 ± 0.06     12.49 ± 0.15
+ PCE (P=50)                 3.90 ± 0.01       3.90 ± 0.01          7.13 ± 0.03     7.15 ± 0.03     11.15 ± 0.06     11.86 ± 0.10
+ JointVarPost (P=1)         3.70 ± 0.16       3.70 ± 0.16          6.10 ± 0.25     6.10 ± 0.25     11.76 ± 0.08     12.99 ± 0.14
+ JointVarPost (P=50)        3.95 ± 0.01       3.95 ± 0.01          7.20 ± 0.01     7.22 ± 0.01     11.99 ± 0.03     13.37 ± 0.15
+ VarMarg (P=1)              3.63 ± 0.02       3.64 ± 0.02          5.50 ± 0.02     5.50 ± 0.02     11.44 ± 0.04     12.33 ± 0.10
+ VarMarg (P=50)             3.63 ± 0.01       3.63 ± 0.01          5.54 ± 0.00     5.55 ± 0.00     11.44 ± 0.01     12.35 ± 0.04
+ VarPost (P=1)              3.87 ± 0.01       3.87 ± 0.01          7.21 ± 0.01     7.22 ± 0.01     11.79 ± 0.02     12.92 ± 0.06
+ VarPost (P=50)             3.92 ± 0.02       3.92 ± 0.02          7.19 ± 0.02     7.20 ± 0.02     11.84 ± 0.02     13.32 ± 0.21
+ IO-SMC2 (P=1)              3.49 ± 0.04       3.49 ± 0.04          5.81 ± 0.02     5.81 ± 0.02     11.31 ± 0.04     12.09 ± 0.04
+
+
+Section 3. Interestingly, S CORE BED performs marginally              decision directly impacts the state of the system at future
+better when P = 1, which indicates that the score network             iterations, creating a non-Markovian structure where early
+has not yet plateaued at this budget, as corroborated by the          design decisions can dramatically change the regime of later
+EIG vs NLE curves (see below). Surprisingly, we observe               observations. We simulate each system for T = 50 time
+that the variational marginal approach does not perform               steps using an Euler-Maruyama discretisation scheme with
+well on either of the location finding settings, despite being        step size δ = 0.05. We train an adaptive policy using the
+theoretically more suited to the high-dimensional setting for         stochastic LSTM architecture from Iqbal et al. (2024).
+the same reasons as S CORE BED.
+                                                                     We note for these problems we experienced some instability
+In Figure 1 we present a curve of EIG bounds versus NLE              in the training of the score network. To mitigate this, we
+budget for each method under the P = 1 protocol for                  trained three score networks each with a third of the allowed
+the higher dimensional setting, which shows S CORE BED               budget. We then split the P policy restarts between the three
+achieving consistently higher EIG over a range of NLE                networks and reported the performance of the best policy as
+budgets. We also visualise a comparison between the EIG              per our established best-of-P protocol. We therefore report
+curves during policy training for S CORE BED and PCE,                P = 3 and P = 50 variants only for our approach. We also
+where S CORE BED appears to benefit from slightly faster             only present IO-SMC2 in the P = 1 variant because the
+training per iteration than PCE, likely due to reducing the          wall-clock time for the P = 50 protocol was prohibitive.
+variance of the gradient estimates. This translates to signific-
+                                                                     Stochastic pendulum. This system consists of a pendu-
+antly faster policy training per NLE since the per-iteration
+                                                                     lum of unknown mass and length controlled by a torque
+cost of S CORE BED is significantly cheaper in NLE given
+                                                                     ξt ∈ [−1, 1]. Results in Table 2 show statistically indistin-
+the pre-trained score network allowing us to avoid the need
+                                                                     guishable performance between S CORE BED and the two
+to consider M contrastive samples.
+                                                                     variational posterior approaches under the P = 50 protocol,
+                                                                     while PCE performs similarly as well. We found policy
+5.2   DYNAMICAL SYSTEMS                                              training to be very cheap here—only requiring 500 gradient
+                                                                     steps to converge—therefore we were able to cheaply train
+Our second set of experiments is a series of dynamical               50 policy restarts but found only modest improvements in
+systems models, introduced as BED benchmarks by Iqbal                doing so. We expect larger gains could be realised by allow-
+et al. (2024). Each problem consists of a dynamical system           ing search over architectures amongst the P = 50 policies.
+whose behaviour is governed by an SDE depending on a                 Both VarMarg and IO-SMC2 performed poorly compared to
+set of unknown parameters and controlled by an external              the other approaches. The lower performance of IO-SMC2
+force ξt . The design problem is to control the system via           than presented in Iqbal et al. (2024) throughout the experi-
+ξt in order to learn about the unknown parameters. The               ments is due to our problem setup being slightly different,
+models are the stochastic pendulum, cart-pole and double             with a higher observation noise level to avoid EIG satura-
+link systems, which increase in complexity based on dimen-           tion and thus more reliable evaluation. We were still able to
+sionality and trajectory dynamics. In all cases, each design         replicate their results when run on the same noise setting.
+
+
+                                                               5400
+                                                                 ScoreBED                                    Location Finding               Stochastic Pendulum
+                                                                 PCE                                                                  4.0
+
+
+
+
+                                                                                   EIG Lower Bound
+                                                                 PCE*
+                     101                                                                             7.5                              3.5
+  EIG Gradient MSE
+
+
+
+                                                                                                     5.0
+                          0
+                                                                                                                                      3.0
+                     10                                                                              2.5
+                                    1000                                                                                                      ScoreBED
+                                    5000
+                                                                                                                                      2.5     PCE
+                                    10000
+                                                                                                     0.0
+                     10 1           20000                                                                     10 1    100       101           10 1       101      103
+                                    50000                                                                  EIG Gradient Bias 2              EIG Gradient Bias 2
+                                    100000
+                                    200000
+                                                                               Figure 3: EIG lower bound versus EIG gradient squared-bias.
+                              101            102           103        104      S CORE BED points are generated from different seeds and
+                                             N (Outer Samples)                 training checkpoints. PCE points cover a range of M inner
+                                                                               samples. ‘x’ marks the budgets used in our main results.
+Figure 2: EIG gradient MSE versus N for PCE and
+S CORE BED. Horizontal lines mark squared-bias asymp-                          the gradient estimator eventually leads to the bias dominat-
+totes. PCE∗ uses 10× the budget of PCE by increasing the                       ing the error, and even at modest N —for example we used
+number of inner samples by 10, as per Table 1.                                 N = 1024 in our experiments—the implicit averaging ef-
+                                                                               fect of stochastic gradient descent still reveals the bias as the
+Cart-pole. The cart-pole system consists of a cart of un-                      limiting source of error over policy training. Indeed, we over-
+known mass and a freely pivoting pole of unknown mass                          laid the error curve for PCE and found significantly higher
+and length. The design ξt ∈ [−5, 5] is the force applied to                    gradient biases, which matches the inferior performance of
+the cart, and observations consist of the velocity and ac-                     PCE on this task (whereas we found this bias to be lower
+celeration of the cart and the angular position and angular                    for PCE on tasks where it performed better, cf. Figure 3).
+velocity of the pole. The results presented in Table 2 draw
+similar conclusions to the stochastic pendulum variant with                    Furthermore, we find a clear correlation between the gradi-
+very minor differences between approaches, except for Var-                     ent bias and the downstream EIG achieved across all our
+Marg and IO-SMC2 , which performed poorly. We note the                         experiments, which we illustrate in Figure 3. Higher gradi-
+joint variational posterior approach also experienced some                     ent biases can throw off the policy training and lead to poor
+instability on this task and thus benefitted from selecting the                performance of the final policy. This reveals the gradient
+best policy from the P = 50 protocol.                                          bias as a key determining factor to the success of any policy
+                                                                               training methodology. For S CORE BED, bias corresponds to
+Double link. The double link system is made up of two                          approximation and estimation errors of the score network,
+links, each of unknown mass and length. The system is                          which are typically reducible by better training and network
+                                                 (1)
+controlled by a two-dimensional design with ξt ∈ [−4, 4]                       capacity, while PCE and nested sampling approaches admit
+                                           (2)
+being the torque on the first link and ξt ∈ [−2, 2] the                        bias through finite sample sizes. This confirms each of these
+torque on the second. The results in Table 2 show that the co-                 approaches as distinct methods with different properties
+trained variational posterior works best on this task, with the                which may each be advantageous in their own scenarios.
+variational posterior and S CORE BED performing similarly
+and nearly catching up with the co-trained variant when                        6                     CONCLUSION
+P = 50. The best PCE variant here occurs with P = 1 and
+lags slightly behind the aforementioned approaches, but is                     We turned the doubly intractable EIG gradient in policy-
+slightly better than VarMarg or IO-SMC2 .                                      based BED problems into two singly intractable problems
+                                                                               which can be solved sequentially: a score matching problem
+5.3                  POLICY GRADIENT BIAS                                      for the intractable marginal followed by policy-training us-
+                                                                               ing the learned score network. This S CORE BED approach
+To investigate the key factors behind the quality of policy                    allows significantly cheaper gradient-based policy training
+training, we explored the error of the S CORE BED EIG gradi-                   by solving the double intractability upfront, such that we can
+ent estimates as a function of N and the number of score                       easily repeatedly train multiple policies on a given problem.
+training iterations on the high-dimensional source location                    This benefits policy training through, for example, allowing
+finding task in Figure 2. At low N , we observe the expected                   architecture and hyperparameter searches and avoiding local
+1/N convergence rate, which gives way to a bias plateau                        optima. Our results illustrate that S CORE BED achieves com-
+as N increases. We derive a bias-variance decomposition in                     petitive performance with existing approaches that do not al-
+Appendix C which explains this behaviour as variance terms                     low cheap policy retraining and with newly proposed altern-
+in the decomposition are scaled by 1/N . Increasing N in                       atives that train a fixed amortised posterior network upfront.
+
+
+                                                                            5401
+Acknowledgements                                             Conor Durkan, Artur Bekasov, Iain Murray, and George
+                                                               Papamakarios. Neural Spline Flows. In Advances in
+AP is supported by the EPSRC CDT in Modern Statistics          Neural Information Processing Systems, volume 32. Cur-
+and Statistical Machine Learning (EP/S023151/1). GK and        ran Associates, Inc., 2019.
+TR are supported by EPSRC grant EP/Y037200/1.
+                                                             Sergey Dushenko, Kapildeb Ambal, and Robert D. McMi-
+                                                               chael. Sequential Bayesian Experiment Design for Optic-
+References                                                     ally Detected Magnetic Resonance of Nitrogen-Vacancy
+                                                               Centers. Physical Review Applied, 14(5):054036, Novem-
+Ziqiao Ao and Jinglai Li. On Estimating the Gradient of        ber 2020. doi: 10.1103/PhysRevApplied.14.054036.
+  the Expected Information Gain in Bayesian Experimental
+  Design. Proceedings of the AAAI Conference on Artificial   Lawrence C Evans. Measure theory and fine properties of
+  Intelligence, 38(18):20311–20319, March 2024. ISSN           functions. Chapman and Hall/CRC, 2025.
+  2374-3468. doi: 10.1609/aaai.v38i18.30012. Number:
+                                                             Adam Foster, Martin Jankowiak, Elias Bingham, Paul
+  18.
+                                                               Horsfall, Yee Whye Teh, Thomas Rainforth, and Noah
+David Barber and Felix Agakov. Information Maximization        Goodman. Variational Bayesian Optimal Experimental
+  in Noisy Channels : A Variational Approach. In Advances      Design. In Advances in Neural Information Processing
+  in Neural Information Processing Systems, volume 16.        Systems, volume 32. Curran Associates, Inc., 2019.
+  MIT Press, 2003.
+                                                             Adam Foster, Martin Jankowiak, Matthew O’Meara,
+Tom Blau, Edwin V. Bonilla, Iadine Chades, and Amir Dez-      Yee Whye Teh, and Tom Rainforth. A unified stochastic
+  fouli. Optimizing Sequential Experimental Design with        gradient approach to designing bayesian-optimal exper-
+  Deep Reinforcement Learning. In Proceedings of the 39th      iments. In Proceedings of the Twenty Third Interna-
+  International Conference on Machine Learning, pages          tional Conference on Artificial Intelligence and Statistics,
+  2107–2128. PMLR, June 2022.                                 volume 108 of Proceedings of Machine Learning Re-
+                                                               search, pages 2959–2969. PMLR, 26–28 Aug 2020.
+Niels Bracher, Lars Kühmichel, Desi R. Ivanova, Xavier
+  Intes, Paul-Christian Bürkner, and Stefan T. Radev. JA-    Adam Foster, Desi R. Ivanova, Ilyas Malik, and Tom Rain-
+  DAI: Jointly Amortizing Adaptive Design and Bayesian         forth. Deep Adaptive Design: Amortizing Sequential
+  Inference, December 2025. arXiv:2512.22999 [stat].           Bayesian Experimental Design. In Proceedings of the
+James Bradbury, Roy Frostig, Peter Hawkins, Matthew           38th International Conference on Machine Learning,
+  Johnson, Chris Leary, Dougal Maclaurin, George Necula,       pages 3384–3395. PMLR, July 2021.
+  Adam Paszke, Jake VanderPlas, Skye Wanderman-Milne,        Yarin Gal, Riashat Islam, and Zoubin Ghahramani. Deep
+  and Qiao Zhang. JAX: composable transformations of           Bayesian active learning with image data. In Proceedings
+  Python+NumPy programs, 2018.                                 of the 34th International Conference on Machine Learn-
+Johann Brehmer, Gilles Louppe, Juan Pavez, and Kyle            ing - Volume 70, ICML’17, pages 1183–1192, Sydney,
+  Cranmer. Mining gold from implicit models to improve         NSW, Australia, August 2017. JMLR.org.
+  likelihood-free inference. Proceedings of the National     Takashi Goda, Tomohiko Hironaka, Wataru Kitade, and
+  Academy of Sciences, 117(10):5242–5249, March 2020.          Adam Foster. Unbiased MLMC Stochastic Gradient-
+  doi: 10.1073/pnas.1915980117.                                Based Optimization of Bayesian Experimental Designs.
+Kathryn Chaloner and Isabella Verdinelli. Bayesian Ex-         SIAM Journal on Scientific Computing, 44(1):A286–
+  perimental Design: A Review. Statistical Science, 10(3):     A311, February 2022. ISSN 1064-8275. doi: 10.1137/
+  273–304, August 1995. ISSN 0883-4237, 2168-8745.             20M1338848.
+  doi: 10.1214/ss/1177009939.
+                                                             Marcel Hedman, Desi R. Ivanova, Cong Guan, and Tom
+Prafulla Dhariwal and Alexander Nichol. Diffusion Models      Rainforth. Step-DAD: Semi-Amortized Policy-Based
+  Beat GANs on Image Synthesis. In Advances in Neural         Bayesian Experimental Design. In Proceedings of the
+  Information Processing Systems, volume 34, pages 8780–      42nd International Conference on Machine Learning,
+  8794. Curran Associates, Inc., 2021.                        pages 22904–22923. PMLR, October 2025.
+Jiayuan Dong, Christian Jacobsen, Mehdi Khalloufi,           Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising
+   Maryam Akram, Wanjiao Liu, Karthik Duraisamy, and           diffusion probabilistic models. In Proceedings of the
+   Xun Huan. Variational Bayesian optimal experimental         34th International Conference on Neural Information
+   design with normalizing flows. Computer Methods in Ap-      Processing Systems, NIPS ’20, pages 6840–6851, Red
+   plied Mechanics and Engineering, 433:117457, January        Hook, NY, USA, December 2020. Curran Associates Inc.
+   2025. ISSN 00457825. doi: 10.1016/j.cma.2024.117457.        ISBN 978-1-7138-2954-6.
+
+
+                                                         5402
+Xun Huan, Jayanth Jagalur, and Youssef Marzouk. Op-             Yingzhen Li and Richard E Turner. Gradient estimators for
+  timal experimental design: Formulations and computa-            implicit models. In International Conference on Learning
+  tions. Acta Numerica, 33:715–840, July 2024. ISSN 0962-         Representations, 2018.
+ 4929, 1474-0508. doi: 10.1017/S0962492924000023.
+                                                                Jae Hyun Lim, Aaron Courville, Christopher Pal, and Chin-
+Daolang Huang, Zhuoyue Huang, Conor Hassan, Luigi                 Wei Huang. AR-DAE: Towards Unbiased Neural En-
+  Acerbi, Samuel Kaski, and Tom Rainforth. Efficient              tropy Gradient Estimation. In Proceedings of the 37th
+  adaptive data acquisition via pretrained belief representa-     International Conference on Machine Learning, pages
+  tions. arXiv preprint arXiv:2606.25197, 2026a.                  6061–6071. PMLR, November 2020.
+
+Daolang Huang, Xinyi Wen, Ayush Bharti, Samuel Kaski,           D. V. Lindley. On a Measure of the Information Provided by
+  and Luigi Acerbi.       Aline: Joint amortization for           an Experiment. The Annals of Mathematical Statistics, 27
+  bayesian inference and active data acquisition. Advances        (4):986–1005, December 1956. ISSN 0003-4851, 2168-
+  in Neural Information Processing Systems, 38:54068–             8990. doi: 10.1214/aoms/1177728069.
+  54102, 2026b.
+                                                                Dennis Victor Lindley. Bayesian statistics: A review. SIAM,
+Aapo Hyvärinen. Estimation of Non-Normalized Statistical         1972.
+  Models by Score Matching. Journal of Machine Learning
+  Research, 6(24):695–709, 2005. ISSN 1533-7928.                Robert D. McMichael, Sergey Dushenko, and Sean M.
+                                                                  Blakley. Sequential Bayesian experiment design for
+Jacopo Iollo, Christophe Heinkelé, Pierre Alliez, and             adaptive Ramsey sequence measurements. Journal of
+  Florence Forbes. Bayesian Experimental Design via Con-          Applied Physics, 130(14):144401, October 2021. ISSN
+  trastive Diffusions, March 2025. arXiv:2410.11826 [stat]        0021-8979. doi: 10.1063/5.0055630.
+  version: 2.
+                                                                Tung Nguyen and Aditya Grover. Transformer neural pro-
+Sahel Iqbal, Adrien Corenflos, Simo Särkkä, and Hany              cesses: Uncertainty-aware meta learning via sequence
+  Abdulsamad. Nesting Particle Filters for Experimental           modeling. In Kamalika Chaudhuri, Stefanie Jegelka,
+  Design in Dynamical Systems. In Proceedings of the 41st         Le Song, Csaba Szepesvari, Gang Niu, and Sivan Sabato,
+  International Conference on Machine Learning, pages             editors, Proceedings of the 39th International Conference
+  21047–21068. PMLR, July 2024.                                   on Machine Learning, volume 162 of Proceedings of Ma-
+                                                                  chine Learning Research, pages 16569–16594. PMLR,
+Desi R Ivanova, Adam Foster, Steven Kleinegesse, Mi-              17–23 Jul 2022.
+  chael U. Gutmann, and Thomas Rainforth. Implicit Deep
+  Adaptive Design: Policy-Based Experimental Design             George Papamakarios, Theo Pavlakou, and Iain Murray.
+  without Likelihoods. In Advances in Neural Informa-             Masked Autoregressive Flow for Density Estimation.
+  tion Processing Systems, volume 34, pages 25785–25798.          In Advances in Neural Information Processing Systems,
+  Curran Associates, Inc., 2021.                                  volume 30. Curran Associates, Inc., 2017.
+
+Diederik P. Kingma and Jimmy Ba. Adam: A Method for             Josh Pasek and Jon A. Krosnick. Optimizing Survey Ques-
+  Stochastic Optimization, January 2017. arXiv:1412.6980          tionnaire Design in Political Science: Insights from Psy-
+  [cs].                                                           chology. In Jan E. Leighley, editor, The Oxford Handbook
+                                                                  of American Elections and Political Behavior, page 0.
+Diederik P. Kingma and Max Welling. Auto-Encoding                 Oxford University Press, February 2010. ISBN 978-0-19-
+  Variational Bayes, December 2013. arXiv:1312.6114               923547-6. doi: 10.1093/oxfordhb/9780199235476.003.
+  [stat].                                                         0003.
+
+Steven Kleinegesse and Michael U. Gutmann. Efficient            Tom Rainforth, Rob Cornish, Hongseok Yang, Andrew War-
+  Bayesian Experimental Design for Implicit Models. In            rington, and Frank Wood. On Nesting Monte Carlo Es-
+  Proceedings of the Twenty-Second International Confer-          timators. In Proceedings of the 35th International Con-
+  ence on Artificial Intelligence and Statistics, pages 476–      ference on Machine Learning, pages 4267–4276. PMLR,
+  485. PMLR, April 2019.                                          July 2018.
+
+Steven Kleinegesse and Michael U. Gutmann. Bayesian             Tom Rainforth, Adam Foster, Desi R. Ivanova, and Fred-
+  Experimental Design for Implicit Models by Mutual In-           die Bickford Smith. Modern Bayesian Experimental
+  formation Neural Estimation. In Proceedings of the 37th         Design. Statistical Science, 39(1):100–114, February
+  International Conference on Machine Learning, pages             2024. ISSN 0883-4237, 2168-8745. doi: 10.1214/
+  5316–5326. PMLR, November 2020.                                 23-STS915.
+
+
+                                                            5403
+Chang-Han Rhee and Peter W. Glynn. Unbiased Estimation         Matthew Tancik, Pratul Srinivasan, Ben Mildenhall, Sara
+  with Square Root Convergence for SDE Models. Oper-            Fridovich-Keil, Nithin Raghavan, Utkarsh Singhal, Ravi
+  ations Research, 63(5):1026–1043, 2015. ISSN 0030-            Ramamoorthi, Jonathan Barron, and Ren Ng. Fourier
+  364X.                                                         Features Let Networks Learn High Frequency Functions
+                                                                in Low Dimensional Domains. In Advances in Neural
+Robin Rombach, Andreas Blattmann, Dominik Lorenz,               Information Processing Systems, volume 33, pages 7537–
+  Patrick Esser, and Björn Ommer. High-Resolution Im-           7547. Curran Associates, Inc., 2020.
+  age Synthesis with Latent Diffusion Models. In 2022
+  IEEE/CVF Conference on Computer Vision and Pattern           W. M. Telford, L. P. Geldart, and R. E. Sheriff. Gravity
+  Recognition (CVPR), pages 10674–10685, June 2022.             Methods, page 6–61. Cambridge University Press, 1990.
+  doi: 10.1109/CVPR52688.2022.01042.
+                                                               Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkor-
+Donald B Rubin. Inference and missing data. Biometrika,          eit, Llion Jones, Aidan N Gomez, Ł ukasz Kaiser, and
+  63(3):581–592, 1976.                                           Illia Polosukhin. Attention is All you Need. In Advances
+                                                                 in Neural Information Processing Systems, volume 30.
+Leopoldo Sarra and Florian Marquardt. Deep Bayesian ex-          Curran Associates, Inc., 2017.
+  perimental design for quantum many-body systems. Ma-
+  chine Learning: Science and Technology, 4(4):045022,         Benjamin Thomas Vincent and Tom Rainforth. The DARC
+  October 2023.      ISSN 2632-2153.     doi: 10.1088/           Toolbox: automated, flexible, and efficient delayed and
+  2632-2153/ad020d.                                              risky choice experiments using Bayesian adaptive design,
+                                                                 October 2017.
+C. E. Shannon.        A Mathematical Theory of Com-
+  munication.       Bell System Technical Journal, 27          Pascal Vincent. A Connection Between Score Match-
+  (3):379–423, 1948.          ISSN 1538-7305.         doi:       ing and Denoising Autoencoders. Neural Computation,
+  10.1002/j.1538-7305.1948.tb01338.x.            _eprint:        23(7):1661–1674, July 2011. ISSN 0899-7667. doi:
+  https://onlinelibrary.wiley.com/doi/pdf/10.1002/j.1538-        10.1162/NECO_a_00142. Conference Name: Neural
+  7305.1948.tb01338.x.                                           Computation.
+
+Wanggang Shen and Xun Huan. Bayesian Sequential Op-            Andrew B. Watson. QUEST+: A general multidimensional
+ timal Experimental Design for Nonlinear Models Us-              Bayesian adaptive psychometric method. Journal of
+ ing Policy Gradient Reinforcement Learning. Com-               Vision, 17(3):10, April 2017. ISSN 1534-7362. doi:
+ puter Methods in Applied Mechanics and Engineering,            10.1167/17.3.10.
+ 416:116304, November 2023. ISSN 00457825. doi:
+                                                               Liangjian Wen, Haoli Bai, Lirong He, Yiji Zhou, Mingy-
+ 10.1016/j.cma.2023.116304. arXiv:2110.15335 [cs].
+                                                                 uan Zhou, and Zenglin Xu. Gradient estimation of in-
+Xiaohong Sheng and Yu-Hen Hu. Maximum likelihood                 formation measures in deep learning. Knowledge-Based
+  multiple-source localization using acoustic energy meas-       Systems, 224:107046, July 2021. ISSN 09507051. doi:
+  urements with wireless sensor networks. IEEE Transac-          10.1016/j.knosys.2021.107046.
+  tions on Signal Processing, 53(1):44–53, January 2005.
+                                                               Ronald J. Williams. Simple Statistical Gradient-Following
+  ISSN 1941-0476. doi: 10.1109/TSP.2004.838930. Con-
+                                                                 Algorithms for Connectionist Reinforcement Learning.
+  ference Name: IEEE Transactions on Signal Processing.
+                                                                 Mach. Learn., 8(3-4):229–256, May 1992. ISSN 0885-
+Jiaxin Shi, Shengyang Sun, and Jun Zhu. A spectral ap-           6125. doi: 10.1007/BF00992696.
+   proach to gradient estimation for implicit distributions.
+   In International Conference on Machine Learning, pages
+   4644–4653. PMLR, 2018.
+
+Jasper Snoek, Hugo Larochelle, and Ryan P. Adams. Prac-
+  tical Bayesian Optimization of Machine Learning Al-
+  gorithms, August 2012. arXiv:1206.2944 [stat].
+
+Yang Song and Stefano Ermon. Generative Modeling by Es-
+  timating Gradients of the Data Distribution. In Advances
+  in Neural Information Processing Systems, volume 32.
+  Curran Associates, Inc., 2019.
+
+Yang Song, Sahaj Garg, Jiaxin Shi, and Stefano Ermon.
+  Sliced Score Matching: A Scalable Approach to Density
+  and Score Estimation, June 2019. arXiv:1905.07088.
+
+
+                                                           5404
+                        Bayesian Experimental Design via Score Matching
+                                   (Supplementary Material)
+
+
+
+                 Angus Phillips1                         Gavin Kerrigan1                        Tom Rainforth1
+
+                                        1
+                                            Department of Statistics, University of Oxford
+
+
+
+
+INTRODUCTION
+The Appendix is structured as follows. In Appendix A we derive the gradient expression of Theorem 1. In Appendix B
+we prove an error bound on the S CORE BED EIG gradient approximation. In Appendix C we provide the bias–variance
+decomposition discussed in Section 5.3. In Appendix D we provide full details of our experimental procedures. In Appendix
+E we provide additional results, ablation studies and further empirical investigations.
+
+
+A     EIG GRADIENT EXPRESSION
+
+A.1   POLICY-BASED TOTAL EIG
+
+Recall the information gain as a measure of the utility (Lindley, 1956) of a set of designs ξ1:T for which you observe data
+y1:T , defined as IGθ (y1:T , ξ1:T ) = H[p(θ)] − H[p(θ | y1:T , ξ1:T )]. Since we wish to optimise the next designs prior to
+observing any data, we consider the expectation of the information gain with respect to the data generating process.
+In a policy-based BED setting, we plan to draw designs from an adaptive proposal distribution πϕ (ξt | ht−1 ) which we
+assume to be stochastic in general although we note that optimal policies are always deterministic (Lindley, 1972). In
+the stochastic case, πϕ (ξt | ht−1 ) represents a distribution with density of the same notation defined with respect to the
+Lebesgue measure. If the policy network is instead deterministic, πϕ no longer has a density with respect to the Lebesgue
+measure and instead collapses to a degenerate distribution. In the deterministic case our notation is no longer formally
+correct but an alternative formulation of the likelihood p(yt | θ; ξt ) could be considered where ξt is no longer a random
+variable but a parameter of the likelihood. With that distinction, all of the same definitions and results hold. A more in-depth
+discussion can be found in the Appendix of Ivanova et al. (2021).
+Given the (stochastic) policy network πϕ and conditional on the underlying parameter θ, the data generating process can
+                                       QT
+be written as pϕ (y1:T , ξ1:T | θ) = t=1 πϕ (ξt | ht−1 )p(yt | θ, ξt , ht−1 ). We integrate this over the prior p(θ) to obtain
+the joint pϕ (y1:T , ξ1:T ). The posterior distribution is p(θ | y1:T , ξ1:T ) ∝ p(θ)pϕ (y1:T , ξ1:T | θ) which is easily seen to be
+independent of how the designs ξ1:T were proposed, as follows:
+                                                     p(θ)pϕ (y1:T , ξ1:T | θ)
+                             p(θ | y1:T , ξ1:T ) = R                                                                             (7)
+                                                     p(θ)pϕ (y1:T , ξ1:T | θ)dθ
+                                                          QT
+                                                     p(θ) t=1 πϕ (ξt | ht−1 )p(yt | ξt , ht−1 , θ)
+                                                  =R     QT                                                                      (8)
+                                                     p(θ) t=1 πϕ (ξt | ht−1 )p(yt | ξt , ht−1 , θ)dθ
+                                                          QT
+                                                     p(θ) t=1 p(yt | ξt , ht−1 , θ)
+                                                  =R     QT                                                                      (9)
+                                                     p(θ) t=1 p(yt | ξt , ht−1 , θ)dθ
+where the design proposals cancelled. This assumes that observations do not depend on the policy in any way beyond
+the realised designs, that is we have p(yt |ξt , ht−1 , θ) rather than p(yt |ξt , ht−1 , θ, ϕ). The ignorability of the observation
+
+
+                                                                5405
+mechanism in posterior inference and the conditions required have previously been studied in related literature on missing
+data, see Rubin (1976).
+                                                                                                       R      QT
+We also define the marginal distribution of the data given a set of designs, p(y1:T | ξ1:T ) = p(θ) t=1 p(yt |
+                  QT                                                R
+ξt , ht−1 , θ)dθ = t=1 p(yt | ξt , ht−1 ) where p(yt | ξt , ht−1 ) = p(θ | ht−1 )p(yt | ξt , ht−1 , θ)dθ. This decomposi-
+tion is axiomatically true by stacking nested conditional densities but we also show below that p(yt | ξt , ht−1 ) has a
+particular form:
+
+  Z          T
+             Y
+      p(θ)         p(yt | ξt , ht−1 , θ)dθ                                                                                                       (10)
+             t=1
+                 Z                               T
+                                                 Y
+             =       p(θ)p(y1 | ξ1 , h0 , θ)           p(yt | ξt , ht−1 , θ)dθ                                                                   (11)
+                                                 t=2
+                                                                                         T
+                                                              p(θ)p(y1 | ξ1 , h0 , θ) Y
+                 Z                                    Z
+             =     p(θ)p(y1 | ξ1 , h0 , θ)dθ              R                                 p(yt | ξt , ht−1 , θ)dθ                              (12)
+                                                              p(θ)p(y1 | ξ1 , h0 , θ)dθ t=2
+                 |         {z              }
+                            p(y1 |ξ1 ,h0 )
+                                     Z                T
+                                                      Y
+             = p(y1 | ξ1 , h0 )          p(θ | h1 )         p(yt | ξt , ht−1 , θ)dθ                                                              (13)
+                                                      t=2
+                                                                                                                       T
+                                                                                      p(θ | h1 )p(y2 | ξ2 , h1 , θ) Y
+                                     Z                                        Z
+             = p(y1 | ξ1 , h0 )        p(θ | h1 )p(y2 | ξ2 , h1 , θ)dθ            R                                       p(yt | ξt , ht−1 , θ)dθ (14)
+                                                                                      p(θ | h1 )p(y2 | ξ2 , h1 , θ)dθ t=3
+                                     |             {z                }
+                                                  p(y2 |ξ2 ,h1 )
+
+             = ···                                                                                                                               (15)
+                 T
+                 Y
+             =         p(yt | ξt , ht−1 )                                                                                                        (16)
+                 t=1
+
+                                 R
+where p(yt | ξt , ht−1 ) =           p(θ | ht−1 )p(yt | ξt , ht−1 , θ)dθ and the intermediate steps were completed by induction.
+With the above distributions carefully defined, we consider the expected information gain as IT (ϕ) =
+Epϕ (y1:T ,ξ1:T ) {IGθ (y1:T , ξ1:T )}. Note that the information gain itself does not depend on the policy network, but only
+on the specific set of designs that are seen. The dependency on the policy network is only introduced in the outer expectation
+of the EIG.
+
+
+A.2    DERIVATION OF EIG GRADIENT
+
+We restate our theorem for the gradient of the EIG in full notation below.
+
+Theorem 2 (Gradient of EIG). The following expression for the gradient of the EIG holds:
+                                         (                                                                                                        )
+                                              d                           ∂                      ∂y1:T     ∂                      ∂ξ1:T
+ ∇ϕ IT (ϕ) = Ep(θ)q(δ1:T ,ϵ1:T )                log p(y1:T |ξ1:T , θ) −       log p(y1:T |ξ1:T )       −       log p(y1:T |ξ1:T )
+                                             dϕ                         ∂y1:T                     ∂ϕ     ∂ξ1:T                     ∂ϕ
+                                                                                                                                                 (17)
+
+where y1:T = {gt1 (δ1:t , ϵ1:t , θ, ϕ)}Tt=1 , ξ1:T = {gt2 (δ1:t−1 , ϵ1:t , θ, ϕ)}Tt=1 ∼ pϕ (·, · | θ) for δ1:T , ϵ1:T ∼ q(·, ·) are obtained
+by reparameterisation. In the specific case of static (non-adaptive) designs, the expression simplifies to:
+                                                                                                                                  
+                                                                     d                             ∂                       ∂y1:T
+                     ∇ξ1:T IT (ξ1:T ) = Ep(θ)q(δ1:T )                    log p(y1:T |θ; ξ1:T ) −       log p(y1:T ; ξ1:T )                       (18)
+                                                                   dξ1:T                         ∂y1:T                     ∂ξ1:T
+
+where again we use the reparameterisation trick such that y1:T = {gt (δ1:t , θ, ξ1:T )}Tt=1 ∼ p(·; ξ1:T ) for δ1:T ∼ q(·).
+
+
+                                                                               5406
+Proof. To derive this expression we start by considering the mutual information form of the EIG as follows:
+
+                             IT (ϕ) = Epϕ (y1:T ,ξ1:T ) {IGθ (y1:T , ξ1:T )}                                                                           (19)
+                                      = Epϕ (y1:T ,ξ1:T ) {Ep(θ|y1:T ,ξ1:T ) log p(θ | y1:T , ξ1:T ) − Ep(θ) log p(θ)}                                 (20)
+                                      = Ep(θ)pϕ (y1:T ,ξ1:T |θ) {log p(θ | y1:T , ξ1:T )} + C                                                          (21)
+                                      = Ep(θ)pϕ (y1:T ,ξ1:T |θ) {log p(y1:T | ξ1:T , θ) − log p(y1:T | ξ1:T )} + C                                     (22)
+
+where C denotes terms constant in ϕ. Firstly, we consider the full gradient expression in the general case of stochastic
+proposals, given in eq. (3). This expression follows by reparameterising, differentiating under the expectation, and applying
+the chain rule. Explicitly, we define the reparameterisation recursively by yt = gt1 (δt , ξt , θ, ht−1 ) (recall yt ∼ p(· |
+ξt , θ, ht−1 )) and ξt = gt2 (ϵt , ht−1 , ϕ) (recall ξt ∼ πϕ (· | ht−1 )). Rolling out the recursive reparameterisation we obtain1
+           1                                  2
+y1:T = g1:T    (δ1:T , ϵ1:T , θ, ϕ), ξ1:T = g1:T (δ1:T −1 , ϵ1:T , θ, ϕ) ∼ pϕ (·, · | θ) for ϵ1:T , δ1:T ∼ q(·, ·), as stated in the theorem.
+Then the gradient of the objective can be written as:
+                                      n d                                                 d                                     o
+                                                    1               2                              1               2
+ ∇ϕ IT (ϕ) = Ep(θ)q(ϵ1:T ,δ1:T )             log p(g1:T (. . . ) | g1:T (. . . ), θ) −      log p(g1:T (. . . ) | g1:T (. . . ))                       (23)
+                                       dϕ                                                dϕ
+                                      (
+                                         d        1               2
+                = Ep(θ)q(ϵ1:T ,δ1:T )      log p(g1:T (. . . ) | g1:T (. . . ), θ)
+                                        dϕ
+                                                                                                                            1
+                                                          ∂                                                               ∂g1:T (δ1:T , ϵ1:T , θ, ϕ)
+                                                    −         log p(y1:T | ξ1:T )          y1:T =g 1 (δ1:T ,ϵ1:T ,θ,ϕ)
+                                                        ∂y1:T                                     1:T
+                                                                                                2 (δ
+                                                                                                                                    ∂ϕ
+                                                                                         ξ1:T =g1:T 1:T −1 ,ϵ1:T ,θ,ϕ)
+                                                                                                                                                        )
+                                                                                                                            2
+                                                        ∂                                                                 ∂g1:T (δ1:T −1 , ϵ1:T , θ, ϕ)
+                                                    −       log p(y1:T | ξ1:T )            y1:T =g 1 (δ1:T ,ϵ1:T ,θ,ϕ)
+                                                                                                                                                          .
+                                                      ∂ξ1:T                                       1:T
+                                                                                                2 (δ
+                                                                                                                                      ∂ϕ
+                                                                                         ξ1:T =g1:T  1:T −1 ,ϵ1:T ,θ,ϕ)
+
+                                                                                                                                                       (24)
+
+This is the main gradient expression of the theorem as required.
+As stated in the beginning, when the designs are static, they are uniquely determined up front and have no dependence on
+the data or unknown parameters of the model, and so we can simplify the above expression. Starting again from eq. (22):
+
+                       Ep(θ)pϕ (y1:T ,ξ1:T |θ) {log p(y1:T | ξ1:T , θ) − log p(y1:T | ξ1:T )} + C                                                      (25)
+                                               = Ep(θ)p(y1:T |θ;ξ1:T ) {log p(y1:T | θ; ξ1:T ) − log p(y1:T ; ξ1:T )} + C                              (26)
+
+where we have rewritten the marginal distribution of the data given the designs as p(y1:T | ξ1:T ) = p(y1:T ; ξ1:T ) in the
+static case (to emphasise the deterministic nature of the designs). This is now easy to reparameterise as yt = gt (δt , θ, ht−1 )
+which rolls out to y1:T = {gt (δ1:t , θ, ξ1:t )}Tt=1 with δ1:T ∼ q(·). Now differentiating under the expectation and applying the
+chain rule we obtain:
+                                       
+                                            d
+      ∇ξ1:T IT (ξ1:T ) = Ep(θ)q(δ1:T )            log p(g1:T (δ1:T , θ, ξ1:T ) | θ; ξ1:T )
+                                         dξ1:T
+                                                              ∂                                                     ∂g1:T (δ1:T , θ, ξ1:T )
+                                                        −           log p(y1:T ; ξ1:T )
+                                                            ∂y1:T                        y1:T =g1:T (δ1:T ,θ,ξ1:T )        ∂ξ1:T
+                                                                                                                    
+                                                              ∂
+                                                        −          log p(y1:T ; ξ1:T )                                .                     (27)
+                                                            ∂ξ1:T                        y1:T =g1:T (δ1:T ,θ,ξ1:T )
+
+Now we show that the final term is zero in expectation. To do so we undo the original reparameterisation by writing δ1:T =
+h1:T (y1:T , θ, ξ1:T ) ∼ q(·) for y1:T ∼ p(·; ξ1:T ), where h is the inverse of g, i.e. y1:T = g1:T (h1:T (y1:T , θ, ξ1:T ), θ, ξ1:T ).
+
+
+
+
+                                          1
+    1
+        We use shorthand notation y1:T = g1:T (δ1:T , ϵ1:T , θ, ϕ) to mean y1:T = {gt1 (δ1:t , ϵ1:t , θ, ϕ)}Tt=1 .
+
+
+                                                                         5407
+Then we have:
+                                                                                     
+                                 ∂
+                Ep(θ)q(δ1:T )         log p(y1:T ; ξ1:T )                                                                           (28)
+                               ∂ξ1:T                       y1:T =g1:T (δ1:T ,θ,ξ1:T )
+                                                                                                                               
+                                                          ∂
+                              = Ep(θ)p(y1:T |θ;ξ1:T )          log p(y1:T ; ξ1:T )                                                  (29)
+                                                        ∂ξ1:T                         y1:T =g1:T (h1:T (y1:T ,θ,ξ1:T ),θ,ξ1:T )
+                                                                                     
+                                                          ∂
+                              = Ep(θ)p(y1:T |θ;ξ1:T )          log p(y1:T ; ξ1:T )                                                  (30)
+                                                        ∂ξ1:T
+                                ZZ
+                                        ∂
+                              =              log p(y1:T ; ξ1:T )p(θ)p(y1:T | θ; ξ1:T )dy1:T dθ                                      (31)
+                                     ∂ξ1:T
+                                        ∂
+                                     ∂ξ1:T p(y1:T ; ξ1:T )
+                                ZZ
+                              =                             p(y1:T ; ξ1:T )p(θ | y1:T )dy1:T dθ                                     (32)
+                                         p(y1:T ; ξ1:T )
+                                ZZ
+                                        ∂
+                              =             p(y1:T ; ξ1:T )p(θ | y1:T )dy1:T dθ                                                     (33)
+                                     ∂ξ1:T
+                                Z                          Z
+                                      ∂
+                              =           p(y1:T ; ξ1:T ) p(θ | y1:T )dθdy1:T                                                       (34)
+                                    ∂ξ1:T
+                                        Z
+                                   ∂
+                              =            p(y1:T ; ξ1:T )dy1:T = 0.                                                                (35)
+                                ∂ξ1:T
+So we have removed one intractable term from the gradient expression in the static design case, providing the second part of
+the result from the theorem.
+
+One might be tempted to try a similar trick to eliminate the last term in the general case. However, when using policies it
+turns out that this term is no longer zero in expectation. At a high level, this is because it is necessary to reparameterise
+the designs, which introduces a dependence on θ which cannot be integrated away as in the penultimate line of the proof
+above. For completeness, we show this below. Starting with the last term and applying the inverse reparameterisation trick,
+analogous to the deterministic case with δ1:T = h11:T (y1:T , ξ1:T , θ, ϕ), ϵ1:T = h21:T (y1:T −1 , ξ1:T , θ, ϕ), we have:
+                                                                                             2
+                                                                                                                        
+                                  ∂                                                        ∂g1:T (δ1:T −1 , ϵ1:T , θ, ϕ)
+           Ep(θ)q(δ1:T ,ϵ1:T )          log p(y1:T | ξ1:T ) y =g1 (δ ,ϵ ,θ,ϕ)                                                       (36)
+                               ∂ξ1:T                          1:T   1:T 1:T 1:T
+                                                                   2 (δ
+                                                                                                       ∂ϕ
+                                                           ξ1:T =g1:T   1:T −1 ,ϵ1:T ,θ,ϕ)
+                                        
+                                            ∂
+              = Ep(θ)pϕ (y1:T ,ξ1:T |θ)         log p(y1:T | ξ1:T )×
+                                          ∂ξ1:T
+                                                   2
+                                                      (h11:T (y1:T −1 , ξ1:T , θ, ϕ), h21:T (y1:T −1 , ξ1:T −1 , θ, ϕ), θ, ϕ)
+                                                                                                                              
+                                                ∂g1:T
+                                                                                                                                    (37)
+                                                                                      ∂ϕ
+                                                |                                     {z                                    }
+                                                                                 Jϕ (y1:T −1 ,ξ1:T ,θ,ϕ)
+                                                        T                                               
+                                                ∂       Y
+              = Ep(θ)pϕ (y1:T ,ξ1:T |θ)             log     p(yt | ξt , ht−1 )Jϕ (y1:T −1 , ξ1:T , θ, ϕ)                            (38)
+                                              ∂ξ1:T     t=1
+                                             −1
+                                           TX
+                                                      ∂
+              = Ep(θ)pϕ (y1:T ,ξ1:T |θ)                   log p(yt | ξt , ht−1 )Jϕ (y1:T −1 , ξ1:T , θ, ϕ)+
+                                                t=1
+                                                    ∂ξ1:T
+                                                                                                                            
+                                                                   ∂
+                                                                       log p(yT | ξT , hT −1 )Jϕ (y1:T −1 , ξ1:T , θ, ϕ)            (39)
+                                                                 ∂ξ1:T
+Looking at the last term:
+                                                                                                          
+                                                  ∂
+                  Ep(θ)pϕ (y1:T ,ξ1:T |θ)             log p(yT | ξT , hT −1 )Jϕ (y1:T −1 , ξ1:T , θ, ϕ)                             (40)
+                                                ∂ξ1:T
+                                    ∂
+                                  ∂ξ1:T p(yT | ξT , hT −1 )
+                         ZZZ
+                     =                                         Jϕ (y1:T −1 , ξ1:T , θ, ϕ)p(θ | y1:T , ξ1:T )
+                                     p(yT | ξT , hT −1 )
+                                  T
+                                  Y
+                                        p(yt | ξt , ht−1 )πϕ (ξt | ht−1 )dy1:T dξ1:T dθ                                             (41)
+                                  t=1
+
+
+                                                                       5408
+                        ZZZ
+                                ∂
+                    =               p(yT | ξT , hT −1 )Jϕ (y1:T −1 , ξ1:T , θ, ϕ)p(θ | y1:T , ξ1:T )πϕ (ξT | hT −1 )
+                              ∂ξ1:T
+                               −1
+                              TY
+                                   p(yt | ξt , ht−1 )πϕ (ξt | ht−1 )dy1:T dξ1:T dθ.                                         (42)
+                               t=1
+
+The problem now is that we cannot eliminate the dependence on yT from the posterior by integrating over θ since the
+Jacobian term, which arose from the reparameterisation of the designs, depends on θ.
+
+A.3   CONSTANT ADDITIVE NOISE MODELS
+
+Our gradient expression can be further simplified when the model is known to have constant additive noise, i.e. y = f (ξ, θ)+ε
+where ε is a realisation of an independent noise variable. In this case, p(y | θ, ξ) = pε (y − f (ξ, θ)) so:
+
+                                 H[p(y | θ, ξ)] = Ep(y|θ,ξ) {log p(y | θ, ξ)}
+                                                  Z
+                                                = log p (y | θ, ξ) p (y | θ, ξ) dy
+                                                  Z
+                                                = log pε (y − f (ξ, θ)) pε (y − f (ξ, θ)) dy
+                                                  Z
+                                                = log pε (z)pε (z)dz
+
+                                                 = H[pε (ε)] ≡ constant.
+
+Therefore, in such cases the first term of our EIG gradient expression (eq. (3)) is also identically zero and the gradient of the
+EIG only depends on the intractable score terms which we propose to approximate.
+
+
+B     ERROR BOUNDS
+In this section we show that the accuracy of our score-based EIG gradient estimator is directly controlled by the accuracy of
+the score approximation, in the sense that the ℓ2 error in the gradient estimator is bounded above by a constant times the
+mean score error. The constant depends only on the Lipschitz properties of the map from policy parameters to rolled-out
+trajectories (y1:T , ξ1:T ).
+
+Set-up. Let zϕ := (y1:T , ξ1:T ) ∈ RT (dy +dξ ) denote the rolled-out trajectory under the policy with parameters ϕ, viewed
+as a function of the reparameterisation variables (δ1:T , ϵ1:T ), the latent θ, and ϕ:
+                                                   1                          2
+                                                                                                         
+                           zϕ (δ1:T , ϵ1:T , θ) = g1:T (δ1:T , ϵ1:T , θ, ϕ), g1:T (δ1:T −1 , ϵ1:T , θ, ϕ) .             (43)
+
+Let sψ : RT (dy +dξ ) → RT (dy +dξ ) be a score approximation and define the corresponding score-based gradient estimator by
+replacing the marginal score in Equation (17) with sψ :
+                                                                                                 
+                        b ψ (ϕ) = Ep(θ)q(δ ,ϵ ) d log p(y1:T | ξ1:T , θ) − sψ (y1:T , ξ1:T ) ∂zϕ .
+                        G                                                                                               (44)
+                                            1:T 1:T
+                                                      dϕ                                       ∂ϕ
+
+Theorem 3. Fix a tolerance η > 0. Assume that, for all (δ1:T , ϵ1:T , θ) in the support of p(θ)q(δ1:T , ϵ1:T ), the reparamet-
+erisation map ϕ 7→ zϕ (δ1:T , ϵ1:T , θ) is uniformly L-Lipschitz, i.e. there exists L > 0 with
+
+                           ∥zϕ (δ1:T , ϵ1:T , θ) − zϕ′ (δ1:T , ϵ1:T , θ)∥2 ≤ L∥ϕ − ϕ′ ∥2    for all ϕ, ϕ′ .                 (45)
+
+Suppose further that the score approximation satisfies the mean error bound
+                                                                                        
+                            Ep,q sψ (y1:T , ξ1:T ) − ∇(y1:T ,ξ1:T ) log p(y1:T | ξ1:T ) 2 ≤ η/L.                            (46)
+
+Then the ℓ2 error of the score-based gradient estimator is bounded by η for every ϕ:
+
+                                                   ∇ϕ IT (ϕ) − G
+                                                               b ψ (ϕ)         ≤ η.                                         (47)
+                                                                           2
+
+
+                                                               5409
+Proof. Subtracting the approximate gradient G
+                                            b ψ in Equation (44) from the EIG gradient expression Equation (17) gives
+                                                                                                  
+                              b ψ (ϕ) = Ep,q sψ (y1:T , ξ1:T ) − ∇(y ,ξ ) log p(y1:T | ξ1:T ) ∂zϕ .
+                                                                                             
+                 ∇ϕ IT (ϕ) − G                                      1:T 1:T
+                                                                                                                   (48)
+                                                                                               ∂ϕ
+Taking ℓ2 norms, by Jensen’s inequality and submultiplicativity of the operator norm,
+                                                                                                           
+                                                                                                      ∂zϕ
+                         b ψ (ϕ) ≤ Ep,q
+             ∇ϕ IT (ϕ) − G                    sψ (y1:T , ξ1:T ) − ∇(y1:T ,ξ1:T ) log p(y1:T | ξ1:T )                     (49)
+                                 2                                                                     ∂ϕ 2
+                                           "                                                                    #
+                                                                                                         ∂zϕ
+                                   ≤ Ep,q sψ (y1:T , ξ1:T ) − ∇(y1:T ,ξ1:T ) log p(y1:T | ξ1:T ) 2 ·              .      (50)
+                                                                                                          ∂ϕ op
+
+Since ϕ 7→ zϕ is L-Lipschitz almost surely, Rademacher’s theorem (Evans, 2025) gives ∥∂zϕ /∂ϕ∥op ≤ L almost surely.
+Pulling this constant out of the expectation gives
+                                                                                                    
+                ∇ϕ IT (ϕ) − G  b ψ (ϕ) ≤ L · Ep,q sψ (y1:T , ξ1:T ) − ∇(y ,ξ ) log p(y1:T | ξ1:T )
+                                                                         1:T 1:T                   2
+                                                                                                       ≤ η,   (51)
+                                      2
+
+where the final inequality uses the assumed score-error bound Equation (46).
+
+Theorem 3 confirms the intuition motivating our approach: the EIG-gradient error is directly controlled by the score-matching
+error. Reducing the mean score error by a factor k reduces the gradient error by the same factor (up to the Lipschitz constant
+L of the reparameterisation, which is independent of the score network). Since score-matching training has access to
+unlimited samples from the model, achieving small mean score error is in principle only a question of network capacity and
+training budget.
+
+Remark (component-separated bound). A slightly sharper bound is available when the y- and ξ-reparameterisation
+maps have different Lipschitz constants. If ϕ 7→ y1:T and ϕ 7→ ξ1:T are uniformly Lipschitz with constants Ly and Lξ
+respectively, then by the same argument applied to each score component separately,
+
+                                 ∇ϕ IT (ϕ) − G
+                                             b ψ (ϕ)            ≤ Ly · Ep,q ∥ey ∥2 + Lξ · Ep,q ∥eξ ∥2 ,                  (52)
+                                                            2
+
+where ey and eξ are the y- and ξ-component errors of the score network. This refinement is useful when one of the two
+reparameterisation maps is significantly more regular than the other.
+
+
+C     BIAS-VARIANCE DECOMPOSITIONS
+We now decompose errors in the score network and resulting EIG gradient approximation into interpretable bias and variance
+components, revealing the behaviour of our EIG gradient approximation.
+
+Notation. For notational simplicity we drop the t component of our data and design variables and we write s(ξ, y) for the
+score network, µ(ξ, y) = ∇y,ξ log p(y|ξ) for the true marginal score. We define Σν (ξ, y) := Covθ|ξ,y (∇ log p(y|ξ, θ)) as
+the posterior covariance of the conditional score.
+
+C.1   SCORE ERROR
+
+Firstly we consider a bias-variance decomposition of the score matching loss. For the MSM loss (Equation (6)), adding and
+subtracting µ inside the loss gives
+                                     L = Eξ,y Eθ|ξ,y ∥s(ξ, y) − ∇ log p(y|ξ, θ)∥2                                        (53)
+                                                                             2
+                                          = Eξ,y ∥s(ξ, y) − µ(ξ, y)∥ + Eξ,y Tr Σν (ξ, y),                                (54)
+where we used Eθ|ξ,y [∇ log p(y|ξ, θ)] = µ to eliminate the cross term. In this expression the second term isolates the
+irreducible target variance Eξ,y Tr Σν (ξ, y) from the learnable score network error in the first term. Applying the standard
+bias–variance identity E∥e∥2 = ∥Ee∥2 + Tr Cov(e) to the first term with error e = s − µ gives
+                                               L = ∥B∥2 +             Ve           +      Vν ,                           (55)
+                                                   | {z }            |{z}                |{z}
+                                                     bias         error variance       target noise
+
+
+                                                                    5410
+with B := Eξ,y [s − µ], Ve := Tr Covξ,y (s − µ) and Vν := Eξ,y Tr Σν (ξ, y). Empirically, in our experiments we found the
+dominant term in this decomposition to be the error variance Ve while the irreducible target variance Vν was insignificant in
+the overall loss.
+
+
+C.2   EIG GRADIENT ERROR
+
+We now consider analogous decompositions for the EIG gradient error of S CORE BED. For ease of notation we consider
+gradients with respect to a single static design ξ ∗ , with the policy gradient versions coming from a single pushback through
+the policy network Jacobian.
+Recalling the form of the S CORE BED EIG gradient approximation in Equation (3), the estimate is formed by an expectation
+over y ∼ p(·|ξ ∗ ) of the per-sample integrand which we denote by:
+
+                                          gs (ξ ∗ , y) = sξ (ξ ∗ , y) + J(ξ ∗ , y)⊤ sy (ξ ∗ , y),                                    (56)
+
+where sξ , sy are the design- and data-score outputs of the network and J(ξ ∗ , y) = ∂y/∂ξ ∗ is the reparameterisation Jacobian.
+We write gµ for the same integrand built with the true score µ. The S CORE BED gradient approximation is then realised by
+an N -sample Monte Carlo estimate of the expectation which we denote
+
+                                                                             N
+                                                                        1 X
+                                                      ĜN (ξ ∗ ) :=           gs (ξ ∗ , yi ),                                        (57)
+                                                                        N i=1
+
+while the true gradient is denoted G(ξ ∗ ) = Ey|ξ∗ [gµ (ξ ∗ , y)].
+We now apply the standard bias–variance decomposition to the MSE of the S CORE BED EIG gradient approximation. Since
+the target G(ξ ∗ ) is deterministic, the identity E∥Z − c∥2 = ∥EZ − c∥2 + Tr Cov(Z) applied to Z = ĜN (ξ ∗ ) gives
+                                                            2                                         2
+         MSEN (ξ ∗ ) := Ey1:N |ξ∗ ĜN (ξ ∗ ) − G(ξ ∗ )          = Ey1:N |ξ∗ [ĜN (ξ ∗ )] − G(ξ ∗ ) + Tr Covy1:N |ξ∗ (ĜN (ξ ∗ )) .   (58)
+                                                                 |               {z               } |          {z              }
+                                                                                  squared bias                        variance
+
+
+For the bias, linearity of the sample average gives Ey1:N |ξ∗ [ĜN (ξ ∗ )] = Ey|ξ∗ [gs ], so
+
+                                    Ey1:N |ξ∗ [ĜN (ξ ∗ )] − G(ξ ∗ ) = Ey|ξ∗ [gs − gµ ] =: B(ξ ∗ ),                                  (59)
+
+which is independent of N . For the variance, the outer samples yi ∼ p(·|ξ ∗ ) are i.i.d., so the covariance of their average is
+1/N times the single-sample covariance,
+                                                    PN                     
+                                                                  ∗
+                            Tr Covy1:N |ξ∗       1
+                                                 N    i=1 gs (ξ       , yi ) = N1 Tr Covy|ξ∗ (gs ) =: N1 Vs (ξ ∗ ),                  (60)
+
+where Vs (ξ ∗ ) is the per-sample variance of the score integrand. Combining the two terms,
+
+                                                 MSEN (ξ ∗ ) = ∥B(ξ ∗ )∥2 + N1 Vs (ξ ∗ ).                                            (61)
+
+
+Overall, we observe the variance contributions to the EIG gradient error are scaled down by N1 , leaving the gradient bias as
+the dominant term which determines the quality of the policy training.
+
+Relating B to B(ξ ∗ ). It remains to show how the bias B = Eξ,y [s − µ] in the score matching loss decomposition relates
+to the EIG gradient bias B(ξ ∗ ) = Ey|ξ∗ [gs − gµ ], and indeed whether reducing B corresponds to a meaningful reduction in
+B(ξ ∗ ).
+To do so, we observe that B is an unconditional mean of the score error over the joint distribution of (ξ, y), whereas B(ξ ∗ )
+is a conditional mean of the integrand error at a fixed design. We therefore introduce the design-conditional score bias:
+
+                                                     b(ξ) := Ey|ξ [s(ξ, y) − µ(ξ, y)],                                               (62)
+
+
+                                                                         5411
+which recovers B = Eξ [b(ξ)] by the tower property. This design-conditional bias offers a conditional version of the
+bias–variance decomposition of the MSM loss:
+
+                          Eξ,y ∥s(ξ, y) − µ(ξ, y)∥2 = Eξ Ey|ξ ∥s(ξ, y) − µ(ξ, y)∥2                                           (63)
+                                                                        2
+                                                      = Eξ [∥b(ξ)∥ + Tr Covy|ξ (s(ξ, y) − µ(ξ, y))]                          (64)
+                                                                                2
+                                                      =          Eξ ∥b(ξ)∥               +Vewithin ,                         (65)
+                                                                 | {z }
+                                                          design-averaged squared bias
+
+
+where Vewithin = Eξ [Tr Covy|ξ (s(ξ, y) − µ(ξ, y))], which gives the MSM loss decomposition:
+
+                                           L=         Eξ ∥b(ξ)∥2               +Vewithin + Vν .                              (66)
+                                                      | {z }
+                                                design-averaged squared bias
+
+
+This confirms that the loss penalises Eξ ∥b(ξ)∥2 , the mean squared conditional bias — not merely ∥B∥2 = ∥Eξ b(ξ)∥2 . In
+particular, conditional biases of opposite sign at different designs cancel in B but not in Eξ ∥b(ξ)∥2 .
+It remains to connect the conditional score bias b(ξ) to the integrand bias B(ξ ∗ ). Splitting the integrand error into its design
+and data components,
+                                        gs − gµ = (sξ − µξ ) + J(ξ ∗ , y)⊤ (sy − µy ),                                        (67)
+the design component of B(ξ ∗ ) is exactly the design block of the conditional bias b(ξ ∗ ), so the argument above transfers
+directly: reducing the loss drives down the design-averaged squared design bias. The data component is instead the
+Jacobian-weighted conditional mean Ey|ξ∗ [J ⊤ (sy − µy )], which the (unweighted, J-agnostic) loss controls only through a
+Cauchy–Schwarz bound
+                                                     2
+                               Ey|ξ∗ [J ⊤ (sy − µy )] ≤ Ey|ξ∗ ∥J∥2op Ey|ξ∗ ∥sy − µy ∥2 ,
+                                                                                            
+                                                                                                                        (68)
+with a constant set by the reparameterisation geometry. This directly bounds the data-component contribution to ∥B(ξ ∗ )∥2
+by the per-design score MSE Ey|ξ∗ ∥sy − µy ∥2 which the loss controls. This is the same mechanism which is identified in
+our error bound proof of Appendix B.
+In summary, we confirm through the illustrative bias-variance decompositions presented above that the score matching loss
+penalises the score network in such a way that reduces the bias in the error of the EIG gradient estimate, either directly in
+the case of the design score term or indirectly via the Cauchy–Schwarz inequality for the data score term.
+
+Penalising design-conditional bias. We briefly highlight two score identities which allow one to directly penalise the
+design-conditional bias of the score network during training. For y ∈ Rd , assuming boundary terms vanish, the divergence
+theorem gives                                                  Z
+                                         Ey|ξ [∇y log p(y|ξ)] =             ∇y p(y|ξ) dy = 0,                                (69)
+
+and for the design component                                                Z
+                                         Ey|ξ [∇ξ log p(y|ξ)] = ∇ξ              p(y|ξ) dy = 0.                               (70)
+
+Thus the true marginal score integrates to zero over y|ξ, and at fixed ξ the bias derives from the network alone: ∥b(ξ)∥2 =
+∥Ey|ξ s(ξ, y)∥2 . Given samples {yi } ∼ p(·|ξ), one could estimate and penalise this bias as an addition to the MSM loss. In
+                                1               2                             1
+                                  P
+particular, the naive plug-in ∥ M   i s(ξ, yi )∥ is itself biased upward by M Tr Covy|ξ (s) but an unbiased estimate could be
+obtained via the U-statistic
+                                                          1      X
+                                         U (ξ) =                     s(ξ, yi )⊤ s(ξ, yj ).                               (71)
+                                                    M (M − 1)
+                                                                     i̸=j
+
+This could be included in the score network training objective to provide additional signal on the critical design-conditional
+bias, while leaving the optimum unchanged.
+
+
+D    EXPERIMENTAL DETAILS
+Here we detail the experimental set-up used to produce the results in Section 5. Our approach is implemented in Jax
+(Bradbury et al., 2018) and all training was performed on a single NVIDIA Hopper H100 GPU. We benchmark against
+
+
+                                                                 5412
+several baselines: PCE, an unbiased Monte Carlo approach MLMC (Goda et al., 2022), pre-trained variational marginal and
+posterior approaches (Foster et al., 2019), a joint variational posterior (Foster et al., 2020) trained on the Barber-Agakov
+lower bound, and finally IO-SMC2 (Iqbal et al., 2024). We implemented the PCE, MLMC, and all variational baselines
+ourselves and used the authors’ own implementation (Iqbal et al., 2024) of IO-SMC2 . Our results tables report NMC/PCE
+bounds on EIG performance of the final policies, with error bounds representing standard error with respect to randomness
+in the selected policies. We also explore the stability of the score network training in Appendix E.4.
+This section is organised as follows. In Appendix D.1 we describe the generative model for each of our experimental tasks.
+In Appendix D.3 we detail the policy networks used and their training parameters. In Appendix D.4 we give details of the
+score matching approach followed by details of each baseline in Appendix D.5. In Appendix D.6 we provide details of the
+PCE/NMC bounds and the sample sizes used for evaluation. Finally, in Appendix D.8 we calculate the NLE cost of each
+method and provide the exact parameters used to obtain the compute-normalised comparisons in our main results.
+Our code is available here: https://github.com/angusphillips/Score_Matching_BED
+
+D.1     BED TASKS
+
+D.1.1    Source location finding
+
+Model definition. For the source location finding task we use the exact set-up of Foster et al. (2021). The model consists
+                                                   i.i.d.
+of a Gaussian prior on K hidden sources in Rd , θk ∼ N (0, Id ) for k = 1, . . . , K, and a log-normal observation model
+                                           log y | θ, ξ ∼ N log µ(θ, ξ), σ 2 ,
+                                                                            
+                                                                                                                      (72)
+where the mean function is a superposition of decaying signals from each source,
+                                                                 K
+                                                                 X           αk
+                                                µ(θ, ξ) = b +                         2.                                             (73)
+                                                                 k=1
+                                                                       m + ∥θk − ξ∥
+We use b = 10−1 , m = 10−4 , αk = 1, σ = 0.5. In the standard location finding task we consider d = 2, K = 2 and
+T = 30, while the high-dimensional setting considers d = 3, K = 10 and T = 30. We therefore have yt ∈ R and ξt ∈ R2
+or ξt ∈ R3 respectively.
+
+D.1.2    Dynamical systems
+
+The three dynamical-systems tasks follow the experimental set-up of Iqbal et al. (2024) but, for completeness, we restate
+the generative models in full here. In each case the latent parameters are physical constants with a log-normal prior
+log θ ∼ N (0, 0.01 Idθ ) and the data yt ∈ Rdy is generated by an Euler–Maruyama discretisation of the corresponding
+controlled SDE with step size δt = 0.05,
+                                                                  √
+                              yt = yt−1 + δt · f (yt−1 , ξt , θ) + δt L ϵt , ϵt ∼ N (0, Idy ),                       (74)
+where f is the system-specific drift and L is a diagonal diffusion matrix. We use T = 50 for all three systems and initialise
+all systems with y0 = 0. The likelihood p(yt | yt−1 , ξt , θ) = N (yt ; yt−1 + δt · f (yt−1 , ξt , θ), δt LL⊤ ) is Markovian (i.e.
+not i.i.d. across t).
+
+Stochastic pendulum. The state y = (q, q̇) ∈ R2 contains the angle q and angular velocity q̇ of a damped pendulum
+driven by a scalar control torque ξ ∈ [−1, 1]. The latent parameters θ = (m, l) are the mass and length, both with log-normal
+priors. The drift in Equation (74) is
+                                                                                    
+                                                                     q̇
+                                        f (y, ξ, θ) =  3 g             3 (ξ − b q̇)  ,                                  (75)
+                                                        −     sin(q) +        2
+                                                           2l              ml
+where g = 9.81 is gravitational acceleration and b = 0.1 is a damping coefficient.2 We use the diffusion matrix L =
+diag(0.1, 0.1). Designs are constrained to [−1, 1] by clipping, which is done via a tanh output activation on the final
+    2
+     There is an inconsistency between the equations stated in Iqbal et al. (2024) and their public implementation: the stated drift omits
+the factor of 3 on the input/damping term, while their implementation includes it. To remain consistent with the results in their paper we
+follow the implementation.
+
+
+                                                                  5413
+stochastic output of the policy network.
+
+Cart-pole. The state y = (s, q, ṡ, q̇) ∈ R4 contains the cart position s, pole angle q and their velocities. The latent
+parameters θ = (l, mp , mc ) are the pole length, pole mass and cart mass, all with log-normal priors. A scalar control force
+ξ ∈ [−5, 5] is applied to the cart. The drift in Equation (74) is
+                             T
+ f (y, ξ, θ) = (ṡ, q̇, s̈, q̈) ,                                                                                                (76)
+                                        2
+                                              
+                  ξ + mp sin(q) lq̇ + g cos(q) − (k1 s + d1 ṡ) − (k2 q + d2 q̇) cos(q)/l
+           s̈ =                                                                                           ,                      (77)
+                                                       mc + mp sin2 (q)
+                  −ξ cos(q) − mp l q̇ 2 cos(q) sin(q) − (mc + mp ) g sin(q) − (k1 s + d1 ṡ) cos(q) − (k2 q + d2 q̇) cos2 (q)/l
+           q̈ =                                                                                                                 ,
+                                                            l (mc + mp sin2 (q))
+                                                                                                                             (78)
+
+with stiffness/damping constants (k1 , k2 , d1 , d2 ) = (0.01, 0.01, 0.01, 0.01) and g = 9.81. We use the diffusion matrix
+L = diag(0.1, 0.1, 0.1, 0.1). Again designs are constrained to [−5, 5] with a tanh output activation on the policy network.
+
+Double link. The state y = (q1 , q2 , q̇1 , q̇2 ) ∈ R4 contains the angles and angular velocities of the two links. The latent
+parameters θ = (m1 , m2 , l1 , l2 ) are the masses and lengths of the two links, all with log-normal priors. A 2-dimensional
+control torque ξ ∈ [−4, 4] × [−2, 2] is applied. The Euler-Lagrange equations give the constrained dynamics
+                                                                         
+                                              q̈1                          q̇
+                                  M (q2 ; θ)       + C(q2 , q̇1 , q̇2 ; θ) 1 + τ (q1 , q2 ; θ) = ξ,                       (79)
+                                              q̈2                          q̇2
+with mass matrix
+                                    (m1 + m2 )l12 + m2 l22 + 2m2 l1 l2 cos(q2 )                  m2 l22 + m2 l1 l2 cos(q2 )
+                                                                                                                          
+                      M (q2 ; θ) =                                                                                           ,   (80)
+                                           m2 l22 + m2 l1 l2 cos(q2 )                                     m2 l22
+coriolis/centrifugal matrix
+                                                                                                                        
+                                                                       0                 −m2 l1 l2 sin(q2 ) (2q̇1 + q̇2 )
+                         C(q2 , q̇1 , q̇2 ; θ) =       1                                                                   ,     (81)
+                                                       2 m2 l1 l2 (2q̇1 + q̇2 ) sin(q2 )   − 12 m2 l1 l2 q̇1 sin(q2 )
+and gravity term                                                                                           
+                                                                (m1 + m2 )l1 sin(q1 ) + m2 l2 sin(q1 + q2 )
+                                    τ (q1 , q2 ; θ) = −g                                                      .                  (82)
+                                                                           m2 l2 sin(q1 + q2 )
+The drift in Equation (74) is then f (y, ξ, θ) = (q̇1 , q̇2 , M −1 (ξ − C q̇ − τ )). We use the diffusion matrix L =
+diag(0.1, 0.1, 0.1, 0.1) and g = 9.81. Again designs are constrained with a tanh output activation on the final output
+of the policy network.
+
+D.2   GRAVIMETRY
+
+Model definition. The gravimetry experiments are inspired by the gravity methods of Telford et al. (1990) for detecting an
+underground void or well from surface measurements of the local gravitational anomaly. A buried spherical mass anomaly
+of source strength κ at horizontal position x0 and depth z produces, at a surface measurement location ξt , a vertical gravity
+perturbation (in µGal, with lengths in metres)
+                                                                                   z
+                                                         g(ξt ; θ) = κ                        3/2 .                             (83)
+                                                                          (ξt − x0 )2 + z 2
+
+The unknown parameter is θ = (x0 , z, κ) ∈ R × R≥0 × R≤0 . The source strength κ (in µGal · m2 ) is negative for a mass
+deficit such as a void, and relates to the physical radius R and density contrast ∆ρ of the anomaly through
+                                                                         G · 43 πR3 ∆ρ
+                                                                  κ=                   ,                                         (84)
+                                                                              10−8
+i.e. the mass-anomaly term G ∆M rescaled from m s−2 to µGal with 1 µGal = 10−8 m s−2 . We fix G = 6.674 ×
+10−11 m3 kg−1 s−2 and a density contrast ∆ρ = −2200 kg m−3 (typical of an air-filled void in rock). Only the product
+
+
+                                                                           5414
+R3 ∆ρ (equivalently κ) is identifiable, so we fix ∆ρ and never infer R and ∆ρ jointly. The observations are i.i.d. additive
+Gaussian around this nonlinear mean,
+                                                                               N
+                                                                               Y
+                        yi | θ, ξi ∼ N g(ξi ; θ), σ 2 ,                              N yi ; g(ξi ; θ), σ 2 ,
+                                                                                                         
+                                                            p(y1:T | θ, ξ) =                                               (85)
+                                                                               i=1
+
+with observation noise scale σ = 1 µGal.
+The prior on the latent parameters θ = (x0 , z, κ) is
+                      x0 ∼ N (0, τ 2 ),      log z ∼ N (ln 10, 0.52 ) (z ≥ 3),           R ∼ U (1.5, 4) m,                 (86)
+where τ = 30 m and the source strength κ is obtained generatively from the sampled radius R through the mapping above
+with ∆ρ fixed, giving κ ∈ [−3940, −210] µGal · m2 . This places the horizontal source position within roughly ±60 m of
+the origin, the depth at a median of 10 m (with 95% mass in [3.7, 27] m and a floor at 3 m), and the source strength at typical
+void magnitudes.
+
+D.3   POLICY NETWORKS
+
+For each task we use the same policy network architecture across all methods, so the resulting policies differ only through
+the gradient estimator or alternative method that trains them. In total we use three different types of policy network across
+the experimental tasks. Firstly, in both settings of location finding we used the DAD policy network (Foster et al., 2021). For
+each of the dynamical systems models we used a stochastic LSTM with GRU cells as per Iqbal et al. (2024). Finally, in the
+gravimetry experiment we used the iDAD attention network introduced in Ivanova et al. (2021). Optimiser settings for the
+policy networks are also shared across all methods and are summarised in Table 4; these settings are largely borrowed from
+their original implementations.
+
+DAD policy network (location finding). We use the deep adaptive design (DAD) policy of Foster et al. (2021). Each
+(yt , ξt ) pair is concatenated and passed through a shared encoder MLP with hidden layers [256] and ReLU activations,
+producing a 16-dimensional encoding per time step. The history encoding is formed by summing the per-step encodings,
+which is permutation-invariant by construction, and is passed through a linear emitter to produce the next design ξt ∈ R2
+(we reduce default initialisation of the weights in the final emitter layer from U(− √1f , √1f ) to U(−0.05, 0.05) to control
+                                                                                        in    in
+the dynamic range of designs at initialisation).
+
+Iqbal GRU policy network (dynamical systems). For all three dynamical-systems tasks we use the stochastic LSTM
+policy network of Iqbal et al. (2024). Each (yt , ξt ) pair is concatenated and passed through a shared encoder MLP with
+hidden layers [256, 256] and ReLU activations, producing a 64-dimensional encoding per time step. The sequence of
+encodings is processed by a 2-layer GRU of hidden size 64, with the top-layer hidden state mapped through an emitter
+MLP with hidden layers [256, 256] to the design dimensionality. Policies in this case are stochastic, following the original
+implementation by Iqbal et al. (2024). We therefore let the emitter output mean µt and we parameterise a per-component
+learnable standard deviation in log space, so that ξt ∼ N (µt , diag(σ 2 )).
+
+Attention policy network (gravimetry). For the gravimetry tasks we use a transformer-based policy inspired by the
+iDAD policy network (Ivanova et al., 2021). Each design ξt and outcome yt is first embedded separately by design- and
+outcome-encoder MLPs, each with hidden layers [64] and GELU activations producing 32-dimensional embeddings; these
+are concatenated and passed through a fusion MLP (hidden layers [64], GELU) to give a 32-dimensional per-step pair
+representation rt . The set of history representations {r1 , . . . , rt }, each augmented with a learned history-type embedding,
+is prepended with a learned decision token and processed by a single self-attention transformer encoder layer with 4
+heads, model dimension 32 and a position-wise feed-forward network of hidden size 64 (using GELU activation, residual
+connections and layer normalisation throughout). A causal mask ensures that when emitting the design at step t the decision
+token attends only to itself and the t available history tokens, so the aggregation is invariant to the presentation order of
+the observations. The design is emitted from the decision-token output using an MLP with hidden layers [64] and GELU
+activations. As with the DAD policy, we reduce the default initialisation of the final emitter layer weights to U(−0.05, 0.05)
+to control the dynamic range of designs at initialisation.
+
+Policy output activations. In order to respect any scaling or bound constraints on designs ξt , we apply output activations
+to the raw outputs of the policy network which are detailed in Table 3.
+
+
+                                                             5415
+                                        Task                           output activation
+                                        Location finding                         ξt = ut
+                                        Stochastic pendulum               ξt = tanh(ut )
+                                        Cart-pole                       ξt = 5 tanh(ut )
+                                        Double pendulum          ξt = (4, 2) ⊙ tanh(ut )
+                                        Gravimetry                            ξt = 40ut
+
+  Table 3: Policy output activations by task. ⊙ represents element-wise multiplication and tanh is applied elementwise.
+
+
+Optimiser settings. Each policy is trained with the Adam optimiser, gradient clipping at ∥∇∥2 ≤ 1, and an exponential
+learning-rate decay schedule. The full hyperparameters are given in Table 4.
+
+      Task                    # iters    batch size   schedule       init LR    decay rate    decay every      (β1 , β2 )
+                                                                          −5
+      Location finding       20,000        1024       exp decay      5 × 10        0.98          1000        (0.8, 0.998)
+      Stochastic pendulum     500          1024        constant      1 × 10−4      N/A           N/A         (0.9, 0.999)
+      Cart-pole               500          1024        constant      1 × 10−4      N/A           N/A         (0.9, 0.999)
+      Double link             500          1024        constant      1 × 10−4      N/A           N/A         (0.9, 0.999)
+      Gravimetry             10000         1024       exp decay      5 × 10−5      0.98          1000        (0.8, 0.998)
+
+          Table 4: Policy training hyperparameters. All optimisers are Adam with gradient clipping at ∥∇∥2 ≤ 1.
+
+
+D.4    SCORE MATCHING APPROACH
+
+Score network architecture. For all tasks we use the same backbone architecture, differing only in input/output dimension-
+alities, the presence of positional encodings, and the choice of inputs to the final output head (detailed below). The backbone
+is a stack of pre-norm transformer blocks (Vaswani et al., 2017) with two prediction heads, one for ∇yt log p(y1:T | ξ1:T )
+and one for ∇ξt log p(y1:T | ξ1:T ). The exact configuration is given in Table 5 and each component is detailed below.
+Embedding. Each yt and ξt is first standardised then separately embedded with a random Fourier features layer (Tancik
+et al., 2020) (with σ = 10) into 64-dimensional features each. These are concatenated and passed through a 2-layer MLP
+with [192, 128] hidden units and GeLU activations. A linear projection maps these to the 256-dim model space, giving a
+sequence of T per-timestep embeddings.
+Positional encodings. When positional encodings are required (see below), a sinusoidal encoding (Vaswani et al., 2017) is
+added to the per-timestep embeddings.
+Backbone. A learnable global token is joined to the sequence, making its length T + 1. The sequence is then processed by 4
+transformer blocks, each consisting of layer norm, multi-head self-attention over the time dimension (8 heads), residual,
+layer norm, a 2-layer MLP with hidden width 2 · dmodel and GeLU activations, and a final residual.
+Prediction heads. Following the main transformer backbone, two independent prediction heads produce the y-score and
+ξ-score components. These heads consist of a layer norm followed by a 2-layer MLP with dmodel and GeLU activations.
+The prediction heads receive different inputs depending on the task, and use a separate “head embedding” — an independent
+RFF + MLP embedding of the raw (yt , ξt ) pair. The inputs are constructed as follows:
+
+   • standard inputs (location finding): the head input is the concatenation of [global token, head embedding at t, transformer
+     backbone output at t].
+   • markov window inputs (dynamical systems): the head input additionally concatenates the head embeddings at t − 1
+     and t + 1 (zero-padded at the boundaries). This Markov window is motivated by the Markovian likelihoods of the
+     dynamical systems since the conditional score at time t has explicit dependence on its one-step neighbours. This setup
+     saves the backbone output from having to reconstruct this information through the attention layers.
+
+Conservative wrapper. The two-headed transformer described above produces a dy + dξ -dimensional vector at each
+time step. We project this to a scalar potential Φψ (y1:T , ξ1:T ) via a final linear layer, and define the score network as
+sψ (y1:T , ξ1:T ) = ∇(y1:T ,ξ1:T ) Φψ (y1:T , ξ1:T ), obtained by automatic differentiation. This ensures the learned score is
+
+
+                                                              5416
+conservative (i.e. it is the gradient of a scalar function), a structural property that the true score ∇(y1:T ,ξ1:T ) log p(y1:T | ξ1:T )
+satisfies. This is a principled design choice which was found to greatly stabilise policy training on the location finding task
+and therefore was adopted across all tasks. However, we note that computationally this choice considerably increases the
+burden of evaluating the score network during policy training.
+Permutation equivariance. For tasks with an exchangeable likelihood, p(y1:T | ξ1:T ) is exchangeable with respect to
+the ordering of (yt , ξt ) pairs, so the score is permutation-equivariant in t. We bake this into the network by omitting the
+positional encoding. For the dynamical systems the likelihood is Markovian and the score is not equivariant, therefore we
+add sinusoidal positional encodings to the per-timestep embeddings.
+
+Table 5: Score network architecture, shared across all tasks (excluding positional encodings for non-iid tasks and task
+specific inputs to the output heads). The full network has approximately 3 million parameters.
+
+                     Component              Hyperparameter                             Value
+                     RFF embedding          dimension                                  64 (i.e. 128 after concat)
+                                            σ                                          10.0
+                     Embedding MLP          hidden widths                              [192, 128]
+                                            activation function                        GeLU
+                     Transformer            model dim dmodel                           256
+                                            # transformer blocks                       4
+                                            # attention heads                          8
+                                            MLP hidden width                           2 · dmodel = 512
+                                            activation function                        GeLU
+                                            global summary token                       yes (learnable)
+                     Head embedding         RFF dim                                    64
+                                            MLP hidden widths                          [192, 128]
+                     Head MLP               hidden width                               dmodel = 256
+                                            activation                                 GeLU
+                     Potential proj.        final linear to scalar Φψ                  yes
+                     Score                  sψ = ∇(y1:T ,ξ1:T ) Φψ (conservative)      yes
+
+
+Score training. The score network is trained on the marginal score-matching loss Equation (6) with the Adam optimiser
+(Kingma and Ba, 2017) and a warmup-cosine learning-rate schedule that linearly warms the learning rate up over the
+first 0.1% of training to a peak value, then cosine-decays to a small floor of 10−5 . The standard score-matching loss is
+augmented with a per-coordinate weighting on the y-score component (denoted λy in Table 6) chosen so that the y-score
+loss is comparable in magnitude to the ξ-score loss; this is task-dependent because the relative scales of the y- and ξ-score
+components differ. Designs for the score-training data distribution are sampled from simple distributions spanning the
+relevant region of ξ-space, discussed in greater detail below. All training hyperparameters are summarised in Table 6. The
+number of training iterations is dictated for each experiment by the allowed NLE budget, which we describe in Appendix
+D.8.
+
+                          Task                       batch size     peak LR       grad-norm clip        λy
+                          Location finding              1024        2 × 10−4            600            30.0
+                          Stochastic pendulum           1024        2 × 10−4           5,000          0.0125
+                          Cart-pole                     1024        2 × 10−4            600            0.004
+                          Double link                   1024        2 × 10−4          10,000           0.02
+                          Gravimetry                    1024        2 × 10−4           5,000          10000
+
+Table 6: Score network training hyperparameters. Optimiser is Adam with default (β1 , β2 ) = (0.9, 0.999). Learning rate
+uses linear warmup over 0.1% of training iterations to the peak value, then cosine decay to 10−5 .
+
+
+Score-based policy training. Once the score network is trained, the policy is optimised using the EIG gradient estimator
+of Equation (3), with the intractable score terms replaced by sψ . The policy network and its optimiser settings are shared
+with the baselines and described in Section D.3.
+
+
+                                                                  5417
+D.4.1    Design sampling distributions
+
+As described in Section 3, our marginal score matching approach samples designs from a distribution q(ξ) which we are
+free to choose. In the following we describe the distributions used in each experiment, while in Appendix E.3 we ablate a
+wider selection of sampling distributions to illustrate the influence of this choice. In each case the chosen samplers reflect
+our a-priori beliefs about the regions of design space which may be likely under an optimal policy.
+
+Location finding. Here we use a temporally correlated Gaussian distribution with uniform hyperpriors on temporal
+correlation and random scale. Specifically, for each sampled trajectory we first draw a scale σ ∼ U(0.2, 5.0) and a temporal
+correlation coefficient ρ ∼ U(0.7, 1.0), and then sample the full design sequence ξ = (ξ1 , . . . , ξT ), with each ξt ∈ Rd , from
+the zero-mean Gaussian
+                                      ξ ∼ N 0, σ 2 Kρ ⊗ Id ,          [Kρ ]s,t = ρ|s−t| ,
+                                                              
+                                                                                                                               (87)
+where Kρ ∈ RT ×T is an AR(1) correlation matrix over the T experiment steps and the d spatial coordinates of each design
+are sampled independently. This construction gives designs that are marginally N (0, σ 2 Id ) but whose successive locations
+are smoothly correlated in time: ρ → 1 yields near-constant trajectories while smaller ρ produces more rapidly varying ones.
+
+Dynamical systems. Here we draw design trajectories from an equal mixture of two distributions. Firstly, a simple i.i.d.
+uniform distribution on the design space [−B, B]. Secondly, a ‘pseudo-random’ design distribution which concentrates
+designs on the boundary by randomly switching between each boundary according to a Poisson process. Specifically, for
+each trajectory and each design dimension we sample a sign process st ∈ {−1, +1}: the initial sign s1 is drawn uniformly,
+and at each subsequent step the sign flips with probability 1 − e−λ , where the switch rate is drawn per trajectory as
+λ ∼ U(0.02, 0.1). This is a discrete-time analogue of a Poisson switching process, so on average the design remains pinned
+to one boundary for a geometrically distributed number of steps before flipping to the other. In practice we apply a small
+jitter to sit just inside the boundary by adding standard Gaussian noise around a nominal boundary level uB for which
+tanh(uB ) ≈ 1. In other words, we sample ξt = B tanh(st uB + ε) where ε is Gaussian noise and st is the sign process.
+
+Gravimetry. Here we sample designs independently from a Gaussian with trajectory-level random scale σ ∼ U [0.3, 1.2].
+Designs are then mapped to the physical space using the output activation ξt = 40ut , similarly to the policy output activation
+detailed in Appendix D.3.
+
+D.5     BASELINES
+
+PCE. PCE (Foster et al., 2020) uses the same policy architecture and training schedule as our score-based approach (see
+Table 4) but replaces the score-based gradient estimator with the sequential PCE estimator (Foster et al., 2021). The number
+of contrastive samples for each task is dictated by the allowed NLE budget which we describe in Appendix D.8.
+
+Pre-trained variational marginal (VarMarg). The variational marginal approach (Foster et al., 2019) replaces the
+intractable log p(y1:T | ξ1:T ) in the MI form of the EIG with a learned approximation log qη (y1:T | ξ1:T ), providing an
+upper-bound surrogate. The variational approximation qη is a Masked Autoregressive Flow (Papamakarios et al., 2017) with
+rational-quadratic-spline transforms (Durkan et al., 2019): 5 MAF layers, conditioner networks of depth 2 and width 80,
+and 8 spline bins on an interval of [−4, 4]. The base distribution is a standard Normal of dimension T (dy + dξ ), and the
+flow is trained by maximum likelihood on samples from the model. We train qη using a warmup-cosine-decay learning-rate
+schedule with peak 10−3 and floor 10−6 . We sample designs from the same design sampling distributions as the score
+network (Appendix D.4.1) and we model the joint p(y1:T , ξ1:T ) then subtract the analytic marginal design score to obtain
+the required conditional. The policy is then trained with log qη (y1:T | ξ1:T ) providing an approximation of the intractable
+marginal. The policy training hyperparameters are identical to those in Table 4 and the number of training iterations is
+dictated by the allowed NLE budget as per Appendix D.8.
+
+Pre-trained variational posterior (VarPost). In this approach, we pre-train a variational approximation of the posterior
+distribution p(θ|hT ) and use the resulting approximation to train the policy by maximising the Barber-Agakov lower bound
+on IT (Barber and Agakov, 2003). Again we sample designs from the same design sampling distributions as the score
+network (Appendix D.4.1).
+
+Joint variational posterior (JointVarPost). The joint variational posterior approach (Foster et al., 2020) co-optimises the
+variational posterior qη (θ | y1:T , ξ1:T ) and the policy by maximising the Barber-Agakov lower bound on the EIG.
+
+
+                                                              5418
+The variational posterior qη (z | y1:T , ξ1:T ) is shared between each of the variational approaches. It is a transformer-encoded
+conditional mixture of Gaussians where the transformer backbone mimics the architecture of the score networks as closely
+as possible to provide a fair comparison. Specifically, it is identical to the score transformer network presented in Appendix
+D.4 up until the prediction heads, where here we use per-component heads to predict the means and diagonal log-scales
+of the K mixture components and the mixing logits. We use K = 10 components. The network is specialised further in
+the location finding task where we canonicalise the hidden source ordering by sorting on their first coordinate to maintain
+identifiability. Furthermore, in the dynamical systems tasks we use positional encodings to capture the permutation-aware
+structure of the conditioning observations.
+In each variational approach, we train the posterior with batch size 1024 and one posterior sample per data point per step.
+The posterior optimiser is Adam with a warmup-cosine schedule (peak 10−3 , floor 10−6 , warmup over 0.1% of training). In
+the joint approach, the policy optimiser is Adam with a cosine-decay schedule from 10−5 to 5 × 10−6 .
+
+IO-SMC2 . For IO-SMC2 we use the authors’ public Jax implementation (Iqbal et al., 2024). We only modified the
+diffusion matrices from their set-up in order to avoid the extremely high EIG settings where policy performance is hard to
+reliably validate. In order to compensate for the lower reward signal in this regime, we experimented with increasing the
+tempering parameter and reducing the strength of the slew rate penalty on designs, however neither of these provided any
+noticeable improvements. The hyperparameters used are therefore identical to the original implementation and we varied the
+number of particles used in order to respect the fixed NLE budget, which is described in Appendix D.8.
+
+
+D.6   EVALUATION BOUNDS
+
+For each trained policy we report upper and lower bounds on the true total EIG IT (ϕ). These bounds are introduced by
+Foster et al. (2021) and are computed as follows. Let θ0 ∼ p(θ) and y1:T ∼ pϕ (y1:T | θ0 ) denote an outer sample from the
+                                       i.i.d.
+model under the policy, and let θ1:M ∼ p(θ) denote M independent contrastive samples from the prior.
+
+sNMC upper bound. The sequential NMC estimator of Foster et al. (2021); Rainforth et al. (2018) gives the upper bound
+                                     (                                    )
+                        sNMC                     p(y1:T | θ0 , ξ1:T )
+                       IT,M (ϕ) = E log 1 PM                                 ≥ IT (ϕ),                            (88)
+                                           M     m=1 p(y1:T | θm , ξ1:T )
+
+which is asymptotically tight as M → ∞.
+
+sPCE lower bound.       The sequential prior contrastive estimator of Foster et al. (2021) gives the lower bound
+                                             (                                       )
+                              sPCE                        p(y 1:T | θ0 , ξ1:T )
+                             IT,M  (ϕ) = E log 1 PM                                    ≤ IT (ϕ),                            (89)
+                                                   M +1     m=0 p(y1:T | θm , ξ1:T )
+
+which is asymptotically tight as M → ∞ and bounded above by log(M + 1).
+
+Sample sizes. Both bounds are estimated with M = 1 × 106 inner (contrastive) samples and N = 2048 outer samples
+for every (policy, task) pair, with the exception of the standard location finding task and the gravimetry tasks, where
+M = 5 × 106 contrastive samples were used. With N = 2048 samples, the standard error of the bound estimates was found
+to be below the standard error over randomness in the choice of final policy.
+
+
+D.7   NLE CALCULATIONS
+
+To ensure a fair comparison and highlight the benefit of pre-training the score network in our approach, we compare all
+methods under a fixed budget of number of likelihood evaluations (NLE) consumed during training. We define one NLE as a
+single evaluation of the conditional likelihood p(yt | θ, ξt , ht−1 ), so an evaluation of the joint log-likelihood over the full
+experiment costs T NLE. We use NLE as a natural cost metric because it provides a comparable measure of how much
+information each method consumes from the model. For implicit methods (the variational posterior approaches), these
+methods do not evaluate the model likelihood but do require samples from it, therefore we use the number of samples as an
+equivalent proxy.
+
+
+                                                             5419
+     Method                Upfront     Per-policy
+     Score-based           KU BU T     KP N T
+     PCE                   —           KP N (M + 1)T
+     VarMarg               KU BU T     KP N T
+     VarPost               KU BU T     KP N T
+     JointVarPost          —           K J BJ T
+     IO-SMC2 (lower)       —           KS(N M T + (N −1)M T ) + N M T
+     IO-SMC2 (upper)       —           KS(N M T + (N −1)(M T + M RT (T +1)/2)) + N M T + N M RT (T +1)/2
+
+Table 7: Per-policy and total-budget NLE formulas for each method. “Upfront” is paid once and amortises over P policies.
+IO-SMC2 costs are stated as lower/upper bounds spanning the IBIS resampling regime; the realised cost depends on the rate
+at which the degeneracy criterion triggers.
+
+
+We use the following common notation: KP is the number of policy gradient steps, N the policy training outer batch size,
+T the experiment length, P the number of policies trained, KU , BU the number of iterations and batch size for upfront
+training (applies to score, VarMarg and VarPost methods), M the number of contrastive samples per outer sample for PCE,
+and KJ , BJ the joint iterations and batch size for the joint variational posterior training. The total cost across P policies is
+upfront + P · per-policy. We summarise the calculations in Table 7.
+
+Score-based (and pre-trained variational). Our score-based approach incurs NLE in two phases. The upfront variational
+approaches share an identical cost structure. The upfront score-training phase performs KU iterations with batch size BU ;
+each sample requires one evaluation of the per-time-step grad-log-likelihood in the marginal score matching objective
+(Equation (6)), which we count as T NLE per sample. The upfront cost is therefore KU BU T . The policy-training phase
+performs KP iterations with batch size N ; each sample requires one evaluation of the joint log-likelihood to compute the
+conditional-likelihood gradient term of Equation (3), costing T NLE. The per-policy cost is therefore KP N T , and total cost
+across P policies is
+                                           Cscore (P ) = KU BU T + P · KP N T.                                           (90)
+The upfront score-training cost is paid once and amortises across all P policies, giving a key computational advantage when
+P grows.
+
+PCE. Using the PCE (Foster et al., 2021), the policy is trained for KP iterations with batch size N . Each sample requires
+one evaluation of the joint log-likelihood under the realised θ (T NLE), plus an inner Monte-Carlo estimate of p(y1:T | ξ1:T )
+using M samples from the prior (M T NLE). The per-policy cost is therefore KP N (M + 1)T and the total is
+
+                                              CPCE (P ) = P · KP N (M + 1)T.                                                (91)
+
+
+Co-trained variational posterior. The variational-posterior approach (Foster et al., 2020) co-trains a posterior qη (θ |
+y1:T , ξ1:T ) and the policy on the Barber-Agakov lower bound. We charge T NLE per outer sample so that joint training for
+K iterations with batch size B costs
+                                                Cvar-post (P ) = P · KJ BJ T.                                         (92)
+The cost is per-policy because the posterior is specialised to the current policy and is not re-used across restarts.
+
+IO-SMC2 . IO-SMC2 (Iqbal et al., 2024) implements a particle filter (IBIS) within a particle filter (CSMC) within
+Markovian score climbing. Working from the outermost loop inwards: score climbing performs K gradient-based maximisa-
+tion iterations on the policy parameters, each of which calls IO-SMC2 once to sample N trajectories
+                                                                                                  QT from a reward-tilted
+distribution. Note that the policy-parameter gradient is taken through the policy density ∇ϕ log t=1 πϕ (ξt | z0:t−1 ), not
+through the dynamics likelihood, so the outer optimisation itself contributes no likelihood evaluations.
+The inner IO-SMC2 algorithm uses IBIS to approximate the posterior over θ at each step with M particles. Each IBIS step
+costs at minimum M NLE. If a degeneracy criterion is met at step t, R move-resample steps cost an additional M Rt NLE.
+The per-step IBIS cost is therefore between M and M (1 + Rt). Particle re-weighting in the CSMC kernel itself costs M
+NLE per trajectory per step. Summing over T steps and N trajectories (IBIS is run for N −1 trajectories since the reference
+trajectory is inherited), and accounting for the one-off cost of initialising the reference trajectory via unconditional SMC, the
+
+
+                                                             5420
+Table 8: Location Finding budget configurations. All methods share a fixed NLE budget of exactly 6.144 × 109 ; PCE∗ uses
+10× this budget (6.144 × 1010 ) reflecting more typical values required for this method. Shared fixed values (across all rows):
+experiment length T = 30, policy-training iterations KP = 104 , policy batch size N = 1024, and upfront/joint batch size
+BU = BJ = 1024. We tabulate only the quantities varied to meet the budget: the number of policies P , the upfront/joint
+training iterations KU /KJ , and the number of PCE contrastive samples M .
+
+                               Method                                    P    KU / KJ       M
+                               Score-based (plus VarMarg, VarPost)        1    190,000      —
+                               Score-based (plus VarMarg, VarPost)        5    150,000      —
+                               PCE                                        1          —      19
+                               PCE                                        5          —       3
+                               PCE∗                                       1          —     199
+                               JointVarPost                               1    200,000      —
+                               JointVarPost                               5     40,000      —
+
+
+
+total cost of IO-SMC2 with S CSMC kernel applications per gradient step satisfies
+
+          lower
+                                                          
+         CIO-SMC2 (P ) = P · KS(N M T + (N −1)M T ) + N M T ,                                                             (93)
+                            h                                                                i
+          upper                                                    
+         CIO-SMC2 (P ) = P · KS N M T + (N −1)(M T + M RT (T +1)/2) + N M T + N M RT (T +1)/2 .                           (94)
+
+The realised cost falls between these bounds. In our experiments we track the actual number of evaluations and report these
+additionally. The original IO-SMC2 paper uses S = 1 and R = 3.
+
+Table 9: Dynamical Systems configurations. All methods share a fixed NLE budget of exactly 1.024 × 1010 . Shared fixed
+values (across all rows): experiment length T = 50, policy-training iterations KP = 500, policy batch size N = 1024,
+and upfront/joint batch size BU = BJ = 1024. We tabulate only the varied quantities: the number of policies P , the
+upfront/joint training iterations KU /KJ , and the number of PCE contrastive samples M . Realised IO-SMC2 configurations
+are reported separately in Table 11.
+
+                               Method                                    P    KU / KJ       M
+                               Score-based (plus VarMarg, VarPost)       1      199,500     —
+                               Score-based (plus VarMarg, VarPost)      50      175,000     —
+                               PCE                                       1           —     399
+                               PCE                                      50           —       7
+                               JointVarPost                              1      200,000     —
+                               JointVarPost                             50        4,000     —
+
+
+
+
+D.8   NLE VALUES
+
+In the previous subsection, we detailed the NLE cost structure of each method. In our experimental protocol, all methods
+were assigned a fixed NLE budget. We presented the results for each method by training either one or multiple policies
+P . For P > 1 we select the best performing policy based on an initial estimate of its PCE lower bound, and report an
+independent re-estimate of the EIG bounds for that selected policy. Depending on P , we adjusted the number of upfront/joint
+training iterations KU , KJ and the number of contrastive samples M for each method (similarly the number of particles M
+and trajectories N in IO-SMC2 ) in order to respect the fixed NLE budget available. This is representative of the procedure
+one might undertake when selecting a policy network by testing multiple architectures/hyperparameters or by training
+multiple policies to avoid local optima. We provide full details of the NLE budget and the configurations used to achieve
+these budgets in Tables 8 to 11.
+
+
+                                                            5421
+Table 10: Gravimetry configurations. All methods share a fixed NLE budget of 4.096 × 109 ; PCE∗ uses 10× this budget
+(4.096 × 1010 ). Shared fixed values (across all rows): experiment length T = 20, policy-training iterations KP = 104 ,
+policy batch size N = 1024, and upfront/joint batch size BU = BJ = 1024. We tabulate only the varied quantities: the
+number of policies P , the upfront/joint training iterations KU /KJ , and the number of PCE contrastive samples M .
+
+                              Method                                          P     KU / KJ            M
+                              Score-based (plus VarMarg, VarPost)              1      190,000           —
+                              Score-based (plus VarMarg, VarPost)              5      150,000           —
+                              PCE                                              1              —         19
+                              PCE                                              5              —          3
+                              PCE∗                                             1              —        199
+                              JointVarPost                                     1      200,000           —
+                              JointVarPost                                     5       40,000           —
+
+Table 11: IO-SMC2 NLE bounds on Dynamical Systems experiments. Here we report the configuration used and the
+upper and lower bounds on NLE cost. The configuration was chosen to capture the target NLE value of 1.024 × 1010
+allowed to each other method. We then report the realised NLE value on each experiment. We did not use a P = 50 variant
+for IO-SMC2 as the wall-clock time required to train and evaluate the required number of policies using the IO-SMC2
+implementation was prohibitive.
+
+                                     (K, N, M, R, S)                 lower                upper
+                                     (25, 1024, 512, 3, 1)     1.34 × 109          5.34 × 1010
+
+                                 Stochastic Pendulum                           Cart-Pole                Double Pendulum
+                                        9             7                 10                7
+              Realised NLE     9.9 × 10 ± 5.7 × 10           1.5 × 10        ± 3.6 × 10        1.8 × 1010 ± 7.8 × 107
+
+
+E     ABLATION STUDIES, FURTHER RESULTS AND INSIGHTS
+
+E.1   MLMC RESULTS
+
+We implemented the MLMC approach of Goda et al. (2022) and tested this on the standard location finding experiment.
+MLMC uses a debiasing scheme which randomises the number of inner samples to provide an unbiased estimate of the EIG
+gradient. In our experiments we found that the resulting gradients are high variance, therefore we increased the number of
+outer samples per gradient estimate and trained the policy network for longer to allow proper convergence. We obtained a
+lower bound of 7.21 ± 0.40 and an upper bound of 7.27 ± 0.40 on the d = 2, K = 2 location finding task. Unfortunately,
+the implementation took > 24 hours to train a single policy, therefore we were unable to provide results across all our
+experimental settings. We provide the experimental settings and approximate NLE cost used for these results in Table 12.
+Note that the configuration we tested far exceeds the NLE cost of the budget for the main results, yet the MLMC performance
+was still significantly worse.
+
+NLE cost of MLMC.       Each outer sample n = 1, . . . , N is assigned a random level Ln drawn from a geometric distribution,
+
+                                   Pr(L = l) = (1 − 2−τ ) (2−τ )l ,             l = 0, 1, 2, . . . ,                      (95)
+
+and the number of inner (nested) samples at level l is M0 2l . The expected number of inner samples per outer sample is
+therefore
+                                                            ∞
+                                     L                 −τ
+                                                           X          l       1 − 2−τ
+                                                                 21−τ = M0
+                                      
+                              E M0 2 = M0 (1 − 2 )                                      ,                         (96)
+                                                                              1 − 21−τ
+                                                               l=0
+
+which is finite only for τ > 1. We used τ = 1.1, for which this is ≈ 7.96M0 . This gives a total theoretical expected NLE
+cost of 7.96T KP N M0 .
+To compile and parallelise the loop we require a static number of inner samples. We therefore cap the level Ln at lmax = 12,
+
+
+                                                              5422
+Table 12: Configuration and NLE values for MLMC on the standard location finding experiment. Theoretical NLE gives an
+expected NLE based on the expected number of inner samples per outer sample in the randomised scheme. Realised NLE
+reports the actual NLE required due to padding to allow parallelisation.
+
+                                               N                         2000
+                                               M0                            1
+                                               KP                       50000
+                                               τ                           1.1
+                                               Theoretical NLE      2.4 × 1010
+                                               Realised NLE         2.0 × 1013
+
+
+                                    Method                 Lower Bound      Upper Bound
+                                    S CORE BED (P=1)         8.09 ± 0.09      9.31 ± 0.11
+                                    S CORE BED (P=5)         8.42 ± 0.16      9.49 ± 0.27
+                                    PCE (P=1)                8.43 ± 0.06      8.78 ± 0.09
+                                    PCE (P=5)                8.37 ± 0.06      8.85 ± 0.12
+                                    JointVarPost (P=1)       8.86 ± 0.04     10.20 ± 0.15
+                                    JointVarPost (P=5)       8.80 ± 0.04     10.54 ± 0.48
+                                    VarMarg (P=1)            7.51 ± 0.13      8.19 ± 0.15
+                                    VarMarg (P=5)            7.65 ± 0.06      8.55 ± 0.14
+                                    VarPost (P=1)            8.85 ± 0.05      9.72 ± 0.07
+                                    VarPost (P=5)            8.87 ± 0.04      9.91 ± 0.15
+
+Table 13: Results on the 1D gravimetry task. Each approach is allowed an NLE budget of 4.096 × 109 . Results are mean ±
+one standard error over policy repeats with bold indicating statistically significant best lower bound at 95% confidence level.
+
+
+which clips a total mass of at most 0.01% of the tail. The actual realised compute cost is therefore T N KP M0 2lmax , in other
+words equivalent to PCE with 212 M0 = 4096M0 inner samples.
+
+
+E.2   GRAVIMETRY RESULTS
+
+We consider an additional experimental design task inspired by the gravity methods described in Telford et al. (1990)
+with which one infers the unknown location, depth and strength of an underground void based on measurements of local
+gravitational anomalies. We consider a one-dimensional search space, where designs ξt ∈ R are placed on a line and a noisy
+measurement of the gravitational deviation is observed. This task can be seen as a more challenging development of the
+source location finding task. In particular, the signal strength—a function of the size and relative density of the underground
+void—is now unknown and the depth and signal strength can only be independently identified by measurements adjacent to
+but not directly above the source. We place T = 20 designs and train an adaptive TNP-style policy network (Nguyen and
+Grover, 2022). Results are presented in Table 13 where again we observe that S CORE BED performs on par with PCE and
+slightly worse than the variational approaches.
+
+
+E.3   CHOICE OF DESIGN SAMPLING DISTRIBUTION
+
+Here we explore the importance of the design sampling distribution q(ξ1:T ) used during score network training. We provided
+details of the sampling distributions used in our main results (see Section 5) in Appendix D.4.1. Here we present additional
+results using different choices of design sampling distribution.
+
+Location finding. Here we consider the influence of the design sampling distribution used during score network training
+for the d = 2, K = 2 location finding task. We consider four different choices of design sampler. Firstly, a standard isotropic
+Gaussian sampler which simply samples i.i.d. designs ξt ∼ N (0, 1), t = 1, ...T , which represents the simplest possible
+choice for this experiment. Secondly, we augment the standard Gaussian with a random scale sampled uniformly per
+trajectory from U[0.5, 2]. Thirdly, we consider a handcrafted design distribution which was specifically created to mimic
+the behaviour of an optimal DAD policy, which typically exhibits a spiralling behaviour. This was achieved by sampling
+
+
+                                                            5423
+                                             Sampler                  Lower Bound                        Upper Bound
+                                             Gaussian                   2.86 ± 0.26                       2.86 ± 0.26
+                                             Random scale Gaussian     10.84 ± 0.08                      10.97 ± 0.09
+                                             Temporal correlation      10.81 ± 0.06                      10.95 ± 0.07
+                                             Low rank projection       11.01 ± 0.02                      11.18 ± 0.02
+
+Table 14: Ablation results for design sampler choice on the d = 2, K = 2 location finding task. Final policies are obtained
+using the P = 1 protocol. Results present mean ± one standard error with bold indicating statistically best lower bound at
+the 95% confidence level.
+
+
+                    10                                                                         7.0
+  EIG Lower Bound
+
+
+
+
+                                                                             EIG Lower Bound
+                     8
+                     6                                                                         6.5
+                     4
+                     2                                                                         6.0
+
+                         0   20000   40000     60000   80000 100000                                  0      20000   40000   60000    80000 100000
+                                Score Training Iterations                                                      Score Training Iterations
+Figure 4: Stability of S CORE BED with respect to score training. Each curve presents the final policy EIG under the P = 1
+protocol against number of score training iterations. Left: d = 2, K = 2 location finding. Right: cart-pole.
+
+
+trajectories as low-rank projections of Gaussian noise, ξ = Φz, where Φ ∈ RT ×r is a time-basis matrix and z ∈ Rr×d are
+Gaussian coefficients, zij ∼ N (0, s2 ) with an overall scale drawn randomly as s ∼ U [0.5, 2]. For each sample the basis Φ
+is drawn uniformly from a family of temporal bases — sinusoidal, Fourier, or spirals — and the projection rank r is drawn
+uniformly in [2, 8], so that designs are smooth, low-dimensional curves in time whose complexity varies across samples.
+Finally, for reference we include the temporally correlated random scale Gaussian which was used in our main results.
+We present the results of the ablation in Table 14. We find that when the score network is trained on the plain isotropic
+Gaussian, it fails to train successful policies. The other design sampler choices perform similarly, with marginally best
+performance from the low rank projection sampler. From our experiments, we found that the critical ingredient for this task
+is the hyperprior on the sampler scale. This is critical because at initialisation, the policy network emits designs on a scale
+much smaller than a standard Gaussian and the scale then grows as the policy trains. Including a hyperprior on design scales
+better covers the design space in the regions that the policy visits during training. The custom low rank projection sampler
+gives the best performance although it required substantial customisation to do so.
+
+
+E.4             SCORE TRAINING STABILITY
+
+We investigated the stability of S CORE BED with respect to score training seed. Figure 4 plots the final policy EIG under
+the P = 1 protocol for multiple score network training seeds on the standard location finding and cart-pole tasks. While
+S CORE BED is clearly very stable on the location finding task, we observe instability early in the score network training,
+as noted in Section 5. In order to compensate for this, we split the allowed score budget between multiple score networks,
+therefore guarding against this instability. We believe that this instability is more precisely attributed to unstable policy
+training due to bias in the S CORE BED EIG gradient approximation, which we explore in the following section.
+
+
+E.5             ADDITIONAL BIAS-VARIANCE RESULTS
+
+We now extend the discussion from Section 5.3 by exploring the bias of the EIG gradients of S CORE BED and PCE on a
+larger set of tasks. Figure 7 presents error curves of S CORE BED against N for increasing score training iterations on both
+location finding tasks and two dynamical systems tasks. It is immediately clear that S CORE BED achieves considerably
+
+
+                                                                      5424
+lower bias than PCE on both location finding tasks, while S CORE BED carries greater bias on both the stochastic pendulum
+and cart-pole tasks compared with PCE. As per our bias–variance decomposition and discussions in Section 5.3, we believe
+that gradient bias is a key factor in the quality of policy training as large bias can throw off policy training by pushing the
+policy in suboptimal directions. Indeed, the scatter plots in Figure 5 show the correlation between EIG gradient bias and
+final policy performance, illustrating that lower bias is associated with stable policy performance. We see that the bias of
+S CORE BED on the dynamical systems tasks may be on the verge of stable performance, but by selecting policies between
+multiple score training seeds in the P > 1 protocol, we are still able to avoid this instability.
+In order to investigate the cause of this bias on the dynamical systems tasks, we explored correlation between score MSE
+and the conditioning of the Jacobian Jξ (y) = ∂y  ∂ξ appearing in the gradient bias (cf. eq. (68)), see Figure 6. We found that in
+the trained (final) policy regime, trajectories have significantly worse Jacobian conditioning and there is apparent correlation
+between score MSE and Jacobian conditioning. This is unsurprising since the non-Markovian property of the dynamical
+systems models makes them particularly sensitive to perturbations early in the trajectory, and it suggests the bound on EIG
+gradient error in eq. (68)— equivalently the constant Ly in eq. (52)—may be such that the score networks are required to be
+extremely accurate on this task to provide sufficiently low EIG gradient bias.
+
+                                                                                                 4                                                            7
+                 10
+EIG Bound
+
+
+
+
+                                                           5                                                                                                  6
+                  5                                                                              3
+                                                                                                                                                              5
+                                                           0
+                        10 2    10 1    100                            10 1    100         101                         10 3   10 1         101     103                    10 2         100      102
+                        EIG Gradient Bias 2                         EIG Gradient Bias 2                                EIG Gradient Bias 2                               EIG Gradient Bias 2
+Figure 5: Scatter plots showing correlation between EIG gradient bias and final policy performance, with points representing
+different score training budgets/seeds (blue) and different numbers of PCE inner samples (green). From left to right: location
+finding (d = 2, K = 2), location finding (d = 3, K = 10), stochastic pendulum, cart-pole.
+
+
+                  0.2
+                                                          104                                                         0.025                                        104
+                                                                                                     Base
+    Base
+
+
+
+
+                                                                                                                                                       Score MSE
+
+                                                          103
+                                              Score MSE
+
+
+
+
+                  0.0                                                                                                 0.000                                        103
+                                                               2
+                                                          10
+                                                                                                     Policy (final)
+Policy (final)
+
+
+
+
+                 0.05                                                         Base                                    0.005                                        102                   Base
+                                                          101                 Policy (final)                                                                                             Policy (final)
+                 0.00                                                                                                 0.000
+                           50      75                                50              100                                             200         400                             200         400
+                      Condition number (J)                         Condition number (J)                                   Condition number (J)                           Condition number (J)
+
+Figure 6: Histograms showing the distribution of Jacobian condition number between the score training distribution and the
+distribution induced by the final policy network. Scatter plots show correlation between score MSE and Jacobian condition
+number. Left: stochastic pendulum. Right: cart-pole.
+
+
+
+
+                                                                                               5425
+                                                                   ScoreBED                                                                      ScoreBED
+                           101                                     PCE                                        1                                  PCE
+                                                                   PCE*                                  10                                      PCE*
+        EIG Gradient MSE
+
+
+
+
+                                                                                      EIG Gradient MSE
+                           100                                                                                          1000
+                                          1000                                                           100            5000
+                                          5000                                                                          10000
+                           10 1           10000                                                                         20000
+                                          20000                                                          10 1           50000
+                                          50000                                                                         100000
+                           10 2           100000                                                                        200000
+
+                                    101            102     103           104                                      101            102     103           104
+                                               N (Outer Samples)                                                             N (Outer Samples)
+
+                           103                                   ScoreBED                                102                                   ScoreBED
+                           10   2                                PCE(P=50)                                                                     PCE(P=50)
+                                                                 PCE(P=1)                                101                                   PCE(P=1)
+                                                                                      EIG Gradient MSE
+        EIG Gradient MSE
+
+
+
+
+                                1
+                           10
+                           100            1000                                                           100            1000
+                                1         5000                                                                          5000
+                           10             10000                                                          10 1           10000
+                                          20000                                                                         20000
+                           10 2           50000                                                                         50000
+                                                                                                         10 2
+                           10   3         100000                                                                        100000
+
+                                    101            102     103           104                                      101            102     103           104
+                                               N (Outer Samples)                                                             N (Outer Samples)
+Figure 7: EIG gradient MSE curves for S CORE BED and PCE. PCE uses M = 19 and PCE∗ uses M = 199 inner samples
+on the location finding tasks, while PCE (P = 50) uses M = 7 and PCE (P = 1) uses M = 399 on the dynamical systems
+tasks. These values are chosen according to the fixed NLE budgets for each task as per Appendix D.8. From top left to
+bottom right: location finding (d = 2, K = 2), location finding (d = 3, K = 10), stochastic pendulum, cart-pole.
+
+
+
+
+                                                                               5426
+

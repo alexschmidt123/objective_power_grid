@@ -1,0 +1,127 @@
+{
+  "bed_model": {
+    "population": 500.0,
+    "i0": 2.0,
+    "t_end": 100.0,
+    "min_spacing": 0.1,
+    "integration_steps_per_stage": 512,
+    "beta_mean": 0.5,
+    "gamma_mean": 0.10000000000000002,
+    "log_std": 0.5,
+    "sigma": 1.0,
+    "name": "sir_ode",
+    "T": 5
+  },
+  "policy_network": {
+    "_target_": "policy_learning.policies.IqbalGRUNet",
+    "encoder_shapes": [
+      256,
+      256
+    ],
+    "encoding_dim": 64,
+    "rnn_hidden_dim": 64,
+    "rnn_layers": 2,
+    "enc_act": "relu",
+    "emit_act": "relu",
+    "emitter_shapes": [
+      256,
+      256
+    ],
+    "concat": true,
+    "min_std": 0.0001,
+    "deterministic": false
+  },
+  "policy": {
+    "lr_schedule": {
+      "_target_": "optax.constant_schedule",
+      "value": 0.0001
+    },
+    "num_iters": 500,
+    "b1": 0.9,
+    "b2": 0.999,
+    "norm_clip": 1.0,
+    "train_outer_samples": 4,
+    "train_inner_samples": 1024,
+    "train_outer_batch_size": 4,
+    "eval_inner_samples": 500000.0,
+    "eval_outer_samples": 2048,
+    "eval_outer_batch_size": 64,
+    "grad_est_type": "score_chunked",
+    "checkpoint_freq": 100,
+    "optim_log_freq": null,
+    "eig_bounds": {
+      "freq": 50,
+      "eval_at": null
+    }
+  },
+  "score": {
+    "num_iters": 2,
+    "lr_schedule": {
+      "_target_": "optax.warmup_cosine_decay_schedule",
+      "init_value": 0.0,
+      "peak_value": 0.0002,
+      "warmup_steps": 1,
+      "decay_steps": 2,
+      "end_value": 1e-05
+    },
+    "log_freq": 200,
+    "checkpoint_freq": null,
+    "eval_batch_size": 1024,
+    "batch_size": 4,
+    "y_score_loss_weight": 0.02,
+    "clip_grad_norm": 10000,
+    "design_sampler_type": "random_sampler",
+    "design_sampler_kwargs": {},
+    "eval_iters": [
+      10000,
+      20000,
+      50000
+    ]
+  },
+  "score_network": {
+    "_target_": "policy_learning.score_nets.ConservativeScoreNetwork",
+    "base_score_network": {
+      "_target_": "policy_learning.score_nets.Transformer1Branch",
+      "transformer_num_layers": 4,
+      "model_dim": 256,
+      "num_heads": 8,
+      "embed_mlp_dim": 192,
+      "embed_dim": 128,
+      "positional": true,
+      "head_mode": "shared_e_t_window",
+      "noise_condition_mode": "none",
+      "xi_output_mode": "none",
+      "y_output_mode": "none",
+      "y_residual_mode": "default",
+      "rff_sigma": 10.0,
+      "head_style": "residual_mlp",
+      "head_num_blocks": 2
+    },
+    "y_output_mode": "none",
+    "xi_output_mode": "none",
+    "y_residual_mode": "default",
+    "noise_condition_mode": "y_and_xi_mean",
+    "potential_hidden_dim": 256
+  },
+  "mc_posterior": {
+    "posterior_sampler": "laplace",
+    "batch_size": 16,
+    "mala_steps": 5,
+    "mala_step_size": 0.0005,
+    "laplace_reg": 0.0001,
+    "n_map_steps": 500
+  },
+  "wandb": {
+    "project": "policy-learning",
+    "tags": [
+      "results_check_02_06"
+    ]
+  },
+  "experiment_name": "double_pend",
+  "seed": 0,
+  "score_reload_path": null,
+  "score_reload_step": null,
+  "n_restarts": 1,
+  "train_n_post_samples": 5000,
+  "eval_n_post_samples": 5000
+}

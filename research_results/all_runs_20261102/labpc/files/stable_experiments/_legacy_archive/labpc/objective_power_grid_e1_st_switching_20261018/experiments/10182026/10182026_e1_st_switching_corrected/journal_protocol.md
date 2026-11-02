@@ -1,0 +1,29 @@
+# Corrected straight-through switching
+
+{
+  "name": "corrected_ST_switching",
+  "source_commit": "939ebf50db31f987a4e4377c1aa85cb485a700fa",
+  "master": "labpc",
+  "worker": "ubuntu-pc",
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "all_four_training": "straight_through",
+  "first_job": "switchmoe_seed101",
+  "continue_cohort_regardless_of_EIG": true,
+  "stop_only_for_verified_correctness_failure": true,
+  "base_episodes": 500000,
+  "residual_episodes": 500000,
+  "development_seed": 1001,
+  "systems": 2000,
+  "contrasts": 1000000,
+  "checkpoint_selection": "final_fixed_budget",
+  "consumed_seed_excluded": 8831001,
+  "baseline_jobs_untouched": true
+}
+
+One coherent five-seed procedure; failed seeds retained. No architecture, optimizer, gamma, loss, clipping or regularization coefficient changes. Relaxed-warmup not used. Previous ST-switch regression remains development evidence, not proof of a bypass. Hard proposals and hard switching each have their own surrogate; graph-connected carried state is separate from relaxed regularization recurrence.

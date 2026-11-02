@@ -1,0 +1,72 @@
+{
+  "training": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+  "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+  "logical_primary_ODE_stage_evaluations": 170,
+  "minimum_primary_RK4_steps": 87040,
+  "solver_work_note": "Lower bound on primal solver work; adaptive subdivisions and autodiff extra work are not claimed as exact FLOPs",
+  "sir_score_adapter_revision": 2,
+  "potential_hidden_dim": 256,
+  "score_dimension_compatibility": "Pinned native potential_hidden_dim avoids scalar-data/scalar-time LayerNorm degeneracy; unchanged Transformer, loss, optimizers and training allocation",
+  "reported_policy_parameters": "params_ema",
+  "random_streams": "native derive_key score_trainer and policy_trainer/restart0",
+  "generated_training_trajectories": 34,
+  "training_forward_trajectories": 34,
+  "contrast_training_trajectories": 0,
+  "training_trajectory_budget": 34,
+  "training_budget_unit": "primary_episodes",
+  "initialization_trajectories": 18,
+  "standardisation_trajectories": 4,
+  "score_training_trajectories": 8,
+  "policy_training_trajectories": 8,
+  "budget_reconciliation": {
+    "smoke": true
+  },
+  "score_batch": 4,
+  "actual_score_updates": 2,
+  "actual_policy_updates": 2,
+  "training_seconds": 36.97792479675263,
+  "history": [
+    {
+      "phase": "score",
+      "step": 2,
+      "episodes": 8,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 4.309850331636,
+        "loss_total": 1.8722520350595442,
+        "loss_unweighted_total": 2.72434206039276,
+        "loss_x_component": 1.8548624427058051,
+        "loss_y_component": 0.01738959235373909,
+        "loss_y_unweighted": 0.8694796176869545,
+        "param_norm": 136.24974525437867,
+        "update_norm": 0.32237251225949815
+      }
+    }
+  ],
+  "checkpoint_selection": "final",
+  "architecture": "official_4layer_256dim_8head_RFF_conservative_transformer",
+  "policy_architecture": "official_IqbalGRUNet_256_256_64_two_GRU_64_256_256",
+  "adaptations": "1million total primary episodes including normalization and initialization; one fresh policy; published dynamical-system P1 99.75:0.25 allocation transferred to SIR; original batch1024; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions",
+  "design_bounds": [
+    0.0,
+    100.0
+  ],
+  "bounded_mapping": "chronological feasible-time sigmoid with minimum spacing",
+  "sir_configuration": {
+    "population": 500.0,
+    "i0": 2.0,
+    "t_end": 100.0,
+    "min_spacing": 0.1,
+    "integration_steps_per_stage": 512,
+    "beta_mean": 0.5,
+    "gamma_mean": 0.10000000000000002,
+    "log_std": 0.5,
+    "sigma": 1.0
+  },
+  "runtime": {
+    "jax": "0.7.2",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  }
+}
