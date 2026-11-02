@@ -1,0 +1,70 @@
+Log file: experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1/logs/run_log.log
+=== run.sh (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+Result folder: experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+Evaluate: moe_sboed
+Train: moe_sboed
+=== data_generation (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+[full-bank] no data.reuse_bank_dir; nothing to ensure
+[generate-data] type=eig_based config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/sir_ode_eig.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1 smoke=False force=False methods=['moe_sboed']
+[generate-data] SIR ODE dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode
+[generate-data] reused=True path=/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode train=10000 test=3000 actions=100
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+=== training method=moe_sboed (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[independent-moe] T=5 epoch=0/200 val=4.98239 best=4.98239 elapsed=0.2s
+[independent-moe] T=5 epoch=10/200 val=6.26327 best=6.66734 elapsed=1.6s
+[independent-moe] T=5 epoch=20/200 val=6.83019 best=6.86335 elapsed=2.7s
+[independent-moe] T=5 epoch=30/200 val=6.77371 best=6.87512 elapsed=3.9s
+[independent-moe] T=5 epoch=40/200 val=6.88546 best=6.90025 elapsed=5.0s
+[independent-moe] T=5 epoch=50/200 val=6.88136 best=6.90025 elapsed=6.2s
+[independent-moe] T=5 epoch=60/200 val=6.88690 best=6.90025 elapsed=7.4s
+[independent-moe] T=5 epoch=70/200 val=6.89874 best=6.90154 elapsed=8.5s
+[independent-moe] T=5 epoch=80/200 val=6.87641 best=6.90154 elapsed=9.7s
+[independent-moe] T=5 epoch=90/200 val=6.88349 best=6.90154 elapsed=10.8s
+[independent-moe] T=5 epoch=100/200 val=6.89660 best=6.90154 elapsed=12.0s
+[independent-moe] T=5 epoch=110/200 val=6.88739 best=6.90154 elapsed=13.2s
+[independent-moe] T=5 epoch=120/200 val=6.87535 best=6.90154 elapsed=14.3s
+[independent-moe] T=5 epoch=130/200 val=6.88017 best=6.90154 elapsed=15.5s
+[independent-moe] T=5 epoch=140/200 val=6.88067 best=6.90154 elapsed=16.6s
+[independent-moe] T=5 epoch=150/200 val=6.88969 best=6.90154 elapsed=17.8s
+[independent-moe] T=5 epoch=160/200 val=6.89176 best=6.90154 elapsed=18.9s
+[independent-moe] T=5 epoch=170/200 val=6.89260 best=6.90186 elapsed=20.1s
+[independent-moe] T=5 epoch=180/200 val=6.86753 best=6.90186 elapsed=21.2s
+[independent-moe] T=5 epoch=190/200 val=6.88454 best=6.90186 elapsed=22.4s
+[independent-moe] T=5 epoch=200/200 val=6.88773 best=6.90186 elapsed=23.5s
+[train] moe_sboed val_eig=6.9018635749816895 uniq=67 stage=epoch_165 24s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1/model/moe_sboed.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+=== crossed evaluation train_seed=101 eval_seed=1001 ===
+=== evaluation (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[evaluate] type=eig_based methods=['moe_sboed'] eval_seed=1001 N_obs=1 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+[evaluate] moe_sboed eig=6.8849 uniq=81 eval_seed=1001
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+=== crossed evaluation train_seed=101 eval_seed=1002 ===
+=== evaluation (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[evaluate] type=eig_based methods=['moe_sboed'] eval_seed=1002 N_obs=1 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+[evaluate] moe_sboed eig=6.8861 uniq=82 eval_seed=1002
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+=== crossed evaluation train_seed=101 eval_seed=1003 ===
+=== evaluation (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[evaluate] type=eig_based methods=['moe_sboed'] eval_seed=1003 N_obs=1 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+[evaluate] moe_sboed eig=6.8728 uniq=79 eval_seed=1003
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+=== crossed evaluation train_seed=101 eval_seed=1004 ===
+=== evaluation (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[evaluate] type=eig_based methods=['moe_sboed'] eval_seed=1004 N_obs=1 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+[evaluate] moe_sboed eig=6.8780 uniq=86 eval_seed=1004
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+=== crossed evaluation train_seed=101 eval_seed=1005 ===
+=== evaluation (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[evaluate] type=eig_based methods=['moe_sboed'] eval_seed=1005 N_obs=1 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+[evaluate] moe_sboed eig=6.8758 uniq=81 eval_seed=1005
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+
+Done config=configs/sir_ode_eig.yaml type=eig_based T=5.
+EXP_DIR=experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1
+LOG_FILE=experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1/logs/run_log.log

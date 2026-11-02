@@ -1,0 +1,43 @@
+{
+  "horizons": [
+    3,
+    4,
+    5
+  ],
+  "training_seed": 101,
+  "evaluation_seeds": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005
+  ],
+  "epochs": 200,
+  "trajectories_per_epoch": 512,
+  "validation_systems": 256,
+  "test_systems": 512,
+  "noise_sigma": 1.0,
+  "new_trainings": [
+    "uniform",
+    "matched_dense"
+  ],
+  "frozen_interventions": [
+    "uniform_all_experts",
+    "expert_1",
+    "expert_2",
+    "expert_3",
+    "expert_4"
+  ],
+  "reference_campaign": "experiments/09162026/09162026_independent_moe_sir",
+  "checkpoint_selection": "validation_EIG_only",
+  "hypotheses": [
+    "MoE improves over a parameter-matched single network",
+    "Learned routing improves over uniform mixing",
+    "Experts have complementary decision preferences"
+  ],
+  "limitations": [
+    "one training seed",
+    "total parameters matched, not active FLOPs",
+    "frozen expert interventions are not independently trained experts"
+  ]
+}

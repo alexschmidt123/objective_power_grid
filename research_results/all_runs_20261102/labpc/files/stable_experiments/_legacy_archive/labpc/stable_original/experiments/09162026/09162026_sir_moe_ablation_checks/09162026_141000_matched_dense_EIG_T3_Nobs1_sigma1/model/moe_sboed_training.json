@@ -1,0 +1,65 @@
+{
+  "architecture": "independent_sparse_moe_v1",
+  "method": "moe_sboed",
+  "training_seed": 101,
+  "variant": "matched_dense",
+  "routing": "uniform",
+  "reference_parameter_count": 446004,
+  "policy_hidden": 256,
+  "n_experts": 1,
+  "top_k": 1,
+  "expert_hidden": 1028,
+  "objective": "terminal_posterior_entropy_reduction",
+  "estimator": "finite_particle_entropy_difference",
+  "optimizer": "ppo_actor_critic",
+  "teacher": null,
+  "behavioral_cloning_trajectories": 0,
+  "moe_step0_action": null,
+  "first_action": "learned",
+  "checkpoint_selection": "maximum_validation_eig_only",
+  "best_stage": "epoch_0",
+  "best_validation_terminal_eig": 6.551520347595215,
+  "best_validation_n_unique_sequences": 2,
+  "epochs": 2,
+  "trajectories_per_epoch": 16,
+  "n_validation_systems": 4,
+  "parameter_count": 446104,
+  "checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1/model/moe_sboed.pth",
+  "elapsed_seconds": 0.38096474297344685,
+  "history": [
+    {
+      "epoch": 0,
+      "validation_terminal_eig": 6.551520347595215,
+      "validation_n_unique_sequences": 2,
+      "mean_terminal_eig": null,
+      "mean_loss": null,
+      "elapsed_seconds": 0.19333720789290965
+    },
+    {
+      "epoch": 1,
+      "validation_terminal_eig": 2.510927677154541,
+      "validation_n_unique_sequences": 1,
+      "mean_terminal_eig": 3.2429491877555847,
+      "mean_loss": -0.21333206817507744,
+      "elapsed_seconds": 0.3509589768946171,
+      "router_entropy": 0.0,
+      "expert_load": [
+        1.0
+      ],
+      "balance_loss": 0.0
+    },
+    {
+      "epoch": 2,
+      "validation_terminal_eig": 2.510927677154541,
+      "validation_n_unique_sequences": 1,
+      "mean_terminal_eig": 3.1838138550519943,
+      "mean_loss": -0.18565724045038223,
+      "elapsed_seconds": 0.38048994401469827,
+      "router_entropy": 0.0,
+      "expert_load": [
+        1.0
+      ],
+      "balance_loss": 0.0
+    }
+  ]
+}

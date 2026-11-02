@@ -1,0 +1,67 @@
+{
+  "architecture": "independent_sparse_moe_v1",
+  "method": "moe_sboed",
+  "training_seed": 101,
+  "policy_hidden": 256,
+  "n_experts": 4,
+  "top_k": 2,
+  "expert_hidden": 256,
+  "objective": "terminal_posterior_entropy_reduction",
+  "estimator": "finite_particle_entropy_difference",
+  "optimizer": "ppo_actor_critic",
+  "teacher": null,
+  "behavioral_cloning_trajectories": 0,
+  "moe_step0_action": null,
+  "first_action": "learned",
+  "checkpoint_selection": "maximum_validation_eig_only",
+  "best_stage": "epoch_2",
+  "best_validation_terminal_eig": 4.767894268035889,
+  "epochs": 2,
+  "trajectories_per_epoch": 16,
+  "n_validation_systems": 4,
+  "parameter_count": 447540,
+  "checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_independent_moe_sir_checks/09162026_120000_sir_ode_EIG_T5_Nobs1_sigma1/model/moe_sboed.pth",
+  "elapsed_seconds": 0.5335087720304728,
+  "history": [
+    {
+      "epoch": 0,
+      "validation_terminal_eig": 2.0896267890930176,
+      "validation_n_unique_sequences": 3,
+      "mean_terminal_eig": null,
+      "mean_loss": null,
+      "elapsed_seconds": 0.23473389795981348
+    },
+    {
+      "epoch": 1,
+      "validation_terminal_eig": 0.9940809011459351,
+      "validation_n_unique_sequences": 1,
+      "mean_terminal_eig": 3.5811834633350372,
+      "mean_loss": -0.14208668656647205,
+      "elapsed_seconds": 0.43582957005128264,
+      "router_entropy": 1.3852325677871704,
+      "expert_load": [
+        0.10000000149011612,
+        0.20000000298023224,
+        0.4749999940395355,
+        0.22500000894069672
+      ],
+      "balance_loss": 1.0133187770843506
+    },
+    {
+      "epoch": 2,
+      "validation_terminal_eig": 4.767894268035889,
+      "validation_n_unique_sequences": 2,
+      "mean_terminal_eig": 3.4914365112781525,
+      "mean_loss": -0.12581093050539494,
+      "elapsed_seconds": 0.5329797090962529,
+      "router_entropy": 1.384934902191162,
+      "expert_load": [
+        0.17499999701976776,
+        0.4000000059604645,
+        0.125,
+        0.30000001192092896
+      ],
+      "balance_loss": 1.0080114603042603
+    }
+  ]
+}

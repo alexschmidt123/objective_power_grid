@@ -1,0 +1,71 @@
+{
+  "architecture": "independent_sparse_moe_v1",
+  "method": "moe_sboed",
+  "training_seed": 101,
+  "variant": "learned",
+  "routing": "learned",
+  "reference_parameter_count": 447540,
+  "policy_hidden": 256,
+  "n_experts": 4,
+  "top_k": 2,
+  "expert_hidden": 256,
+  "objective": "terminal_posterior_entropy_reduction",
+  "estimator": "finite_particle_entropy_difference",
+  "optimizer": "ppo_actor_critic",
+  "teacher": null,
+  "behavioral_cloning_trajectories": 0,
+  "moe_step0_action": null,
+  "first_action": "learned",
+  "checkpoint_selection": "maximum_validation_eig_only",
+  "best_stage": "epoch_2",
+  "best_validation_terminal_eig": 4.970964431762695,
+  "best_validation_n_unique_sequences": 2,
+  "epochs": 2,
+  "trajectories_per_epoch": 16,
+  "n_validation_systems": 4,
+  "parameter_count": 447540,
+  "checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1/model/moe_sboed.pth",
+  "elapsed_seconds": 0.44427218195050955,
+  "history": [
+    {
+      "epoch": 0,
+      "validation_terminal_eig": 2.10982608795166,
+      "validation_n_unique_sequences": 3,
+      "mean_terminal_eig": null,
+      "mean_loss": null,
+      "elapsed_seconds": 0.18429496698081493
+    },
+    {
+      "epoch": 1,
+      "validation_terminal_eig": 0.9898728132247925,
+      "validation_n_unique_sequences": 1,
+      "mean_terminal_eig": 3.7654135525226593,
+      "mean_loss": -0.14188588224351406,
+      "elapsed_seconds": 0.3836947081144899,
+      "router_entropy": 1.3854128122329712,
+      "expert_load": [
+        0.07500000298023224,
+        0.17499999701976776,
+        0.45000001788139343,
+        0.30000001192092896
+      ],
+      "balance_loss": 1.0094363689422607
+    },
+    {
+      "epoch": 2,
+      "validation_terminal_eig": 4.970964431762695,
+      "validation_n_unique_sequences": 2,
+      "mean_terminal_eig": 3.6308202147483826,
+      "mean_loss": -0.12648078426718712,
+      "elapsed_seconds": 0.4437430480029434,
+      "router_entropy": 1.384325385093689,
+      "expert_load": [
+        0.20000000298023224,
+        0.42500001192092896,
+        0.02500000037252903,
+        0.3499999940395355
+      ],
+      "balance_loss": 1.0228749513626099
+    }
+  ]
+}

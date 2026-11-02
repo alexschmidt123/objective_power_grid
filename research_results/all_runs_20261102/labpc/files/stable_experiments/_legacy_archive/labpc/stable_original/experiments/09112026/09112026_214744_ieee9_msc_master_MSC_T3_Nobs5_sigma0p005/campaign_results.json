@@ -1,0 +1,726 @@
+{
+  "status": "complete",
+  "n_fresh": 128,
+  "results": [
+    {
+      "methods": {
+        "no_probe": {
+          "mean_loss": 0.39999999999999997,
+          "std_across_seed_means": 0.0,
+          "bank_coverage": 1.0,
+          "mean_posterior_risk": 0.39999999999999997,
+          "median_posterior_ess": 384.0,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.4
+          ],
+          "mean_unique_sequences": 1.0,
+          "mean_bank_loss": 0.39999999999999997,
+          "physical_safety_rate": 1.0
+        },
+        "random": {
+          "mean_loss": 0.38786458333333335,
+          "std_across_seed_means": 0.001049126931171015,
+          "bank_coverage": 0.9505208333333334,
+          "mean_posterior_risk": 0.38786458333333335,
+          "median_posterior_ess": 133.93937714936771,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 128.0,
+          "mean_bank_loss": 0.38786458333333335,
+          "physical_safety_rate": 0.9505208333333334
+        },
+        "fixed": {
+          "mean_loss": 0.3848958333333334,
+          "std_across_seed_means": 0.000520181884256238,
+          "bank_coverage": 0.9765625,
+          "mean_posterior_risk": 0.3848958333333334,
+          "median_posterior_ess": 83.23997087428523,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 1.0,
+          "mean_bank_loss": 0.3848958333333334,
+          "physical_safety_rate": 0.9765625
+        },
+        "myopic": {
+          "mean_loss": 0.3851822916666667,
+          "std_across_seed_means": 0.0006314768569261465,
+          "bank_coverage": 0.9609375,
+          "mean_posterior_risk": 0.3851822916666667,
+          "median_posterior_ess": 94.15683486531816,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 41.666666666666664,
+          "mean_bank_loss": 0.3851822916666667,
+          "physical_safety_rate": 0.9609375
+        },
+        "lookahead": {
+          "mean_loss": 0.38567708333333334,
+          "std_across_seed_means": 0.0012459243451985228,
+          "bank_coverage": 0.9635416666666666,
+          "mean_posterior_risk": 0.38567708333333334,
+          "median_posterior_ess": 88.72921591407552,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 57.666666666666664,
+          "mean_bank_loss": 0.38567708333333334,
+          "physical_safety_rate": 0.9635416666666666
+        }
+      },
+      "adaptive_gain": {
+        "mean": -0.0007812500000000003,
+        "ci95": [
+          -0.0015885416666666678,
+          2.604166666666678e-05
+        ],
+        "sample_std_across_theta": 0.0047415140388463945,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.0019531250000000004,
+        "familywise_interval": [
+          -0.0019791666666666673,
+          0.00044270833333333277
+        ],
+        "family_size": 12
+      },
+      "myopic_adaptive_gain": {
+        "mean": -0.0002864583333333337,
+        "ci95": [
+          -0.0012506510416666684,
+          0.0007031250000000006
+        ],
+        "sample_std_across_theta": 0.00567457135484632,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.0007161458333333343,
+        "familywise_interval": [
+          -0.001692708333333335,
+          0.0011458333333333333
+        ],
+        "family_size": 12
+      },
+      "nonmyopic_gain": {
+        "mean": -0.0004947916666666666,
+        "ci95": [
+          -0.0014322916666666672,
+          0.0004687500000000006
+        ],
+        "sample_std_across_theta": 0.0055350603469717895,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.0012369791666666664,
+        "familywise_interval": [
+          -0.0019010416666666672,
+          0.0009114583333333348
+        ],
+        "family_size": 12
+      },
+      "key": [
+        2,
+        36,
+        46,
+        84,
+        148,
+        219
+      ],
+      "durations_s": [
+        0.22,
+        0.56,
+        0.66,
+        1.04,
+        1.68,
+        2.39
+      ],
+      "horizon": 3,
+      "budget": {
+        "inner": 64,
+        "outer": 32,
+        "first_candidates": 54,
+        "fixed_restarts": 8,
+        "calibration": 512,
+        "histories_per_batch": 16,
+        "actions_per_batch": 6,
+        "bootstrap": 2000
+      },
+      "fixed_sequence": [
+        46,
+        47,
+        52
+      ],
+      "fixed_calibration_loss": 0.38160156250000005,
+      "metric": "selected_msc_with_physical_safety",
+      "mean_oracle_control": 0.3719461001989976,
+      "joint_positive_signal": false
+    },
+    {
+      "methods": {
+        "no_probe": {
+          "mean_loss": 0.39999999999999997,
+          "std_across_seed_means": 0.0,
+          "bank_coverage": 1.0,
+          "mean_posterior_risk": 0.39999999999999997,
+          "median_posterior_ess": 384.0,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.4
+          ],
+          "mean_unique_sequences": 1.0,
+          "mean_bank_loss": 0.39999999999999997,
+          "physical_safety_rate": 1.0
+        },
+        "random": {
+          "mean_loss": 0.3855208333333333,
+          "std_across_seed_means": 0.0007864410870073788,
+          "bank_coverage": 0.9713541666666666,
+          "mean_posterior_risk": 0.3855208333333333,
+          "median_posterior_ess": 106.65538730787401,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 128.0,
+          "mean_bank_loss": 0.3855208333333333,
+          "physical_safety_rate": 0.9713541666666666
+        },
+        "fixed": {
+          "mean_loss": 0.384453125,
+          "std_across_seed_means": 0.00043498159084608866,
+          "bank_coverage": 0.9713541666666666,
+          "mean_posterior_risk": 0.384453125,
+          "median_posterior_ess": 75.58763550211623,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 1.0,
+          "mean_bank_loss": 0.384453125,
+          "physical_safety_rate": 0.9713541666666666
+        },
+        "myopic": {
+          "mean_loss": 0.38427083333333334,
+          "std_across_seed_means": 0.00025113673856747487,
+          "bank_coverage": 0.9609375,
+          "mean_posterior_risk": 0.38427083333333334,
+          "median_posterior_ess": 79.260720450208,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 49.333333333333336,
+          "mean_bank_loss": 0.38427083333333334,
+          "physical_safety_rate": 0.9609375
+        },
+        "lookahead": {
+          "mean_loss": 0.3851822916666667,
+          "std_across_seed_means": 0.0010664372515335157,
+          "bank_coverage": 0.9583333333333334,
+          "mean_posterior_risk": 0.3851822916666667,
+          "median_posterior_ess": 90.48466693406615,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 71.0,
+          "mean_bank_loss": 0.3851822916666667,
+          "physical_safety_rate": 0.9583333333333334
+        }
+      },
+      "adaptive_gain": {
+        "mean": -0.000729166666666666,
+        "ci95": [
+          -0.0016666666666666646,
+          0.00013020833333333425
+        ],
+        "sample_std_across_theta": 0.005306650773529007,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.001822916666666665,
+        "familywise_interval": [
+          -0.0020572916666666656,
+          0.0005989583333333347
+        ],
+        "family_size": 12
+      },
+      "myopic_adaptive_gain": {
+        "mean": 0.00018229166666666724,
+        "ci95": [
+          -0.0006770833333333331,
+          0.0010156250000000013
+        ],
+        "sample_std_across_theta": 0.004883750866745147,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": 0.0004557291666666681,
+        "familywise_interval": [
+          -0.0010416666666666673,
+          0.00141498480902783
+        ],
+        "family_size": 12
+      },
+      "nonmyopic_gain": {
+        "mean": -0.0009114583333333332,
+        "ci95": [
+          -0.0018750000000000001,
+          6.51041666664569e-07
+        ],
+        "sample_std_across_theta": 0.005544930511237559,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.002278645833333333,
+        "familywise_interval": [
+          -0.002265625000000001,
+          0.00046875000000000085
+        ],
+        "family_size": 12
+      },
+      "key": [
+        62,
+        106,
+        158,
+        180,
+        221,
+        264
+      ],
+      "durations_s": [
+        0.82,
+        1.26,
+        1.78,
+        2.0,
+        2.41,
+        2.84
+      ],
+      "horizon": 3,
+      "budget": {
+        "inner": 64,
+        "outer": 32,
+        "first_candidates": 54,
+        "fixed_restarts": 8,
+        "calibration": 512,
+        "histories_per_batch": 16,
+        "actions_per_batch": 6,
+        "bootstrap": 2000
+      },
+      "fixed_sequence": [
+        36,
+        47,
+        52
+      ],
+      "fixed_calibration_loss": 0.3811328125,
+      "metric": "selected_msc_with_physical_safety",
+      "mean_oracle_control": 0.3719461001989976,
+      "joint_positive_signal": false
+    },
+    {
+      "methods": {
+        "no_probe": {
+          "mean_loss": 0.39999999999999997,
+          "std_across_seed_means": 0.0,
+          "bank_coverage": 1.0,
+          "mean_posterior_risk": 0.39999999999999997,
+          "median_posterior_ess": 384.0,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.4
+          ],
+          "mean_unique_sequences": 1.0,
+          "mean_bank_loss": 0.39999999999999997,
+          "physical_safety_rate": 1.0
+        },
+        "random": {
+          "mean_loss": 0.3859895833333333,
+          "std_across_seed_means": 0.0008280267237283418,
+          "bank_coverage": 0.9583333333333334,
+          "mean_posterior_risk": 0.3859895833333333,
+          "median_posterior_ess": 105.9273895401419,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 128.0,
+          "mean_bank_loss": 0.3859895833333333,
+          "physical_safety_rate": 0.9583333333333334
+        },
+        "fixed": {
+          "mean_loss": 0.38447916666666665,
+          "std_across_seed_means": 0.0005487319662944149,
+          "bank_coverage": 0.9739583333333334,
+          "mean_posterior_risk": 0.38447916666666665,
+          "median_posterior_ess": 73.91075341543666,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 1.0,
+          "mean_bank_loss": 0.38447916666666665,
+          "physical_safety_rate": 0.9739583333333334
+        },
+        "myopic": {
+          "mean_loss": 0.384453125,
+          "std_across_seed_means": 0.0005468749999999546,
+          "bank_coverage": 0.9557291666666666,
+          "mean_posterior_risk": 0.384453125,
+          "median_posterior_ess": 77.67223190618238,
+          "fraction_posterior_ess_below_2": 0.0026041666666666665,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 59.666666666666664,
+          "mean_bank_loss": 0.384453125,
+          "physical_safety_rate": 0.9557291666666666
+        },
+        "lookahead": {
+          "mean_loss": 0.3856510416666667,
+          "std_across_seed_means": 0.001241015891400379,
+          "bank_coverage": 0.9661458333333334,
+          "mean_posterior_risk": 0.3856510416666667,
+          "median_posterior_ess": 69.87408699709522,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 74.66666666666667,
+          "mean_bank_loss": 0.3856510416666667,
+          "physical_safety_rate": 0.9661458333333334
+        }
+      },
+      "adaptive_gain": {
+        "mean": -0.0011718749999999989,
+        "ci95": [
+          -0.002083333333333333,
+          -0.00028645833333333165
+        ],
+        "sample_std_across_theta": 0.005350200423879284,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.002929687499999997,
+        "familywise_interval": [
+          -0.0024999999999999996,
+          0.00015625000000000128
+        ],
+        "family_size": 12
+      },
+      "myopic_adaptive_gain": {
+        "mean": 2.604166666666716e-05,
+        "ci95": [
+          -0.0009114583333333336,
+          0.0009114583333333346
+        ],
+        "sample_std_across_theta": 0.0052496068052568295,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": 6.51041666666679e-05,
+        "familywise_interval": [
+          -0.0012760416666666677,
+          0.0013541666666666678
+        ],
+        "family_size": 12
+      },
+      "nonmyopic_gain": {
+        "mean": -0.0011979166666666661,
+        "ci95": [
+          -0.0021614583333333334,
+          -0.0002864583333333323
+        ],
+        "sample_std_across_theta": 0.005433675093513809,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.002994791666666665,
+        "familywise_interval": [
+          -0.002500000000000001,
+          0.00011290147569449685
+        ],
+        "family_size": 12
+      },
+      "key": [
+        16,
+        56,
+        70,
+        192,
+        229,
+        272
+      ],
+      "durations_s": [
+        0.36,
+        0.76,
+        0.9,
+        2.12,
+        2.49,
+        2.92
+      ],
+      "horizon": 3,
+      "budget": {
+        "inner": 64,
+        "outer": 32,
+        "first_candidates": 54,
+        "fixed_restarts": 8,
+        "calibration": 512,
+        "histories_per_batch": 16,
+        "actions_per_batch": 6,
+        "bootstrap": 2000
+      },
+      "fixed_sequence": [
+        36,
+        47,
+        52
+      ],
+      "fixed_calibration_loss": 0.3809765625,
+      "metric": "selected_msc_with_physical_safety",
+      "mean_oracle_control": 0.3719461001989976,
+      "joint_positive_signal": false
+    },
+    {
+      "methods": {
+        "no_probe": {
+          "mean_loss": 0.39999999999999997,
+          "std_across_seed_means": 0.0,
+          "bank_coverage": 1.0,
+          "mean_posterior_risk": 0.39999999999999997,
+          "median_posterior_ess": 384.0,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.4
+          ],
+          "mean_unique_sequences": 1.0,
+          "mean_bank_loss": 0.39999999999999997,
+          "physical_safety_rate": 1.0
+        },
+        "random": {
+          "mean_loss": 0.38447916666666665,
+          "std_across_seed_means": 0.0009768228819537008,
+          "bank_coverage": 0.9713541666666666,
+          "mean_posterior_risk": 0.38447916666666665,
+          "median_posterior_ess": 86.04935951249104,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 128.0,
+          "mean_bank_loss": 0.38447916666666665,
+          "physical_safety_rate": 0.9713541666666666
+        },
+        "fixed": {
+          "mean_loss": 0.384453125,
+          "std_across_seed_means": 0.0007031249999999989,
+          "bank_coverage": 0.9713541666666666,
+          "mean_posterior_risk": 0.384453125,
+          "median_posterior_ess": 75.48921052194268,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 1.0,
+          "mean_bank_loss": 0.384453125,
+          "physical_safety_rate": 0.9713541666666666
+        },
+        "myopic": {
+          "mean_loss": 0.38458333333333333,
+          "std_across_seed_means": 0.00019661027175183274,
+          "bank_coverage": 0.953125,
+          "mean_posterior_risk": 0.38458333333333333,
+          "median_posterior_ess": 79.52163392737856,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 59.333333333333336,
+          "mean_bank_loss": 0.38458333333333333,
+          "physical_safety_rate": 0.953125
+        },
+        "lookahead": {
+          "mean_loss": 0.3844791666666667,
+          "std_across_seed_means": 0.0004009063624567694,
+          "bank_coverage": 0.9739583333333334,
+          "mean_posterior_risk": 0.3844791666666667,
+          "median_posterior_ess": 76.86805502730003,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 91.66666666666667,
+          "mean_bank_loss": 0.3844791666666667,
+          "physical_safety_rate": 0.9739583333333334
+        }
+      },
+      "adaptive_gain": {
+        "mean": -2.60416666666664e-05,
+        "ci95": [
+          -0.0009121093750000009,
+          0.0008593750000000011
+        ],
+        "sample_std_across_theta": 0.0051656055764187645,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -6.5104166666666e-05,
+        "familywise_interval": [
+          -0.0013541666666666667,
+          0.0013020833333333346
+        ],
+        "family_size": 12
+      },
+      "myopic_adaptive_gain": {
+        "mean": -0.00013020833333333352,
+        "ci95": [
+          -0.001093750000000001,
+          0.0008333333333333328
+        ],
+        "sample_std_across_theta": 0.005363470360173716,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.0003255208333333338,
+        "familywise_interval": [
+          -0.0014583333333333343,
+          0.001223958333333334
+        ],
+        "family_size": 12
+      },
+      "nonmyopic_gain": {
+        "mean": 0.00010416666666666701,
+        "ci95": [
+          -0.0007031250000000003,
+          0.0009635416666666677
+        ],
+        "sample_std_across_theta": 0.0048770984446538665,
+        "n_theta": 128,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": 0.00026041666666666753,
+        "familywise_interval": [
+          -0.001119791666666667,
+          0.0013281250000000018
+        ],
+        "family_size": 12
+      },
+      "key": [
+        155,
+        195,
+        220,
+        254,
+        259,
+        277
+      ],
+      "durations_s": [
+        1.75,
+        2.15,
+        2.4,
+        2.74,
+        2.79,
+        2.97
+      ],
+      "horizon": 3,
+      "budget": {
+        "inner": 64,
+        "outer": 32,
+        "first_candidates": 54,
+        "fixed_restarts": 8,
+        "calibration": 512,
+        "histories_per_batch": 16,
+        "actions_per_batch": 6,
+        "bootstrap": 2000
+      },
+      "fixed_sequence": [
+        34,
+        43,
+        52
+      ],
+      "fixed_calibration_loss": 0.38076171875,
+      "metric": "selected_msc_with_physical_safety",
+      "mean_oracle_control": 0.3719461001989976,
+      "joint_positive_signal": false
+    }
+  ]
+}

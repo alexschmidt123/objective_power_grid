@@ -1,0 +1,206 @@
+{
+  "T": 1,
+  "context_horizon": 3,
+  "N_obs": 0,
+  "window_s": 3.0,
+  "duration_bounds_s": [
+    0.2,
+    3.0
+  ],
+  "plot_step_s": 0.01,
+  "amplitude_pu": 0.05,
+  "physical_bus": 1,
+  "noise_sigma_hz_s": 0.005,
+  "noise_added_to_curve": false,
+  "initial_state": "equilibrium for each independent T=1 candidate",
+  "systems": 128,
+  "seed": 101,
+  "rocof_sample_dt_s": 0.025,
+  "hardware": {
+    "execution_site": "labpc",
+    "cluster": null,
+    "computer_name": "ecen-80r5x04.engr.tamu.edu",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+    "gpu_model": "NVIDIA GeForce RTX 4090"
+  },
+  "physical_config": {
+    "system": {
+      "name": "ieee9"
+    },
+    "N": 3,
+    "data": {
+      "observation_backend": "online_continuous_swing",
+      "uses_probe_bank": false,
+      "uses_control_bank": false,
+      "generate_if_missing": false
+    },
+    "observation": {
+      "N_obs": 0,
+      "noise_sigma": 0.005,
+      "sampling": "max_absolute_rocof_over_fixed_recording_window"
+    },
+    "swing_equation": {
+      "topology": "ieee9",
+      "physical_bus_count": 9,
+      "dynamic_machine_buses": [
+        1,
+        2,
+        3
+      ],
+      "retained_bus_map": [
+        1,
+        2,
+        3
+      ],
+      "bus_label_conventions": {
+        "physical_bus_numbering": "one_based_ieee",
+        "probe_bus_indexing": "zero_based_physical",
+        "observation_bus_field": "one_based_physical",
+        "control_bus_indexing": "zero_based_reduced_dynamic",
+        "reduced_index_to_physical_bus": {
+          "0": 1,
+          "1": 2,
+          "2": 3
+        }
+      },
+      "observation_bus": 1,
+      "base_frequency_hz": 60.0,
+      "base_power_mva": 100.0,
+      "coupling_strength": 1.0,
+      "damping": 0.0,
+      "latent_model": "machinewise_mk",
+      "M_lower_nodes": [
+        0.0877898665,
+        0.0237671385,
+        0.0111779822
+      ],
+      "M_upper_nodes": [
+        0.1630383235,
+        0.0441389715,
+        0.0207591098
+      ],
+      "K_lower_nodes": [
+        0.029375,
+        0.013125,
+        0.0075
+      ],
+      "K_upper_nodes": [
+        0.29375,
+        0.13125,
+        0.075
+      ],
+      "use_node_specific_damping": true,
+      "D_nodes": [
+        0.01254141,
+        0.003395306,
+        0.001596855
+      ],
+      "P_m_nodes": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "theta0_nodes": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "omega0_nodes": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "enforce_initial_equilibrium": true,
+      "probe_buses": [
+        0
+      ],
+      "probe_amplitudes": [
+        0.05
+      ],
+      "reset_after_probe": false,
+      "T_obs_sec": 3.0,
+      "ode_dt": 0.0015625,
+      "fs_hz": 40.0,
+      "sigma": 0.2,
+      "probe_duration_bounds": [
+        0.2,
+        3.0
+      ]
+    },
+    "prior": {
+      "mc_samples": 512,
+      "mc_support_seed": 1
+    },
+    "experiment": {
+      "mode": "continuous_duration_no_reset",
+      "experiment_type": "eig_based",
+      "step_number": 3,
+      "methods": [
+        "dad",
+        "rl_sboed",
+        "step_dad",
+        "myopic",
+        "fixed",
+        "random"
+      ],
+      "min_duration_separation": 0.01
+    },
+    "control": {
+      "rocof_limit_hz_s": 22.0,
+      "delta_f_nadir_hz": -0.2,
+      "T_obs_sec": 10.0,
+      "ode_dt": 0.0015625,
+      "fs_hz": 40.0,
+      "contingency": {
+        "bus": 0,
+        "magnitude": -0.45,
+        "units": "pu"
+      },
+      "profile": {
+        "bus": 0,
+        "t_start": 0.0,
+        "duration": 10.0,
+        "shape": "step",
+        "units": "pu"
+      },
+      "posterior_coverage": 0.9,
+      "robust_rule": "quantile",
+      "safety_margin": 0.0,
+      "initial_state": "carried_terminal_probe_state",
+      "u_bounds": [
+        0.0,
+        0.5
+      ],
+      "solver_scan_points": 33,
+      "solver_tolerance": 1e-05,
+      "alpha": 0.09999999999999998,
+      "enforce_bayes_loss_alignment": true
+    },
+    "nonreset_backend_status": "implemented_ieee9",
+    "training": {
+      "eig_based": {
+        "updates": 2000,
+        "batch_size": 64
+      },
+      "msc_based": {
+        "updates": 2000,
+        "batch_size": 64
+      },
+      "objective_based": {
+        "updates": 2000,
+        "batch_size": 64,
+        "undercontrol_penalty": 10.000000000000002,
+        "violation_penalty": 0.0
+      }
+    },
+    "poster_mocu_protocol": {
+      "alpha": 0.09999999999999998
+    }
+  },
+  "source_hashes": {
+    "/home/grads/g/g.lin/Documents/objective_power_grid/tools/plot_rocof_duration.py": "ed16520fc8f34b5df4accf3950e9459635eaa0a948df12b5de2afff932018e28",
+    "configs/ieee9_eig.yaml": "647fd665df01cff379ca252caba164c4aae385746e320b1d65dd0ba700b31fd9",
+    "src/domains/swing/continuous_rocof.py": "9848773dc2fbc4e223f21686888486f04445e6da387b791120e70d61a1a9739e",
+    "src/domains/swing/continuous_cuda.py": "f4cde4e718e81e67a377fd8c2f2580b08c7de975637de698ff5609d5793a2bfa"
+  }
+}

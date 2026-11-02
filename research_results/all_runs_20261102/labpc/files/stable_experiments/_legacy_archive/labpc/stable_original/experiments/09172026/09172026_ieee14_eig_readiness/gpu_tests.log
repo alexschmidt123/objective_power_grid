@@ -1,0 +1,24 @@
+test_endpoint_state_carry_and_time_step_convergence (tools.tests.test_ieee14_gpu.IEEE14GPUTests) ... FAIL
+test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) ... ok
+test_scalar_reference_spce (tools.tests.test_ieee14_gpu.IEEE14GPUTests) ... ok
+test_endpoint_eig_gradient_t3_t4_t5 (tools.tests.test_direct_moe_physics.DirectMoEPhysicsTests) ... ok
+test_conditional_t3_stepdad_gradients (tools.tests.test_endpoint_rocof.EndpointRocofTests) ... ok
+test_full_t3_fixed_and_dad_gradients (tools.tests.test_endpoint_rocof.EndpointRocofTests) ... ok
+test_signed_endpoint_and_state_carry_against_independent_cpu (tools.tests.test_endpoint_rocof.EndpointRocofTests) ... ok
+test_cuda_matches_cpu_with_particle_specific_carried_states (tools.tests.test_continuous_swing.ContinuousSwingTests) ... ok
+test_matches_independent_full_episode_integration (tools.tests.test_continuous_swing.ContinuousSwingTests) ... ok
+test_particle_states_are_independent_and_history_conditioned (tools.tests.test_continuous_swing.ContinuousSwingTests) ... ok
+test_recording_window_and_continuous_duration (tools.tests.test_continuous_swing.ContinuousSwingTests) ... ok
+
+======================================================================
+FAIL: test_endpoint_state_carry_and_time_step_convergence (tools.tests.test_ieee14_gpu.IEEE14GPUTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09172026/09172026_ieee14_eig_readiness/source/tools/tests/test_ieee14_gpu.py", line 37, in test_endpoint_state_carry_and_time_step_convergence
+    self.assertLessEqual(fine_err,coarse_err+2e-8)
+AssertionError: np.float64(3.718964868004715e-08) not less than or equal to np.float64(2.9669473222118086e-08)
+
+----------------------------------------------------------------------
+Ran 11 tests in 107.794s
+
+FAILED (failures=1)

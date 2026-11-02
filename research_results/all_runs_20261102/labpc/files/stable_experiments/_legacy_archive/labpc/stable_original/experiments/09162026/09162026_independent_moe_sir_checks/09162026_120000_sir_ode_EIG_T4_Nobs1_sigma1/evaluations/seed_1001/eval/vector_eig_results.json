@@ -1,0 +1,494 @@
+{
+  "observation": "sir_infected_count",
+  "n_obs": 1,
+  "device": "cuda",
+  "eval_seed": 1001,
+  "eig_data_audit": {
+    "support_shape": [
+      100,
+      1024,
+      1
+    ],
+    "finite_support": true,
+    "informative_actions": 100,
+    "n_test_systems": 3000
+  },
+  "fixed_calibration_seed": null,
+  "fixed_artifact": null,
+  "random_design_replicates_per_system": 8,
+  "paired_summaries": [],
+  "summaries": [
+    {
+      "method": "moe_sboed",
+      "n": 4,
+      "n_design_replicates": 4,
+      "design_replicates_per_system": 1,
+      "design_replication_note": "one deterministic design per held-out system",
+      "terminal_eig_mean": 6.905369187474253,
+      "terminal_eig_std": 0.052112189227095956,
+      "ci95_low": 6.8542992420317,
+      "ci95_high": 6.956439132916807,
+      "seconds": 0.34363841102458537,
+      "offline_training_or_calibration_seconds": 0.469257386168465,
+      "training_time_seconds": 0.469257386168465,
+      "online_seconds_per_rollout": 0.08590960275614634,
+      "n_unique_sequences": 3,
+      "eval_seed": 1001,
+      "timing_scope": "offline=method-specific preparation; online=CUDA-synchronized warm action selection + observation lookup + posterior update; shared physical-bank generation excluded"
+    }
+  ],
+  "rollouts": [
+    {
+      "method": "moe_sboed",
+      "rollout_id": 0,
+      "sequence": [
+        9,
+        62,
+        98,
+        99
+      ],
+      "terminal_eig": 6.931396937201498,
+      "step_eig": [
+        3.187601327896118,
+        3.0640634298324585,
+        0.6618813965469599,
+        0.01785078292596154
+      ],
+      "router_trace": [
+        {
+          "step": 0,
+          "dense_weights": [
+            [
+              0.2189653366804123,
+              0.26388001441955566,
+              0.3160381019115448,
+              0.20111659169197083
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              1
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5449702143669128,
+              0.45502975583076477
+            ]
+          ]
+        },
+        {
+          "step": 1,
+          "dense_weights": [
+            [
+              0.24469350278377533,
+              0.26288294792175293,
+              0.2671947181224823,
+              0.22522880136966705
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              1
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.504067063331604,
+              0.49593284726142883
+            ]
+          ]
+        },
+        {
+          "step": 2,
+          "dense_weights": [
+            [
+              0.25246062874794006,
+              0.26379844546318054,
+              0.25343820452690125,
+              0.23030272126197815
+            ]
+          ],
+          "selected_experts": [
+            [
+              1,
+              2
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5100150108337402,
+              0.48998501896858215
+            ]
+          ]
+        },
+        {
+          "step": 3,
+          "dense_weights": [
+            [
+              0.2503780722618103,
+              0.2756240963935852,
+              0.24768733978271484,
+              0.22631046175956726
+            ]
+          ],
+          "selected_experts": [
+            [
+              1,
+              0
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5239980220794678,
+              0.4760019779205322
+            ]
+          ]
+        }
+      ],
+      "theta_id": 0,
+      "design_replicate": 0
+    },
+    {
+      "method": "moe_sboed",
+      "rollout_id": 1,
+      "sequence": [
+        9,
+        34,
+        42,
+        50
+      ],
+      "terminal_eig": 6.93140720041265,
+      "step_eig": [
+        3.2164595127105713,
+        3.6591530069708824,
+        0.0548368354793638,
+        0.000957845251832623
+      ],
+      "router_trace": [
+        {
+          "step": 0,
+          "dense_weights": [
+            [
+              0.2189653366804123,
+              0.26388001441955566,
+              0.3160381019115448,
+              0.20111659169197083
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              1
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5449702143669128,
+              0.45502975583076477
+            ]
+          ]
+        },
+        {
+          "step": 1,
+          "dense_weights": [
+            [
+              0.24260006844997406,
+              0.26324063539505005,
+              0.2684641182422638,
+              0.2256951481103897
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              1
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5049119591712952,
+              0.49508795142173767
+            ]
+          ]
+        },
+        {
+          "step": 2,
+          "dense_weights": [
+            [
+              0.24780337512493134,
+              0.24198195338249207,
+              0.2573574185371399,
+              0.2528572678565979
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              3
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5044100284576416,
+              0.495589941740036
+            ]
+          ]
+        },
+        {
+          "step": 3,
+          "dense_weights": [
+            [
+              0.2502851188182831,
+              0.24167896807193756,
+              0.2560286819934845,
+              0.25200721621513367
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              3
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5039578676223755,
+              0.4960421323776245
+            ]
+          ]
+        }
+      ],
+      "theta_id": 1,
+      "design_replicate": 0
+    },
+    {
+      "method": "moe_sboed",
+      "rollout_id": 2,
+      "sequence": [
+        9,
+        62,
+        88,
+        98
+      ],
+      "terminal_eig": 6.827200919389725,
+      "step_eig": [
+        3.8764114379882812,
+        2.8793497532606125,
+        0.03547714650630951,
+        0.035962581634521484
+      ],
+      "router_trace": [
+        {
+          "step": 0,
+          "dense_weights": [
+            [
+              0.2189653366804123,
+              0.26388001441955566,
+              0.3160381019115448,
+              0.20111659169197083
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              1
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5449702143669128,
+              0.45502975583076477
+            ]
+          ]
+        },
+        {
+          "step": 1,
+          "dense_weights": [
+            [
+              0.24007408320903778,
+              0.2682904005050659,
+              0.2711375653743744,
+              0.22049793601036072
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              1
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5026390552520752,
+              0.4973609149456024
+            ]
+          ]
+        },
+        {
+          "step": 2,
+          "dense_weights": [
+            [
+              0.24899059534072876,
+              0.2820298671722412,
+              0.25589296221733093,
+              0.21308660507202148
+            ]
+          ],
+          "selected_experts": [
+            [
+              1,
+              2
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5242942571640015,
+              0.47570568323135376
+            ]
+          ]
+        },
+        {
+          "step": 3,
+          "dense_weights": [
+            [
+              0.2495705932378769,
+              0.2829231321811676,
+              0.2533060908317566,
+              0.21420016884803772
+            ]
+          ],
+          "selected_experts": [
+            [
+              1,
+              2
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.527616024017334,
+              0.47238394618034363
+            ]
+          ]
+        }
+      ],
+      "theta_id": 2,
+      "design_replicate": 0
+    },
+    {
+      "method": "moe_sboed",
+      "rollout_id": 3,
+      "sequence": [
+        9,
+        34,
+        42,
+        50
+      ],
+      "terminal_eig": 6.93147169289314,
+      "step_eig": [
+        3.4295477867126465,
+        2.8146214485168457,
+        0.6873022035366319,
+        2.5412701631921664e-07
+      ],
+      "router_trace": [
+        {
+          "step": 0,
+          "dense_weights": [
+            [
+              0.2189653366804123,
+              0.26388001441955566,
+              0.3160381019115448,
+              0.20111659169197083
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              1
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5449702143669128,
+              0.45502975583076477
+            ]
+          ]
+        },
+        {
+          "step": 1,
+          "dense_weights": [
+            [
+              0.24005451798439026,
+              0.26655828952789307,
+              0.2724881172180176,
+              0.22089910507202148
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              1
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.505500316619873,
+              0.49449971318244934
+            ]
+          ]
+        },
+        {
+          "step": 2,
+          "dense_weights": [
+            [
+              0.24808862805366516,
+              0.244258314371109,
+              0.25595590472221375,
+              0.2516971528530121
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              3
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5041945576667786,
+              0.49580544233322144
+            ]
+          ]
+        },
+        {
+          "step": 3,
+          "dense_weights": [
+            [
+              0.250442773103714,
+              0.2445731908082962,
+              0.25355595350265503,
+              0.25142809748649597
+            ]
+          ],
+          "selected_experts": [
+            [
+              2,
+              3
+            ]
+          ],
+          "selected_weights": [
+            [
+              0.5021069049835205,
+              0.49789318442344666
+            ]
+          ]
+        }
+      ],
+      "theta_id": 3,
+      "design_replicate": 0
+    }
+  ]
+}

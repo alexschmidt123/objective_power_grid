@@ -1,0 +1,823 @@
+{
+  "protocol": {
+    "horizons": [
+      3,
+      4,
+      5
+    ],
+    "training_seed": 101,
+    "evaluation_seeds": [
+      1001,
+      1002,
+      1003,
+      1004,
+      1005
+    ],
+    "epochs": 200,
+    "trajectories_per_epoch": 512,
+    "validation_systems": 256,
+    "test_systems": 512,
+    "noise_sigma": 1.0,
+    "new_trainings": [
+      "uniform",
+      "matched_dense"
+    ],
+    "frozen_interventions": [
+      "uniform_all_experts",
+      "expert_1",
+      "expert_2",
+      "expert_3",
+      "expert_4"
+    ],
+    "reference_campaign": "experiments/09162026/09162026_independent_moe_sir",
+    "checkpoint_selection": "validation_EIG_only",
+    "hypotheses": [
+      "MoE improves over a parameter-matched single network",
+      "Learned routing improves over uniform mixing",
+      "Experts have complementary decision preferences"
+    ],
+    "limitations": [
+      "one training seed",
+      "total parameters matched, not active FLOPs",
+      "frozen expert interventions are not independently trained experts"
+    ]
+  },
+  "summary": [
+    {
+      "T": 3,
+      "method": "MoE-sBOED",
+      "mean_eig": 6.852512205205858,
+      "eval_seed_sd": 0.002985932505987701,
+      "per_seed_means": [
+        6.853888219222426,
+        6.852328785695136,
+        6.856748363003135,
+        6.850524260662496,
+        6.849071397446096
+      ]
+    },
+    {
+      "T": 3,
+      "method": "Matched single network",
+      "mean_eig": 6.85156335024846,
+      "eval_seed_sd": 0.0029907022368508966,
+      "per_seed_means": [
+        6.854807601847443,
+        6.85039748515563,
+        6.854337508513932,
+        6.847649926195257,
+        6.850624229530043
+      ]
+    },
+    {
+      "T": 3,
+      "method": "Uniform mixture (trained)",
+      "mean_eig": 6.853525895827454,
+      "eval_seed_sd": 0.006385006486976505,
+      "per_seed_means": [
+        6.859182894460585,
+        6.845593256014943,
+        6.858207487789972,
+        6.84766817981284,
+        6.856977661058934
+      ]
+    },
+    {
+      "T": 3,
+      "method": "Uniform weights (frozen MoE)",
+      "mean_eig": 6.411309676617384,
+      "eval_seed_sd": 0.009342525889081067,
+      "per_seed_means": [
+        6.407912258990109,
+        6.403005315922201,
+        6.403064960613847,
+        6.420355657115579,
+        6.422210190445185
+      ]
+    },
+    {
+      "T": 3,
+      "method": "Expert 1 alone",
+      "mean_eig": 6.120695092156529,
+      "eval_seed_sd": 0.014464747403327097,
+      "per_seed_means": [
+        6.11764551512897,
+        6.104899005964398,
+        6.132978246547282,
+        6.109733975492418,
+        6.138218717649579
+      ]
+    },
+    {
+      "T": 3,
+      "method": "Expert 2 alone",
+      "mean_eig": 5.638552138116211,
+      "eval_seed_sd": 0.022585396101031507,
+      "per_seed_means": [
+        5.645432950928807,
+        5.61529631819576,
+        5.665390287525952,
+        5.651721610222012,
+        5.614919523708522
+      ]
+    },
+    {
+      "T": 3,
+      "method": "Expert 3 alone",
+      "mean_eig": 6.736931178160011,
+      "eval_seed_sd": 0.007742686531345828,
+      "per_seed_means": [
+        6.750352302566171,
+        6.732532236725092,
+        6.732868027873337,
+        6.736851070076227,
+        6.732052253559232
+      ]
+    },
+    {
+      "T": 3,
+      "method": "Expert 4 alone",
+      "mean_eig": 5.264484147075564,
+      "eval_seed_sd": 0.013374995420467686,
+      "per_seed_means": [
+        5.260781047400087,
+        5.2465597852133214,
+        5.277498213108629,
+        5.259460648987442,
+        5.2781210406683385
+      ]
+    },
+    {
+      "T": 3,
+      "method": "Single expert selected on validation",
+      "mean_eig": 6.736931178160011,
+      "eval_seed_sd": 0.007742686531345828,
+      "per_seed_means": [
+        6.750352302566171,
+        6.732532236725092,
+        6.732868027873337,
+        6.736851070076227,
+        6.732052253559232
+      ]
+    },
+    {
+      "T": 4,
+      "method": "MoE-sBOED",
+      "mean_eig": 6.870166309736669,
+      "eval_seed_sd": 0.0045883349952849095,
+      "per_seed_means": [
+        6.869654412381351,
+        6.8756245179101825,
+        6.865057108923793,
+        6.873992083594203,
+        6.866503425873816
+      ]
+    },
+    {
+      "T": 4,
+      "method": "Matched single network",
+      "mean_eig": 6.869929654693422,
+      "eval_seed_sd": 0.0047147983300909165,
+      "per_seed_means": [
+        6.8732889070932845,
+        6.874388994454624,
+        6.863054943347452,
+        6.867217190486077,
+        6.871698238085674
+      ]
+    },
+    {
+      "T": 4,
+      "method": "Uniform mixture (trained)",
+      "mean_eig": 6.870569757425896,
+      "eval_seed_sd": 0.0038209121256708605,
+      "per_seed_means": [
+        6.871670135009203,
+        6.875163801382547,
+        6.8651420736714215,
+        6.87225106229519,
+        6.868621714771123
+      ]
+    },
+    {
+      "T": 4,
+      "method": "Uniform weights (frozen MoE)",
+      "mean_eig": 6.370069345645606,
+      "eval_seed_sd": 0.006063223753794644,
+      "per_seed_means": [
+        6.366798118688166,
+        6.368080924265087,
+        6.380855969153345,
+        6.367926748469472,
+        6.366684967651963
+      ]
+    },
+    {
+      "T": 4,
+      "method": "Expert 1 alone",
+      "mean_eig": 6.1602961082011465,
+      "eval_seed_sd": 0.004277503513531201,
+      "per_seed_means": [
+        6.163911116309464,
+        6.157764870673418,
+        6.164541416801512,
+        6.15435357298702,
+        6.160909564234316
+      ]
+    },
+    {
+      "T": 4,
+      "method": "Expert 2 alone",
+      "mean_eig": 5.460018580686301,
+      "eval_seed_sd": 0.010998678039058818,
+      "per_seed_means": [
+        5.452277475968003,
+        5.447778903879225,
+        5.4760998343117535,
+        5.459975933190435,
+        5.463960756082088
+      ]
+    },
+    {
+      "T": 4,
+      "method": "Expert 3 alone",
+      "mean_eig": 6.846468709968031,
+      "eval_seed_sd": 0.0049775857950986446,
+      "per_seed_means": [
+        6.84748612716794,
+        6.854239066131413,
+        6.844125727191567,
+        6.8408552231267095,
+        6.845637406222522
+      ]
+    },
+    {
+      "T": 4,
+      "method": "Expert 4 alone",
+      "mean_eig": 5.408271946292371,
+      "eval_seed_sd": 0.012834004962664534,
+      "per_seed_means": [
+        5.408679361920804,
+        5.387593877967447,
+        5.420754285063595,
+        5.407424767035991,
+        5.416907439474016
+      ]
+    },
+    {
+      "T": 4,
+      "method": "Single expert selected on validation",
+      "mean_eig": 6.846468709968031,
+      "eval_seed_sd": 0.0049775857950986446,
+      "per_seed_means": [
+        6.84748612716794,
+        6.854239066131413,
+        6.844125727191567,
+        6.8408552231267095,
+        6.845637406222522
+      ]
+    },
+    {
+      "T": 5,
+      "method": "MoE-sBOED",
+      "mean_eig": 6.881651976890862,
+      "eval_seed_sd": 0.004061186856797955,
+      "per_seed_means": [
+        6.875679274089634,
+        6.883363890461624,
+        6.879950906150043,
+        6.886463698931038,
+        6.8828021148219705
+      ]
+    },
+    {
+      "T": 5,
+      "method": "Matched single network",
+      "mean_eig": 6.884936890652379,
+      "eval_seed_sd": 0.006073046773131337,
+      "per_seed_means": [
+        6.885932194070344,
+        6.892621836359733,
+        6.880656929179445,
+        6.888190150950866,
+        6.877283342701509
+      ]
+    },
+    {
+      "T": 5,
+      "method": "Uniform mixture (trained)",
+      "mean_eig": 6.879540736402376,
+      "eval_seed_sd": 0.005768162157832652,
+      "per_seed_means": [
+        6.884938565061709,
+        6.886092038184632,
+        6.872833425172984,
+        6.877993211905144,
+        6.8758464416874086
+      ]
+    },
+    {
+      "T": 5,
+      "method": "Uniform weights (frozen MoE)",
+      "mean_eig": 6.705856593884528,
+      "eval_seed_sd": 0.005195972206343441,
+      "per_seed_means": [
+        6.707100251689553,
+        6.708044128492475,
+        6.705402570776641,
+        6.71133301500231,
+        6.697403003461659
+      ]
+    },
+    {
+      "T": 5,
+      "method": "Expert 1 alone",
+      "mean_eig": 6.6641029302030805,
+      "eval_seed_sd": 0.004447298389129955,
+      "per_seed_means": [
+        6.670806675218046,
+        6.659432450309396,
+        6.665665274485946,
+        6.663619497790933,
+        6.660990753211081
+      ]
+    },
+    {
+      "T": 5,
+      "method": "Expert 2 alone",
+      "mean_eig": 6.498616416938603,
+      "eval_seed_sd": 0.007471699080208433,
+      "per_seed_means": [
+        6.505985138937831,
+        6.495862225070596,
+        6.488420232199132,
+        6.505983372218907,
+        6.496831116266549
+      ]
+    },
+    {
+      "T": 5,
+      "method": "Expert 3 alone",
+      "mean_eig": 6.838999674841761,
+      "eval_seed_sd": 0.004822154956382864,
+      "per_seed_means": [
+        6.837248729541898,
+        6.8354263138026,
+        6.847003555856645,
+        6.835477477870882,
+        6.839842297136784
+      ]
+    },
+    {
+      "T": 5,
+      "method": "Expert 4 alone",
+      "mean_eig": 6.54544155690819,
+      "eval_seed_sd": 0.010150359181667809,
+      "per_seed_means": [
+        6.557689224369824,
+        6.546551353298128,
+        6.530414412729442,
+        6.550379638560116,
+        6.542173155583441
+      ]
+    },
+    {
+      "T": 5,
+      "method": "Single expert selected on validation",
+      "mean_eig": 6.838999674841761,
+      "eval_seed_sd": 0.004822154956382864,
+      "per_seed_means": [
+        6.837248729541898,
+        6.8354263138026,
+        6.847003555856645,
+        6.835477477870882,
+        6.839842297136784
+      ]
+    }
+  ],
+  "parameters": [
+    {
+      "T": 3,
+      "variant": "matched_dense",
+      "parameters": 446104,
+      "moe_reference_parameters": 446004,
+      "training_seconds": 14.739839696092531,
+      "best_stage": "epoch_183"
+    },
+    {
+      "T": 3,
+      "variant": "uniform",
+      "parameters": 444976,
+      "moe_reference_parameters": 446004,
+      "training_seconds": 15.346937343012542,
+      "best_stage": "epoch_153"
+    },
+    {
+      "T": 4,
+      "variant": "matched_dense",
+      "parameters": 446872,
+      "moe_reference_parameters": 446772,
+      "training_seconds": 18.89487125305459,
+      "best_stage": "epoch_110"
+    },
+    {
+      "T": 4,
+      "variant": "uniform",
+      "parameters": 445744,
+      "moe_reference_parameters": 446772,
+      "training_seconds": 19.57418558606878,
+      "best_stage": "epoch_185"
+    },
+    {
+      "T": 5,
+      "variant": "matched_dense",
+      "parameters": 447640,
+      "moe_reference_parameters": 447540,
+      "training_seconds": 23.03558288817294,
+      "best_stage": "epoch_90"
+    },
+    {
+      "T": 5,
+      "variant": "uniform",
+      "parameters": 446512,
+      "moe_reference_parameters": 447540,
+      "training_seconds": 23.536568362964317,
+      "best_stage": "epoch_165"
+    }
+  ],
+  "paired_comparisons": [
+    {
+      "T": 3,
+      "comparison": "MoE-sBOED minus Matched single network",
+      "mean_difference": 0.0009488549573967915,
+      "ci95_low": -0.007732048328286584,
+      "ci95_high": 0.009629758243080166,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 3,
+      "comparison": "MoE-sBOED minus Uniform mixture (trained)",
+      "mean_difference": -0.0010136906215972071,
+      "ci95_low": -0.0097138486206887,
+      "ci95_high": 0.0076864673774942865,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 3,
+      "comparison": "MoE-sBOED minus Uniform weights (frozen MoE)",
+      "mean_difference": 0.4412025285884738,
+      "ci95_low": 0.3973445399339735,
+      "ci95_high": 0.4850605172429741,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 3,
+      "comparison": "MoE-sBOED minus Expert 1 alone",
+      "mean_difference": 0.7318171130493284,
+      "ci95_low": 0.6772150612946806,
+      "ci95_high": 0.7864191648039762,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 3,
+      "comparison": "MoE-sBOED minus Expert 2 alone",
+      "mean_difference": 1.2139600670896469,
+      "ci95_low": 1.136875908326245,
+      "ci95_high": 1.2910442258530488,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 3,
+      "comparison": "MoE-sBOED minus Expert 3 alone",
+      "mean_difference": 0.11558102704584598,
+      "ci95_low": 0.08899494049391839,
+      "ci95_high": 0.14216711359777356,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 3,
+      "comparison": "MoE-sBOED minus Expert 4 alone",
+      "mean_difference": 1.5880280581302941,
+      "ci95_low": 1.484828348955105,
+      "ci95_high": 1.6912277673054832,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 3,
+      "comparison": "MoE-sBOED minus Single expert selected on validation",
+      "mean_difference": 0.11558102704584598,
+      "ci95_low": 0.08899494049391839,
+      "ci95_high": 0.14216711359777356,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 4,
+      "comparison": "MoE-sBOED minus Matched single network",
+      "mean_difference": 0.00023665504324692438,
+      "ci95_low": -0.00821873053684158,
+      "ci95_high": 0.008692040623335428,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 4,
+      "comparison": "MoE-sBOED minus Uniform mixture (trained)",
+      "mean_difference": -0.00040344768922734504,
+      "ci95_low": -0.007966067301905699,
+      "ci95_high": 0.007159171923451008,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 4,
+      "comparison": "MoE-sBOED minus Uniform weights (frozen MoE)",
+      "mean_difference": 0.5000969640910625,
+      "ci95_low": 0.45559735081053576,
+      "ci95_high": 0.5445965773715893,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 4,
+      "comparison": "MoE-sBOED minus Expert 1 alone",
+      "mean_difference": 0.7098702015355229,
+      "ci95_low": 0.6489558472799236,
+      "ci95_high": 0.7707845557911223,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 4,
+      "comparison": "MoE-sBOED minus Expert 2 alone",
+      "mean_difference": 1.410147729050368,
+      "ci95_low": 1.3073439273098968,
+      "ci95_high": 1.512951530790839,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 4,
+      "comparison": "MoE-sBOED minus Expert 3 alone",
+      "mean_difference": 0.02369759976863861,
+      "ci95_low": 0.014084819825668489,
+      "ci95_high": 0.03331037971160873,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 4,
+      "comparison": "MoE-sBOED minus Expert 4 alone",
+      "mean_difference": 1.4618943634442985,
+      "ci95_low": 1.3614965420001044,
+      "ci95_high": 1.5622921848884925,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 4,
+      "comparison": "MoE-sBOED minus Single expert selected on validation",
+      "mean_difference": 0.02369759976863861,
+      "ci95_low": 0.014084819825668489,
+      "ci95_high": 0.03331037971160873,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 5,
+      "comparison": "MoE-sBOED minus Matched single network",
+      "mean_difference": -0.003284913761517328,
+      "ci95_low": -0.009944932998795761,
+      "ci95_high": 0.0033751054757611065,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 5,
+      "comparison": "MoE-sBOED minus Uniform mixture (trained)",
+      "mean_difference": 0.0021112404884862154,
+      "ci95_low": -0.005096931246817441,
+      "ci95_high": 0.009319412223789871,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 5,
+      "comparison": "MoE-sBOED minus Uniform weights (frozen MoE)",
+      "mean_difference": 0.1757953830063343,
+      "ci95_low": 0.15023716457001374,
+      "ci95_high": 0.20135360144265485,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 5,
+      "comparison": "MoE-sBOED minus Expert 1 alone",
+      "mean_difference": 0.21754904668778183,
+      "ci95_low": 0.18782501914917002,
+      "ci95_high": 0.24727307422639364,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 5,
+      "comparison": "MoE-sBOED minus Expert 2 alone",
+      "mean_difference": 0.3830355599522591,
+      "ci95_low": 0.3439305264423771,
+      "ci95_high": 0.42214059346214106,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 5,
+      "comparison": "MoE-sBOED minus Expert 3 alone",
+      "mean_difference": 0.0426523020491004,
+      "ci95_low": 0.026277468024705673,
+      "ci95_high": 0.05902713607349513,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 5,
+      "comparison": "MoE-sBOED minus Expert 4 alone",
+      "mean_difference": 0.33621041998267176,
+      "ci95_low": 0.2989529410013948,
+      "ci95_high": 0.3734678989639487,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    },
+    {
+      "T": 5,
+      "comparison": "MoE-sBOED minus Single expert selected on validation",
+      "mean_difference": 0.0426523020491004,
+      "ci95_low": 0.026277468024705673,
+      "ci95_high": 0.05902713607349513,
+      "scope": "system-level approximate CI; five noise seeds averaged; conditional on training seed 101"
+    }
+  ],
+  "specialization": [
+    {
+      "T": 3,
+      "expert_selected_on_validation": "Expert 3 alone",
+      "expert_validation_scores": {
+        "MoE-sBOED": 6.876128822565079,
+        "Uniform weights (frozen MoE)": 6.486465802416205,
+        "Expert 1 alone": 6.161554781720042,
+        "Expert 2 alone": 5.679495420306921,
+        "Expert 3 alone": 6.717789940536022,
+        "Expert 4 alone": 5.3244133070111275
+      },
+      "mean_pairwise_expert_action_disagreement": 0.9727539181709289
+    },
+    {
+      "T": 4,
+      "expert_selected_on_validation": "Expert 3 alone",
+      "expert_validation_scores": {
+        "MoE-sBOED": 6.898550426587462,
+        "Uniform weights (frozen MoE)": 6.4120115004479885,
+        "Expert 1 alone": 6.183833761140704,
+        "Expert 2 alone": 5.558666088618338,
+        "Expert 3 alone": 6.8440560307353735,
+        "Expert 4 alone": 5.494215794838965
+      },
+      "mean_pairwise_expert_action_disagreement": 0.9053168654441833
+    },
+    {
+      "T": 5,
+      "expert_selected_on_validation": "Expert 3 alone",
+      "expert_validation_scores": {
+        "MoE-sBOED": 6.906009716913104,
+        "Uniform weights (frozen MoE)": 6.737931914627552,
+        "Expert 1 alone": 6.719384551048279,
+        "Expert 2 alone": 6.549645632505417,
+        "Expert 3 alone": 6.8267169538885355,
+        "Expert 4 alone": 6.60983775369823
+      },
+      "mean_pairwise_expert_action_disagreement": 0.9600748896598816
+    }
+  ],
+  "provenance": [
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/expert_interventions_T3/expert_interventions.json",
+      "sha256": "3c265d1ff545f5ecc830d208942d92dea9a108b6a0855a54199a8116dd5761a9"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T3_Nobs1_sigma1/evaluations/seed_1001/eval/vector_eig_results.json",
+      "sha256": "022ba508ea46d0a48491cb8d5363afeb024ebaf77956c0eaa7a78e92b9a65d1c"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T3_Nobs1_sigma1/evaluations/seed_1002/eval/vector_eig_results.json",
+      "sha256": "91204b31358777155cb3c0701fa5db6c5edbb742b2713f52acebd6a56c5a0c93"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T3_Nobs1_sigma1/evaluations/seed_1003/eval/vector_eig_results.json",
+      "sha256": "d7d01d5feb3b7d95b44e01da0705e7327e52153c875296a57b8e44c1758dccc4"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T3_Nobs1_sigma1/evaluations/seed_1004/eval/vector_eig_results.json",
+      "sha256": "2c070ee853aeabbde6b8d8a1a9b1fa00900fe19b6656dbaff7c124eb9db2c60d"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T3_Nobs1_sigma1/evaluations/seed_1005/eval/vector_eig_results.json",
+      "sha256": "61006c54afd9392bd3d8634bd12ef8213a48078146264290fb93193785e31711"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T3_Nobs1_sigma1/evaluations/seed_1001/eval/vector_eig_results.json",
+      "sha256": "926a00bd34c2df41049fe7a411e92fcd90d1122b32c63ce264e5d0ccb09722b8"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T3_Nobs1_sigma1/evaluations/seed_1002/eval/vector_eig_results.json",
+      "sha256": "4ee6e851bece27426ee92f0cb92f498ddf0fcdc5353bb80d493a83e26d1e1338"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T3_Nobs1_sigma1/evaluations/seed_1003/eval/vector_eig_results.json",
+      "sha256": "df26393feceadebf54c2743ace7364679f16fd04114b064a14138fec34a94f8f"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T3_Nobs1_sigma1/evaluations/seed_1004/eval/vector_eig_results.json",
+      "sha256": "5eb579984d4202311e76258698c604dcb059f0b285731e848d9ff343edf7bc18"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T3_Nobs1_sigma1/evaluations/seed_1005/eval/vector_eig_results.json",
+      "sha256": "4b6d731c5dbe80383fefe18cc5e337b741cc3d300a6bbb335cc360db4c5052be"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/expert_interventions_T4/expert_interventions.json",
+      "sha256": "6939b22bd2d38c87a8e0457a6930bb421c349be541e1713388dbe376e1366b60"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T4_Nobs1_sigma1/evaluations/seed_1001/eval/vector_eig_results.json",
+      "sha256": "4212ad9c3a105232ea694d7dd0c96959af56fc9651d33457fb62767fca4c2b9c"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T4_Nobs1_sigma1/evaluations/seed_1002/eval/vector_eig_results.json",
+      "sha256": "f092d5b0d483897bbd79597479d4edca39589df02245ba06a34c0705459bb2b1"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T4_Nobs1_sigma1/evaluations/seed_1003/eval/vector_eig_results.json",
+      "sha256": "899c762fc5f0becd403d8c5bce2612ddfce7ec7152bdcb6bdbd8c6212de82690"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T4_Nobs1_sigma1/evaluations/seed_1004/eval/vector_eig_results.json",
+      "sha256": "1ce660c8bcc8a1ec1fb5c57af220611a966972319d33ea9f0e94372e2b98b854"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T4_Nobs1_sigma1/evaluations/seed_1005/eval/vector_eig_results.json",
+      "sha256": "45d2b6c9358056f713fa6bb52d7f9353ff671b33648ca58d4c961f3be51baf2c"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T4_Nobs1_sigma1/evaluations/seed_1001/eval/vector_eig_results.json",
+      "sha256": "505a383ecae6b44f6622843712625979be104f5bac7e2d6b8ad56800a37a57e8"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T4_Nobs1_sigma1/evaluations/seed_1002/eval/vector_eig_results.json",
+      "sha256": "040e1313f86bd5fb725fb39185bcc29abcb61b142e2723db3298fb2d1a4033c3"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T4_Nobs1_sigma1/evaluations/seed_1003/eval/vector_eig_results.json",
+      "sha256": "08382f59899e0f18d8aebc9b2794516907a414fb279f9a79726304fe810d5990"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T4_Nobs1_sigma1/evaluations/seed_1004/eval/vector_eig_results.json",
+      "sha256": "90f0616d834664093cbe475ace5218daa9eda24678570b6c806ce11d064f0c11"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T4_Nobs1_sigma1/evaluations/seed_1005/eval/vector_eig_results.json",
+      "sha256": "043564e1197526b361b30430b4a65ffa7e7158c5cf9075158d942f9219837974"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/expert_interventions_T5/expert_interventions.json",
+      "sha256": "f51444d71a060fe42fbd87ae2013b0366a0a75cfeaca93f4aa88cd154210f377"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T5_Nobs1_sigma1/evaluations/seed_1001/eval/vector_eig_results.json",
+      "sha256": "b9fdb868a9543413192abb260d7e732837784f9a1530cafd2dd9ddfbb4e6ff1c"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T5_Nobs1_sigma1/evaluations/seed_1002/eval/vector_eig_results.json",
+      "sha256": "ebdb76fa48ebba283e95f12dc0eb1d30791cf8c96e04b5a68767fea7d722d38c"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T5_Nobs1_sigma1/evaluations/seed_1003/eval/vector_eig_results.json",
+      "sha256": "121a310b47a911d358fb224deb94971c7eed34a39969d197ca6f6c8e814d7541"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T5_Nobs1_sigma1/evaluations/seed_1004/eval/vector_eig_results.json",
+      "sha256": "59d3de38471c256f7563831c91f6b01acea9ee64849c216011937383d8964604"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_matched_dense_EIG_T5_Nobs1_sigma1/evaluations/seed_1005/eval/vector_eig_results.json",
+      "sha256": "e0e9fb14485e9a81e39a0ee38769002a9a8455a376b2a5b77332c1ba52f9e6b5"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1/evaluations/seed_1001/eval/vector_eig_results.json",
+      "sha256": "a2daf5a911a07cd69b63869d0d1043679de4edd0b81c02d5f36c210effc790ba"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1/evaluations/seed_1002/eval/vector_eig_results.json",
+      "sha256": "bc3eef52aad3037d213e6eff26db6ecfb0016e6fe4120efa7ba7c304c8a64206"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1/evaluations/seed_1003/eval/vector_eig_results.json",
+      "sha256": "22cc2546169a6a5a3a1255cf624ca08e8d3ed8859a9897237294bd3dc14188f3"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1/evaluations/seed_1004/eval/vector_eig_results.json",
+      "sha256": "812b3500cb714c7da1161eaea53c016761256ec3572a4c582f482d72c8cc04d4"
+    },
+    {
+      "path": "experiments/09162026/09162026_sir_moe_ablations/09162026_150000_uniform_EIG_T5_Nobs1_sigma1/evaluations/seed_1005/eval/vector_eig_results.json",
+      "sha256": "02b93a05eb7782e16333c49b50869ce70020c923bf6270244554dc8c53abaef2"
+    }
+  ],
+  "interpretation_limits": [
+    "One training seed; five evaluation seeds do not replace independent training repetitions.",
+    "Single-head and uniform interventions use co-trained frozen MoE heads and can visit out-of-routing-distribution states.",
+    "Parameter matching does not match activated FLOPs.",
+    "Entropy-reduction estimator is bounded above by log(1024) = 6.93147 nats."
+  ]
+}

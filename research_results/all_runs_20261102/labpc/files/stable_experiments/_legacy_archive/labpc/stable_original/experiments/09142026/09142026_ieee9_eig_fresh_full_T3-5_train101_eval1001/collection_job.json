@@ -1,0 +1,17 @@
+{
+  "job_id": "3160369",
+  "command": [
+    "sbatch",
+    "--parsable",
+    "--account=142707191546",
+    "--partition=cpu",
+    "--ntasks=1",
+    "--cpus-per-task=1",
+    "--mem=2G",
+    "--time=00:10:00",
+    "--job-name=ieee9-eig-collect",
+    "--dependency=afterok:3160362:3160363:3160364",
+    "--output=/scratch/user/g.lin/Documents/objective_power_grid/experiments/09142026/09142026_ieee9_eig_fresh_full_T3-5_train101_eval1001/collect-%j.out"
+  ],
+  "script": "#!/bin/bash\nset -euo pipefail\n/scratch/user/g.lin/Documents/objective_power_grid/.venv/bin/python /scratch/user/g.lin/Documents/objective_power_grid/experiments/09142026/09142026_ieee9_eig_fresh_full_T3-5_train101_eval1001/source/tools/summarize_continuous_runs.py --campaign /scratch/user/g.lin/Documents/objective_power_grid/experiments/09142026/09142026_ieee9_eig_fresh_full_T3-5_train101_eval1001\n"
+}

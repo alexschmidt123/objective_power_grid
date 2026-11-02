@@ -1,0 +1,25 @@
+{
+  "selected_recipe": "stable32",
+  "criterion": "maximum validation EIG after 8192 training trajectories per candidate; no test evaluation",
+  "training_seed": 101,
+  "validation_seed": 900101,
+  "development_horizon": 5,
+  "test_seed_used_for_selection": false,
+  "full_rerun_horizons": [
+    3,
+    4,
+    5
+  ],
+  "full_rerun_budget_per_horizon": {
+    "updates": 2000,
+    "batch_size": 32,
+    "training_trajectories": 64000
+  },
+  "changes": [
+    "learning rate 0.001 to 0.0003",
+    "reject and roll back sampled-KL estimates above 0.02",
+    "separate actor and critic gradient clipping",
+    "record policy changes and per-expert gradient norms"
+  ],
+  "limitations": "Short diagnostic does not establish convergence or cross-seed reliability; extra development cost is separate from final training budget"
+}

@@ -1,0 +1,45 @@
+Log file: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1/logs/run_log.log
+=== run.sh (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=dad,moe_sboed) ===
+Result folder: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1
+Evaluate: dad moe_sboed
+Train: dad moe_sboed
+=== data_generation (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=dad,moe_sboed) ===
+[full-bank] no data.reuse_bank_dir; nothing to ensure
+[generate-data] type=eig_based config=/home/grads/g/g.lin/Documents/sir4096_submission/configs/sir_ode_eig.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1 smoke=True force=False methods=['dad', 'moe_sboed']
+[generate-data] SIR ODE dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode
+[generate-data] reused=True path=/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode train=10000 test=3000 actions=100
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1
+=== training method=dad (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101) ===
+[prior] SIR using mc_samples=4096/7500 fit particles (seed=1)
+[eig:dad_eig] BC warm-start trajectories=12 horizon=5 n_actions=100 lookahead=two_step temp=0.5 actor_critic=False obs_seed=101
+[eig:dad_eig] BC 1/12
+[eig:dad_eig] BC 2/12
+[eig:dad_eig] BC 3/12
+[eig:dad_eig] BC 4/12
+[eig:dad_eig] BC 5/12
+[eig:dad_eig] BC 6/12
+[eig:dad_eig] BC 7/12
+[eig:dad_eig] BC 8/12
+[eig:dad_eig] BC 9/12
+[eig:dad_eig] BC 10/12
+[eig:dad_eig] BC 11/12
+[eig:dad_eig] BC 12/12
+[train] dad_eig val_eig=8.177114456284585 uniq=3 stage=epoch_2 58s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1/model/dad_eig.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1
+=== training method=moe_sboed (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101) ===
+[prior] SIR using mc_samples=4096/7500 fit particles (seed=1)
+[independent-moe] T=5 epoch=0/2 val=2.10983 best=2.10983 elapsed=0.2s
+[independent-moe] T=5 epoch=2/2 val=4.97096 best=4.97096 elapsed=0.4s
+[train] moe_sboed val_eig=4.970964431762695 uniq=2 stage=epoch_2 0s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1/model/moe_sboed.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1
+=== crossed evaluation train_seed=101 eval_seed=1001 ===
+=== evaluation (config=configs/sir_ode_eig.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=dad,moe_sboed) ===
+[prior] SIR using mc_samples=4096/7500 fit particles (seed=1)
+[evaluate] type=eig_based methods=['dad', 'moe_sboed'] eval_seed=1001 N_obs=1 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1
+[evaluate] dad_eig eig=8.1177 uniq=2 eval_seed=1001
+[evaluate] moe_sboed eig=7.7676 uniq=2 eval_seed=1001
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1
+
+Done config=configs/sir_ode_eig.yaml type=eig_based T=5.
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1
+LOG_FILE=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_submission_check/09162026_180000_smoke_EIG_T5_Nobs1_sigma1/logs/run_log.log

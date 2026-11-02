@@ -1,0 +1,20 @@
+{
+  "purpose": "Replace only DAD policy architecture with a jointly trained soft MoE.",
+  "architecture": "history_soft_moe_pathwise_v2",
+  "shared_initialization": "Random candidate and fresh Fixed sequence, selected by validation independently for each policy.",
+  "shared_training": "Pathwise sPCE, 2000 updates, batch32, Adam0.001, same training/validation RNG streams.",
+  "evaluation": "128 paired systems and observations-noise draws, seed1001; checkpoint selected on validation only.",
+  "acceptance": "Report actual MoE-minus-DAD paired EIG and system-level SE; no superiority claim from architecture alone.",
+  "limitations": [
+    "One training seed and one evaluation seed.",
+    "Four-expert policy has more parameters than DAD.",
+    "Shared Fixed calibration is part of both training pipelines and must be counted in compute costs.",
+    "Expert separation and router variation are diagnostics, not proof of useful specialization."
+  ],
+  "estimated_hours": [
+    3,
+    5
+  ],
+  "tests": "19 targeted unit/regression tests plus physical T3/T4/T5 gradient test and completed joint smoke.",
+  "historical_reference": "experiments/09142026/09142026_ieee9_eig_endpoint_rocof_T3_train101_eval1001/T3/run"
+}

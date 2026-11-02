@@ -1,0 +1,537 @@
+{
+  "source_config": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09112026_101907_ieee9_msc_q0p9_full_T3-5_train101-303_eval1001-1005_Nobs5_sigma0p005/source_snapshot/configs/ieee9_mocu.yaml",
+  "config_name": "ieee9_mocu",
+  "data_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9/probe_subsets/eba8db9e23a48ced",
+  "system_label": "IEEE-9",
+  "topology": "ieee9",
+  "run_name": "ieee9_mocu",
+  "preset": "default",
+  "n_buses": 3,
+  "experiment_type": "msc_based",
+  "T": 4,
+  "step_number": 4,
+  "N_obs": 5,
+  "noise_sigma": 0.005,
+  "seed": 101,
+  "methods": [
+    "dad",
+    "rl_sboed",
+    "step_dad",
+    "myopic",
+    "fixed",
+    "random"
+  ],
+  "system": {
+    "name": "ieee9"
+  },
+  "N": 3,
+  "data": {
+    "dataset_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9/probe_subsets/eba8db9e23a48ced",
+    "reuse_bank_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9/probe_master",
+    "mocu_dataset_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9/control_banks/f977c0cd2518626e",
+    "generate_if_missing": false
+  },
+  "observation": {
+    "msc_based": {
+      "N_obs": 5,
+      "noise_sigma": 0.005
+    },
+    "sampling": "uniform",
+    "objective_based": {
+      "N_obs": 5,
+      "noise_sigma": 0.005
+    },
+    "eig_based": {
+      "N_obs": 5,
+      "noise_sigma": 0.01
+    },
+    "N_obs": 5,
+    "noise_sigma": 0.005
+  },
+  "oracle": {
+    "tolerance": 0.0001
+  },
+  "swing_equation": {
+    "topology": "ieee9",
+    "physical_bus_count": 9,
+    "dynamic_machine_buses": [
+      1,
+      2,
+      3
+    ],
+    "retained_bus_map": [
+      1,
+      2,
+      3
+    ],
+    "bus_label_conventions": {
+      "physical_bus_numbering": "one_based_ieee",
+      "probe_bus_indexing": "zero_based_physical",
+      "observation_bus_field": "one_based_physical",
+      "control_bus_indexing": "zero_based_reduced_dynamic",
+      "reduced_index_to_physical_bus": {
+        "0": 1,
+        "1": 2,
+        "2": 3
+      }
+    },
+    "observation_bus": 1,
+    "base_frequency_hz": 60.0,
+    "base_power_mva": 100.0,
+    "coupling_strength": 1.0,
+    "damping": 0.0,
+    "latent_model": "machinewise_mk",
+    "M_lower_nodes": [
+      0.0877898665,
+      0.0237671385,
+      0.0111779822
+    ],
+    "M_upper_nodes": [
+      0.1630383235,
+      0.0441389715,
+      0.0207591098
+    ],
+    "K_lower_nodes": [
+      0.029375,
+      0.013125,
+      0.0075
+    ],
+    "K_upper_nodes": [
+      0.29375,
+      0.13125,
+      0.075
+    ],
+    "use_node_specific_damping": true,
+    "D_nodes": [
+      0.01254141,
+      0.003395306,
+      0.001596855
+    ],
+    "P_m_nodes": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "theta0_nodes": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "omega0_nodes": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "enforce_initial_equilibrium": true,
+    "probe_buses": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "probe_amplitudes": [
+      0.05
+    ],
+    "probe_durations": [
+      1.75,
+      2.15,
+      2.4,
+      2.74,
+      2.79,
+      2.97
+    ],
+    "probe_duration": 2.0,
+    "reset_after_probe": true,
+    "T_obs_sec": 4.0,
+    "ode_dt": 0.0015625,
+    "fs_hz": 40.0,
+    "sigma": 0.2
+  },
+  "prior": {
+    "mc_samples": 512,
+    "mc_support_seed": 1
+  },
+  "experiment": {
+    "mode": "duration_bus_reset",
+    "step_number": 4,
+    "methods": [
+      "dad",
+      "rl_sboed",
+      "step_dad",
+      "myopic",
+      "fixed",
+      "random"
+    ],
+    "experiment_type": "msc_based"
+  },
+  "control": {
+    "robust_rule": "quantile",
+    "posterior_coverage": 0.9,
+    "enforce_bayes_loss_alignment": true,
+    "safety_margin": 0.0,
+    "snap_up": true,
+    "rocof_limit_hz_s": 22.0,
+    "delta_f_nadir_hz": -0.2,
+    "T_obs_sec": 10.0,
+    "ode_dt": 0.00625,
+    "fs_hz": 40.0,
+    "contingency": {
+      "bus": 0,
+      "magnitude": -0.45,
+      "units": "pu"
+    },
+    "profile": {
+      "bus": 0,
+      "t_start": 0.0,
+      "duration": 10.0,
+      "shape": "step",
+      "units": "pu"
+    },
+    "u_candidates": [
+      0.0,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.31,
+      0.32,
+      0.33,
+      0.34,
+      0.35,
+      0.36,
+      0.37,
+      0.38,
+      0.39,
+      0.4,
+      0.41,
+      0.42,
+      0.43,
+      0.44,
+      0.45,
+      0.46,
+      0.47,
+      0.48,
+      0.49,
+      0.5
+    ],
+    "myopic_hypothetical": 256,
+    "fixed_exhaustive_threshold": 0,
+    "fixed_noise_replicas": 2,
+    "fixed_greedy_restarts": 8,
+    "alpha": 0.09999999999999998
+  },
+  "data_generation": {
+    "backend": "cuda",
+    "cuda_batch_size": 128,
+    "theta_sample_size_train": 512,
+    "theta_sample_size_test": 128,
+    "train_seed": 101,
+    "test_seed": 202,
+    "reused": true,
+    "force": false,
+    "smoke": false,
+    "bank_shape_train": null,
+    "bank_shape_test": null,
+    "elapsed_seconds": null,
+    "N_sim": null,
+    "train_theta_count": null,
+    "test_theta_count": null
+  },
+  "bank_quality": {
+    "enabled": true,
+    "min_u_positive_frac": 0.5,
+    "min_u_q95": 0.05,
+    "min_u_headroom": 0.02,
+    "min_max_abs_corr_rocof_u": 0.05,
+    "delta_f_var_eps": 1e-12
+  },
+  "evaluation": {
+    "eig_test_systems": 128,
+    "eig_fixed_calibration_seed": 104729,
+    "eig_random_replicates": 32,
+    "objective_eval_seed": 104729
+  },
+  "poster_eig_protocol": {
+    "horizons": [
+      3,
+      4,
+      5
+    ],
+    "N_obs": 5,
+    "noise_sigma": [
+      0.005,
+      0.01
+    ],
+    "seeds": [
+      101,
+      202,
+      303
+    ],
+    "methods": [
+      "dad",
+      "rl_sboed",
+      "step_dad",
+      "myopic",
+      "fixed",
+      "random"
+    ],
+    "claim_scope": "paired_terminal_eig"
+  },
+  "poster_mocu_protocol": {
+    "pilot_horizon": 2,
+    "horizons": [
+      2,
+      3,
+      4
+    ],
+    "N_obs": 5,
+    "noise_sigma": 0.01,
+    "pilot_seed": 101,
+    "seeds": [
+      101,
+      202,
+      303
+    ],
+    "methods": [
+      "dad",
+      "rl_sboed",
+      "step_dad",
+      "myopic",
+      "fixed",
+      "random"
+    ],
+    "promotion_gate": "paired_advantage_and_non_degenerate_terminal_control",
+    "alpha": 0.09999999999999998
+  },
+  "training": {
+    "device": "auto",
+    "policy_hidden": 256,
+    "use_bank_observations": true,
+    "reference_method_fidelity": true,
+    "updates": 2000,
+    "min_updates_per_horizon": 200,
+    "trajectories_per_update": 128,
+    "ppo_epochs": 4,
+    "validation_interval": 50,
+    "validation_rollouts": 256,
+    "patience": 0,
+    "entropy_coefficient": 0.1,
+    "entropy_final_coefficient": 0.005,
+    "entropy_anneal_fraction": 0.8,
+    "dense_counterfactual_coefficient": 0.0,
+    "dense_counterfactual_temperature": 0.35,
+    "dense_branching_coefficient": 0.0,
+    "dense_branching_similarity_threshold": 0.5,
+    "dense_branching_margin": 0.35,
+    "dad_optimizer": "reinforce",
+    "checkpoint_diversity_weight": 0.0,
+    "min_unique_sequence_fraction": 0.1,
+    "prefer_unique_sequence_floor": false,
+    "unique_floor_mocu_slack": 0.0025,
+    "open_loop_warn_after_updates": 100,
+    "actor_lr": 0.0003,
+    "critic_lr": 0.001,
+    "max_grad_norm": 1.0
+  },
+  "control_safety_calibration": {
+    "enabled": false,
+    "mode": "config",
+    "expected_alpha": 0.01
+  },
+  "source_provenance": {
+    "git_commit": "2677ec6319dbb0a6df8eaedf266dcb723f6c6c4f",
+    "dirty": true,
+    "git_status_sha256": "2bd9bf7e1f375ec341f51e1b4618cc0ae57a4f74476428cc3a054ac2b48ca896",
+    "git_diff_sha256": "a0fe601fa33303e4903e001c9133f58a3daa752ebc5f60ae5414e69c5237b6ec",
+    "available": true,
+    "source_tree_sha256": "fa4443cc795d90640755ad7af4ea6d135fd8063ddeea2ef8fa4bbb09946af43c",
+    "source_files_sha256": {
+      "src/banks/__init__.py": "4ba36b02ab8446dca1da74db812b0fe3a6e8fdb4a732ba502b130713c9927a05",
+      "src/banks/control_u.py": "27d53dfde583f79d20c78a04d26a62c6ec77e8fd6f50ca6ba026609343cdb9e8",
+      "src/banks/diagnose_control.py": "82144d653d6549c48752959646f5f59eddf71b2db60c79e399e9e4cd7d0dc5be",
+      "src/banks/diagnose_duration.py": "a22d7e97c1b984d8662871b29144030a51eeded8c5b60d28c156662c2bd66313",
+      "src/banks/generate_control.py": "d7eccae5fff87d91e30d0a318d5c06dfec7b311078ee558ac88c1b796f6d1cb0",
+      "src/banks/paths.py": "b75ac0efa0def8c901cde788aa100b634fdae9fc238c49103fe2e0150661c4b4",
+      "src/banks/power_grid.py": "b700868644a8bca1bfc8c908b59f21f80dfdb85a0bb0fb640b23adb6cbd0d714",
+      "src/banks/quality.py": "dadc601f4077b8ecc15d7ecf2383a9738d5361d1d87b7c7d1a959ca74269a0ed",
+      "src/banks/tables.py": "1eaf04dad437a73d99a806758bf8cf9ae9e23e2d100b56585f42289c9e368cb0",
+      "src/banks/transaction.py": "3e06b5499ccc6d6c3fda59d82c5d449afcbc135d93f0cdb816d6a5940404525d",
+      "src/config.py": "5d0761df5457968e969f10b9fd2f2bc419ebe73d2d165a0453914c121b115f0b",
+      "src/control/__init__.py": "bf1d1f5790359c2fc9d878baed32e1e8a6e58e2d3e133088277330bbd8cc49e3",
+      "src/control/cuda_control.py": "14b74df44b2697950235218555a9e7863b78c82733d1c4b03cd27360ec8c6948",
+      "src/control/fixed_search.py": "80336c038142eec745ae6c020f63e61eaf95f56cdcf24b7f32a13047762d37cc",
+      "src/control/myopic.py": "eb43e0deb40dbb83f91b0abf665d7da1a15a4e7f40e72862da585b0859a53572",
+      "src/control/oracle_u_ctrl.py": "500c1b91837c162b31863e9b39ea817b16e164b7714e6ad370c030e4fe0ca76f",
+      "src/control/posterior_ctrl.py": "2f739577f0f663cc9f29dbce02ac43c431da6803dc20db5966aff242b33199c4",
+      "src/control/terminal_rule.py": "55c1f9838da9d2f9728344b35b0a33494e32bc7af7736824daa2c5a2603f7d2f",
+      "src/control/u_req.py": "ed3d3e770d371aa998d642229e3bc56a3b3cdca778ad8d295241e799b18cc062",
+      "src/domains/__init__.py": "c20cf9f1a50c25db36e64d90840f72859f9aadc20e786589e46bf6565f96ac8b",
+      "src/domains/sir/__init__.py": "1b334f66a511573ce1fbe19606c2171047f88f6fb0e74130c9d3039b32f1a634",
+      "src/domains/sir/banks.py": "76884a9828ca3b5ddb297b29b1ce00690f82d960bad4a8593a15d0149400f3e6",
+      "src/domains/sir/context.py": "bf33bda23cd42ca85b4fff9211017b3d220edc05fe8d332869f6c8038112a13a",
+      "src/domains/sir/design.py": "69c302660760b684ab38cd4618389bfe7440f355cf161956ae838439cf5e8360",
+      "src/domains/sir/simulator.py": "c51d08b2b3a5f0b3d7768ad7ec2ad59122b2606095f8b77bcdc5121b9679b3e5",
+      "src/domains/swing/__init__.py": "7d95795aaddc232e6481cf8a28ddad935be88b55634d439223ab090c07f7ad73",
+      "src/domains/swing/cuda.py": "deffdb8ca066c8008cbb8a6aad8d9f76de88c690b8632c055b17a552cd68ebac",
+      "src/domains/swing/design.py": "28c02f9c534eb8cc84d8b9e39d505b7bbfbd8cfa1e00656725ca143fe8774c68",
+      "src/domains/swing/simulator.py": "3d91982d60c79fe71c94ae9e1d291767570ecda855316449b68da03a8b1f4c42",
+      "src/experiment.py": "fa8ebb90c1928d05e1161a4c07e7ef0c06504b833826300baa395ddfaf0b1991",
+      "src/layout.py": "813cef58580f2cf0521877f6825b8d04943ec1ac9078415894dea83ed920e1e9",
+      "src/objectives/__init__.py": "ed9de9c8de9e0513d4b1e8f45625ebf19800cb92921dc6c1f35f80747158c9b9",
+      "src/objectives/eig/__init__.py": "90e41de8d47eec8fab784a7ce9794ab63a53453b5b9d16980b059f29d0121baa",
+      "src/objectives/eig/cli.py": "e1733e3cc845e48102e51d6e56781b5b38efe6f2f64a09844e575bd136e9077b",
+      "src/objectives/eig/dad_rollout.py": "e45dcd588addf4109502655b9ef9e34bd3e25945bf0bb2ccc0306866f24950f4",
+      "src/objectives/eig/methods.py": "f67fe3980eae9e9f67e89d3535f572d0b9eefbf7c06db9d84facbd10175cebd4",
+      "src/objectives/eig/pipeline.py": "03d5a8bdf1d5d1725326d7594c19c1b14473c8cf10918d0c1c27a0b5e6bc5801",
+      "src/objectives/eig/rollout.py": "f4b23f42eea1b9dfc97ec5768fa5d3c3254dfe6c3dd1690e9fc7fe41411e0a5f",
+      "src/objectives/eig/vector.py": "ab8b102be25ce976a6e52b4a1a98be016ed01bb091ede1c348b4cc6d622401a0",
+      "src/objectives/mocu/__init__.py": "4f30a157cfa0c0f8335581da2a5af729c6d081e015a2c95fdf94523930d367e8",
+      "src/objectives/mocu/calibrate.py": "ddb097e89716787365703f73d2ced11201984283f440cb3e91f64cec350acfb1",
+      "src/objectives/mocu/context.py": "9f7e679ba507e4abaa1ce38d471f6a6301b0838aa1e8b816f87d18fb0f3f5081",
+      "src/objectives/mocu/diagnostics.py": "59d1a774b3832c448ab48dc4512d752bb997a18ba8085f2e7daea2c368c4ead5",
+      "src/objectives/mocu/evaluate.py": "fbab5fd543db1c258b44f2f1167ceee5ee779937316335a9b2081c0d2f28a4a1",
+      "src/objectives/mocu/moe_diagnostics.py": "d60648fced3d44cc99429c4073cfa62599354a997bb4d68b46a38a1e554d2fb4",
+      "src/objectives/mocu/preflight.py": "c87f892d720b17c43ecc91f0e7df902fb872df48c5f97556eed15c66148ab03f",
+      "src/objectives/mocu/rewards.py": "26720b2cc634941d9a6c231f6f3c5f60b0ed73f7b3b4400d15f17a613b28497c",
+      "src/objectives/mocu/step_dad.py": "08040f8e6fd632734f332a02d563fa675f2b73a6cc1e17d14ef359a2dc1cbbc9",
+      "src/objectives/mocu/train.py": "9b4fa7382cdf1035eb01c57b7005c1984395f242123bcc47e775669b459b9acb",
+      "src/objectives/msc/__init__.py": "c38038850bb1624da87d3c8403247036ce5c1eec2fbb1234b4517b896313f81a",
+      "src/objectives/msc/objective.py": "5c28aa1588ff54c0f56fa0dc3ed569f87bf871ee007910238e53fa89b6818d4c",
+      "src/observations/__init__.py": "246f5d4f798e0dd209812d01a1b6797b262509ccd2e98f6f13216193e0df10e0",
+      "src/observations/carry_state.py": "174667b6ed21245ce121fa8c1d7829a3f05040fd6980e8a8acd374842919143f",
+      "src/observations/compress.py": "9606abb02cbd58906a339a5aaa298cf2a43cef3c79490fe60d741026d57c0fcd",
+      "src/observations/likelihood.py": "b301f3c0a9ec92c164120ffda6a27bc4e85172c0c42b87a64d05cc1dabeed04a",
+      "src/observations/noise.py": "4a84f657f8a053bf40a00b62fc5083cb1267a8677f9fcabe64d3e891e09c2d64",
+      "src/policies/__init__.py": "299d3dd2997d8ab87906288b6db440b56b7450d4e0e57f247fe8170c809cfbac",
+      "src/policies/dad.py": "0eecc0c0e01163796d5413a61ea6a3aa67a730d7200c878005c1147a51bf04b1",
+      "src/policies/moe.py": "99a99fb41d243e12546e4c642ef72e63d607405a7c82f9920d24c7e94649762f",
+      "src/policies/rl_sboed.py": "8b69abfc918077a18c48b2160aff3988602eaf5bf0c6ffffdae263bc4ac5da3b",
+      "src/results/__init__.py": "b40ca73a0302e333b20f5518160c94ebf674945319402b849e675583d0ec0bb5",
+      "src/results/plots.py": "964cc2c3ed5213b81b9b30e869dbde9cb4474019b8b6297b5aa01c9b09c10471",
+      "src/results/publication_tables.py": "d9af05ac2c762d5d82afaa971176c543691db290db18212eb87c4d3686f21266",
+      "src/results/summary.py": "a7ed55240603ad6bffe68609c5acd32761652e098e7c652e96ff567112dd8c4c",
+      "src/results/tables.py": "eef070ce4a5e49412172dc4d57db10a29b07c4e22b619e5060c1723725f85bce",
+      "tools/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tools/audit_ieee9_master_search.py": "9af10abea4759653de2c91ca2e310eb28f9b0f2da39a6be38e83b41b7c4747a3",
+      "tools/audit_mocu_space.py": "0a2dbbf9fe937843e7d07052531a9491c0f22edc375311a24bc60074cbb6c106",
+      "tools/audits/__init__.py": "1c9dab7ff4f92c4696cd67d9f6a4a606384c879b23b7b11d4c27a3e7739fb9e3",
+      "tools/audits/bank_cli.py": "04e270e12a942072bd054318386c6659864b59d662879106567d1308abfbc498",
+      "tools/audits/bank_structure.py": "f4b5d4ebfbd2da464653ab1615c822edb1a3142759238cf4fc4b895a5b560a29",
+      "tools/audits/campaign.py": "8865776c96e2ce01a4ddac9ceb7cf4f67129ae134b3c0e8a3995756b7def2aeb",
+      "tools/audits/catalog.py": "069607b701a9edb34062311da2e0527f48f673333a56d9c2042d0f3956ac0141",
+      "tools/audits/space.py": "e043794f3bcb7fab6cb6275918b0720d56ab193ecf3627a1ea6d30d3d4172b2c",
+      "tools/audits/validation.py": "0abdef34b77eaf8f09bfc1a76fce436ee7bf951c50d9bac830fe55de15332ee4",
+      "tools/bank_sweeps/search_ieee9_eig_duration_sets_full.py": "0c67a0ca65f19b211ae96122bf77eb8ebfbb944e6b743b98a9a54b576d37020d",
+      "tools/bank_sweeps/sweep_ieee9_eig_duration_sets.py": "9712ab7056b17a23a53daae5494b971575e154d6c82e93b477b4e17adc4e227a",
+      "tools/bank_sweeps/validate_ieee9_eig_duration_finalists.py": "8b5aaa82f798df3c067a2d7d1751d2b8d78e590eb3e70942eb739728eb5c0856",
+      "tools/check_mocu_alignment.py": "33603164c1016c0bff27d61a5275fcffb80bdecf39b40410953b8f01127fb21d",
+      "tools/check_repository.py": "e4b95242add4af10e1d1d0d169cf0d16cbe73c676cdd94bb4720f8df6f7d7968",
+      "tools/ensure_full_physical_bank.py": "b2bb9aedd3b1241b25098ac295f51c43c9483a1da99f463145faddc43ecfd229",
+      "tools/mocu_preflight.py": "273c9343ea4432b5fca59bb982cb5f26e50c22313b063b858aab46f430851fd5",
+      "tools/publication_protocol.json": "5ab1b74170f06b8cbdf80eafbc65de1db59d1e1cbfd7eddb2f8fb9a5b41723d7",
+      "tools/reference_data/provenance.json": "dadd65f365dae1e9db15cef74a12f2b52fa550fab0dc5febd9db53962aae3491",
+      "tools/regenerate_mocu_bank.py": "7cf81488389eea854e17778274620d77647a699e40dfe367cf2a429231a5aabf",
+      "tools/render_network.py": "ccf4a654fa1a74a8714ea2ed1c0fb70dec2afea7efdc5c17b7fc89a6e3993da0",
+      "tools/smoke_mocu_correctness.py": "adbef863f282a3ebc752df622d1552046ca8f278f2faeeccee1e30dff1ded4eb",
+      "tools/submit_audit.py": "fd253c272b7f9638570d69dda28acda7ccffcad9c42cf1740fade34172c27416",
+      "tools/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tools/tests/test_audit_validation.py": "0864aa4adbbd0497a942c54fb4e46afb791f2e6e71c326af217bb3ef12417d59",
+      "tools/tests/test_catalog.py": "8a7136f1d3e9c14105c00b2f41e5e84b340362bf06464cbf31ce411850a705b9",
+      "tools/tests/test_ieee30_model.py": "f25b9b97ea93a86f13da95d6c04ae056890f67558d037cb6f0ba32631e60c474",
+      "tools/tests/test_mocu_correctness.py": "e4e85c8f4d3811360e7fd5d99325878380188813dc3d35f243eba3212c3c0b6b",
+      "tools/tests/test_mocu_selection.py": "ce64bd8558eb00710d031cab755978f32ee28cbb8ddfdbd77b60a46d8191df97",
+      "tools/tests/test_mocu_space_audit.py": "11733befcf887e2cff158e99175c8994ac31f03e6081d2c58c8aa6b4dff18275",
+      "tools/tests/test_msc.py": "09185f15240a0a0a57d5f8545d51eda22e4280eabf2efccd144b2000fd3f3a4e",
+      "tools/tests/test_safety_ratio.py": "6ce0fa3598bda16ec02efdc5608537677396165218b6ad43d5b98151df5836df",
+      "tools/tests/test_safety_reporting.py": "a2c262164d565be296ecc31f2fbfa67870c2087e6ae9fd79f3d5794d87260310",
+      "tools/tests/test_submission.py": "f96c0cc1f951fdcc784aeba8cc6fbbf478ddb7b14d633096a6114e5332280b0e",
+      "scripts/audit.sh": "18848882c62957e559cfc396fc697ba4f0a0ade64ed937258abbc6772a2e8d5a",
+      "scripts/check.sh": "0c0ee3d320c45510b54df4d04bf5a96ec37aa935617aa1d2407f46ad808d15f8",
+      "scripts/data_generation.sh": "f9cde00a01aa421a5fb74700dea22017fcf9a786a5373caf337791f0f9137f06",
+      "scripts/evaluation.sh": "fb99d6a4ca3ebdfffbc72f5bcc4f9d11bb3e141d5b3d830629e6fba56f3725bc",
+      "scripts/submit_audit.sh": "624442358979a7de29396378b5771dcd4092a78cd15430d3b6ea6a62929263df",
+      "scripts/training.sh": "95251b33895c03b254332238fe0b43a948cc1e3a180d7d4b6ecc0646c94fba33",
+      "scripts/visualization.sh": "b9f884bab4595bd432fdf68e372e316312868a0b00fb74751530cf6dd6d66d8c",
+      "configs/ieee14_mocu.yaml": "a102ece7676b2ea84050a80b231509c705eda487cb755610a5f2875f72da9b62",
+      "configs/ieee30_mocu.yaml": "3daf98aa0dd496b7f10507a5f3e1d4f5136e678035f3e47194f7dee02b07068a",
+      "configs/ieee9_eig.yaml": "f33dacb304d053fe504aea9e46c2ab32c18b67e8572fc8529671397d5b878d6c",
+      "configs/ieee9_mocu.yaml": "78849ba327cc6fe1922b61a8ff09a98db941243d579351928af590d1f2df8e0e",
+      "configs/sir_ode_eig.yaml": "2f20ee6003459cddbd77b7d4e895419c1f5233699a1216c260f015d9503f44c6",
+      "run.sh": "a03a4bf6a81c4da1555d23f5c727d2cb80571b43b79562687c96c7a92a4a021d",
+      "sweep_run.sh": "8f7c0876519d915e0d7f34a274d53f116aae2edd9c3aa243128a18d993067893"
+    }
+  },
+  "eval_seed": 1003,
+  "smoke": false,
+  "eval_meta": {
+    "system": "ieee9",
+    "experiment_type": "msc_based",
+    "objective": "msc",
+    "config_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09112026_101907_ieee9_msc_q0p9_full_T3-5_train101-303_eval1001-1005_Nobs5_sigma0p005/source_snapshot/configs/ieee9_mocu.yaml",
+    "config_hash": "78849ba327cc6fe1",
+    "n_theta_train": 512,
+    "n_theta_val": 128,
+    "n_theta_test": 128,
+    "n_designs": 54,
+    "mocu_cost_definition": "legacy quantile safety-aware regret",
+    "undercontrol_penalty": 10.000000000000002,
+    "violation_penalty": 0.0,
+    "N_obs": 5,
+    "N_sim": 2560,
+    "observation_mode": "sampled_delta_f",
+    "compression_ratio": 0.001953125,
+    "obs_indices": [
+      0,
+      640,
+      1280,
+      1919,
+      2559
+    ],
+    "sampling": "uniform",
+    "data_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9/probe_subsets/eba8db9e23a48ced",
+    "out_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09112026_101907_ieee9_msc_q0p9_full_T3-5_train101-303_eval1001-1005_Nobs5_sigma0p005/runs/09112026_160413_ieee9_MSC_T4_Nobs5_sigma0p005"
+  },
+  "training_results": {
+    "dad": {
+      "seed": 101,
+      "elapsed_seconds": 97.503164768219,
+      "n_updates_ran": 2000,
+      "trajectories_sampled": 256000,
+      "trajectories_budget": 256000,
+      "objective": "msc",
+      "best_validation_mean_objective": 0.3828515625,
+      "best_validation_n_unique_sequences": 1,
+      "best_checkpoint_score": 0.3828515625,
+      "best_meets_unique_floor": false,
+      "open_loop_warned": true,
+      "device": "cuda",
+      "checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09112026_101907_ieee9_msc_q0p9_full_T3-5_train101-303_eval1001-1005_Nobs5_sigma0p005/runs/09112026_160413_ieee9_MSC_T4_Nobs5_sigma0p005/model/dad.pth",
+      "parent_initialization": null,
+      "moe_counterfactual_coefficient": 0.0
+    },
+    "rl_sboed": {
+      "seed": 101,
+      "elapsed_seconds": 161.7745976448059,
+      "n_updates_ran": 2000,
+      "trajectories_sampled": 256000,
+      "trajectories_budget": 256000,
+      "objective": "msc",
+      "best_validation_mean_objective": 0.3825390625,
+      "best_validation_n_unique_sequences": 2,
+      "best_checkpoint_score": 0.3825390625,
+      "best_meets_unique_floor": false,
+      "open_loop_warned": true,
+      "device": "cuda",
+      "checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09112026_101907_ieee9_msc_q0p9_full_T3-5_train101-303_eval1001-1005_Nobs5_sigma0p005/runs/09112026_160413_ieee9_MSC_T4_Nobs5_sigma0p005/model/rl_sboed.pth",
+      "parent_initialization": null,
+      "moe_counterfactual_coefficient": 0.0
+    }
+  }
+}

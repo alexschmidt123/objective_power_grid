@@ -1,0 +1,3236 @@
+{
+  "architecture": "independent_sparse_moe_v1",
+  "method": "moe_sboed",
+  "training_seed": 101,
+  "policy_hidden": 256,
+  "n_experts": 4,
+  "top_k": 2,
+  "expert_hidden": 256,
+  "objective": "terminal_posterior_entropy_reduction",
+  "estimator": "finite_particle_entropy_difference",
+  "optimizer": "ppo_actor_critic",
+  "teacher": null,
+  "behavioral_cloning_trajectories": 0,
+  "moe_step0_action": null,
+  "first_action": "learned",
+  "checkpoint_selection": "maximum_validation_eig_only",
+  "best_stage": "epoch_197",
+  "best_validation_terminal_eig": 6.906009674072266,
+  "best_validation_n_unique_sequences": 57,
+  "epochs": 200,
+  "trajectories_per_epoch": 512,
+  "n_validation_systems": 256,
+  "parameter_count": 447540,
+  "checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_independent_moe_sir/09162026_130000_sir_ode_EIG_T5_Nobs1_sigma1/model/moe_sboed.pth",
+  "elapsed_seconds": 33.92755918111652,
+  "history": [
+    {
+      "epoch": 0,
+      "validation_terminal_eig": 3.3443377017974854,
+      "validation_n_unique_sequences": 7,
+      "mean_terminal_eig": null,
+      "mean_loss": null,
+      "elapsed_seconds": 0.24114138213917613
+    },
+    {
+      "epoch": 1,
+      "validation_terminal_eig": 6.666803359985352,
+      "validation_n_unique_sequences": 22,
+      "mean_terminal_eig": 4.025889629498124,
+      "mean_loss": -0.14039578288793564,
+      "elapsed_seconds": 0.5687678230460733,
+      "router_entropy": 1.3837906122207642,
+      "expert_load": [
+        0.31132814288139343,
+        0.20234374701976776,
+        0.232421875,
+        0.25390625
+      ],
+      "balance_loss": 1.0007293224334717
+    },
+    {
+      "epoch": 2,
+      "validation_terminal_eig": 6.721076011657715,
+      "validation_n_unique_sequences": 13,
+      "mean_terminal_eig": 4.099749817512929,
+      "mean_loss": -0.1495845839381218,
+      "elapsed_seconds": 0.7410823351237923,
+      "router_entropy": 1.3708690404891968,
+      "expert_load": [
+        0.10117187350988388,
+        0.23710937798023224,
+        0.3929687440395355,
+        0.26875001192092896
+      ],
+      "balance_loss": 1.0381903648376465
+    },
+    {
+      "epoch": 3,
+      "validation_terminal_eig": 6.879642009735107,
+      "validation_n_unique_sequences": 11,
+      "mean_terminal_eig": 4.496357625350356,
+      "mean_loss": -0.16123785823583603,
+      "elapsed_seconds": 0.9078248450532556,
+      "router_entropy": 1.2979997396469116,
+      "expert_load": [
+        0.2535156309604645,
+        0.09492187947034836,
+        0.46796876192092896,
+        0.18359375
+      ],
+      "balance_loss": 1.1611132621765137
+    },
+    {
+      "epoch": 4,
+      "validation_terminal_eig": 6.791954040527344,
+      "validation_n_unique_sequences": 19,
+      "mean_terminal_eig": 5.044510708190501,
+      "mean_loss": -0.18130523711442947,
+      "elapsed_seconds": 1.073842816054821,
+      "router_entropy": 1.1417173147201538,
+      "expert_load": [
+        0.19960938394069672,
+        0.19453124701976776,
+        0.49882814288139343,
+        0.10703124850988388
+      ],
+      "balance_loss": 1.3382782936096191
+    },
+    {
+      "epoch": 5,
+      "validation_terminal_eig": 6.729809284210205,
+      "validation_n_unique_sequences": 5,
+      "mean_terminal_eig": 5.896985055413097,
+      "mean_loss": -0.18099602311849594,
+      "elapsed_seconds": 1.239861557027325,
+      "router_entropy": 0.9865394830703735,
+      "expert_load": [
+        0.22382812201976776,
+        0.05156249925494194,
+        0.4976562559604645,
+        0.22695313394069672
+      ],
+      "balance_loss": 1.4662597179412842
+    },
+    {
+      "epoch": 6,
+      "validation_terminal_eig": 6.643158912658691,
+      "validation_n_unique_sequences": 6,
+      "mean_terminal_eig": 6.402913699857891,
+      "mean_loss": -0.17039577662944794,
+      "elapsed_seconds": 1.4051408770028502,
+      "router_entropy": 0.8907648324966431,
+      "expert_load": [
+        0.20937500894069672,
+        0.05625000223517418,
+        0.4867187440395355,
+        0.24765625596046448
+      ],
+      "balance_loss": 1.508191704750061
+    },
+    {
+      "epoch": 7,
+      "validation_terminal_eig": 6.728615760803223,
+      "validation_n_unique_sequences": 6,
+      "mean_terminal_eig": 6.609338124282658,
+      "mean_loss": -0.16911576688289642,
+      "elapsed_seconds": 1.5703790099360049,
+      "router_entropy": 0.8669042587280273,
+      "expert_load": [
+        0.06328125298023224,
+        0.21914063394069672,
+        0.46210938692092896,
+        0.2554687559604645
+      ],
+      "balance_loss": 1.4484952688217163
+    },
+    {
+      "epoch": 8,
+      "validation_terminal_eig": 6.596848487854004,
+      "validation_n_unique_sequences": 8,
+      "mean_terminal_eig": 6.695271261502057,
+      "mean_loss": -0.15787506103515625,
+      "elapsed_seconds": 1.7368476761039346,
+      "router_entropy": 0.8827764391899109,
+      "expert_load": [
+        0.125,
+        0.20351563394069672,
+        0.4312500059604645,
+        0.240234375
+      ],
+      "balance_loss": 1.3524736166000366
+    },
+    {
+      "epoch": 9,
+      "validation_terminal_eig": 6.729085922241211,
+      "validation_n_unique_sequences": 8,
+      "mean_terminal_eig": 6.747839762829244,
+      "mean_loss": -0.15960784256458282,
+      "elapsed_seconds": 1.9051596450153738,
+      "router_entropy": 0.8781183362007141,
+      "expert_load": [
+        0.07773437350988388,
+        0.2757812440395355,
+        0.4312500059604645,
+        0.21523438394069672
+      ],
+      "balance_loss": 1.3491168022155762
+    },
+    {
+      "epoch": 10,
+      "validation_terminal_eig": 6.7315874099731445,
+      "validation_n_unique_sequences": 11,
+      "mean_terminal_eig": 6.749775756150484,
+      "mean_loss": -0.1518513187766075,
+      "elapsed_seconds": 2.074132228968665,
+      "router_entropy": 0.8664186596870422,
+      "expert_load": [
+        0.11640625447034836,
+        0.31328126788139343,
+        0.43828126788139343,
+        0.13203124701976776
+      ],
+      "balance_loss": 1.3764539957046509
+    },
+    {
+      "epoch": 11,
+      "validation_terminal_eig": 6.716456890106201,
+      "validation_n_unique_sequences": 16,
+      "mean_terminal_eig": 6.750716674141586,
+      "mean_loss": -0.1555430218577385,
+      "elapsed_seconds": 2.2431666390039027,
+      "router_entropy": 0.9081659317016602,
+      "expert_load": [
+        0.18398438394069672,
+        0.28789064288139343,
+        0.4136718809604645,
+        0.11445312947034836
+      ],
+      "balance_loss": 1.2893459796905518
+    },
+    {
+      "epoch": 12,
+      "validation_terminal_eig": 6.675135612487793,
+      "validation_n_unique_sequences": 18,
+      "mean_terminal_eig": 6.7792866714298725,
+      "mean_loss": -0.15424653142690659,
+      "elapsed_seconds": 2.4128597620874643,
+      "router_entropy": 0.9761099815368652,
+      "expert_load": [
+        0.22187499701976776,
+        0.2515625059604645,
+        0.34375,
+        0.18281249701976776
+      ],
+      "balance_loss": 1.12626051902771
+    },
+    {
+      "epoch": 13,
+      "validation_terminal_eig": 6.844342231750488,
+      "validation_n_unique_sequences": 19,
+      "mean_terminal_eig": 6.764145435765386,
+      "mean_loss": -0.15795834362506866,
+      "elapsed_seconds": 2.581952369073406,
+      "router_entropy": 0.9592821002006531,
+      "expert_load": [
+        0.14726562798023224,
+        0.2945312559604645,
+        0.3687500059604645,
+        0.189453125
+      ],
+      "balance_loss": 1.174134612083435
+    },
+    {
+      "epoch": 14,
+      "validation_terminal_eig": 6.779426574707031,
+      "validation_n_unique_sequences": 19,
+      "mean_terminal_eig": 6.784744911827147,
+      "mean_loss": -0.1521025002002716,
+      "elapsed_seconds": 2.749826906947419,
+      "router_entropy": 0.9436451196670532,
+      "expert_load": [
+        0.16835938394069672,
+        0.3167968690395355,
+        0.39726564288139343,
+        0.11757812649011612
+      ],
+      "balance_loss": 1.2382142543792725
+    },
+    {
+      "epoch": 15,
+      "validation_terminal_eig": 6.797428131103516,
+      "validation_n_unique_sequences": 17,
+      "mean_terminal_eig": 6.778014007024467,
+      "mean_loss": -0.15091509371995926,
+      "elapsed_seconds": 2.9181713501457125,
+      "router_entropy": 0.9491588473320007,
+      "expert_load": [
+        0.22500000894069672,
+        0.2710937559604645,
+        0.36640626192092896,
+        0.13750000298023224
+      ],
+      "balance_loss": 1.1700029373168945
+    },
+    {
+      "epoch": 16,
+      "validation_terminal_eig": 6.8031768798828125,
+      "validation_n_unique_sequences": 17,
+      "mean_terminal_eig": 6.735091598704457,
+      "mean_loss": -0.15789221227169037,
+      "elapsed_seconds": 3.0859755200799555,
+      "router_entropy": 0.8985674977302551,
+      "expert_load": [
+        0.21484375,
+        0.240234375,
+        0.38984376192092896,
+        0.15507812798023224
+      ],
+      "balance_loss": 1.2304660081863403
+    },
+    {
+      "epoch": 17,
+      "validation_terminal_eig": 6.866946697235107,
+      "validation_n_unique_sequences": 21,
+      "mean_terminal_eig": 6.796338260173798,
+      "mean_loss": -0.1548132747411728,
+      "elapsed_seconds": 3.2539980600122362,
+      "router_entropy": 0.8607916235923767,
+      "expert_load": [
+        0.13593749701976776,
+        0.19921875,
+        0.4039062559604645,
+        0.26093751192092896
+      ],
+      "balance_loss": 1.2943309545516968
+    },
+    {
+      "epoch": 18,
+      "validation_terminal_eig": 6.856359958648682,
+      "validation_n_unique_sequences": 17,
+      "mean_terminal_eig": 6.787342170253396,
+      "mean_loss": -0.14796122908592224,
+      "elapsed_seconds": 3.4217255690600723,
+      "router_entropy": 0.831939697265625,
+      "expert_load": [
+        0.12265624850988388,
+        0.142578125,
+        0.3968749940395355,
+        0.337890625
+      ],
+      "balance_loss": 1.3138154745101929
+    },
+    {
+      "epoch": 19,
+      "validation_terminal_eig": 6.85427188873291,
+      "validation_n_unique_sequences": 18,
+      "mean_terminal_eig": 6.802132671698928,
+      "mean_loss": -0.1492118537425995,
+      "elapsed_seconds": 3.589359479956329,
+      "router_entropy": 0.8407089114189148,
+      "expert_load": [
+        0.29218751192092896,
+        0.142578125,
+        0.353515625,
+        0.21171875298023224
+      ],
+      "balance_loss": 1.2094024419784546
+    },
+    {
+      "epoch": 20,
+      "validation_terminal_eig": 6.860856056213379,
+      "validation_n_unique_sequences": 24,
+      "mean_terminal_eig": 6.7652729684486985,
+      "mean_loss": -0.15094762295484543,
+      "elapsed_seconds": 3.7564841960556805,
+      "router_entropy": 0.8843792080879211,
+      "expert_load": [
+        0.28125,
+        0.18828125298023224,
+        0.35546875,
+        0.17499999701976776
+      ],
+      "balance_loss": 1.1766183376312256
+    },
+    {
+      "epoch": 21,
+      "validation_terminal_eig": 6.873497486114502,
+      "validation_n_unique_sequences": 29,
+      "mean_terminal_eig": 6.788052287884057,
+      "mean_loss": -0.14962908625602722,
+      "elapsed_seconds": 3.9243783571291715,
+      "router_entropy": 0.8821942210197449,
+      "expert_load": [
+        0.20781250298023224,
+        0.19648437201976776,
+        0.35820314288139343,
+        0.23749999701976776
+      ],
+      "balance_loss": 1.1754095554351807
+    },
+    {
+      "epoch": 22,
+      "validation_terminal_eig": 6.878591060638428,
+      "validation_n_unique_sequences": 34,
+      "mean_terminal_eig": 6.801228283904493,
+      "mean_loss": -0.15186279267072678,
+      "elapsed_seconds": 4.091700250981376,
+      "router_entropy": 0.8897711634635925,
+      "expert_load": [
+        0.2109375,
+        0.19375000894069672,
+        0.34296876192092896,
+        0.2523437440395355
+      ],
+      "balance_loss": 1.1457535028457642
+    },
+    {
+      "epoch": 23,
+      "validation_terminal_eig": 6.873715400695801,
+      "validation_n_unique_sequences": 30,
+      "mean_terminal_eig": 6.7750533586367965,
+      "mean_loss": -0.15444102883338928,
+      "elapsed_seconds": 4.2593013199511915,
+      "router_entropy": 0.8831629753112793,
+      "expert_load": [
+        0.21523438394069672,
+        0.23984375596046448,
+        0.33906251192092896,
+        0.20585937798023224
+      ],
+      "balance_loss": 1.1296135187149048
+    },
+    {
+      "epoch": 24,
+      "validation_terminal_eig": 6.8783769607543945,
+      "validation_n_unique_sequences": 33,
+      "mean_terminal_eig": 6.812702791765332,
+      "mean_loss": -0.15427061170339584,
+      "elapsed_seconds": 4.4273238009773195,
+      "router_entropy": 0.8706365823745728,
+      "expert_load": [
+        0.17070312798023224,
+        0.23554687201976776,
+        0.34687501192092896,
+        0.24687500298023224
+      ],
+      "balance_loss": 1.1474337577819824
+    },
+    {
+      "epoch": 25,
+      "validation_terminal_eig": 6.863189697265625,
+      "validation_n_unique_sequences": 40,
+      "mean_terminal_eig": 6.810633690096438,
+      "mean_loss": -0.15353527665138245,
+      "elapsed_seconds": 4.595981267979369,
+      "router_entropy": 0.8610219359397888,
+      "expert_load": [
+        0.21367187798023224,
+        0.23710937798023224,
+        0.34687501192092896,
+        0.20234374701976776
+      ],
+      "balance_loss": 1.1429499387741089
+    },
+    {
+      "epoch": 26,
+      "validation_terminal_eig": 6.861712455749512,
+      "validation_n_unique_sequences": 26,
+      "mean_terminal_eig": 6.808337353169918,
+      "mean_loss": -0.15073934942483902,
+      "elapsed_seconds": 4.764688950031996,
+      "router_entropy": 0.8477548956871033,
+      "expert_load": [
+        0.2265625,
+        0.20859375596046448,
+        0.33281251788139343,
+        0.23203125596046448
+      ],
+      "balance_loss": 1.1259819269180298
+    },
+    {
+      "epoch": 27,
+      "validation_terminal_eig": 6.859943389892578,
+      "validation_n_unique_sequences": 22,
+      "mean_terminal_eig": 6.779408730566502,
+      "mean_loss": -0.1508738398551941,
+      "elapsed_seconds": 4.933962201001123,
+      "router_entropy": 0.8498031497001648,
+      "expert_load": [
+        0.2750000059604645,
+        0.20234374701976776,
+        0.3375000059604645,
+        0.18515625596046448
+      ],
+      "balance_loss": 1.1329127550125122
+    },
+    {
+      "epoch": 28,
+      "validation_terminal_eig": 6.886455059051514,
+      "validation_n_unique_sequences": 39,
+      "mean_terminal_eig": 6.7922059670090675,
+      "mean_loss": -0.1497998684644699,
+      "elapsed_seconds": 5.103453380987048,
+      "router_entropy": 0.8669875264167786,
+      "expert_load": [
+        0.29570314288139343,
+        0.19882813096046448,
+        0.318359375,
+        0.18710938096046448
+      ],
+      "balance_loss": 1.1052993535995483
+    },
+    {
+      "epoch": 29,
+      "validation_terminal_eig": 6.893428802490234,
+      "validation_n_unique_sequences": 46,
+      "mean_terminal_eig": 6.773466954939067,
+      "mean_loss": -0.15068046748638153,
+      "elapsed_seconds": 5.272766429930925,
+      "router_entropy": 0.8940610885620117,
+      "expert_load": [
+        0.23749999701976776,
+        0.24960938096046448,
+        0.31171876192092896,
+        0.201171875
+      ],
+      "balance_loss": 1.0707087516784668
+    },
+    {
+      "epoch": 30,
+      "validation_terminal_eig": 6.888523101806641,
+      "validation_n_unique_sequences": 30,
+      "mean_terminal_eig": 6.792541652917862,
+      "mean_loss": -0.15331370383501053,
+      "elapsed_seconds": 5.442214880138636,
+      "router_entropy": 0.8597770929336548,
+      "expert_load": [
+        0.19218750298023224,
+        0.18203125894069672,
+        0.31562501192092896,
+        0.3101562559604645
+      ],
+      "balance_loss": 1.1239187717437744
+    },
+    {
+      "epoch": 31,
+      "validation_terminal_eig": 6.854608535766602,
+      "validation_n_unique_sequences": 32,
+      "mean_terminal_eig": 6.796525442041457,
+      "mean_loss": -0.14951709657907486,
+      "elapsed_seconds": 5.611312635010108,
+      "router_entropy": 0.8718603253364563,
+      "expert_load": [
+        0.15195313096046448,
+        0.19375000894069672,
+        0.31718751788139343,
+        0.33710938692092896
+      ],
+      "balance_loss": 1.1399420499801636
+    },
+    {
+      "epoch": 32,
+      "validation_terminal_eig": 6.8700151443481445,
+      "validation_n_unique_sequences": 31,
+      "mean_terminal_eig": 6.807183706201613,
+      "mean_loss": -0.14926746487617493,
+      "elapsed_seconds": 5.779795854119584,
+      "router_entropy": 0.8697704672813416,
+      "expert_load": [
+        0.21367187798023224,
+        0.08632812649011612,
+        0.29765626788139343,
+        0.40234375
+      ],
+      "balance_loss": 1.1434121131896973
+    },
+    {
+      "epoch": 33,
+      "validation_terminal_eig": 6.870668411254883,
+      "validation_n_unique_sequences": 47,
+      "mean_terminal_eig": 6.778845907654613,
+      "mean_loss": -0.14949022233486176,
+      "elapsed_seconds": 5.948768709087744,
+      "router_entropy": 0.8909546136856079,
+      "expert_load": [
+        0.2691406309604645,
+        0.10117187350988388,
+        0.275390625,
+        0.35429689288139343
+      ],
+      "balance_loss": 1.087294578552246
+    },
+    {
+      "epoch": 34,
+      "validation_terminal_eig": 6.876936435699463,
+      "validation_n_unique_sequences": 41,
+      "mean_terminal_eig": 6.795780619606376,
+      "mean_loss": -0.1488906368613243,
+      "elapsed_seconds": 6.1178392770234495,
+      "router_entropy": 0.9191822409629822,
+      "expert_load": [
+        0.2874999940395355,
+        0.10585937649011612,
+        0.263671875,
+        0.34296876192092896
+      ],
+      "balance_loss": 1.0629825592041016
+    },
+    {
+      "epoch": 35,
+      "validation_terminal_eig": 6.880474090576172,
+      "validation_n_unique_sequences": 50,
+      "mean_terminal_eig": 6.791596722789109,
+      "mean_loss": -0.14642634987831116,
+      "elapsed_seconds": 6.286268220981583,
+      "router_entropy": 0.9294756054878235,
+      "expert_load": [
+        0.25117188692092896,
+        0.1328125,
+        0.2660156190395355,
+        0.3499999940395355
+      ],
+      "balance_loss": 1.0376625061035156
+    },
+    {
+      "epoch": 36,
+      "validation_terminal_eig": 6.875257968902588,
+      "validation_n_unique_sequences": 44,
+      "mean_terminal_eig": 6.80963362660259,
+      "mean_loss": -0.14586567133665085,
+      "elapsed_seconds": 6.4549294139724225,
+      "router_entropy": 0.9127699136734009,
+      "expert_load": [
+        0.18281249701976776,
+        0.3203125,
+        0.298828125,
+        0.19804687798023224
+      ],
+      "balance_loss": 1.0582644939422607
+    },
+    {
+      "epoch": 37,
+      "validation_terminal_eig": 6.8754377365112305,
+      "validation_n_unique_sequences": 38,
+      "mean_terminal_eig": 6.821232262067497,
+      "mean_loss": -0.14426729828119278,
+      "elapsed_seconds": 6.624144131084904,
+      "router_entropy": 0.9069995880126953,
+      "expert_load": [
+        0.16484375298023224,
+        0.32734376192092896,
+        0.3062500059604645,
+        0.20156250894069672
+      ],
+      "balance_loss": 1.0725971460342407
+    },
+    {
+      "epoch": 38,
+      "validation_terminal_eig": 6.899001121520996,
+      "validation_n_unique_sequences": 48,
+      "mean_terminal_eig": 6.827151294797659,
+      "mean_loss": -0.13817698508501053,
+      "elapsed_seconds": 6.793095610104501,
+      "router_entropy": 0.8991867899894714,
+      "expert_load": [
+        0.18125000596046448,
+        0.18515625596046448,
+        0.2992187440395355,
+        0.3343749940395355
+      ],
+      "balance_loss": 1.0718364715576172
+    },
+    {
+      "epoch": 39,
+      "validation_terminal_eig": 6.899689674377441,
+      "validation_n_unique_sequences": 49,
+      "mean_terminal_eig": 6.820092279464006,
+      "mean_loss": -0.14124641567468643,
+      "elapsed_seconds": 6.9622395660262555,
+      "router_entropy": 0.9277065396308899,
+      "expert_load": [
+        0.20390625298023224,
+        0.14531250298023224,
+        0.29296875,
+        0.3578124940395355
+      ],
+      "balance_loss": 1.0732170343399048
+    },
+    {
+      "epoch": 40,
+      "validation_terminal_eig": 6.897763252258301,
+      "validation_n_unique_sequences": 45,
+      "mean_terminal_eig": 6.835253895260394,
+      "mean_loss": -0.13314449787139893,
+      "elapsed_seconds": 7.13108885101974,
+      "router_entropy": 0.8960371017456055,
+      "expert_load": [
+        0.18085937201976776,
+        0.267578125,
+        0.3246093690395355,
+        0.22695313394069672
+      ],
+      "balance_loss": 1.0926414728164673
+    },
+    {
+      "epoch": 41,
+      "validation_terminal_eig": 6.8831329345703125,
+      "validation_n_unique_sequences": 56,
+      "mean_terminal_eig": 6.825517499819398,
+      "mean_loss": -0.1444840282201767,
+      "elapsed_seconds": 7.3000851990655065,
+      "router_entropy": 0.8851003646850586,
+      "expert_load": [
+        0.19179688394069672,
+        0.2554687559604645,
+        0.31523439288139343,
+        0.23749999701976776
+      ],
+      "balance_loss": 1.0744717121124268
+    },
+    {
+      "epoch": 42,
+      "validation_terminal_eig": 6.88394832611084,
+      "validation_n_unique_sequences": 36,
+      "mean_terminal_eig": 6.822037551552057,
+      "mean_loss": -0.13973180949687958,
+      "elapsed_seconds": 7.468595691025257,
+      "router_entropy": 0.8303203582763672,
+      "expert_load": [
+        0.15312500298023224,
+        0.2601562440395355,
+        0.33085939288139343,
+        0.255859375
+      ],
+      "balance_loss": 1.1192196607589722
+    },
+    {
+      "epoch": 43,
+      "validation_terminal_eig": 6.873636245727539,
+      "validation_n_unique_sequences": 32,
+      "mean_terminal_eig": 6.832767031155527,
+      "mean_loss": -0.13785281777381897,
+      "elapsed_seconds": 7.637807150138542,
+      "router_entropy": 0.7934806942939758,
+      "expert_load": [
+        0.140625,
+        0.2777343690395355,
+        0.3558593690395355,
+        0.22578124701976776
+      ],
+      "balance_loss": 1.1741197109222412
+    },
+    {
+      "epoch": 44,
+      "validation_terminal_eig": 6.889990329742432,
+      "validation_n_unique_sequences": 43,
+      "mean_terminal_eig": 6.836179279722273,
+      "mean_loss": -0.13771658390760422,
+      "elapsed_seconds": 7.8069995190016925,
+      "router_entropy": 0.7847540974617004,
+      "expert_load": [
+        0.158203125,
+        0.26484376192092896,
+        0.3515625,
+        0.22539062798023224
+      ],
+      "balance_loss": 1.1647093296051025
+    },
+    {
+      "epoch": 45,
+      "validation_terminal_eig": 6.876890182495117,
+      "validation_n_unique_sequences": 58,
+      "mean_terminal_eig": 6.8364965217188,
+      "mean_loss": -0.14037658274173737,
+      "elapsed_seconds": 7.975752541096881,
+      "router_entropy": 0.7538929581642151,
+      "expert_load": [
+        0.15859375894069672,
+        0.28203126788139343,
+        0.388671875,
+        0.17070312798023224
+      ],
+      "balance_loss": 1.255446434020996
+    },
+    {
+      "epoch": 46,
+      "validation_terminal_eig": 6.875929832458496,
+      "validation_n_unique_sequences": 40,
+      "mean_terminal_eig": 6.838768866844475,
+      "mean_loss": -0.1369163915514946,
+      "elapsed_seconds": 8.14438041811809,
+      "router_entropy": 0.7383300065994263,
+      "expert_load": [
+        0.20000000298023224,
+        0.26093751192092896,
+        0.384765625,
+        0.154296875
+      ],
+      "balance_loss": 1.2439579963684082
+    },
+    {
+      "epoch": 47,
+      "validation_terminal_eig": 6.884079933166504,
+      "validation_n_unique_sequences": 53,
+      "mean_terminal_eig": 6.8305677538737655,
+      "mean_loss": -0.13784697651863098,
+      "elapsed_seconds": 8.31278157304041,
+      "router_entropy": 0.7437227368354797,
+      "expert_load": [
+        0.23281250894069672,
+        0.2757812440395355,
+        0.38554689288139343,
+        0.10585937649011612
+      ],
+      "balance_loss": 1.2494659423828125
+    },
+    {
+      "epoch": 48,
+      "validation_terminal_eig": 6.877105712890625,
+      "validation_n_unique_sequences": 66,
+      "mean_terminal_eig": 6.807977360673249,
+      "mean_loss": -0.14419487863779068,
+      "elapsed_seconds": 8.48118689097464,
+      "router_entropy": 0.7312523722648621,
+      "expert_load": [
+        0.22929687798023224,
+        0.30156251788139343,
+        0.369140625,
+        0.10000000149011612
+      ],
+      "balance_loss": 1.221248745918274
+    },
+    {
+      "epoch": 49,
+      "validation_terminal_eig": 6.875471115112305,
+      "validation_n_unique_sequences": 70,
+      "mean_terminal_eig": 6.812664220109582,
+      "mean_loss": -0.14151624590158463,
+      "elapsed_seconds": 8.649580008117482,
+      "router_entropy": 0.6989288330078125,
+      "expert_load": [
+        0.25507813692092896,
+        0.27656251192092896,
+        0.35820314288139343,
+        0.11015625298023224
+      ],
+      "balance_loss": 1.2027671337127686
+    },
+    {
+      "epoch": 50,
+      "validation_terminal_eig": 6.872592926025391,
+      "validation_n_unique_sequences": 57,
+      "mean_terminal_eig": 6.839407650753856,
+      "mean_loss": -0.14003939181566238,
+      "elapsed_seconds": 8.81763316411525,
+      "router_entropy": 0.7159149050712585,
+      "expert_load": [
+        0.232421875,
+        0.3003906309604645,
+        0.3753906190395355,
+        0.091796875
+      ],
+      "balance_loss": 1.2337708473205566
+    },
+    {
+      "epoch": 51,
+      "validation_terminal_eig": 6.890748023986816,
+      "validation_n_unique_sequences": 65,
+      "mean_terminal_eig": 6.8166848458349705,
+      "mean_loss": -0.13820217549800873,
+      "elapsed_seconds": 8.985500846989453,
+      "router_entropy": 0.7113541960716248,
+      "expert_load": [
+        0.24570313096046448,
+        0.287109375,
+        0.375,
+        0.09218750149011612
+      ],
+      "balance_loss": 1.2402312755584717
+    },
+    {
+      "epoch": 52,
+      "validation_terminal_eig": 6.879992485046387,
+      "validation_n_unique_sequences": 52,
+      "mean_terminal_eig": 6.829307189211249,
+      "mean_loss": -0.1405704841017723,
+      "elapsed_seconds": 9.153614666080102,
+      "router_entropy": 0.7243925929069519,
+      "expert_load": [
+        0.22929687798023224,
+        0.29375001788139343,
+        0.37890625,
+        0.09804687649011612
+      ],
+      "balance_loss": 1.2401487827301025
+    },
+    {
+      "epoch": 53,
+      "validation_terminal_eig": 6.873326301574707,
+      "validation_n_unique_sequences": 63,
+      "mean_terminal_eig": 6.840339818969369,
+      "mean_loss": -0.13441010564565659,
+      "elapsed_seconds": 9.322367683053017,
+      "router_entropy": 0.7122218012809753,
+      "expert_load": [
+        0.23671875894069672,
+        0.2632812559604645,
+        0.39140626788139343,
+        0.10859375447034836
+      ],
+      "balance_loss": 1.2663853168487549
+    },
+    {
+      "epoch": 54,
+      "validation_terminal_eig": 6.883124351501465,
+      "validation_n_unique_sequences": 56,
+      "mean_terminal_eig": 6.827818582765758,
+      "mean_loss": -0.1388813778758049,
+      "elapsed_seconds": 9.49003014410846,
+      "router_entropy": 0.710405170917511,
+      "expert_load": [
+        0.20351563394069672,
+        0.27656251192092896,
+        0.40625,
+        0.11367187649011612
+      ],
+      "balance_loss": 1.2988418340682983
+    },
+    {
+      "epoch": 55,
+      "validation_terminal_eig": 6.883956432342529,
+      "validation_n_unique_sequences": 53,
+      "mean_terminal_eig": 6.836224125698209,
+      "mean_loss": -0.13407199084758759,
+      "elapsed_seconds": 9.658581487135962,
+      "router_entropy": 0.680459201335907,
+      "expert_load": [
+        0.18515625596046448,
+        0.2906250059604645,
+        0.42070314288139343,
+        0.103515625
+      ],
+      "balance_loss": 1.3606698513031006
+    },
+    {
+      "epoch": 56,
+      "validation_terminal_eig": 6.895439624786377,
+      "validation_n_unique_sequences": 43,
+      "mean_terminal_eig": 6.835374593734741,
+      "mean_loss": -0.13548876345157623,
+      "elapsed_seconds": 9.8270768111106,
+      "router_entropy": 0.6479124426841736,
+      "expert_load": [
+        0.17812500894069672,
+        0.30078125,
+        0.41484376788139343,
+        0.10625000298023224
+      ],
+      "balance_loss": 1.3543466329574585
+    },
+    {
+      "epoch": 57,
+      "validation_terminal_eig": 6.897004127502441,
+      "validation_n_unique_sequences": 55,
+      "mean_terminal_eig": 6.852999306283891,
+      "mean_loss": -0.13427063822746277,
+      "elapsed_seconds": 9.995464391075075,
+      "router_entropy": 0.6953612565994263,
+      "expert_load": [
+        0.18437500298023224,
+        0.28125,
+        0.41132813692092896,
+        0.123046875
+      ],
+      "balance_loss": 1.3233968019485474
+    },
+    {
+      "epoch": 58,
+      "validation_terminal_eig": 6.894107341766357,
+      "validation_n_unique_sequences": 53,
+      "mean_terminal_eig": 6.835486643947661,
+      "mean_loss": -0.1383042335510254,
+      "elapsed_seconds": 10.164180129999295,
+      "router_entropy": 0.7200049757957458,
+      "expert_load": [
+        0.18710938096046448,
+        0.28242188692092896,
+        0.37968751788139343,
+        0.15078125894069672
+      ],
+      "balance_loss": 1.234612226486206
+    },
+    {
+      "epoch": 59,
+      "validation_terminal_eig": 6.8814191818237305,
+      "validation_n_unique_sequences": 45,
+      "mean_terminal_eig": 6.840724227949977,
+      "mean_loss": -0.14606763422489166,
+      "elapsed_seconds": 10.332991278963163,
+      "router_entropy": 0.7220470309257507,
+      "expert_load": [
+        0.205078125,
+        0.26250001788139343,
+        0.3667968809604645,
+        0.16562500596046448
+      ],
+      "balance_loss": 1.199568510055542
+    },
+    {
+      "epoch": 60,
+      "validation_terminal_eig": 6.887472629547119,
+      "validation_n_unique_sequences": 53,
+      "mean_terminal_eig": 6.8110682079568505,
+      "mean_loss": -0.1397564932703972,
+      "elapsed_seconds": 10.501408582087606,
+      "router_entropy": 0.7074009776115417,
+      "expert_load": [
+        0.20742188394069672,
+        0.28398439288139343,
+        0.3714843690395355,
+        0.13710938394069672
+      ],
+      "balance_loss": 1.2138597965240479
+    },
+    {
+      "epoch": 61,
+      "validation_terminal_eig": 6.89206075668335,
+      "validation_n_unique_sequences": 47,
+      "mean_terminal_eig": 6.847573082894087,
+      "mean_loss": -0.1392814964056015,
+      "elapsed_seconds": 10.669901752145961,
+      "router_entropy": 0.7168680429458618,
+      "expert_load": [
+        0.189453125,
+        0.2679687440395355,
+        0.37812501192092896,
+        0.16445313394069672
+      ],
+      "balance_loss": 1.227789044380188
+    },
+    {
+      "epoch": 62,
+      "validation_terminal_eig": 6.893005847930908,
+      "validation_n_unique_sequences": 45,
+      "mean_terminal_eig": 6.832275162450969,
+      "mean_loss": -0.14054840058088303,
+      "elapsed_seconds": 10.839061188977212,
+      "router_entropy": 0.6896129846572876,
+      "expert_load": [
+        0.16171875596046448,
+        0.2933593690395355,
+        0.396484375,
+        0.1484375
+      ],
+      "balance_loss": 1.29296875
+    },
+    {
+      "epoch": 63,
+      "validation_terminal_eig": 6.887561321258545,
+      "validation_n_unique_sequences": 50,
+      "mean_terminal_eig": 6.840919634327292,
+      "mean_loss": -0.13632193207740784,
+      "elapsed_seconds": 11.007613430032507,
+      "router_entropy": 0.6497623324394226,
+      "expert_load": [
+        0.134765625,
+        0.31523439288139343,
+        0.4164062440395355,
+        0.13359375298023224
+      ],
+      "balance_loss": 1.3730472326278687
+    },
+    {
+      "epoch": 64,
+      "validation_terminal_eig": 6.8838911056518555,
+      "validation_n_unique_sequences": 43,
+      "mean_terminal_eig": 6.861123504117131,
+      "mean_loss": -0.1340557411313057,
+      "elapsed_seconds": 11.176429293118417,
+      "router_entropy": 0.6777405738830566,
+      "expert_load": [
+        0.13828125596046448,
+        0.32148438692092896,
+        0.4058593809604645,
+        0.13437500596046448
+      ],
+      "balance_loss": 1.335540771484375
+    },
+    {
+      "epoch": 65,
+      "validation_terminal_eig": 6.883305549621582,
+      "validation_n_unique_sequences": 52,
+      "mean_terminal_eig": 6.82013077288866,
+      "mean_loss": -0.13409960269927979,
+      "elapsed_seconds": 11.344946036115289,
+      "router_entropy": 0.6946267485618591,
+      "expert_load": [
+        0.16093750298023224,
+        0.32539063692092896,
+        0.38007813692092896,
+        0.13359375298023224
+      ],
+      "balance_loss": 1.2505155801773071
+    },
+    {
+      "epoch": 66,
+      "validation_terminal_eig": 6.879926681518555,
+      "validation_n_unique_sequences": 43,
+      "mean_terminal_eig": 6.8258925238624215,
+      "mean_loss": -0.13966252654790878,
+      "elapsed_seconds": 11.51283320505172,
+      "router_entropy": 0.7270911931991577,
+      "expert_load": [
+        0.13828125596046448,
+        0.31562501192092896,
+        0.373046875,
+        0.17304687201976776
+      ],
+      "balance_loss": 1.217747688293457
+    },
+    {
+      "epoch": 67,
+      "validation_terminal_eig": 6.895617485046387,
+      "validation_n_unique_sequences": 39,
+      "mean_terminal_eig": 6.8189722169190645,
+      "mean_loss": -0.13760951906442642,
+      "elapsed_seconds": 11.681000533048064,
+      "router_entropy": 0.7305658459663391,
+      "expert_load": [
+        0.10039062798023224,
+        0.35859376192092896,
+        0.37968751788139343,
+        0.16132812201976776
+      ],
+      "balance_loss": 1.2537095546722412
+    },
+    {
+      "epoch": 68,
+      "validation_terminal_eig": 6.88642692565918,
+      "validation_n_unique_sequences": 39,
+      "mean_terminal_eig": 6.850678062066436,
+      "mean_loss": -0.13934650272130966,
+      "elapsed_seconds": 11.849400557111949,
+      "router_entropy": 0.7519823312759399,
+      "expert_load": [
+        0.10546875,
+        0.34882813692092896,
+        0.3824218809604645,
+        0.16328124701976776
+      ],
+      "balance_loss": 1.2442418336868286
+    },
+    {
+      "epoch": 69,
+      "validation_terminal_eig": 6.8906025886535645,
+      "validation_n_unique_sequences": 47,
+      "mean_terminal_eig": 6.8391127567738295,
+      "mean_loss": -0.13443569093942642,
+      "elapsed_seconds": 12.017568232025951,
+      "router_entropy": 0.7735603451728821,
+      "expert_load": [
+        0.10078125447034836,
+        0.36835938692092896,
+        0.37578126788139343,
+        0.15507812798023224
+      ],
+      "balance_loss": 1.2344030141830444
+    },
+    {
+      "epoch": 70,
+      "validation_terminal_eig": 6.895848274230957,
+      "validation_n_unique_sequences": 37,
+      "mean_terminal_eig": 6.840216865763068,
+      "mean_loss": -0.1382753700017929,
+      "elapsed_seconds": 12.185520365135744,
+      "router_entropy": 0.7941969037055969,
+      "expert_load": [
+        0.13828125596046448,
+        0.3285156190395355,
+        0.33984375,
+        0.193359375
+      ],
+      "balance_loss": 1.1252535581588745
+    },
+    {
+      "epoch": 71,
+      "validation_terminal_eig": 6.886355400085449,
+      "validation_n_unique_sequences": 44,
+      "mean_terminal_eig": 6.802783776074648,
+      "mean_loss": -0.13871312886476517,
+      "elapsed_seconds": 12.353636472020298,
+      "router_entropy": 0.7939483523368835,
+      "expert_load": [
+        0.14218750596046448,
+        0.32421875,
+        0.3335937559604645,
+        0.20000000298023224
+      ],
+      "balance_loss": 1.108758568763733
+    },
+    {
+      "epoch": 72,
+      "validation_terminal_eig": 6.882139205932617,
+      "validation_n_unique_sequences": 39,
+      "mean_terminal_eig": 6.823781977407634,
+      "mean_loss": -0.1393098086118698,
+      "elapsed_seconds": 12.52214672905393,
+      "router_entropy": 0.7995697259902954,
+      "expert_load": [
+        0.13671875,
+        0.29804688692092896,
+        0.33476564288139343,
+        0.23046875
+      ],
+      "balance_loss": 1.112846851348877
+    },
+    {
+      "epoch": 73,
+      "validation_terminal_eig": 6.8912272453308105,
+      "validation_n_unique_sequences": 33,
+      "mean_terminal_eig": 6.816531893797219,
+      "mean_loss": -0.14369387179613113,
+      "elapsed_seconds": 12.689880650956184,
+      "router_entropy": 0.7950929999351501,
+      "expert_load": [
+        0.12187500298023224,
+        0.2972656190395355,
+        0.3433593809604645,
+        0.23749999701976776
+      ],
+      "balance_loss": 1.1424071788787842
+    },
+    {
+      "epoch": 74,
+      "validation_terminal_eig": 6.888563632965088,
+      "validation_n_unique_sequences": 27,
+      "mean_terminal_eig": 6.824570066295564,
+      "mean_loss": -0.14371543377637863,
+      "elapsed_seconds": 12.858108883956447,
+      "router_entropy": 0.7995421290397644,
+      "expert_load": [
+        0.11953125149011612,
+        0.28593751788139343,
+        0.3402343690395355,
+        0.2542968690395355
+      ],
+      "balance_loss": 1.1369270086288452
+    },
+    {
+      "epoch": 75,
+      "validation_terminal_eig": 6.894084930419922,
+      "validation_n_unique_sequences": 41,
+      "mean_terminal_eig": 6.813364160247147,
+      "mean_loss": -0.14488229155540466,
+      "elapsed_seconds": 13.026495474157855,
+      "router_entropy": 0.8080393671989441,
+      "expert_load": [
+        0.12421875447034836,
+        0.30195313692092896,
+        0.3238281309604645,
+        0.25
+      ],
+      "balance_loss": 1.106792688369751
+    },
+    {
+      "epoch": 76,
+      "validation_terminal_eig": 6.867583751678467,
+      "validation_n_unique_sequences": 43,
+      "mean_terminal_eig": 6.813609544187784,
+      "mean_loss": -0.14509478956460953,
+      "elapsed_seconds": 13.194461192004383,
+      "router_entropy": 0.8028151392936707,
+      "expert_load": [
+        0.12421875447034836,
+        0.296875,
+        0.3265624940395355,
+        0.2523437440395355
+      ],
+      "balance_loss": 1.1153138875961304
+    },
+    {
+      "epoch": 77,
+      "validation_terminal_eig": 6.88197135925293,
+      "validation_n_unique_sequences": 42,
+      "mean_terminal_eig": 6.8466011034324765,
+      "mean_loss": -0.13973233848810196,
+      "elapsed_seconds": 13.362353983102366,
+      "router_entropy": 0.7639374136924744,
+      "expert_load": [
+        0.09101562947034836,
+        0.328125,
+        0.3550781309604645,
+        0.22578124701976776
+      ],
+      "balance_loss": 1.1879640817642212
+    },
+    {
+      "epoch": 78,
+      "validation_terminal_eig": 6.8785600662231445,
+      "validation_n_unique_sequences": 45,
+      "mean_terminal_eig": 6.839211429469287,
+      "mean_loss": -0.1395014524459839,
+      "elapsed_seconds": 13.53077489999123,
+      "router_entropy": 0.7570378184318542,
+      "expert_load": [
+        0.111328125,
+        0.33984375,
+        0.34648439288139343,
+        0.20234374701976776
+      ],
+      "balance_loss": 1.1731677055358887
+    },
+    {
+      "epoch": 79,
+      "validation_terminal_eig": 6.870305061340332,
+      "validation_n_unique_sequences": 46,
+      "mean_terminal_eig": 6.831854439340532,
+      "mean_loss": -0.14325245469808578,
+      "elapsed_seconds": 13.69862122205086,
+      "router_entropy": 0.7417882084846497,
+      "expert_load": [
+        0.11679687350988388,
+        0.34765625,
+        0.3363281190395355,
+        0.19921875
+      ],
+      "balance_loss": 1.1526628732681274
+    },
+    {
+      "epoch": 80,
+      "validation_terminal_eig": 6.888077735900879,
+      "validation_n_unique_sequences": 37,
+      "mean_terminal_eig": 6.83120293635875,
+      "mean_loss": -0.13970017433166504,
+      "elapsed_seconds": 13.86657747393474,
+      "router_entropy": 0.7214442491531372,
+      "expert_load": [
+        0.14218750596046448,
+        0.3433593809604645,
+        0.3285156190395355,
+        0.18593750894069672
+      ],
+      "balance_loss": 1.1316680908203125
+    },
+    {
+      "epoch": 81,
+      "validation_terminal_eig": 6.896466255187988,
+      "validation_n_unique_sequences": 37,
+      "mean_terminal_eig": 6.829698845744133,
+      "mean_loss": -0.13959944248199463,
+      "elapsed_seconds": 14.035786055028439,
+      "router_entropy": 0.7074458599090576,
+      "expert_load": [
+        0.16171875596046448,
+        0.32500001788139343,
+        0.3359375,
+        0.17734375596046448
+      ],
+      "balance_loss": 1.1446388959884644
+    },
+    {
+      "epoch": 82,
+      "validation_terminal_eig": 6.888542175292969,
+      "validation_n_unique_sequences": 38,
+      "mean_terminal_eig": 6.83629833906889,
+      "mean_loss": -0.1352289691567421,
+      "elapsed_seconds": 14.202653971035033,
+      "router_entropy": 0.6439678072929382,
+      "expert_load": [
+        0.10234375298023224,
+        0.36835938692092896,
+        0.35468751192092896,
+        0.17460937798023224
+      ],
+      "balance_loss": 1.2158472537994385
+    },
+    {
+      "epoch": 83,
+      "validation_terminal_eig": 6.877875328063965,
+      "validation_n_unique_sequences": 30,
+      "mean_terminal_eig": 6.841112120077014,
+      "mean_loss": -0.13571538031101227,
+      "elapsed_seconds": 14.369979975977913,
+      "router_entropy": 0.6391167044639587,
+      "expert_load": [
+        0.109375,
+        0.3515625,
+        0.3472656309604645,
+        0.19179688394069672
+      ],
+      "balance_loss": 1.1881649494171143
+    },
+    {
+      "epoch": 84,
+      "validation_terminal_eig": 6.882373809814453,
+      "validation_n_unique_sequences": 30,
+      "mean_terminal_eig": 6.82597759924829,
+      "mean_loss": -0.1427837684750557,
+      "elapsed_seconds": 14.537989430129528,
+      "router_entropy": 0.6226264834403992,
+      "expert_load": [
+        0.13125000894069672,
+        0.31914064288139343,
+        0.3460937440395355,
+        0.20351563394069672
+      ],
+      "balance_loss": 1.1802711486816406
+    },
+    {
+      "epoch": 85,
+      "validation_terminal_eig": 6.8749213218688965,
+      "validation_n_unique_sequences": 39,
+      "mean_terminal_eig": 6.84128403943032,
+      "mean_loss": -0.1396975964307785,
+      "elapsed_seconds": 14.705226212041453,
+      "router_entropy": 0.6284818053245544,
+      "expert_load": [
+        0.14335937798023224,
+        0.31640625,
+        0.349609375,
+        0.19062499701976776
+      ],
+      "balance_loss": 1.1814169883728027
+    },
+    {
+      "epoch": 86,
+      "validation_terminal_eig": 6.87706995010376,
+      "validation_n_unique_sequences": 38,
+      "mean_terminal_eig": 6.832760077901185,
+      "mean_loss": -0.14256786555051804,
+      "elapsed_seconds": 14.872204778017476,
+      "router_entropy": 0.6368604898452759,
+      "expert_load": [
+        0.1640625,
+        0.30937501788139343,
+        0.3433593809604645,
+        0.18320313096046448
+      ],
+      "balance_loss": 1.1620090007781982
+    },
+    {
+      "epoch": 87,
+      "validation_terminal_eig": 6.884489059448242,
+      "validation_n_unique_sequences": 51,
+      "mean_terminal_eig": 6.807674195617437,
+      "mean_loss": -0.14692744612693787,
+      "elapsed_seconds": 15.0404743750114,
+      "router_entropy": 0.6698768734931946,
+      "expert_load": [
+        0.17148438096046448,
+        0.306640625,
+        0.33710938692092896,
+        0.18476562201976776
+      ],
+      "balance_loss": 1.1398533582687378
+    },
+    {
+      "epoch": 88,
+      "validation_terminal_eig": 6.884083271026611,
+      "validation_n_unique_sequences": 54,
+      "mean_terminal_eig": 6.845437538810074,
+      "mean_loss": -0.143408864736557,
+      "elapsed_seconds": 15.20874536712654,
+      "router_entropy": 0.705848217010498,
+      "expert_load": [
+        0.17578125,
+        0.3089843690395355,
+        0.318359375,
+        0.19687500596046448
+      ],
+      "balance_loss": 1.0958092212677002
+    },
+    {
+      "epoch": 89,
+      "validation_terminal_eig": 6.869326591491699,
+      "validation_n_unique_sequences": 51,
+      "mean_terminal_eig": 6.859622119925916,
+      "mean_loss": -0.14868251234292984,
+      "elapsed_seconds": 15.37724803108722,
+      "router_entropy": 0.7173484563827515,
+      "expert_load": [
+        0.16562500596046448,
+        0.318359375,
+        0.3199218809604645,
+        0.19609375298023224
+      ],
+      "balance_loss": 1.0999772548675537
+    },
+    {
+      "epoch": 90,
+      "validation_terminal_eig": 6.889094352722168,
+      "validation_n_unique_sequences": 43,
+      "mean_terminal_eig": 6.838854660280049,
+      "mean_loss": -0.14217621833086014,
+      "elapsed_seconds": 15.546317660948262,
+      "router_entropy": 0.7274298667907715,
+      "expert_load": [
+        0.14101563394069672,
+        0.3492187559604645,
+        0.30546876788139343,
+        0.20429687201976776
+      ],
+      "balance_loss": 1.0871644020080566
+    },
+    {
+      "epoch": 91,
+      "validation_terminal_eig": 6.889909744262695,
+      "validation_n_unique_sequences": 38,
+      "mean_terminal_eig": 6.857002221047878,
+      "mean_loss": -0.14267003536224365,
+      "elapsed_seconds": 15.714561413042247,
+      "router_entropy": 0.7300676107406616,
+      "expert_load": [
+        0.16289062798023224,
+        0.3265624940395355,
+        0.3050781190395355,
+        0.20546875894069672
+      ],
+      "balance_loss": 1.0734971761703491
+    },
+    {
+      "epoch": 92,
+      "validation_terminal_eig": 6.8786516189575195,
+      "validation_n_unique_sequences": 25,
+      "mean_terminal_eig": 6.829008096829057,
+      "mean_loss": -0.14401021599769592,
+      "elapsed_seconds": 15.88303469796665,
+      "router_entropy": 0.7095381617546082,
+      "expert_load": [
+        0.17070312798023224,
+        0.32304689288139343,
+        0.30546876788139343,
+        0.20078125596046448
+      ],
+      "balance_loss": 1.0685322284698486
+    },
+    {
+      "epoch": 93,
+      "validation_terminal_eig": 6.885088920593262,
+      "validation_n_unique_sequences": 40,
+      "mean_terminal_eig": 6.824631116352975,
+      "mean_loss": -0.14395581185817719,
+      "elapsed_seconds": 16.052155568962917,
+      "router_entropy": 0.6780579090118408,
+      "expert_load": [
+        0.16015625,
+        0.32890626788139343,
+        0.31757813692092896,
+        0.193359375
+      ],
+      "balance_loss": 1.0959718227386475
+    },
+    {
+      "epoch": 94,
+      "validation_terminal_eig": 6.8743743896484375,
+      "validation_n_unique_sequences": 44,
+      "mean_terminal_eig": 6.834636367857456,
+      "mean_loss": -0.14281366765499115,
+      "elapsed_seconds": 16.220792663050815,
+      "router_entropy": 0.6568872332572937,
+      "expert_load": [
+        0.17148438096046448,
+        0.3089843690395355,
+        0.31328126788139343,
+        0.20624999701976776
+      ],
+      "balance_loss": 1.0883386135101318
+    },
+    {
+      "epoch": 95,
+      "validation_terminal_eig": 6.882765769958496,
+      "validation_n_unique_sequences": 49,
+      "mean_terminal_eig": 6.835602317005396,
+      "mean_loss": -0.1386977583169937,
+      "elapsed_seconds": 16.389741071965545,
+      "router_entropy": 0.6498393416404724,
+      "expert_load": [
+        0.205078125,
+        0.2679687440395355,
+        0.31132814288139343,
+        0.21562500298023224
+      ],
+      "balance_loss": 1.0823237895965576
+    },
+    {
+      "epoch": 96,
+      "validation_terminal_eig": 6.872062683105469,
+      "validation_n_unique_sequences": 49,
+      "mean_terminal_eig": 6.834130317904055,
+      "mean_loss": -0.14131228625774384,
+      "elapsed_seconds": 16.558407119940966,
+      "router_entropy": 0.6401218771934509,
+      "expert_load": [
+        0.19843749701976776,
+        0.2640624940395355,
+        0.3218750059604645,
+        0.21562500298023224
+      ],
+      "balance_loss": 1.1045732498168945
+    },
+    {
+      "epoch": 97,
+      "validation_terminal_eig": 6.866755485534668,
+      "validation_n_unique_sequences": 49,
+      "mean_terminal_eig": 6.822253777645528,
+      "mean_loss": -0.14098674058914185,
+      "elapsed_seconds": 16.72726512211375,
+      "router_entropy": 0.6645427346229553,
+      "expert_load": [
+        0.208984375,
+        0.2789062559604645,
+        0.33085939288139343,
+        0.18125000596046448
+      ],
+      "balance_loss": 1.1153700351715088
+    },
+    {
+      "epoch": 98,
+      "validation_terminal_eig": 6.8629150390625,
+      "validation_n_unique_sequences": 67,
+      "mean_terminal_eig": 6.839692184701562,
+      "mean_loss": -0.1403450071811676,
+      "elapsed_seconds": 16.896156535949558,
+      "router_entropy": 0.6793779730796814,
+      "expert_load": [
+        0.25273439288139343,
+        0.24140624701976776,
+        0.33515626192092896,
+        0.17070312798023224
+      ],
+      "balance_loss": 1.121322512626648
+    },
+    {
+      "epoch": 99,
+      "validation_terminal_eig": 6.8725385665893555,
+      "validation_n_unique_sequences": 68,
+      "mean_terminal_eig": 6.820886920206249,
+      "mean_loss": -0.14541001617908478,
+      "elapsed_seconds": 17.064652925124392,
+      "router_entropy": 0.7196125388145447,
+      "expert_load": [
+        0.24062500894069672,
+        0.2718749940395355,
+        0.3160156309604645,
+        0.17148438096046448
+      ],
+      "balance_loss": 1.0796282291412354
+    },
+    {
+      "epoch": 100,
+      "validation_terminal_eig": 6.865321159362793,
+      "validation_n_unique_sequences": 46,
+      "mean_terminal_eig": 6.827497170306742,
+      "mean_loss": -0.1420644298195839,
+      "elapsed_seconds": 17.232426779111847,
+      "router_entropy": 0.745018482208252,
+      "expert_load": [
+        0.22187499701976776,
+        0.29296875,
+        0.32500001788139343,
+        0.16015625
+      ],
+      "balance_loss": 1.0976572036743164
+    },
+    {
+      "epoch": 101,
+      "validation_terminal_eig": 6.882830619812012,
+      "validation_n_unique_sequences": 51,
+      "mean_terminal_eig": 6.834638838656247,
+      "mean_loss": -0.1461382880806923,
+      "elapsed_seconds": 17.400822980096564,
+      "router_entropy": 0.7407737970352173,
+      "expert_load": [
+        0.24375000596046448,
+        0.2730468809604645,
+        0.322265625,
+        0.16093750298023224
+      ],
+      "balance_loss": 1.0978267192840576
+    },
+    {
+      "epoch": 102,
+      "validation_terminal_eig": 6.878477096557617,
+      "validation_n_unique_sequences": 58,
+      "mean_terminal_eig": 6.8103174939751625,
+      "mean_loss": -0.14360571652650833,
+      "elapsed_seconds": 17.568953183013946,
+      "router_entropy": 0.7146355509757996,
+      "expert_load": [
+        0.23085938394069672,
+        0.2777343690395355,
+        0.33867189288139343,
+        0.15273438394069672
+      ],
+      "balance_loss": 1.1269969940185547
+    },
+    {
+      "epoch": 103,
+      "validation_terminal_eig": 6.88059139251709,
+      "validation_n_unique_sequences": 50,
+      "mean_terminal_eig": 6.847397727891803,
+      "mean_loss": -0.14476635307073593,
+      "elapsed_seconds": 17.73676416510716,
+      "router_entropy": 0.7219536304473877,
+      "expert_load": [
+        0.22109375894069672,
+        0.283203125,
+        0.34687501192092896,
+        0.14882813394069672
+      ],
+      "balance_loss": 1.1482949256896973
+    },
+    {
+      "epoch": 104,
+      "validation_terminal_eig": 6.882829666137695,
+      "validation_n_unique_sequences": 47,
+      "mean_terminal_eig": 6.835900677368045,
+      "mean_loss": -0.1482330784201622,
+      "elapsed_seconds": 17.90524257509969,
+      "router_entropy": 0.7324568033218384,
+      "expert_load": [
+        0.24453125894069672,
+        0.2574218809604645,
+        0.3414062559604645,
+        0.15664063394069672
+      ],
+      "balance_loss": 1.1345877647399902
+    },
+    {
+      "epoch": 105,
+      "validation_terminal_eig": 6.8786139488220215,
+      "validation_n_unique_sequences": 53,
+      "mean_terminal_eig": 6.824170423671603,
+      "mean_loss": -0.1471039280295372,
+      "elapsed_seconds": 18.073426024988294,
+      "router_entropy": 0.7232958674430847,
+      "expert_load": [
+        0.2718749940395355,
+        0.22773437201976776,
+        0.33125001192092896,
+        0.16914062201976776
+      ],
+      "balance_loss": 1.1188634634017944
+    },
+    {
+      "epoch": 106,
+      "validation_terminal_eig": 6.882267475128174,
+      "validation_n_unique_sequences": 62,
+      "mean_terminal_eig": 6.832222557626665,
+      "mean_loss": -0.1495051309466362,
+      "elapsed_seconds": 18.24155451892875,
+      "router_entropy": 0.7466954588890076,
+      "expert_load": [
+        0.27070313692092896,
+        0.228515625,
+        0.3296875059604645,
+        0.17109374701976776
+      ],
+      "balance_loss": 1.1156179904937744
+    },
+    {
+      "epoch": 107,
+      "validation_terminal_eig": 6.883115291595459,
+      "validation_n_unique_sequences": 46,
+      "mean_terminal_eig": 6.830127013847232,
+      "mean_loss": -0.14709241688251495,
+      "elapsed_seconds": 18.40936199412681,
+      "router_entropy": 0.7788733839988708,
+      "expert_load": [
+        0.275390625,
+        0.23085938394069672,
+        0.34062501788139343,
+        0.15312500298023224
+      ],
+      "balance_loss": 1.1358962059020996
+    },
+    {
+      "epoch": 108,
+      "validation_terminal_eig": 6.881814956665039,
+      "validation_n_unique_sequences": 53,
+      "mean_terminal_eig": 6.831417642533779,
+      "mean_loss": -0.1482487916946411,
+      "elapsed_seconds": 18.577752721961588,
+      "router_entropy": 0.7696377635002136,
+      "expert_load": [
+        0.26093751192092896,
+        0.23710937798023224,
+        0.34765625,
+        0.154296875
+      ],
+      "balance_loss": 1.1477619409561157
+    },
+    {
+      "epoch": 109,
+      "validation_terminal_eig": 6.8869218826293945,
+      "validation_n_unique_sequences": 58,
+      "mean_terminal_eig": 6.834513922221959,
+      "mean_loss": -0.14925354719161987,
+      "elapsed_seconds": 18.74630590202287,
+      "router_entropy": 0.7659485936164856,
+      "expert_load": [
+        0.23867188394069672,
+        0.23867188394069672,
+        0.33671876788139343,
+        0.18593750894069672
+      ],
+      "balance_loss": 1.1185898780822754
+    },
+    {
+      "epoch": 110,
+      "validation_terminal_eig": 6.88516902923584,
+      "validation_n_unique_sequences": 48,
+      "mean_terminal_eig": 6.8454604260623455,
+      "mean_loss": -0.13960900157690048,
+      "elapsed_seconds": 18.91493796603754,
+      "router_entropy": 0.720300555229187,
+      "expert_load": [
+        0.22929687798023224,
+        0.248046875,
+        0.34492188692092896,
+        0.177734375
+      ],
+      "balance_loss": 1.145124912261963
+    },
+    {
+      "epoch": 111,
+      "validation_terminal_eig": 6.886198997497559,
+      "validation_n_unique_sequences": 45,
+      "mean_terminal_eig": 6.838684590533376,
+      "mean_loss": -0.14320294559001923,
+      "elapsed_seconds": 19.08099414105527,
+      "router_entropy": 0.6933243870735168,
+      "expert_load": [
+        0.224609375,
+        0.25312501192092896,
+        0.3499999940395355,
+        0.17226563394069672
+      ],
+      "balance_loss": 1.1596587896347046
+    },
+    {
+      "epoch": 112,
+      "validation_terminal_eig": 6.882376670837402,
+      "validation_n_unique_sequences": 47,
+      "mean_terminal_eig": 6.83458433765918,
+      "mean_loss": -0.1387818679213524,
+      "elapsed_seconds": 19.245519272983074,
+      "router_entropy": 0.7084470391273499,
+      "expert_load": [
+        0.24062500894069672,
+        0.23164062201976776,
+        0.33710938692092896,
+        0.19062499701976776
+      ],
+      "balance_loss": 1.1388413906097412
+    },
+    {
+      "epoch": 113,
+      "validation_terminal_eig": 6.873673439025879,
+      "validation_n_unique_sequences": 45,
+      "mean_terminal_eig": 6.85180052369833,
+      "mean_loss": -0.1445942223072052,
+      "elapsed_seconds": 19.409809336066246,
+      "router_entropy": 0.735723614692688,
+      "expert_load": [
+        0.23593750596046448,
+        0.21640625596046448,
+        0.341796875,
+        0.20585937798023224
+      ],
+      "balance_loss": 1.152809739112854
+    },
+    {
+      "epoch": 114,
+      "validation_terminal_eig": 6.887540817260742,
+      "validation_n_unique_sequences": 52,
+      "mean_terminal_eig": 6.8240362564101815,
+      "mean_loss": -0.14161556214094162,
+      "elapsed_seconds": 19.57422543806024,
+      "router_entropy": 0.7521657347679138,
+      "expert_load": [
+        0.21367187798023224,
+        0.232421875,
+        0.34648439288139343,
+        0.20742188394069672
+      ],
+      "balance_loss": 1.156479835510254
+    },
+    {
+      "epoch": 115,
+      "validation_terminal_eig": 6.879351615905762,
+      "validation_n_unique_sequences": 51,
+      "mean_terminal_eig": 6.848776335828006,
+      "mean_loss": -0.14153476059436798,
+      "elapsed_seconds": 19.73900173814036,
+      "router_entropy": 0.7462688684463501,
+      "expert_load": [
+        0.20703125,
+        0.2265625,
+        0.3570312559604645,
+        0.20937500894069672
+      ],
+      "balance_loss": 1.1871922016143799
+    },
+    {
+      "epoch": 116,
+      "validation_terminal_eig": 6.879266738891602,
+      "validation_n_unique_sequences": 52,
+      "mean_terminal_eig": 6.831735776737332,
+      "mean_loss": -0.13946671038866043,
+      "elapsed_seconds": 19.90426577697508,
+      "router_entropy": 0.7637807130813599,
+      "expert_load": [
+        0.21132813394069672,
+        0.22578124701976776,
+        0.3515625,
+        0.21132813394069672
+      ],
+      "balance_loss": 1.1635777950286865
+    },
+    {
+      "epoch": 117,
+      "validation_terminal_eig": 6.88097620010376,
+      "validation_n_unique_sequences": 62,
+      "mean_terminal_eig": 6.842376863583922,
+      "mean_loss": -0.14403725415468216,
+      "elapsed_seconds": 20.068798115942627,
+      "router_entropy": 0.7383502125740051,
+      "expert_load": [
+        0.19921875,
+        0.21718750894069672,
+        0.34257814288139343,
+        0.24101562798023224
+      ],
+      "balance_loss": 1.1581252813339233
+    },
+    {
+      "epoch": 118,
+      "validation_terminal_eig": 6.872612953186035,
+      "validation_n_unique_sequences": 58,
+      "mean_terminal_eig": 6.832053478807211,
+      "mean_loss": -0.14804667979478836,
+      "elapsed_seconds": 20.23338296194561,
+      "router_entropy": 0.7372877597808838,
+      "expert_load": [
+        0.18125000596046448,
+        0.23007813096046448,
+        0.34101563692092896,
+        0.24765625596046448
+      ],
+      "balance_loss": 1.149864912033081
+    },
+    {
+      "epoch": 119,
+      "validation_terminal_eig": 6.887017250061035,
+      "validation_n_unique_sequences": 62,
+      "mean_terminal_eig": 6.823688612319529,
+      "mean_loss": -0.14110789448022842,
+      "elapsed_seconds": 20.398457650095224,
+      "router_entropy": 0.7198604941368103,
+      "expert_load": [
+        0.18203125894069672,
+        0.24609375,
+        0.35273438692092896,
+        0.21914063394069672
+      ],
+      "balance_loss": 1.17325758934021
+    },
+    {
+      "epoch": 120,
+      "validation_terminal_eig": 6.873680114746094,
+      "validation_n_unique_sequences": 65,
+      "mean_terminal_eig": 6.84866735059768,
+      "mean_loss": -0.14580383151769638,
+      "elapsed_seconds": 20.563079955987632,
+      "router_entropy": 0.7517223358154297,
+      "expert_load": [
+        0.20742188394069672,
+        0.22695313394069672,
+        0.3355468809604645,
+        0.23007813096046448
+      ],
+      "balance_loss": 1.1349246501922607
+    },
+    {
+      "epoch": 121,
+      "validation_terminal_eig": 6.87000036239624,
+      "validation_n_unique_sequences": 56,
+      "mean_terminal_eig": 6.8298673164099455,
+      "mean_loss": -0.1451093927025795,
+      "elapsed_seconds": 20.727462225127965,
+      "router_entropy": 0.7678993940353394,
+      "expert_load": [
+        0.19609375298023224,
+        0.22304688394069672,
+        0.3265624940395355,
+        0.2542968690395355
+      ],
+      "balance_loss": 1.1162974834442139
+    },
+    {
+      "epoch": 122,
+      "validation_terminal_eig": 6.888254642486572,
+      "validation_n_unique_sequences": 61,
+      "mean_terminal_eig": 6.840276886709034,
+      "mean_loss": -0.1418679729104042,
+      "elapsed_seconds": 20.891621910966933,
+      "router_entropy": 0.7873958945274353,
+      "expert_load": [
+        0.15898437798023224,
+        0.23671875894069672,
+        0.3226562440395355,
+        0.2816406190395355
+      ],
+      "balance_loss": 1.1218749284744263
+    },
+    {
+      "epoch": 123,
+      "validation_terminal_eig": 6.895244121551514,
+      "validation_n_unique_sequences": 54,
+      "mean_terminal_eig": 6.842590841464698,
+      "mean_loss": -0.1402508020401001,
+      "elapsed_seconds": 21.05875809211284,
+      "router_entropy": 0.7951218485832214,
+      "expert_load": [
+        0.16367188096046448,
+        0.22539062798023224,
+        0.3226562440395355,
+        0.28828126192092896
+      ],
+      "balance_loss": 1.1277179718017578
+    },
+    {
+      "epoch": 124,
+      "validation_terminal_eig": 6.886781692504883,
+      "validation_n_unique_sequences": 50,
+      "mean_terminal_eig": 6.842698983848095,
+      "mean_loss": -0.13549868017435074,
+      "elapsed_seconds": 21.22653393005021,
+      "router_entropy": 0.779059886932373,
+      "expert_load": [
+        0.18476562201976776,
+        0.2109375,
+        0.3050781190395355,
+        0.2992187440395355
+      ],
+      "balance_loss": 1.1068384647369385
+    },
+    {
+      "epoch": 125,
+      "validation_terminal_eig": 6.882963180541992,
+      "validation_n_unique_sequences": 55,
+      "mean_terminal_eig": 6.828228955157101,
+      "mean_loss": -0.12908995151519775,
+      "elapsed_seconds": 21.394545467104763,
+      "router_entropy": 0.7695562243461609,
+      "expert_load": [
+        0.1640625,
+        0.23671875894069672,
+        0.3324218690395355,
+        0.26679688692092896
+      ],
+      "balance_loss": 1.1278363466262817
+    },
+    {
+      "epoch": 126,
+      "validation_terminal_eig": 6.874408721923828,
+      "validation_n_unique_sequences": 60,
+      "mean_terminal_eig": 6.816744881682098,
+      "mean_loss": -0.13717828691005707,
+      "elapsed_seconds": 21.56403850298375,
+      "router_entropy": 0.786948025226593,
+      "expert_load": [
+        0.19179688394069672,
+        0.22968749701976776,
+        0.30000001192092896,
+        0.27851563692092896
+      ],
+      "balance_loss": 1.0728639364242554
+    },
+    {
+      "epoch": 127,
+      "validation_terminal_eig": 6.887239933013916,
+      "validation_n_unique_sequences": 46,
+      "mean_terminal_eig": 6.8362750401720405,
+      "mean_loss": -0.14398697763681412,
+      "elapsed_seconds": 21.7320600701496,
+      "router_entropy": 0.7669023871421814,
+      "expert_load": [
+        0.20468750596046448,
+        0.22109375894069672,
+        0.29414063692092896,
+        0.28007814288139343
+      ],
+      "balance_loss": 1.06963312625885
+    },
+    {
+      "epoch": 128,
+      "validation_terminal_eig": 6.88630485534668,
+      "validation_n_unique_sequences": 56,
+      "mean_terminal_eig": 6.816309657879174,
+      "mean_loss": -0.1455870345234871,
+      "elapsed_seconds": 21.90078559401445,
+      "router_entropy": 0.7973253130912781,
+      "expert_load": [
+        0.21250000596046448,
+        0.21992187201976776,
+        0.27734375,
+        0.29023438692092896
+      ],
+      "balance_loss": 1.047658920288086
+    },
+    {
+      "epoch": 129,
+      "validation_terminal_eig": 6.861052989959717,
+      "validation_n_unique_sequences": 69,
+      "mean_terminal_eig": 6.8331683073192835,
+      "mean_loss": -0.14024262875318527,
+      "elapsed_seconds": 22.069559148978442,
+      "router_entropy": 0.7986589074134827,
+      "expert_load": [
+        0.216796875,
+        0.22421875596046448,
+        0.2906250059604645,
+        0.26835939288139343
+      ],
+      "balance_loss": 1.058943271636963
+    },
+    {
+      "epoch": 130,
+      "validation_terminal_eig": 6.880315780639648,
+      "validation_n_unique_sequences": 62,
+      "mean_terminal_eig": 6.828108958899975,
+      "mean_loss": -0.1469380483031273,
+      "elapsed_seconds": 22.237902471097186,
+      "router_entropy": 0.8072547316551208,
+      "expert_load": [
+        0.20820312201976776,
+        0.23867188394069672,
+        0.322265625,
+        0.23085938394069672
+      ],
+      "balance_loss": 1.0980864763259888
+    },
+    {
+      "epoch": 131,
+      "validation_terminal_eig": 6.882153034210205,
+      "validation_n_unique_sequences": 79,
+      "mean_terminal_eig": 6.84864704683423,
+      "mean_loss": -0.1448180302977562,
+      "elapsed_seconds": 22.406546475132927,
+      "router_entropy": 0.8056753277778625,
+      "expert_load": [
+        0.17421875894069672,
+        0.28007814288139343,
+        0.34257814288139343,
+        0.203125
+      ],
+      "balance_loss": 1.1349077224731445
+    },
+    {
+      "epoch": 132,
+      "validation_terminal_eig": 6.8862457275390625,
+      "validation_n_unique_sequences": 89,
+      "mean_terminal_eig": 6.817408820614219,
+      "mean_loss": -0.14262916892766953,
+      "elapsed_seconds": 22.575460670981556,
+      "router_entropy": 0.7771214842796326,
+      "expert_load": [
+        0.19023437798023224,
+        0.27617189288139343,
+        0.3515625,
+        0.18203125894069672
+      ],
+      "balance_loss": 1.1581811904907227
+    },
+    {
+      "epoch": 133,
+      "validation_terminal_eig": 6.884857177734375,
+      "validation_n_unique_sequences": 74,
+      "mean_terminal_eig": 6.844158205203712,
+      "mean_loss": -0.14493703842163086,
+      "elapsed_seconds": 22.743979627033696,
+      "router_entropy": 0.7378897666931152,
+      "expert_load": [
+        0.19960938394069672,
+        0.2730468809604645,
+        0.37226563692092896,
+        0.15507812798023224
+      ],
+      "balance_loss": 1.2117066383361816
+    },
+    {
+      "epoch": 134,
+      "validation_terminal_eig": 6.88045597076416,
+      "validation_n_unique_sequences": 57,
+      "mean_terminal_eig": 6.847170911729336,
+      "mean_loss": -0.14450671523809433,
+      "elapsed_seconds": 22.912639419082552,
+      "router_entropy": 0.7401680946350098,
+      "expert_load": [
+        0.19882813096046448,
+        0.2613281309604645,
+        0.3558593690395355,
+        0.18398438394069672
+      ],
+      "balance_loss": 1.1721981763839722
+    },
+    {
+      "epoch": 135,
+      "validation_terminal_eig": 6.88191032409668,
+      "validation_n_unique_sequences": 54,
+      "mean_terminal_eig": 6.846814624965191,
+      "mean_loss": -0.1432366892695427,
+      "elapsed_seconds": 23.081121298018843,
+      "router_entropy": 0.7300242185592651,
+      "expert_load": [
+        0.18671874701976776,
+        0.25117188692092896,
+        0.34765625,
+        0.21445313096046448
+      ],
+      "balance_loss": 1.1620234251022339
+    },
+    {
+      "epoch": 136,
+      "validation_terminal_eig": 6.883959770202637,
+      "validation_n_unique_sequences": 48,
+      "mean_terminal_eig": 6.8390479208901525,
+      "mean_loss": -0.14934158325195312,
+      "elapsed_seconds": 23.249202240956947,
+      "router_entropy": 0.7402070760726929,
+      "expert_load": [
+        0.20742188394069672,
+        0.23867188394069672,
+        0.3304687440395355,
+        0.22343750298023224
+      ],
+      "balance_loss": 1.1235706806182861
+    },
+    {
+      "epoch": 137,
+      "validation_terminal_eig": 6.8864312171936035,
+      "validation_n_unique_sequences": 62,
+      "mean_terminal_eig": 6.820610351860523,
+      "mean_loss": -0.1449199840426445,
+      "elapsed_seconds": 23.418231192044914,
+      "router_entropy": 0.7368674278259277,
+      "expert_load": [
+        0.20390625298023224,
+        0.24492187798023224,
+        0.31640625,
+        0.23476563394069672
+      ],
+      "balance_loss": 1.096810221672058
+    },
+    {
+      "epoch": 138,
+      "validation_terminal_eig": 6.88715934753418,
+      "validation_n_unique_sequences": 58,
+      "mean_terminal_eig": 6.8431657906621695,
+      "mean_loss": -0.14749909192323685,
+      "elapsed_seconds": 23.58722679805942,
+      "router_entropy": 0.7503740191459656,
+      "expert_load": [
+        0.193359375,
+        0.25390625,
+        0.3238281309604645,
+        0.22890625894069672
+      ],
+      "balance_loss": 1.1087915897369385
+    },
+    {
+      "epoch": 139,
+      "validation_terminal_eig": 6.893226146697998,
+      "validation_n_unique_sequences": 52,
+      "mean_terminal_eig": 6.852667764760554,
+      "mean_loss": -0.14437738060951233,
+      "elapsed_seconds": 23.755433575017378,
+      "router_entropy": 0.7487086653709412,
+      "expert_load": [
+        0.19023437798023224,
+        0.2738281190395355,
+        0.34257814288139343,
+        0.193359375
+      ],
+      "balance_loss": 1.1424485445022583
+    },
+    {
+      "epoch": 140,
+      "validation_terminal_eig": 6.881659030914307,
+      "validation_n_unique_sequences": 48,
+      "mean_terminal_eig": 6.814523249864578,
+      "mean_loss": -0.1365935578942299,
+      "elapsed_seconds": 23.92439600196667,
+      "router_entropy": 0.7612394690513611,
+      "expert_load": [
+        0.18867187201976776,
+        0.2769531309604645,
+        0.33476564288139343,
+        0.19960938394069672
+      ],
+      "balance_loss": 1.1226224899291992
+    },
+    {
+      "epoch": 141,
+      "validation_terminal_eig": 6.880452632904053,
+      "validation_n_unique_sequences": 54,
+      "mean_terminal_eig": 6.826645956374705,
+      "mean_loss": -0.1440194994211197,
+      "elapsed_seconds": 24.093096747994423,
+      "router_entropy": 0.7509638667106628,
+      "expert_load": [
+        0.19609375298023224,
+        0.2699218690395355,
+        0.3433593809604645,
+        0.19062499701976776
+      ],
+      "balance_loss": 1.1413724422454834
+    },
+    {
+      "epoch": 142,
+      "validation_terminal_eig": 6.878818511962891,
+      "validation_n_unique_sequences": 51,
+      "mean_terminal_eig": 6.828202246688306,
+      "mean_loss": -0.1441243216395378,
+      "elapsed_seconds": 24.261777236126363,
+      "router_entropy": 0.7499457597732544,
+      "expert_load": [
+        0.19648437201976776,
+        0.28828126192092896,
+        0.3558593690395355,
+        0.15937499701976776
+      ],
+      "balance_loss": 1.1731247901916504
+    },
+    {
+      "epoch": 143,
+      "validation_terminal_eig": 6.886765003204346,
+      "validation_n_unique_sequences": 50,
+      "mean_terminal_eig": 6.832109019160271,
+      "mean_loss": -0.1388157680630684,
+      "elapsed_seconds": 24.430452388944104,
+      "router_entropy": 0.7365902066230774,
+      "expert_load": [
+        0.20156250894069672,
+        0.29609376192092896,
+        0.3812499940395355,
+        0.12109375
+      ],
+      "balance_loss": 1.2397311925888062
+    },
+    {
+      "epoch": 144,
+      "validation_terminal_eig": 6.888919830322266,
+      "validation_n_unique_sequences": 48,
+      "mean_terminal_eig": 6.834120390936732,
+      "mean_loss": -0.14015768468379974,
+      "elapsed_seconds": 24.599367873044685,
+      "router_entropy": 0.7264952063560486,
+      "expert_load": [
+        0.1953125,
+        0.31132814288139343,
+        0.37968751788139343,
+        0.11367187649011612
+      ],
+      "balance_loss": 1.2426036596298218
+    },
+    {
+      "epoch": 145,
+      "validation_terminal_eig": 6.898486137390137,
+      "validation_n_unique_sequences": 56,
+      "mean_terminal_eig": 6.842597595416009,
+      "mean_loss": -0.14362675696611404,
+      "elapsed_seconds": 24.76809485303238,
+      "router_entropy": 0.7290026545524597,
+      "expert_load": [
+        0.19765625894069672,
+        0.3109374940395355,
+        0.37421876192092896,
+        0.1171875
+      ],
+      "balance_loss": 1.2302048206329346
+    },
+    {
+      "epoch": 146,
+      "validation_terminal_eig": 6.886626243591309,
+      "validation_n_unique_sequences": 49,
+      "mean_terminal_eig": 6.831949428655207,
+      "mean_loss": -0.14873841404914856,
+      "elapsed_seconds": 24.93642340810038,
+      "router_entropy": 0.7553591132164001,
+      "expert_load": [
+        0.20156250894069672,
+        0.306640625,
+        0.37187501788139343,
+        0.11992187798023224
+      ],
+      "balance_loss": 1.218225359916687
+    },
+    {
+      "epoch": 147,
+      "validation_terminal_eig": 6.883974552154541,
+      "validation_n_unique_sequences": 51,
+      "mean_terminal_eig": 6.83014478161931,
+      "mean_loss": -0.1478879600763321,
+      "elapsed_seconds": 25.101438207086176,
+      "router_entropy": 0.7443788647651672,
+      "expert_load": [
+        0.16250000894069672,
+        0.33984375,
+        0.369140625,
+        0.12851563096046448
+      ],
+      "balance_loss": 1.2196024656295776
+    },
+    {
+      "epoch": 148,
+      "validation_terminal_eig": 6.882386207580566,
+      "validation_n_unique_sequences": 56,
+      "mean_terminal_eig": 6.826871434226632,
+      "mean_loss": -0.1412709727883339,
+      "elapsed_seconds": 25.2662634649314,
+      "router_entropy": 0.76821368932724,
+      "expert_load": [
+        0.15078125894069672,
+        0.3511718809604645,
+        0.35078126192092896,
+        0.14726562798023224
+      ],
+      "balance_loss": 1.1764730215072632
+    },
+    {
+      "epoch": 149,
+      "validation_terminal_eig": 6.8848443031311035,
+      "validation_n_unique_sequences": 43,
+      "mean_terminal_eig": 6.8586078602820635,
+      "mean_loss": -0.14239539206027985,
+      "elapsed_seconds": 25.43083548708819,
+      "router_entropy": 0.7699012160301208,
+      "expert_load": [
+        0.15898437798023224,
+        0.3511718809604645,
+        0.3421874940395355,
+        0.14765624701976776
+      ],
+      "balance_loss": 1.1585965156555176
+    },
+    {
+      "epoch": 150,
+      "validation_terminal_eig": 6.888051986694336,
+      "validation_n_unique_sequences": 43,
+      "mean_terminal_eig": 6.838863174431026,
+      "mean_loss": -0.14301542192697525,
+      "elapsed_seconds": 25.59486499801278,
+      "router_entropy": 0.7711723446846008,
+      "expert_load": [
+        0.16757813096046448,
+        0.3433593809604645,
+        0.33476564288139343,
+        0.154296875
+      ],
+      "balance_loss": 1.1388635635375977
+    },
+    {
+      "epoch": 151,
+      "validation_terminal_eig": 6.893154621124268,
+      "validation_n_unique_sequences": 52,
+      "mean_terminal_eig": 6.830311155878007,
+      "mean_loss": -0.1435437798500061,
+      "elapsed_seconds": 25.759963185992092,
+      "router_entropy": 0.7487050890922546,
+      "expert_load": [
+        0.16835938394069672,
+        0.341796875,
+        0.34648439288139343,
+        0.14335937798023224
+      ],
+      "balance_loss": 1.167060136795044
+    },
+    {
+      "epoch": 152,
+      "validation_terminal_eig": 6.888976097106934,
+      "validation_n_unique_sequences": 43,
+      "mean_terminal_eig": 6.853266526944935,
+      "mean_loss": -0.1388373002409935,
+      "elapsed_seconds": 25.924541705055162,
+      "router_entropy": 0.7096888422966003,
+      "expert_load": [
+        0.17539063096046448,
+        0.33281251788139343,
+        0.3734374940395355,
+        0.11835937947034836
+      ],
+      "balance_loss": 1.232249140739441
+    },
+    {
+      "epoch": 153,
+      "validation_terminal_eig": 6.880588531494141,
+      "validation_n_unique_sequences": 54,
+      "mean_terminal_eig": 6.821233688853681,
+      "mean_loss": -0.14249468594789505,
+      "elapsed_seconds": 26.088894319953397,
+      "router_entropy": 0.6910380721092224,
+      "expert_load": [
+        0.20585937798023224,
+        0.3031249940395355,
+        0.35820314288139343,
+        0.1328125
+      ],
+      "balance_loss": 1.188454508781433
+    },
+    {
+      "epoch": 154,
+      "validation_terminal_eig": 6.886589050292969,
+      "validation_n_unique_sequences": 65,
+      "mean_terminal_eig": 6.839309260249138,
+      "mean_loss": -0.1473914533853531,
+      "elapsed_seconds": 26.25310715311207,
+      "router_entropy": 0.6860429048538208,
+      "expert_load": [
+        0.23828125,
+        0.2691406309604645,
+        0.3363281190395355,
+        0.15625
+      ],
+      "balance_loss": 1.1440966129302979
+    },
+    {
+      "epoch": 155,
+      "validation_terminal_eig": 6.884477615356445,
+      "validation_n_unique_sequences": 68,
+      "mean_terminal_eig": 6.848193820565939,
+      "mean_loss": -0.14656157046556473,
+      "elapsed_seconds": 26.41791438101791,
+      "router_entropy": 0.7077943682670593,
+      "expert_load": [
+        0.23710937798023224,
+        0.2738281190395355,
+        0.3375000059604645,
+        0.15156249701976776
+      ],
+      "balance_loss": 1.1421914100646973
+    },
+    {
+      "epoch": 156,
+      "validation_terminal_eig": 6.886693000793457,
+      "validation_n_unique_sequences": 60,
+      "mean_terminal_eig": 6.831401888281107,
+      "mean_loss": -0.13997388631105423,
+      "elapsed_seconds": 26.58236759295687,
+      "router_entropy": 0.7442423701286316,
+      "expert_load": [
+        0.23320312798023224,
+        0.2890625,
+        0.33125001192092896,
+        0.146484375
+      ],
+      "balance_loss": 1.1281208992004395
+    },
+    {
+      "epoch": 157,
+      "validation_terminal_eig": 6.9008259773254395,
+      "validation_n_unique_sequences": 58,
+      "mean_terminal_eig": 6.8378544906154275,
+      "mean_loss": -0.14051058143377304,
+      "elapsed_seconds": 26.747056371998042,
+      "router_entropy": 0.7604650855064392,
+      "expert_load": [
+        0.21054688096046448,
+        0.3218750059604645,
+        0.33515626192092896,
+        0.13242188096046448
+      ],
+      "balance_loss": 1.1379729509353638
+    },
+    {
+      "epoch": 158,
+      "validation_terminal_eig": 6.8942766189575195,
+      "validation_n_unique_sequences": 49,
+      "mean_terminal_eig": 6.844450684264302,
+      "mean_loss": -0.1373891979455948,
+      "elapsed_seconds": 26.915967178996652,
+      "router_entropy": 0.7382718920707703,
+      "expert_load": [
+        0.20078125596046448,
+        0.314453125,
+        0.36601564288139343,
+        0.11874999850988388
+      ],
+      "balance_loss": 1.2025350332260132
+    },
+    {
+      "epoch": 159,
+      "validation_terminal_eig": 6.889378547668457,
+      "validation_n_unique_sequences": 54,
+      "mean_terminal_eig": 6.849530935287476,
+      "mean_loss": -0.13899389654397964,
+      "elapsed_seconds": 27.084547334117815,
+      "router_entropy": 0.7441760301589966,
+      "expert_load": [
+        0.18125000596046448,
+        0.3394531309604645,
+        0.3746093809604645,
+        0.10468750447034836
+      ],
+      "balance_loss": 1.225396752357483
+    },
+    {
+      "epoch": 160,
+      "validation_terminal_eig": 6.8942060470581055,
+      "validation_n_unique_sequences": 60,
+      "mean_terminal_eig": 6.850830669514835,
+      "mean_loss": -0.1374981701374054,
+      "elapsed_seconds": 27.252347768982872,
+      "router_entropy": 0.7290951013565063,
+      "expert_load": [
+        0.18476562201976776,
+        0.326171875,
+        0.39921876788139343,
+        0.08984375
+      ],
+      "balance_loss": 1.2965714931488037
+    },
+    {
+      "epoch": 161,
+      "validation_terminal_eig": 6.892416000366211,
+      "validation_n_unique_sequences": 56,
+      "mean_terminal_eig": 6.85478940512985,
+      "mean_loss": -0.1412889063358307,
+      "elapsed_seconds": 27.420600672950968,
+      "router_entropy": 0.7451640963554382,
+      "expert_load": [
+        0.20664063096046448,
+        0.29960939288139343,
+        0.3863281309604645,
+        0.107421875
+      ],
+      "balance_loss": 1.2505217790603638
+    },
+    {
+      "epoch": 162,
+      "validation_terminal_eig": 6.879213333129883,
+      "validation_n_unique_sequences": 49,
+      "mean_terminal_eig": 6.829558509401977,
+      "mean_loss": -0.14323290437459946,
+      "elapsed_seconds": 27.589558948995546,
+      "router_entropy": 0.7205705046653748,
+      "expert_load": [
+        0.22968749701976776,
+        0.2699218690395355,
+        0.3792968690395355,
+        0.12109375
+      ],
+      "balance_loss": 1.2383427619934082
+    },
+    {
+      "epoch": 163,
+      "validation_terminal_eig": 6.889856338500977,
+      "validation_n_unique_sequences": 36,
+      "mean_terminal_eig": 6.838357978500426,
+      "mean_loss": -0.14152368903160095,
+      "elapsed_seconds": 27.75734560098499,
+      "router_entropy": 0.7278887629508972,
+      "expert_load": [
+        0.24687500298023224,
+        0.25312501192092896,
+        0.3628906309604645,
+        0.13710938394069672
+      ],
+      "balance_loss": 1.1942942142486572
+    },
+    {
+      "epoch": 164,
+      "validation_terminal_eig": 6.885388374328613,
+      "validation_n_unique_sequences": 39,
+      "mean_terminal_eig": 6.853019909933209,
+      "mean_loss": -0.14190185815095901,
+      "elapsed_seconds": 27.925334380939603,
+      "router_entropy": 0.749352753162384,
+      "expert_load": [
+        0.2562499940395355,
+        0.24335937201976776,
+        0.3402343690395355,
+        0.16015625
+      ],
+      "balance_loss": 1.1482064723968506
+    },
+    {
+      "epoch": 165,
+      "validation_terminal_eig": 6.887467384338379,
+      "validation_n_unique_sequences": 72,
+      "mean_terminal_eig": 6.8499621180817485,
+      "mean_loss": -0.14779598265886307,
+      "elapsed_seconds": 28.093646672088653,
+      "router_entropy": 0.7801114916801453,
+      "expert_load": [
+        0.25664064288139343,
+        0.24648438394069672,
+        0.2992187440395355,
+        0.19765625894069672
+      ],
+      "balance_loss": 1.0678327083587646
+    },
+    {
+      "epoch": 166,
+      "validation_terminal_eig": 6.8784379959106445,
+      "validation_n_unique_sequences": 49,
+      "mean_terminal_eig": 6.824290278367698,
+      "mean_loss": -0.145797997713089,
+      "elapsed_seconds": 28.26160798012279,
+      "router_entropy": 0.7503822445869446,
+      "expert_load": [
+        0.2515625059604645,
+        0.24960938096046448,
+        0.3296875059604645,
+        0.16914062201976776
+      ],
+      "balance_loss": 1.1270217895507812
+    },
+    {
+      "epoch": 167,
+      "validation_terminal_eig": 6.885079383850098,
+      "validation_n_unique_sequences": 50,
+      "mean_terminal_eig": 6.838493911549449,
+      "mean_loss": -0.1416696533560753,
+      "elapsed_seconds": 28.429329079110175,
+      "router_entropy": 0.7753342390060425,
+      "expert_load": [
+        0.22734375298023224,
+        0.27617189288139343,
+        0.32890626788139343,
+        0.16757813096046448
+      ],
+      "balance_loss": 1.1124083995819092
+    },
+    {
+      "epoch": 168,
+      "validation_terminal_eig": 6.885224342346191,
+      "validation_n_unique_sequences": 55,
+      "mean_terminal_eig": 6.823362453840673,
+      "mean_loss": -0.141412191092968,
+      "elapsed_seconds": 28.59781971713528,
+      "router_entropy": 0.7862429022789001,
+      "expert_load": [
+        0.20390625298023224,
+        0.2738281190395355,
+        0.3246093690395355,
+        0.19765625894069672
+      ],
+      "balance_loss": 1.1045231819152832
+    },
+    {
+      "epoch": 169,
+      "validation_terminal_eig": 6.899417877197266,
+      "validation_n_unique_sequences": 50,
+      "mean_terminal_eig": 6.833991382271051,
+      "mean_loss": -0.14011529833078384,
+      "elapsed_seconds": 28.76575562497601,
+      "router_entropy": 0.7604951858520508,
+      "expert_load": [
+        0.23515625298023224,
+        0.2613281309604645,
+        0.3296875059604645,
+        0.173828125
+      ],
+      "balance_loss": 1.1204999685287476
+    },
+    {
+      "epoch": 170,
+      "validation_terminal_eig": 6.887468338012695,
+      "validation_n_unique_sequences": 51,
+      "mean_terminal_eig": 6.8305322881788015,
+      "mean_loss": -0.13972001522779465,
+      "elapsed_seconds": 28.934519499074668,
+      "router_entropy": 0.7242838144302368,
+      "expert_load": [
+        0.21562500298023224,
+        0.27070313692092896,
+        0.3531250059604645,
+        0.16054688394069672
+      ],
+      "balance_loss": 1.1735217571258545
+    },
+    {
+      "epoch": 171,
+      "validation_terminal_eig": 6.890122413635254,
+      "validation_n_unique_sequences": 69,
+      "mean_terminal_eig": 6.842477449215949,
+      "mean_loss": -0.1396336778998375,
+      "elapsed_seconds": 29.102267323061824,
+      "router_entropy": 0.7226196527481079,
+      "expert_load": [
+        0.19648437201976776,
+        0.2750000059604645,
+        0.36406251788139343,
+        0.16445313394069672
+      ],
+      "balance_loss": 1.1968938112258911
+    },
+    {
+      "epoch": 172,
+      "validation_terminal_eig": 6.895550727844238,
+      "validation_n_unique_sequences": 61,
+      "mean_terminal_eig": 6.847929517738521,
+      "mean_loss": -0.1394391432404518,
+      "elapsed_seconds": 29.269055837066844,
+      "router_entropy": 0.6798450350761414,
+      "expert_load": [
+        0.18476562201976776,
+        0.298828125,
+        0.38359376788139343,
+        0.1328125
+      ],
+      "balance_loss": 1.257580041885376
+    },
+    {
+      "epoch": 173,
+      "validation_terminal_eig": 6.877871990203857,
+      "validation_n_unique_sequences": 57,
+      "mean_terminal_eig": 6.854089801199734,
+      "mean_loss": -0.13554637879133224,
+      "elapsed_seconds": 29.436222579097375,
+      "router_entropy": 0.6584224104881287,
+      "expert_load": [
+        0.181640625,
+        0.30000001192092896,
+        0.39960938692092896,
+        0.11874999850988388
+      ],
+      "balance_loss": 1.306833267211914
+    },
+    {
+      "epoch": 174,
+      "validation_terminal_eig": 6.896306991577148,
+      "validation_n_unique_sequences": 57,
+      "mean_terminal_eig": 6.859737675637007,
+      "mean_loss": -0.1333182156085968,
+      "elapsed_seconds": 29.60365330404602,
+      "router_entropy": 0.6576625108718872,
+      "expert_load": [
+        0.19843749701976776,
+        0.28203126788139343,
+        0.39570313692092896,
+        0.12382812798023224
+      ],
+      "balance_loss": 1.293660044670105
+    },
+    {
+      "epoch": 175,
+      "validation_terminal_eig": 6.891937255859375,
+      "validation_n_unique_sequences": 69,
+      "mean_terminal_eig": 6.842277094721794,
+      "mean_loss": -0.13799698650836945,
+      "elapsed_seconds": 29.77020426513627,
+      "router_entropy": 0.6636574864387512,
+      "expert_load": [
+        0.18984375894069672,
+        0.2890625,
+        0.384765625,
+        0.13632813096046448
+      ],
+      "balance_loss": 1.255965232849121
+    },
+    {
+      "epoch": 176,
+      "validation_terminal_eig": 6.886116027832031,
+      "validation_n_unique_sequences": 61,
+      "mean_terminal_eig": 6.858786384575069,
+      "mean_loss": -0.1385207697749138,
+      "elapsed_seconds": 29.93773603392765,
+      "router_entropy": 0.6857690215110779,
+      "expert_load": [
+        0.22382812201976776,
+        0.259765625,
+        0.3687500059604645,
+        0.14765624701976776
+      ],
+      "balance_loss": 1.216389775276184
+    },
+    {
+      "epoch": 177,
+      "validation_terminal_eig": 6.888480186462402,
+      "validation_n_unique_sequences": 62,
+      "mean_terminal_eig": 6.833676686510444,
+      "mean_loss": -0.1376536414027214,
+      "elapsed_seconds": 30.103407677961513,
+      "router_entropy": 0.6615472435951233,
+      "expert_load": [
+        0.20624999701976776,
+        0.263671875,
+        0.39179688692092896,
+        0.13828125596046448
+      ],
+      "balance_loss": 1.2793508768081665
+    },
+    {
+      "epoch": 178,
+      "validation_terminal_eig": 6.891901969909668,
+      "validation_n_unique_sequences": 58,
+      "mean_terminal_eig": 6.850008255802095,
+      "mean_loss": -0.13775944709777832,
+      "elapsed_seconds": 30.268448933959007,
+      "router_entropy": 0.6887451410293579,
+      "expert_load": [
+        0.18828125298023224,
+        0.26953125,
+        0.365234375,
+        0.17695312201976776
+      ],
+      "balance_loss": 1.2034194469451904
+    },
+    {
+      "epoch": 179,
+      "validation_terminal_eig": 6.896904945373535,
+      "validation_n_unique_sequences": 62,
+      "mean_terminal_eig": 6.827663456089795,
+      "mean_loss": -0.14162321388721466,
+      "elapsed_seconds": 30.43353958008811,
+      "router_entropy": 0.6765727400779724,
+      "expert_load": [
+        0.16484375298023224,
+        0.255859375,
+        0.3539062440395355,
+        0.22539062798023224
+      ],
+      "balance_loss": 1.1836018562316895
+    },
+    {
+      "epoch": 180,
+      "validation_terminal_eig": 6.884686470031738,
+      "validation_n_unique_sequences": 63,
+      "mean_terminal_eig": 6.839208942838013,
+      "mean_loss": -0.14569582790136337,
+      "elapsed_seconds": 30.599223758094013,
+      "router_entropy": 0.6812849640846252,
+      "expert_load": [
+        0.14492188394069672,
+        0.2503906190395355,
+        0.3550781309604645,
+        0.24960938096046448
+      ],
+      "balance_loss": 1.190669059753418
+    },
+    {
+      "epoch": 181,
+      "validation_terminal_eig": 6.881624221801758,
+      "validation_n_unique_sequences": 54,
+      "mean_terminal_eig": 6.842979381792247,
+      "mean_loss": -0.13744282722473145,
+      "elapsed_seconds": 30.76463933312334,
+      "router_entropy": 0.6684805750846863,
+      "expert_load": [
+        0.13164062798023224,
+        0.24960938096046448,
+        0.3824218809604645,
+        0.236328125
+      ],
+      "balance_loss": 1.268672227859497
+    },
+    {
+      "epoch": 182,
+      "validation_terminal_eig": 6.8858795166015625,
+      "validation_n_unique_sequences": 37,
+      "mean_terminal_eig": 6.840537855401635,
+      "mean_loss": -0.13949305564165115,
+      "elapsed_seconds": 30.929936941014603,
+      "router_entropy": 0.6736404299736023,
+      "expert_load": [
+        0.14023438096046448,
+        0.23749999701976776,
+        0.35468751192092896,
+        0.267578125
+      ],
+      "balance_loss": 1.2018623352050781
+    },
+    {
+      "epoch": 183,
+      "validation_terminal_eig": 6.887816429138184,
+      "validation_n_unique_sequences": 35,
+      "mean_terminal_eig": 6.834698332473636,
+      "mean_loss": -0.14213044941425323,
+      "elapsed_seconds": 31.09557804092765,
+      "router_entropy": 0.6802792549133301,
+      "expert_load": [
+        0.14453125,
+        0.23671875894069672,
+        0.3499999940395355,
+        0.26875001192092896
+      ],
+      "balance_loss": 1.188292145729065
+    },
+    {
+      "epoch": 184,
+      "validation_terminal_eig": 6.884273529052734,
+      "validation_n_unique_sequences": 36,
+      "mean_terminal_eig": 6.830471099354327,
+      "mean_loss": -0.13828253746032715,
+      "elapsed_seconds": 31.26061166403815,
+      "router_entropy": 0.6495856642723083,
+      "expert_load": [
+        0.13398437201976776,
+        0.23867188394069672,
+        0.361328125,
+        0.2660156190395355
+      ],
+      "balance_loss": 1.2233303785324097
+    },
+    {
+      "epoch": 185,
+      "validation_terminal_eig": 6.885749816894531,
+      "validation_n_unique_sequences": 40,
+      "mean_terminal_eig": 6.847142631188035,
+      "mean_loss": -0.14534665644168854,
+      "elapsed_seconds": 31.425761261954904,
+      "router_entropy": 0.6687161922454834,
+      "expert_load": [
+        0.13828125596046448,
+        0.23828125,
+        0.3460937440395355,
+        0.27734375
+      ],
+      "balance_loss": 1.1899975538253784
+    },
+    {
+      "epoch": 186,
+      "validation_terminal_eig": 6.884164333343506,
+      "validation_n_unique_sequences": 38,
+      "mean_terminal_eig": 6.862441842444241,
+      "mean_loss": -0.13754090666770935,
+      "elapsed_seconds": 31.59157835901715,
+      "router_entropy": 0.6803800463676453,
+      "expert_load": [
+        0.14023438096046448,
+        0.22539062798023224,
+        0.33710938692092896,
+        0.2972656190395355
+      ],
+      "balance_loss": 1.181777000427246
+    },
+    {
+      "epoch": 187,
+      "validation_terminal_eig": 6.898529052734375,
+      "validation_n_unique_sequences": 46,
+      "mean_terminal_eig": 6.857884663157165,
+      "mean_loss": -0.14628230035305023,
+      "elapsed_seconds": 31.75685282004997,
+      "router_entropy": 0.681454598903656,
+      "expert_load": [
+        0.14023438096046448,
+        0.21562500298023224,
+        0.3359375,
+        0.3082031309604645
+      ],
+      "balance_loss": 1.1851840019226074
+    },
+    {
+      "epoch": 188,
+      "validation_terminal_eig": 6.885584354400635,
+      "validation_n_unique_sequences": 41,
+      "mean_terminal_eig": 6.8464976362884045,
+      "mean_loss": -0.13850898295640945,
+      "elapsed_seconds": 31.92561078001745,
+      "router_entropy": 0.6815881133079529,
+      "expert_load": [
+        0.13984374701976776,
+        0.21367187798023224,
+        0.33671876788139343,
+        0.30976563692092896
+      ],
+      "balance_loss": 1.1884915828704834
+    },
+    {
+      "epoch": 189,
+      "validation_terminal_eig": 6.888986587524414,
+      "validation_n_unique_sequences": 37,
+      "mean_terminal_eig": 6.853450938127935,
+      "mean_loss": -0.1407904103398323,
+      "elapsed_seconds": 32.09424726199359,
+      "router_entropy": 0.677692711353302,
+      "expert_load": [
+        0.12968750298023224,
+        0.21601562201976776,
+        0.3531250059604645,
+        0.3011718690395355
+      ],
+      "balance_loss": 1.2251554727554321
+    },
+    {
+      "epoch": 190,
+      "validation_terminal_eig": 6.895327568054199,
+      "validation_n_unique_sequences": 37,
+      "mean_terminal_eig": 6.86370724439621,
+      "mean_loss": -0.13707993924617767,
+      "elapsed_seconds": 32.26248600194231,
+      "router_entropy": 0.6583505272865295,
+      "expert_load": [
+        0.162109375,
+        0.236328125,
+        0.3671875,
+        0.234375
+      ],
+      "balance_loss": 1.2295727729797363
+    },
+    {
+      "epoch": 191,
+      "validation_terminal_eig": 6.879334449768066,
+      "validation_n_unique_sequences": 51,
+      "mean_terminal_eig": 6.836156101897359,
+      "mean_loss": -0.13589981943368912,
+      "elapsed_seconds": 32.43188280798495,
+      "router_entropy": 0.6808291673660278,
+      "expert_load": [
+        0.19687500596046448,
+        0.23007813096046448,
+        0.36445313692092896,
+        0.20859375596046448
+      ],
+      "balance_loss": 1.2087664604187012
+    },
+    {
+      "epoch": 192,
+      "validation_terminal_eig": 6.889072418212891,
+      "validation_n_unique_sequences": 47,
+      "mean_terminal_eig": 6.833594840019941,
+      "mean_loss": -0.1397511437535286,
+      "elapsed_seconds": 32.60097909998149,
+      "router_entropy": 0.6736003160476685,
+      "expert_load": [
+        0.17343750596046448,
+        0.27656251192092896,
+        0.373046875,
+        0.17695312201976776
+      ],
+      "balance_loss": 1.22087824344635
+    },
+    {
+      "epoch": 193,
+      "validation_terminal_eig": 6.883615493774414,
+      "validation_n_unique_sequences": 48,
+      "mean_terminal_eig": 6.856922659091651,
+      "mean_loss": -0.13778924196958542,
+      "elapsed_seconds": 32.76958115003072,
+      "router_entropy": 0.7137458920478821,
+      "expert_load": [
+        0.18515625596046448,
+        0.27460938692092896,
+        0.3675781190395355,
+        0.17265625298023224
+      ],
+      "balance_loss": 1.199236273765564
+    },
+    {
+      "epoch": 194,
+      "validation_terminal_eig": 6.890359878540039,
+      "validation_n_unique_sequences": 59,
+      "mean_terminal_eig": 6.855145387351513,
+      "mean_loss": -0.13999255746603012,
+      "elapsed_seconds": 32.93874084809795,
+      "router_entropy": 0.7461355328559875,
+      "expert_load": [
+        0.17656250298023224,
+        0.28242188692092896,
+        0.328125,
+        0.212890625
+      ],
+      "balance_loss": 1.1117033958435059
+    },
+    {
+      "epoch": 195,
+      "validation_terminal_eig": 6.877711296081543,
+      "validation_n_unique_sequences": 62,
+      "mean_terminal_eig": 6.829886474646628,
+      "mean_loss": -0.13523749262094498,
+      "elapsed_seconds": 33.10409392300062,
+      "router_entropy": 0.7509297132492065,
+      "expert_load": [
+        0.21601562201976776,
+        0.26484376192092896,
+        0.3148437440395355,
+        0.20429687201976776
+      ],
+      "balance_loss": 1.079308271408081
+    },
+    {
+      "epoch": 196,
+      "validation_terminal_eig": 6.891195774078369,
+      "validation_n_unique_sequences": 50,
+      "mean_terminal_eig": 6.851792126893997,
+      "mean_loss": -0.13907741755247116,
+      "elapsed_seconds": 33.268193467054516,
+      "router_entropy": 0.7463229894638062,
+      "expert_load": [
+        0.20742188394069672,
+        0.26679688692092896,
+        0.3050781190395355,
+        0.220703125
+      ],
+      "balance_loss": 1.0646809339523315
+    },
+    {
+      "epoch": 197,
+      "validation_terminal_eig": 6.906009674072266,
+      "validation_n_unique_sequences": 57,
+      "mean_terminal_eig": 6.8446785397827625,
+      "mean_loss": -0.13694490492343903,
+      "elapsed_seconds": 33.43306916812435,
+      "router_entropy": 0.6957216858863831,
+      "expert_load": [
+        0.20703125,
+        0.24257813394069672,
+        0.35664063692092896,
+        0.19375000894069672
+      ],
+      "balance_loss": 1.1757346391677856
+    },
+    {
+      "epoch": 198,
+      "validation_terminal_eig": 6.889915943145752,
+      "validation_n_unique_sequences": 52,
+      "mean_terminal_eig": 6.869234174489975,
+      "mean_loss": -0.1283738985657692,
+      "elapsed_seconds": 33.59834839194082,
+      "router_entropy": 0.6213852763175964,
+      "expert_load": [
+        0.203125,
+        0.24140624701976776,
+        0.4007812440395355,
+        0.15468750894069672
+      ],
+      "balance_loss": 1.3068859577178955
+    },
+    {
+      "epoch": 199,
+      "validation_terminal_eig": 6.877896785736084,
+      "validation_n_unique_sequences": 62,
+      "mean_terminal_eig": 6.85651221871376,
+      "mean_loss": -0.1244337297976017,
+      "elapsed_seconds": 33.76273965602741,
+      "router_entropy": 0.6160505414009094,
+      "expert_load": [
+        0.22343750298023224,
+        0.23867188394069672,
+        0.4144531190395355,
+        0.12343750149011612
+      ],
+      "balance_loss": 1.3594704866409302
+    },
+    {
+      "epoch": 200,
+      "validation_terminal_eig": 6.884973526000977,
+      "validation_n_unique_sequences": 65,
+      "mean_terminal_eig": 6.865871625952423,
+      "mean_loss": -0.11862051486968994,
+      "elapsed_seconds": 33.92697653104551,
+      "router_entropy": 0.6009880900382996,
+      "expert_load": [
+        0.22265625,
+        0.2542968690395355,
+        0.4156250059604645,
+        0.107421875
+      ],
+      "balance_loss": 1.3599331378936768
+    }
+  ]
+}

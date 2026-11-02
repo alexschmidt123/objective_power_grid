@@ -1,0 +1,30 @@
+{
+  "job_id": "3160696",
+  "collection_job_id": "3160700",
+  "github_commit": "e10f952a282f0be075ed82bc5be15efd0b0aab3f",
+  "campaign": "experiments/09142026/09142026_ieee9_eig_endpoint_rocof_T3_train101_eval1001",
+  "execution_site": "hprc",
+  "cluster": "faster",
+  "account": "142707191546",
+  "resources": {"gpu": "1 A100", "cpus": 4, "memory_gb": 32, "walltime_hours": 8},
+  "estimated_compute_hours": [2, 4],
+  "estimated_su": [274, 548],
+  "maximum_compute_reservation_su": 1096,
+  "balance_before_submission_su": 5049.08,
+  "settings": {
+    "objective": "eig", "T": 3, "seed": 101, "evaluation_seeds": [1001],
+    "observation_kind": "endpoint_rocof", "N_obs": 0, "noise_sigma": 0.005,
+    "window_s": 3.5, "total_simulated_time_s": 10.5, "rocof_difference_interval_s": 0.025,
+    "duration_bounds_s": [0.2, 3.0], "duration_order": "increasing", "minimum_gap_s": 0.01,
+    "methods": ["dad", "rl_sboed", "step_dad", "myopic", "fixed", "random"],
+    "updates": 2000, "batch_size": 32, "contrasts": 128,
+    "validation_systems": 128, "validate_every": 100, "evaluation_systems": 128,
+    "planner_particles": 128, "search_candidates": 16, "search_rounds": 3,
+    "fantasies": 32, "refinement_updates": 16, "learning_rate": 0.001,
+    "redq_critics": 10, "redq_updates_per_batch": 5, "preflight_max_hours": 7
+  },
+  "validation": {"targeted_tests": "passed", "fresh_six_method_smoke": "passed", "timing_metadata": "passed"},
+  "data_generation": "skipped; scripts/data_generation.sh retained",
+  "entrypoint": "source/hprc/experiment.slurm -> run.sh",
+  "transfer_status": "pending completion; preserve campaign-relative paths and exclude large binary models"
+}

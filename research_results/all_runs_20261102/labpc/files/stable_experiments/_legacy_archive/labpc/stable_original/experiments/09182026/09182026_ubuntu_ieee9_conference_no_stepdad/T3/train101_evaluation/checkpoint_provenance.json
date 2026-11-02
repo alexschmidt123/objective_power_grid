@@ -1,0 +1,30 @@
+{
+  "training_run": "/home/qiqi/Documents/objective_power_grid/experiments/09142026/09142026_ieee9_eig_endpoint_rocof_T3_train101_eval1001/T3/run",
+  "training_seed": 101,
+  "source_config_sha256": "45ded4897f61b0c1b2000f1f8ba8917bc303820d6562672f143cfc8aeac5bca8",
+  "checkpoints": {
+    "fixed": {
+      "path": "/home/qiqi/Documents/objective_power_grid/experiments/09142026/09142026_ieee9_eig_endpoint_rocof_T3_train101_eval1001/T3/run/models/fixed.pth",
+      "sha256": "6e648676432fd6ff685bca1dceecc2c13a7169a855166e3374c2be9731526ebf"
+    },
+    "dad": {
+      "path": "/home/qiqi/Documents/objective_power_grid/experiments/09142026/09142026_ieee9_eig_endpoint_rocof_T3_train101_eval1001/T3/run/models/dad.pth",
+      "sha256": "38cc939f428d389d4983d1965d774e9c214b4082a4395e3f2692e96a42326c4b"
+    },
+    "rl_sboed": {
+      "path": "/home/qiqi/Documents/objective_power_grid/experiments/09142026/09142026_ieee9_eig_endpoint_rocof_T3_train101_eval1001/T3/run/models/rl_sboed.pth",
+      "sha256": "1dd81a98579f107472cea07ec1c0b47f5a47524030f805ed5c0f6074b29e3730"
+    }
+  },
+  "evaluation_overrides": {
+    "eval_systems": {
+      "source": 128,
+      "evaluation": 512
+    },
+    "methods": {
+      "source": "dad,rl_sboed,step_dad,myopic,fixed,random",
+      "evaluation": "dad,rl_sboed,myopic,fixed,random"
+    }
+  },
+  "source_code_check": "exact hashes; continuous_eig scientific AST permits CLI-only changes; online_cli dispatch excluded"
+}

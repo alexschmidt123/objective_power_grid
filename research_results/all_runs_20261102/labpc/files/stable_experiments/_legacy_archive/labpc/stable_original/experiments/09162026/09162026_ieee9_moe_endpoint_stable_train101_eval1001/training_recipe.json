@@ -1,0 +1,75 @@
+{
+  "diagnostic": {
+    "legacy32": {
+      "best_validation": 2.4896644887636694,
+      "last_validation": 2.4896644887636694,
+      "elapsed_seconds": 124.67943483009003,
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "mode": "legacy",
+      "attempted_kl_median": 0.024234347976744175,
+      "attempted_kl_max": 4.174758434295654,
+      "attempts_exceeding_kl_limit": 586,
+      "rejected_steps": 0,
+      "accepted_steps": 1024,
+      "critic_to_actor_gradient_ratio_median": 0.15398039245497752,
+      "expert_pair_switch_fraction_mean": 0.052496338087166805
+    },
+    "stable32": {
+      "best_validation": 2.6358523599517802,
+      "last_validation": 2.6017336882736513,
+      "elapsed_seconds": 127.63922742009163,
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "mode": "stable",
+      "attempted_kl_median": 0.003422275884076953,
+      "attempted_kl_max": 0.035565756261348724,
+      "attempts_exceeding_kl_limit": 55,
+      "rejected_steps": 55,
+      "accepted_steps": 924,
+      "critic_to_actor_gradient_ratio_median": 0.43504834683554233,
+      "expert_pair_switch_fraction_mean": 0.07911133831385922
+    },
+    "stable128": {
+      "best_validation": 1.256197585432526,
+      "last_validation": 1.256197585432526,
+      "elapsed_seconds": 62.37963247601874,
+      "learning_rate": 0.0003,
+      "batch_size": 128,
+      "mode": "stable",
+      "attempted_kl_median": 0.005295633338391781,
+      "attempted_kl_max": 0.06047973036766052,
+      "attempts_exceeding_kl_limit": 44,
+      "rejected_steps": 44,
+      "accepted_steps": 87,
+      "critic_to_actor_gradient_ratio_median": 0.6166197557201666,
+      "expert_pair_switch_fraction_mean": 0.1151121174730005
+    }
+  },
+  "selection": {
+    "selected_recipe": "stable32",
+    "criterion": "maximum validation EIG after 8192 training trajectories per candidate; no test evaluation",
+    "training_seed": 101,
+    "validation_seed": 900101,
+    "development_horizon": 5,
+    "test_seed_used_for_selection": false,
+    "full_rerun_horizons": [
+      3,
+      4,
+      5
+    ],
+    "full_rerun_budget_per_horizon": {
+      "updates": 2000,
+      "batch_size": 32,
+      "training_trajectories": 64000
+    },
+    "changes": [
+      "learning rate 0.001 to 0.0003",
+      "reject and roll back sampled-KL estimates above 0.02",
+      "separate actor and critic gradient clipping",
+      "record policy changes and per-expert gradient norms"
+    ],
+    "limitations": "Short diagnostic does not establish convergence or cross-seed reliability; extra development cost is separate from final training budget"
+  },
+  "full_training_trajectories": 64000
+}

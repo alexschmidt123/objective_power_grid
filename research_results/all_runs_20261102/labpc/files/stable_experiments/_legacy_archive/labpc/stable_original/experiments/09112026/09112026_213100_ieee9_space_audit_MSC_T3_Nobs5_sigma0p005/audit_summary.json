@@ -1,0 +1,306 @@
+{
+  "schema": "msc_space_development_v1",
+  "status": "complete",
+  "objective": "msc",
+  "posterior_coverage": 0.9,
+  "horizons": [
+    3
+  ],
+  "seeds": [
+    101,
+    202,
+    303
+  ],
+  "n_validation_systems": 16,
+  "validation_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "budget": {
+    "inner": 16,
+    "outer": 8,
+    "first_candidates": 54,
+    "fixed_restarts": 8,
+    "calibration": 256,
+    "histories_per_batch": 4,
+    "actions_per_batch": 3,
+    "bootstrap": 2000
+  },
+  "n_actions": 54,
+  "n_support": 384,
+  "prior_msc": 0.4,
+  "structure": {
+    "control_levels": [
+      0.34,
+      0.35,
+      0.36,
+      0.37,
+      0.38,
+      0.39,
+      0.4,
+      0.41
+    ],
+    "control_mass": [
+      0.015625,
+      0.09114583333333333,
+      0.20572916666666666,
+      0.20833333333333334,
+      0.22916666666666666,
+      0.14322916666666666,
+      0.09114583333333333,
+      0.015625
+    ],
+    "action_response_effective_rank": 1.0313266486817783,
+    "median_action_response_cosine": 0.9867883878249804,
+    "fraction_action_pairs_cosine_above_0995": 0.38784067085953877,
+    "informative_observation_coordinates": 4,
+    "rms_signal_to_noise_by_action": [
+      0.5605503049957048,
+      0.5609481249701855,
+      0.5611716096990045,
+      0.5606235059122304,
+      0.5607407318275198,
+      0.5610138449432772,
+      0.5609335378312594,
+      0.5608798553725834,
+      0.5606820618424511,
+      0.6544990164237827,
+      0.653688544423359,
+      0.6540282998708089,
+      0.6542780850220711,
+      0.6541695803244142,
+      0.6540084038875944,
+      0.6538992509597326,
+      0.6538253302807983,
+      0.6540972224639475,
+      0.7126553889806065,
+      0.7132084360320549,
+      0.7131963948400206,
+      0.712761369225598,
+      0.7128689985132941,
+      0.7131009908878814,
+      0.7130929782507828,
+      0.7130911736506794,
+      0.7128553648020186,
+      0.7810691571200353,
+      0.7817828379593577,
+      0.7817685560626488,
+      0.7812291056056566,
+      0.7813716253174451,
+      0.781657943054386,
+      0.7816513134260343,
+      0.7816502137191406,
+      0.7813599624684237,
+      0.7900182057358306,
+      0.7906733523220919,
+      0.7906859791770782,
+      0.7901677453809627,
+      0.7903034576512747,
+      0.7905760999198564,
+      0.7905620917145091,
+      0.790555553028703,
+      0.7902880052471436,
+      0.8199796907234551,
+      0.8208698238075456,
+      0.8207529426724072,
+      0.820179816323392,
+      0.8203396119148011,
+      0.8206530638321922,
+      0.8206783189755782,
+      0.820699249259147,
+      0.8203480459728761
+    ],
+    "interpretation": "correlation/rank diagnose redundancy; they do not bound decision complementarity"
+  },
+  "primary_metric": "posterior selected MSC = control; no MOCU loss in ranking",
+  "safety_metric": "bank threshold proxy only, not fresh physical safety simulation",
+  "scope": "Development diagnostic on previously used training-validation bank; not independent confirmation; no final test systems used. Two-step lookahead and greedy Fixed are approximate; null gaps do not prove absence of opportunity.",
+  "planning": "all actions at second step; independently resampled second-stage values; first candidates limited by configured budget",
+  "support_hash": "087d01a4f23a83f6cb6f89dc28c0c45a23c50451d7cfb476f0f00d6afedee86a",
+  "results": {
+    "3": {
+      "methods": {
+        "no_probe": {
+          "mean_loss": 0.39999999999999997,
+          "std_across_seed_means": 6.798699777552591e-17,
+          "bank_coverage": 1.0,
+          "mean_posterior_risk": 0.39999999999999997,
+          "median_posterior_ess": 384.0,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.4
+          ],
+          "mean_unique_sequences": 1.0,
+          "mean_msc_by_stage": [
+            0.39999999999999997
+          ]
+        },
+        "random": {
+          "mean_loss": 0.38499999999999995,
+          "std_across_seed_means": 0.0025000000000000022,
+          "bank_coverage": 0.9791666666666666,
+          "mean_posterior_risk": 0.38499999999999995,
+          "median_posterior_ess": 74.95323173938061,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4
+          ],
+          "mean_unique_sequences": 16.0,
+          "mean_msc_by_stage": [
+            0.3999999999999999,
+            0.38687500000000014,
+            0.3868750000000001,
+            0.38500000000000006
+          ]
+        },
+        "fixed": {
+          "mean_loss": 0.38479166666666664,
+          "std_across_seed_means": 0.002009093908540208,
+          "bank_coverage": 0.9583333333333334,
+          "mean_posterior_risk": 0.38479166666666664,
+          "median_posterior_ess": 69.64459458364414,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 1.0,
+          "mean_msc_by_stage": [
+            0.3999999999999999,
+            0.3879166666666667,
+            0.38625000000000015,
+            0.3847916666666667
+          ]
+        },
+        "myopic": {
+          "mean_loss": 0.385,
+          "std_across_seed_means": 0.0,
+          "bank_coverage": 0.8958333333333334,
+          "mean_posterior_risk": 0.385,
+          "median_posterior_ess": 80.98687797100014,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 12.333333333333334,
+          "mean_msc_by_stage": [
+            0.3999999999999999,
+            0.3870833333333334,
+            0.38562500000000005,
+            0.3850000000000002
+          ]
+        },
+        "lookahead": {
+          "mean_loss": 0.38479166666666664,
+          "std_across_seed_means": 0.0003608439182435084,
+          "bank_coverage": 0.9583333333333334,
+          "mean_posterior_risk": 0.38479166666666664,
+          "median_posterior_ess": 61.850462296568544,
+          "fraction_posterior_ess_below_2": 0.0,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 15.333333333333334,
+          "mean_msc_by_stage": [
+            0.3999999999999999,
+            0.3883333333333335,
+            0.3858333333333334,
+            0.3847916666666668
+          ]
+        }
+      },
+      "adaptive_gain": {
+        "mean": 1.1926223897340549e-18,
+        "ci95": [
+          -0.002916666666666669,
+          0.0029166666666666646
+        ],
+        "sample_std_across_theta": 0.006085806194501847,
+        "n_theta": 16,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": 2.9815559743351372e-18
+      },
+      "myopic_adaptive_gain": {
+        "mean": -0.00020833333333333354,
+        "ci95": [
+          -0.002083333333333335,
+          0.0012500000000000011
+        ],
+        "sample_std_across_theta": 0.0033263816399828256,
+        "n_theta": 16,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.0005208333333333338
+      },
+      "nonmyopic_gain": {
+        "mean": 0.00020833333333333467,
+        "ci95": [
+          -0.0024999999999999988,
+          0.0029166666666666672
+        ],
+        "sample_std_across_theta": 0.005639641438562878,
+        "n_theta": 16,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": 0.0005208333333333367
+      },
+      "probe_gain": {
+        "mean": 0.015000000000000013,
+        "ci95": [
+          0.009166666666666674,
+          0.020630208333333323
+        ],
+        "sample_std_across_theta": 0.01192569587999889,
+        "n_theta": 16,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed"
+      },
+      "design_gain": {
+        "mean": 0.00020833333333333467,
+        "ci95": [
+          -0.001666666666666667,
+          0.002291666666666669
+        ],
+        "sample_std_across_theta": 0.004121982622566568,
+        "n_theta": 16,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed"
+      },
+      "fixed_sequence": [
+        36,
+        47,
+        50
+      ],
+      "completed_seeds": 3
+    }
+  },
+  "elapsed_seconds": 28.247561204014346
+}

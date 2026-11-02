@@ -1,0 +1,15 @@
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9/probe_subsets/eba8db9e23a48ced (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[mocu-bank] separate control bank -> /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9/control_banks/f977c0cd2518626e
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/tools/audit_msc_space.py", line 57, in <module>
+    if __name__=='__main__':main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/tools/audit_msc_space.py", line 29, in main
+    ctx=build_context_from_config(cfg,project_root=ROOT,out_dir=out,smoke=False,experiment_type='msc_based')
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/objectives/mocu/context.py", line 973, in build_context_from_config
+    out_dir = assert_experiments_result_dir(
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/layout.py", line 222, in assert_experiments_result_dir
+    validate_result_dir_name(path.name)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/layout.py", line 202, in validate_result_dir_name
+    raise ValueError(
+ValueError: Result folder name must be 'date_time_config_Uctrl|EIG_Tnum_NobsN_sigmaX', got '09112026_212952_ieee9_msc_q090_space_audit_T3'

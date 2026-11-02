@@ -1,0 +1,27 @@
+Log file: experiments/09162026/09162026_independent_moe_sir_checks/T3/logs/run_log.log
+=== run.sh (config=configs/sir_ode_eig.yaml type=eig_based T=3 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+Result folder: experiments/09162026/09162026_independent_moe_sir_checks/T3
+Evaluate: moe_sboed
+Train: moe_sboed
+=== data_generation (config=configs/sir_ode_eig.yaml type=eig_based T=3 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+[full-bank] no data.reuse_bank_dir; nothing to ensure
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/experiment.py", line 1150, in <module>
+    main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/experiment.py", line 1144, in main
+    args.func(args)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/experiment.py", line 344, in cmd_generate_data
+    exp_dir = _resolve_exp_dir(
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/experiment.py", line 185, in _resolve_exp_dir
+    return resolve_result_dir(
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/layout.py", line 316, in resolve_result_dir
+    path = assert_experiments_result_dir(path, project_root=root)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/layout.py", line 222, in assert_experiments_result_dir
+    validate_result_dir_name(path.name)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/layout.py", line 202, in validate_result_dir_name
+    raise ValueError(
+ValueError: Result folder name must be 'date_time_config_Uctrl|EIG_Tnum_NobsN_sigmaX', got 'T3'

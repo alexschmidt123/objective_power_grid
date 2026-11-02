@@ -1,0 +1,64 @@
+[cache] verified writable caches under /tmp/job.3163923/boed-g.lin-3163923
+[run.sh] Default results: experiments/MMDDYYYY/MMDDYYYY_<time>_<objective_parameters>/
+[run.sh] SIR ODE mode: experiment_type=eig_based, chronological times, y=I(t) count
+Log file: /scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1/logs/run_log.log
+=== run.sh (config=configs/sir_ode_eig.yaml type=eig_based T=4 N_obs=1 noise_sigma=1.0 seed=101 methods=dad,moe_sboed) ===
+Result folder: /scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1
+Evaluate: dad moe_sboed
+Train: dad moe_sboed
+=== data_generation (config=configs/sir_ode_eig.yaml type=eig_based T=4 N_obs=1 noise_sigma=1.0 seed=101 methods=dad,moe_sboed) ===
+[full-bank] no data.reuse_bank_dir; nothing to ensure
+[generate-data] type=eig_based config=/scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/source/configs/sir_ode_eig.yaml exp_dir=/scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1 smoke=False force=False methods=['dad', 'moe_sboed']
+[generate-data] SIR ODE dataset_dir=/scratch/user/g.lin/Documents/objective_power_grid/data/sir_ode
+[generate-data] reused=True path=/scratch/user/g.lin/Documents/objective_power_grid/data/sir_ode train=10000 test=3000 actions=100
+EXP_DIR=/scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1
+=== training method=dad (config=configs/sir_ode_eig.yaml type=eig_based T=4 N_obs=1 noise_sigma=1.0 seed=101) ===
+[prior] SIR using mc_samples=4096/7500 fit particles (seed=1)
+[eig:dad_eig] BC warm-start trajectories=128 horizon=4 n_actions=100 lookahead=two_step temp=0.5 actor_critic=False obs_seed=101
+[eig:dad_eig] BC 1/128
+[eig:dad_eig] BC 16/128
+[eig:dad_eig] BC 32/128
+[eig:dad_eig] BC 48/128
+[eig:dad_eig] BC 64/128
+[eig:dad_eig] BC 80/128
+[eig:dad_eig] BC 96/128
+[eig:dad_eig] BC 112/128
+[eig:dad_eig] BC 128/128
+[train] dad_eig val_eig=8.170033938537387 uniq=42 stage=epoch_171 5093s → /scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1/model/dad_eig.pth
+EXP_DIR=/scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1
+=== training method=moe_sboed (config=configs/sir_ode_eig.yaml type=eig_based T=4 N_obs=1 noise_sigma=1.0 seed=101) ===
+[prior] SIR using mc_samples=4096/7500 fit particles (seed=1)
+[independent-moe] T=4 epoch=0/200 val=6.93066 best=6.93066 elapsed=10.3s
+[independent-moe] T=4 epoch=10/200 val=7.99929 best=7.99929 elapsed=23.1s
+[independent-moe] T=4 epoch=20/200 val=8.11337 best=8.11337 elapsed=29.4s
+[independent-moe] T=4 epoch=30/200 val=8.14215 best=8.14215 elapsed=35.8s
+[independent-moe] T=4 epoch=40/200 val=8.16637 best=8.16637 elapsed=42.1s
+[independent-moe] T=4 epoch=50/200 val=8.14177 best=8.16637 elapsed=48.4s
+[independent-moe] T=4 epoch=60/200 val=8.13166 best=8.16637 elapsed=54.7s
+[independent-moe] T=4 epoch=70/200 val=8.14897 best=8.16637 elapsed=61.1s
+[independent-moe] T=4 epoch=80/200 val=8.15493 best=8.17149 elapsed=67.4s
+[independent-moe] T=4 epoch=90/200 val=8.15899 best=8.17678 elapsed=73.7s
+[independent-moe] T=4 epoch=100/200 val=8.13080 best=8.17678 elapsed=80.0s
+[independent-moe] T=4 epoch=110/200 val=8.13854 best=8.17678 elapsed=86.3s
+[independent-moe] T=4 epoch=120/200 val=8.15896 best=8.17678 elapsed=92.6s
+[independent-moe] T=4 epoch=130/200 val=8.16780 best=8.17739 elapsed=98.9s
+[independent-moe] T=4 epoch=140/200 val=8.16765 best=8.17739 elapsed=105.2s
+[independent-moe] T=4 epoch=150/200 val=8.14483 best=8.17739 elapsed=111.6s
+[independent-moe] T=4 epoch=160/200 val=8.16838 best=8.17739 elapsed=117.9s
+[independent-moe] T=4 epoch=170/200 val=8.14552 best=8.17739 elapsed=124.2s
+[independent-moe] T=4 epoch=180/200 val=8.15539 best=8.17814 elapsed=130.5s
+[independent-moe] T=4 epoch=190/200 val=8.17583 best=8.18524 elapsed=136.8s
+[independent-moe] T=4 epoch=200/200 val=8.15600 best=8.18524 elapsed=143.1s
+[train] moe_sboed val_eig=8.1852388381958 uniq=40 stage=epoch_185 143s → /scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1/model/moe_sboed.pth
+EXP_DIR=/scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1
+=== crossed evaluation train_seed=101 eval_seed=1001 ===
+=== evaluation (config=configs/sir_ode_eig.yaml type=eig_based T=4 N_obs=1 noise_sigma=1.0 seed=101 methods=dad,moe_sboed) ===
+[prior] SIR using mc_samples=4096/7500 fit particles (seed=1)
+[evaluate] type=eig_based methods=['dad', 'moe_sboed'] eval_seed=1001 N_obs=1 exp_dir=/scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1
+[evaluate] dad_eig eig=8.0980 uniq=44 eval_seed=1001
+[evaluate] moe_sboed eig=8.1110 uniq=45 eval_seed=1001
+EXP_DIR=/scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1
+
+Done config=configs/sir_ode_eig.yaml type=eig_based T=4.
+EXP_DIR=/scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1
+LOG_FILE=/scratch/user/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir4096_dad_moe/09162026_165556_sir4096_EIG_T4_Nobs1_sigma1/logs/run_log.log

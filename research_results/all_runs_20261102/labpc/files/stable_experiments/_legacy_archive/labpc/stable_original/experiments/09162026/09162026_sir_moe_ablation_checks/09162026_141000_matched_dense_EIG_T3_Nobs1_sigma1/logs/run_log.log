@@ -1,0 +1,27 @@
+Log file: experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1/logs/run_log.log
+=== run.sh (config=configs/sir_ode_eig.yaml type=eig_based T=3 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+Result folder: experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1
+Evaluate: moe_sboed
+Train: moe_sboed
+=== data_generation (config=configs/sir_ode_eig.yaml type=eig_based T=3 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+[full-bank] no data.reuse_bank_dir; nothing to ensure
+[generate-data] type=eig_based config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/sir_ode_eig.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1 smoke=True force=False methods=['moe_sboed']
+[generate-data] SIR ODE dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode
+[generate-data] reused=True path=/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode train=10000 test=3000 actions=100
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1
+=== training method=moe_sboed (config=configs/sir_ode_eig.yaml type=eig_based T=3 N_obs=1 noise_sigma=1.0 seed=101) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[independent-moe] T=3 epoch=0/2 val=6.55152 best=6.55152 elapsed=0.2s
+[independent-moe] T=3 epoch=2/2 val=2.51093 best=6.55152 elapsed=0.4s
+[train] moe_sboed val_eig=6.551520347595215 uniq=2 stage=epoch_0 0s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1/model/moe_sboed.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1
+=== crossed evaluation train_seed=101 eval_seed=1001 ===
+=== evaluation (config=configs/sir_ode_eig.yaml type=eig_based T=3 N_obs=1 noise_sigma=1.0 seed=101 methods=moe_sboed) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[evaluate] type=eig_based methods=['moe_sboed'] eval_seed=1001 N_obs=1 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1
+[evaluate] moe_sboed eig=6.9313 uniq=2 eval_seed=1001
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1
+
+Done config=configs/sir_ode_eig.yaml type=eig_based T=3.
+EXP_DIR=experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1
+LOG_FILE=experiments/09162026/09162026_sir_moe_ablation_checks/09162026_141000_matched_dense_EIG_T3_Nobs1_sigma1/logs/run_log.log

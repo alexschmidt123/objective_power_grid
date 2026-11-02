@@ -1,0 +1,19 @@
+{
+  "purpose": "Paired development test of replacing only the history policy network.",
+  "initialization": "Both train fresh from random initialization; no Fixed initializer or baseline checkpoint.",
+  "moe": "Four independent 64x64 Tanh experts and 64-unit soft router; combine latent proposals.",
+  "shared": "History features, feasible map, full-horizon sPCE, pathwise gradient, Adam, training and validation RNG seeds.",
+  "maximum_updates_each": 1000,
+  "batch_size": 32,
+  "evaluation_seed": 900123,
+  "caveats": [
+    "Single training seed; not publication superiority.",
+    "Parameter counts differ; larger dense control remains a separate test.",
+    "Compare paired DAD here; historical DAD may have different initialization."
+  ],
+  "estimated_compute_minutes": [
+    20,
+    45
+  ],
+  "wait_for_pid": 529566
+}
