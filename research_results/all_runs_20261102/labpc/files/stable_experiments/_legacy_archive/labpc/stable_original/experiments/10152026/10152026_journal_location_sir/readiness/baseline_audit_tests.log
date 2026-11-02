@@ -1,0 +1,61 @@
+FF.........................                                              [100%]
+=================================== FAILURES ===================================
+___ PaperProtocolTests.test_budget_accounts_for_contrasts_and_partial_batch ____
+
+self = <tools.tests.test_vsoed_paper_protocol.PaperProtocolTests testMethod=test_budget_accounts_for_contrasts_and_partial_batch>
+
+    def test_budget_accounts_for_contrasts_and_partial_batch(self):
+        cfg=DEFAULTS|dict(updates=10,batch_size=4,contrasts=8,validation_systems=2,
+                          validation_contrasts=8,validate_every=1,hidden=8)
+        with tempfile.TemporaryDirectory() as d:
+>           _,r=train_spce(benchmark(),'moe_sboed',3,cfg,97,Path(d),
+                          final_checkpoint=True,trajectory_budget=45)
+
+tools/tests/test_vsoed_paper_protocol.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/research/training.py:34: in train_spce
+    policy = policy if policy is not None else make_policy(benchmark,horizon,kind,settings['hidden'],settings)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+benchmark = <src.research.benchmarks.LocationFinding object at 0x7842378c4f10>
+horizon = 3, kind = 'moe_sboed', hidden = 8
+settings = {'batch_size': 4, 'contrasts': 8, 'eval_contrasts': 1024, 'eval_systems': 128, ...}
+
+    def make_policy(benchmark, horizon, kind, hidden, settings=None):
+        settings=settings or {}
+>       if kind not in {'dad','fixed'}:raise ValueError('Retired MoE; sparse replacement is validation-only')
+E       ValueError: Retired MoE; sparse replacement is validation-only
+
+src/research/policies.py:51: ValueError
+__________ PaperProtocolTests.test_chunked_evaluation_matches_direct ___________
+
+self = <tools.tests.test_vsoed_paper_protocol.PaperProtocolTests testMethod=test_chunked_evaluation_matches_direct>
+
+    def test_chunked_evaluation_matches_direct(self):
+        b=benchmark(); rng=generator(94)
+        bank=b.sample((37,),rng)
+>       p=make_policy(b,5,'moe_sboed',8)
+
+tools/tests/test_vsoed_paper_protocol.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+benchmark = <src.research.benchmarks.LocationFinding object at 0x7840b1a73a90>
+horizon = 5, kind = 'moe_sboed', hidden = 8, settings = {}
+
+    def make_policy(benchmark, horizon, kind, hidden, settings=None):
+        settings=settings or {}
+>       if kind not in {'dad','fixed'}:raise ValueError('Retired MoE; sparse replacement is validation-only')
+E       ValueError: Retired MoE; sparse replacement is validation-only
+
+src/research/policies.py:51: ValueError
+=============================== warnings summary ===============================
+tools/tests/test_sir_offline.py::Tests::test_jax_torch_carried_ode_and_gradients
+tools/tests/test_sir_residual_base.py::test_cpu_initialized_sir_prior_and_rollout_on_cuda
+  /home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/utils/checkpoint.py:1399: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+    with device_autocast_ctx, torch.cpu.amp.autocast(**cpu_autocast_kwargs), recompute_context:  # type: ignore[attr-defined]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tools/tests/test_vsoed_paper_protocol.py::PaperProtocolTests::test_budget_accounts_for_contrasts_and_partial_batch
+FAILED tools/tests/test_vsoed_paper_protocol.py::PaperProtocolTests::test_chunked_evaluation_matches_direct
+2 failed, 25 passed, 2 warnings in 12.19s

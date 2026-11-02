@@ -1,0 +1,53 @@
+{
+  "status": "development_frozen_before_training",
+  "methods": [
+    "random",
+    "fixed",
+    "dad",
+    "rl_sboed",
+    "vsoed",
+    "scorebed",
+    "moe",
+    "resmoe",
+    "switchmoe",
+    "switchresmoe"
+  ],
+  "benchmarks": [
+    "location_finding",
+    "sir_ode"
+  ],
+  "current_execution": "location_only",
+  "training_seed": 101,
+  "development_evaluation_seed": 1001,
+  "reserved_final_seed": 8831001,
+  "reserved_final_seed_used": false,
+  "phase_episodes": 500000,
+  "total_per_model": 1000000,
+  "physical_training_episodes_for_shared_base_and_two_variants": 1500000,
+  "training_contrasts": 1024,
+  "batch_size": 64,
+  "base": "Existing compatible sum-encoder64/64tanh internal base, not a benchmark baseline or architecture ablation",
+  "base_freeze": true,
+  "selection": "Final exact-budget checkpoint, matching historical fixed-budget runs; validation diagnostic only",
+  "validation": {
+    "seed": 771001,
+    "systems": 512,
+    "contrasts": 1000000,
+    "batch_size": 16,
+    "chunk": 16384
+  },
+  "router_schedule": "Gamma1 through30percent of residual500k phase, cosine to0.001 at95percent; switching gate unchanged",
+  "train_seed_replication_candidates": [
+    70101,
+    70102,
+    70103,
+    70104,
+    70105
+  ],
+  "replication": "Not launched until development verification and explicit protocol seal; never use8831001 during development",
+  "historical_preservation": {
+    "experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/resmoe/models/resmoe.pt": "e9ac1228b83ecd459801c7802b1aa24e595b99a494307f068fae01bfa81ffcbb",
+    "experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/switchresmoe/models/switchresmoe.pt": "81178670c2f0abcd079c3029607e490eaafe47f1948bf81da6b646eee34333aa"
+  },
+  "minimum_required_tests": 42
+}

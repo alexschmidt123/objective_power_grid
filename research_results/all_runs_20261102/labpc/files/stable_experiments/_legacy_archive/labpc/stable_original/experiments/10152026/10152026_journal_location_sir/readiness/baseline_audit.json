@@ -1,0 +1,64 @@
+{
+  "status": "focused_implementation_audit_not_full_convergence_certification",
+  "tests": {
+    "passed": 35,
+    "log": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_journal_location_sir/readiness/baseline_audit_tests_v3.log"
+  },
+  "baseline_methods": [
+    {
+      "method": "Random",
+      "implementation": "Benchmark-defined truncated standard normal in location box; sequential feasible-time sampling in SIR",
+      "departures": "Common feasible design domain; random sampling distribution must be stated explicitly",
+      "decision": "Retain historical development reference; no training rerun required"
+    },
+    {
+      "method": "Optimized Fixed",
+      "implementation": "One trainable pre-observation design sequence; explicit-likelihood sPCE",
+      "departures": "Torch implementation, bounded mapping, initialization and resource/checkpoint-selection settings",
+      "decision": "No defect identified by focused checks; historical final checkpoint not certified converged"
+    },
+    {
+      "method": "DAD",
+      "implementation": "Location sum256/16 encoder and linear emitter; full-horizon sPCE; SIR normalized time/count adapter",
+      "departures": "Torch reimplementation, bounded mapping, separate first design, optimizer/budget/validation selection; SIR is a benchmark adaptation",
+      "decision": "Retain architecture and old checkpoint; no forced MoE emitter; convergence unverified"
+    },
+    {
+      "method": "RL-sBOED",
+      "implementation": "Standalone Torch SAC, two Q networks and incremental PCE rewards",
+      "departures": "Discount1 vs published source setting0.9; training L1024 vs100000; replay gradient cycles2 vs local default64; Torch replaces Garage; history/action adaptations and norm1 clipping",
+      "decision": "Explicitly adapted baseline, permitted by user for cost; no hidden architecture or objective substitution; not exact paper reproduction"
+    },
+    {
+      "method": "vsOED",
+      "implementation": "Pinned native GMM-I posterior/actor/critic training, raw bounded inputs, Adam, discount0.9",
+      "departures": "Common bounded benchmark, historical980 vs recorded10001 reference updates; fresh seed201 and validation selection in rerun. SIR explicit ODE instead of published stochastic data bank",
+      "decision": "Rerun location with native learning unchanged and sufficient validation-controlled duration; preserve8.58218 as historical"
+    },
+    {
+      "method": "ScoreBED",
+      "implementation": "Pinned JAX score matching, score EIG policy gradient, conservative transformer and native DADNet policy",
+      "departures": "Common feasibility mapping, capped pretraining, smaller minibatches, single restart, sampler keyword compatibility fix; SIR explicit ODE adapter",
+      "decision": "Vendor hashes and inference bridge pass; no evidence requiring architecture correction. Full convergence/pretraining calibration remains pending"
+    }
+  ],
+  "shared_conditions": [
+    "prior",
+    "physical initial state",
+    "observation function and noise",
+    "horizon",
+    "feasible design domain",
+    "held-out EIG scoring"
+  ],
+  "neural_initialization": "method-specific, not equal weights across architectures",
+  "native_objectives_and_durations": "method-specific; every departure must be disclosed",
+  "historical_vsoed": {
+    "training_record": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_vsoed_incremental_discount_correction/pilot_retry/models/vsoed_training.json",
+    "updates": 980,
+    "reference_updates": 10001,
+    "training_seconds": 674.5586158009246,
+    "historical_EIG": 8.5821758125
+  },
+  "final_seed_used": false,
+  "source_commit": "123aed276aaaac65f9adca537692e8fc7212923d"
+}

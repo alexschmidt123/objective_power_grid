@@ -1,0 +1,66 @@
+{
+  "status": "prepared_pending_fixed_budget_ScoreBED_smoke",
+  "methods": [
+    "random",
+    "fixed",
+    "dad",
+    "rl_sboed",
+    "vsoed",
+    "scorebed",
+    "moe",
+    "resmoe",
+    "switchmoe",
+    "switchresmoe"
+  ],
+  "training_seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "training_episodes_per_method": 1000000,
+  "base_episodes": 500000,
+  "residual_episodes": 500000,
+  "evaluation_seed": 1001,
+  "reserved_final_seed": 8831001,
+  "reserved_final_seed_used": false,
+  "checkpoint_selection": "final_fixed_budget",
+  "validation": "diagnostic_only",
+  "primary_pairs": [
+    [
+      "resmoe",
+      "scorebed"
+    ],
+    [
+      "resmoe",
+      "dad"
+    ],
+    [
+      "resmoe",
+      "moe"
+    ],
+    [
+      "switchmoe",
+      "moe"
+    ],
+    [
+      "switchresmoe",
+      "resmoe"
+    ],
+    [
+      "switchresmoe",
+      "switchmoe"
+    ]
+  ],
+  "statistical_rule": "Paired training-seed mean differences; Student t95CI and Bonferroni simultaneous95CI over6contrasts; conclusions use simultaneous interval; trajectory MC intervals separately",
+  "training_seed101": "Development-used seed, reused only if compatible;102\u2013105 independent fixed-configuration replications; no best-seed selection",
+  "SIR_status": "readiness/calibration pending; T5 only; no SIR multiseed launch",
+  "resource_safety": {
+    "location_phase_seconds": 10800,
+    "sir_phase_seconds": 90000,
+    "whole_campaign_seconds": 604800
+  },
+  "resume": "Completed phase markers can be reused; partial native training is not silently resumed or counted as complete",
+  "git_commit": "123aed276aaaac65f9adca537692e8fc7212923d"
+}

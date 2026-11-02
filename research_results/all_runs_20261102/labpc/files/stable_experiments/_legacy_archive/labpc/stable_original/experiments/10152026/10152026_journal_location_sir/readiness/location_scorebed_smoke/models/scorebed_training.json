@@ -1,0 +1,146 @@
+{
+  "training": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+  "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+  "generated_training_trajectories": 34,
+  "training_forward_trajectories": 34,
+  "contrast_training_trajectories": 0,
+  "training_trajectory_budget": 34,
+  "training_budget_unit": "primary_episodes",
+  "initialization_trajectories": 18,
+  "standardisation_trajectories": 4,
+  "score_training_trajectories": 8,
+  "policy_training_trajectories": 8,
+  "score_batch": 4,
+  "actual_score_updates": 2,
+  "actual_policy_updates": 2,
+  "training_seconds": 27.97725252993405,
+  "history": [
+    {
+      "phase": "score",
+      "step": 2,
+      "episodes": 8,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 2631.841552734375,
+        "loss_total": 133.2887725830078,
+        "loss_unweighted_total": 5.279285430908203,
+        "loss_x_component": 0.8651650547981262,
+        "loss_y_component": 132.42361450195312,
+        "loss_y_unweighted": 4.414120674133301,
+        "param_norm": 129.06398010253906,
+        "update_norm": 0.31602439284324646
+      }
+    }
+  ],
+  "checkpoint_selection": "best_predeclared_validation_EIG",
+  "architecture": "official_4layer_256dim_8head_RFF_conservative_transformer",
+  "policy_architecture": "official_DADNet_256_16_sum_encoder",
+  "adaptations": "1million total primary episodes including normalization and initialization; one fresh policy; 70percent remaining budget score pretraining; smaller minibatches under capped budget; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions",
+  "design_bounds": [
+    -4.0,
+    4.0
+  ],
+  "bounded_mapping": "lo+(hi-lo)*sigmoid(raw_policy_output); teacher design sampler mapped into same box",
+  "runtime": {
+    "jax": "0.7.2",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  },
+  "policy_bridge_max_absolute_error": 4.76837158203125e-07,
+  "policy_parameters": 5170,
+  "reported_eig": "shared held-out explicit-likelihood evaluator, never score network estimates",
+  "convergence_status": "budget_limited",
+  "journal_validation_history": [
+    {
+      "checkpoint": 1,
+      "episodes": 30,
+      "training_seconds": 25.18976705800742,
+      "eig": 1.9955245043152492,
+      "mc_standard_error": 0.15627220383906915,
+      "paired_improvement_from_anchor": null,
+      "improvement_threshold": null,
+      "patience_used": 0,
+      "selected": true,
+      "status": "training",
+      "update": 1,
+      "validation": {
+        "seed": 771001,
+        "systems": 4,
+        "contrasts": 8,
+        "paired_draws_sha256": "8d7db6e662029bce531854502b7d4b43f3e3442369922c7573cc0360a66a65a7",
+        "seconds": 1.0305739569012076,
+        "forward_particle_stages": 1080,
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false,
+        "consumer_seconds": 0.24743652204051614
+      }
+    },
+    {
+      "checkpoint": 2,
+      "episodes": 34,
+      "training_seconds": 25.20700506004505,
+      "eig": 1.9935683933203268,
+      "mc_standard_error": 0.15741994626111158,
+      "paired_improvement_from_anchor": -0.001956110994922433,
+      "improvement_threshold": 0.01,
+      "patience_used": 1,
+      "selected": false,
+      "status": "budget_limited",
+      "update": 2,
+      "validation": {
+        "seed": 771001,
+        "systems": 4,
+        "contrasts": 8,
+        "paired_draws_sha256": "8d7db6e662029bce531854502b7d4b43f3e3442369922c7573cc0360a66a65a7",
+        "seconds": 1.0296062270645052,
+        "forward_particle_stages": 1080,
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false,
+        "consumer_seconds": 0.24025008804164827
+      }
+    }
+  ],
+  "validation_seconds": 2.060180183965713,
+  "optimization_seconds": 27.97725252993405,
+  "stopping_rule": {
+    "minimum_episodes": 8,
+    "minimum_checkpoints": 2,
+    "validation_every_episodes": 4,
+    "patience": 2,
+    "minimum_improvement": 0.01,
+    "noise_multiplier": 1.96,
+    "maximum_episodes": 34,
+    "maximum_training_seconds": 120
+  },
+  "selected_checkpoint": {
+    "checkpoint": 1,
+    "episodes": 30,
+    "training_seconds": 25.18976705800742,
+    "eig": 1.9955245043152492,
+    "mc_standard_error": 0.15627220383906915,
+    "paired_improvement_from_anchor": null,
+    "improvement_threshold": null,
+    "patience_used": 0,
+    "selected": true,
+    "status": "training",
+    "update": 1,
+    "validation": {
+      "seed": 771001,
+      "systems": 4,
+      "contrasts": 8,
+      "paired_draws_sha256": "8d7db6e662029bce531854502b7d4b43f3e3442369922c7573cc0360a66a65a7",
+      "seconds": 1.0305739569012076,
+      "forward_particle_stages": 1080,
+      "mode": "hard_deployed_policy",
+      "secondary_parameter_inference": false,
+      "consumer_seconds": 0.24743652204051614
+    }
+  },
+  "validation_seed": 771001,
+  "native_elapsed_seconds": 30.032721766037866,
+  "total_offline_seconds": 30.03743271389976,
+  "journal_protocol": "validation_convergence_v1",
+  "training_cap_is_not_target": true,
+  "checkpoint_sha256": "e1616bf4206065fa4b3eedac317dd9a67d9edf1291c50210f1b0f61dadf136f6"
+}

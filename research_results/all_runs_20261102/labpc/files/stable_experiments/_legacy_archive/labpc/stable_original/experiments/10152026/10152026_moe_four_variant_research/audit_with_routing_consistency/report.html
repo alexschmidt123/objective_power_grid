@@ -1,0 +1,40 @@
+<!doctype html><meta charset="utf-8"><title>MoE-sBOED controlled research report</title><style>body{font:16px system-ui;max-width:1200px;margin:35px auto;padding:0 25px;color:#182431}table{border-collapse:collapse;width:100%;margin:20px 0}th,td{padding:9px;border-bottom:1px solid #ddd;text-align:left}img{max-width:100%}pre{white-space:pre-wrap;background:#f3f5f7;padding:16px}</style><h1>MoE-sBOED: four-variant research report</h1><p>Development study. Full results are reported only for completed runs. No statistical superiority across training seeds is claimed.</p><h2>A. Exactly four MoE-sBOED variants</h2><table><tr><th>Model</th><th>EIG</th><th>95% trajectory MC interval</th><th>Additional / total training episodes</th><th>Training + base time (min)</th><th>Status</th></tr><tr><td>MoE-sBOED</td><td>9.82944</td><td>[9.73534, 9.92353]</td><td>1,000,000 / 1,000,000</td><td>27.18 + 0.00</td><td>Complete</td></tr><tr><td>ResMoE-sBOED</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Pending</td></tr><tr><td>SwitchMoE-sBOED</td><td>10.23554</td><td>[10.14986, 10.32122]</td><td>1,000,000 / 1,000,000</td><td>30.73 + 0.00</td><td>Complete</td></tr><tr><td>SwitchResMoE-sBOED</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Pending</td></tr></table><table><tr><th>Variant</th><th>Total parameters</th><th>Pretrained</th><th>Newly initialized</th><th>Active first routed</th><th>Active later routed</th></tr><tr><td>MoE-sBOED</td><td>72,544</td><td>0</td><td>72,544</td><td>22,424</td><td>22,424</td></tr><tr><td>ResMoE-sBOED</td><td>126,306</td><td>58,900</td><td>67,406</td><td>76,186</td><td>76,186</td></tr><tr><td>SwitchMoE-sBOED</td><td>72,742</td><td>0</td><td>72,742</td><td>22,424</td><td>22,622</td></tr><tr><td>SwitchResMoE-sBOED</td><td>126,504</td><td>58,900</td><td>67,604</td><td>76,186</td><td>76,384</td></tr></table><p>Measured unique parameters touched by a batch-one hard forward. Counts include frozen base parameters when executed. Later counts depend on whether rerouting occurs; these values are the measured checkpoint decision, not estimates.</p><h2>B. External algorithms and strong single-policy controls</h2><table><tr><th>Model</th><th>EIG</th><th>95% trajectory MC interval</th><th>Additional / total training episodes</th><th>Training + base time (min)</th><th>Status</th></tr><tr><td>Random</td><td>8.26624</td><td>[8.17985, 8.35262]</td><td>0 / 0</td><td>0.00 + 0.00</td><td>Complete</td></tr><tr><td>Optimized Fixed</td><td>8.85782</td><td>[8.78007, 8.93557]</td><td>1,000,000 / 1,000,000</td><td>6.70 + 0.00</td><td>Complete</td></tr><tr><td>DAD reference</td><td>9.76665</td><td>[9.67460, 9.85871]</td><td>1,000,000 / 1,000,000</td><td>10.70 + 0.00</td><td>Complete</td></tr><tr><td>RL-sBOED</td><td>9.49698</td><td>[9.41168, 9.58229]</td><td>1,000,000 / 1,000,000</td><td>10.32 + 0.00</td><td>Complete</td></tr><tr><td>ScoreBED</td><td>9.91568</td><td>[9.81331, 10.01804]</td><td>1,000,000 / 1,000,000</td><td>3.51 + 0.00</td><td>Complete</td></tr><tr><td>vsOED (latest corrected)</td><td>8.58218</td><td>[8.48747, 8.67688]</td><td>1,000,000 / 1,000,000</td><td>11.24 + 0.00</td><td>Complete</td></tr><tr><td>DAD-MLP</td><td>10.66260</td><td>[10.57288, 10.75232]</td><td>1,000,000 / 1,000,000</td><td>12.16 + 0.00</td><td>Complete</td></tr><tr><td>DAD-MLP continued training</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Pending</td></tr><tr><td>Matched193-input single policy</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Pending</td></tr></table><h2>C. Mechanism diagnostics</h2><p>The first learned measurement is excluded from expert usage. Gradient exposure thresholds and all stage-wise data are retained in machine-readable outputs. Training sPCE values are not held-out EIG.</p><p><a href="four_variant_eig.svg"><img src="four_variant_eig.png" alt="four_variant_eig"></a></p><p><a href="expert_utilization_gradient_exposure.svg"><img src="expert_utilization_gradient_exposure.png" alt="expert_utilization_gradient_exposure"></a></p><p><a href="stage_utilization_switching.svg"><img src="stage_utilization_switching.png" alt="stage_utilization_switching"></a></p><p><a href="strategy_durations.svg"><img src="strategy_durations.png" alt="strategy_durations"></a></p><p><a href="training_curves_score_distributions.svg"><img src="training_curves_score_distributions.png" alt="training_curves_score_distributions"></a></p><p><a href="hard_relaxed_eig.svg"><img src="hard_relaxed_eig.png" alt="hard_relaxed_eig"></a></p><h2>D. Controlled improvement</h2><p>Not selected or run yet. Selection waits for all four initial results and mechanism diagnostics.</p><h2>E. Reproducibility and paired differences</h2><p><a href="research_report.json">Complete configurations, source paths, costs, diagnostics and limitations (JSON)</a> · <a href="results.csv">Results CSV</a></p><pre>{
+  &quot;moe_minus_single&quot;: {
+    &quot;n&quot;: 2000,
+    &quot;mean&quot;: -0.8331626377487782,
+    &quot;mc_standard_error&quot;: 0.05843620525447546,
+    &quot;conditional_95_interval&quot;: [
+      -0.9476976000475501,
+      -0.7186276754500063
+    ]
+  },
+  &quot;moe_minus_continued&quot;: null,
+  &quot;moe_minus_matched&quot;: null,
+  &quot;resmoe_minus_single&quot;: null,
+  &quot;resmoe_minus_continued&quot;: null,
+  &quot;resmoe_minus_matched&quot;: null,
+  &quot;switchmoe_minus_single&quot;: {
+    &quot;n&quot;: 2000,
+    &quot;mean&quot;: -0.42706187777694454,
+    &quot;mc_standard_error&quot;: 0.05745345516482309,
+    &quot;conditional_95_interval&quot;: [
+      -0.5396706498999978,
+      -0.3144531056538913
+    ]
+  },
+  &quot;switchmoe_minus_continued&quot;: null,
+  &quot;switchmoe_minus_matched&quot;: null,
+  &quot;switchresmoe_minus_single&quot;: null,
+  &quot;switchresmoe_minus_continued&quot;: null,
+  &quot;switchresmoe_minus_matched&quot;: null,
+  &quot;switchmoe_minus_moe&quot;: {
+    &quot;n&quot;: 2000,
+    &quot;mean&quot;: 0.40610075997183354,
+    &quot;mc_standard_error&quot;: 0.05787546527439462,
+    &quot;conditional_95_interval&quot;: [
+      0.2926648480340201,
+      0.519536671909647
+    ]
+  },
+  &quot;switchresmoe_minus_resmoe&quot;: null
+}</pre><h2>F. Research conclusions and limits</h2><ul><li>One independent training seed; MC intervals are not training-seed variation</li><li>Historical SwitchMoE uses legacy gamma schedule; original slower MoE and residual variants use30/95 cosine</li><li>Residual models include pretrained base effort; continued DAD-MLP is required for attribution</li><li>DAD-MLP input772 versus full-MoE input193; matched193 control reported separately</li><li>External RL-sBOED is an existing documented two-Q adaptation; exact published reproduction is not established</li><li>Forced-routing failures may reflect out-of-distribution histories</li></ul><p>Incomplete experiments and the one controlled intervention remain pending where indicated. Expert proposal differences alone do not establish useful specialization.</p>

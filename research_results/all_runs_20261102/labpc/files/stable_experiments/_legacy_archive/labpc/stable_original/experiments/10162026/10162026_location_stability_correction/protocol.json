@@ -1,0 +1,91 @@
+{
+  "created_utc": "2026-10-16T21:11:13.564668+00:00",
+  "status": "predeclared_before_candidate_training",
+  "family_ids": [
+    "moe",
+    "switchmoe"
+  ],
+  "only_training_factor_changed": {
+    "moe_router_minimum_gamma": {
+      "original": 0.001,
+      "candidate": 0.01
+    }
+  },
+  "preserved": {
+    "warmup": 0.3,
+    "finish": 0.95,
+    "episodes": 1000000,
+    "contrasts": 1024,
+    "batch_size": 64,
+    "experts": 4,
+    "hidden": [
+      64,
+      64
+    ],
+    "activation": "tanh",
+    "gradient_clip": "component5",
+    "encoder": "sum",
+    "checkpoint_selection": "final_fixed_budget",
+    "switch_initial_reroute": 0.99
+  },
+  "initial_seeds": [
+    102,
+    103
+  ],
+  "remaining_seeds_if_accepted": [
+    101,
+    104,
+    105
+  ],
+  "evaluation": {
+    "seed": 1001,
+    "systems": 2000,
+    "contrasts": 1000000,
+    "paired": true
+  },
+  "diagnostic": {
+    "seeds": [
+      102,
+      103,
+      104
+    ],
+    "systems": 512,
+    "contrasts": 1000000,
+    "reference": "same existing bank and first512 paired cases; not main result"
+  },
+  "selection_rule": {
+    "require_all_four_completed_exact_budget": true,
+    "failed_seed103_each_variant": {
+      "mean_eig_improvement_at_least": 0.5,
+      "paired_mc_95_lower_above": 0,
+      "late_router_p99_at_most_original_fraction": 0.1
+    },
+    "successful_seed102_each_variant": {
+      "mean_eig_difference_at_least": -0.1,
+      "paired_mc_95_lower_above": -0.2
+    },
+    "hard_relaxed": {
+      "diagnostic_systems": 512,
+      "maximum_increase_in_absolute_mean_gap": 0.2
+    },
+    "action_on_failure": "Preserve negative results; stop without another configuration search"
+  },
+  "resource_limits": {
+    "max_training_seconds_per_model": 7200,
+    "max_wall_seconds_per_model": 10800,
+    "minimum_free_disk_GiB": 10,
+    "wait_for_existing_SIR_campaign_and_other_GPU_jobs": true,
+    "queue_wait_cap_days": 7,
+    "additional_training_primary_episodes_initial": 4000000,
+    "additional_training_primary_episodes_if_expanded": 6000000,
+    "validation_and_diagnostics_separate_from_training": true
+  },
+  "scope_exclusions": [
+    "No vsOED retraining",
+    "No ScoreBED retraining absent training defect",
+    "No residual retraining",
+    "No final seed8831001",
+    "No changes to original frozen repository"
+  ],
+  "interpretation": "All101\u2013105 are development-used. Fresh-seed confirmation is separate and not launched automatically."
+}

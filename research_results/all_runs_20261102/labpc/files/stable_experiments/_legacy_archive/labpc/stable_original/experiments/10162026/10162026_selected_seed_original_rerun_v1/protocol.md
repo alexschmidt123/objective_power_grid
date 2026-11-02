@@ -1,0 +1,3 @@
+# Selected-seed original-setting reruns
+
+Exactly MoE103,SwitchMoE103,ScoreBED102, from scratch,1M total primary episodes each. Original frozen architecture, training objective, optimization and gamma0.001/30%/95% restored by copying original source. Only ScoreBED diagnostic validation bounds metadata fix retained. Existing main source, historical checkpoints and candidate negative results are not overwritten. Common2000/L1M/1001 evaluator, final-budget checkpoints, paired cases/bank hashes checked. No additional seeds, ScoreBED training modifications, best-repeat selection, or SIR auto-start. Selected-seed repeats are diagnostic and do not establish reduced across-seed variance.
