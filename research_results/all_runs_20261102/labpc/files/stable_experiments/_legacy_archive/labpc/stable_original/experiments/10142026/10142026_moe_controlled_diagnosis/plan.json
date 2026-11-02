@@ -1,0 +1,31 @@
+{
+  "models": {
+    "A": "sum_single",
+    "B": "attention_single",
+    "C": "attention_dense_moe",
+    "D": "attention_sparse_moe",
+    "capacity_control": "attention_matched_dense"
+  },
+  "cost_estimate_hours": [
+    4,
+    5
+  ],
+  "basis": "measured DAD11min/MoE30min training plus15-20min common final eval per model; allowance for intermediate validation",
+  "train_seed": 101,
+  "eval_seed": 1001,
+  "training_episodes_per_model": 1000000,
+  "training_L": 1024,
+  "eval_L": 1000000,
+  "eval_trajectories": 2000,
+  "clipping": "component norm5 for every model",
+  "sparse_schedule": "legacy gamma1 to.001 by80percent",
+  "unavoidable_differences": [
+    "A uses original DAD sum encoder but common64/64tanh control head; native16 context zero padded to772, differs from published linear DAD emitter",
+    "B sees all4 attention contexts flattened772; each MoE expert sees its193 context",
+    "A and B start from separately initialized encoders; all first actions learn fromraw0",
+    "D retains intrinsic tiny selector/load regularizers; dense C has no selector entropy",
+    "active parameter count measures selected expert MLP; shared attention still computes4 pools"
+  ],
+  "original_dad_baseline": "reused 9.76665; separate from A architecture control",
+  "decision": "No extra correction or multiseed campaign until controls support a cause"
+}

@@ -1,0 +1,124 @@
+{
+  "training": "pathwise_sPCE_architecture_control",
+  "base_pretraining": {
+    "pretrained": true,
+    "path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_moe_controlled_diagnosis/controls/models/sum_single.pt",
+    "sha256": "ec309d224a5c69a9b8ab9574b094f5d4225db506b2c352bbe88e4453865ac300",
+    "input_dim": 772,
+    "benchmark": "location_finding",
+    "training_episodes": 1000000,
+    "training_seconds": 729.7960161538795,
+    "action_scale": 4.0,
+    "obs_scale": 3.0
+  },
+  "additional_training_episodes": 8,
+  "total_training_episodes": 1000008,
+  "base_training_seconds": 729.7960161538795,
+  "training_seconds": 0.2526970519684255,
+  "diagnostic_validation_seconds": 0.0,
+  "generated_training_trajectories": 8,
+  "contrast_training_trajectories": 64,
+  "training_forward_trajectories": 72,
+  "history": [
+    {
+      "update": 1,
+      "primary_episodes": 4,
+      "contrast_trajectories": 32,
+      "training_eig": 2.1972245773362182,
+      "gradient_norm": 6.0840750387217465e-18,
+      "gradient_before": {
+        "encoder": 4.0249813895448504e-18,
+        "head": 4.516590883814495e-18,
+        "first_design": 6.449036198211474e-19
+      },
+      "gradient_after": {
+        "encoder": 4.0249813895448504e-18,
+        "head": 4.516590883814495e-18,
+        "first_design": 6.449036198211474e-19
+      },
+      "clip_scale": null,
+      "gradient_clip_mode": "component",
+      "gamma": null,
+      "collapse_penalty": 0.0,
+      "selector_entropy": 0.0,
+      "training_score_distribution": {
+        "mean": 2.1972245773362182,
+        "quantiles": [
+          2.1972245773362182,
+          2.1972245773362182,
+          2.1972245773362182,
+          2.1972245773362182,
+          2.1972245773362182,
+          2.1972245773362182
+        ],
+        "fraction_within_01_of_ceiling": 1.0,
+        "fraction_within_05_of_ceiling": 1.0
+      },
+      "training_scores": [
+        2.1972245773362182,
+        2.1972245773362182,
+        2.1972245773362182,
+        2.1972245773362182
+      ]
+    },
+    {
+      "update": 2,
+      "primary_episodes": 8,
+      "contrast_trajectories": 64,
+      "training_eig": 2.1972245773361987,
+      "gradient_norm": 2.102766887398458e-11,
+      "gradient_before": {
+        "encoder": 1.7226082618585655e-11,
+        "head": 1.1366796460223215e-11,
+        "first_design": 4.02751463354985e-12
+      },
+      "gradient_after": {
+        "encoder": 1.7226082618585655e-11,
+        "head": 1.1366796460223215e-11,
+        "first_design": 4.02751463354985e-12
+      },
+      "clip_scale": null,
+      "gradient_clip_mode": "component",
+      "gamma": null,
+      "collapse_penalty": 0.0,
+      "selector_entropy": 0.0,
+      "training_score_distribution": {
+        "mean": 2.1972245773361987,
+        "quantiles": [
+          2.19722457733614,
+          2.1972245773361636,
+          2.1972245773362182,
+          2.1972245773362182,
+          2.1972245773362182,
+          2.1972245773362182
+        ],
+        "fraction_within_01_of_ceiling": 1.0,
+        "fraction_within_05_of_ceiling": 1.0
+      },
+      "training_scores": [
+        2.19722457733614,
+        2.1972245773362182,
+        2.1972245773362182,
+        2.1972245773362182
+      ]
+    }
+  ],
+  "validation_history": [],
+  "validation_not_used_for_checkpoint_selection": true,
+  "diagnostic_trace": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_003211_115551_location_finding_research_eig_T30_train101/models/sum_single_diagnostics.jsonl",
+  "policy_parameters": 58900,
+  "trainable_parameters": 58900,
+  "active_parameter_definition": "non-first stages: shared encoder+router+one selected expert for sparse; all modules for dense; excludes separate first-action",
+  "active_parameters_nonfirst": 58898,
+  "gradient_clip_mode": "component",
+  "parameter_groups": {
+    "encoder": 5136,
+    "head": 53762,
+    "first_design": 2
+  },
+  "matched_target_parameters": null,
+  "checkpoint_selection": "final",
+  "architecture": "existing_encoder_routing_ablation_v1:sum_single",
+  "routing_algorithm": "none",
+  "checkpoint_sha256": "14ae872d5698a01f35dce7d9029323b3b821411d902546614e37109f96a3038d"
+}
