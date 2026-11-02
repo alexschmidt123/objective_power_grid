@@ -1,0 +1,395 @@
+{
+  "initialization_seconds": 13.812208341027144,
+  "score_pretraining_seconds": 732.9622114999802,
+  "policy_training_seconds": 51.75903258199105,
+  "training": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+  "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+  "logical_primary_ODE_stage_evaluations": 5000000,
+  "minimum_primary_RK4_steps": 2560000000,
+  "solver_work_note": "Lower bound on primal solver work; adaptive subdivisions and autodiff extra work are not claimed as exact FLOPs",
+  "sir_score_adapter_revision": 2,
+  "potential_hidden_dim": 256,
+  "score_dimension_compatibility": "Pinned native potential_hidden_dim avoids scalar-data/scalar-time LayerNorm degeneracy; unchanged Transformer, loss, optimizers and training allocation",
+  "reported_policy_parameters": "params_ema",
+  "random_streams": "native derive_key score_trainer and policy_trainer/restart0",
+  "generated_training_trajectories": 1000000,
+  "training_forward_trajectories": 1000000,
+  "contrast_training_trajectories": 0,
+  "training_trajectory_budget": 1000000,
+  "training_budget_unit": "primary_episodes",
+  "initialization_trajectories": 100014,
+  "standardisation_trajectories": 100000,
+  "score_training_trajectories": 897736,
+  "policy_training_trajectories": 2250,
+  "budget_reconciliation": {
+    "budget": 1000000,
+    "initialization": 100014,
+    "score": 897736,
+    "policy": 2250,
+    "score_fraction": "399/400",
+    "batch": 1024,
+    "score_updates": 877,
+    "policy_updates": 3,
+    "score_final_batch": 712,
+    "policy_final_batch": 202,
+    "rounding": "floor score allocation; remainder to policy; partial final minibatches only"
+  },
+  "score_batch": 1024,
+  "actual_score_updates": 877,
+  "actual_policy_updates": 3,
+  "training_seconds": 799.0040295459912,
+  "history": [
+    {
+      "phase": "score",
+      "step": 50,
+      "episodes": 51200,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.007774071067268674,
+        "loss_total": 176.0600470335826,
+        "loss_unweighted_total": 177.02456033035588,
+        "loss_x_component": 176.0403630887505,
+        "loss_y_component": 0.01968394483210739,
+        "loss_y_unweighted": 0.9841972416053694,
+        "param_norm": 136.25594835272554,
+        "update_norm": 0.020342883306201875
+      }
+    },
+    {
+      "phase": "score",
+      "step": 100,
+      "episodes": 102400,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.006800348299122313,
+        "loss_total": 145.9695839676326,
+        "loss_unweighted_total": 146.96793845223522,
+        "loss_x_component": 145.94920938631415,
+        "loss_y_component": 0.0203745813184213,
+        "loss_y_unweighted": 1.0187290659210646,
+        "param_norm": 136.25522023665673,
+        "update_norm": 0.007304036673756013
+      }
+    },
+    {
+      "phase": "score",
+      "step": 150,
+      "episodes": 153600,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.002116891803050872,
+        "loss_total": 168.33330418276793,
+        "loss_unweighted_total": 169.3029702036951,
+        "loss_x_component": 168.31351508030002,
+        "loss_y_component": 0.019789102467901904,
+        "loss_y_unweighted": 0.9894551233950952,
+        "param_norm": 136.25515828820824,
+        "update_norm": 0.004161874168899959
+      }
+    },
+    {
+      "phase": "score",
+      "step": 200,
+      "episodes": 204800,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.0030604306409027105,
+        "loss_total": 135.2167803427463,
+        "loss_unweighted_total": 136.19574270426295,
+        "loss_x_component": 135.19680151904186,
+        "loss_y_component": 0.01997882370442216,
+        "loss_y_unweighted": 0.9989411852211081,
+        "param_norm": 136.25587683599542,
+        "update_norm": 0.006101029009192156
+      }
+    },
+    {
+      "phase": "score",
+      "step": 250,
+      "episodes": 256000,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.007451612206528884,
+        "loss_total": 155.5437623661343,
+        "loss_unweighted_total": 156.5466290449205,
+        "loss_x_component": 155.5232956992203,
+        "loss_y_component": 0.020466666914003496,
+        "loss_y_unweighted": 1.0233333457001748,
+        "param_norm": 136.2577492307309,
+        "update_norm": 0.016740439970660943
+      }
+    },
+    {
+      "phase": "score",
+      "step": 300,
+      "episodes": 307200,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.009185959159790478,
+        "loss_total": 202.58083700694033,
+        "loss_unweighted_total": 203.56929590110906,
+        "loss_x_component": 202.56066437644708,
+        "loss_y_component": 0.02017263049324014,
+        "loss_y_unweighted": 1.008631524662007,
+        "param_norm": 136.26871788567823,
+        "update_norm": 0.10641820847592945
+      }
+    },
+    {
+      "phase": "score",
+      "step": 350,
+      "episodes": 358400,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.027478105944154917,
+        "loss_total": 165.51518502287445,
+        "loss_unweighted_total": 166.47996441188465,
+        "loss_x_component": 165.4954956475885,
+        "loss_y_component": 0.01968937528592206,
+        "loss_y_unweighted": 0.984468764296103,
+        "param_norm": 136.28666209915636,
+        "update_norm": 0.04830340416585068
+      }
+    },
+    {
+      "phase": "score",
+      "step": 400,
+      "episodes": 409600,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.004610740131207288,
+        "loss_total": 210.75498096348323,
+        "loss_unweighted_total": 211.77641994596326,
+        "loss_x_component": 210.73413526996325,
+        "loss_y_component": 0.02084569351999974,
+        "loss_y_unweighted": 1.042284675999987,
+        "param_norm": 136.28808555970863,
+        "update_norm": 0.01207923498308209
+      }
+    },
+    {
+      "phase": "score",
+      "step": 450,
+      "episodes": 460800,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.0011568978551413356,
+        "loss_total": 219.20199819206394,
+        "loss_unweighted_total": 220.2019060110427,
+        "loss_x_component": 219.18159191004398,
+        "loss_y_component": 0.020406282019974804,
+        "loss_y_unweighted": 1.0203141009987404,
+        "param_norm": 136.28918391452018,
+        "update_norm": 0.00271639599451811
+      }
+    },
+    {
+      "phase": "score",
+      "step": 500,
+      "episodes": 512000,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.001927719952319593,
+        "loss_total": 217.42498575426953,
+        "loss_unweighted_total": 218.3988195853075,
+        "loss_x_component": 217.40511159445242,
+        "loss_y_component": 0.019874159817101375,
+        "loss_y_unweighted": 0.9937079908550688,
+        "param_norm": 136.28896286410654,
+        "update_norm": 0.0015179882035376545
+      }
+    },
+    {
+      "phase": "score",
+      "step": 550,
+      "episodes": 563200,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.007368420341712801,
+        "loss_total": 182.15113220847044,
+        "loss_unweighted_total": 183.11865121557392,
+        "loss_x_component": 182.1313869226112,
+        "loss_y_component": 0.019745285859254433,
+        "loss_y_unweighted": 0.9872642929627218,
+        "param_norm": 136.28877163939333,
+        "update_norm": 0.0028472625696386485
+      }
+    },
+    {
+      "phase": "score",
+      "step": 600,
+      "episodes": 614400,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.003972755001595406,
+        "loss_total": 153.22140020622157,
+        "loss_unweighted_total": 154.21113232058906,
+        "loss_x_component": 153.20120159164264,
+        "loss_y_component": 0.020198614578928485,
+        "loss_y_unweighted": 1.009930728946424,
+        "param_norm": 136.2887929500045,
+        "update_norm": 0.0019093056581724205
+      }
+    },
+    {
+      "phase": "score",
+      "step": 650,
+      "episodes": 665600,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.0027378846782072272,
+        "loss_total": 269.07663755695467,
+        "loss_unweighted_total": 270.0856364217969,
+        "loss_x_component": 269.05604574338645,
+        "loss_y_component": 0.020591813568208592,
+        "loss_y_unweighted": 1.0295906784104294,
+        "param_norm": 136.2885671262482,
+        "update_norm": 0.0012360802216005488
+      }
+    },
+    {
+      "phase": "score",
+      "step": 700,
+      "episodes": 716800,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.006616777496444944,
+        "loss_total": 193.65829094572774,
+        "loss_unweighted_total": 194.62140699453127,
+        "loss_x_component": 193.63863551616032,
+        "loss_y_component": 0.019655429567418642,
+        "loss_y_unweighted": 0.9827714783709319,
+        "param_norm": 136.28864291334665,
+        "update_norm": 0.0016207165189531917
+      }
+    },
+    {
+      "phase": "score",
+      "step": 750,
+      "episodes": 768000,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.0021766022635916833,
+        "loss_total": 236.85467952110184,
+        "loss_unweighted_total": 237.83409350523334,
+        "loss_x_component": 236.83469148060937,
+        "loss_y_component": 0.019988040492479948,
+        "loss_y_unweighted": 0.9994020246239974,
+        "param_norm": 136.28871414849993,
+        "update_norm": 0.0007566701166511383
+      }
+    },
+    {
+      "phase": "score",
+      "step": 800,
+      "episodes": 819200,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.0026267620820752424,
+        "loss_total": 160.14494802925887,
+        "loss_unweighted_total": 161.14055924910434,
+        "loss_x_component": 160.1246294329355,
+        "loss_y_component": 0.02031859632337709,
+        "loss_y_unweighted": 1.0159298161688544,
+        "param_norm": 136.2887264162269,
+        "update_norm": 0.00034230152551501555
+      }
+    },
+    {
+      "phase": "score",
+      "step": 850,
+      "episodes": 870400,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.0016200072217019187,
+        "loss_total": 199.8769001834792,
+        "loss_unweighted_total": 200.80702182683382,
+        "loss_x_component": 199.85791810912502,
+        "loss_y_component": 0.018982074354176023,
+        "loss_y_unweighted": 0.9491037177088013,
+        "param_norm": 136.28876168381657,
+        "update_norm": 0.0005369654155631868
+      }
+    },
+    {
+      "phase": "score",
+      "step": 877,
+      "episodes": 897736,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.0025011844633107227,
+        "loss_total": 227.82847969089286,
+        "loss_unweighted_total": 228.8109946747135,
+        "loss_x_component": 227.80842836469245,
+        "loss_y_component": 0.020051326200421132,
+        "loss_y_unweighted": 1.0025663100210565,
+        "param_norm": 136.28874693525682,
+        "update_norm": 0.0006201782187933029
+      }
+    }
+  ],
+  "checkpoint_selection": "final",
+  "architecture": "official_4layer_256dim_8head_RFF_conservative_transformer",
+  "policy_architecture": "official_IqbalGRUNet_256_256_64_two_GRU_64_256_256",
+  "adaptations": "1million total primary episodes including normalization and initialization; one fresh policy; published dynamical-system P1 99.75:0.25 allocation transferred to SIR; original batch1024; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions",
+  "design_bounds": [
+    0.0,
+    100.0
+  ],
+  "bounded_mapping": "chronological feasible-time sigmoid with minimum spacing",
+  "sir_configuration": {
+    "population": 500.0,
+    "i0": 2.0,
+    "t_end": 100.0,
+    "min_spacing": 0.1,
+    "integration_steps_per_stage": 512,
+    "beta_mean": 0.5,
+    "gamma_mean": 0.10000000000000002,
+    "log_std": 0.5,
+    "sigma": 1.0
+  },
+  "runtime": {
+    "jax": "0.7.2",
+    "devices": [
+      "cuda:0"
+    ]
+  },
+  "resource_ledger": {
+    "schema": 2,
+    "scope": "current training phase; base cost separately attributed",
+    "counts": {
+      "fresh_complete_episodes": 1000000,
+      "true_parameter_stage_propagations": 5000000,
+      "contrast_parameter_stage_propagations": 0,
+      "scalar_conditional_log_density_evaluations": null
+    },
+    "optimizer_updates": {
+      "policy": 3,
+      "critic": null,
+      "posterior": null,
+      "score": 877,
+      "temperature": null
+    },
+    "replay_transition_samples": null,
+    "offline_seconds": 799.0040295459912,
+    "validation_seconds": null,
+    "base_training_seconds": null,
+    "ode_rhs_evaluations": null,
+    "solver_backward_work": null,
+    "gpu_occupancy_seconds": null,
+    "nle_equivalent_proxy": {
+      "value": 4488680,
+      "unit": "conditional Gaussian stage terms differentiated for score targets",
+      "basis": "model estimate, not equal-cost hardware work"
+    },
+    "basis": "derived from native executed counters, not direct hardware measurement",
+    "limitations": [
+      "score-target and backward recomputation not counted",
+      "Unknown fields are not zero; walltime is not GPU occupancy"
+    ],
+    "likelihood_gradient_work": {
+      "scalar_stage_terms": 4488680,
+      "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+    }
+  }
+}

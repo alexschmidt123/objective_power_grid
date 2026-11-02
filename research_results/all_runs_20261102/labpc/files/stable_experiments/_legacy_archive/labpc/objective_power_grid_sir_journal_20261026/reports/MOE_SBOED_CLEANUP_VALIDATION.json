@@ -1,0 +1,53 @@
+{
+  "status": "VALIDATED_FOR_SCOPE_CLEANUP",
+  "branch": "research/moe-project-scope-cleanup-20261026",
+  "base_commit": "04b221d2155a59e2afb9d0108c45b22a5702eb8b",
+  "foundation_commit": "13681d7091189a4e68056e6a2864dc58f9d5700b",
+  "foundation_files_unchanged": 6,
+  "source_transfer_files_verified": 139,
+  "archived_original_files_verified": 63,
+  "source_transfer_manifest_sha256": "e575093df20527d73c3cb0d21d79d3558f4379853769fa5b1de1ed1f70b9b6fa",
+  "machines": {
+    "UbuntuPC": {
+      "tests_passed": 19,
+      "tests_deselected": 2,
+      "test_seconds": 1.64,
+      "device": "CPU",
+      "warning": "Existing test converts requires-grad tensor to scalar; no failure"
+    },
+    "LabPC": {
+      "tests_passed": 19,
+      "tests_deselected": 2,
+      "test_seconds": 1.81,
+      "device": "CPU"
+    }
+  },
+  "test_command": "python -m pytest -q tools/tests/test_project_scope.py tools/tests/test_deepseek_sboed.py -k \"not small_controlled_learning and not existing_common_evaluator\"",
+  "deselected_reasons": [
+    "Avoid toy supervised optimizer training in scope cleanup",
+    "Avoid unnecessary small EIG evaluator run; no official evaluation authorized"
+  ],
+  "checks": [
+    "registered checkpoint digest and exact output compatibility",
+    "shared/routed/router and full-horizon gradients",
+    "actual top-three unnormalized gate semantics",
+    "all-stage frozen deployment with forbidden APIs patched",
+    "legacy/future registration and checkpoint substitution rejected",
+    "benchmark physics identity",
+    "conventional baseline aliases and all-selector/sourced shell compatibility",
+    "current configuration nested legacy keys absent",
+    "historical checkpoint metadata read-only",
+    "archive original checksums",
+    "all changed active Python files compile",
+    "shell syntax and git diff checks"
+  ],
+  "new_full_training_runs": 0,
+  "new_official_eig_evaluations": 0,
+  "new_gpu_locked_seconds": 0,
+  "existing_experiments_interrupted": false,
+  "SIR_moe_status": "PENDING_INDEPENDENT_VALIDATION",
+  "enhanced_versions_registered": [],
+  "specialization_claim": "NOT_PROVEN",
+  "publishing_machine": "LabPC only",
+  "merge_main": false
+}

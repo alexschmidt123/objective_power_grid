@@ -1,0 +1,24 @@
+[run.sh] Default results: experiments/MMDDYYYY/MMDDYYYY_<time>_<objective_parameters>/
+ScoreBED official {'phase': 'score', 'step': 50, 'episodes': 51200, 'metrics': {'clip_applied': 0.0, 'grad_norm_preclip': 353.8173828125, 'loss_total': 71.7721176147461, 'loss_unweighted_total': 8.339109420776367, 'loss_x_component': 6.151763916015625, 'loss_y_component': 65.62035369873047, 'loss_y_unweighted': 2.187345027923584, 'param_norm': 129.14923095703125, 'update_norm': 0.07049232721328735}}
+ScoreBED official {'phase': 'score', 'step': 100, 'episodes': 102400, 'metrics': {'clip_applied': 0.0, 'grad_norm_preclip': 66.22085571289062, 'loss_total': 60.907440185546875, 'loss_unweighted_total': 8.629384994506836, 'loss_x_component': 6.826694488525391, 'loss_y_component': 54.080745697021484, 'loss_y_unweighted': 1.8026914596557617, 'param_norm': 129.16201782226562, 'update_norm': 0.0207652747631073}}
+ScoreBED official {'phase': 'score', 'step': 150, 'episodes': 153600, 'metrics': {'clip_applied': 0.0, 'grad_norm_preclip': 196.6515655517578, 'loss_total': 47.589134216308594, 'loss_unweighted_total': 7.227229118347168, 'loss_x_component': 5.835439682006836, 'loss_y_component': 41.753692626953125, 'loss_y_unweighted': 1.3917896747589111, 'param_norm': 129.1713104248047, 'update_norm': 0.014973646029829979}}
+ScoreBED official {'phase': 'score', 'step': 190, 'episodes': 194560, 'metrics': {'clip_applied': 0.0, 'grad_norm_preclip': 112.69381713867188, 'loss_total': 44.85169982910156, 'loss_unweighted_total': 6.827985763549805, 'loss_x_component': 5.516823768615723, 'loss_y_component': 39.334877014160156, 'loss_y_unweighted': 1.3111624717712402, 'param_norm': 129.17474365234375, 'update_norm': 0.005617140792310238}}
+ScoreBED official {'phase': 'policy', 'restart': 0, 'step': 10, 'episodes': 10240, 'restart_episodes': 10240, 'metrics': {'clip_applied': 1.0, 'grad_norm_preclip': 126.9834976196289, 'param_norm': 10.725831985473633, 'update_norm': 0.003230405505746603}}
+ScoreBED common journal validation {'checkpoint': 1, 'episodes': 214814, 'training_seconds': 106.44921038113534, 'eig': 4.314878254197437, 'mc_standard_error': 0.4183689770332541, 'paired_improvement_from_anchor': None, 'improvement_threshold': None, 'patience_used': 0, 'selected': True, 'status': 'fixed_budget_complete', 'update': 10, 'validation': {'seed': 1001, 'systems': 16, 'contrasts': 16384, 'paired_draws_sha256': '59399c698a627fbd992b34bcd4bc3a8df095d51d27e0e1b454b52a468e70654e', 'seconds': 0.28406854066997766, 'forward_particle_stages': 7864800, 'device': 'cpu', 'mode': 'hard_deployed_policy', 'secondary_parameter_inference': False}}
+SCOREBED_OFFICIAL_TRAINING_COMPLETE
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/src/online_cli.py", line 60, in <module>
+    if __name__=='__main__':main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/src/online_cli.py", line 25, in main
+    research(argv if any(a.split("=")[0]=="--config" for a in argv) else ["--config",known.config,*argv])
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/src/research/runner.py", line 257, in main
+    return journal_main(args,raw,root)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/src/research/journal_run.py", line 182, in main
+    rows,summary=evaluate(b,p,method,h,settings,es,t,out,paper=True,infer_parameters=False,evaluation_draws=saved_draws)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/src/research/runner.py", line 108, in evaluate
+    raise ValueError('Frozen evaluation cases/bank shape mismatch')
+ValueError: Frozen evaluation cases/bank shape mismatch

@@ -1,0 +1,76 @@
+Log file: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01/logs/run_log.log
+=== run.sh (config=configs/ieee9_eig_duration_candidate.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+Result folder: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01
+Evaluate: dad rl_sboed moe_sboed myopic fixed random
+Train: dad rl_sboed moe_sboed
+=== data_generation (config=configs/ieee9_eig_duration_candidate.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+[generate-data] type=eig_based config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/ieee9_eig_duration_candidate.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01 smoke=False force=False methods=['dad', 'rl_sboed', 'moe_sboed', 'myopic', 'fixed', 'random']
+[generate-data] dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate_subset
+[generate-data] target bank missing at /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate_subset; selecting configured actions from larger bank /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01.
+Reused larger physical bank → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01
+  selected 54/2529 actions into /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate_subset without CUDA simulation (0.6s)
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[generate-data] reused=True type=eig_based train=512 test=128 actions=54
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01
+=== training method=dad (config=configs/ieee9_eig_duration_candidate.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.01 seed=101) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[eig:dad_eig] BC warm-start trajectories=96 horizon=3 n_actions=54 lookahead=two_step temp=0.5 actor_critic=False obs_seed=101
+[eig:dad_eig] BC 1/96
+[eig:dad_eig] BC 12/96
+[eig:dad_eig] BC 24/96
+[eig:dad_eig] BC 36/96
+[eig:dad_eig] BC 48/96
+[eig:dad_eig] BC 60/96
+[eig:dad_eig] BC 72/96
+[eig:dad_eig] BC 84/96
+[eig:dad_eig] BC 96/96
+[train] dad_eig val_eig=0.7259919475764036 uniq=3 stage=epoch_170 804s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01/model/dad_eig.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01
+=== training method=rl_sboed (config=configs/ieee9_eig_duration_candidate.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.01 seed=101) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[eig:rl_sboed_eig] BC warm-start trajectories=96 horizon=3 n_actions=54 lookahead=two_step temp=0.5 actor_critic=True obs_seed=101
+[eig:rl_sboed_eig] BC 1/96
+[eig:rl_sboed_eig] BC 12/96
+[eig:rl_sboed_eig] BC 24/96
+[eig:rl_sboed_eig] BC 36/96
+[eig:rl_sboed_eig] BC 48/96
+[eig:rl_sboed_eig] BC 60/96
+[eig:rl_sboed_eig] BC 72/96
+[eig:rl_sboed_eig] BC 84/96
+[eig:rl_sboed_eig] BC 96/96
+[train] rl_sboed_eig val_eig=0.7262187916785479 uniq=3 stage=epoch_182 562s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01/model/rl_sboed_eig.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01
+=== training method=moe_sboed (config=configs/ieee9_eig_duration_candidate.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.01 seed=101) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[eig:moe_sboed] BC warm-start trajectories=96 horizon=3 n_actions=54 lookahead=two_step temp=0.5 actor_critic=True obs_seed=101
+[eig:moe_sboed] BC 1/96
+[eig:moe_sboed] BC 12/96
+[eig:moe_sboed] BC 24/96
+[eig:moe_sboed] BC 36/96
+[eig:moe_sboed] BC 48/96
+[eig:moe_sboed] BC 60/96
+[eig:moe_sboed] BC 72/96
+[eig:moe_sboed] BC 84/96
+[eig:moe_sboed] BC 96/96
+[eig:moe_sboed] specialist experts reinitialized; fused policy is the routed mixture (no teacher residual)
+[eig:moe_sboed] pin t=0 to prior one-step action=50 (MoE adaptive only for t>0)
+[train] moe_sboed val_eig=0.7261832933872938 uniq=15 stage=epoch_90 696s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01/model/moe_sboed.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01
+=== evaluation (config=configs/ieee9_eig_duration_candidate.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'moe_sboed', 'myopic', 'fixed', 'random'] eval_seed=101 N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01
+[evaluate] dad_eig eig=0.6931 uniq=3 eval_seed=101
+[evaluate] rl_sboed_eig eig=0.6926 uniq=2 eval_seed=101
+[evaluate] moe_sboed eig=0.6933 uniq=12 eval_seed=101
+[evaluate] myopic_delta_h eig=0.6761 uniq=125 eval_seed=101
+[evaluate] fixed_open_loop eig=0.6925 uniq=1 eval_seed=101
+[evaluate] random eig=0.3731 uniq=4039 eval_seed=101
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01
+
+Done config=configs/ieee9_eig_duration_candidate.yaml type=eig_based T=3.
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01
+LOG_FILE=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_012014_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01/logs/run_log.log

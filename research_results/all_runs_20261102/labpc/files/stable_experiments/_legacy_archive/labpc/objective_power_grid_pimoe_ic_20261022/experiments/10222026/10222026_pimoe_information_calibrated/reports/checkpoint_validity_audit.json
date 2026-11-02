@@ -1,0 +1,19 @@
+{
+  "status": "DO_NOT_EVALUATE_OR_PROMOTE",
+  "original_training_commit": "58fb6afa46068bc09e0bbb29df5e1f7568c8383e",
+  "checkpoint_preserved": "/home/grads/g/g.lin/Documents/objective_power_grid_pimoe_ic_20261022/experiments/10222026/10222026_pimoe_information_calibrated/models/pimoe_ic_seed101.pt",
+  "bug": "(sum r)^2 / clamp(sum r^2,min=1e-12) is not scale invariant",
+  "reproduction": {
+    "samples": 128,
+    "constant_membership": 1e-12,
+    "incorrect_ESS": 1.6384e-08,
+    "correct_ESS": 128
+  },
+  "native_seconds_used": 70.63012438199985,
+  "native_allowance_seconds": 70.91861508367583,
+  "native_seconds_remaining": 0.28849070167598256,
+  "no_budget_reset": true,
+  "official_seed1001_not_evaluated": true,
+  "fix": "Use log-space conditional membership normalization; ESS=1/sum normalized_r^2; preserve normalized regional summaries and component densities for tiny alpha",
+  "corrected_training_status": "NOT_TRAINED_WITHIN_THIS_ATTEMPT"
+}

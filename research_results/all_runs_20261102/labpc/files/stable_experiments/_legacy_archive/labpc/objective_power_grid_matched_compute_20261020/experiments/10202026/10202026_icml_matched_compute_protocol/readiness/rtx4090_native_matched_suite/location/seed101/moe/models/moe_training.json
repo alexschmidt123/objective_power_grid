@@ -1,0 +1,1161 @@
+{
+  "training": "pathwise_full_horizon_sPCE",
+  "variant": "moe",
+  "canonical_name": "MoE-sBOED",
+  "training_seconds": 8.185352179221809,
+  "optimizer_scope": "one shared Adam step for encoder, experts, router and switching gate; per-component gradient exposure separate",
+  "measured_parameters": {
+    "first": {
+      "total": 72544,
+      "active": 2,
+      "trainable": 72544,
+      "pretrained": 0,
+      "newly_initialized": 72544
+    },
+    "initial_routed": {
+      "total": 72544,
+      "active": 22424,
+      "trainable": 72544,
+      "pretrained": 0,
+      "newly_initialized": 72544
+    },
+    "later_routed": {
+      "total": 72544,
+      "active": 22424,
+      "trainable": 72544,
+      "pretrained": 0,
+      "newly_initialized": 72544
+    }
+  },
+  "generated_training_trajectories": 4096,
+  "contrast_training_trajectories": 4194304,
+  "training_trajectory_budget": 4096,
+  "training_budget_unit": "primary_episodes",
+  "history": [
+    {
+      "update": 64,
+      "primary_episodes": 4096,
+      "training_eig": 4.255194075171341,
+      "selector_entropy": 1.232318522198672,
+      "collapse_penalty": 0.0,
+      "gamma": 1.0,
+      "gradient_norm": 114.1143491600744,
+      "gradient_before": {
+        "first_design": 1.3846594713813318,
+        "router": 109.23487335447395,
+        "expert_0": 13.796439246628228,
+        "expert_1": 3.655476163566669,
+        "expert_2": 16.692643456360184,
+        "expert_3": 4.092001444894075,
+        "encoder": 24.265547229626527
+      },
+      "gradient_after": {
+        "first_design": 1.3846594713813318,
+        "router": 4.999999954227073,
+        "expert_0": 4.999999637587673,
+        "expert_1": 3.655476163566669,
+        "expert_2": 4.999999700466872,
+        "expert_3": 4.092001444894075,
+        "encoder": 4.999999793946547
+      },
+      "clip_scale": null,
+      "gradient_clip_mode": "component",
+      "component_clip_scales": {
+        "first_design": 1.0,
+        "router": 0.04577292764373665,
+        "expert_0": 0.36241232597821543,
+        "expert_1": 1.0,
+        "expert_2": 0.29953312748447797,
+        "expert_3": 1.0,
+        "encoder": 0.20605345293189592
+      },
+      "training_score_distribution": {
+        "quantiles": [
+          0.8426768567970733,
+          2.297593474976915,
+          4.169312686978163,
+          6.649818726308299,
+          6.932446117132087,
+          6.932447416131733
+        ],
+        "fraction_within_01_of_ceiling": 0.078125,
+        "fraction_within_05_of_ceiling": 0.15625
+      },
+      "training_scores": [
+        3.834006469752662,
+        3.9124583427959614,
+        2.2751270658932903,
+        4.77662067464907,
+        2.35001509617204,
+        4.227920855401926,
+        4.088302335755969,
+        4.772907286761914,
+        4.229748156149359,
+        0.8426768567970733,
+        6.449350140878996,
+        4.188126350059804,
+        5.151179573439595,
+        4.158860007276882,
+        6.130362098611247,
+        4.587900830450089,
+        6.256207750726489,
+        3.903948039337358,
+        3.4462854646298062,
+        4.3426745855596955,
+        2.8738126853371764,
+        3.1993702423578796,
+        6.287256988671242,
+        2.8838546012485438,
+        2.0969507344268514,
+        4.862264543146392,
+        1.1374812309129787,
+        6.752956730554189,
+        6.932445354227532,
+        2.9929739671981217,
+        3.8234387147559055,
+        5.9857605517259955,
+        4.73211449458773,
+        5.072983005652599,
+        2.395183154390576,
+        6.876944048689541,
+        5.988191064857002,
+        2.7500054735392965,
+        6.570451468660176,
+        2.399942964389151,
+        3.1892865091359717,
+        6.6838332653003505,
+        3.0871411136491815,
+        5.080987217262631,
+        6.932447416131733,
+        2.5919416531003137,
+        2.1967728565664224,
+        4.179765366679444,
+        3.382691460255728,
+        2.455090386487278,
+        4.087213545949481,
+        1.5898586673422024,
+        3.1076682207528634,
+        4.93438694330678,
+        6.536735514765269,
+        6.108360586459323,
+        6.882485090837243,
+        3.1099904962775966,
+        3.2167253062289127,
+        5.723995271225412,
+        4.995405128801124,
+        1.543039533780476,
+        6.879112010501338,
+        3.2984272497406586
+      ],
+      "router_probabilities_by_stage": [
+        [
+          0.2590736442931236,
+          0.2582992067037323,
+          0.2416948919537394,
+          0.24093225704940469
+        ],
+        [
+          0.265139690430353,
+          0.2511618493305391,
+          0.2484684483658946,
+          0.2352300118732133
+        ],
+        [
+          0.2713620705940314,
+          0.24382860974609769,
+          0.255518483849664,
+          0.2292908358102068
+        ],
+        [
+          0.2775570310695345,
+          0.23661633045498276,
+          0.2625229044389229,
+          0.22330373403655981
+        ],
+        [
+          0.2837460027034826,
+          0.22953767776957384,
+          0.2694555917763094,
+          0.21726072775063415
+        ],
+        [
+          0.2899358619853392,
+          0.22265551059551883,
+          0.27623147826334016,
+          0.21117714915580169
+        ],
+        [
+          0.296325076492457,
+          0.2153243210405048,
+          0.2835260535165343,
+          0.20482454895050392
+        ],
+        [
+          0.3027243539615684,
+          0.2080956987991073,
+          0.2907901023839137,
+          0.1983898448554106
+        ],
+        [
+          0.30925538963484206,
+          0.20059300051505222,
+          0.2984427928640283,
+          0.1917088169860774
+        ],
+        [
+          0.3157286595807276,
+          0.19328298408230804,
+          0.3059310425449454,
+          0.18505731379201895
+        ],
+        [
+          0.32223121608175476,
+          0.18593776462452086,
+          0.3135205454620929,
+          0.17831047383163154
+        ],
+        [
+          0.328664376374571,
+          0.17882802278001614,
+          0.3208736829839166,
+          0.1716339178614962
+        ],
+        [
+          0.3350969333171957,
+          0.17170504794480762,
+          0.3283165326290597,
+          0.16488148610893702
+        ],
+        [
+          0.34149367672103204,
+          0.16470036984295183,
+          0.33564412906252317,
+          0.15816182437349297
+        ],
+        [
+          0.34795515993864984,
+          0.15745301039438714,
+          0.3433439109568773,
+          0.15124791871008572
+        ],
+        [
+          0.3543099062402071,
+          0.15046815927306975,
+          0.35075495797771905,
+          0.14446697650900409
+        ],
+        [
+          0.360606812539071,
+          0.14357553395407266,
+          0.3580711005241958,
+          0.13774655298266059
+        ],
+        [
+          0.36685943342499583,
+          0.13670189860032722,
+          0.3654244329228779,
+          0.1310142350517991
+        ],
+        [
+          0.3729738058969788,
+          0.13015475450219732,
+          0.372357762506888,
+          0.12451367709393582
+        ],
+        [
+          0.3790405162538202,
+          0.12375852622810311,
+          0.3790701599548415,
+          0.11813079756323511
+        ],
+        [
+          0.38504436295100364,
+          0.11740637607243355,
+          0.38575683108551,
+          0.11179242989105281
+        ],
+        [
+          0.3910273264665198,
+          0.11106005147137965,
+          0.39241711775672083,
+          0.1054955043053798
+        ],
+        [
+          0.3968424348658611,
+          0.10498408832623532,
+          0.39879266224667925,
+          0.0993808145612243
+        ],
+        [
+          0.40258883741801144,
+          0.09910577746878722,
+          0.40483871039833413,
+          0.09346667471486725
+        ],
+        [
+          0.4082512299437323,
+          0.09336673494262782,
+          0.4106810462789148,
+          0.08770098883472506
+        ],
+        [
+          0.41381922404733146,
+          0.08777054976788125,
+          0.4163253682427942,
+          0.08208485794199309
+        ],
+        [
+          0.4193014295641907,
+          0.08221703361085377,
+          0.4219531800579249,
+          0.07652835676703054
+        ],
+        [
+          0.4246367133252237,
+          0.07696525766439702,
+          0.4271612180179613,
+          0.071236810992418
+        ],
+        [
+          0.42986000519354095,
+          0.07165687633627252,
+          0.4325534803126953,
+          0.06592963815749121
+        ]
+      ],
+      "hard_choice_frequency_by_stage": [
+        [
+          0.421875,
+          0.578125,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.96875,
+          0.0,
+          0.03125,
+          0.0
+        ],
+        [
+          0.9375,
+          0.0,
+          0.0625,
+          0.0
+        ],
+        [
+          0.921875,
+          0.0,
+          0.078125,
+          0.0
+        ],
+        [
+          0.875,
+          0.0,
+          0.125,
+          0.0
+        ],
+        [
+          0.8125,
+          0.0,
+          0.1875,
+          0.0
+        ],
+        [
+          0.78125,
+          0.0,
+          0.21875,
+          0.0
+        ],
+        [
+          0.75,
+          0.0,
+          0.25,
+          0.0
+        ],
+        [
+          0.75,
+          0.0,
+          0.25,
+          0.0
+        ],
+        [
+          0.71875,
+          0.0,
+          0.28125,
+          0.0
+        ],
+        [
+          0.6875,
+          0.0,
+          0.3125,
+          0.0
+        ],
+        [
+          0.6875,
+          0.0,
+          0.3125,
+          0.0
+        ],
+        [
+          0.671875,
+          0.0,
+          0.328125,
+          0.0
+        ],
+        [
+          0.65625,
+          0.0,
+          0.34375,
+          0.0
+        ],
+        [
+          0.625,
+          0.0,
+          0.375,
+          0.0
+        ],
+        [
+          0.625,
+          0.0,
+          0.375,
+          0.0
+        ],
+        [
+          0.625,
+          0.0,
+          0.375,
+          0.0
+        ],
+        [
+          0.625,
+          0.0,
+          0.375,
+          0.0
+        ],
+        [
+          0.609375,
+          0.0,
+          0.390625,
+          0.0
+        ],
+        [
+          0.609375,
+          0.0,
+          0.390625,
+          0.0
+        ],
+        [
+          0.609375,
+          0.0,
+          0.390625,
+          0.0
+        ],
+        [
+          0.609375,
+          0.0,
+          0.390625,
+          0.0
+        ],
+        [
+          0.609375,
+          0.0,
+          0.390625,
+          0.0
+        ],
+        [
+          0.609375,
+          0.0,
+          0.390625,
+          0.0
+        ],
+        [
+          0.609375,
+          0.0,
+          0.390625,
+          0.0
+        ],
+        [
+          0.59375,
+          0.0,
+          0.40625,
+          0.0
+        ],
+        [
+          0.59375,
+          0.0,
+          0.40625,
+          0.0
+        ],
+        [
+          0.59375,
+          0.0,
+          0.40625,
+          0.0
+        ]
+      ],
+      "execution_utilization_by_stage": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ],
+      "router_probabilities": [
+        0.3466017648727293,
+        0.16024865596009444,
+        0.3410496075633041,
+        0.15209997160387212
+      ],
+      "hard_choice_frequency": [
+        0.6961206896551724,
+        0.019935344827586205,
+        0.2839439655172414,
+        0.0
+      ],
+      "execution_utilization": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "routing_entropy": 1.2748122643434536,
+      "selector_saturated_fraction": 0.0,
+      "selector_logit_quantiles": [
+        -0.46317254816221753,
+        -0.21407611673617186,
+        -0.02271005866419109,
+        0.008237980991583417,
+        0.0787815953002082
+      ],
+      "strategy_reroute_probability_by_stage": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "strategy_reroute_probability_mean": 1.0,
+      "strategy_reroute_requested_by_stage": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "strategy_reroute_requested_mean": 1.0,
+      "strategy_actual_strategy_change_by_stage": [
+        0.0,
+        0.578125,
+        0.03125,
+        0.03125,
+        0.015625,
+        0.046875,
+        0.0625,
+        0.03125,
+        0.03125,
+        0.0,
+        0.03125,
+        0.03125,
+        0.0,
+        0.015625,
+        0.015625,
+        0.03125,
+        0.0,
+        0.0,
+        0.0,
+        0.015625,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03125,
+        0.015625,
+        0.0,
+        0.0
+      ],
+      "strategy_actual_strategy_change_mean": 0.03502155172413793,
+      "strategy_consecutive_duration_by_stage": [
+        1.0,
+        1.421875,
+        2.359375,
+        3.265625,
+        4.203125,
+        4.96875,
+        5.609375,
+        6.390625,
+        7.15625,
+        8.15625,
+        8.859375,
+        9.53125,
+        10.53125,
+        11.34375,
+        12.125,
+        12.6875,
+        13.6875,
+        14.6875,
+        15.6875,
+        16.40625,
+        17.40625,
+        18.40625,
+        19.40625,
+        20.40625,
+        21.40625,
+        21.703125,
+        22.3125,
+        23.3125,
+        24.3125
+      ],
+      "strategy_consecutive_duration_mean": 12.370689655172413,
+      "strategy_state_interpretation": "relaxed state and argmax proxies; actual hard behavior evaluated separately"
+    }
+  ],
+  "diagnostic_trace": "/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/readiness/rtx4090_native_matched_suite/location/seed101/moe/models/moe_diagnostics.jsonl",
+  "base_checkpoint": {},
+  "additional_training_episodes": 4096,
+  "total_training_episodes": 4096,
+  "base_training_seconds": 0.0,
+  "total_training_seconds": 8.240714686922729,
+  "policy_parameters": 72544,
+  "trainable_parameters": 72544,
+  "history_encoder_revision": 2,
+  "encoder_input_dim": 193,
+  "base_input_dim": null,
+  "routing_warmup_fraction": 0.3,
+  "routing_finish_fraction": 0.95,
+  "switching_schedule": "none; preserves existing sigmoid gate",
+  "development_diagnostic_seconds": 0.0,
+  "settings": {
+    "routing_mode": "learned_switch",
+    "initial_reroute_probability": 0.99,
+    "residual_scale": 1.0,
+    "residual_initial_std": 0.001,
+    "base_finetune": false
+  },
+  "checkpoint_selection": "latest_budget_eligible_checkpoint",
+  "training_objective": "full_horizon_sPCE",
+  "contrasts": 1024,
+  "expert_ids": [
+    "E1",
+    "E2",
+    "E3",
+    "E4"
+  ],
+  "gradient_clip_mode": "component",
+  "load_penalty_weight": 0.0001,
+  "selector_entropy_weight_max": 0.0001,
+  "actual_updates": 64,
+  "compute_budget": {
+    "version": 1,
+    "start": 2251570.873633819,
+    "budget_seconds": 60.0,
+    "credit_seconds": 0.0,
+    "hardware": "NVIDIA GeForce RTX 4090",
+    "excluded": [
+      [
+        2251579.876662752,
+        2251579.930079072,
+        "validation"
+      ]
+    ],
+    "counts": {
+      "fresh_complete_episodes": 4096,
+      "true_parameter_stage_propagations": 122880,
+      "contrast_parameter_stage_propagations": 125829120,
+      "scalar_conditional_log_density_evaluations": 125952000,
+      "optimizer_updates": 64
+    },
+    "components": {
+      "current_training": {
+        "fresh_complete_episodes": 4096,
+        "true_parameter_stage_propagations": 122880,
+        "contrast_parameter_stage_propagations": 125829120,
+        "scalar_conditional_log_density_evaluations": 125952000
+      },
+      "policy": {
+        "optimizer_updates": 64
+      }
+    },
+    "checkpoints": [
+      {
+        "identifier": "64",
+        "charged_seconds": 9.003409105353057,
+        "eligible": true
+      }
+    ],
+    "stopped_at": 2251579.956699334,
+    "charged_seconds": 9.0296491952613,
+    "fraction_of_allocated_budget": 0.150494153254355,
+    "unused_seconds": 50.9703508047387,
+    "unit": "exclusive-device allocated training wall seconds",
+    "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+    "not_equal_to_FLOPs": true,
+    "overrun_seconds": 0.0
+  },
+  "convergence_status": "planned_schedule_complete_before_compute_cap",
+  "journal_validation_history": [
+    {
+      "checkpoint": 1,
+      "episodes": 4096,
+      "training_seconds": 9.002969493623823,
+      "eig": 4.348806114999362,
+      "mc_standard_error": 0.36148708293386894,
+      "paired_improvement_from_anchor": null,
+      "improvement_threshold": null,
+      "patience_used": 0,
+      "selected": true,
+      "status": "planned_schedule_complete_before_compute_cap",
+      "update": 64,
+      "validation": {
+        "seed": 1001,
+        "systems": 16,
+        "contrasts": 16384,
+        "paired_draws_sha256": "59399c698a627fbd992b34bcd4bc3a8df095d51d27e0e1b454b52a468e70654e",
+        "seconds": 0.05321574490517378,
+        "forward_particle_stages": 7864800,
+        "device": "cpu",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      },
+      "compute_checkpoint": {
+        "identifier": "64",
+        "charged_seconds": 9.003409105353057,
+        "eligible": true
+      }
+    }
+  ],
+  "validation_seconds": 0.05321574490517378,
+  "optimization_seconds": 8.185352179221809,
+  "stopping_rule": {
+    "minimum_episodes": 4096,
+    "minimum_checkpoints": 8,
+    "validation_every_episodes": 4096,
+    "patience": 6,
+    "minimum_improvement": 0.01,
+    "noise_multiplier": 1.96,
+    "maximum_episodes": 1000000000,
+    "maximum_training_seconds": 1800
+  },
+  "selected_checkpoint": {
+    "checkpoint": 1,
+    "episodes": 4096,
+    "training_seconds": 9.002969493623823,
+    "eig": 4.348806114999362,
+    "mc_standard_error": 0.36148708293386894,
+    "paired_improvement_from_anchor": null,
+    "improvement_threshold": null,
+    "patience_used": 0,
+    "selected": true,
+    "status": "planned_schedule_complete_before_compute_cap",
+    "update": 64,
+    "validation": {
+      "seed": 1001,
+      "systems": 16,
+      "contrasts": 16384,
+      "paired_draws_sha256": "59399c698a627fbd992b34bcd4bc3a8df095d51d27e0e1b454b52a468e70654e",
+      "seconds": 0.05321574490517378,
+      "forward_particle_stages": 7864800,
+      "device": "cpu",
+      "mode": "hard_deployed_policy",
+      "secondary_parameter_inference": false
+    },
+    "compute_checkpoint": {
+      "identifier": "64",
+      "charged_seconds": 9.003409105353057,
+      "eligible": true
+    }
+  },
+  "validation_seed": 1001,
+  "resource_ledger": {
+    "schema": 2,
+    "scope": "current training phase; base cost separately attributed",
+    "counts": {
+      "fresh_complete_episodes": 4096,
+      "true_parameter_stage_propagations": 122880,
+      "contrast_parameter_stage_propagations": 125829120,
+      "scalar_conditional_log_density_evaluations": 125952000
+    },
+    "optimizer_updates": {
+      "policy": 64,
+      "critic": null,
+      "posterior": null,
+      "score": null,
+      "temperature": null
+    },
+    "replay_transition_samples": null,
+    "offline_seconds": 8.240712156053632,
+    "validation_seconds": 0.05321574490517378,
+    "base_training_seconds": 0.0,
+    "ode_rhs_evaluations": null,
+    "solver_backward_work": null,
+    "gpu_occupancy_seconds": null,
+    "nle_equivalent_proxy": null,
+    "basis": "derived from native executed counters, not direct hardware measurement",
+    "limitations": [
+      "score-target and backward recomputation not counted",
+      "Unknown fields are not zero; walltime is not GPU occupancy"
+    ],
+    "likelihood_gradient_work": {
+      "scalar_stage_terms": null,
+      "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+    },
+    "complete_method_counts": {
+      "fresh_complete_episodes": 4096,
+      "true_parameter_stage_propagations": 122880,
+      "contrast_parameter_stage_propagations": 125829120,
+      "scalar_conditional_log_density_evaluations": 125952000
+    },
+    "cpu_process_seconds": 11.830935,
+    "waited_child_cpu_seconds_including_validation": 0.014745,
+    "compute_budget": {
+      "version": 1,
+      "start": 2251570.873633819,
+      "budget_seconds": 60.0,
+      "credit_seconds": 0.0,
+      "hardware": "NVIDIA GeForce RTX 4090",
+      "excluded": [
+        [
+          2251579.876662752,
+          2251579.930079072,
+          "validation"
+        ]
+      ],
+      "counts": {
+        "fresh_complete_episodes": 4096,
+        "true_parameter_stage_propagations": 122880,
+        "contrast_parameter_stage_propagations": 125829120,
+        "scalar_conditional_log_density_evaluations": 125952000,
+        "optimizer_updates": 64
+      },
+      "components": {
+        "current_training": {
+          "fresh_complete_episodes": 4096,
+          "true_parameter_stage_propagations": 122880,
+          "contrast_parameter_stage_propagations": 125829120,
+          "scalar_conditional_log_density_evaluations": 125952000
+        },
+        "policy": {
+          "optimizer_updates": 64
+        }
+      },
+      "checkpoints": [
+        {
+          "identifier": "64",
+          "charged_seconds": 9.003409105353057,
+          "eligible": true
+        }
+      ],
+      "stopped_at": 2251579.956699334,
+      "charged_seconds": 9.0296491952613,
+      "fraction_of_allocated_budget": 0.150494153254355,
+      "unused_seconds": 50.9703508047387,
+      "unit": "exclusive-device allocated training wall seconds",
+      "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+      "not_equal_to_FLOPs": true,
+      "overrun_seconds": 0.0
+    }
+  },
+  "native_elapsed_seconds": 8.240712156053632,
+  "total_offline_seconds": 8.238567924126983,
+  "journal_protocol": "validation_convergence_v1",
+  "training_cap_is_not_target": true,
+  "comparison_budget_unit": "exclusive_device_training_seconds",
+  "primary_episode_safety_cap": 1000000000,
+  "reference_schedule_episodes": 4096,
+  "stop_reason": "reference_schedule_completion",
+  "effective_training_settings": {
+    "strategy_routing_mode": "learned_switch",
+    "strategy_initial_reroute_probability": 0.99,
+    "strategy_diagnostics_every": 1,
+    "moe_history_encoder_revision": 1,
+    "first_design_revision": 2,
+    "training_bound": 4,
+    "variational_policy_lr": 0.0002,
+    "variational_density_lr": 0.001,
+    "variational_density_hidden": 128,
+    "variational_mixtures": 16,
+    "variational_density_updates": 2,
+    "variational_warmup": 200,
+    "smc_moves": 8,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "spce_curriculum": 1,
+    "updates": 10000,
+    "batch_size": 64,
+    "learning_rate": 5e-05,
+    "hidden": 64,
+    "contrasts": 1024,
+    "validation_contrasts": 16384,
+    "validation_systems": 128,
+    "validate_every": 100,
+    "eval_systems": 16,
+    "eval_contrasts": 16384,
+    "posterior_particles": 8192,
+    "posterior_steps": 64,
+    "posterior_chains": 4,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 128,
+    "search_candidates": 16,
+    "search_rounds": 3,
+    "fantasies": 32,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 3,
+    "vsoed_critic_updates": 5,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 16,
+    "evaluation_contrast_chunk": 4096,
+    "evaluation_population_systems": 16,
+    "threads": 2,
+    "rl_batch_size": 100,
+    "rl_replay_batch": 4096,
+    "rl_replay_capacity": 1000000,
+    "rl_min_buffer": 100000,
+    "rl_gradient_steps": 2,
+    "rl_log_every": 10,
+    "moe_density_updates": 4,
+    "moe_gradient_clip_mode": "component",
+    "moe_router_finish_fraction": 0.95,
+    "moe_router_warmup_fraction": 0.3,
+    "moe_specialist_budget_fraction": 0.25,
+    "primary_episode_budget": 1,
+    "scorebed_batch_size": 64,
+    "spce_adam_beta1": 0.8,
+    "spce_adam_beta2": 0.998,
+    "spce_lr_decay": 0.98,
+    "spce_lr_schedule_every": 1000,
+    "reference_schedule_episodes": 4096,
+    "router_schedule_episodes": 1000000,
+    "training_routing_mode": "straight_through"
+  },
+  "resume_scope": "Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed",
+  "historical_runtime_overlap": "New runs are serialized; historical timings require separate provenance",
+  "checkpoint_sha256": "29731b5844ecdebb322162441d523c61c60945f5fc04c567cdbc11f3f714101a"
+}

@@ -1,0 +1,82 @@
+Log file: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08252026_180535_sir_ode_EIG_T5_Nobs1_sigma1/logs/run_log.log
+=== run.sh (config=configs/sir_ode.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=config) ===
+Result folder: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08252026_180535_sir_ode_EIG_T5_Nobs1_sigma1
+Evaluate: dad rl_sboed moe_sboed myopic fixed random
+Train: dad rl_sboed moe_sboed
+=== data_generation (config=configs/sir_ode.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101 methods=config) ===
+[generate-data] type=eig_based config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/sir_ode.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08252026_180535_sir_ode_EIG_T5_Nobs1_sigma1 smoke=False force=False methods=['dad', 'rl_sboed', 'moe_sboed', 'myopic', 'fixed', 'random']
+[generate-data] SIR ODE dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode
+[generate-data] reused=True path=/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode train=10000 test=3000 actions=100
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08252026_180535_sir_ode_EIG_T5_Nobs1_sigma1
+=== training method=dad (config=configs/sir_ode.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[eig:dad_eig] BC warm-start trajectories=128 horizon=5 n_actions=100 lookahead=two_step temp=0.5 actor_critic=False obs_seed=101
+[eig:dad_eig] BC 1/128
+[eig:dad_eig] BC 16/128
+[eig:dad_eig] BC 32/128
+[eig:dad_eig] BC 48/128
+[eig:dad_eig] BC 64/128
+[eig:dad_eig] BC 80/128
+[eig:dad_eig] BC 96/128
+[eig:dad_eig] BC 112/128
+[eig:dad_eig] BC 128/128
+[train] dad_eig val_eig=6.902612518723558 uniq=49 stage=epoch_152 1976s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08252026_180535_sir_ode_EIG_T5_Nobs1_sigma1/model/dad_eig.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08252026_180535_sir_ode_EIG_T5_Nobs1_sigma1
+=== training method=rl_sboed (config=configs/sir_ode.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[eig:rl_sboed_eig] BC warm-start trajectories=128 horizon=5 n_actions=100 lookahead=two_step temp=0.5 actor_critic=True obs_seed=101
+[eig:rl_sboed_eig] BC 1/128
+[eig:rl_sboed_eig] BC 16/128
+[eig:rl_sboed_eig] BC 32/128
+[eig:rl_sboed_eig] BC 48/128
+[eig:rl_sboed_eig] BC 64/128
+[eig:rl_sboed_eig] BC 80/128
+[eig:rl_sboed_eig] BC 96/128
+[eig:rl_sboed_eig] BC 112/128
+[eig:rl_sboed_eig] BC 128/128
+[train] rl_sboed_eig val_eig=6.903929757441149 uniq=42 stage=epoch_197 1650s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08252026_180535_sir_ode_EIG_T5_Nobs1_sigma1/model/rl_sboed_eig.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08252026_180535_sir_ode_EIG_T5_Nobs1_sigma1
+=== training method=moe_sboed (config=configs/sir_ode.yaml type=eig_based T=5 N_obs=1 noise_sigma=1.0 seed=101) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[eig:moe_sboed] BC warm-start trajectories=128 horizon=5 n_actions=100 lookahead=two_step temp=0.5 actor_critic=True obs_seed=101
+[eig:moe_sboed] BC 1/128
+[eig:moe_sboed] BC 16/128
+[eig:moe_sboed] BC 32/128
+[eig:moe_sboed] BC 48/128
+[eig:moe_sboed] BC 64/128
+[eig:moe_sboed] BC 80/128
+[eig:moe_sboed] BC 96/128
+[eig:moe_sboed] BC 112/128
+[eig:moe_sboed] BC 128/128
+[eig:moe_sboed] specialist experts reinitialized; fused policy is the routed mixture (no teacher residual)
+[eig:moe_sboed] pin t=0 to prior one-step action=24 (MoE adaptive only for t>0)
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/experiment.py", line 1173, in <module>
+    main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/experiment.py", line 1167, in main
+    args.func(args)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/experiment.py", line 605, in cmd_train
+    result = train_vector_eig_policy(
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/objectives/eig/vector.py", line 927, in train_vector_eig_policy
+    branch_loss, branch_stats = policy.belief_branching_loss(
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/policies/moe.py", line 568, in belief_branching_loss
+    logits, _, _, _, _ = self._components(*inputs)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/policies/moe.py", line 323, in _components
+    features = self.backbone(*inputs)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/policies/rl_sboed.py", line 171, in forward
+    particles = self.particle_encoder(particle_features, posterior_weights)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/policies/rl_sboed.py", line 136, in forward
+    return (h * w.unsqueeze(-1)).sum(dim=1)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.25 GiB. GPU 0 has a total capacity of 23.52 GiB of which 314.31 MiB is free. Including non-PyTorch memory, this process has 23.07 GiB memory in use. Of the allocated memory 21.63 GiB is allocated by PyTorch, and 1005.03 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

@@ -1,0 +1,3 @@
+# Specialization evidence
+
+PENDING real offline competence and independent development measurements. No expert has a predefined exploration/localization/source role. Architecture alone is not specialization evidence. Reports will contain per-expertQ, pairedQdifferenceSE, uncertainty-aware responsibilities, conditional training exposure, output distances, routingentropy and utilization by stage. Different experts need resolved advantages in different contexts before specialization is claimed. A traincontext competence heatmap is exploratory, not held-out causal evidence. Matchedsingle and randomuniform routing are required controls.

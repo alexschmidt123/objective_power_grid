@@ -1,0 +1,9 @@
+Location seed101 matched-compute round: RUNNING, NOT COMPLETE.
+
+Frozen source3da606a.35 focused tests pass. Native-size score-to-policy, JAX policy TrainState restore, original RL replay, native vsOED updates, allfourST rollouts, zero-training Random, residual shared-base and optimizer/time credit checked. Over1M regression actually executed2,119,454 episodes and canonical2000/L1M evaluation. Final affected checkpoint IO integration passed. Previous reduced-evaluation bank-shape failure and missing base-counter/Random-clock attempts preserved; corrected retests are separate.
+
+Allowance:4hours exclusive-device allocated training wall time, RTX4090, latest eligible checkpoint. Complete initialization/compile/normalization/training/auxiliary/replay/base/checkpoint phases charged, independent validation excluded and separately reported. Native reference schedule completion may leave quota unused. ScoreBED fixed19:1 measured phase plan177365score/9335policy, native1024 batch and original scheduler horizons. Source/config/bank hashes frozen before primary EIG. Allten methods queued using existing controller; first native ScoreBED optimizer is advancing. Seeds102-105 held; no convergence requirement.
+
+Unknown costs: actual GPU-active occupancy, backward FLOPs, ScoreBED scalar-density call totals and compiler-recomputation work remain unmeasured, never zero-filled. Model work is derived from executed native counters, not hardware FLOPs. Exact mid-phase resume remains unsupported for some native trainers; checkpoints and optimizer states are preserved and partial runs cannot be silently accepted or resumed. Controller timeout terminates only its own worker group.
+
+SIR allowance is not yet calibrated or frozen. No SIR/grid/E2/E3 jobs launched. Primary E1 seed101 results and final ten-method verification pending.

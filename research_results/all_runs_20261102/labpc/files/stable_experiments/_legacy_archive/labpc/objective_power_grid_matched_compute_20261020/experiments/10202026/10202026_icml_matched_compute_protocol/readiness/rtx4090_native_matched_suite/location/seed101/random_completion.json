@@ -1,0 +1,20 @@
+{
+  "method": "random",
+  "native_method": "random",
+  "benchmark": "location",
+  "seed": 101,
+  "run": "/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/readiness/rtx4090_native_matched_suite/location/seed101/random",
+  "status": "failed",
+  "failure": {
+    "type": "CalledProcessError",
+    "message": "Command '['bash', 'run.sh', '--config', '/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/readiness/rtx4090_native_matched_suite/configs/random.yaml', '--journal', '--seed', '101', '--eval-seeds', '1001', '--eig-only', '--source-check-manifest', '/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/readiness/rtx4090_native_matched_suite/source_manifest.json', '--output', '/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/readiness/rtx4090_native_matched_suite/location/seed101/random', '--methods', 'random', '--evaluation-cases', '/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/readiness/rtx4090_native_matched_suite/evaluations/location_cases.npz', '--evaluation-bank', '/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/readiness/rtx4090_native_matched_suite/evaluations/location_contrasts.npy']' returned non-zero exit status 1.",
+    "classification": "requires_inspection",
+    "native_failure": {
+      "type": "ValueError",
+      "message": "Matched-compute selection requires an initialized whole-method clock",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/src/research/journal_run.py\", line 87, in main\n    rule=StoppingRule(**this_rule);observer=ValidationObserver(validator,rule,out/'models',method,selection_mode=protocol.get('checkpoint_selection_mode','best_validation'),compute_clock=compute_clock,compute_checkpoint_seconds=900. if not compute_cfg else compute_cfg.get('checkpoint_seconds',900.))\n  File \"/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/src/research/journal_validation.py\", line 98, in __init__\n    if selection_mode==\"final_compute_budget\" and compute_clock is None:raise ValueError(\"Matched-compute selection requires an initialized whole-method clock\")\nValueError: Matched-compute selection requires an initialized whole-method clock\n"
+    }
+  },
+  "serialized_wall_seconds": 1.020154694095254,
+  "provenance": "new_fixed_configuration_training"
+}

@@ -1,0 +1,371 @@
+{
+  "training": "official_vsOED_GMM_I",
+  "upstream_commit": "d0884f9ba30fbddc56618841c68af2f3bfe16539",
+  "profile": {
+    "actor_lr": 0.001,
+    "critic_lr": 0.001,
+    "critic_updates": 5,
+    "discount": 0.9,
+    "exploration": 0.5,
+    "exploration_decay": 0.9999,
+    "initial_replay": 20000,
+    "log_every": 100,
+    "lr_decay": 0.9999,
+    "n_incre": 30,
+    "new_trajectories": 1000,
+    "posterior_coordinate_reference": "source_coordinates",
+    "posterior_lr": 0.001,
+    "posterior_updates": 5,
+    "replay_batch": 10000,
+    "replay_capacity": 1000000,
+    "target_rate": 0.1,
+    "transition": 0,
+    "updates": 2
+  },
+  "device": "cuda:0",
+  "selected_update": 2,
+  "checkpoint_selection": "latest_budget_eligible_checkpoint",
+  "policy_parameters": 162306,
+  "history": [
+    {
+      "Epoch": "0",
+      "Reward/MeanReward": "-3.1275596618652344",
+      "Reward/StdReward": "4.087453842163086",
+      "Design/MeanDesign": "[-0.1089056134223938, -0.1189500018954277]",
+      "Design/StdDesign": "[0.02888518199324608, 0.024913614615797997]",
+      "ReplayBuffer/buffer_size": "20000"
+    }
+  ],
+  "training_seconds": 2.6408907980658114,
+  "generated_training_trajectories": 22000,
+  "contrast_training_trajectories": 0,
+  "training_forward_trajectories": 22000,
+  "training_trajectory_budget": 22000,
+  "reward_discount": 0.9,
+  "implementation_adaptations": "Common bounded action space; published raw network inputs and Adam actor updates; no added actor trust constraint; explicit episode cap; reward discount recorded separately; vendor unchanged",
+  "posterior_optimizer_updates": 300,
+  "critic_optimizer_updates": 10,
+  "actor_update_trust_radius": null,
+  "actor_backtracks": 0,
+  "replay_batch_size": 10000,
+  "actor_optimizer_updates": 2,
+  "forward_particle_stages": 660000,
+  "native_optimizer_updates": {
+    "actor": 2,
+    "critic": 10,
+    "posterior": 300
+  },
+  "auxiliary_checkpoint_role": "last_training_state; selected actor is separately validated",
+  "benchmark_adaptation": "bounded location physics unchanged",
+  "compute_budget": {
+    "version": 1,
+    "start": 2251616.354557747,
+    "budget_seconds": 60.0,
+    "credit_seconds": 0.0,
+    "hardware": "NVIDIA GeForce RTX 4090",
+    "excluded": [
+      [
+        2251619.805177043,
+        2251619.843311152,
+        "validation"
+      ]
+    ],
+    "counts": {
+      "fresh_complete_episodes": 22000,
+      "true_parameter_stage_propagations": 660000,
+      "contrast_parameter_stage_propagations": 0,
+      "scalar_conditional_log_density_evaluations": 0,
+      "optimizer_updates": 312
+    },
+    "components": {
+      "current_training": {
+        "fresh_complete_episodes": 22000,
+        "true_parameter_stage_propagations": 660000,
+        "contrast_parameter_stage_propagations": 0,
+        "scalar_conditional_log_density_evaluations": 0
+      },
+      "policy": {
+        "optimizer_updates": 2
+      },
+      "critic": {
+        "optimizer_updates": 10
+      },
+      "posterior": {
+        "optimizer_updates": 300
+      }
+    },
+    "checkpoints": [
+      {
+        "identifier": "2",
+        "charged_seconds": 3.4510714863426983,
+        "eligible": true
+      }
+    ],
+    "stopped_at": 2251619.935384536,
+    "charged_seconds": 3.542692680377513,
+    "fraction_of_allocated_budget": 0.059044878006291886,
+    "unused_seconds": 56.45730731962249,
+    "unit": "exclusive-device allocated training wall seconds",
+    "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+    "not_equal_to_FLOPs": true,
+    "overrun_seconds": 0.0
+  },
+  "convergence_status": "planned_schedule_complete_before_compute_cap",
+  "journal_validation_history": [
+    {
+      "checkpoint": 1,
+      "episodes": 22000,
+      "training_seconds": 3.450557325966656,
+      "eig": 2.5344072658010854,
+      "mc_standard_error": 0.26652132669209877,
+      "paired_improvement_from_anchor": null,
+      "improvement_threshold": null,
+      "patience_used": 0,
+      "selected": true,
+      "status": "planned_schedule_complete_before_compute_cap",
+      "update": 2,
+      "validation": {
+        "seed": 1001,
+        "systems": 16,
+        "contrasts": 16384,
+        "paired_draws_sha256": "59399c698a627fbd992b34bcd4bc3a8df095d51d27e0e1b454b52a468e70654e",
+        "seconds": 0.03789213765412569,
+        "forward_particle_stages": 7864800,
+        "device": "cpu",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      },
+      "compute_checkpoint": {
+        "identifier": "2",
+        "charged_seconds": 3.4510714863426983,
+        "eligible": true
+      }
+    }
+  ],
+  "validation_seconds": 0.03789213765412569,
+  "optimization_seconds": 2.6408907980658114,
+  "stopping_rule": {
+    "minimum_episodes": 22000,
+    "minimum_checkpoints": 8,
+    "validation_every_episodes": 22000,
+    "patience": 6,
+    "minimum_improvement": 0.01,
+    "noise_multiplier": 1.96,
+    "maximum_episodes": 1000000000,
+    "maximum_training_seconds": 1800
+  },
+  "selected_checkpoint": {
+    "checkpoint": 1,
+    "episodes": 22000,
+    "training_seconds": 3.450557325966656,
+    "eig": 2.5344072658010854,
+    "mc_standard_error": 0.26652132669209877,
+    "paired_improvement_from_anchor": null,
+    "improvement_threshold": null,
+    "patience_used": 0,
+    "selected": true,
+    "status": "planned_schedule_complete_before_compute_cap",
+    "update": 2,
+    "validation": {
+      "seed": 1001,
+      "systems": 16,
+      "contrasts": 16384,
+      "paired_draws_sha256": "59399c698a627fbd992b34bcd4bc3a8df095d51d27e0e1b454b52a468e70654e",
+      "seconds": 0.03789213765412569,
+      "forward_particle_stages": 7864800,
+      "device": "cpu",
+      "mode": "hard_deployed_policy",
+      "secondary_parameter_inference": false
+    },
+    "compute_checkpoint": {
+      "identifier": "2",
+      "charged_seconds": 3.4510714863426983,
+      "eligible": true
+    }
+  },
+  "validation_seed": 1001,
+  "resource_ledger": {
+    "schema": 2,
+    "scope": "current training phase; base cost separately attributed",
+    "counts": {
+      "fresh_complete_episodes": 22000,
+      "true_parameter_stage_propagations": 660000,
+      "contrast_parameter_stage_propagations": 0,
+      "scalar_conditional_log_density_evaluations": 0
+    },
+    "optimizer_updates": {
+      "policy": 2,
+      "critic": 10,
+      "posterior": 300,
+      "score": null,
+      "temperature": null
+    },
+    "replay_transition_samples": null,
+    "offline_seconds": 2.7495953291654587,
+    "validation_seconds": 0.03789213765412569,
+    "base_training_seconds": null,
+    "ode_rhs_evaluations": null,
+    "solver_backward_work": null,
+    "gpu_occupancy_seconds": null,
+    "nle_equivalent_proxy": null,
+    "basis": "derived from native executed counters, not direct hardware measurement",
+    "limitations": [
+      "score-target and backward recomputation not counted",
+      "Unknown fields are not zero; walltime is not GPU occupancy"
+    ],
+    "likelihood_gradient_work": {
+      "scalar_stage_terms": null,
+      "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+    },
+    "replay_work": {
+      "minibatch_trajectories": 10000,
+      "optimizer_steps": {
+        "policy": 2,
+        "critic": 10,
+        "posterior": 300,
+        "score": null,
+        "temperature": null
+      },
+      "note": "Posterior steps may include stage-specific nets; stored data are not fresh episodes"
+    },
+    "complete_method_counts": {
+      "fresh_complete_episodes": 22000,
+      "true_parameter_stage_propagations": 660000,
+      "contrast_parameter_stage_propagations": 0,
+      "scalar_conditional_log_density_evaluations": 0
+    },
+    "cpu_process_seconds": 6.074152,
+    "waited_child_cpu_seconds_including_validation": 0.013314999999999999,
+    "compute_budget": {
+      "version": 1,
+      "start": 2251616.354557747,
+      "budget_seconds": 60.0,
+      "credit_seconds": 0.0,
+      "hardware": "NVIDIA GeForce RTX 4090",
+      "excluded": [
+        [
+          2251619.805177043,
+          2251619.843311152,
+          "validation"
+        ]
+      ],
+      "counts": {
+        "fresh_complete_episodes": 22000,
+        "true_parameter_stage_propagations": 660000,
+        "contrast_parameter_stage_propagations": 0,
+        "scalar_conditional_log_density_evaluations": 0,
+        "optimizer_updates": 312
+      },
+      "components": {
+        "current_training": {
+          "fresh_complete_episodes": 22000,
+          "true_parameter_stage_propagations": 660000,
+          "contrast_parameter_stage_propagations": 0,
+          "scalar_conditional_log_density_evaluations": 0
+        },
+        "policy": {
+          "optimizer_updates": 2
+        },
+        "critic": {
+          "optimizer_updates": 10
+        },
+        "posterior": {
+          "optimizer_updates": 300
+        }
+      },
+      "checkpoints": [
+        {
+          "identifier": "2",
+          "charged_seconds": 3.4510714863426983,
+          "eligible": true
+        }
+      ],
+      "stopped_at": 2251619.935384536,
+      "charged_seconds": 3.542692680377513,
+      "fraction_of_allocated_budget": 0.059044878006291886,
+      "unused_seconds": 56.45730731962249,
+      "unit": "exclusive-device allocated training wall seconds",
+      "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+      "not_equal_to_FLOPs": true,
+      "overrun_seconds": 0.0
+    }
+  },
+  "native_elapsed_seconds": 2.7495953291654587,
+  "total_offline_seconds": 2.678782935719937,
+  "journal_protocol": "validation_convergence_v1",
+  "training_cap_is_not_target": true,
+  "comparison_budget_unit": "exclusive_device_training_seconds",
+  "primary_episode_safety_cap": 1000000000,
+  "reference_schedule_episodes": 22000,
+  "stop_reason": "reference_schedule_completion",
+  "effective_training_settings": {
+    "strategy_routing_mode": "learned_switch",
+    "strategy_initial_reroute_probability": 0.99,
+    "strategy_diagnostics_every": 1,
+    "moe_history_encoder_revision": 1,
+    "first_design_revision": 2,
+    "training_bound": 4,
+    "variational_policy_lr": 0.0002,
+    "variational_density_lr": 0.001,
+    "variational_density_hidden": 128,
+    "variational_mixtures": 16,
+    "variational_density_updates": 2,
+    "variational_warmup": 200,
+    "smc_moves": 8,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "spce_curriculum": 1,
+    "updates": 10000,
+    "batch_size": 64,
+    "learning_rate": 5e-05,
+    "hidden": 64,
+    "contrasts": 1024,
+    "validation_contrasts": 16384,
+    "validation_systems": 128,
+    "validate_every": 100,
+    "eval_systems": 16,
+    "eval_contrasts": 16384,
+    "posterior_particles": 8192,
+    "posterior_steps": 64,
+    "posterior_chains": 4,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 128,
+    "search_candidates": 16,
+    "search_rounds": 3,
+    "fantasies": 32,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 3,
+    "vsoed_critic_updates": 5,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 16,
+    "evaluation_contrast_chunk": 4096,
+    "evaluation_population_systems": 16,
+    "threads": 2,
+    "rl_batch_size": 100,
+    "rl_replay_batch": 4096,
+    "rl_replay_capacity": 1000000,
+    "rl_min_buffer": 100000,
+    "rl_gradient_steps": 2,
+    "rl_log_every": 10,
+    "moe_density_updates": 4,
+    "moe_gradient_clip_mode": "component",
+    "moe_router_finish_fraction": 0.95,
+    "moe_router_warmup_fraction": 0.3,
+    "moe_specialist_budget_fraction": 0.25,
+    "primary_episode_budget": 1,
+    "scorebed_batch_size": 64,
+    "spce_adam_beta1": 0.8,
+    "spce_adam_beta2": 0.998,
+    "spce_lr_decay": 0.98,
+    "spce_lr_schedule_every": 1000,
+    "reference_schedule_episodes": 22000
+  },
+  "resume_scope": "Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed",
+  "historical_runtime_overlap": "New runs are serialized; historical timings require separate provenance",
+  "checkpoint_sha256": "18ac78ed178d928040edf3b66089255cf04c40802d13c7ebdc2d6dc29b2083ac"
+}

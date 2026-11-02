@@ -1,0 +1,1 @@
+Reference ScoreBED P1 seed101 retry. Same native190000score+10000policy updates, batch1024, bounds and bank. Typed-key checkpoint I/O fix only; no new compute cap. Old failed artifacts remain historical. New matched-compute study remains held.

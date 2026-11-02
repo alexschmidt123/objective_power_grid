@@ -1,0 +1,485 @@
+Log file: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005/logs/run_log.log
+=== run.sh (config=configs/ieee9_mocu_duration_v2_best.yaml type=objective_based T=4 N_obs=5 noise_sigma=0.005 seed=101 methods=config) ===
+Result folder: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+Evaluate: dad rl_sboed moe_sboed myopic fixed random
+Train: dad rl_sboed moe_sboed
+=== data_generation (config=configs/ieee9_mocu_duration_v2_best.yaml type=objective_based T=4 N_obs=5 noise_sigma=0.005 seed=101 methods=config) ===
+[generate-data] type=objective_based config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/ieee9_mocu_duration_v2_best.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005 smoke=False force=False methods=['dad', 'rl_sboed', 'moe_sboed', 'myopic', 'fixed', 'random']
+[generate-data] dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_subset
+Using existing physical bank → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_subset
+  (skipping CUDA generation; pass --force to regenerate)
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[generate-data] reused=True type=objective_based train=None test=None actions=None
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+=== training method=dad (config=configs/ieee9_mocu_duration_v2_best.yaml type=objective_based T=4 N_obs=5 noise_sigma=0.005 seed=101) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[mocu-bank] separate control bank -> /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_control
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[fixed] C(54,4)=316251 > threshold=0; multi-restart greedy (restarts=8)
+[fixed] greedy step 1/4: action=53 mean_safety_mocu=0.0273
+[fixed] greedy step 2/4: action=48 mean_safety_mocu=0.0254
+[fixed] greedy step 3/4: action=47 mean_safety_mocu=0.0240
+[fixed] greedy step 4/4: action=45 mean_safety_mocu=0.0228
+  restart 0: score=0.0228 seq=[53, 48, 47, 45]
+[fixed] greedy step 2/4: action=50 mean_safety_mocu=0.0255
+[fixed] greedy step 3/4: action=49 mean_safety_mocu=0.0240
+[fixed] greedy step 4/4: action=53 mean_safety_mocu=0.0229
+  restart 1: score=0.0229 seq=[45, 50, 49, 53]
+[fixed] greedy step 2/4: action=53 mean_safety_mocu=0.0267
+[fixed] greedy step 3/4: action=48 mean_safety_mocu=0.0249
+[fixed] greedy step 4/4: action=47 mean_safety_mocu=0.0236
+  restart 2: score=0.0236 seq=[14, 53, 48, 47]
+[fixed] greedy step 2/4: action=48 mean_safety_mocu=0.0261
+[fixed] greedy step 3/4: action=53 mean_safety_mocu=0.0245
+[fixed] greedy step 4/4: action=45 mean_safety_mocu=0.0233
+  restart 3: score=0.0233 seq=[40, 48, 53, 45]
+[fixed] greedy step 2/4: action=53 mean_safety_mocu=0.0268
+[fixed] greedy step 3/4: action=48 mean_safety_mocu=0.0250
+[fixed] greedy step 4/4: action=47 mean_safety_mocu=0.0237
+  restart 4: score=0.0237 seq=[17, 53, 48, 47]
+[fixed] greedy step 2/4: action=53 mean_safety_mocu=0.0264
+[fixed] greedy step 3/4: action=48 mean_safety_mocu=0.0248
+[fixed] greedy step 4/4: action=47 mean_safety_mocu=0.0235
+  restart 5: score=0.0235 seq=[31, 53, 48, 47]
+[fixed] greedy step 2/4: action=53 mean_safety_mocu=0.0266
+[fixed] greedy step 3/4: action=48 mean_safety_mocu=0.0249
+[fixed] greedy step 4/4: action=45 mean_safety_mocu=0.0236
+  restart 6: score=0.0236 seq=[21, 53, 48, 45]
+[fixed] greedy step 2/4: action=53 mean_safety_mocu=0.0263
+[fixed] greedy step 3/4: action=48 mean_safety_mocu=0.0247
+[fixed] greedy step 4/4: action=47 mean_safety_mocu=0.0235
+  restart 7: score=0.0235 seq=[34, 53, 48, 47]
+[fixed] greedy step 2/4: action=53 mean_safety_mocu=0.0268
+[fixed] greedy step 3/4: action=48 mean_safety_mocu=0.0250
+[fixed] greedy step 4/4: action=47 mean_safety_mocu=0.0237
+  restart 8: score=0.0237 seq=[6, 53, 48, 47]
+[fixed] done mode=greedy_multirestart_offline score=0.0228 seq=[53, 48, 47, 45] (77.8s) → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005/model/fixed_subset_T4.json
+[train] type=objective_based DAD config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/ieee9_mocu_duration_v2_best.yaml N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+[train] DAD checkpoint selection: joint_score=MOCU-0*unique_frac; soft_floor=OFF (uniq>=26/256, mocu_slack=0.0025)
+[train] DAD device=cuda updates=2000 traj/update=128 total_trajectories=256000 val_every=50 val_rollouts=256 entropy_coef=0.1→0.005 entropy_anneal_fraction=0.8 diversity_w=0.0 dense_cf=0.0 dense_branch=0.0
+[train] DAD update=1/2000 mean_u=0.3956 entropy=3.955 entropy_coef=0.10000 update_s=0.24 traj=128/256000 elapsed=0.2s eta=485.9s
+[train] DAD update=25/2000 mean_u=0.3948 entropy=3.948 entropy_coef=0.09858 update_s=0.02 traj=3200/256000 elapsed=0.9s eta=68.4s
+[train] DAD update=50/2000 mean_u=0.3954 entropy=3.926 entropy_coef=0.09709 update_s=0.02 traj=6400/256000 elapsed=1.5s eta=58.3s
+[train] DAD val update=50 mean_u=0.3942 mocu=0.0222 under=0.023 unique_seq=11/256 seq_H=1.708 joint_score=0.0222 floor=MISS
+[train] DAD update=75/2000 mean_u=0.3949 entropy=3.819 entropy_coef=0.09561 update_s=0.02 traj=9600/256000 elapsed=3.3s eta=85.9s
+[train] DAD update=100/2000 mean_u=0.3948 entropy=3.541 entropy_coef=0.09412 update_s=0.02 traj=12800/256000 elapsed=3.9s eta=75.0s
+[train] DAD val update=100 mean_u=0.3943 mocu=0.0223 under=0.020 unique_seq=3/256 seq_H=0.524 joint_score=0.0223 floor=MISS
+[train] DAD update=125/2000 mean_u=0.3941 entropy=3.332 entropy_coef=0.09264 update_s=0.02 traj=16000/256000 elapsed=5.8s eta=86.3s
+[train] DAD update=150/2000 mean_u=0.3936 entropy=3.226 entropy_coef=0.09115 update_s=0.02 traj=19200/256000 elapsed=6.4s eta=78.4s
+[train] DAD val update=150 mean_u=0.3940 mocu=0.0275 under=0.047 unique_seq=3/256 seq_H=0.071 joint_score=0.0275 floor=MISS
+[train] DAD update=175/2000 mean_u=0.3935 entropy=3.134 entropy_coef=0.08967 update_s=0.02 traj=22400/256000 elapsed=8.2s eta=85.1s
+[train] DAD update=200/2000 mean_u=0.3946 entropy=3.276 entropy_coef=0.08818 update_s=0.02 traj=25600/256000 elapsed=8.8s eta=78.9s
+[train] DAD val update=200 mean_u=0.3951 mocu=0.0207 under=0.012 unique_seq=17/256 seq_H=1.880 joint_score=0.0207 floor=MISS
+[train] DAD update=225/2000 mean_u=0.3954 entropy=3.221 entropy_coef=0.08670 update_s=0.02 traj=28800/256000 elapsed=10.6s eta=83.5s
+[train] DAD update=250/2000 mean_u=0.3965 entropy=3.049 entropy_coef=0.08522 update_s=0.02 traj=32000/256000 elapsed=11.2s eta=78.3s
+[train] DAD val update=250 mean_u=0.3940 mocu=0.0227 under=0.027 unique_seq=1/256 seq_H=-0.000 joint_score=0.0227 floor=MISS
+[train] WARNING DAD: deterministic unique_seq=1 after update=250 (open-loop collapse). Consider higher entropy_coefficient or checking belief conditioning.
+[train] DAD update=275/2000 mean_u=0.3937 entropy=2.927 entropy_coef=0.08373 update_s=0.02 traj=35200/256000 elapsed=13.0s eta=81.6s
+[train] DAD update=300/2000 mean_u=0.3932 entropy=2.925 entropy_coef=0.08225 update_s=0.02 traj=38400/256000 elapsed=13.6s eta=77.1s
+[train] DAD val update=300 mean_u=0.3946 mocu=0.0218 under=0.020 unique_seq=4/256 seq_H=0.747 joint_score=0.0218 floor=MISS
+[train] DAD update=325/2000 mean_u=0.3938 entropy=2.949 entropy_coef=0.08076 update_s=0.02 traj=41600/256000 elapsed=15.4s eta=79.5s
+[train] DAD update=350/2000 mean_u=0.3951 entropy=3.011 entropy_coef=0.07928 update_s=0.02 traj=44800/256000 elapsed=16.0s eta=75.5s
+[train] DAD val update=350 mean_u=0.3939 mocu=0.0203 under=0.016 unique_seq=6/256 seq_H=0.948 joint_score=0.0203 floor=MISS
+[train] DAD update=375/2000 mean_u=0.3936 entropy=2.879 entropy_coef=0.07779 update_s=0.02 traj=48000/256000 elapsed=17.8s eta=77.3s
+[train] DAD update=400/2000 mean_u=0.3922 entropy=2.829 entropy_coef=0.07631 update_s=0.02 traj=51200/256000 elapsed=18.4s eta=73.7s
+[train] DAD val update=400 mean_u=0.3939 mocu=0.0234 under=0.027 unique_seq=7/256 seq_H=1.373 joint_score=0.0234 floor=MISS
+[train] DAD update=425/2000 mean_u=0.3944 entropy=2.766 entropy_coef=0.07483 update_s=0.02 traj=54400/256000 elapsed=20.2s eta=75.0s
+[train] DAD update=450/2000 mean_u=0.3936 entropy=2.730 entropy_coef=0.07334 update_s=0.03 traj=57600/256000 elapsed=20.9s eta=71.8s
+[train] DAD val update=450 mean_u=0.3944 mocu=0.0223 under=0.023 unique_seq=4/256 seq_H=1.069 joint_score=0.0223 floor=MISS
+[train] DAD update=475/2000 mean_u=0.3941 entropy=2.801 entropy_coef=0.07186 update_s=0.02 traj=60800/256000 elapsed=22.7s eta=72.8s
+[train] DAD update=500/2000 mean_u=0.3940 entropy=2.814 entropy_coef=0.07037 update_s=0.02 traj=64000/256000 elapsed=23.3s eta=69.8s
+[train] DAD val update=500 mean_u=0.3943 mocu=0.0215 under=0.020 unique_seq=2/256 seq_H=0.345 joint_score=0.0215 floor=MISS
+[train] DAD update=525/2000 mean_u=0.3952 entropy=2.746 entropy_coef=0.06889 update_s=0.02 traj=67200/256000 elapsed=25.1s eta=70.5s
+[train] DAD update=550/2000 mean_u=0.3930 entropy=2.594 entropy_coef=0.06740 update_s=0.02 traj=70400/256000 elapsed=25.7s eta=67.8s
+[train] DAD val update=550 mean_u=0.3936 mocu=0.0200 under=0.016 unique_seq=4/256 seq_H=0.202 joint_score=0.0200 floor=MISS
+[train] DAD update=575/2000 mean_u=0.3921 entropy=2.728 entropy_coef=0.06592 update_s=0.02 traj=73600/256000 elapsed=27.5s eta=68.2s
+[train] DAD update=600/2000 mean_u=0.3945 entropy=2.689 entropy_coef=0.06443 update_s=0.02 traj=76800/256000 elapsed=28.1s eta=65.6s
+[train] DAD val update=600 mean_u=0.3942 mocu=0.0221 under=0.023 unique_seq=14/256 seq_H=1.590 joint_score=0.0221 floor=MISS
+[train] DAD update=625/2000 mean_u=0.3939 entropy=2.723 entropy_coef=0.06295 update_s=0.02 traj=80000/256000 elapsed=29.9s eta=65.9s
+[train] DAD update=650/2000 mean_u=0.3940 entropy=2.593 entropy_coef=0.06147 update_s=0.02 traj=83200/256000 elapsed=30.5s eta=63.4s
+[train] DAD val update=650 mean_u=0.3939 mocu=0.0188 under=0.008 unique_seq=9/256 seq_H=1.705 joint_score=0.0188 floor=MISS
+[train] DAD update=675/2000 mean_u=0.3934 entropy=2.553 entropy_coef=0.05998 update_s=0.02 traj=86400/256000 elapsed=32.4s eta=63.5s
+[train] DAD update=700/2000 mean_u=0.3941 entropy=2.496 entropy_coef=0.05850 update_s=0.02 traj=89600/256000 elapsed=33.0s eta=61.2s
+[train] DAD val update=700 mean_u=0.3944 mocu=0.0216 under=0.020 unique_seq=15/256 seq_H=1.344 joint_score=0.0216 floor=MISS
+[train] DAD update=725/2000 mean_u=0.3930 entropy=2.455 entropy_coef=0.05701 update_s=0.02 traj=92800/256000 elapsed=34.8s eta=61.3s
+[train] DAD update=750/2000 mean_u=0.3934 entropy=2.408 entropy_coef=0.05553 update_s=0.02 traj=96000/256000 elapsed=35.6s eta=59.3s
+[train] DAD val update=750 mean_u=0.3942 mocu=0.0238 under=0.027 unique_seq=15/256 seq_H=2.317 joint_score=0.0238 floor=MISS
+[train] DAD update=775/2000 mean_u=0.3945 entropy=2.257 entropy_coef=0.05404 update_s=0.03 traj=99200/256000 elapsed=37.5s eta=59.3s
+[train] DAD update=800/2000 mean_u=0.3937 entropy=2.215 entropy_coef=0.05256 update_s=0.02 traj=102400/256000 elapsed=38.1s eta=57.2s
+[train] DAD val update=800 mean_u=0.3941 mocu=0.0221 under=0.023 unique_seq=9/256 seq_H=1.108 joint_score=0.0221 floor=MISS
+[train] DAD update=825/2000 mean_u=0.3934 entropy=2.291 entropy_coef=0.05108 update_s=0.02 traj=105600/256000 elapsed=39.9s eta=56.9s
+[train] DAD update=850/2000 mean_u=0.3938 entropy=2.280 entropy_coef=0.04959 update_s=0.02 traj=108800/256000 elapsed=40.6s eta=54.9s
+[train] DAD val update=850 mean_u=0.3945 mocu=0.0201 under=0.012 unique_seq=14/256 seq_H=2.228 joint_score=0.0201 floor=MISS
+[train] DAD update=875/2000 mean_u=0.3925 entropy=2.309 entropy_coef=0.04811 update_s=0.02 traj=112000/256000 elapsed=42.4s eta=54.5s
+[train] DAD update=900/2000 mean_u=0.3939 entropy=2.234 entropy_coef=0.04662 update_s=0.02 traj=115200/256000 elapsed=43.0s eta=52.5s
+[train] DAD val update=900 mean_u=0.3938 mocu=0.0202 under=0.016 unique_seq=7/256 seq_H=1.135 joint_score=0.0202 floor=MISS
+[train] DAD update=925/2000 mean_u=0.3927 entropy=2.181 entropy_coef=0.04514 update_s=0.02 traj=118400/256000 elapsed=44.8s eta=52.0s
+[train] DAD update=950/2000 mean_u=0.3942 entropy=2.121 entropy_coef=0.04365 update_s=0.02 traj=121600/256000 elapsed=45.4s eta=50.2s
+[train] DAD val update=950 mean_u=0.3942 mocu=0.0198 under=0.012 unique_seq=11/256 seq_H=1.432 joint_score=0.0198 floor=MISS
+[train] DAD update=975/2000 mean_u=0.3942 entropy=2.070 entropy_coef=0.04217 update_s=0.02 traj=124800/256000 elapsed=47.2s eta=49.6s
+[train] DAD update=1000/2000 mean_u=0.3934 entropy=2.010 entropy_coef=0.04068 update_s=0.02 traj=128000/256000 elapsed=47.8s eta=47.8s
+[train] DAD val update=1000 mean_u=0.3943 mocu=0.0223 under=0.023 unique_seq=10/256 seq_H=1.942 joint_score=0.0223 floor=MISS
+[train] DAD update=1025/2000 mean_u=0.3947 entropy=2.172 entropy_coef=0.03920 update_s=0.02 traj=131200/256000 elapsed=49.6s eta=47.2s
+[train] DAD update=1050/2000 mean_u=0.3927 entropy=2.144 entropy_coef=0.03772 update_s=0.02 traj=134400/256000 elapsed=50.2s eta=45.5s
+[train] DAD val update=1050 mean_u=0.3946 mocu=0.0241 under=0.020 unique_seq=16/256 seq_H=2.017 joint_score=0.0241 floor=MISS
+[train] DAD update=1075/2000 mean_u=0.3917 entropy=2.205 entropy_coef=0.03623 update_s=0.02 traj=137600/256000 elapsed=52.0s eta=44.8s
+[train] DAD update=1100/2000 mean_u=0.3941 entropy=2.148 entropy_coef=0.03475 update_s=0.02 traj=140800/256000 elapsed=52.6s eta=43.1s
+[train] DAD val update=1100 mean_u=0.3939 mocu=0.0203 under=0.016 unique_seq=12/256 seq_H=1.990 joint_score=0.0203 floor=MISS
+[train] DAD update=1125/2000 mean_u=0.3913 entropy=2.040 entropy_coef=0.03326 update_s=0.02 traj=144000/256000 elapsed=54.5s eta=42.4s
+[train] DAD update=1150/2000 mean_u=0.3928 entropy=2.056 entropy_coef=0.03178 update_s=0.02 traj=147200/256000 elapsed=55.1s eta=40.7s
+[train] DAD val update=1150 mean_u=0.3943 mocu=0.0223 under=0.023 unique_seq=10/256 seq_H=1.348 joint_score=0.0223 floor=MISS
+[train] DAD update=1175/2000 mean_u=0.3930 entropy=2.091 entropy_coef=0.03029 update_s=0.02 traj=150400/256000 elapsed=56.9s eta=39.9s
+[train] DAD update=1200/2000 mean_u=0.3934 entropy=2.050 entropy_coef=0.02881 update_s=0.02 traj=153600/256000 elapsed=57.5s eta=38.3s
+[train] DAD val update=1200 mean_u=0.3944 mocu=0.0232 under=0.027 unique_seq=9/256 seq_H=1.875 joint_score=0.0232 floor=MISS
+[train] DAD update=1225/2000 mean_u=0.3945 entropy=2.011 entropy_coef=0.02733 update_s=0.02 traj=156800/256000 elapsed=59.3s eta=37.5s
+[train] DAD update=1250/2000 mean_u=0.3955 entropy=1.916 entropy_coef=0.02584 update_s=0.02 traj=160000/256000 elapsed=59.9s eta=35.9s
+[train] DAD val update=1250 mean_u=0.3941 mocu=0.0283 under=0.043 unique_seq=7/256 seq_H=1.307 joint_score=0.0283 floor=MISS
+[train] DAD update=1275/2000 mean_u=0.3923 entropy=1.822 entropy_coef=0.02436 update_s=0.02 traj=163200/256000 elapsed=61.7s eta=35.1s
+[train] DAD update=1300/2000 mean_u=0.3933 entropy=1.711 entropy_coef=0.02287 update_s=0.02 traj=166400/256000 elapsed=62.3s eta=33.6s
+[train] DAD val update=1300 mean_u=0.3945 mocu=0.0217 under=0.020 unique_seq=4/256 seq_H=0.909 joint_score=0.0217 floor=MISS
+[train] DAD update=1325/2000 mean_u=0.3941 entropy=1.765 entropy_coef=0.02139 update_s=0.02 traj=169600/256000 elapsed=64.2s eta=32.7s
+[train] DAD update=1350/2000 mean_u=0.3926 entropy=1.790 entropy_coef=0.01990 update_s=0.02 traj=172800/256000 elapsed=64.8s eta=31.2s
+[train] DAD val update=1350 mean_u=0.3947 mocu=0.0211 under=0.016 unique_seq=7/256 seq_H=1.790 joint_score=0.0211 floor=MISS
+[train] DAD update=1375/2000 mean_u=0.3938 entropy=1.909 entropy_coef=0.01842 update_s=0.02 traj=176000/256000 elapsed=66.6s eta=30.3s
+[train] DAD update=1400/2000 mean_u=0.3927 entropy=1.873 entropy_coef=0.01693 update_s=0.02 traj=179200/256000 elapsed=67.2s eta=28.8s
+[train] DAD val update=1400 mean_u=0.3950 mocu=0.0207 under=0.012 unique_seq=10/256 seq_H=1.655 joint_score=0.0207 floor=MISS
+[train] DAD update=1425/2000 mean_u=0.3928 entropy=1.626 entropy_coef=0.01545 update_s=0.02 traj=182400/256000 elapsed=69.0s eta=27.8s
+[train] DAD update=1450/2000 mean_u=0.3930 entropy=1.472 entropy_coef=0.01397 update_s=0.02 traj=185600/256000 elapsed=69.6s eta=26.4s
+[train] DAD val update=1450 mean_u=0.3942 mocu=0.0253 under=0.039 unique_seq=4/256 seq_H=0.574 joint_score=0.0253 floor=MISS
+[train] DAD update=1475/2000 mean_u=0.3938 entropy=1.538 entropy_coef=0.01248 update_s=0.02 traj=188800/256000 elapsed=71.4s eta=25.4s
+[train] DAD update=1500/2000 mean_u=0.3930 entropy=1.558 entropy_coef=0.01100 update_s=0.02 traj=192000/256000 elapsed=72.0s eta=24.0s
+[train] DAD val update=1500 mean_u=0.3943 mocu=0.0214 under=0.020 unique_seq=6/256 seq_H=1.418 joint_score=0.0214 floor=MISS
+[train] DAD update=1525/2000 mean_u=0.3932 entropy=1.573 entropy_coef=0.00951 update_s=0.02 traj=195200/256000 elapsed=73.8s eta=23.0s
+[train] DAD update=1550/2000 mean_u=0.3943 entropy=1.503 entropy_coef=0.00803 update_s=0.02 traj=198400/256000 elapsed=74.4s eta=21.6s
+[train] DAD val update=1550 mean_u=0.3940 mocu=0.0243 under=0.031 unique_seq=6/256 seq_H=1.304 joint_score=0.0243 floor=MISS
+[train] DAD update=1575/2000 mean_u=0.3920 entropy=1.411 entropy_coef=0.00654 update_s=0.02 traj=201600/256000 elapsed=76.3s eta=20.6s
+[train] DAD update=1600/2000 mean_u=0.3937 entropy=1.488 entropy_coef=0.00506 update_s=0.02 traj=204800/256000 elapsed=76.9s eta=19.2s
+[train] DAD val update=1600 mean_u=0.3944 mocu=0.0208 under=0.016 unique_seq=13/256 seq_H=1.685 joint_score=0.0208 floor=MISS
+[train] DAD update=1625/2000 mean_u=0.3942 entropy=1.466 entropy_coef=0.00500 update_s=0.02 traj=208000/256000 elapsed=78.7s eta=18.2s
+[train] DAD update=1650/2000 mean_u=0.3933 entropy=1.578 entropy_coef=0.00500 update_s=0.02 traj=211200/256000 elapsed=79.3s eta=16.8s
+[train] DAD val update=1650 mean_u=0.3941 mocu=0.0221 under=0.023 unique_seq=7/256 seq_H=1.061 joint_score=0.0221 floor=MISS
+[train] DAD update=1675/2000 mean_u=0.3934 entropy=1.558 entropy_coef=0.00500 update_s=0.02 traj=214400/256000 elapsed=81.1s eta=15.7s
+[train] DAD update=1700/2000 mean_u=0.3935 entropy=1.379 entropy_coef=0.00500 update_s=0.02 traj=217600/256000 elapsed=81.7s eta=14.4s
+[train] DAD val update=1700 mean_u=0.3943 mocu=0.0214 under=0.016 unique_seq=6/256 seq_H=1.085 joint_score=0.0214 floor=MISS
+[train] DAD update=1725/2000 mean_u=0.3927 entropy=1.353 entropy_coef=0.00500 update_s=0.02 traj=220800/256000 elapsed=83.5s eta=13.3s
+[train] DAD update=1750/2000 mean_u=0.3931 entropy=1.408 entropy_coef=0.00500 update_s=0.02 traj=224000/256000 elapsed=84.1s eta=12.0s
+[train] DAD val update=1750 mean_u=0.3943 mocu=0.0215 under=0.020 unique_seq=6/256 seq_H=1.458 joint_score=0.0215 floor=MISS
+[train] DAD update=1775/2000 mean_u=0.3943 entropy=1.444 entropy_coef=0.00500 update_s=0.02 traj=227200/256000 elapsed=85.9s eta=10.9s
+[train] DAD update=1800/2000 mean_u=0.3918 entropy=1.444 entropy_coef=0.00500 update_s=0.02 traj=230400/256000 elapsed=86.5s eta=9.6s
+[train] DAD val update=1800 mean_u=0.3937 mocu=0.0240 under=0.031 unique_seq=6/256 seq_H=0.761 joint_score=0.0240 floor=MISS
+[train] DAD update=1825/2000 mean_u=0.3941 entropy=1.583 entropy_coef=0.00500 update_s=0.02 traj=233600/256000 elapsed=88.3s eta=8.5s
+[train] DAD update=1850/2000 mean_u=0.3920 entropy=1.577 entropy_coef=0.00500 update_s=0.02 traj=236800/256000 elapsed=88.9s eta=7.2s
+[train] DAD val update=1850 mean_u=0.3940 mocu=0.0220 under=0.020 unique_seq=6/256 seq_H=1.119 joint_score=0.0220 floor=MISS
+[train] DAD update=1875/2000 mean_u=0.3936 entropy=1.424 entropy_coef=0.00500 update_s=0.02 traj=240000/256000 elapsed=90.7s eta=6.0s
+[train] DAD update=1900/2000 mean_u=0.3937 entropy=1.409 entropy_coef=0.00500 update_s=0.02 traj=243200/256000 elapsed=91.3s eta=4.8s
+[train] DAD val update=1900 mean_u=0.3946 mocu=0.0211 under=0.016 unique_seq=4/256 seq_H=1.295 joint_score=0.0211 floor=MISS
+[train] DAD update=1925/2000 mean_u=0.3930 entropy=1.388 entropy_coef=0.00500 update_s=0.02 traj=246400/256000 elapsed=93.2s eta=3.6s
+[train] DAD update=1950/2000 mean_u=0.3920 entropy=1.253 entropy_coef=0.00500 update_s=0.02 traj=249600/256000 elapsed=93.8s eta=2.4s
+[train] DAD val update=1950 mean_u=0.3945 mocu=0.0216 under=0.020 unique_seq=2/256 seq_H=0.353 joint_score=0.0216 floor=MISS
+[train] DAD update=1975/2000 mean_u=0.3947 entropy=1.232 entropy_coef=0.00500 update_s=0.02 traj=252800/256000 elapsed=95.6s eta=1.2s
+[train] DAD update=2000/2000 mean_u=0.3927 entropy=1.246 entropy_coef=0.00500 update_s=0.02 traj=256000/256000 elapsed=96.2s eta=0.0s
+[train] DAD val update=2000 mean_u=0.3946 mocu=0.0226 under=0.023 unique_seq=3/256 seq_H=0.235 joint_score=0.0226 floor=MISS
+[train] WARNING DAD: best checkpoint still misses unique-seq floor (unique=9/256). Policy may be open-loop.
+[train] DAD finished updates=2000 trajectories=256000 elapsed=97.5s best_val_mocu=0.0188 unique=9 score=0.0188 → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005/model/dad.pth
+[train] DAD 97s
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+=== training method=rl_sboed (config=configs/ieee9_mocu_duration_v2_best.yaml type=objective_based T=4 N_obs=5 noise_sigma=0.005 seed=101) ===
+[data] removed non-bank files under /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_subset: fixed_cache/objective_fixed_safetyocu_T4_Nobs5_sigma0p005.json
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[mocu-bank] separate control bank -> /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_control
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[fixed] loaded sequence from /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005/model/fixed_subset_T4.json: [53, 48, 47, 45]
+[train] type=objective_based RL-sBOED config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/ieee9_mocu_duration_v2_best.yaml N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+[train] RL-sBOED checkpoint selection: joint_score=MOCU-0*unique_frac; soft_floor=OFF (uniq>=26/256, mocu_slack=0.0025)
+[train] RL-sBOED device=cuda updates=2000 traj/update=128 total_trajectories=256000 val_every=50 val_rollouts=256 entropy_coef=0.1→0.005 entropy_anneal_fraction=0.8 diversity_w=0.0 dense_cf=0.0 dense_branch=0.0
+[train] RL-sBOED update=1/2000 mean_u=0.3956 entropy=3.953 entropy_coef=0.10000 update_s=0.28 traj=128/256000 elapsed=0.3s eta=552.8s
+[train] RL-sBOED update=25/2000 mean_u=0.3933 entropy=3.468 entropy_coef=0.09858 update_s=0.08 traj=3200/256000 elapsed=1.8s eta=144.9s
+[train] RL-sBOED update=50/2000 mean_u=0.3944 entropy=3.108 entropy_coef=0.09709 update_s=0.07 traj=6400/256000 elapsed=3.4s eta=134.1s
+[train] RL-sBOED val update=50 mean_u=0.3941 mocu=0.0236 under=0.027 unique_seq=1/256 seq_H=-0.000 joint_score=0.0236 floor=MISS
+[train] RL-sBOED update=75/2000 mean_u=0.3937 entropy=3.038 entropy_coef=0.09561 update_s=0.06 traj=9600/256000 elapsed=6.2s eta=158.2s
+[train] RL-sBOED update=100/2000 mean_u=0.3945 entropy=3.210 entropy_coef=0.09412 update_s=0.06 traj=12800/256000 elapsed=7.6s eta=143.9s
+[train] RL-sBOED val update=100 mean_u=0.3945 mocu=0.0225 under=0.023 unique_seq=3/256 seq_H=0.539 joint_score=0.0225 floor=MISS
+[train] RL-sBOED update=125/2000 mean_u=0.3945 entropy=3.332 entropy_coef=0.09264 update_s=0.06 traj=16000/256000 elapsed=10.1s eta=152.2s
+[train] RL-sBOED update=150/2000 mean_u=0.3933 entropy=3.064 entropy_coef=0.09115 update_s=0.06 traj=19200/256000 elapsed=11.5s eta=142.3s
+[train] RL-sBOED val update=150 mean_u=0.3936 mocu=0.0278 under=0.043 unique_seq=4/256 seq_H=1.183 joint_score=0.0278 floor=MISS
+[train] RL-sBOED update=175/2000 mean_u=0.3930 entropy=2.772 entropy_coef=0.08967 update_s=0.06 traj=22400/256000 elapsed=14.1s eta=147.3s
+[train] RL-sBOED update=200/2000 mean_u=0.3946 entropy=3.372 entropy_coef=0.08818 update_s=0.06 traj=25600/256000 elapsed=15.5s eta=139.6s
+[train] RL-sBOED val update=200 mean_u=0.3945 mocu=0.0233 under=0.023 unique_seq=6/256 seq_H=1.377 joint_score=0.0233 floor=MISS
+[train] RL-sBOED update=225/2000 mean_u=0.3950 entropy=2.990 entropy_coef=0.08670 update_s=0.06 traj=28800/256000 elapsed=18.1s eta=142.7s
+[train] RL-sBOED update=250/2000 mean_u=0.3961 entropy=2.845 entropy_coef=0.08522 update_s=0.06 traj=32000/256000 elapsed=19.5s eta=136.3s
+[train] RL-sBOED val update=250 mean_u=0.3941 mocu=0.0229 under=0.023 unique_seq=10/256 seq_H=0.753 joint_score=0.0229 floor=MISS
+[train] RL-sBOED update=275/2000 mean_u=0.3941 entropy=2.731 entropy_coef=0.08373 update_s=0.06 traj=35200/256000 elapsed=22.0s eta=138.3s
+[train] RL-sBOED update=300/2000 mean_u=0.3933 entropy=2.890 entropy_coef=0.08225 update_s=0.06 traj=38400/256000 elapsed=23.4s eta=132.8s
+[train] RL-sBOED val update=300 mean_u=0.3943 mocu=0.0215 under=0.020 unique_seq=33/256 seq_H=2.341 joint_score=0.0215 floor=ok
+[train] RL-sBOED update=325/2000 mean_u=0.3938 entropy=3.072 entropy_coef=0.08076 update_s=0.06 traj=41600/256000 elapsed=26.0s eta=134.0s
+[train] RL-sBOED update=350/2000 mean_u=0.3945 entropy=2.857 entropy_coef=0.07928 update_s=0.06 traj=44800/256000 elapsed=27.4s eta=129.1s
+[train] RL-sBOED val update=350 mean_u=0.3946 mocu=0.0225 under=0.020 unique_seq=18/256 seq_H=1.949 joint_score=0.0225 floor=MISS
+[train] RL-sBOED update=375/2000 mean_u=0.3938 entropy=2.757 entropy_coef=0.07779 update_s=0.06 traj=48000/256000 elapsed=30.0s eta=129.8s
+[train] RL-sBOED update=400/2000 mean_u=0.3919 entropy=2.574 entropy_coef=0.07631 update_s=0.06 traj=51200/256000 elapsed=31.4s eta=125.4s
+[train] RL-sBOED val update=400 mean_u=0.3942 mocu=0.0237 under=0.031 unique_seq=11/256 seq_H=1.937 joint_score=0.0237 floor=MISS
+[train] RL-sBOED update=425/2000 mean_u=0.3941 entropy=2.366 entropy_coef=0.07483 update_s=0.06 traj=54400/256000 elapsed=33.9s eta=125.7s
+[train] RL-sBOED update=450/2000 mean_u=0.3937 entropy=2.648 entropy_coef=0.07334 update_s=0.06 traj=57600/256000 elapsed=35.3s eta=121.6s
+[train] RL-sBOED val update=450 mean_u=0.3936 mocu=0.0263 under=0.047 unique_seq=12/256 seq_H=1.224 joint_score=0.0263 floor=MISS
+[train] RL-sBOED update=475/2000 mean_u=0.3943 entropy=2.872 entropy_coef=0.07186 update_s=0.06 traj=60800/256000 elapsed=37.9s eta=121.6s
+[train] RL-sBOED update=500/2000 mean_u=0.3941 entropy=2.544 entropy_coef=0.07037 update_s=0.06 traj=64000/256000 elapsed=39.3s eta=117.8s
+[train] RL-sBOED val update=500 mean_u=0.3938 mocu=0.0241 under=0.035 unique_seq=13/256 seq_H=1.938 joint_score=0.0241 floor=MISS
+[train] RL-sBOED update=525/2000 mean_u=0.3946 entropy=2.485 entropy_coef=0.06889 update_s=0.06 traj=67200/256000 elapsed=41.8s eta=117.6s
+[train] RL-sBOED update=550/2000 mean_u=0.3932 entropy=2.661 entropy_coef=0.06740 update_s=0.06 traj=70400/256000 elapsed=43.2s eta=114.0s
+[train] RL-sBOED val update=550 mean_u=0.3944 mocu=0.0239 under=0.027 unique_seq=14/256 seq_H=1.089 joint_score=0.0239 floor=MISS
+[train] RL-sBOED update=575/2000 mean_u=0.3920 entropy=2.524 entropy_coef=0.06592 update_s=0.06 traj=73600/256000 elapsed=45.8s eta=113.5s
+[train] RL-sBOED update=600/2000 mean_u=0.3942 entropy=2.485 entropy_coef=0.06443 update_s=0.06 traj=76800/256000 elapsed=47.2s eta=110.1s
+[train] RL-sBOED val update=600 mean_u=0.3939 mocu=0.0227 under=0.027 unique_seq=16/256 seq_H=1.414 joint_score=0.0227 floor=MISS
+[train] RL-sBOED update=625/2000 mean_u=0.3937 entropy=2.487 entropy_coef=0.06295 update_s=0.06 traj=80000/256000 elapsed=49.8s eta=109.5s
+[train] RL-sBOED update=650/2000 mean_u=0.3936 entropy=2.665 entropy_coef=0.06147 update_s=0.06 traj=83200/256000 elapsed=51.2s eta=106.3s
+[train] RL-sBOED val update=650 mean_u=0.3944 mocu=0.0223 under=0.023 unique_seq=29/256 seq_H=2.652 joint_score=0.0223 floor=ok
+[train] RL-sBOED update=675/2000 mean_u=0.3932 entropy=2.253 entropy_coef=0.05998 update_s=0.06 traj=86400/256000 elapsed=53.7s eta=105.5s
+[train] RL-sBOED update=700/2000 mean_u=0.3938 entropy=2.172 entropy_coef=0.05850 update_s=0.06 traj=89600/256000 elapsed=55.1s eta=102.4s
+[train] RL-sBOED val update=700 mean_u=0.3934 mocu=0.0268 under=0.047 unique_seq=9/256 seq_H=1.380 joint_score=0.0268 floor=MISS
+[train] RL-sBOED update=725/2000 mean_u=0.3924 entropy=2.229 entropy_coef=0.05701 update_s=0.06 traj=92800/256000 elapsed=57.7s eta=101.5s
+[train] RL-sBOED update=750/2000 mean_u=0.3934 entropy=2.219 entropy_coef=0.05553 update_s=0.06 traj=96000/256000 elapsed=59.1s eta=98.5s
+[train] RL-sBOED val update=750 mean_u=0.3936 mocu=0.0247 under=0.035 unique_seq=11/256 seq_H=2.025 joint_score=0.0247 floor=MISS
+[train] RL-sBOED update=775/2000 mean_u=0.3943 entropy=2.037 entropy_coef=0.05404 update_s=0.06 traj=99200/256000 elapsed=61.7s eta=97.5s
+[train] RL-sBOED update=800/2000 mean_u=0.3938 entropy=2.483 entropy_coef=0.05256 update_s=0.06 traj=102400/256000 elapsed=63.1s eta=94.6s
+[train] RL-sBOED val update=800 mean_u=0.3936 mocu=0.0231 under=0.027 unique_seq=16/256 seq_H=2.198 joint_score=0.0231 floor=MISS
+[train] RL-sBOED update=825/2000 mean_u=0.3935 entropy=2.201 entropy_coef=0.05108 update_s=0.06 traj=105600/256000 elapsed=65.6s eta=93.5s
+[train] RL-sBOED update=850/2000 mean_u=0.3944 entropy=2.333 entropy_coef=0.04959 update_s=0.06 traj=108800/256000 elapsed=67.0s eta=90.7s
+[train] RL-sBOED val update=850 mean_u=0.3943 mocu=0.0215 under=0.016 unique_seq=10/256 seq_H=1.922 joint_score=0.0215 floor=MISS
+[train] RL-sBOED update=875/2000 mean_u=0.3930 entropy=2.388 entropy_coef=0.04811 update_s=0.06 traj=112000/256000 elapsed=69.6s eta=89.5s
+[train] RL-sBOED update=900/2000 mean_u=0.3939 entropy=2.220 entropy_coef=0.04662 update_s=0.06 traj=115200/256000 elapsed=71.0s eta=86.8s
+[train] RL-sBOED val update=900 mean_u=0.3939 mocu=0.0250 under=0.039 unique_seq=6/256 seq_H=1.417 joint_score=0.0250 floor=MISS
+[train] RL-sBOED update=925/2000 mean_u=0.3927 entropy=1.952 entropy_coef=0.04514 update_s=0.06 traj=118400/256000 elapsed=73.6s eta=85.5s
+[train] RL-sBOED update=950/2000 mean_u=0.3942 entropy=2.227 entropy_coef=0.04365 update_s=0.06 traj=121600/256000 elapsed=75.0s eta=82.9s
+[train] RL-sBOED val update=950 mean_u=0.3938 mocu=0.0186 under=0.008 unique_seq=6/256 seq_H=1.599 joint_score=0.0186 floor=MISS
+[train] RL-sBOED update=975/2000 mean_u=0.3941 entropy=2.106 entropy_coef=0.04217 update_s=0.06 traj=124800/256000 elapsed=77.6s eta=81.5s
+[train] RL-sBOED update=1000/2000 mean_u=0.3934 entropy=1.677 entropy_coef=0.04068 update_s=0.06 traj=128000/256000 elapsed=79.0s eta=79.0s
+[train] RL-sBOED val update=1000 mean_u=0.3943 mocu=0.0254 under=0.035 unique_seq=4/256 seq_H=0.840 joint_score=0.0254 floor=MISS
+[train] RL-sBOED update=1025/2000 mean_u=0.3950 entropy=2.321 entropy_coef=0.03920 update_s=0.06 traj=131200/256000 elapsed=81.6s eta=77.6s
+[train] RL-sBOED update=1050/2000 mean_u=0.3924 entropy=1.999 entropy_coef=0.03772 update_s=0.06 traj=134400/256000 elapsed=82.9s eta=75.0s
+[train] RL-sBOED val update=1050 mean_u=0.3946 mocu=0.0234 under=0.023 unique_seq=10/256 seq_H=1.644 joint_score=0.0234 floor=MISS
+[train] RL-sBOED update=1075/2000 mean_u=0.3912 entropy=1.956 entropy_coef=0.03623 update_s=0.06 traj=137600/256000 elapsed=85.5s eta=73.6s
+[train] RL-sBOED update=1100/2000 mean_u=0.3943 entropy=2.056 entropy_coef=0.03475 update_s=0.06 traj=140800/256000 elapsed=86.9s eta=71.1s
+[train] RL-sBOED val update=1100 mean_u=0.3944 mocu=0.0255 under=0.035 unique_seq=13/256 seq_H=1.930 joint_score=0.0255 floor=MISS
+[train] RL-sBOED update=1125/2000 mean_u=0.3913 entropy=1.954 entropy_coef=0.03326 update_s=0.06 traj=144000/256000 elapsed=89.5s eta=69.6s
+[train] RL-sBOED update=1150/2000 mean_u=0.3930 entropy=1.875 entropy_coef=0.03178 update_s=0.06 traj=147200/256000 elapsed=90.9s eta=67.2s
+[train] RL-sBOED val update=1150 mean_u=0.3937 mocu=0.0225 under=0.027 unique_seq=9/256 seq_H=1.850 joint_score=0.0225 floor=MISS
+[train] RL-sBOED update=1175/2000 mean_u=0.3930 entropy=1.868 entropy_coef=0.03029 update_s=0.06 traj=150400/256000 elapsed=93.4s eta=65.6s
+[train] RL-sBOED update=1200/2000 mean_u=0.3937 entropy=1.916 entropy_coef=0.02881 update_s=0.06 traj=153600/256000 elapsed=94.8s eta=63.2s
+[train] RL-sBOED val update=1200 mean_u=0.3941 mocu=0.0228 under=0.027 unique_seq=8/256 seq_H=1.490 joint_score=0.0228 floor=MISS
+[train] RL-sBOED update=1225/2000 mean_u=0.3941 entropy=1.776 entropy_coef=0.02733 update_s=0.06 traj=156800/256000 elapsed=97.4s eta=61.6s
+[train] RL-sBOED update=1250/2000 mean_u=0.3955 entropy=1.746 entropy_coef=0.02584 update_s=0.06 traj=160000/256000 elapsed=98.8s eta=59.3s
+[train] RL-sBOED val update=1250 mean_u=0.3940 mocu=0.0290 under=0.043 unique_seq=8/256 seq_H=1.427 joint_score=0.0290 floor=MISS
+[train] RL-sBOED update=1275/2000 mean_u=0.3925 entropy=1.753 entropy_coef=0.02436 update_s=0.06 traj=163200/256000 elapsed=101.4s eta=57.6s
+[train] RL-sBOED update=1300/2000 mean_u=0.3933 entropy=1.633 entropy_coef=0.02287 update_s=0.06 traj=166400/256000 elapsed=102.7s eta=55.3s
+[train] RL-sBOED val update=1300 mean_u=0.3941 mocu=0.0221 under=0.023 unique_seq=8/256 seq_H=1.665 joint_score=0.0221 floor=MISS
+[train] RL-sBOED update=1325/2000 mean_u=0.3941 entropy=1.417 entropy_coef=0.02139 update_s=0.06 traj=169600/256000 elapsed=105.3s eta=53.7s
+[train] RL-sBOED update=1350/2000 mean_u=0.3920 entropy=1.559 entropy_coef=0.01990 update_s=0.06 traj=172800/256000 elapsed=106.7s eta=51.4s
+[train] RL-sBOED val update=1350 mean_u=0.3946 mocu=0.0211 under=0.016 unique_seq=19/256 seq_H=2.426 joint_score=0.0211 floor=MISS
+[train] RL-sBOED update=1375/2000 mean_u=0.3938 entropy=1.556 entropy_coef=0.01842 update_s=0.06 traj=176000/256000 elapsed=109.3s eta=49.7s
+[train] RL-sBOED update=1400/2000 mean_u=0.3926 entropy=1.572 entropy_coef=0.01693 update_s=0.06 traj=179200/256000 elapsed=110.7s eta=47.4s
+[train] RL-sBOED val update=1400 mean_u=0.3948 mocu=0.0220 under=0.020 unique_seq=13/256 seq_H=1.916 joint_score=0.0220 floor=MISS
+[train] RL-sBOED update=1425/2000 mean_u=0.3925 entropy=1.305 entropy_coef=0.01545 update_s=0.06 traj=182400/256000 elapsed=113.2s eta=45.7s
+[train] RL-sBOED update=1450/2000 mean_u=0.3932 entropy=1.488 entropy_coef=0.01397 update_s=0.06 traj=185600/256000 elapsed=114.6s eta=43.5s
+[train] RL-sBOED val update=1450 mean_u=0.3940 mocu=0.0243 under=0.031 unique_seq=8/256 seq_H=0.810 joint_score=0.0243 floor=MISS
+[train] RL-sBOED update=1475/2000 mean_u=0.3934 entropy=1.619 entropy_coef=0.01248 update_s=0.06 traj=188800/256000 elapsed=117.2s eta=41.7s
+[train] RL-sBOED update=1500/2000 mean_u=0.3930 entropy=1.506 entropy_coef=0.01100 update_s=0.06 traj=192000/256000 elapsed=118.7s eta=39.6s
+[train] RL-sBOED val update=1500 mean_u=0.3941 mocu=0.0228 under=0.023 unique_seq=6/256 seq_H=1.389 joint_score=0.0228 floor=MISS
+[train] RL-sBOED update=1525/2000 mean_u=0.3927 entropy=1.311 entropy_coef=0.00951 update_s=0.06 traj=195200/256000 elapsed=121.2s eta=37.8s
+[train] RL-sBOED update=1550/2000 mean_u=0.3941 entropy=1.232 entropy_coef=0.00803 update_s=0.06 traj=198400/256000 elapsed=122.6s eta=35.6s
+[train] RL-sBOED val update=1550 mean_u=0.3945 mocu=0.0201 under=0.012 unique_seq=4/256 seq_H=0.977 joint_score=0.0201 floor=MISS
+[train] RL-sBOED update=1575/2000 mean_u=0.3926 entropy=1.268 entropy_coef=0.00654 update_s=0.06 traj=201600/256000 elapsed=125.2s eta=33.8s
+[train] RL-sBOED update=1600/2000 mean_u=0.3937 entropy=1.405 entropy_coef=0.00506 update_s=0.06 traj=204800/256000 elapsed=126.6s eta=31.6s
+[train] RL-sBOED val update=1600 mean_u=0.3949 mocu=0.0213 under=0.016 unique_seq=7/256 seq_H=1.466 joint_score=0.0213 floor=MISS
+[train] RL-sBOED update=1625/2000 mean_u=0.3941 entropy=1.355 entropy_coef=0.00500 update_s=0.06 traj=208000/256000 elapsed=129.2s eta=29.8s
+[train] RL-sBOED update=1650/2000 mean_u=0.3933 entropy=1.407 entropy_coef=0.00500 update_s=0.06 traj=211200/256000 elapsed=130.6s eta=27.7s
+[train] RL-sBOED val update=1650 mean_u=0.3947 mocu=0.0211 under=0.016 unique_seq=6/256 seq_H=1.270 joint_score=0.0211 floor=MISS
+[train] RL-sBOED update=1675/2000 mean_u=0.3938 entropy=1.276 entropy_coef=0.00500 update_s=0.06 traj=214400/256000 elapsed=133.1s eta=25.8s
+[train] RL-sBOED update=1700/2000 mean_u=0.3939 entropy=1.344 entropy_coef=0.00500 update_s=0.06 traj=217600/256000 elapsed=134.5s eta=23.7s
+[train] RL-sBOED val update=1700 mean_u=0.3949 mocu=0.0245 under=0.031 unique_seq=5/256 seq_H=1.384 joint_score=0.0245 floor=MISS
+[train] RL-sBOED update=1725/2000 mean_u=0.3929 entropy=1.026 entropy_coef=0.00500 update_s=0.06 traj=220800/256000 elapsed=137.1s eta=21.9s
+[train] RL-sBOED update=1750/2000 mean_u=0.3930 entropy=1.048 entropy_coef=0.00500 update_s=0.06 traj=224000/256000 elapsed=138.5s eta=19.8s
+[train] RL-sBOED val update=1750 mean_u=0.3946 mocu=0.0242 under=0.031 unique_seq=4/256 seq_H=1.068 joint_score=0.0242 floor=MISS
+[train] RL-sBOED update=1775/2000 mean_u=0.3941 entropy=1.479 entropy_coef=0.00500 update_s=0.06 traj=227200/256000 elapsed=141.0s eta=17.9s
+[train] RL-sBOED update=1800/2000 mean_u=0.3923 entropy=1.253 entropy_coef=0.00500 update_s=0.06 traj=230400/256000 elapsed=142.4s eta=15.8s
+[train] RL-sBOED val update=1800 mean_u=0.3949 mocu=0.0229 under=0.020 unique_seq=6/256 seq_H=1.253 joint_score=0.0229 floor=MISS
+[train] RL-sBOED update=1825/2000 mean_u=0.3938 entropy=1.348 entropy_coef=0.00500 update_s=0.06 traj=233600/256000 elapsed=145.0s eta=13.9s
+[train] RL-sBOED update=1850/2000 mean_u=0.3924 entropy=1.092 entropy_coef=0.00500 update_s=0.06 traj=236800/256000 elapsed=146.4s eta=11.9s
+[train] RL-sBOED val update=1850 mean_u=0.3942 mocu=0.0245 under=0.031 unique_seq=6/256 seq_H=1.237 joint_score=0.0245 floor=MISS
+[train] RL-sBOED update=1875/2000 mean_u=0.3935 entropy=1.193 entropy_coef=0.00500 update_s=0.06 traj=240000/256000 elapsed=149.0s eta=9.9s
+[train] RL-sBOED update=1900/2000 mean_u=0.3935 entropy=1.340 entropy_coef=0.00500 update_s=0.06 traj=243200/256000 elapsed=150.3s eta=7.9s
+[train] RL-sBOED val update=1900 mean_u=0.3948 mocu=0.0243 under=0.027 unique_seq=7/256 seq_H=1.700 joint_score=0.0243 floor=MISS
+[train] RL-sBOED update=1925/2000 mean_u=0.3930 entropy=1.200 entropy_coef=0.00500 update_s=0.06 traj=246400/256000 elapsed=152.9s eta=6.0s
+[train] RL-sBOED update=1950/2000 mean_u=0.3919 entropy=1.444 entropy_coef=0.00500 update_s=0.06 traj=249600/256000 elapsed=154.3s eta=4.0s
+[train] RL-sBOED val update=1950 mean_u=0.3948 mocu=0.0220 under=0.016 unique_seq=6/256 seq_H=1.324 joint_score=0.0220 floor=MISS
+[train] RL-sBOED update=1975/2000 mean_u=0.3948 entropy=1.455 entropy_coef=0.00500 update_s=0.06 traj=252800/256000 elapsed=156.9s eta=2.0s
+[train] RL-sBOED update=2000/2000 mean_u=0.3927 entropy=1.119 entropy_coef=0.00500 update_s=0.06 traj=256000/256000 elapsed=158.3s eta=0.0s
+[train] RL-sBOED val update=2000 mean_u=0.3943 mocu=0.0223 under=0.023 unique_seq=6/256 seq_H=0.860 joint_score=0.0223 floor=MISS
+[train] WARNING RL-sBOED: best checkpoint still misses unique-seq floor (unique=6/256). Policy may be open-loop.
+[train] RL-sBOED finished updates=2000 trajectories=256000 elapsed=159.6s best_val_mocu=0.0186 unique=6 score=0.0186 → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005/model/rl_sboed.pth
+[train] RL-sBOED 160s
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+=== training method=moe_sboed (config=configs/ieee9_mocu_duration_v2_best.yaml type=objective_based T=4 N_obs=5 noise_sigma=0.005 seed=101) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[mocu-bank] separate control bank -> /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_control
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[fixed] loaded sequence from /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005/model/fixed_subset_T4.json: [53, 48, 47, 45]
+[train] type=objective_based MoE-sBOED config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/ieee9_mocu_duration_v2_best.yaml N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+[train] MoE-sBOED checkpoint selection: joint_score=MOCU-0*unique_frac; soft_floor=OFF (uniq>=26/256, mocu_slack=0.0025)
+[train] MoE-sBOED device=cuda updates=2000 traj/update=128 total_trajectories=256000 val_every=50 val_rollouts=256 entropy_coef=0.1→0.005 entropy_anneal_fraction=0.8 diversity_w=0.0 dense_cf=0.0 dense_branch=0.0
+[train] MoE-sBOED architecture n_experts=4 top_k=2 expert_hidden=128 total_params=286900 cf_coef=0 cf_floor=0 balance=0.001 logit_scale_init=3
+[train] MoE-sBOED update=1/2000 mean_u=0.3956 entropy=3.947 entropy_coef=0.10000 update_s=0.35 traj=128/256000 elapsed=0.4s eta=703.7s
+[train] MoE-sBOED update=25/2000 mean_u=0.3928 entropy=2.414 entropy_coef=0.09858 update_s=0.13 traj=3200/256000 elapsed=3.5s eta=280.4s
+[train] MoE-sBOED update=50/2000 mean_u=0.3938 entropy=2.069 entropy_coef=0.09709 update_s=0.13 traj=6400/256000 elapsed=6.9s eta=268.0s
+[train] MoE-sBOED val update=50 mean_u=0.3945 mocu=0.0217 under=0.016 unique_seq=2/256 seq_H=0.692 joint_score=0.0217 floor=MISS
+[train] MoE-sBOED update=75/2000 mean_u=0.3934 entropy=2.098 entropy_coef=0.09561 update_s=0.13 traj=9600/256000 elapsed=11.6s eta=298.2s
+[train] MoE-sBOED update=100/2000 mean_u=0.3936 entropy=2.161 entropy_coef=0.09412 update_s=0.13 traj=12800/256000 elapsed=15.0s eta=284.1s
+[train] MoE-sBOED val update=100 mean_u=0.3944 mocu=0.0231 under=0.023 unique_seq=12/256 seq_H=1.313 joint_score=0.0231 floor=MISS
+[train] MoE-sBOED update=125/2000 mean_u=0.3939 entropy=2.187 entropy_coef=0.09264 update_s=0.13 traj=16000/256000 elapsed=19.7s eta=295.9s
+[train] MoE-sBOED update=150/2000 mean_u=0.3934 entropy=2.066 entropy_coef=0.09115 update_s=0.13 traj=19200/256000 elapsed=23.1s eta=284.3s
+[train] MoE-sBOED val update=150 mean_u=0.3950 mocu=0.0230 under=0.020 unique_seq=9/256 seq_H=0.995 joint_score=0.0230 floor=MISS
+[train] MoE-sBOED update=175/2000 mean_u=0.3931 entropy=1.584 entropy_coef=0.08967 update_s=0.13 traj=22400/256000 elapsed=27.8s eta=289.8s
+[train] MoE-sBOED update=200/2000 mean_u=0.3938 entropy=1.978 entropy_coef=0.08818 update_s=0.13 traj=25600/256000 elapsed=31.1s eta=280.0s
+[train] MoE-sBOED val update=200 mean_u=0.3941 mocu=0.0245 under=0.031 unique_seq=10/256 seq_H=0.926 joint_score=0.0245 floor=MISS
+[train] MoE-sBOED update=225/2000 mean_u=0.3947 entropy=1.764 entropy_coef=0.08670 update_s=0.13 traj=28800/256000 elapsed=35.9s eta=282.9s
+[train] MoE-sBOED update=250/2000 mean_u=0.3963 entropy=1.821 entropy_coef=0.08522 update_s=0.13 traj=32000/256000 elapsed=39.2s eta=274.2s
+[train] MoE-sBOED val update=250 mean_u=0.3945 mocu=0.0224 under=0.020 unique_seq=14/256 seq_H=1.152 joint_score=0.0224 floor=MISS
+[train] MoE-sBOED update=275/2000 mean_u=0.3935 entropy=1.676 entropy_coef=0.08373 update_s=0.13 traj=35200/256000 elapsed=43.9s eta=275.5s
+[train] MoE-sBOED update=300/2000 mean_u=0.3937 entropy=1.779 entropy_coef=0.08225 update_s=0.13 traj=38400/256000 elapsed=47.2s eta=267.7s
+[train] MoE-sBOED val update=300 mean_u=0.3944 mocu=0.0192 under=0.008 unique_seq=16/256 seq_H=2.129 joint_score=0.0192 floor=MISS
+[train] MoE-sBOED update=325/2000 mean_u=0.3941 entropy=2.103 entropy_coef=0.08076 update_s=0.13 traj=41600/256000 elapsed=52.0s eta=268.0s
+[train] MoE-sBOED update=350/2000 mean_u=0.3948 entropy=1.703 entropy_coef=0.07928 update_s=0.13 traj=44800/256000 elapsed=55.3s eta=260.9s
+[train] MoE-sBOED val update=350 mean_u=0.3942 mocu=0.0245 under=0.031 unique_seq=12/256 seq_H=1.020 joint_score=0.0245 floor=MISS
+[train] MoE-sBOED update=375/2000 mean_u=0.3937 entropy=1.584 entropy_coef=0.07779 update_s=0.13 traj=48000/256000 elapsed=60.1s eta=260.3s
+[train] MoE-sBOED regime prototypes reset at update=400 for re-initialization from warmed-up fingerprints
+[train] MoE-sBOED update=400/2000 mean_u=0.3921 entropy=1.254 entropy_coef=0.07631 update_s=0.13 traj=51200/256000 elapsed=63.4s eta=253.6s
+[train] MoE-sBOED val update=400 mean_u=0.3947 mocu=0.0211 under=0.016 unique_seq=19/256 seq_H=1.930 joint_score=0.0211 floor=MISS
+[train] MoE-sBOED update=425/2000 mean_u=0.3944 entropy=1.482 entropy_coef=0.07483 update_s=0.13 traj=54400/256000 elapsed=68.1s eta=252.5s
+[train] MoE-sBOED update=450/2000 mean_u=0.3933 entropy=1.708 entropy_coef=0.07334 update_s=0.13 traj=57600/256000 elapsed=71.5s eta=246.2s
+[train] MoE-sBOED val update=450 mean_u=0.3933 mocu=0.0244 under=0.035 unique_seq=13/256 seq_H=1.398 joint_score=0.0244 floor=MISS
+[train] MoE-sBOED update=475/2000 mean_u=0.3942 entropy=1.678 entropy_coef=0.07186 update_s=0.13 traj=60800/256000 elapsed=76.2s eta=244.7s
+[train] MoE-sBOED update=500/2000 mean_u=0.3939 entropy=1.485 entropy_coef=0.07037 update_s=0.13 traj=64000/256000 elapsed=79.5s eta=238.6s
+[train] MoE-sBOED val update=500 mean_u=0.3941 mocu=0.0275 under=0.047 unique_seq=10/256 seq_H=0.854 joint_score=0.0275 floor=MISS
+[train] MoE-sBOED update=525/2000 mean_u=0.3947 entropy=1.544 entropy_coef=0.06889 update_s=0.13 traj=67200/256000 elapsed=84.3s eta=236.8s
+[train] MoE-sBOED update=550/2000 mean_u=0.3930 entropy=1.623 entropy_coef=0.06740 update_s=0.13 traj=70400/256000 elapsed=87.6s eta=230.9s
+[train] MoE-sBOED val update=550 mean_u=0.3939 mocu=0.0282 under=0.051 unique_seq=12/256 seq_H=1.031 joint_score=1000.0672 floor=MISS
+[train] MoE-sBOED update=575/2000 mean_u=0.3922 entropy=1.550 entropy_coef=0.06592 update_s=0.13 traj=73600/256000 elapsed=92.3s eta=228.8s
+[train] MoE-sBOED update=600/2000 mean_u=0.3939 entropy=1.250 entropy_coef=0.06443 update_s=0.13 traj=76800/256000 elapsed=95.6s eta=223.1s
+[train] MoE-sBOED val update=600 mean_u=0.3946 mocu=0.0218 under=0.020 unique_seq=22/256 seq_H=2.298 joint_score=0.0218 floor=MISS
+[train] MoE-sBOED update=625/2000 mean_u=0.3931 entropy=1.457 entropy_coef=0.06295 update_s=0.13 traj=80000/256000 elapsed=100.3s eta=220.8s
+[train] MoE-sBOED update=650/2000 mean_u=0.3936 entropy=1.471 entropy_coef=0.06147 update_s=0.13 traj=83200/256000 elapsed=103.7s eta=215.3s
+[train] MoE-sBOED val update=650 mean_u=0.3941 mocu=0.0237 under=0.031 unique_seq=22/256 seq_H=1.906 joint_score=0.0237 floor=MISS
+[train] MoE-sBOED update=675/2000 mean_u=0.3930 entropy=1.439 entropy_coef=0.05998 update_s=0.13 traj=86400/256000 elapsed=108.4s eta=212.8s
+[train] MoE-sBOED update=700/2000 mean_u=0.3935 entropy=1.326 entropy_coef=0.05850 update_s=0.13 traj=89600/256000 elapsed=111.7s eta=207.5s
+[train] MoE-sBOED val update=700 mean_u=0.3939 mocu=0.0266 under=0.043 unique_seq=19/256 seq_H=2.028 joint_score=0.0266 floor=MISS
+[train] MoE-sBOED update=725/2000 mean_u=0.3926 entropy=0.887 entropy_coef=0.05701 update_s=0.13 traj=92800/256000 elapsed=116.4s eta=204.8s
+[train] MoE-sBOED update=750/2000 mean_u=0.3933 entropy=1.355 entropy_coef=0.05553 update_s=0.13 traj=96000/256000 elapsed=119.8s eta=199.6s
+[train] MoE-sBOED val update=750 mean_u=0.3944 mocu=0.0239 under=0.020 unique_seq=20/256 seq_H=2.377 joint_score=0.0239 floor=MISS
+[train] MoE-sBOED update=775/2000 mean_u=0.3948 entropy=0.627 entropy_coef=0.05404 update_s=0.13 traj=99200/256000 elapsed=124.5s eta=196.8s
+[train] MoE-sBOED update=800/2000 mean_u=0.3938 entropy=0.768 entropy_coef=0.05256 update_s=0.13 traj=102400/256000 elapsed=127.8s eta=191.8s
+[train] MoE-sBOED val update=800 mean_u=0.3942 mocu=0.0222 under=0.023 unique_seq=16/256 seq_H=1.743 joint_score=0.0222 floor=MISS
+[train] MoE-sBOED update=825/2000 mean_u=0.3935 entropy=0.507 entropy_coef=0.05108 update_s=0.13 traj=105600/256000 elapsed=132.6s eta=188.8s
+[train] MoE-sBOED update=850/2000 mean_u=0.3936 entropy=0.562 entropy_coef=0.04959 update_s=0.14 traj=108800/256000 elapsed=136.0s eta=184.0s
+[train] MoE-sBOED val update=850 mean_u=0.3944 mocu=0.0232 under=0.027 unique_seq=12/256 seq_H=1.332 joint_score=0.0232 floor=MISS
+[train] MoE-sBOED update=875/2000 mean_u=0.3927 entropy=0.706 entropy_coef=0.04811 update_s=0.13 traj=112000/256000 elapsed=140.8s eta=181.0s
+[train] MoE-sBOED update=900/2000 mean_u=0.3938 entropy=0.905 entropy_coef=0.04662 update_s=0.13 traj=115200/256000 elapsed=144.1s eta=176.1s
+[train] MoE-sBOED val update=900 mean_u=0.3938 mocu=0.0234 under=0.031 unique_seq=13/256 seq_H=1.909 joint_score=0.0234 floor=MISS
+[train] MoE-sBOED update=925/2000 mean_u=0.3924 entropy=0.882 entropy_coef=0.04514 update_s=0.13 traj=118400/256000 elapsed=148.8s eta=173.0s
+[train] MoE-sBOED update=950/2000 mean_u=0.3943 entropy=0.921 entropy_coef=0.04365 update_s=0.13 traj=121600/256000 elapsed=152.1s eta=168.2s
+[train] MoE-sBOED val update=950 mean_u=0.3942 mocu=0.0230 under=0.023 unique_seq=13/256 seq_H=2.007 joint_score=0.0230 floor=MISS
+[train] MoE-sBOED update=975/2000 mean_u=0.3936 entropy=0.846 entropy_coef=0.04217 update_s=0.13 traj=124800/256000 elapsed=156.9s eta=164.9s
+[train] MoE-sBOED update=1000/2000 mean_u=0.3931 entropy=0.458 entropy_coef=0.04068 update_s=0.13 traj=128000/256000 elapsed=160.2s eta=160.2s
+[train] MoE-sBOED val update=1000 mean_u=0.3942 mocu=0.0245 under=0.027 unique_seq=18/256 seq_H=2.025 joint_score=0.0245 floor=MISS
+[train] MoE-sBOED update=1025/2000 mean_u=0.3944 entropy=0.305 entropy_coef=0.03920 update_s=0.11 traj=131200/256000 elapsed=164.3s eta=156.3s
+[train] MoE-sBOED update=1050/2000 mean_u=0.3929 entropy=0.175 entropy_coef=0.03772 update_s=0.11 traj=134400/256000 elapsed=167.1s eta=151.2s
+[train] MoE-sBOED val update=1050 mean_u=0.3938 mocu=0.0225 under=0.027 unique_seq=18/256 seq_H=1.760 joint_score=0.0225 floor=MISS
+[train] MoE-sBOED update=1075/2000 mean_u=0.3910 entropy=0.722 entropy_coef=0.03623 update_s=0.11 traj=137600/256000 elapsed=171.2s eta=147.3s
+[train] MoE-sBOED update=1100/2000 mean_u=0.3943 entropy=0.545 entropy_coef=0.03475 update_s=0.11 traj=140800/256000 elapsed=173.9s eta=142.3s
+[train] MoE-sBOED val update=1100 mean_u=0.3941 mocu=0.0237 under=0.027 unique_seq=16/256 seq_H=1.877 joint_score=0.0237 floor=MISS
+[train] MoE-sBOED update=1125/2000 mean_u=0.3912 entropy=0.622 entropy_coef=0.03326 update_s=0.11 traj=144000/256000 elapsed=178.1s eta=138.5s
+[train] MoE-sBOED update=1150/2000 mean_u=0.3934 entropy=0.044 entropy_coef=0.03178 update_s=0.11 traj=147200/256000 elapsed=180.8s eta=133.7s
+[train] MoE-sBOED val update=1150 mean_u=0.3939 mocu=0.0227 under=0.027 unique_seq=16/256 seq_H=1.193 joint_score=0.0227 floor=MISS
+[train] MoE-sBOED update=1175/2000 mean_u=0.3932 entropy=0.219 entropy_coef=0.03029 update_s=0.11 traj=150400/256000 elapsed=185.0s eta=129.9s
+[train] MoE-sBOED update=1200/2000 mean_u=0.3935 entropy=0.220 entropy_coef=0.02881 update_s=0.11 traj=153600/256000 elapsed=187.7s eta=125.2s
+[train] MoE-sBOED val update=1200 mean_u=0.3940 mocu=0.0220 under=0.020 unique_seq=16/256 seq_H=1.992 joint_score=0.0220 floor=MISS
+[train] MoE-sBOED update=1225/2000 mean_u=0.3945 entropy=0.207 entropy_coef=0.02733 update_s=0.11 traj=156800/256000 elapsed=191.9s eta=121.4s
+[train] MoE-sBOED update=1250/2000 mean_u=0.3957 entropy=0.428 entropy_coef=0.02584 update_s=0.11 traj=160000/256000 elapsed=194.6s eta=116.8s
+[train] MoE-sBOED val update=1250 mean_u=0.3936 mocu=0.0207 under=0.020 unique_seq=21/256 seq_H=1.699 joint_score=0.0207 floor=MISS
+[train] MoE-sBOED update=1275/2000 mean_u=0.3924 entropy=0.392 entropy_coef=0.02436 update_s=0.11 traj=163200/256000 elapsed=198.8s eta=113.0s
+[train] MoE-sBOED update=1300/2000 mean_u=0.3935 entropy=0.552 entropy_coef=0.02287 update_s=0.11 traj=166400/256000 elapsed=201.5s eta=108.5s
+[train] MoE-sBOED val update=1300 mean_u=0.3943 mocu=0.0223 under=0.020 unique_seq=19/256 seq_H=2.086 joint_score=0.0223 floor=MISS
+[train] MoE-sBOED update=1325/2000 mean_u=0.3945 entropy=0.365 entropy_coef=0.02139 update_s=0.11 traj=169600/256000 elapsed=205.7s eta=104.8s
+[train] MoE-sBOED update=1350/2000 mean_u=0.3924 entropy=0.314 entropy_coef=0.01990 update_s=0.11 traj=172800/256000 elapsed=208.4s eta=100.3s
+[train] MoE-sBOED val update=1350 mean_u=0.3940 mocu=0.0251 under=0.035 unique_seq=16/256 seq_H=2.202 joint_score=0.0251 floor=MISS
+[train] MoE-sBOED update=1375/2000 mean_u=0.3938 entropy=0.170 entropy_coef=0.01842 update_s=0.11 traj=176000/256000 elapsed=212.6s eta=96.6s
+[train] MoE-sBOED update=1400/2000 mean_u=0.3922 entropy=0.178 entropy_coef=0.01693 update_s=0.11 traj=179200/256000 elapsed=215.3s eta=92.3s
+[train] MoE-sBOED val update=1400 mean_u=0.3940 mocu=0.0227 under=0.027 unique_seq=17/256 seq_H=1.740 joint_score=0.0227 floor=MISS
+[train] MoE-sBOED update=1425/2000 mean_u=0.3930 entropy=0.038 entropy_coef=0.01545 update_s=0.11 traj=182400/256000 elapsed=219.4s eta=88.5s
+[train] MoE-sBOED update=1450/2000 mean_u=0.3927 entropy=0.109 entropy_coef=0.01397 update_s=0.11 traj=185600/256000 elapsed=222.2s eta=84.3s
+[train] MoE-sBOED val update=1450 mean_u=0.3940 mocu=0.0259 under=0.039 unique_seq=11/256 seq_H=1.852 joint_score=0.0259 floor=MISS
+[train] MoE-sBOED update=1475/2000 mean_u=0.3934 entropy=0.042 entropy_coef=0.01248 update_s=0.11 traj=188800/256000 elapsed=226.3s eta=80.6s
+[train] MoE-sBOED update=1500/2000 mean_u=0.3927 entropy=0.190 entropy_coef=0.01100 update_s=0.11 traj=192000/256000 elapsed=229.1s eta=76.4s
+[train] MoE-sBOED val update=1500 mean_u=0.3941 mocu=0.0237 under=0.027 unique_seq=10/256 seq_H=1.926 joint_score=0.0237 floor=MISS
+[train] MoE-sBOED update=1525/2000 mean_u=0.3939 entropy=0.226 entropy_coef=0.00951 update_s=0.11 traj=195200/256000 elapsed=233.2s eta=72.6s
+[train] MoE-sBOED update=1550/2000 mean_u=0.3944 entropy=0.172 entropy_coef=0.00803 update_s=0.11 traj=198400/256000 elapsed=235.9s eta=68.5s
+[train] MoE-sBOED val update=1550 mean_u=0.3941 mocu=0.0276 under=0.047 unique_seq=4/256 seq_H=1.103 joint_score=0.0276 floor=MISS
+[train] MoE-sBOED update=1575/2000 mean_u=0.3920 entropy=0.153 entropy_coef=0.00654 update_s=0.11 traj=201600/256000 elapsed=240.1s eta=64.8s
+[train] MoE-sBOED update=1600/2000 mean_u=0.3935 entropy=0.163 entropy_coef=0.00506 update_s=0.11 traj=204800/256000 elapsed=242.8s eta=60.7s
+[train] MoE-sBOED val update=1600 mean_u=0.3939 mocu=0.0242 under=0.031 unique_seq=6/256 seq_H=1.427 joint_score=0.0242 floor=MISS
+[train] MoE-sBOED update=1625/2000 mean_u=0.3938 entropy=0.167 entropy_coef=0.00500 update_s=0.11 traj=208000/256000 elapsed=247.0s eta=57.0s
+[train] MoE-sBOED update=1650/2000 mean_u=0.3938 entropy=0.163 entropy_coef=0.00500 update_s=0.11 traj=211200/256000 elapsed=249.7s eta=53.0s
+[train] MoE-sBOED val update=1650 mean_u=0.3941 mocu=0.0252 under=0.035 unique_seq=6/256 seq_H=1.445 joint_score=0.0252 floor=MISS
+[train] MoE-sBOED update=1675/2000 mean_u=0.3940 entropy=0.038 entropy_coef=0.00500 update_s=0.11 traj=214400/256000 elapsed=253.9s eta=49.3s
+[train] MoE-sBOED update=1700/2000 mean_u=0.3937 entropy=0.079 entropy_coef=0.00500 update_s=0.11 traj=217600/256000 elapsed=256.6s eta=45.3s
+[train] MoE-sBOED val update=1700 mean_u=0.3946 mocu=0.0218 under=0.016 unique_seq=11/256 seq_H=1.470 joint_score=0.0218 floor=MISS
+[train] MoE-sBOED update=1725/2000 mean_u=0.3930 entropy=0.030 entropy_coef=0.00500 update_s=0.11 traj=220800/256000 elapsed=260.7s eta=41.6s
+[train] MoE-sBOED update=1750/2000 mean_u=0.3933 entropy=0.034 entropy_coef=0.00500 update_s=0.11 traj=224000/256000 elapsed=263.5s eta=37.6s
+[train] MoE-sBOED val update=1750 mean_u=0.3946 mocu=0.0210 under=0.016 unique_seq=8/256 seq_H=1.314 joint_score=0.0210 floor=MISS
+[train] MoE-sBOED update=1775/2000 mean_u=0.3948 entropy=0.047 entropy_coef=0.00500 update_s=0.11 traj=227200/256000 elapsed=267.6s eta=33.9s
+[train] MoE-sBOED update=1800/2000 mean_u=0.3922 entropy=0.090 entropy_coef=0.00500 update_s=0.11 traj=230400/256000 elapsed=270.3s eta=30.0s
+[train] MoE-sBOED val update=1800 mean_u=0.3948 mocu=0.0227 under=0.020 unique_seq=7/256 seq_H=1.226 joint_score=0.0227 floor=MISS
+[train] MoE-sBOED update=1825/2000 mean_u=0.3937 entropy=0.075 entropy_coef=0.00500 update_s=0.11 traj=233600/256000 elapsed=274.5s eta=26.3s
+[train] MoE-sBOED update=1850/2000 mean_u=0.3918 entropy=0.113 entropy_coef=0.00500 update_s=0.11 traj=236800/256000 elapsed=277.2s eta=22.5s
+[train] MoE-sBOED val update=1850 mean_u=0.3947 mocu=0.0219 under=0.016 unique_seq=10/256 seq_H=1.547 joint_score=0.0219 floor=MISS
+[train] MoE-sBOED update=1875/2000 mean_u=0.3938 entropy=0.198 entropy_coef=0.00500 update_s=0.11 traj=240000/256000 elapsed=281.4s eta=18.8s
+[train] MoE-sBOED update=1900/2000 mean_u=0.3935 entropy=0.319 entropy_coef=0.00500 update_s=0.11 traj=243200/256000 elapsed=284.1s eta=15.0s
+[train] MoE-sBOED val update=1900 mean_u=0.3942 mocu=0.0238 under=0.027 unique_seq=10/256 seq_H=1.692 joint_score=0.0238 floor=MISS
+[train] MoE-sBOED update=1925/2000 mean_u=0.3935 entropy=0.335 entropy_coef=0.00500 update_s=0.11 traj=246400/256000 elapsed=288.3s eta=11.2s
+[train] MoE-sBOED update=1950/2000 mean_u=0.3917 entropy=0.398 entropy_coef=0.00500 update_s=0.11 traj=249600/256000 elapsed=291.0s eta=7.5s
+[train] MoE-sBOED val update=1950 mean_u=0.3943 mocu=0.0191 under=0.004 unique_seq=13/256 seq_H=1.497 joint_score=0.0191 floor=MISS
+[train] MoE-sBOED update=1975/2000 mean_u=0.3949 entropy=0.376 entropy_coef=0.00500 update_s=0.11 traj=252800/256000 elapsed=295.2s eta=3.7s
+[train] MoE-sBOED update=2000/2000 mean_u=0.3929 entropy=0.372 entropy_coef=0.00500 update_s=0.11 traj=256000/256000 elapsed=297.9s eta=0.0s
+[train] MoE-sBOED val update=2000 mean_u=0.3941 mocu=0.0205 under=0.012 unique_seq=9/256 seq_H=1.320 joint_score=0.0205 floor=MISS
+[train] WARNING MoE-sBOED: best checkpoint still misses unique-seq floor (unique=13/256). Policy may be open-loop.
+[train] MoE-sBOED finished updates=2000 trajectories=256000 elapsed=299.5s best_val_mocu=0.0191 unique=13 score=0.0191 → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005/model/moe_sboed.pth
+[train] MoE-sBOED 299s
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+=== evaluation (config=configs/ieee9_mocu_duration_v2_best.yaml type=objective_based T=4 N_obs=5 noise_sigma=0.005 seed=101 methods=config) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[mocu-bank] separate control bank -> /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_control
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[fixed] loaded sequence from /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005/model/fixed_subset_T4.json: [53, 48, 47, 45]
+[evaluate] type=objective_based methods=['dad', 'rl_sboed', 'moe_sboed', 'myopic', 'fixed', 'random'] eval_seed=104729 N_obs=5 mode=sampled_delta_f exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+[ieee9] evaluating DAD n=128 eval_seed=104729
+[ieee9] DAD runtime=0.746s (0.005832s/rollout)
+[ieee9] evaluating RL-sBOED n=128 eval_seed=104729
+[ieee9] RL-sBOED runtime=0.626s (0.004890s/rollout)
+[ieee9] evaluating MoE-sBOED n=128 eval_seed=104729
+[ieee9] MoE-sBOED runtime=0.748s (0.005841s/rollout)
+[ieee9] evaluating Myopic n=128 eval_seed=104729
+[ieee9] Myopic runtime=74.813s (0.584479s/rollout)
+[ieee9] evaluating Fixed n=128 eval_seed=104729
+[ieee9] Fixed runtime=0.025s (0.000194s/rollout)
+[ieee9] evaluating Random n=128 eval_seed=104729
+[ieee9] Random runtime=0.971s (0.000237s/rollout)
+[ieee9] oracle + safety
+  oracle θ 25/128
+  oracle θ 50/128
+  oracle θ 75/128
+  oracle θ 100/128
+  oracle θ 125/128
+Summary → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005/summary.md
+Done → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+
+Done config=configs/ieee9_mocu_duration_v2_best.yaml type=objective_based T=4.
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005
+LOG_FILE=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08292026_085911_ieee9_mocu_duration_v2_best_Uctrl_T4_Nobs5_sigma0p005/logs/run_log.log

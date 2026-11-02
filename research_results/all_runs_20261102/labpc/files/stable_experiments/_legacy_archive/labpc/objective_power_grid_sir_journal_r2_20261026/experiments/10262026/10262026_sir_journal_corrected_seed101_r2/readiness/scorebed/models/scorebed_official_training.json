@@ -1,0 +1,123 @@
+{
+  "initialization_seconds": 13.80313161702361,
+  "score_pretraining_seconds": 45.08934317796957,
+  "policy_training_seconds": 17.562126178003382,
+  "training": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+  "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+  "logical_primary_ODE_stage_evaluations": 510950,
+  "minimum_primary_RK4_steps": 261606400,
+  "solver_work_note": "Lower bound on primal solver work; adaptive subdivisions and autodiff extra work are not claimed as exact FLOPs",
+  "sir_score_adapter_revision": 2,
+  "potential_hidden_dim": 256,
+  "score_dimension_compatibility": "Pinned native potential_hidden_dim avoids scalar-data/scalar-time LayerNorm degeneracy; unchanged Transformer, loss, optimizers and training allocation",
+  "reported_policy_parameters": "params_ema",
+  "random_streams": "native derive_key score_trainer and policy_trainer/restart0",
+  "generated_training_trajectories": 102190,
+  "training_forward_trajectories": 102190,
+  "contrast_training_trajectories": 0,
+  "training_trajectory_budget": 102190,
+  "training_budget_unit": "primary_episodes",
+  "initialization_trajectories": 100014,
+  "standardisation_trajectories": 100000,
+  "score_training_trajectories": 2170,
+  "policy_training_trajectories": 6,
+  "budget_reconciliation": {
+    "budget": 102190,
+    "initialization": 100014,
+    "score": 2170,
+    "policy": 6,
+    "score_fraction": "399/400",
+    "batch": 1024,
+    "score_updates": 3,
+    "policy_updates": 1,
+    "score_final_batch": 122,
+    "policy_final_batch": 6,
+    "rounding": "floor score allocation; remainder to policy; partial final minibatches only"
+  },
+  "score_batch": 1024,
+  "actual_score_updates": 3,
+  "actual_policy_updates": 1,
+  "training_seconds": 77.81418308400316,
+  "history": [
+    {
+      "phase": "score",
+      "step": 3,
+      "episodes": 2170,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.9481526575123784,
+        "loss_total": 157.1719128679385,
+        "loss_unweighted_total": 158.1149233802341,
+        "loss_x_component": 157.15266775544265,
+        "loss_y_component": 0.019245112495829532,
+        "loss_y_unweighted": 0.9622556247914764,
+        "param_norm": 136.24959161210109,
+        "update_norm": 0.09923812415610052
+      }
+    }
+  ],
+  "checkpoint_selection": "final",
+  "architecture": "official_4layer_256dim_8head_RFF_conservative_transformer",
+  "policy_architecture": "official_IqbalGRUNet_256_256_64_two_GRU_64_256_256",
+  "adaptations": "1million total primary episodes including normalization and initialization; one fresh policy; published dynamical-system P1 99.75:0.25 allocation transferred to SIR; original batch1024; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions",
+  "design_bounds": [
+    0.0,
+    100.0
+  ],
+  "bounded_mapping": "chronological feasible-time sigmoid with minimum spacing",
+  "sir_configuration": {
+    "population": 500.0,
+    "i0": 2.0,
+    "t_end": 100.0,
+    "min_spacing": 0.1,
+    "integration_steps_per_stage": 512,
+    "beta_mean": 0.5,
+    "gamma_mean": 0.10000000000000002,
+    "log_std": 0.5,
+    "sigma": 1.0
+  },
+  "runtime": {
+    "jax": "0.7.2",
+    "devices": [
+      "cuda:0"
+    ]
+  },
+  "resource_ledger": {
+    "schema": 2,
+    "scope": "current training phase; base cost separately attributed",
+    "counts": {
+      "fresh_complete_episodes": 102190,
+      "true_parameter_stage_propagations": 510950,
+      "contrast_parameter_stage_propagations": 0,
+      "scalar_conditional_log_density_evaluations": null
+    },
+    "optimizer_updates": {
+      "policy": 1,
+      "critic": null,
+      "posterior": null,
+      "score": 3,
+      "temperature": null
+    },
+    "replay_transition_samples": null,
+    "offline_seconds": 77.81418308400316,
+    "validation_seconds": null,
+    "base_training_seconds": null,
+    "ode_rhs_evaluations": null,
+    "solver_backward_work": null,
+    "gpu_occupancy_seconds": null,
+    "nle_equivalent_proxy": {
+      "value": 10850,
+      "unit": "conditional Gaussian stage terms differentiated for score targets",
+      "basis": "model estimate, not equal-cost hardware work"
+    },
+    "basis": "derived from native executed counters, not direct hardware measurement",
+    "limitations": [
+      "score-target and backward recomputation not counted",
+      "Unknown fields are not zero; walltime is not GPU occupancy"
+    ],
+    "likelihood_gradient_work": {
+      "scalar_stage_terms": 10850,
+      "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+    }
+  }
+}

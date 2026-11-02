@@ -1,0 +1,43 @@
+Log file: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_011210_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01/logs/run_log.log
+=== run.sh (config=configs/ieee9_eig_duration_candidate.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+Result folder: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_011210_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01
+Evaluate: dad rl_sboed moe_sboed myopic fixed random
+Train: dad rl_sboed moe_sboed
+=== data_generation (config=configs/ieee9_eig_duration_candidate.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+[bank-quality] FAILED
+Bank failed sBOED quality gates. Tighten control.contingency magnitude and/or delta_f_nadir_hz / rocof_limit_hz_s, then regenerate with --force. To temporarily bypass (not recommended): set bank_quality.enabled: false.
+train: ['delta_f_not_flat'] stats={'n': 512, 'u_positive_frac': 1.0, 'u_mean': 0.37480468749999996, 'u_q95': 0.4, 'u_headroom_q95_minus_mean': 0.025195312500000067, 'u_max': 0.41, 'max_abs_corr_rocof_u': 0.44433109218043315}
+test: ['delta_f_not_flat'] stats={'n': 128, 'u_positive_frac': 1.0, 'u_mean': 0.375234375, 'u_q95': 0.4, 'u_headroom_q95_minus_mean': 0.024765625000000013, 'u_max': 0.41, 'max_abs_corr_rocof_u': 0.3492586883009122}
+[generate-data] type=eig_based config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/ieee9_eig_duration_candidate.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08272026_011210_ieee9_eig_duration_candidate_EIG_T3_Nobs5_sigma0p01 smoke=False force=True methods=['dad', 'rl_sboed', 'moe_sboed', 'myopic', 'fixed', 'random']
+[generate-data] dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate
+[generate-data] bank missing or incomplete at /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate; running CUDA generation (this can take a long time).
+[ieee9] generating physical banks: train=512 test=128 actions=54 N_sim=2560
+[ieee9] generating train: 512 θ × 54 × N_sim=2560 (full Δf + max |ROCOF|)
+  train θ 51/512
+  train θ 102/512
+  train θ 153/512
+  train θ 204/512
+  train θ 255/512
+  train θ 306/512
+  train θ 357/512
+  train θ 408/512
+  train θ 459/512
+  train θ 510/512
+  train θ 512/512
+[ieee9] generating train ψ★-bank (psi_star) n=512
+  control-bank GPU: 512 θ × 27 candidates = 13824 trajectories
+[ieee9] generating test: 128 θ × 54 × N_sim=2560 (full Δf + max |ROCOF|)
+  test θ 12/128
+  test θ 24/128
+  test θ 36/128
+  test θ 48/128
+  test θ 60/128
+  test θ 72/128
+  test θ 84/128
+  test θ 96/128
+  test θ 108/128
+  test θ 120/128
+  test θ 128/128
+[ieee9] generating test ψ★-bank (psi_star) n=128
+  control-bank GPU: 128 θ × 27 candidates = 3456 trajectories
+Physical bank ready → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_candidate (train=512×54×2560, test=128×54×2560, 148.0s, reused=false)

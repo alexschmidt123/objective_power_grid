@@ -1,0 +1,1 @@
+Native-size matched-compute integration only. Latest eligible checkpoint, no EIG selection. Original1024 minibatches, reference scheduler horizons, measured phase plan. More than1M episodes required; no legacy cap.

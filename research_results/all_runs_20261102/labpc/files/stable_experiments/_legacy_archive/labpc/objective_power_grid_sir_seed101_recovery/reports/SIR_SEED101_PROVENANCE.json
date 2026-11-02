@@ -1,0 +1,3578 @@
+{
+  "scope": "Recovered completed native-adapted E1 protocol; NOT unexecuted strict published-setting restoration",
+  "methods": {
+    "random": {
+      "method": "random",
+      "status": "VALID_COMPLETED",
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/sir/seed101/random",
+      "source_commit": "23f629c412ae419bd84ee797205f7f67bfcef1ff",
+      "source_manifest_sha256": "878810e61213382825da565ad181b22b392b48c93755ab31e7cff0dff12db372",
+      "config_sha256": "35ae1c2f624bcb5da1f8169d3746ed63014b5cd113575169edbca12f079ba51e",
+      "checkpoint_sha256": null,
+      "source_files_verified": 254,
+      "source_failures": [],
+      "physics_valid": true,
+      "budget_valid": true,
+      "episodes": 0,
+      "additional_episodes": 0,
+      "updates": null,
+      "training_seconds": 0.0,
+      "base_training_seconds": 0,
+      "training_tag": "none",
+      "checkpoint_selection": "not_applicable",
+      "effective_settings": {
+        "strategy_routing_mode": "learned_switch",
+        "strategy_initial_reroute_probability": 0.99,
+        "strategy_diagnostics_every": 1,
+        "moe_history_encoder_revision": 1,
+        "first_design_revision": 1,
+        "training_bound": 1,
+        "variational_policy_lr": 0.0002,
+        "variational_density_lr": 0.001,
+        "variational_density_hidden": 128,
+        "variational_mixtures": 16,
+        "variational_density_updates": 2,
+        "variational_warmup": 200,
+        "smc_moves": 8,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "spce_curriculum": 1,
+        "updates": 31250,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "hidden": 64,
+        "contrasts": 1024,
+        "validation_contrasts": 1024,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "posterior_particles": 1024,
+        "posterior_steps": 64,
+        "posterior_chains": 4,
+        "posterior_proposal_scale": 0.15,
+        "planner_particles": 128,
+        "search_candidates": 16,
+        "search_rounds": 3,
+        "fantasies": 32,
+        "vsoed_hidden": 128,
+        "vsoed_mixtures": 8,
+        "vsoed_critic_lr": 0.001,
+        "vsoed_posterior_lr": 0.001,
+        "vsoed_posterior_updates": 3,
+        "vsoed_critic_updates": 5,
+        "replay_capacity": 8192,
+        "vsoed_exploration": 0.3,
+        "target_rate": 0.01,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 4096,
+        "evaluation_population_systems": 2048,
+        "threads": 2,
+        "rl_batch_size": 100,
+        "rl_replay_batch": 4096,
+        "rl_replay_capacity": 1000000,
+        "rl_min_buffer": 100000,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "primary_episode_budget": 1,
+        "scorebed_batch_size": 64,
+        "moe_gradient_clip_mode": "component",
+        "moe_router_warmup_fraction": 0.3,
+        "moe_router_finish_fraction": 0.95
+      },
+      "sir_score_adapter_revision": null,
+      "potential_hidden_dim": null,
+      "base_checkpoint": null,
+      "model_files": {},
+      "hardware": {
+        "execution_site": "labpc",
+        "cluster": null,
+        "computer_name": "ecen-80r5x04.engr.tamu.edu",
+        "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+        "gpu_model": "NVIDIA GeForce RTX 4090"
+      },
+      "benchmark": {
+        "system": {
+          "name": "sir_ode"
+        },
+        "N": 1,
+        "experiment": {
+          "experiment_type": "eig_based",
+          "step_number": 5,
+          "methods": [
+            "random"
+          ]
+        },
+        "observation": {
+          "noise_sigma": 1.0,
+          "sampling": "infected_count_at_continuous_time"
+        },
+        "sir_ode": {
+          "population": 500.0,
+          "i0": 2.0,
+          "t_end": 100.0,
+          "beta_mean": 0.5,
+          "gamma_mean": 0.1,
+          "log_std": 0.5,
+          "min_spacing": 0.1,
+          "integration_steps_per_stage": 512,
+          "execution_backend": "fused_rk4"
+        },
+        "research": {
+          "enabled": true,
+          "settings": {
+            "eval_systems": 2048,
+            "eval_contrasts": 16384,
+            "moe_revision": 4,
+            "moe_router_temperature": 1.0,
+            "moe_specialist_budget_fraction": 0.25,
+            "moe_density_updates": 4,
+            "updates": 31250,
+            "batch_size": 64,
+            "learning_rate": 0.0003,
+            "training_bound": 1,
+            "primary_episode_budget": 1,
+            "contrasts": 1024,
+            "evaluation_population_systems": 2048,
+            "evaluation_batch_size": 16,
+            "evaluation_contrast_chunk": 4096,
+            "validation_systems": 128,
+            "validation_contrasts": 1024,
+            "rl_batch_size": 100,
+            "rl_replay_batch": 4096,
+            "rl_replay_capacity": 1000000,
+            "rl_min_buffer": 100000,
+            "rl_gradient_steps": 2,
+            "rl_log_every": 10,
+            "scorebed_batch_size": 64,
+            "threads": 2,
+            "strategy_diagnostics_every": 1
+          },
+          "plan": {
+            "source": "User-provided ChatGPT research plan",
+            "horizons": [
+              5
+            ],
+            "training_repetitions": 5,
+            "test_trajectories": 2048,
+            "routing": "four-expert DSelect1 sparse MoE",
+            "training_criterion": "sPCE",
+            "online_policy_refinement": false,
+            "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+            "secondary_metric": "parameter_MSE",
+            "exclusions": [
+              "step_dad",
+              "myopic",
+              "mocu",
+              "msc",
+              "cost_utility",
+              "growing_tree"
+            ],
+            "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+            "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+            "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+            "scope": "E1 T5 fixed-budget development followed by replication"
+          },
+          "training_episode_cap": 1000000,
+          "journal_protocol": {
+            "version": "validation_convergence_v1",
+            "status": "SIR_development_pending_readiness",
+            "comparison": "one_million_total_primary_episodes",
+            "budget_unit": "method_specific_resource_safety_caps",
+            "checkpoint_selection": "final_predeclared_fixed_budget",
+            "claim_limit": "No confirmation until readiness, precision and settings are frozen; historical results are separate.",
+            "development_training_seeds": [
+              101
+            ],
+            "training_seeds": [
+              101,
+              102,
+              103,
+              104,
+              105
+            ],
+            "evaluation_seeds": [
+              1002
+            ],
+            "previously_used_evaluation_seeds": [
+              1001
+            ],
+            "validation": {
+              "seed": 1003,
+              "systems": 128,
+              "contrasts": 16384,
+              "batch_size": 16,
+              "chunk": 4096
+            },
+            "stopping_rule": {
+              "minimum_episodes": 1000000,
+              "minimum_checkpoints": 8,
+              "validation_every_episodes": 125000,
+              "patience": 6,
+              "minimum_improvement": 0.01,
+              "noise_multiplier": 1.96,
+              "maximum_episodes": 1000000,
+              "maximum_training_seconds": 86400
+            },
+            "common_pathwise_settings": {
+              "hidden": 64,
+              "contrasts": 1024,
+              "moe_gradient_clip_mode": "component",
+              "moe_router_warmup_fraction": 0.3,
+              "moe_router_finish_fraction": 0.95,
+              "strategy_routing_mode": "learned_switch",
+              "strategy_initial_reroute_probability": 0.99
+            },
+            "method_settings": {
+              "moe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "resmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchresmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "sum_single": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 32768
+              },
+              "fixed": {},
+              "dad": {
+                "first_design_revision": 1,
+                "spce_gradient_clip": null
+              },
+              "scorebed": {
+                "scorebed_pretraining_episodes": 692990,
+                "scorebed_batch_size": 64
+              },
+              "rl_sboed": {
+                "rl_original_reference": true,
+                "rl_native_replay_capacity": 1000000,
+                "rl_native_contrasts": 1024
+              }
+            },
+            "method_stopping": {},
+            "final_evaluation": {
+              "systems": 2048,
+              "contrasts": 16384,
+              "resolution_status": "uncalibrated",
+              "seed": 1002
+            },
+            "residual_base": {
+              "method": "sum_single",
+              "seed_specific": true,
+              "share_within_seed": true,
+              "initially_frozen": true,
+              "total_cost_includes_base": true
+            },
+            "independent_seeds_required": 5,
+            "development_resource_gate": "measured GPU forward/backward 0.798 seconds per batch64; seed101 approved",
+            "native_fidelity_required": true,
+            "native_vsoed_profile": {
+              "updates": 7810,
+              "new_trajectories": 128,
+              "replay_batch": 256,
+              "initial_replay": 320,
+              "replay_capacity": 100000,
+              "posterior_updates": 5,
+              "critic_updates": 5,
+              "posterior_lr": 0.0005,
+              "actor_lr": 0.0005,
+              "critic_lr": 0.001,
+              "lr_decay": 0.9999,
+              "discount": 1.0,
+              "exploration": 5.0,
+              "exploration_decay": 0.9999,
+              "target_rate": 0.1,
+              "transition": 0,
+              "log_every": 100,
+              "n_incre": 1,
+              "budget_note": "Initial replay320 instead of draft256 permits exactly1M episodes with native new-trajectory batches128; ODE adapter, not published SDE reproduction"
+            },
+            "checkpoint_selection_mode": "final_fixed_budget",
+            "training_device": "cuda_if_available",
+            "study_id": "E1_SIR_T5_native_all_four_ST"
+          },
+          "paper_protocol": {
+            "nominal_training_trajectories": 1000000,
+            "training_budget_unit": "primary_episodes",
+            "checkpoint_selection": "final",
+            "regime": "journal_1M_total_fixed_budget"
+          }
+        },
+        "_config_path": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/configs/sir_1000000.yaml"
+      },
+      "raw_evaluation_source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/evaluations/random_N2048_nested.npz",
+      "raw_evaluation_sha256": "8841dd9e6f1d97795603e601b2010b90fadf402e8097ffa85a83b649b63157da",
+      "native_updates": 0,
+      "score_allocation": {}
+    },
+    "fixed": {
+      "method": "fixed",
+      "status": "VALID_COMPLETED",
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/sir/seed101/fixed",
+      "source_commit": "23f629c412ae419bd84ee797205f7f67bfcef1ff",
+      "source_manifest_sha256": "878810e61213382825da565ad181b22b392b48c93755ab31e7cff0dff12db372",
+      "config_sha256": "77d04e916409bf6d77e290e95d57eaf4ce3938c63de90bcebd2656c5c0d1f19f",
+      "checkpoint_sha256": "61cfe6a8fdb5c4aaa23abba99332353671ed3f5e6933cc127cb1459a65945982",
+      "source_files_verified": 254,
+      "source_failures": [],
+      "physics_valid": true,
+      "budget_valid": true,
+      "episodes": 1000000,
+      "additional_episodes": 1000000,
+      "updates": 15625,
+      "training_seconds": 8797.369509253884,
+      "base_training_seconds": 0,
+      "training_tag": "pathwise_sPCE",
+      "checkpoint_selection": "final_predeclared_fixed_budget",
+      "effective_settings": {
+        "strategy_routing_mode": "learned_switch",
+        "strategy_initial_reroute_probability": 0.99,
+        "strategy_diagnostics_every": 1,
+        "moe_history_encoder_revision": 1,
+        "first_design_revision": 1,
+        "training_bound": 1,
+        "variational_policy_lr": 0.0002,
+        "variational_density_lr": 0.001,
+        "variational_density_hidden": 128,
+        "variational_mixtures": 16,
+        "variational_density_updates": 2,
+        "variational_warmup": 200,
+        "smc_moves": 8,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "spce_curriculum": 1,
+        "updates": 31250,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "hidden": 64,
+        "contrasts": 1024,
+        "validation_contrasts": 1024,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "posterior_particles": 1024,
+        "posterior_steps": 64,
+        "posterior_chains": 4,
+        "posterior_proposal_scale": 0.15,
+        "planner_particles": 128,
+        "search_candidates": 16,
+        "search_rounds": 3,
+        "fantasies": 32,
+        "vsoed_hidden": 128,
+        "vsoed_mixtures": 8,
+        "vsoed_critic_lr": 0.001,
+        "vsoed_posterior_lr": 0.001,
+        "vsoed_posterior_updates": 3,
+        "vsoed_critic_updates": 5,
+        "replay_capacity": 8192,
+        "vsoed_exploration": 0.3,
+        "target_rate": 0.01,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 4096,
+        "evaluation_population_systems": 2048,
+        "threads": 2,
+        "rl_batch_size": 100,
+        "rl_replay_batch": 4096,
+        "rl_replay_capacity": 1000000,
+        "rl_min_buffer": 100000,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "primary_episode_budget": 1,
+        "scorebed_batch_size": 64,
+        "moe_gradient_clip_mode": "component",
+        "moe_router_warmup_fraction": 0.3,
+        "moe_router_finish_fraction": 0.95
+      },
+      "sir_score_adapter_revision": null,
+      "potential_hidden_dim": null,
+      "base_checkpoint": null,
+      "model_files": {
+        "fixed.pt": {
+          "sha256": "61cfe6a8fdb5c4aaa23abba99332353671ed3f5e6933cc127cb1459a65945982",
+          "bytes": 1490
+        }
+      },
+      "hardware": {
+        "execution_site": "labpc",
+        "cluster": null,
+        "computer_name": "ecen-80r5x04.engr.tamu.edu",
+        "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+        "gpu_model": "NVIDIA GeForce RTX 4090"
+      },
+      "benchmark": {
+        "system": {
+          "name": "sir_ode"
+        },
+        "N": 1,
+        "experiment": {
+          "experiment_type": "eig_based",
+          "step_number": 5,
+          "methods": [
+            "fixed"
+          ]
+        },
+        "observation": {
+          "noise_sigma": 1.0,
+          "sampling": "infected_count_at_continuous_time"
+        },
+        "sir_ode": {
+          "population": 500.0,
+          "i0": 2.0,
+          "t_end": 100.0,
+          "beta_mean": 0.5,
+          "gamma_mean": 0.1,
+          "log_std": 0.5,
+          "min_spacing": 0.1,
+          "integration_steps_per_stage": 512,
+          "execution_backend": "fused_rk4"
+        },
+        "research": {
+          "enabled": true,
+          "settings": {
+            "eval_systems": 2048,
+            "eval_contrasts": 16384,
+            "moe_revision": 4,
+            "moe_router_temperature": 1.0,
+            "moe_specialist_budget_fraction": 0.25,
+            "moe_density_updates": 4,
+            "updates": 31250,
+            "batch_size": 64,
+            "learning_rate": 0.0003,
+            "training_bound": 1,
+            "primary_episode_budget": 1,
+            "contrasts": 1024,
+            "evaluation_population_systems": 2048,
+            "evaluation_batch_size": 16,
+            "evaluation_contrast_chunk": 4096,
+            "validation_systems": 128,
+            "validation_contrasts": 1024,
+            "rl_batch_size": 100,
+            "rl_replay_batch": 4096,
+            "rl_replay_capacity": 1000000,
+            "rl_min_buffer": 100000,
+            "rl_gradient_steps": 2,
+            "rl_log_every": 10,
+            "scorebed_batch_size": 64,
+            "threads": 2,
+            "strategy_diagnostics_every": 1
+          },
+          "plan": {
+            "source": "User-provided ChatGPT research plan",
+            "horizons": [
+              5
+            ],
+            "training_repetitions": 5,
+            "test_trajectories": 2048,
+            "routing": "four-expert DSelect1 sparse MoE",
+            "training_criterion": "sPCE",
+            "online_policy_refinement": false,
+            "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+            "secondary_metric": "parameter_MSE",
+            "exclusions": [
+              "step_dad",
+              "myopic",
+              "mocu",
+              "msc",
+              "cost_utility",
+              "growing_tree"
+            ],
+            "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+            "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+            "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+            "scope": "E1 T5 fixed-budget development followed by replication"
+          },
+          "training_episode_cap": 1000000,
+          "journal_protocol": {
+            "version": "validation_convergence_v1",
+            "status": "SIR_development_pending_readiness",
+            "comparison": "one_million_total_primary_episodes",
+            "budget_unit": "method_specific_resource_safety_caps",
+            "checkpoint_selection": "final_predeclared_fixed_budget",
+            "claim_limit": "No confirmation until readiness, precision and settings are frozen; historical results are separate.",
+            "development_training_seeds": [
+              101
+            ],
+            "training_seeds": [
+              101,
+              102,
+              103,
+              104,
+              105
+            ],
+            "evaluation_seeds": [
+              1002
+            ],
+            "previously_used_evaluation_seeds": [
+              1001
+            ],
+            "validation": {
+              "seed": 1003,
+              "systems": 128,
+              "contrasts": 16384,
+              "batch_size": 16,
+              "chunk": 4096
+            },
+            "stopping_rule": {
+              "minimum_episodes": 1000000,
+              "minimum_checkpoints": 8,
+              "validation_every_episodes": 125000,
+              "patience": 6,
+              "minimum_improvement": 0.01,
+              "noise_multiplier": 1.96,
+              "maximum_episodes": 1000000,
+              "maximum_training_seconds": 86400
+            },
+            "common_pathwise_settings": {
+              "hidden": 64,
+              "contrasts": 1024,
+              "moe_gradient_clip_mode": "component",
+              "moe_router_warmup_fraction": 0.3,
+              "moe_router_finish_fraction": 0.95,
+              "strategy_routing_mode": "learned_switch",
+              "strategy_initial_reroute_probability": 0.99
+            },
+            "method_settings": {
+              "moe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "resmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchresmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "sum_single": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 32768
+              },
+              "fixed": {},
+              "dad": {
+                "first_design_revision": 1,
+                "spce_gradient_clip": null
+              },
+              "scorebed": {
+                "scorebed_pretraining_episodes": 692990,
+                "scorebed_batch_size": 64
+              },
+              "rl_sboed": {
+                "rl_original_reference": true,
+                "rl_native_replay_capacity": 1000000,
+                "rl_native_contrasts": 1024
+              }
+            },
+            "method_stopping": {},
+            "final_evaluation": {
+              "systems": 2048,
+              "contrasts": 16384,
+              "resolution_status": "uncalibrated",
+              "seed": 1002
+            },
+            "residual_base": {
+              "method": "sum_single",
+              "seed_specific": true,
+              "share_within_seed": true,
+              "initially_frozen": true,
+              "total_cost_includes_base": true
+            },
+            "independent_seeds_required": 5,
+            "development_resource_gate": "measured GPU forward/backward 0.798 seconds per batch64; seed101 approved",
+            "native_fidelity_required": true,
+            "native_vsoed_profile": {
+              "updates": 7810,
+              "new_trajectories": 128,
+              "replay_batch": 256,
+              "initial_replay": 320,
+              "replay_capacity": 100000,
+              "posterior_updates": 5,
+              "critic_updates": 5,
+              "posterior_lr": 0.0005,
+              "actor_lr": 0.0005,
+              "critic_lr": 0.001,
+              "lr_decay": 0.9999,
+              "discount": 1.0,
+              "exploration": 5.0,
+              "exploration_decay": 0.9999,
+              "target_rate": 0.1,
+              "transition": 0,
+              "log_every": 100,
+              "n_incre": 1,
+              "budget_note": "Initial replay320 instead of draft256 permits exactly1M episodes with native new-trajectory batches128; ODE adapter, not published SDE reproduction"
+            },
+            "checkpoint_selection_mode": "final_fixed_budget",
+            "training_device": "cuda_if_available",
+            "study_id": "E1_SIR_T5_native_all_four_ST"
+          },
+          "paper_protocol": {
+            "nominal_training_trajectories": 1000000,
+            "training_budget_unit": "primary_episodes",
+            "checkpoint_selection": "final",
+            "regime": "journal_1M_total_fixed_budget"
+          }
+        },
+        "_config_path": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/configs/sir_1000000.yaml"
+      },
+      "raw_evaluation_source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/evaluations/fixed_N2048_nested.npz",
+      "raw_evaluation_sha256": "70d8dff9527cafacb8453bb3164d43615cda36b2b6719a71e0f8520d562e0622",
+      "native_updates": 15625,
+      "score_allocation": {}
+    },
+    "dad": {
+      "method": "dad",
+      "status": "VALID_COMPLETED",
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/sir/seed101/dad",
+      "source_commit": "23f629c412ae419bd84ee797205f7f67bfcef1ff",
+      "source_manifest_sha256": "878810e61213382825da565ad181b22b392b48c93755ab31e7cff0dff12db372",
+      "config_sha256": "ffd31d9ea79912fd4be274a0e8ae9e9d8d78177161f95b507104d5275bcc9d6b",
+      "checkpoint_sha256": "5f68887243a595af7a54579664fbb10410a28fa956418d2281ece80245cb42b8",
+      "source_files_verified": 254,
+      "source_failures": [],
+      "physics_valid": true,
+      "budget_valid": true,
+      "episodes": 1000000,
+      "additional_episodes": 1000000,
+      "updates": 15625,
+      "training_seconds": 8616.320386311738,
+      "base_training_seconds": 0,
+      "training_tag": "pathwise_sPCE",
+      "checkpoint_selection": "final_predeclared_fixed_budget",
+      "effective_settings": {
+        "strategy_routing_mode": "learned_switch",
+        "strategy_initial_reroute_probability": 0.99,
+        "strategy_diagnostics_every": 1,
+        "moe_history_encoder_revision": 1,
+        "first_design_revision": 1,
+        "training_bound": 1,
+        "variational_policy_lr": 0.0002,
+        "variational_density_lr": 0.001,
+        "variational_density_hidden": 128,
+        "variational_mixtures": 16,
+        "variational_density_updates": 2,
+        "variational_warmup": 200,
+        "smc_moves": 8,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "spce_curriculum": 1,
+        "updates": 31250,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "hidden": 64,
+        "contrasts": 1024,
+        "validation_contrasts": 1024,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "posterior_particles": 1024,
+        "posterior_steps": 64,
+        "posterior_chains": 4,
+        "posterior_proposal_scale": 0.15,
+        "planner_particles": 128,
+        "search_candidates": 16,
+        "search_rounds": 3,
+        "fantasies": 32,
+        "vsoed_hidden": 128,
+        "vsoed_mixtures": 8,
+        "vsoed_critic_lr": 0.001,
+        "vsoed_posterior_lr": 0.001,
+        "vsoed_posterior_updates": 3,
+        "vsoed_critic_updates": 5,
+        "replay_capacity": 8192,
+        "vsoed_exploration": 0.3,
+        "target_rate": 0.01,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 4096,
+        "evaluation_population_systems": 2048,
+        "threads": 2,
+        "rl_batch_size": 100,
+        "rl_replay_batch": 4096,
+        "rl_replay_capacity": 1000000,
+        "rl_min_buffer": 100000,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "primary_episode_budget": 1,
+        "scorebed_batch_size": 64,
+        "moe_gradient_clip_mode": "component",
+        "moe_router_warmup_fraction": 0.3,
+        "moe_router_finish_fraction": 0.95,
+        "spce_gradient_clip": null
+      },
+      "sir_score_adapter_revision": null,
+      "potential_hidden_dim": null,
+      "base_checkpoint": null,
+      "model_files": {
+        "dad.pt": {
+          "sha256": "5f68887243a595af7a54579664fbb10410a28fa956418d2281ece80245cb42b8",
+          "bytes": 41888
+        }
+      },
+      "hardware": {
+        "execution_site": "labpc",
+        "cluster": null,
+        "computer_name": "ecen-80r5x04.engr.tamu.edu",
+        "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+        "gpu_model": "NVIDIA GeForce RTX 4090"
+      },
+      "benchmark": {
+        "system": {
+          "name": "sir_ode"
+        },
+        "N": 1,
+        "experiment": {
+          "experiment_type": "eig_based",
+          "step_number": 5,
+          "methods": [
+            "dad"
+          ]
+        },
+        "observation": {
+          "noise_sigma": 1.0,
+          "sampling": "infected_count_at_continuous_time"
+        },
+        "sir_ode": {
+          "population": 500.0,
+          "i0": 2.0,
+          "t_end": 100.0,
+          "beta_mean": 0.5,
+          "gamma_mean": 0.1,
+          "log_std": 0.5,
+          "min_spacing": 0.1,
+          "integration_steps_per_stage": 512,
+          "execution_backend": "fused_rk4"
+        },
+        "research": {
+          "enabled": true,
+          "settings": {
+            "eval_systems": 2048,
+            "eval_contrasts": 16384,
+            "moe_revision": 4,
+            "moe_router_temperature": 1.0,
+            "moe_specialist_budget_fraction": 0.25,
+            "moe_density_updates": 4,
+            "updates": 31250,
+            "batch_size": 64,
+            "learning_rate": 0.0003,
+            "training_bound": 1,
+            "primary_episode_budget": 1,
+            "contrasts": 1024,
+            "evaluation_population_systems": 2048,
+            "evaluation_batch_size": 16,
+            "evaluation_contrast_chunk": 4096,
+            "validation_systems": 128,
+            "validation_contrasts": 1024,
+            "rl_batch_size": 100,
+            "rl_replay_batch": 4096,
+            "rl_replay_capacity": 1000000,
+            "rl_min_buffer": 100000,
+            "rl_gradient_steps": 2,
+            "rl_log_every": 10,
+            "scorebed_batch_size": 64,
+            "threads": 2,
+            "strategy_diagnostics_every": 1
+          },
+          "plan": {
+            "source": "User-provided ChatGPT research plan",
+            "horizons": [
+              5
+            ],
+            "training_repetitions": 5,
+            "test_trajectories": 2048,
+            "routing": "four-expert DSelect1 sparse MoE",
+            "training_criterion": "sPCE",
+            "online_policy_refinement": false,
+            "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+            "secondary_metric": "parameter_MSE",
+            "exclusions": [
+              "step_dad",
+              "myopic",
+              "mocu",
+              "msc",
+              "cost_utility",
+              "growing_tree"
+            ],
+            "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+            "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+            "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+            "scope": "E1 T5 fixed-budget development followed by replication"
+          },
+          "training_episode_cap": 1000000,
+          "journal_protocol": {
+            "version": "validation_convergence_v1",
+            "status": "SIR_development_pending_readiness",
+            "comparison": "one_million_total_primary_episodes",
+            "budget_unit": "method_specific_resource_safety_caps",
+            "checkpoint_selection": "final_predeclared_fixed_budget",
+            "claim_limit": "No confirmation until readiness, precision and settings are frozen; historical results are separate.",
+            "development_training_seeds": [
+              101
+            ],
+            "training_seeds": [
+              101,
+              102,
+              103,
+              104,
+              105
+            ],
+            "evaluation_seeds": [
+              1002
+            ],
+            "previously_used_evaluation_seeds": [
+              1001
+            ],
+            "validation": {
+              "seed": 1003,
+              "systems": 128,
+              "contrasts": 16384,
+              "batch_size": 16,
+              "chunk": 4096
+            },
+            "stopping_rule": {
+              "minimum_episodes": 1000000,
+              "minimum_checkpoints": 8,
+              "validation_every_episodes": 125000,
+              "patience": 6,
+              "minimum_improvement": 0.01,
+              "noise_multiplier": 1.96,
+              "maximum_episodes": 1000000,
+              "maximum_training_seconds": 86400
+            },
+            "common_pathwise_settings": {
+              "hidden": 64,
+              "contrasts": 1024,
+              "moe_gradient_clip_mode": "component",
+              "moe_router_warmup_fraction": 0.3,
+              "moe_router_finish_fraction": 0.95,
+              "strategy_routing_mode": "learned_switch",
+              "strategy_initial_reroute_probability": 0.99
+            },
+            "method_settings": {
+              "moe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "resmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchresmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "sum_single": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 32768
+              },
+              "fixed": {},
+              "dad": {
+                "first_design_revision": 1,
+                "spce_gradient_clip": null
+              },
+              "scorebed": {
+                "scorebed_pretraining_episodes": 692990,
+                "scorebed_batch_size": 64
+              },
+              "rl_sboed": {
+                "rl_original_reference": true,
+                "rl_native_replay_capacity": 1000000,
+                "rl_native_contrasts": 1024
+              }
+            },
+            "method_stopping": {},
+            "final_evaluation": {
+              "systems": 2048,
+              "contrasts": 16384,
+              "resolution_status": "uncalibrated",
+              "seed": 1002
+            },
+            "residual_base": {
+              "method": "sum_single",
+              "seed_specific": true,
+              "share_within_seed": true,
+              "initially_frozen": true,
+              "total_cost_includes_base": true
+            },
+            "independent_seeds_required": 5,
+            "development_resource_gate": "measured GPU forward/backward 0.798 seconds per batch64; seed101 approved",
+            "native_fidelity_required": true,
+            "native_vsoed_profile": {
+              "updates": 7810,
+              "new_trajectories": 128,
+              "replay_batch": 256,
+              "initial_replay": 320,
+              "replay_capacity": 100000,
+              "posterior_updates": 5,
+              "critic_updates": 5,
+              "posterior_lr": 0.0005,
+              "actor_lr": 0.0005,
+              "critic_lr": 0.001,
+              "lr_decay": 0.9999,
+              "discount": 1.0,
+              "exploration": 5.0,
+              "exploration_decay": 0.9999,
+              "target_rate": 0.1,
+              "transition": 0,
+              "log_every": 100,
+              "n_incre": 1,
+              "budget_note": "Initial replay320 instead of draft256 permits exactly1M episodes with native new-trajectory batches128; ODE adapter, not published SDE reproduction"
+            },
+            "checkpoint_selection_mode": "final_fixed_budget",
+            "training_device": "cuda_if_available",
+            "study_id": "E1_SIR_T5_native_all_four_ST"
+          },
+          "paper_protocol": {
+            "nominal_training_trajectories": 1000000,
+            "training_budget_unit": "primary_episodes",
+            "checkpoint_selection": "final",
+            "regime": "journal_1M_total_fixed_budget"
+          }
+        },
+        "_config_path": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/configs/sir_1000000.yaml"
+      },
+      "raw_evaluation_source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/evaluations/dad_N2048_nested.npz",
+      "raw_evaluation_sha256": "23b002e0d89c789ab06d9df4d7666872509e14a4066aa2f7c3f70cc45b19684b",
+      "native_updates": 15625,
+      "score_allocation": {}
+    },
+    "rl_sboed": {
+      "method": "rl_sboed",
+      "status": "VALID_COMPLETED",
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/sir/seed101/rl_sboed",
+      "source_commit": "23f629c412ae419bd84ee797205f7f67bfcef1ff",
+      "source_manifest_sha256": "878810e61213382825da565ad181b22b392b48c93755ab31e7cff0dff12db372",
+      "config_sha256": "a21ca075b9d31f836225fc3320fa375df01ba4d925bb7b0a61ea3aa7567747ae",
+      "checkpoint_sha256": "e97bff8bba545827d5d13b9a62a06c2dfb926e274def5d20e823d4c75e16cb7d",
+      "source_files_verified": 254,
+      "source_failures": [],
+      "physics_valid": true,
+      "budget_valid": true,
+      "episodes": 1000000,
+      "additional_episodes": 1000000,
+      "updates": 10000,
+      "training_seconds": 5578.589382250328,
+      "base_training_seconds": 0,
+      "training_tag": "pinned_original_RL_BOED_REDQ_SIR_ODE_adaptation",
+      "checkpoint_selection": "final_predeclared_fixed_budget",
+      "effective_settings": {
+        "strategy_routing_mode": "learned_switch",
+        "strategy_initial_reroute_probability": 0.99,
+        "strategy_diagnostics_every": 1,
+        "moe_history_encoder_revision": 1,
+        "first_design_revision": 1,
+        "training_bound": 1,
+        "variational_policy_lr": 0.0002,
+        "variational_density_lr": 0.001,
+        "variational_density_hidden": 128,
+        "variational_mixtures": 16,
+        "variational_density_updates": 2,
+        "variational_warmup": 200,
+        "smc_moves": 8,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "spce_curriculum": 1,
+        "updates": 31250,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "hidden": 64,
+        "contrasts": 1024,
+        "validation_contrasts": 1024,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "posterior_particles": 1024,
+        "posterior_steps": 64,
+        "posterior_chains": 4,
+        "posterior_proposal_scale": 0.15,
+        "planner_particles": 128,
+        "search_candidates": 16,
+        "search_rounds": 3,
+        "fantasies": 32,
+        "vsoed_hidden": 128,
+        "vsoed_mixtures": 8,
+        "vsoed_critic_lr": 0.001,
+        "vsoed_posterior_lr": 0.001,
+        "vsoed_posterior_updates": 3,
+        "vsoed_critic_updates": 5,
+        "replay_capacity": 8192,
+        "vsoed_exploration": 0.3,
+        "target_rate": 0.01,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 4096,
+        "evaluation_population_systems": 2048,
+        "threads": 2,
+        "rl_batch_size": 100,
+        "rl_replay_batch": 4096,
+        "rl_replay_capacity": 1000000,
+        "rl_min_buffer": 100000,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "primary_episode_budget": 1,
+        "scorebed_batch_size": 64,
+        "moe_gradient_clip_mode": "component",
+        "moe_router_warmup_fraction": 0.3,
+        "moe_router_finish_fraction": 0.95,
+        "rl_original_reference": true,
+        "rl_native_replay_capacity": 1000000,
+        "rl_native_contrasts": 1024
+      },
+      "sir_score_adapter_revision": null,
+      "potential_hidden_dim": null,
+      "base_checkpoint": null,
+      "model_files": {
+        "rl_sboed.pt": {
+          "sha256": "e97bff8bba545827d5d13b9a62a06c2dfb926e274def5d20e823d4c75e16cb7d",
+          "bytes": 209208
+        }
+      },
+      "hardware": {
+        "execution_site": "labpc",
+        "cluster": null,
+        "computer_name": "ecen-80r5x04.engr.tamu.edu",
+        "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+        "gpu_model": "NVIDIA GeForce RTX 4090"
+      },
+      "benchmark": {
+        "system": {
+          "name": "sir_ode"
+        },
+        "N": 1,
+        "experiment": {
+          "experiment_type": "eig_based",
+          "step_number": 5,
+          "methods": [
+            "rl_sboed"
+          ]
+        },
+        "observation": {
+          "noise_sigma": 1.0,
+          "sampling": "infected_count_at_continuous_time"
+        },
+        "sir_ode": {
+          "population": 500.0,
+          "i0": 2.0,
+          "t_end": 100.0,
+          "beta_mean": 0.5,
+          "gamma_mean": 0.1,
+          "log_std": 0.5,
+          "min_spacing": 0.1,
+          "integration_steps_per_stage": 512,
+          "execution_backend": "fused_rk4"
+        },
+        "research": {
+          "enabled": true,
+          "settings": {
+            "eval_systems": 2048,
+            "eval_contrasts": 16384,
+            "moe_revision": 4,
+            "moe_router_temperature": 1.0,
+            "moe_specialist_budget_fraction": 0.25,
+            "moe_density_updates": 4,
+            "updates": 31250,
+            "batch_size": 64,
+            "learning_rate": 0.0003,
+            "training_bound": 1,
+            "primary_episode_budget": 1,
+            "contrasts": 1024,
+            "evaluation_population_systems": 2048,
+            "evaluation_batch_size": 16,
+            "evaluation_contrast_chunk": 4096,
+            "validation_systems": 128,
+            "validation_contrasts": 1024,
+            "rl_batch_size": 100,
+            "rl_replay_batch": 4096,
+            "rl_replay_capacity": 1000000,
+            "rl_min_buffer": 100000,
+            "rl_gradient_steps": 2,
+            "rl_log_every": 10,
+            "scorebed_batch_size": 64,
+            "threads": 2,
+            "strategy_diagnostics_every": 1
+          },
+          "plan": {
+            "source": "User-provided ChatGPT research plan",
+            "horizons": [
+              5
+            ],
+            "training_repetitions": 5,
+            "test_trajectories": 2048,
+            "routing": "four-expert DSelect1 sparse MoE",
+            "training_criterion": "sPCE",
+            "online_policy_refinement": false,
+            "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+            "secondary_metric": "parameter_MSE",
+            "exclusions": [
+              "step_dad",
+              "myopic",
+              "mocu",
+              "msc",
+              "cost_utility",
+              "growing_tree"
+            ],
+            "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+            "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+            "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+            "scope": "E1 T5 fixed-budget development followed by replication"
+          },
+          "training_episode_cap": 1000000,
+          "journal_protocol": {
+            "version": "validation_convergence_v1",
+            "status": "SIR_development_pending_readiness",
+            "comparison": "one_million_total_primary_episodes",
+            "budget_unit": "method_specific_resource_safety_caps",
+            "checkpoint_selection": "final_predeclared_fixed_budget",
+            "claim_limit": "No confirmation until readiness, precision and settings are frozen; historical results are separate.",
+            "development_training_seeds": [
+              101
+            ],
+            "training_seeds": [
+              101,
+              102,
+              103,
+              104,
+              105
+            ],
+            "evaluation_seeds": [
+              1002
+            ],
+            "previously_used_evaluation_seeds": [
+              1001
+            ],
+            "validation": {
+              "seed": 1003,
+              "systems": 128,
+              "contrasts": 16384,
+              "batch_size": 16,
+              "chunk": 4096
+            },
+            "stopping_rule": {
+              "minimum_episodes": 1000000,
+              "minimum_checkpoints": 8,
+              "validation_every_episodes": 125000,
+              "patience": 6,
+              "minimum_improvement": 0.01,
+              "noise_multiplier": 1.96,
+              "maximum_episodes": 1000000,
+              "maximum_training_seconds": 86400
+            },
+            "common_pathwise_settings": {
+              "hidden": 64,
+              "contrasts": 1024,
+              "moe_gradient_clip_mode": "component",
+              "moe_router_warmup_fraction": 0.3,
+              "moe_router_finish_fraction": 0.95,
+              "strategy_routing_mode": "learned_switch",
+              "strategy_initial_reroute_probability": 0.99
+            },
+            "method_settings": {
+              "moe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "resmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchresmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "sum_single": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 32768
+              },
+              "fixed": {},
+              "dad": {
+                "first_design_revision": 1,
+                "spce_gradient_clip": null
+              },
+              "scorebed": {
+                "scorebed_pretraining_episodes": 692990,
+                "scorebed_batch_size": 64
+              },
+              "rl_sboed": {
+                "rl_original_reference": true,
+                "rl_native_replay_capacity": 1000000,
+                "rl_native_contrasts": 1024
+              }
+            },
+            "method_stopping": {},
+            "final_evaluation": {
+              "systems": 2048,
+              "contrasts": 16384,
+              "resolution_status": "uncalibrated",
+              "seed": 1002
+            },
+            "residual_base": {
+              "method": "sum_single",
+              "seed_specific": true,
+              "share_within_seed": true,
+              "initially_frozen": true,
+              "total_cost_includes_base": true
+            },
+            "independent_seeds_required": 5,
+            "development_resource_gate": "measured GPU forward/backward 0.798 seconds per batch64; seed101 approved",
+            "native_fidelity_required": true,
+            "native_vsoed_profile": {
+              "updates": 7810,
+              "new_trajectories": 128,
+              "replay_batch": 256,
+              "initial_replay": 320,
+              "replay_capacity": 100000,
+              "posterior_updates": 5,
+              "critic_updates": 5,
+              "posterior_lr": 0.0005,
+              "actor_lr": 0.0005,
+              "critic_lr": 0.001,
+              "lr_decay": 0.9999,
+              "discount": 1.0,
+              "exploration": 5.0,
+              "exploration_decay": 0.9999,
+              "target_rate": 0.1,
+              "transition": 0,
+              "log_every": 100,
+              "n_incre": 1,
+              "budget_note": "Initial replay320 instead of draft256 permits exactly1M episodes with native new-trajectory batches128; ODE adapter, not published SDE reproduction"
+            },
+            "checkpoint_selection_mode": "final_fixed_budget",
+            "training_device": "cuda_if_available",
+            "study_id": "E1_SIR_T5_native_all_four_ST"
+          },
+          "paper_protocol": {
+            "nominal_training_trajectories": 1000000,
+            "training_budget_unit": "primary_episodes",
+            "checkpoint_selection": "final",
+            "regime": "journal_1M_total_fixed_budget"
+          }
+        },
+        "_config_path": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/configs/sir_1000000.yaml"
+      },
+      "raw_evaluation_source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/evaluations/rl_sboed_N2048_nested.npz",
+      "raw_evaluation_sha256": "fd8495c57430e08a1145812dd95a7ed63f50259a58003427dd22836629710dd0",
+      "native_updates": {
+        "actor_updates": 627264,
+        "critic_updates": 1254528,
+        "temperature_updates": 627264,
+        "gradient_updates": 627264
+      },
+      "score_allocation": {}
+    },
+    "vsoed": {
+      "method": "vsoed",
+      "status": "VALID_COMPLETED",
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/sir/seed101/vsoed",
+      "source_commit": "23f629c412ae419bd84ee797205f7f67bfcef1ff",
+      "source_manifest_sha256": "878810e61213382825da565ad181b22b392b48c93755ab31e7cff0dff12db372",
+      "config_sha256": "f3cdb039e884620a90ce7330ef3caa2a1ea4eafd8b44bb9f510d386055c5d31e",
+      "checkpoint_sha256": "bddeaff233d44cda2ff051b5eaba80a8bbf409a7f39a113ce5adea86ea9b86b2",
+      "source_files_verified": 254,
+      "source_failures": [],
+      "physics_valid": true,
+      "budget_valid": true,
+      "episodes": 1000000,
+      "additional_episodes": 1000000,
+      "updates": 7810,
+      "training_seconds": 287.2063403711654,
+      "base_training_seconds": 0,
+      "training_tag": "official_vsOED_GMM_SIR_ODE_adapter",
+      "checkpoint_selection": "final_predeclared_fixed_budget",
+      "effective_settings": {
+        "strategy_routing_mode": "learned_switch",
+        "strategy_initial_reroute_probability": 0.99,
+        "strategy_diagnostics_every": 1,
+        "moe_history_encoder_revision": 1,
+        "first_design_revision": 1,
+        "training_bound": 1,
+        "variational_policy_lr": 0.0002,
+        "variational_density_lr": 0.001,
+        "variational_density_hidden": 128,
+        "variational_mixtures": 16,
+        "variational_density_updates": 2,
+        "variational_warmup": 200,
+        "smc_moves": 8,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "spce_curriculum": 1,
+        "updates": 31250,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "hidden": 64,
+        "contrasts": 1024,
+        "validation_contrasts": 1024,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "posterior_particles": 1024,
+        "posterior_steps": 64,
+        "posterior_chains": 4,
+        "posterior_proposal_scale": 0.15,
+        "planner_particles": 128,
+        "search_candidates": 16,
+        "search_rounds": 3,
+        "fantasies": 32,
+        "vsoed_hidden": 128,
+        "vsoed_mixtures": 8,
+        "vsoed_critic_lr": 0.001,
+        "vsoed_posterior_lr": 0.001,
+        "vsoed_posterior_updates": 3,
+        "vsoed_critic_updates": 5,
+        "replay_capacity": 8192,
+        "vsoed_exploration": 0.3,
+        "target_rate": 0.01,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 4096,
+        "evaluation_population_systems": 2048,
+        "threads": 2,
+        "rl_batch_size": 100,
+        "rl_replay_batch": 4096,
+        "rl_replay_capacity": 1000000,
+        "rl_min_buffer": 100000,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "primary_episode_budget": 1,
+        "scorebed_batch_size": 64,
+        "moe_gradient_clip_mode": "component",
+        "moe_router_warmup_fraction": 0.3,
+        "moe_router_finish_fraction": 0.95
+      },
+      "sir_score_adapter_revision": null,
+      "potential_hidden_dim": null,
+      "base_checkpoint": null,
+      "model_files": {
+        "vsoed.pt": {
+          "sha256": "bddeaff233d44cda2ff051b5eaba80a8bbf409a7f39a113ce5adea86ea9b86b2",
+          "bytes": 2989200
+        }
+      },
+      "hardware": {
+        "execution_site": "labpc",
+        "cluster": null,
+        "computer_name": "ecen-80r5x04.engr.tamu.edu",
+        "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+        "gpu_model": "NVIDIA GeForce RTX 4090"
+      },
+      "benchmark": {
+        "system": {
+          "name": "sir_ode"
+        },
+        "N": 1,
+        "experiment": {
+          "experiment_type": "eig_based",
+          "step_number": 5,
+          "methods": [
+            "vsoed"
+          ]
+        },
+        "observation": {
+          "noise_sigma": 1.0,
+          "sampling": "infected_count_at_continuous_time"
+        },
+        "sir_ode": {
+          "population": 500.0,
+          "i0": 2.0,
+          "t_end": 100.0,
+          "beta_mean": 0.5,
+          "gamma_mean": 0.1,
+          "log_std": 0.5,
+          "min_spacing": 0.1,
+          "integration_steps_per_stage": 512,
+          "execution_backend": "fused_rk4"
+        },
+        "research": {
+          "enabled": true,
+          "settings": {
+            "eval_systems": 2048,
+            "eval_contrasts": 16384,
+            "moe_revision": 4,
+            "moe_router_temperature": 1.0,
+            "moe_specialist_budget_fraction": 0.25,
+            "moe_density_updates": 4,
+            "updates": 31250,
+            "batch_size": 64,
+            "learning_rate": 0.0003,
+            "training_bound": 1,
+            "primary_episode_budget": 1,
+            "contrasts": 1024,
+            "evaluation_population_systems": 2048,
+            "evaluation_batch_size": 16,
+            "evaluation_contrast_chunk": 4096,
+            "validation_systems": 128,
+            "validation_contrasts": 1024,
+            "rl_batch_size": 100,
+            "rl_replay_batch": 4096,
+            "rl_replay_capacity": 1000000,
+            "rl_min_buffer": 100000,
+            "rl_gradient_steps": 2,
+            "rl_log_every": 10,
+            "scorebed_batch_size": 64,
+            "threads": 2,
+            "strategy_diagnostics_every": 1
+          },
+          "plan": {
+            "source": "User-provided ChatGPT research plan",
+            "horizons": [
+              5
+            ],
+            "training_repetitions": 5,
+            "test_trajectories": 2048,
+            "routing": "four-expert DSelect1 sparse MoE",
+            "training_criterion": "sPCE",
+            "online_policy_refinement": false,
+            "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+            "secondary_metric": "parameter_MSE",
+            "exclusions": [
+              "step_dad",
+              "myopic",
+              "mocu",
+              "msc",
+              "cost_utility",
+              "growing_tree"
+            ],
+            "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+            "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+            "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+            "scope": "E1 T5 fixed-budget development followed by replication"
+          },
+          "training_episode_cap": 1000000,
+          "journal_protocol": {
+            "version": "validation_convergence_v1",
+            "status": "SIR_development_pending_readiness",
+            "comparison": "one_million_total_primary_episodes",
+            "budget_unit": "method_specific_resource_safety_caps",
+            "checkpoint_selection": "final_predeclared_fixed_budget",
+            "claim_limit": "No confirmation until readiness, precision and settings are frozen; historical results are separate.",
+            "development_training_seeds": [
+              101
+            ],
+            "training_seeds": [
+              101,
+              102,
+              103,
+              104,
+              105
+            ],
+            "evaluation_seeds": [
+              1002
+            ],
+            "previously_used_evaluation_seeds": [
+              1001
+            ],
+            "validation": {
+              "seed": 1003,
+              "systems": 128,
+              "contrasts": 16384,
+              "batch_size": 16,
+              "chunk": 4096
+            },
+            "stopping_rule": {
+              "minimum_episodes": 1000000,
+              "minimum_checkpoints": 8,
+              "validation_every_episodes": 125000,
+              "patience": 6,
+              "minimum_improvement": 0.01,
+              "noise_multiplier": 1.96,
+              "maximum_episodes": 1000000,
+              "maximum_training_seconds": 86400
+            },
+            "common_pathwise_settings": {
+              "hidden": 64,
+              "contrasts": 1024,
+              "moe_gradient_clip_mode": "component",
+              "moe_router_warmup_fraction": 0.3,
+              "moe_router_finish_fraction": 0.95,
+              "strategy_routing_mode": "learned_switch",
+              "strategy_initial_reroute_probability": 0.99
+            },
+            "method_settings": {
+              "moe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "resmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchresmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "sum_single": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 32768
+              },
+              "fixed": {},
+              "dad": {
+                "first_design_revision": 1,
+                "spce_gradient_clip": null
+              },
+              "scorebed": {
+                "scorebed_pretraining_episodes": 692990,
+                "scorebed_batch_size": 64
+              },
+              "rl_sboed": {
+                "rl_original_reference": true,
+                "rl_native_replay_capacity": 1000000,
+                "rl_native_contrasts": 1024
+              }
+            },
+            "method_stopping": {},
+            "final_evaluation": {
+              "systems": 2048,
+              "contrasts": 16384,
+              "resolution_status": "uncalibrated",
+              "seed": 1002
+            },
+            "residual_base": {
+              "method": "sum_single",
+              "seed_specific": true,
+              "share_within_seed": true,
+              "initially_frozen": true,
+              "total_cost_includes_base": true
+            },
+            "independent_seeds_required": 5,
+            "development_resource_gate": "measured GPU forward/backward 0.798 seconds per batch64; seed101 approved",
+            "native_fidelity_required": true,
+            "native_vsoed_profile": {
+              "updates": 7810,
+              "new_trajectories": 128,
+              "replay_batch": 256,
+              "initial_replay": 320,
+              "replay_capacity": 100000,
+              "posterior_updates": 5,
+              "critic_updates": 5,
+              "posterior_lr": 0.0005,
+              "actor_lr": 0.0005,
+              "critic_lr": 0.001,
+              "lr_decay": 0.9999,
+              "discount": 1.0,
+              "exploration": 5.0,
+              "exploration_decay": 0.9999,
+              "target_rate": 0.1,
+              "transition": 0,
+              "log_every": 100,
+              "n_incre": 1,
+              "budget_note": "Initial replay320 instead of draft256 permits exactly1M episodes with native new-trajectory batches128; ODE adapter, not published SDE reproduction"
+            },
+            "checkpoint_selection_mode": "final_fixed_budget",
+            "training_device": "cuda_if_available",
+            "study_id": "E1_SIR_T5_native_all_four_ST"
+          },
+          "paper_protocol": {
+            "nominal_training_trajectories": 1000000,
+            "training_budget_unit": "primary_episodes",
+            "checkpoint_selection": "final",
+            "regime": "journal_1M_total_fixed_budget"
+          }
+        },
+        "_config_path": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/configs/sir_1000000.yaml"
+      },
+      "raw_evaluation_source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/evaluations/vsoed_N2048_nested.npz",
+      "raw_evaluation_sha256": "9dea1170fdbc9e2e66f035a45ffac42f91ed0650438c015cba6d47353e9ce3fd",
+      "native_updates": {
+        "actor": 7810,
+        "critic": 39050,
+        "posterior": 39050
+      },
+      "score_allocation": {}
+    },
+    "scorebed": {
+      "method": "scorebed",
+      "status": "VALID_COMPLETED",
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_sir_e1_corrected_implementations/worker_ubuntu/sir/seed101/scorebed",
+      "source_commit": "2f3bf0cb9c0b560d87edbfce487372cb5b234c86",
+      "source_manifest_sha256": "af7548be8a33c890f245958d6e2de4e9a9ea2e37a10642ab85d75f32b6ad5d78",
+      "config_sha256": "bb9e953a8d55c717c8f603a6f29721b25fc33e169ebc3bd03dfe32d63dd4baa0",
+      "checkpoint_sha256": "f4b65eda5455cca48204a3757baeb5508bf83c1143c592f56b5185e362810d49",
+      "source_files_verified": 255,
+      "source_failures": [],
+      "physics_valid": true,
+      "budget_valid": true,
+      "episodes": 1000000,
+      "additional_episodes": 1000000,
+      "updates": {
+        "score": 10828,
+        "policy": 4641
+      },
+      "training_seconds": 4455.695726122998,
+      "base_training_seconds": 0,
+      "training_tag": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+      "checkpoint_selection": "final_predeclared_fixed_budget",
+      "effective_settings": {
+        "strategy_routing_mode": "learned_switch",
+        "strategy_initial_reroute_probability": 0.99,
+        "strategy_diagnostics_every": 1,
+        "moe_history_encoder_revision": 1,
+        "first_design_revision": 1,
+        "training_bound": 1,
+        "variational_policy_lr": 0.0002,
+        "variational_density_lr": 0.001,
+        "variational_density_hidden": 128,
+        "variational_mixtures": 16,
+        "variational_density_updates": 2,
+        "variational_warmup": 200,
+        "smc_moves": 8,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "spce_curriculum": 1,
+        "updates": 31250,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "hidden": 64,
+        "contrasts": 1024,
+        "validation_contrasts": 1024,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2048,
+        "eval_contrasts": 1000000,
+        "posterior_particles": 1024,
+        "posterior_steps": 64,
+        "posterior_chains": 4,
+        "posterior_proposal_scale": 0.15,
+        "planner_particles": 128,
+        "search_candidates": 16,
+        "search_rounds": 3,
+        "fantasies": 32,
+        "vsoed_hidden": 128,
+        "vsoed_mixtures": 8,
+        "vsoed_critic_lr": 0.001,
+        "vsoed_posterior_lr": 0.001,
+        "vsoed_posterior_updates": 3,
+        "vsoed_critic_updates": 5,
+        "replay_capacity": 8192,
+        "vsoed_exploration": 0.3,
+        "target_rate": 0.01,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 4096,
+        "evaluation_population_systems": 2048,
+        "threads": 2,
+        "rl_batch_size": 100,
+        "rl_replay_batch": 4096,
+        "rl_replay_capacity": 1000000,
+        "rl_min_buffer": 100000,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "primary_episode_budget": 1,
+        "scorebed_batch_size": 64,
+        "moe_gradient_clip_mode": "component",
+        "moe_router_warmup_fraction": 0.3,
+        "moe_router_finish_fraction": 0.95,
+        "scorebed_pretraining_episodes": 692990
+      },
+      "sir_score_adapter_revision": 2,
+      "potential_hidden_dim": 256,
+      "base_checkpoint": null,
+      "model_files": {
+        "scorebed_sir_configuration.json": {
+          "sha256": "9e2f0f144edb6358bc097739bc2fc2fe5c6cc4d41b51c11cb2e29a320e8f638a",
+          "bytes": 207
+        },
+        "scorebed_official_score.msgpack": {
+          "sha256": "133ced7487723e65bdafa4fa2784f4cd33e4a678373403a253b66ac499943dbd",
+          "bytes": 13443497
+        },
+        "scorebed_official_policy.npz": {
+          "sha256": "2256dd21ad173fbd69b8951944c49e46941315acbc467d973099a852fa9ed370",
+          "bytes": 24072
+        },
+        "scorebed_normalization.npz": {
+          "sha256": "65926b92c888702004d770ac1b074313a30ef902db93fc041a3bb554add48bad",
+          "bytes": 1158
+        },
+        "scorebed.pt": {
+          "sha256": "f4b65eda5455cca48204a3757baeb5508bf83c1143c592f56b5185e362810d49",
+          "bytes": 23073
+        },
+        "scorebed_official_config.json": {
+          "sha256": "800dcdb311d6f99e481f9783c24de6dfe0b0eb059e86ce77e744c9477df719c0",
+          "bytes": 3279
+        }
+      },
+      "hardware": {
+        "execution_site": "unknown",
+        "cluster": null,
+        "computer_name": "qiqi-workstation",
+        "cpu_model": "Intel(R) Core(TM) Ultra 7 265K",
+        "gpu_model": "NVIDIA GeForce RTX 5080"
+      },
+      "benchmark": {
+        "system": {
+          "name": "sir_ode"
+        },
+        "N": 1,
+        "experiment": {
+          "experiment_type": "eig_based",
+          "step_number": 5,
+          "methods": [
+            "scorebed"
+          ]
+        },
+        "observation": {
+          "noise_sigma": 1.0,
+          "sampling": "infected_count_at_continuous_time"
+        },
+        "sir_ode": {
+          "population": 500.0,
+          "i0": 2.0,
+          "t_end": 100.0,
+          "beta_mean": 0.5,
+          "gamma_mean": 0.1,
+          "log_std": 0.5,
+          "min_spacing": 0.1,
+          "integration_steps_per_stage": 512,
+          "execution_backend": "fused_rk4"
+        },
+        "research": {
+          "enabled": true,
+          "settings": {
+            "eval_systems": 2048,
+            "eval_contrasts": 1000000,
+            "moe_revision": 4,
+            "moe_router_temperature": 1.0,
+            "moe_specialist_budget_fraction": 0.25,
+            "moe_density_updates": 4,
+            "updates": 31250,
+            "batch_size": 64,
+            "learning_rate": 0.0003,
+            "training_bound": 1,
+            "primary_episode_budget": 1,
+            "contrasts": 1024,
+            "evaluation_population_systems": 2048,
+            "evaluation_batch_size": 16,
+            "evaluation_contrast_chunk": 4096,
+            "validation_systems": 128,
+            "validation_contrasts": 1024,
+            "rl_batch_size": 100,
+            "rl_replay_batch": 4096,
+            "rl_replay_capacity": 1000000,
+            "rl_min_buffer": 100000,
+            "rl_gradient_steps": 2,
+            "rl_log_every": 10,
+            "scorebed_batch_size": 64,
+            "threads": 2,
+            "strategy_diagnostics_every": 1
+          },
+          "plan": {
+            "source": "User-provided ChatGPT research plan",
+            "horizons": [
+              5
+            ],
+            "training_repetitions": 5,
+            "test_trajectories": 2048,
+            "routing": "four-expert DSelect1 sparse MoE",
+            "training_criterion": "sPCE",
+            "online_policy_refinement": false,
+            "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+            "secondary_metric": "parameter_MSE",
+            "exclusions": [
+              "step_dad",
+              "myopic",
+              "mocu",
+              "msc",
+              "cost_utility",
+              "growing_tree"
+            ],
+            "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+            "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+            "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+            "scope": "E1 T5 fixed-budget development followed by replication"
+          },
+          "training_episode_cap": 1000000,
+          "journal_protocol": {
+            "version": "validation_convergence_v1",
+            "status": "ScoreBED_SIR_native_dimension_correction_development",
+            "comparison": "one_million_total_primary_episodes",
+            "budget_unit": "method_specific_resource_safety_caps",
+            "checkpoint_selection": "final_predeclared_fixed_budget",
+            "claim_limit": "No confirmation until readiness, precision and settings are frozen; historical results are separate.",
+            "development_training_seeds": [
+              101
+            ],
+            "training_seeds": [
+              101,
+              102,
+              103,
+              104,
+              105
+            ],
+            "evaluation_seeds": [
+              1002
+            ],
+            "previously_used_evaluation_seeds": [
+              1001
+            ],
+            "validation": {
+              "seed": 1003,
+              "systems": 128,
+              "contrasts": 16384,
+              "batch_size": 16,
+              "chunk": 4096
+            },
+            "stopping_rule": {
+              "minimum_episodes": 1000000,
+              "minimum_checkpoints": 8,
+              "validation_every_episodes": 125000,
+              "patience": 6,
+              "minimum_improvement": 0.01,
+              "noise_multiplier": 1.96,
+              "maximum_episodes": 1000000,
+              "maximum_training_seconds": 86400
+            },
+            "common_pathwise_settings": {
+              "hidden": 64,
+              "contrasts": 1024,
+              "moe_gradient_clip_mode": "component",
+              "moe_router_warmup_fraction": 0.3,
+              "moe_router_finish_fraction": 0.95,
+              "strategy_routing_mode": "learned_switch",
+              "strategy_initial_reroute_probability": 0.99
+            },
+            "method_settings": {
+              "moe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "resmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchresmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "sum_single": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 32768
+              },
+              "fixed": {},
+              "dad": {
+                "first_design_revision": 1,
+                "spce_gradient_clip": null
+              },
+              "scorebed": {
+                "scorebed_pretraining_episodes": 692990,
+                "scorebed_batch_size": 64
+              },
+              "rl_sboed": {
+                "rl_original_reference": true,
+                "rl_native_replay_capacity": 1000000,
+                "rl_native_contrasts": 1024
+              }
+            },
+            "method_stopping": {},
+            "final_evaluation": {
+              "systems": 2048,
+              "contrasts": 1000000,
+              "resolution_status": "provisional; full paired contrast-resolution verification ongoing",
+              "seed": 1002
+            },
+            "residual_base": {
+              "method": "sum_single",
+              "seed_specific": true,
+              "share_within_seed": true,
+              "initially_frozen": true,
+              "total_cost_includes_base": true
+            },
+            "independent_seeds_required": 5,
+            "development_resource_gate": "measured GPU forward/backward 0.798 seconds per batch64; seed101 approved",
+            "native_fidelity_required": true,
+            "native_vsoed_profile": {
+              "updates": 7810,
+              "new_trajectories": 128,
+              "replay_batch": 256,
+              "initial_replay": 320,
+              "replay_capacity": 100000,
+              "posterior_updates": 5,
+              "critic_updates": 5,
+              "posterior_lr": 0.0005,
+              "actor_lr": 0.0005,
+              "critic_lr": 0.001,
+              "lr_decay": 0.9999,
+              "discount": 1.0,
+              "exploration": 5.0,
+              "exploration_decay": 0.9999,
+              "target_rate": 0.1,
+              "transition": 0,
+              "log_every": 100,
+              "n_incre": 1,
+              "budget_note": "Initial replay320 instead of draft256 permits exactly1M episodes with native new-trajectory batches128; ODE adapter, not published SDE reproduction"
+            },
+            "checkpoint_selection_mode": "final_fixed_budget",
+            "training_device": "cuda_if_available",
+            "study_id": "E1_SIR_T5_native_all_four_ST"
+          },
+          "paper_protocol": {
+            "nominal_training_trajectories": 1000000,
+            "training_budget_unit": "primary_episodes",
+            "checkpoint_selection": "final",
+            "regime": "journal_1M_total_fixed_budget"
+          }
+        },
+        "_config_path": "/home/qiqi/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_sir_e1_corrected_implementations/configs/sir_1000000.yaml"
+      },
+      "raw_evaluation_source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_sir_e1_corrected_implementations/worker_ubuntu/sir/seed101/scorebed/eval/scorebed_seed1001.json",
+      "raw_evaluation_sha256": "fa65e55e09220f541bd357b63f833440e93c6fd25026546fe9f04fad90f5bcae",
+      "native_updates": {
+        "score": 10828,
+        "policy": 4641
+      },
+      "score_allocation": {
+        "initialization": 10014,
+        "score": 692990,
+        "policy": 296996
+      }
+    },
+    "moe": {
+      "method": "moe",
+      "status": "VALID_COMPLETED",
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/worker_ubuntu/sir/seed101/moe",
+      "source_commit": "23f629c412ae419bd84ee797205f7f67bfcef1ff",
+      "source_manifest_sha256": "f77783896d5865ca3e0cf5ce340129c5b0fd32a426eda73daf1d46aed66a6405",
+      "config_sha256": "a7d71b6d775e37ec4f8c41e247fc1db5a237b0353290828ae79cffca9acf1f5c",
+      "checkpoint_sha256": "1748bdf5ce27b201ae555bdc54b5a49335355111570ef5df1d2f5228e97bd976",
+      "source_files_verified": 254,
+      "source_failures": [],
+      "physics_valid": true,
+      "budget_valid": true,
+      "episodes": 1000000,
+      "additional_episodes": 1000000,
+      "updates": 15625,
+      "training_seconds": 11018.038180223026,
+      "base_training_seconds": 0.0,
+      "training_tag": "pathwise_full_horizon_sPCE",
+      "checkpoint_selection": "final_predeclared_fixed_budget",
+      "effective_settings": {
+        "strategy_routing_mode": "learned_switch",
+        "strategy_initial_reroute_probability": 0.99,
+        "strategy_diagnostics_every": 1,
+        "moe_history_encoder_revision": 1,
+        "first_design_revision": 1,
+        "training_bound": 1,
+        "variational_policy_lr": 0.0002,
+        "variational_density_lr": 0.001,
+        "variational_density_hidden": 128,
+        "variational_mixtures": 16,
+        "variational_density_updates": 2,
+        "variational_warmup": 200,
+        "smc_moves": 8,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "spce_curriculum": 1,
+        "updates": 31250,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "hidden": 64,
+        "contrasts": 1024,
+        "validation_contrasts": 1024,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "posterior_particles": 1024,
+        "posterior_steps": 64,
+        "posterior_chains": 4,
+        "posterior_proposal_scale": 0.15,
+        "planner_particles": 128,
+        "search_candidates": 16,
+        "search_rounds": 3,
+        "fantasies": 32,
+        "vsoed_hidden": 128,
+        "vsoed_mixtures": 8,
+        "vsoed_critic_lr": 0.001,
+        "vsoed_posterior_lr": 0.001,
+        "vsoed_posterior_updates": 3,
+        "vsoed_critic_updates": 5,
+        "replay_capacity": 8192,
+        "vsoed_exploration": 0.3,
+        "target_rate": 0.01,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 4096,
+        "evaluation_population_systems": 2048,
+        "threads": 2,
+        "rl_batch_size": 100,
+        "rl_replay_batch": 4096,
+        "rl_replay_capacity": 1000000,
+        "rl_min_buffer": 100000,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "primary_episode_budget": 1,
+        "scorebed_batch_size": 64,
+        "moe_gradient_clip_mode": "component",
+        "moe_router_warmup_fraction": 0.3,
+        "moe_router_finish_fraction": 0.95,
+        "spce_adam_beta1": 0.8,
+        "spce_adam_beta2": 0.998,
+        "spce_lr_decay": 0.98,
+        "spce_lr_schedule_every": 1000,
+        "router_schedule_episodes": 1000000,
+        "moe_training_routing_mode": "straight_through"
+      },
+      "sir_score_adapter_revision": null,
+      "potential_hidden_dim": null,
+      "base_checkpoint": {},
+      "model_files": {
+        "moe.pt": {
+          "sha256": "1748bdf5ce27b201ae555bdc54b5a49335355111570ef5df1d2f5228e97bd976",
+          "bytes": 587933
+        }
+      },
+      "hardware": {
+        "execution_site": "unknown",
+        "cluster": null,
+        "computer_name": "qiqi-workstation",
+        "cpu_model": "Intel(R) Core(TM) Ultra 7 265K",
+        "gpu_model": "NVIDIA GeForce RTX 5080"
+      },
+      "benchmark": {
+        "system": {
+          "name": "sir_ode"
+        },
+        "N": 1,
+        "experiment": {
+          "experiment_type": "eig_based",
+          "step_number": 5,
+          "methods": [
+            "moe"
+          ]
+        },
+        "observation": {
+          "noise_sigma": 1.0,
+          "sampling": "infected_count_at_continuous_time"
+        },
+        "sir_ode": {
+          "population": 500.0,
+          "i0": 2.0,
+          "t_end": 100.0,
+          "beta_mean": 0.5,
+          "gamma_mean": 0.1,
+          "log_std": 0.5,
+          "min_spacing": 0.1,
+          "integration_steps_per_stage": 512,
+          "execution_backend": "fused_rk4"
+        },
+        "research": {
+          "enabled": true,
+          "settings": {
+            "eval_systems": 2048,
+            "eval_contrasts": 16384,
+            "moe_revision": 4,
+            "moe_router_temperature": 1.0,
+            "moe_specialist_budget_fraction": 0.25,
+            "moe_density_updates": 4,
+            "updates": 31250,
+            "batch_size": 64,
+            "learning_rate": 0.0003,
+            "training_bound": 1,
+            "primary_episode_budget": 1,
+            "contrasts": 1024,
+            "evaluation_population_systems": 2048,
+            "evaluation_batch_size": 16,
+            "evaluation_contrast_chunk": 4096,
+            "validation_systems": 128,
+            "validation_contrasts": 1024,
+            "rl_batch_size": 100,
+            "rl_replay_batch": 4096,
+            "rl_replay_capacity": 1000000,
+            "rl_min_buffer": 100000,
+            "rl_gradient_steps": 2,
+            "rl_log_every": 10,
+            "scorebed_batch_size": 64,
+            "threads": 2,
+            "strategy_diagnostics_every": 1
+          },
+          "plan": {
+            "source": "User-provided ChatGPT research plan",
+            "horizons": [
+              5
+            ],
+            "training_repetitions": 5,
+            "test_trajectories": 2048,
+            "routing": "four-expert DSelect1 sparse MoE",
+            "training_criterion": "sPCE",
+            "online_policy_refinement": false,
+            "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+            "secondary_metric": "parameter_MSE",
+            "exclusions": [
+              "step_dad",
+              "myopic",
+              "mocu",
+              "msc",
+              "cost_utility",
+              "growing_tree"
+            ],
+            "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+            "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+            "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+            "scope": "E1 T5 fixed-budget development followed by replication"
+          },
+          "training_episode_cap": 1000000,
+          "journal_protocol": {
+            "version": "validation_convergence_v1",
+            "status": "SIR_development_pending_readiness",
+            "comparison": "one_million_total_primary_episodes",
+            "budget_unit": "method_specific_resource_safety_caps",
+            "checkpoint_selection": "final_predeclared_fixed_budget",
+            "claim_limit": "No confirmation until readiness, precision and settings are frozen; historical results are separate.",
+            "development_training_seeds": [
+              101
+            ],
+            "training_seeds": [
+              101,
+              102,
+              103,
+              104,
+              105
+            ],
+            "evaluation_seeds": [
+              1002
+            ],
+            "previously_used_evaluation_seeds": [
+              1001
+            ],
+            "validation": {
+              "seed": 1003,
+              "systems": 128,
+              "contrasts": 16384,
+              "batch_size": 16,
+              "chunk": 4096
+            },
+            "stopping_rule": {
+              "minimum_episodes": 1000000,
+              "minimum_checkpoints": 8,
+              "validation_every_episodes": 125000,
+              "patience": 6,
+              "minimum_improvement": 0.01,
+              "noise_multiplier": 1.96,
+              "maximum_episodes": 1000000,
+              "maximum_training_seconds": 86400
+            },
+            "common_pathwise_settings": {
+              "hidden": 64,
+              "contrasts": 1024,
+              "moe_gradient_clip_mode": "component",
+              "moe_router_warmup_fraction": 0.3,
+              "moe_router_finish_fraction": 0.95,
+              "strategy_routing_mode": "learned_switch",
+              "strategy_initial_reroute_probability": 0.99
+            },
+            "method_settings": {
+              "moe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "resmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchresmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "sum_single": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 32768
+              },
+              "fixed": {},
+              "dad": {
+                "first_design_revision": 1,
+                "spce_gradient_clip": null
+              },
+              "scorebed": {
+                "scorebed_pretraining_episodes": 692990,
+                "scorebed_batch_size": 64
+              },
+              "rl_sboed": {
+                "rl_original_reference": true,
+                "rl_native_replay_capacity": 1000000,
+                "rl_native_contrasts": 1024
+              }
+            },
+            "method_stopping": {},
+            "final_evaluation": {
+              "systems": 2048,
+              "contrasts": 16384,
+              "resolution_status": "uncalibrated",
+              "seed": 1002
+            },
+            "residual_base": {
+              "method": "sum_single",
+              "seed_specific": true,
+              "share_within_seed": true,
+              "initially_frozen": true,
+              "total_cost_includes_base": true
+            },
+            "independent_seeds_required": 5,
+            "development_resource_gate": "measured GPU forward/backward 0.798 seconds per batch64; seed101 approved",
+            "native_fidelity_required": true,
+            "native_vsoed_profile": {
+              "updates": 7810,
+              "new_trajectories": 128,
+              "replay_batch": 256,
+              "initial_replay": 320,
+              "replay_capacity": 100000,
+              "posterior_updates": 5,
+              "critic_updates": 5,
+              "posterior_lr": 0.0005,
+              "actor_lr": 0.0005,
+              "critic_lr": 0.001,
+              "lr_decay": 0.9999,
+              "discount": 1.0,
+              "exploration": 5.0,
+              "exploration_decay": 0.9999,
+              "target_rate": 0.1,
+              "transition": 0,
+              "log_every": 100,
+              "n_incre": 1,
+              "budget_note": "Initial replay320 instead of draft256 permits exactly1M episodes with native new-trajectory batches128; ODE adapter, not published SDE reproduction"
+            },
+            "checkpoint_selection_mode": "final_fixed_budget",
+            "training_device": "cuda_if_available",
+            "study_id": "E1_SIR_T5_native_all_four_ST"
+          },
+          "paper_protocol": {
+            "nominal_training_trajectories": 1000000,
+            "training_budget_unit": "primary_episodes",
+            "checkpoint_selection": "final",
+            "regime": "journal_1M_total_fixed_budget"
+          }
+        },
+        "_config_path": "/home/qiqi/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/configs/sir_1000000.yaml"
+      },
+      "raw_evaluation_source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/evaluations/moe_N2048_nested.npz",
+      "raw_evaluation_sha256": "d8c1ab863cb8cd7b643c3366e26dbb9a499734674c1b46afcc6a1ad21d5f6b4d",
+      "native_updates": 15625,
+      "score_allocation": {}
+    },
+    "resmoe": {
+      "method": "resmoe",
+      "status": "VALID_COMPLETED",
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/worker_ubuntu/sir/seed101/resmoe",
+      "source_commit": "23f629c412ae419bd84ee797205f7f67bfcef1ff",
+      "source_manifest_sha256": "f77783896d5865ca3e0cf5ce340129c5b0fd32a426eda73daf1d46aed66a6405",
+      "config_sha256": "100d8fbefcf7fc291ce0bdb8718ecef110c5f3bc860e08c721f80c37bfe267d0",
+      "checkpoint_sha256": "0bf5eff0f1e9c40a5c81a2edf0c9ede5cc63b667746b35f1b696ef7a6979e23a",
+      "source_files_verified": 254,
+      "source_failures": [],
+      "physics_valid": true,
+      "budget_valid": true,
+      "episodes": 1000000,
+      "additional_episodes": 500000,
+      "updates": 7813,
+      "training_seconds": 4324.2943141980795,
+      "base_training_seconds": 5526.44203953995,
+      "training_tag": "pathwise_full_horizon_sPCE",
+      "checkpoint_selection": "final_predeclared_fixed_budget",
+      "effective_settings": {
+        "strategy_routing_mode": "learned_switch",
+        "strategy_initial_reroute_probability": 0.99,
+        "strategy_diagnostics_every": 1,
+        "moe_history_encoder_revision": 1,
+        "first_design_revision": 1,
+        "training_bound": 1,
+        "variational_policy_lr": 0.0002,
+        "variational_density_lr": 0.001,
+        "variational_density_hidden": 128,
+        "variational_mixtures": 16,
+        "variational_density_updates": 2,
+        "variational_warmup": 200,
+        "smc_moves": 8,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "spce_curriculum": 1,
+        "updates": 31250,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "hidden": 64,
+        "contrasts": 1024,
+        "validation_contrasts": 1024,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "posterior_particles": 1024,
+        "posterior_steps": 64,
+        "posterior_chains": 4,
+        "posterior_proposal_scale": 0.15,
+        "planner_particles": 128,
+        "search_candidates": 16,
+        "search_rounds": 3,
+        "fantasies": 32,
+        "vsoed_hidden": 128,
+        "vsoed_mixtures": 8,
+        "vsoed_critic_lr": 0.001,
+        "vsoed_posterior_lr": 0.001,
+        "vsoed_posterior_updates": 3,
+        "vsoed_critic_updates": 5,
+        "replay_capacity": 8192,
+        "vsoed_exploration": 0.3,
+        "target_rate": 0.01,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 4096,
+        "evaluation_population_systems": 2048,
+        "threads": 2,
+        "rl_batch_size": 100,
+        "rl_replay_batch": 4096,
+        "rl_replay_capacity": 1000000,
+        "rl_min_buffer": 100000,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "primary_episode_budget": 1,
+        "scorebed_batch_size": 64,
+        "moe_gradient_clip_mode": "component",
+        "moe_router_warmup_fraction": 0.3,
+        "moe_router_finish_fraction": 0.95,
+        "spce_adam_beta1": 0.8,
+        "spce_adam_beta2": 0.998,
+        "spce_lr_decay": 0.98,
+        "spce_lr_schedule_every": 1000,
+        "router_schedule_episodes": 500000,
+        "moe_training_routing_mode": "straight_through"
+      },
+      "sir_score_adapter_revision": null,
+      "potential_hidden_dim": null,
+      "base_checkpoint": {
+        "pretrained": true,
+        "path": "/home/qiqi/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/sir/seed101/base/models/sum_single.pt",
+        "sha256": "d362349d556cebb69b7e026232efc15b68ba19e0d8ae897bb66616da2b4cda03",
+        "input_dim": 193,
+        "benchmark": "sir_ode",
+        "training_episodes": 500000,
+        "training_seconds": 5526.44203953995,
+        "action_scale": 100.0,
+        "obs_scale": 500.0
+      },
+      "model_files": {
+        "resmoe.pt": {
+          "sha256": "0bf5eff0f1e9c40a5c81a2edf0c9ede5cc63b667746b35f1b696ef7a6979e23a",
+          "bytes": 723453
+        }
+      },
+      "hardware": {
+        "execution_site": "unknown",
+        "cluster": null,
+        "computer_name": "qiqi-workstation",
+        "cpu_model": "Intel(R) Core(TM) Ultra 7 265K",
+        "gpu_model": "NVIDIA GeForce RTX 5080"
+      },
+      "benchmark": {
+        "system": {
+          "name": "sir_ode"
+        },
+        "N": 1,
+        "experiment": {
+          "experiment_type": "eig_based",
+          "step_number": 5,
+          "methods": [
+            "resmoe"
+          ]
+        },
+        "observation": {
+          "noise_sigma": 1.0,
+          "sampling": "infected_count_at_continuous_time"
+        },
+        "sir_ode": {
+          "population": 500.0,
+          "i0": 2.0,
+          "t_end": 100.0,
+          "beta_mean": 0.5,
+          "gamma_mean": 0.1,
+          "log_std": 0.5,
+          "min_spacing": 0.1,
+          "integration_steps_per_stage": 512,
+          "execution_backend": "fused_rk4"
+        },
+        "research": {
+          "enabled": true,
+          "settings": {
+            "eval_systems": 2048,
+            "eval_contrasts": 16384,
+            "moe_revision": 4,
+            "moe_router_temperature": 1.0,
+            "moe_specialist_budget_fraction": 0.25,
+            "moe_density_updates": 4,
+            "updates": 31250,
+            "batch_size": 64,
+            "learning_rate": 0.0003,
+            "training_bound": 1,
+            "primary_episode_budget": 1,
+            "contrasts": 1024,
+            "evaluation_population_systems": 2048,
+            "evaluation_batch_size": 16,
+            "evaluation_contrast_chunk": 4096,
+            "validation_systems": 128,
+            "validation_contrasts": 1024,
+            "rl_batch_size": 100,
+            "rl_replay_batch": 4096,
+            "rl_replay_capacity": 1000000,
+            "rl_min_buffer": 100000,
+            "rl_gradient_steps": 2,
+            "rl_log_every": 10,
+            "scorebed_batch_size": 64,
+            "threads": 2,
+            "strategy_diagnostics_every": 1
+          },
+          "plan": {
+            "source": "User-provided ChatGPT research plan",
+            "horizons": [
+              5
+            ],
+            "training_repetitions": 5,
+            "test_trajectories": 2048,
+            "routing": "four-expert DSelect1 sparse MoE",
+            "training_criterion": "sPCE",
+            "online_policy_refinement": false,
+            "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+            "secondary_metric": "parameter_MSE",
+            "exclusions": [
+              "step_dad",
+              "myopic",
+              "mocu",
+              "msc",
+              "cost_utility",
+              "growing_tree"
+            ],
+            "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+            "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+            "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+            "scope": "E1 T5 fixed-budget development followed by replication"
+          },
+          "training_episode_cap": 1000000,
+          "journal_protocol": {
+            "version": "validation_convergence_v1",
+            "status": "SIR_development_pending_readiness",
+            "comparison": "one_million_total_primary_episodes",
+            "budget_unit": "method_specific_resource_safety_caps",
+            "checkpoint_selection": "final_predeclared_fixed_budget",
+            "claim_limit": "No confirmation until readiness, precision and settings are frozen; historical results are separate.",
+            "development_training_seeds": [
+              101
+            ],
+            "training_seeds": [
+              101,
+              102,
+              103,
+              104,
+              105
+            ],
+            "evaluation_seeds": [
+              1002
+            ],
+            "previously_used_evaluation_seeds": [
+              1001
+            ],
+            "validation": {
+              "seed": 1003,
+              "systems": 128,
+              "contrasts": 16384,
+              "batch_size": 16,
+              "chunk": 4096
+            },
+            "stopping_rule": {
+              "minimum_episodes": 500000,
+              "minimum_checkpoints": 8,
+              "validation_every_episodes": 125000,
+              "patience": 6,
+              "minimum_improvement": 0.01,
+              "noise_multiplier": 1.96,
+              "maximum_episodes": 500000,
+              "maximum_training_seconds": 86400
+            },
+            "common_pathwise_settings": {
+              "hidden": 64,
+              "contrasts": 1024,
+              "moe_gradient_clip_mode": "component",
+              "moe_router_warmup_fraction": 0.3,
+              "moe_router_finish_fraction": 0.95,
+              "strategy_routing_mode": "learned_switch",
+              "strategy_initial_reroute_probability": 0.99
+            },
+            "method_settings": {
+              "moe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "resmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchresmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "sum_single": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 32768
+              },
+              "fixed": {},
+              "dad": {
+                "first_design_revision": 1,
+                "spce_gradient_clip": null
+              },
+              "scorebed": {
+                "scorebed_pretraining_episodes": 692990,
+                "scorebed_batch_size": 64
+              },
+              "rl_sboed": {
+                "rl_original_reference": true,
+                "rl_native_replay_capacity": 1000000,
+                "rl_native_contrasts": 1024
+              }
+            },
+            "method_stopping": {},
+            "final_evaluation": {
+              "systems": 2048,
+              "contrasts": 16384,
+              "resolution_status": "uncalibrated",
+              "seed": 1002
+            },
+            "residual_base": {
+              "method": "sum_single",
+              "seed_specific": true,
+              "share_within_seed": true,
+              "initially_frozen": true,
+              "total_cost_includes_base": true
+            },
+            "independent_seeds_required": 5,
+            "development_resource_gate": "measured GPU forward/backward 0.798 seconds per batch64; seed101 approved",
+            "native_fidelity_required": true,
+            "native_vsoed_profile": {
+              "updates": 7810,
+              "new_trajectories": 128,
+              "replay_batch": 256,
+              "initial_replay": 320,
+              "replay_capacity": 100000,
+              "posterior_updates": 5,
+              "critic_updates": 5,
+              "posterior_lr": 0.0005,
+              "actor_lr": 0.0005,
+              "critic_lr": 0.001,
+              "lr_decay": 0.9999,
+              "discount": 1.0,
+              "exploration": 5.0,
+              "exploration_decay": 0.9999,
+              "target_rate": 0.1,
+              "transition": 0,
+              "log_every": 100,
+              "n_incre": 1,
+              "budget_note": "Initial replay320 instead of draft256 permits exactly1M episodes with native new-trajectory batches128; ODE adapter, not published SDE reproduction"
+            },
+            "checkpoint_selection_mode": "final_fixed_budget",
+            "training_device": "cuda_if_available",
+            "study_id": "E1_SIR_T5_native_all_four_ST"
+          },
+          "paper_protocol": {
+            "nominal_training_trajectories": 500000,
+            "training_budget_unit": "primary_episodes",
+            "checkpoint_selection": "final",
+            "regime": "journal_1M_total_fixed_budget"
+          }
+        },
+        "_config_path": "/home/qiqi/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/configs/sir_500000.yaml"
+      },
+      "raw_evaluation_source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/evaluations/resmoe_N2048_nested.npz",
+      "raw_evaluation_sha256": "cdc13a2a26a33979fa3d240efed3c11da0c8a50e44fbb3d50aa17f3f7afc7f8a",
+      "native_updates": 7813,
+      "score_allocation": {}
+    },
+    "switchmoe": {
+      "method": "switchmoe",
+      "status": "VALID_COMPLETED",
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/sir/seed101/switchmoe",
+      "source_commit": "23f629c412ae419bd84ee797205f7f67bfcef1ff",
+      "source_manifest_sha256": "878810e61213382825da565ad181b22b392b48c93755ab31e7cff0dff12db372",
+      "config_sha256": "8474f9f43394018dc47992e7cc3121b2a4a895b9b253a9162e056d1a8fb81eae",
+      "checkpoint_sha256": "24bb735c129f8214b3dfadd757a292f7103518d518df2e7aae827a265366b3e6",
+      "source_files_verified": 254,
+      "source_failures": [],
+      "physics_valid": true,
+      "budget_valid": true,
+      "episodes": 1000000,
+      "additional_episodes": 1000000,
+      "updates": 15625,
+      "training_seconds": 8267.418534611817,
+      "base_training_seconds": 0.0,
+      "training_tag": "pathwise_full_horizon_sPCE",
+      "checkpoint_selection": "final_predeclared_fixed_budget",
+      "effective_settings": {
+        "strategy_routing_mode": "learned_switch",
+        "strategy_initial_reroute_probability": 0.99,
+        "strategy_diagnostics_every": 1,
+        "moe_history_encoder_revision": 1,
+        "first_design_revision": 1,
+        "training_bound": 1,
+        "variational_policy_lr": 0.0002,
+        "variational_density_lr": 0.001,
+        "variational_density_hidden": 128,
+        "variational_mixtures": 16,
+        "variational_density_updates": 2,
+        "variational_warmup": 200,
+        "smc_moves": 8,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "spce_curriculum": 1,
+        "updates": 31250,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "hidden": 64,
+        "contrasts": 1024,
+        "validation_contrasts": 1024,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "posterior_particles": 1024,
+        "posterior_steps": 64,
+        "posterior_chains": 4,
+        "posterior_proposal_scale": 0.15,
+        "planner_particles": 128,
+        "search_candidates": 16,
+        "search_rounds": 3,
+        "fantasies": 32,
+        "vsoed_hidden": 128,
+        "vsoed_mixtures": 8,
+        "vsoed_critic_lr": 0.001,
+        "vsoed_posterior_lr": 0.001,
+        "vsoed_posterior_updates": 3,
+        "vsoed_critic_updates": 5,
+        "replay_capacity": 8192,
+        "vsoed_exploration": 0.3,
+        "target_rate": 0.01,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 4096,
+        "evaluation_population_systems": 2048,
+        "threads": 2,
+        "rl_batch_size": 100,
+        "rl_replay_batch": 4096,
+        "rl_replay_capacity": 1000000,
+        "rl_min_buffer": 100000,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "primary_episode_budget": 1,
+        "scorebed_batch_size": 64,
+        "moe_gradient_clip_mode": "component",
+        "moe_router_warmup_fraction": 0.3,
+        "moe_router_finish_fraction": 0.95,
+        "spce_adam_beta1": 0.8,
+        "spce_adam_beta2": 0.998,
+        "spce_lr_decay": 0.98,
+        "spce_lr_schedule_every": 1000,
+        "router_schedule_episodes": 1000000,
+        "moe_training_routing_mode": "straight_through"
+      },
+      "sir_score_adapter_revision": null,
+      "potential_hidden_dim": null,
+      "base_checkpoint": {},
+      "model_files": {
+        "switchmoe.pt": {
+          "sha256": "24bb735c129f8214b3dfadd757a292f7103518d518df2e7aae827a265366b3e6",
+          "bytes": 591738
+        }
+      },
+      "hardware": {
+        "execution_site": "labpc",
+        "cluster": null,
+        "computer_name": "ecen-80r5x04.engr.tamu.edu",
+        "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+        "gpu_model": "NVIDIA GeForce RTX 4090"
+      },
+      "benchmark": {
+        "system": {
+          "name": "sir_ode"
+        },
+        "N": 1,
+        "experiment": {
+          "experiment_type": "eig_based",
+          "step_number": 5,
+          "methods": [
+            "switchmoe"
+          ]
+        },
+        "observation": {
+          "noise_sigma": 1.0,
+          "sampling": "infected_count_at_continuous_time"
+        },
+        "sir_ode": {
+          "population": 500.0,
+          "i0": 2.0,
+          "t_end": 100.0,
+          "beta_mean": 0.5,
+          "gamma_mean": 0.1,
+          "log_std": 0.5,
+          "min_spacing": 0.1,
+          "integration_steps_per_stage": 512,
+          "execution_backend": "fused_rk4"
+        },
+        "research": {
+          "enabled": true,
+          "settings": {
+            "eval_systems": 2048,
+            "eval_contrasts": 16384,
+            "moe_revision": 4,
+            "moe_router_temperature": 1.0,
+            "moe_specialist_budget_fraction": 0.25,
+            "moe_density_updates": 4,
+            "updates": 31250,
+            "batch_size": 64,
+            "learning_rate": 0.0003,
+            "training_bound": 1,
+            "primary_episode_budget": 1,
+            "contrasts": 1024,
+            "evaluation_population_systems": 2048,
+            "evaluation_batch_size": 16,
+            "evaluation_contrast_chunk": 4096,
+            "validation_systems": 128,
+            "validation_contrasts": 1024,
+            "rl_batch_size": 100,
+            "rl_replay_batch": 4096,
+            "rl_replay_capacity": 1000000,
+            "rl_min_buffer": 100000,
+            "rl_gradient_steps": 2,
+            "rl_log_every": 10,
+            "scorebed_batch_size": 64,
+            "threads": 2,
+            "strategy_diagnostics_every": 1
+          },
+          "plan": {
+            "source": "User-provided ChatGPT research plan",
+            "horizons": [
+              5
+            ],
+            "training_repetitions": 5,
+            "test_trajectories": 2048,
+            "routing": "four-expert DSelect1 sparse MoE",
+            "training_criterion": "sPCE",
+            "online_policy_refinement": false,
+            "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+            "secondary_metric": "parameter_MSE",
+            "exclusions": [
+              "step_dad",
+              "myopic",
+              "mocu",
+              "msc",
+              "cost_utility",
+              "growing_tree"
+            ],
+            "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+            "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+            "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+            "scope": "E1 T5 fixed-budget development followed by replication"
+          },
+          "training_episode_cap": 1000000,
+          "journal_protocol": {
+            "version": "validation_convergence_v1",
+            "status": "SIR_development_pending_readiness",
+            "comparison": "one_million_total_primary_episodes",
+            "budget_unit": "method_specific_resource_safety_caps",
+            "checkpoint_selection": "final_predeclared_fixed_budget",
+            "claim_limit": "No confirmation until readiness, precision and settings are frozen; historical results are separate.",
+            "development_training_seeds": [
+              101
+            ],
+            "training_seeds": [
+              101,
+              102,
+              103,
+              104,
+              105
+            ],
+            "evaluation_seeds": [
+              1002
+            ],
+            "previously_used_evaluation_seeds": [
+              1001
+            ],
+            "validation": {
+              "seed": 1003,
+              "systems": 128,
+              "contrasts": 16384,
+              "batch_size": 16,
+              "chunk": 4096
+            },
+            "stopping_rule": {
+              "minimum_episodes": 1000000,
+              "minimum_checkpoints": 8,
+              "validation_every_episodes": 125000,
+              "patience": 6,
+              "minimum_improvement": 0.01,
+              "noise_multiplier": 1.96,
+              "maximum_episodes": 1000000,
+              "maximum_training_seconds": 86400
+            },
+            "common_pathwise_settings": {
+              "hidden": 64,
+              "contrasts": 1024,
+              "moe_gradient_clip_mode": "component",
+              "moe_router_warmup_fraction": 0.3,
+              "moe_router_finish_fraction": 0.95,
+              "strategy_routing_mode": "learned_switch",
+              "strategy_initial_reroute_probability": 0.99
+            },
+            "method_settings": {
+              "moe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "resmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchresmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "sum_single": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 32768
+              },
+              "fixed": {},
+              "dad": {
+                "first_design_revision": 1,
+                "spce_gradient_clip": null
+              },
+              "scorebed": {
+                "scorebed_pretraining_episodes": 692990,
+                "scorebed_batch_size": 64
+              },
+              "rl_sboed": {
+                "rl_original_reference": true,
+                "rl_native_replay_capacity": 1000000,
+                "rl_native_contrasts": 1024
+              }
+            },
+            "method_stopping": {},
+            "final_evaluation": {
+              "systems": 2048,
+              "contrasts": 16384,
+              "resolution_status": "uncalibrated",
+              "seed": 1002
+            },
+            "residual_base": {
+              "method": "sum_single",
+              "seed_specific": true,
+              "share_within_seed": true,
+              "initially_frozen": true,
+              "total_cost_includes_base": true
+            },
+            "independent_seeds_required": 5,
+            "development_resource_gate": "measured GPU forward/backward 0.798 seconds per batch64; seed101 approved",
+            "native_fidelity_required": true,
+            "native_vsoed_profile": {
+              "updates": 7810,
+              "new_trajectories": 128,
+              "replay_batch": 256,
+              "initial_replay": 320,
+              "replay_capacity": 100000,
+              "posterior_updates": 5,
+              "critic_updates": 5,
+              "posterior_lr": 0.0005,
+              "actor_lr": 0.0005,
+              "critic_lr": 0.001,
+              "lr_decay": 0.9999,
+              "discount": 1.0,
+              "exploration": 5.0,
+              "exploration_decay": 0.9999,
+              "target_rate": 0.1,
+              "transition": 0,
+              "log_every": 100,
+              "n_incre": 1,
+              "budget_note": "Initial replay320 instead of draft256 permits exactly1M episodes with native new-trajectory batches128; ODE adapter, not published SDE reproduction"
+            },
+            "checkpoint_selection_mode": "final_fixed_budget",
+            "training_device": "cuda_if_available",
+            "study_id": "E1_SIR_T5_native_all_four_ST"
+          },
+          "paper_protocol": {
+            "nominal_training_trajectories": 1000000,
+            "training_budget_unit": "primary_episodes",
+            "checkpoint_selection": "final",
+            "regime": "journal_1M_total_fixed_budget"
+          }
+        },
+        "_config_path": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/configs/sir_1000000.yaml"
+      },
+      "raw_evaluation_source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/evaluations/switchmoe_N2048_nested.npz",
+      "raw_evaluation_sha256": "389b750d9a74e977ccc2b81ad48e752d812426365cee2b272e317108464410b6",
+      "native_updates": 15625,
+      "score_allocation": {}
+    },
+    "switchresmoe": {
+      "method": "switchresmoe",
+      "status": "VALID_COMPLETED",
+      "run": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/worker_ubuntu/sir/seed101/switchresmoe",
+      "source_commit": "23f629c412ae419bd84ee797205f7f67bfcef1ff",
+      "source_manifest_sha256": "f77783896d5865ca3e0cf5ce340129c5b0fd32a426eda73daf1d46aed66a6405",
+      "config_sha256": "2060b441c8adf598966632ce48d85fa12d31d37c75401d157cf1d5950a1a1f83",
+      "checkpoint_sha256": "f6baf5586e91536d33b27eba8e2ffdffe409a7c31a37cf32150d7eb47fdf825c",
+      "source_files_verified": 254,
+      "source_failures": [],
+      "physics_valid": true,
+      "budget_valid": true,
+      "episodes": 1000000,
+      "additional_episodes": 500000,
+      "updates": 7813,
+      "training_seconds": 4333.953894021048,
+      "base_training_seconds": 5526.44203953995,
+      "training_tag": "pathwise_full_horizon_sPCE",
+      "checkpoint_selection": "final_predeclared_fixed_budget",
+      "effective_settings": {
+        "strategy_routing_mode": "learned_switch",
+        "strategy_initial_reroute_probability": 0.99,
+        "strategy_diagnostics_every": 1,
+        "moe_history_encoder_revision": 1,
+        "first_design_revision": 1,
+        "training_bound": 1,
+        "variational_policy_lr": 0.0002,
+        "variational_density_lr": 0.001,
+        "variational_density_hidden": 128,
+        "variational_mixtures": 16,
+        "variational_density_updates": 2,
+        "variational_warmup": 200,
+        "smc_moves": 8,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "spce_curriculum": 1,
+        "updates": 31250,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "hidden": 64,
+        "contrasts": 1024,
+        "validation_contrasts": 1024,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "posterior_particles": 1024,
+        "posterior_steps": 64,
+        "posterior_chains": 4,
+        "posterior_proposal_scale": 0.15,
+        "planner_particles": 128,
+        "search_candidates": 16,
+        "search_rounds": 3,
+        "fantasies": 32,
+        "vsoed_hidden": 128,
+        "vsoed_mixtures": 8,
+        "vsoed_critic_lr": 0.001,
+        "vsoed_posterior_lr": 0.001,
+        "vsoed_posterior_updates": 3,
+        "vsoed_critic_updates": 5,
+        "replay_capacity": 8192,
+        "vsoed_exploration": 0.3,
+        "target_rate": 0.01,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 4096,
+        "evaluation_population_systems": 2048,
+        "threads": 2,
+        "rl_batch_size": 100,
+        "rl_replay_batch": 4096,
+        "rl_replay_capacity": 1000000,
+        "rl_min_buffer": 100000,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "primary_episode_budget": 1,
+        "scorebed_batch_size": 64,
+        "moe_gradient_clip_mode": "component",
+        "moe_router_warmup_fraction": 0.3,
+        "moe_router_finish_fraction": 0.95,
+        "spce_adam_beta1": 0.8,
+        "spce_adam_beta2": 0.998,
+        "spce_lr_decay": 0.98,
+        "spce_lr_schedule_every": 1000,
+        "router_schedule_episodes": 500000,
+        "moe_training_routing_mode": "straight_through"
+      },
+      "sir_score_adapter_revision": null,
+      "potential_hidden_dim": null,
+      "base_checkpoint": {
+        "pretrained": true,
+        "path": "/home/qiqi/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/sir/seed101/base/models/sum_single.pt",
+        "sha256": "d362349d556cebb69b7e026232efc15b68ba19e0d8ae897bb66616da2b4cda03",
+        "input_dim": 193,
+        "benchmark": "sir_ode",
+        "training_episodes": 500000,
+        "training_seconds": 5526.44203953995,
+        "action_scale": 100.0,
+        "obs_scale": 500.0
+      },
+      "model_files": {
+        "switchresmoe.pt": {
+          "sha256": "f6baf5586e91536d33b27eba8e2ffdffe409a7c31a37cf32150d7eb47fdf825c",
+          "bytes": 728021
+        }
+      },
+      "hardware": {
+        "execution_site": "unknown",
+        "cluster": null,
+        "computer_name": "qiqi-workstation",
+        "cpu_model": "Intel(R) Core(TM) Ultra 7 265K",
+        "gpu_model": "NVIDIA GeForce RTX 5080"
+      },
+      "benchmark": {
+        "system": {
+          "name": "sir_ode"
+        },
+        "N": 1,
+        "experiment": {
+          "experiment_type": "eig_based",
+          "step_number": 5,
+          "methods": [
+            "switchresmoe"
+          ]
+        },
+        "observation": {
+          "noise_sigma": 1.0,
+          "sampling": "infected_count_at_continuous_time"
+        },
+        "sir_ode": {
+          "population": 500.0,
+          "i0": 2.0,
+          "t_end": 100.0,
+          "beta_mean": 0.5,
+          "gamma_mean": 0.1,
+          "log_std": 0.5,
+          "min_spacing": 0.1,
+          "integration_steps_per_stage": 512,
+          "execution_backend": "fused_rk4"
+        },
+        "research": {
+          "enabled": true,
+          "settings": {
+            "eval_systems": 2048,
+            "eval_contrasts": 16384,
+            "moe_revision": 4,
+            "moe_router_temperature": 1.0,
+            "moe_specialist_budget_fraction": 0.25,
+            "moe_density_updates": 4,
+            "updates": 31250,
+            "batch_size": 64,
+            "learning_rate": 0.0003,
+            "training_bound": 1,
+            "primary_episode_budget": 1,
+            "contrasts": 1024,
+            "evaluation_population_systems": 2048,
+            "evaluation_batch_size": 16,
+            "evaluation_contrast_chunk": 4096,
+            "validation_systems": 128,
+            "validation_contrasts": 1024,
+            "rl_batch_size": 100,
+            "rl_replay_batch": 4096,
+            "rl_replay_capacity": 1000000,
+            "rl_min_buffer": 100000,
+            "rl_gradient_steps": 2,
+            "rl_log_every": 10,
+            "scorebed_batch_size": 64,
+            "threads": 2,
+            "strategy_diagnostics_every": 1
+          },
+          "plan": {
+            "source": "User-provided ChatGPT research plan",
+            "horizons": [
+              5
+            ],
+            "training_repetitions": 5,
+            "test_trajectories": 2048,
+            "routing": "four-expert DSelect1 sparse MoE",
+            "training_criterion": "sPCE",
+            "online_policy_refinement": false,
+            "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+            "secondary_metric": "parameter_MSE",
+            "exclusions": [
+              "step_dad",
+              "myopic",
+              "mocu",
+              "msc",
+              "cost_utility",
+              "growing_tree"
+            ],
+            "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+            "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+            "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+            "scope": "E1 T5 fixed-budget development followed by replication"
+          },
+          "training_episode_cap": 1000000,
+          "journal_protocol": {
+            "version": "validation_convergence_v1",
+            "status": "SIR_development_pending_readiness",
+            "comparison": "one_million_total_primary_episodes",
+            "budget_unit": "method_specific_resource_safety_caps",
+            "checkpoint_selection": "final_predeclared_fixed_budget",
+            "claim_limit": "No confirmation until readiness, precision and settings are frozen; historical results are separate.",
+            "development_training_seeds": [
+              101
+            ],
+            "training_seeds": [
+              101,
+              102,
+              103,
+              104,
+              105
+            ],
+            "evaluation_seeds": [
+              1002
+            ],
+            "previously_used_evaluation_seeds": [
+              1001
+            ],
+            "validation": {
+              "seed": 1003,
+              "systems": 128,
+              "contrasts": 16384,
+              "batch_size": 16,
+              "chunk": 4096
+            },
+            "stopping_rule": {
+              "minimum_episodes": 500000,
+              "minimum_checkpoints": 8,
+              "validation_every_episodes": 125000,
+              "patience": 6,
+              "minimum_improvement": 0.01,
+              "noise_multiplier": 1.96,
+              "maximum_episodes": 500000,
+              "maximum_training_seconds": 86400
+            },
+            "common_pathwise_settings": {
+              "hidden": 64,
+              "contrasts": 1024,
+              "moe_gradient_clip_mode": "component",
+              "moe_router_warmup_fraction": 0.3,
+              "moe_router_finish_fraction": 0.95,
+              "strategy_routing_mode": "learned_switch",
+              "strategy_initial_reroute_probability": 0.99
+            },
+            "method_settings": {
+              "moe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "resmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 1000000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "switchresmoe": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 500000,
+                "moe_training_routing_mode": "straight_through"
+              },
+              "sum_single": {
+                "learning_rate": 0.0003,
+                "spce_adam_beta1": 0.8,
+                "spce_adam_beta2": 0.998,
+                "spce_lr_decay": 0.98,
+                "spce_lr_schedule_every": 1000,
+                "router_schedule_episodes": 32768
+              },
+              "fixed": {},
+              "dad": {
+                "first_design_revision": 1,
+                "spce_gradient_clip": null
+              },
+              "scorebed": {
+                "scorebed_pretraining_episodes": 692990,
+                "scorebed_batch_size": 64
+              },
+              "rl_sboed": {
+                "rl_original_reference": true,
+                "rl_native_replay_capacity": 1000000,
+                "rl_native_contrasts": 1024
+              }
+            },
+            "method_stopping": {},
+            "final_evaluation": {
+              "systems": 2048,
+              "contrasts": 16384,
+              "resolution_status": "uncalibrated",
+              "seed": 1002
+            },
+            "residual_base": {
+              "method": "sum_single",
+              "seed_specific": true,
+              "share_within_seed": true,
+              "initially_frozen": true,
+              "total_cost_includes_base": true
+            },
+            "independent_seeds_required": 5,
+            "development_resource_gate": "measured GPU forward/backward 0.798 seconds per batch64; seed101 approved",
+            "native_fidelity_required": true,
+            "native_vsoed_profile": {
+              "updates": 7810,
+              "new_trajectories": 128,
+              "replay_batch": 256,
+              "initial_replay": 320,
+              "replay_capacity": 100000,
+              "posterior_updates": 5,
+              "critic_updates": 5,
+              "posterior_lr": 0.0005,
+              "actor_lr": 0.0005,
+              "critic_lr": 0.001,
+              "lr_decay": 0.9999,
+              "discount": 1.0,
+              "exploration": 5.0,
+              "exploration_decay": 0.9999,
+              "target_rate": 0.1,
+              "transition": 0,
+              "log_every": 100,
+              "n_incre": 1,
+              "budget_note": "Initial replay320 instead of draft256 permits exactly1M episodes with native new-trajectory batches128; ODE adapter, not published SDE reproduction"
+            },
+            "checkpoint_selection_mode": "final_fixed_budget",
+            "training_device": "cuda_if_available",
+            "study_id": "E1_SIR_T5_native_all_four_ST"
+          },
+          "paper_protocol": {
+            "nominal_training_trajectories": 500000,
+            "training_budget_unit": "primary_episodes",
+            "checkpoint_selection": "final",
+            "regime": "journal_1M_total_fixed_budget"
+          }
+        },
+        "_config_path": "/home/qiqi/Documents/objective_power_grid_e1_sir_native_20261018/experiments/10182026/10182026_e1_sir_t5_seed101/configs/sir_500000.yaml"
+      },
+      "raw_evaluation_source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/evaluations/switchresmoe_N2048_nested.npz",
+      "raw_evaluation_sha256": "67c54f67e61c426dc5785873113c05e9643b1fb85f339a7874ad272388a62a18",
+      "native_updates": 7813,
+      "score_allocation": {}
+    }
+  },
+  "bank_manifest": {
+    "seed": 1001,
+    "systems": 2048,
+    "contrasts": 1000000,
+    "sha256": {
+      "cases.npz": "4b0a17909a46726b794316dd5ffc979b2c77b1bb3b1f2fab4845ddaa46703d25",
+      "contrasts_1m.npy": "20fcc4b2cc0e4a6ac071fabc74c56e498dce0c6397e780001ea39488b40a7a48"
+    },
+    "scope": "E1;4M deferred to E2"
+  },
+  "common_truth_noise_verified": true,
+  "paired_scores_verified": true,
+  "checkpoint_matching_verified": true,
+  "resolution": {
+    "status": "E1_FIXED_1M_RESOURCE_FROZEN_NOT_INFINITE_CONTRAST_CONVERGENCE",
+    "shift_16k_to_1m": {
+      "random": 0.09271956981863294,
+      "fixed": 0.582018662081321,
+      "dad": 0.7924323672650573,
+      "rl_sboed": 0.5011322697906575,
+      "vsoed": 0.07474787041102537,
+      "moe": 0.8320851191606096,
+      "resmoe": 0.5628005050542164,
+      "switchmoe": 0.823459889023038,
+      "switchresmoe": 0.5623211678729305,
+      "scorebed": "Corrected revision2: old resolution series used invalid revision1; matching1M score replay verified separately."
+    },
+    "source": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_sir_verified_20261019/experiments/10192026/10192026_e1_sir_verification/reports/sir_contrast_resolution_N2048.csv",
+    "four_million": "Existing128-case probe partial, not all ten; user previously deferred4M to E2",
+    "supersession_notice": {
+      "status": "superseded_historical_development",
+      "replacement": "/home/grads/g/g.lin/Documents/objective_power_grid_e1_original_protocol_20261019/experiments/10192026/10192026_e1_original_baseline_restoration",
+      "queued_jobs_disabled": true,
+      "training_continuation": false
+    }
+  },
+  "new_training": false,
+  "new_evaluation": false,
+  "CPU_wall_seconds": 0.5190936730359681,
+  "reserved_seed8831001_consumed": false
+}

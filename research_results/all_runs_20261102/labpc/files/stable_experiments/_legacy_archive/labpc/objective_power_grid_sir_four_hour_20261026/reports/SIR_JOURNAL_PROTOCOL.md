@@ -1,0 +1,19 @@
+# SIR journal primary protocol — revised four-hour budget
+
+The primary comparison is “Matched four-hour LabPC training-budget comparison on the SIR ODE benchmark.” Exactly 1,000,000 fresh episodes is cancelled as a primary requirement. No common optimizer-update count is imposed. The ceiling is 14,400 charged training seconds per trainable method on LabPC RTX4090. Location-finding retains its separate 14,400-second reference.
+
+Methods: Random, Optimized Fixed, corrected DAD, corrected native RL-sBOED, corrected vsOED, corrected ScoreBED. Only independently validated MoE-sBOED target versions may later join. No legacy MoE is eligible.
+
+Physical benchmark remains population500, I0=2, end100, five increasing measurement times with minimum spacing0.1, independent log-normal beta/gamma with log locations log(0.5)/log(0.1), log SD0.5, infected-count Gaussian noise SD1, and the validated adaptive RK4 backend. No simulator or likelihood change.
+
+Each algorithm retains verified native objectives, optimizer, batch, contrasts, replay and update schedule. All method-specific GPU preparation, compilation, initialization, trainable pretraining, auxiliary and policy optimization, training simulation, replay and checkpoint costs count. Log evaluation exclusions explicitly; final evaluation and latency measurement are measured separately. Account for external simulation, discarded pilots, numerical validation and offline design search separately. Equal time does not imply equal FLOPs, data exposure or total end-to-end compute.
+
+Select the latest numerically valid checkpoint whose complete charged cost, including its serialization, is within14400s. Never select by development/test EIG. If the verified native finite schedule ends earlier retain its final checkpoint without extra updates. If time expires first report COMPUTE_LIMITED_NATIVE_IMPLEMENTATION and distinguish native schedule completion from budget eligibility. Reserve measured time for checkpoint completion; never promote an overshooting checkpoint.
+
+Before a new heavy launch: obtain the local GPU lock, verify the original native finite schedule independently of the old1M allocation, freeze effective method settings/hashes, and pass an at-most1800-second aggregate GPU-locked correctness/runtime pilot. Pilot costs are reported separately and pilot weights are not free initialization. Primary runs initialize afresh unless inherited costs are explicitly charged. No new GPU work preempts the existing campaign.
+
+The existing source839bb7d7c232f555a4f2f34b86fd9a00cc0b0eea campaign10262026_sir_journal_corrected_seed101_r2 continues unmodified as a historical/sensitivity 1M-episode protocol. Do not edit its source, configuration, queue or checkpoints. Its completed checkpoints are not automatically four-hour primary results. Historical Fixed optimization8797.37s alone does not prove complete charged-budget eligibility.
+
+Common explicit-likelihood terminal EIG evaluation retains the independently predeclared high-resolution calibration: nested16384/65536/262144/1000000/4000000 contrasts on development draws, common cases/noise/contrast arrays, absolute sensitivity0.02nats, paired sensitivity0.01nats and shift MCSE0.005. Freeze one common resolution before final comparison; unresolved estimates remain PROVISIONAL. Development seed1001 is previously used; confirmation98502691 and reserved8831001 remain protected until method/evaluator freeze. Report mean, MCSE,95%CI and paired differences versus DAD/vsOED only with verified bank identity. Seed101 is not training-seed variability; plan102–105 separately, not launched here.
+
+Execution gate: policy/configuration budget is frozen; the new primary GPU campaign has NOT launched. Native schedule verification and conservative cutoff/checkpoint adapters must pass before launch. The archive configs/sir_journal_1m_historical.yaml is non-primary provenance only. Task1 cleanup and Task3 Ubuntu v2 development are unchanged.

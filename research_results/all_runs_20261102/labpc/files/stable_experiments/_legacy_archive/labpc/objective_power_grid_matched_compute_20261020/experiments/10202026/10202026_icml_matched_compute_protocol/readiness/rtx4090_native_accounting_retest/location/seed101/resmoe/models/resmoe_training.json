@@ -1,0 +1,1199 @@
+{
+  "training": "pathwise_full_horizon_sPCE",
+  "variant": "resmoe",
+  "canonical_name": "ResMoE-sBOED",
+  "training_seconds": 8.527748795691878,
+  "optimizer_scope": "one shared Adam step for encoder, experts, router and switching gate; per-component gradient exposure separate",
+  "measured_parameters": {
+    "first": {
+      "total": 126306,
+      "active": 2,
+      "trainable": 67406,
+      "pretrained": 58900,
+      "newly_initialized": 67406
+    },
+    "initial_routed": {
+      "total": 126306,
+      "active": 76186,
+      "trainable": 67406,
+      "pretrained": 58900,
+      "newly_initialized": 67406
+    },
+    "later_routed": {
+      "total": 126306,
+      "active": 76186,
+      "trainable": 67406,
+      "pretrained": 58900,
+      "newly_initialized": 67406
+    }
+  },
+  "generated_training_trajectories": 4096,
+  "contrast_training_trajectories": 4194304,
+  "training_trajectory_budget": 4096,
+  "training_budget_unit": "primary_episodes",
+  "history": [
+    {
+      "update": 64,
+      "primary_episodes": 4096,
+      "training_eig": 4.037167033357187,
+      "selector_entropy": 1.2526501165484638,
+      "collapse_penalty": 0.0,
+      "gamma": 1.0,
+      "gradient_norm": 4.343339944837535,
+      "gradient_before": {
+        "base": 0.0,
+        "router": 1.0768214727830347,
+        "expert_0": 1.186933890011236,
+        "expert_1": 2.0051045775039107,
+        "expert_2": 1.7272115869785156,
+        "expert_3": 3.048366956256663
+      },
+      "gradient_after": {
+        "base": 0.0,
+        "router": 1.0768214727830347,
+        "expert_0": 1.186933890011236,
+        "expert_1": 2.0051045775039107,
+        "expert_2": 1.7272115869785156,
+        "expert_3": 3.048366956256663
+      },
+      "clip_scale": null,
+      "gradient_clip_mode": "component",
+      "component_clip_scales": {
+        "base": 1.0,
+        "router": 1.0,
+        "expert_0": 1.0,
+        "expert_1": 1.0,
+        "expert_2": 1.0,
+        "expert_3": 1.0
+      },
+      "training_score_distribution": {
+        "quantiles": [
+          0.033066966149384314,
+          2.5815139658340764,
+          3.9663923304923046,
+          5.906110958583565,
+          6.789244096630035,
+          6.927638120979438
+        ],
+        "fraction_within_01_of_ceiling": 0.015625,
+        "fraction_within_05_of_ceiling": 0.03125
+      },
+      "training_scores": [
+        4.238206890221342,
+        5.442417126307159,
+        3.1851848254891912,
+        5.5884388313029305,
+        4.011679811968669,
+        5.509584868120719,
+        4.330993450431944,
+        4.5134693331803675,
+        3.089207373216979,
+        1.399151629111138,
+        3.167729999950799,
+        3.92110484901594,
+        4.273835337653974,
+        6.431286462869188,
+        2.6882801304701225,
+        2.9408855806870697,
+        5.636731923906815,
+        4.442744438774589,
+        6.400684881710813,
+        4.442560171198515,
+        5.649708865334221,
+        5.744090068297805,
+        3.329965821465464,
+        3.835239322418378,
+        3.54972547091311,
+        6.927638120979438,
+        1.581684422621521,
+        6.707965066456577,
+        5.742752468880756,
+        3.0687172555167557,
+        4.982255203676129,
+        4.572870190533081,
+        5.147896860346638,
+        2.9815508312600265,
+        5.265983909903287,
+        3.015854483788491,
+        3.5380406772303523,
+        5.313558106561448,
+        2.6693135840359297,
+        6.2683628346621845,
+        4.326160455130438,
+        5.663632495760208,
+        2.11140230778841,
+        2.9014157167043457,
+        2.5586059119757856,
+        2.9658285181787107,
+        2.9531306309987,
+        2.493298276087046,
+        3.689320057754859,
+        3.127937192976308,
+        3.865575784500969,
+        3.2758847928959014,
+        3.0138033330884078,
+        4.280470038578045,
+        5.975548482991748,
+        0.033066966149384314,
+        3.3305114019200595,
+        5.035319730356729,
+        6.103079992099765,
+        2.814474446610568,
+        4.113931237843577,
+        0.8017993453959384,
+        2.634966091503422,
+        4.762175447100828
+      ],
+      "router_probabilities_by_stage": [
+        [
+          0.22379294901507288,
+          0.28045408821012013,
+          0.22001560477526239,
+          0.2757373579995446
+        ],
+        [
+          0.2179923828043751,
+          0.27830143567730903,
+          0.2212283838156836,
+          0.2824777977026323
+        ],
+        [
+          0.21210407816114968,
+          0.27605530549513835,
+          0.2223584790518326,
+          0.2894821372918793
+        ],
+        [
+          0.20624751067435276,
+          0.2737694679206857,
+          0.22336172484123032,
+          0.29662129656373126
+        ],
+        [
+          0.20056781937759455,
+          0.27152976452286864,
+          0.22419783779182167,
+          0.30370457830771513
+        ],
+        [
+          0.1947776316176825,
+          0.2692007030284424,
+          0.22492000213322302,
+          0.3111016632206521
+        ],
+        [
+          0.18903282548030614,
+          0.26681599800400274,
+          0.22552540279326608,
+          0.31862577372242507
+        ],
+        [
+          0.18333219749386329,
+          0.26439857997426147,
+          0.22598573635451524,
+          0.32628348617736
+        ],
+        [
+          0.1776542091049984,
+          0.2619173148134403,
+          0.22632646761711875,
+          0.3341020084644425
+        ],
+        [
+          0.17165384170179981,
+          0.25912684599827085,
+          0.2266199243011909,
+          0.3425993879987383
+        ],
+        [
+          0.16568712037686711,
+          0.2562529679383564,
+          0.22676285481121616,
+          0.3512970568735604
+        ],
+        [
+          0.1598318928420287,
+          0.25335149369457366,
+          0.22674180161277543,
+          0.3600748118506223
+        ],
+        [
+          0.15385464346736794,
+          0.250231688096553,
+          0.2266073000454482,
+          0.3693063683906309
+        ],
+        [
+          0.14778224455743838,
+          0.24691221810061775,
+          0.22633122084927546,
+          0.37897431649266844
+        ],
+        [
+          0.1416691986390653,
+          0.24335478984996753,
+          0.22593971174313598,
+          0.38903629976783116
+        ],
+        [
+          0.13551644281385428,
+          0.23961864278088818,
+          0.22535884698266923,
+          0.3995060674225884
+        ],
+        [
+          0.1294075582567964,
+          0.23570357492153649,
+          0.22461937490197026,
+          0.41026949191969686
+        ],
+        [
+          0.12332891549398603,
+          0.2315922519415473,
+          0.22371315584928714,
+          0.4213656767151795
+        ],
+        [
+          0.11715064470713235,
+          0.22715999032891826,
+          0.22261289020659702,
+          0.4330764747573524
+        ],
+        [
+          0.11098911963274136,
+          0.22247565032730657,
+          0.22132918074028035,
+          0.4452060492996718
+        ],
+        [
+          0.10493763344026669,
+          0.2176070930757426,
+          0.2198380741264516,
+          0.45761719935753914
+        ],
+        [
+          0.09904395310560746,
+          0.21260650260749425,
+          0.21813739357366832,
+          0.47021215071322997
+        ],
+        [
+          0.0932059935627351,
+          0.20735358725186448,
+          0.21622725307442675,
+          0.48321316611097365
+        ],
+        [
+          0.08746159413699467,
+          0.20187243715433673,
+          0.21409911208116505,
+          0.4965668566275036
+        ],
+        [
+          0.08177062250767485,
+          0.19609289262184215,
+          0.21172644187257986,
+          0.5104100429979032
+        ],
+        [
+          0.07624734203916554,
+          0.19013595044585144,
+          0.20913691773722043,
+          0.5244797897777627
+        ],
+        [
+          0.07087724116860396,
+          0.18397506048096807,
+          0.20631789897744982,
+          0.5388297993729781
+        ],
+        [
+          0.06559817236829374,
+          0.17751921844209936,
+          0.20323100460161034,
+          0.5536516045879967
+        ],
+        [
+          0.06053441942450085,
+          0.1709239587233777,
+          0.19992238328677656,
+          0.5686192385653448
+        ]
+      ],
+      "hard_choice_frequency_by_stage": [
+        [
+          0.0,
+          0.9375,
+          0.0,
+          0.0625
+        ],
+        [
+          0.0,
+          0.125,
+          0.0,
+          0.875
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "execution_utilization_by_stage": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ],
+      "router_probabilities": [
+        0.14145000682663159,
+        0.23676929215270281,
+        0.22031697863962582,
+        0.40146372238103983
+      ],
+      "hard_choice_frequency": [
+        0.0,
+        0.036637931034482756,
+        0.0,
+        0.9633620689655172
+      ],
+      "execution_utilization": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "routing_entropy": 1.2958449481535834,
+      "selector_saturated_fraction": 0.0,
+      "selector_logit_quantiles": [
+        -0.004298239411676192,
+        0.02467941906621466,
+        0.08425070679243951,
+        0.1571777328064742,
+        0.21725754770111913
+      ],
+      "strategy_reroute_probability_by_stage": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "strategy_reroute_probability_mean": 1.0,
+      "strategy_reroute_requested_by_stage": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "strategy_reroute_requested_mean": 1.0,
+      "strategy_actual_strategy_change_by_stage": [
+        0.0,
+        0.8125,
+        0.125,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "strategy_actual_strategy_change_mean": 0.032327586206896554,
+      "strategy_consecutive_duration_by_stage": [
+        1.0,
+        1.1875,
+        1.9375,
+        2.9375,
+        3.9375,
+        4.9375,
+        5.9375,
+        6.9375,
+        7.9375,
+        8.9375,
+        9.9375,
+        10.9375,
+        11.9375,
+        12.9375,
+        13.9375,
+        14.9375,
+        15.9375,
+        16.9375,
+        17.9375,
+        18.9375,
+        19.9375,
+        20.9375,
+        21.9375,
+        22.9375,
+        23.9375,
+        24.9375,
+        25.9375,
+        26.9375,
+        27.9375
+      ],
+      "strategy_consecutive_duration_mean": 13.982758620689655,
+      "strategy_state_interpretation": "relaxed state and argmax proxies; actual hard behavior evaluated separately"
+    }
+  ],
+  "diagnostic_trace": "/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/readiness/rtx4090_native_accounting_retest/location/seed101/resmoe/models/resmoe_diagnostics.jsonl",
+  "base_checkpoint": {
+    "pretrained": true,
+    "path": "/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/readiness/rtx4090_native_accounting_retest/location/seed101/base/models/sum_single.pt",
+    "sha256": "1b5282d6410db8a37acf9435a03114b8000a4c6674bd2cbce39cee69e2400615",
+    "input_dim": 772,
+    "benchmark": "location_finding",
+    "training_episodes": 4096,
+    "training_seconds": 3.8505550702102482,
+    "action_scale": 4.0,
+    "obs_scale": 3.0
+  },
+  "additional_training_episodes": 4096,
+  "total_training_episodes": 8192,
+  "base_training_seconds": 3.8505550702102482,
+  "total_training_seconds": 12.440022638533264,
+  "policy_parameters": 126306,
+  "trainable_parameters": 67406,
+  "history_encoder_revision": 2,
+  "encoder_input_dim": 193,
+  "base_input_dim": 772,
+  "routing_warmup_fraction": 0.3,
+  "routing_finish_fraction": 0.95,
+  "switching_schedule": "none; preserves existing sigmoid gate",
+  "development_diagnostic_seconds": 0.0,
+  "settings": {
+    "routing_mode": "learned_switch",
+    "initial_reroute_probability": 0.99,
+    "residual_scale": 1.0,
+    "residual_initial_std": 0.001,
+    "base_finetune": false
+  },
+  "checkpoint_selection": "latest_budget_eligible_checkpoint",
+  "training_objective": "full_horizon_sPCE",
+  "contrasts": 1024,
+  "expert_ids": [
+    "E1",
+    "E2",
+    "E3",
+    "E4"
+  ],
+  "gradient_clip_mode": "component",
+  "load_penalty_weight": 0.0001,
+  "selector_entropy_weight_max": 0.0001,
+  "actual_updates": 64,
+  "compute_budget": {
+    "version": 1,
+    "start": 2251714.121983516,
+    "budget_seconds": 120.0,
+    "credit_seconds": 4.785610907245427,
+    "hardware": "NVIDIA GeForce RTX 4090",
+    "excluded": [
+      [
+        2251723.480737753,
+        2251723.538933654,
+        "validation"
+      ]
+    ],
+    "counts": {
+      "optimizer_updates": 128,
+      "fresh_complete_episodes": 8192,
+      "true_parameter_stage_propagations": 245760,
+      "contrast_parameter_stage_propagations": 251658240,
+      "scalar_conditional_log_density_evaluations": 251904000
+    },
+    "components": {
+      "base_policy": {
+        "optimizer_updates": 64
+      },
+      "base_pretraining": {
+        "fresh_complete_episodes": 4096,
+        "true_parameter_stage_propagations": 122880,
+        "contrast_parameter_stage_propagations": 125829120,
+        "scalar_conditional_log_density_evaluations": 125952000
+      },
+      "current_training": {
+        "fresh_complete_episodes": 4096,
+        "true_parameter_stage_propagations": 122880,
+        "contrast_parameter_stage_propagations": 125829120,
+        "scalar_conditional_log_density_evaluations": 125952000
+      },
+      "policy": {
+        "optimizer_updates": 64
+      }
+    },
+    "checkpoints": [
+      {
+        "identifier": "64",
+        "charged_seconds": 14.144835422746837,
+        "eligible": true
+      }
+    ],
+    "stopped_at": 2251723.567452634,
+    "charged_seconds": 14.172884124796838,
+    "fraction_of_allocated_budget": 0.1181073677066403,
+    "unused_seconds": 105.82711587520316,
+    "unit": "exclusive-device allocated training wall seconds",
+    "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+    "not_equal_to_FLOPs": true,
+    "overrun_seconds": 0.0
+  },
+  "convergence_status": "planned_schedule_complete_before_compute_cap",
+  "journal_validation_history": [
+    {
+      "checkpoint": 1,
+      "episodes": 4096,
+      "training_seconds": 14.144311293028295,
+      "eig": 3.9982753562987723,
+      "mc_standard_error": 0.48639901221811294,
+      "paired_improvement_from_anchor": null,
+      "improvement_threshold": null,
+      "patience_used": 0,
+      "selected": true,
+      "status": "planned_schedule_complete_before_compute_cap",
+      "update": 64,
+      "validation": {
+        "seed": 1001,
+        "systems": 16,
+        "contrasts": 16384,
+        "paired_draws_sha256": "59399c698a627fbd992b34bcd4bc3a8df095d51d27e0e1b454b52a468e70654e",
+        "seconds": 0.05799030000343919,
+        "forward_particle_stages": 7864800,
+        "device": "cpu",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      },
+      "compute_checkpoint": {
+        "identifier": "64",
+        "charged_seconds": 14.144835422746837,
+        "eligible": true
+      }
+    }
+  ],
+  "validation_seconds": 0.05799030000343919,
+  "optimization_seconds": 8.527748795691878,
+  "stopping_rule": {
+    "minimum_episodes": 4096,
+    "minimum_checkpoints": 8,
+    "validation_every_episodes": 4096,
+    "patience": 6,
+    "minimum_improvement": 0.01,
+    "noise_multiplier": 1.96,
+    "maximum_episodes": 1000000000,
+    "maximum_training_seconds": 1800
+  },
+  "selected_checkpoint": {
+    "checkpoint": 1,
+    "episodes": 4096,
+    "training_seconds": 14.144311293028295,
+    "eig": 3.9982753562987723,
+    "mc_standard_error": 0.48639901221811294,
+    "paired_improvement_from_anchor": null,
+    "improvement_threshold": null,
+    "patience_used": 0,
+    "selected": true,
+    "status": "planned_schedule_complete_before_compute_cap",
+    "update": 64,
+    "validation": {
+      "seed": 1001,
+      "systems": 16,
+      "contrasts": 16384,
+      "paired_draws_sha256": "59399c698a627fbd992b34bcd4bc3a8df095d51d27e0e1b454b52a468e70654e",
+      "seconds": 0.05799030000343919,
+      "forward_particle_stages": 7864800,
+      "device": "cpu",
+      "mode": "hard_deployed_policy",
+      "secondary_parameter_inference": false
+    },
+    "compute_checkpoint": {
+      "identifier": "64",
+      "charged_seconds": 14.144835422746837,
+      "eligible": true
+    }
+  },
+  "validation_seed": 1001,
+  "resource_ledger": {
+    "schema": 2,
+    "scope": "current training phase; base cost separately attributed",
+    "counts": {
+      "fresh_complete_episodes": 4096,
+      "true_parameter_stage_propagations": 122880,
+      "contrast_parameter_stage_propagations": 125829120,
+      "scalar_conditional_log_density_evaluations": 125952000
+    },
+    "optimizer_updates": {
+      "policy": 64,
+      "critic": null,
+      "posterior": null,
+      "score": null,
+      "temperature": null
+    },
+    "replay_transition_samples": null,
+    "offline_seconds": 8.589465343393385,
+    "validation_seconds": 0.05799030000343919,
+    "base_training_seconds": 3.8505550702102482,
+    "ode_rhs_evaluations": null,
+    "solver_backward_work": null,
+    "gpu_occupancy_seconds": null,
+    "nle_equivalent_proxy": null,
+    "basis": "derived from native executed counters, not direct hardware measurement",
+    "limitations": [
+      "score-target and backward recomputation not counted",
+      "Unknown fields are not zero; walltime is not GPU occupancy"
+    ],
+    "likelihood_gradient_work": {
+      "scalar_stage_terms": null,
+      "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+    },
+    "base_pretraining_counts": {
+      "fresh_complete_episodes": 4096,
+      "true_parameter_stage_propagations": 122880,
+      "contrast_parameter_stage_propagations": 125829120,
+      "scalar_conditional_log_density_evaluations": 125952000
+    },
+    "base_pretraining_optimizer_updates": {
+      "policy": 64,
+      "critic": null,
+      "posterior": null,
+      "score": null,
+      "temperature": null
+    },
+    "complete_method_counts": {
+      "fresh_complete_episodes": 8192,
+      "contrast_parameter_stage_propagations": 251658240,
+      "scalar_conditional_log_density_evaluations": 251904000,
+      "true_parameter_stage_propagations": 245760
+    },
+    "cpu_process_seconds": 12.129683,
+    "waited_child_cpu_seconds_including_validation": 0.01326,
+    "compute_budget": {
+      "version": 1,
+      "start": 2251714.121983516,
+      "budget_seconds": 120.0,
+      "credit_seconds": 4.785610907245427,
+      "hardware": "NVIDIA GeForce RTX 4090",
+      "excluded": [
+        [
+          2251723.480737753,
+          2251723.538933654,
+          "validation"
+        ]
+      ],
+      "counts": {
+        "optimizer_updates": 128,
+        "fresh_complete_episodes": 8192,
+        "true_parameter_stage_propagations": 245760,
+        "contrast_parameter_stage_propagations": 251658240,
+        "scalar_conditional_log_density_evaluations": 251904000
+      },
+      "components": {
+        "base_policy": {
+          "optimizer_updates": 64
+        },
+        "base_pretraining": {
+          "fresh_complete_episodes": 4096,
+          "true_parameter_stage_propagations": 122880,
+          "contrast_parameter_stage_propagations": 125829120,
+          "scalar_conditional_log_density_evaluations": 125952000
+        },
+        "current_training": {
+          "fresh_complete_episodes": 4096,
+          "true_parameter_stage_propagations": 122880,
+          "contrast_parameter_stage_propagations": 125829120,
+          "scalar_conditional_log_density_evaluations": 125952000
+        },
+        "policy": {
+          "optimizer_updates": 64
+        }
+      },
+      "checkpoints": [
+        {
+          "identifier": "64",
+          "charged_seconds": 14.144835422746837,
+          "eligible": true
+        }
+      ],
+      "stopped_at": 2251723.567452634,
+      "charged_seconds": 14.172884124796838,
+      "fraction_of_allocated_budget": 0.1181073677066403,
+      "unused_seconds": 105.82711587520316,
+      "unit": "exclusive-device allocated training wall seconds",
+      "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+      "not_equal_to_FLOPs": true,
+      "overrun_seconds": 0.0
+    }
+  },
+  "native_elapsed_seconds": 8.589465343393385,
+  "total_offline_seconds": 8.585739095695317,
+  "journal_protocol": "validation_convergence_v1",
+  "training_cap_is_not_target": true,
+  "comparison_budget_unit": "exclusive_device_training_seconds",
+  "primary_episode_safety_cap": 1000000000,
+  "reference_schedule_episodes": 4096,
+  "stop_reason": "reference_schedule_completion",
+  "effective_training_settings": {
+    "strategy_routing_mode": "learned_switch",
+    "strategy_initial_reroute_probability": 0.99,
+    "strategy_diagnostics_every": 1,
+    "moe_history_encoder_revision": 1,
+    "first_design_revision": 2,
+    "training_bound": 4,
+    "variational_policy_lr": 0.0002,
+    "variational_density_lr": 0.001,
+    "variational_density_hidden": 128,
+    "variational_mixtures": 16,
+    "variational_density_updates": 2,
+    "variational_warmup": 200,
+    "smc_moves": 8,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "spce_curriculum": 1,
+    "updates": 10000,
+    "batch_size": 64,
+    "learning_rate": 5e-05,
+    "hidden": 64,
+    "contrasts": 1024,
+    "validation_contrasts": 16384,
+    "validation_systems": 128,
+    "validate_every": 100,
+    "eval_systems": 16,
+    "eval_contrasts": 16384,
+    "posterior_particles": 8192,
+    "posterior_steps": 64,
+    "posterior_chains": 4,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 128,
+    "search_candidates": 16,
+    "search_rounds": 3,
+    "fantasies": 32,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 3,
+    "vsoed_critic_updates": 5,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 16,
+    "evaluation_contrast_chunk": 4096,
+    "evaluation_population_systems": 16,
+    "threads": 2,
+    "rl_batch_size": 100,
+    "rl_replay_batch": 4096,
+    "rl_replay_capacity": 1000000,
+    "rl_min_buffer": 100000,
+    "rl_gradient_steps": 2,
+    "rl_log_every": 10,
+    "moe_density_updates": 4,
+    "moe_gradient_clip_mode": "component",
+    "moe_router_finish_fraction": 0.95,
+    "moe_router_warmup_fraction": 0.3,
+    "moe_specialist_budget_fraction": 0.25,
+    "primary_episode_budget": 1,
+    "scorebed_batch_size": 64,
+    "spce_adam_beta1": 0.8,
+    "spce_adam_beta2": 0.998,
+    "spce_lr_decay": 0.98,
+    "spce_lr_schedule_every": 1000,
+    "reference_schedule_episodes": 4096,
+    "router_schedule_episodes": 1000000,
+    "training_routing_mode": "straight_through"
+  },
+  "resume_scope": "Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed",
+  "historical_runtime_overlap": "New runs are serialized; historical timings require separate provenance",
+  "checkpoint_sha256": "1eb1574e76c23ebf5e80beafd1f870fbda4cb6425333b315d01365ae6eb54bc2"
+}

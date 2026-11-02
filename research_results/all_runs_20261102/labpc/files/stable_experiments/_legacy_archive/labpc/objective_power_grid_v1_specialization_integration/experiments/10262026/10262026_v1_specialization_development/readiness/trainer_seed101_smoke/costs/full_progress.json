@@ -1,0 +1,125 @@
+{
+  "records": [
+    {
+      "update": 1,
+      "train_spce": 2.5048451063257855,
+      "total_loss": -2.503824336274291,
+      "preclip_gradient_norm": 32.471763949388304,
+      "charged_seconds": 1.016875926987268,
+      "action_boundary_fraction": 0.0,
+      "nearly_repeated_fraction": 0.3519827586206897,
+      "action_std": [
+        0.013372334479928364,
+        0.07482109825834925
+      ],
+      "routing": {
+        "fraction_contexts_selected": [
+          0.21435,
+          1.0,
+          0.03333333333333333,
+          0.29785,
+          0.14148333333333335,
+          0.5068166666666667,
+          0.8061666666666667
+        ],
+        "mean_softmax": [
+          0.1401577731326086,
+          0.15090153474818943,
+          0.13962316741131683,
+          0.14063488135769173,
+          0.1401707059067359,
+          0.14175448408096752,
+          0.1467574533624901
+        ],
+        "effective_gate_experts": 6.996531441731118,
+        "distinct_selected_experts": 7,
+        "mean_selected_gate_mass": 0.44027910044757546,
+        "top_k": 3
+      },
+      "shared_gradient": 0.0052130048460429105,
+      "router_gradient": 0.00025721587894499153,
+      "routed_gradient": [
+        0.0005643280596272088,
+        0.0010321073387358226,
+        0.0,
+        5.5925170837727087e-05,
+        7.797313655891264e-05,
+        0.00022478082044676052,
+        0.0019632134110642175
+      ],
+      "normalized_late_context_RMS": 0.9999997166162474,
+      "raw_encoder_has_no_bounded_saturating_activation": true,
+      "learning_rate": 4.9e-05,
+      "expert_effective_updates": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "context_gradient": null,
+      "specialization_seconds_this_update": 0.0,
+      "training_seed": 101
+    }
+  ],
+  "clock": {
+    "version": 1,
+    "start": 279175.524190301,
+    "budget_seconds": 60.0,
+    "credit_seconds": 0.0,
+    "hardware": "NVIDIA GeForce RTX 4090",
+    "excluded": [],
+    "counts": {
+      "fresh_complete_primary_trajectories": 4000,
+      "true_parameter_stages": 120000,
+      "contrast_parameter_stages": 240000000,
+      "scalar_conditional_likelihood_evaluations": 240120000,
+      "policy_optimizer_updates": 2,
+      "shared_FFN_contexts": 60000,
+      "routed_FFN_contexts": 180000
+    },
+    "components": {
+      "readiness_probe_discarded_weights": {
+        "fresh_complete_primary_trajectories": 2000,
+        "true_parameter_stages": 60000,
+        "contrast_parameter_stages": 120000000,
+        "scalar_conditional_likelihood_evaluations": 120060000,
+        "policy_optimizer_updates": 1
+      },
+      "training": {
+        "fresh_complete_primary_trajectories": 2000,
+        "true_parameter_stages": 60000,
+        "contrast_parameter_stages": 120000000,
+        "scalar_conditional_likelihood_evaluations": 120060000,
+        "policy_optimizer_updates": 1,
+        "shared_FFN_contexts": 60000,
+        "routed_FFN_contexts": 180000
+      }
+    },
+    "checkpoints": [],
+    "charged_seconds": 1.021102147991769,
+    "fraction_of_allocated_budget": 0.017018647733493708,
+    "unused_seconds": 58.97886778903194,
+    "unit": "exclusive-device allocated training wall seconds",
+    "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+    "not_equal_to_FLOPs": true
+  },
+  "forward_parameter_stages": 120060000,
+  "counts": {
+    "total_parameters": 8434,
+    "activated_parameters_per_context": 6898,
+    "shared_experts": 1,
+    "routed_experts": 7,
+    "top_k": 3,
+    "expert_feature_dimension": 16,
+    "routed_FFN_width": 8,
+    "shared_FFN_width": 8,
+    "FFN_linear_FLOPs_per_context": 3072,
+    "history_encoder_linear_FLOPs_per_observation": 9728,
+    "router_linear_FLOPs_per_context": 224,
+    "action_head_linear_FLOPs_per_context": 64,
+    "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs"
+  }
+}

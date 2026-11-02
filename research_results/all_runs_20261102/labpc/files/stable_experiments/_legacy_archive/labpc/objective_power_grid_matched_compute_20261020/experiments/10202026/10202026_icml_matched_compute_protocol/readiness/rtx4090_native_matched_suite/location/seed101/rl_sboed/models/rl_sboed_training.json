@@ -1,0 +1,389 @@
+{
+  "training": "pinned_original_RL_BOED_source_SAC_REDQ",
+  "publication_algorithm_equivalence": "reference_kernels_and_native_networks; see executable tests",
+  "generated_training_trajectories": 4000,
+  "training_forward_trajectories": 4000,
+  "contrast_training_trajectories": 400000000,
+  "forward_particle_stages": 12000120000,
+  "training_seconds": 16.081860030069947,
+  "history": [
+    {
+      "primary_episodes": 4000,
+      "collection_iterations": 40,
+      "gradient_updates": 448,
+      "training_spce": 4.282440491307201,
+      "alpha": 0.9563489556312561,
+      "target_entropy": -2.000500000000001
+    }
+  ],
+  "gradient_updates": 448,
+  "critic_updates": 896,
+  "actor_updates": 448,
+  "temperature_updates": 448,
+  "gamma": 0.9,
+  "target_rate": 0.001,
+  "policy_lr": 0.0001,
+  "critic_lr": 0.0003,
+  "gradient_steps_per_collection": 64,
+  "replay_batch": 4096,
+  "replay_capacity": 1000000,
+  "contrasts": 100000,
+  "resource_departures": [
+    "Method-specific declared schedule; native contrasts, replay and source-location settings preserved"
+  ],
+  "stochastic_deployment": "native source.py policy evaluation samples tanh Gaussian; independent decision RNG",
+  "compute_budget": {
+    "version": 1,
+    "start": 2251598.735996009,
+    "budget_seconds": 120.0,
+    "credit_seconds": 0.0,
+    "hardware": "NVIDIA GeForce RTX 4090",
+    "excluded": [
+      [
+        2251614.283418095,
+        2251614.332603741,
+        "validation"
+      ],
+      [
+        2251615.700483599,
+        2251615.747117095,
+        "validation"
+      ]
+    ],
+    "counts": {
+      "fresh_complete_episodes": 4000,
+      "true_parameter_stage_propagations": 120000,
+      "contrast_parameter_stage_propagations": 12000000000,
+      "scalar_conditional_log_density_evaluations": 12000120000,
+      "optimizer_updates": 1792
+    },
+    "components": {
+      "current_training": {
+        "fresh_complete_episodes": 4000,
+        "true_parameter_stage_propagations": 120000,
+        "contrast_parameter_stage_propagations": 12000000000,
+        "scalar_conditional_log_density_evaluations": 12000120000
+      },
+      "policy": {
+        "optimizer_updates": 448
+      },
+      "critic": {
+        "optimizer_updates": 896
+      },
+      "temperature": {
+        "optimizer_updates": 448
+      }
+    },
+    "checkpoints": [
+      {
+        "identifier": "39",
+        "charged_seconds": 15.547890834510326,
+        "eligible": true
+      },
+      {
+        "identifier": "40",
+        "charged_seconds": 16.915706157218665,
+        "eligible": true
+      }
+    ],
+    "stopped_at": 2251615.758614801,
+    "charged_seconds": 16.92679965030402,
+    "fraction_of_allocated_budget": 0.1410566637525335,
+    "unused_seconds": 103.07320034969598,
+    "unit": "exclusive-device allocated training wall seconds",
+    "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+    "not_equal_to_FLOPs": true,
+    "overrun_seconds": 0.0
+  },
+  "checkpoint_selection": "latest_budget_eligible_checkpoint",
+  "convergence_status": "planned_schedule_complete_before_compute_cap",
+  "journal_validation_history": [
+    {
+      "checkpoint": 1,
+      "episodes": 3900,
+      "training_seconds": 15.547371092252433,
+      "eig": 4.864083087745026,
+      "mc_standard_error": 0.5845347909711952,
+      "paired_improvement_from_anchor": null,
+      "improvement_threshold": null,
+      "patience_used": 0,
+      "selected": true,
+      "status": "training",
+      "update": 39,
+      "validation": {
+        "seed": 1001,
+        "systems": 16,
+        "contrasts": 16384,
+        "paired_draws_sha256": "59399c698a627fbd992b34bcd4bc3a8df095d51d27e0e1b454b52a468e70654e",
+        "seconds": 0.04895475506782532,
+        "forward_particle_stages": 7864800,
+        "device": "cpu",
+        "mode": "native_stochastic_policy",
+        "secondary_parameter_inference": false
+      },
+      "compute_checkpoint": {
+        "identifier": "39",
+        "charged_seconds": 15.547890834510326,
+        "eligible": true
+      }
+    },
+    {
+      "checkpoint": 2,
+      "episodes": 4000,
+      "training_seconds": 16.915246717166156,
+      "eig": 4.951808764047817,
+      "mc_standard_error": 0.6067524842714856,
+      "paired_improvement_from_anchor": 0.0877256763027906,
+      "improvement_threshold": 0.27396045250517215,
+      "patience_used": 1,
+      "selected": true,
+      "status": "planned_schedule_complete_before_compute_cap",
+      "update": 40,
+      "validation": {
+        "seed": 1001,
+        "systems": 16,
+        "contrasts": 16384,
+        "paired_draws_sha256": "59399c698a627fbd992b34bcd4bc3a8df095d51d27e0e1b454b52a468e70654e",
+        "seconds": 0.04657096415758133,
+        "forward_particle_stages": 7864800,
+        "device": "cpu",
+        "mode": "native_stochastic_policy",
+        "secondary_parameter_inference": false
+      },
+      "compute_checkpoint": {
+        "identifier": "40",
+        "charged_seconds": 16.915706157218665,
+        "eligible": true
+      }
+    }
+  ],
+  "validation_seconds": 0.09552571922540665,
+  "optimization_seconds": 16.081860030069947,
+  "stopping_rule": {
+    "minimum_episodes": 4000,
+    "minimum_checkpoints": 8,
+    "validation_every_episodes": 4000,
+    "patience": 6,
+    "minimum_improvement": 0.01,
+    "noise_multiplier": 1.96,
+    "maximum_episodes": 1000000000,
+    "maximum_training_seconds": 1800
+  },
+  "selected_checkpoint": {
+    "checkpoint": 2,
+    "episodes": 4000,
+    "training_seconds": 16.915246717166156,
+    "eig": 4.951808764047817,
+    "mc_standard_error": 0.6067524842714856,
+    "paired_improvement_from_anchor": 0.0877256763027906,
+    "improvement_threshold": 0.27396045250517215,
+    "patience_used": 1,
+    "selected": true,
+    "status": "planned_schedule_complete_before_compute_cap",
+    "update": 40,
+    "validation": {
+      "seed": 1001,
+      "systems": 16,
+      "contrasts": 16384,
+      "paired_draws_sha256": "59399c698a627fbd992b34bcd4bc3a8df095d51d27e0e1b454b52a468e70654e",
+      "seconds": 0.04657096415758133,
+      "forward_particle_stages": 7864800,
+      "device": "cpu",
+      "mode": "native_stochastic_policy",
+      "secondary_parameter_inference": false
+    },
+    "compute_checkpoint": {
+      "identifier": "40",
+      "charged_seconds": 16.915706157218665,
+      "eligible": true
+    }
+  },
+  "validation_seed": 1001,
+  "resource_ledger": {
+    "schema": 2,
+    "scope": "current training phase; base cost separately attributed",
+    "counts": {
+      "fresh_complete_episodes": 4000,
+      "true_parameter_stage_propagations": 120000,
+      "contrast_parameter_stage_propagations": 12000000000,
+      "scalar_conditional_log_density_evaluations": 12000120000
+    },
+    "optimizer_updates": {
+      "policy": 448,
+      "critic": 896,
+      "posterior": null,
+      "score": null,
+      "temperature": 448
+    },
+    "replay_transition_samples": 1835008,
+    "offline_seconds": 16.16956053674221,
+    "validation_seconds": 0.09552571922540665,
+    "base_training_seconds": null,
+    "ode_rhs_evaluations": null,
+    "solver_backward_work": null,
+    "gpu_occupancy_seconds": null,
+    "nle_equivalent_proxy": null,
+    "basis": "derived from native executed counters, not direct hardware measurement",
+    "limitations": [
+      "score-target and backward recomputation not counted",
+      "Unknown fields are not zero; walltime is not GPU occupancy"
+    ],
+    "likelihood_gradient_work": {
+      "scalar_stage_terms": null,
+      "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+    },
+    "complete_method_counts": {
+      "fresh_complete_episodes": 4000,
+      "true_parameter_stage_propagations": 120000,
+      "contrast_parameter_stage_propagations": 12000000000,
+      "scalar_conditional_log_density_evaluations": 12000120000
+    },
+    "cpu_process_seconds": 19.803554000000002,
+    "waited_child_cpu_seconds_including_validation": 0.014388999999999999,
+    "compute_budget": {
+      "version": 1,
+      "start": 2251598.735996009,
+      "budget_seconds": 120.0,
+      "credit_seconds": 0.0,
+      "hardware": "NVIDIA GeForce RTX 4090",
+      "excluded": [
+        [
+          2251614.283418095,
+          2251614.332603741,
+          "validation"
+        ],
+        [
+          2251615.700483599,
+          2251615.747117095,
+          "validation"
+        ]
+      ],
+      "counts": {
+        "fresh_complete_episodes": 4000,
+        "true_parameter_stage_propagations": 120000,
+        "contrast_parameter_stage_propagations": 12000000000,
+        "scalar_conditional_log_density_evaluations": 12000120000,
+        "optimizer_updates": 1792
+      },
+      "components": {
+        "current_training": {
+          "fresh_complete_episodes": 4000,
+          "true_parameter_stage_propagations": 120000,
+          "contrast_parameter_stage_propagations": 12000000000,
+          "scalar_conditional_log_density_evaluations": 12000120000
+        },
+        "policy": {
+          "optimizer_updates": 448
+        },
+        "critic": {
+          "optimizer_updates": 896
+        },
+        "temperature": {
+          "optimizer_updates": 448
+        }
+      },
+      "checkpoints": [
+        {
+          "identifier": "39",
+          "charged_seconds": 15.547890834510326,
+          "eligible": true
+        },
+        {
+          "identifier": "40",
+          "charged_seconds": 16.915706157218665,
+          "eligible": true
+        }
+      ],
+      "stopped_at": 2251615.758614801,
+      "charged_seconds": 16.92679965030402,
+      "fraction_of_allocated_budget": 0.1410566637525335,
+      "unused_seconds": 103.07320034969598,
+      "unit": "exclusive-device allocated training wall seconds",
+      "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+      "not_equal_to_FLOPs": true,
+      "overrun_seconds": 0.0
+    }
+  },
+  "baseline_fidelity": "pinned_native_source_networks_and_update_kernels",
+  "native_elapsed_seconds": 16.16956053674221,
+  "total_offline_seconds": 16.177385749295354,
+  "journal_protocol": "validation_convergence_v1",
+  "training_cap_is_not_target": true,
+  "comparison_budget_unit": "exclusive_device_training_seconds",
+  "primary_episode_safety_cap": 1000000000,
+  "reference_schedule_episodes": 4000,
+  "stop_reason": "reference_schedule_completion",
+  "effective_training_settings": {
+    "strategy_routing_mode": "learned_switch",
+    "strategy_initial_reroute_probability": 0.99,
+    "strategy_diagnostics_every": 1,
+    "moe_history_encoder_revision": 1,
+    "first_design_revision": 2,
+    "training_bound": 4,
+    "variational_policy_lr": 0.0002,
+    "variational_density_lr": 0.001,
+    "variational_density_hidden": 128,
+    "variational_mixtures": 16,
+    "variational_density_updates": 2,
+    "variational_warmup": 200,
+    "smc_moves": 8,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "spce_curriculum": 1,
+    "updates": 10000,
+    "batch_size": 64,
+    "learning_rate": 5e-05,
+    "hidden": 64,
+    "contrasts": 1024,
+    "validation_contrasts": 16384,
+    "validation_systems": 128,
+    "validate_every": 100,
+    "eval_systems": 16,
+    "eval_contrasts": 16384,
+    "posterior_particles": 8192,
+    "posterior_steps": 64,
+    "posterior_chains": 4,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 128,
+    "search_candidates": 16,
+    "search_rounds": 3,
+    "fantasies": 32,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 3,
+    "vsoed_critic_updates": 5,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 16,
+    "evaluation_contrast_chunk": 4096,
+    "evaluation_population_systems": 16,
+    "threads": 2,
+    "rl_batch_size": 100,
+    "rl_replay_batch": 4096,
+    "rl_replay_capacity": 1000000,
+    "rl_min_buffer": 100000,
+    "rl_gradient_steps": 2,
+    "rl_log_every": 10,
+    "moe_density_updates": 4,
+    "moe_gradient_clip_mode": "component",
+    "moe_router_finish_fraction": 0.95,
+    "moe_router_warmup_fraction": 0.3,
+    "moe_specialist_budget_fraction": 0.25,
+    "primary_episode_budget": 1,
+    "scorebed_batch_size": 64,
+    "spce_adam_beta1": 0.8,
+    "spce_adam_beta2": 0.998,
+    "spce_lr_decay": 0.98,
+    "spce_lr_schedule_every": 1000,
+    "reference_schedule_episodes": 4000,
+    "rl_native_contrasts": 100000,
+    "rl_native_replay_capacity": 1000000,
+    "rl_original_reference": true
+  },
+  "resume_scope": "Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed",
+  "historical_runtime_overlap": "New runs are serialized; historical timings require separate provenance",
+  "checkpoint_sha256": "845b9f08734000f31f48e6dc3e873133d6678fe77349e61869d62bff96604545"
+}
