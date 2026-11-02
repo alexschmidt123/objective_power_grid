@@ -1,0 +1,64 @@
+{
+  "method": "MoE-sBOED-v5",
+  "status": "DEVELOPMENT_UNVALIDATED",
+  "configuration": {
+    "method": "MoE-sBOED-v5",
+    "status": "DEVELOPMENT_UNVALIDATED",
+    "reference_bundle": "scratch_runs/10312026_054200_moe_sboed_v5_ubuntu/labpc_v4_reference",
+    "v5": {
+      "mode": "expert_credit",
+      "conditional": {
+        "enabled": false,
+        "alpha": 0.0,
+        "proposed_alpha": 0.1,
+        "sampler": "LOCATION_POSTERIOR_UNVALIDATED_DISABLED",
+        "stage_sampling_fraction": 1.0,
+        "work_cap": 32
+      },
+      "expert_credit": {
+        "enabled": false,
+        "refinement": 0.0,
+        "proposed_refinement": 0.1,
+        "replicates": 4,
+        "router_gradient_fraction": 0.05,
+        "exposure_enabled": false
+      },
+      "combined_gate": "BLOCKED_UNTIL_BOTH_SINGLE_VARIANTS_PASS"
+    },
+    "smoke": {
+      "trajectories": 4,
+      "contrasts": 32,
+      "optimizer_updates": 0,
+      "device": "cpu",
+      "max_trajectories_per_mode": 16,
+      "max_optimizer_updates_per_mode": 3
+    },
+    "training_reference": {
+      "horizon": 30,
+      "batch": 2000,
+      "contrasts": 2000,
+      "native_max_updates": 50000,
+      "charged_seconds": 14400,
+      "checkpoint_selection": "latest_valid_budget_eligible",
+      "formal_training_authorized": false
+    },
+    "reserved_evaluation_seed": 8831001
+  },
+  "reference_checkpoint": "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/10312026_054200_moe_sboed_v5_ubuntu/labpc_v4_reference/formal/seed101/update29464_final_1793336373.pt",
+  "checkpoint_sha256": "d4b8c7fe3f80d650832e556fbbd112b4901b34d01b8fed96ec737db4ff22d5de",
+  "reference_parity_status": "PASS",
+  "source_sha256": {
+    "src/research/moe_v5_credit.py": "2ee8458061ee0ae74230f23f1ea6b9b0e14d6c921af2c4d5c45fdc50f5afc18c",
+    "src/research/moe_v5_diagnostics.py": "74bec15e962d2de020ea2cf7d86b79ac89e9ba25eeef44306e8cbd5208173c2d",
+    "src/research/moe_v5_experiment.py": "30b5f6b206c7e3fd1973531f4f1a8a0ccaa07fd1c691656f1f78a20a76258cef",
+    "src/research/moe_v5_conditional.py": "95542ab516aa2d4748ca66560b5b3420a04c3ada50bf57a6d7acc74364d25f86"
+  },
+  "seed": 101,
+  "wall_seconds": 0.13159702508710325,
+  "charged_gpu_training_seconds": 0,
+  "optimizer_updates": 0,
+  "benchmark": "location_finding_T30",
+  "conditional_training_enabled": false,
+  "credit_training_enabled": false,
+  "checkpoint_selection": "none: diagnostics do not select or alter a checkpoint"
+}

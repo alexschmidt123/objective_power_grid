@@ -1,0 +1,34 @@
+MoE-sBOED-v2 is running; final EIG and promotion pending.
+
+{
+  "status": "RUNNING_RESIDUAL_PHASE",
+  "model_identity": "MoE-sBOED-v2",
+  "controller_pid": 601246,
+  "source_base_commit": "75d2bf2aad54f77965fb79c9d04bee7d9e12dafe",
+  "source_snapshot_sha256": "25eae77722aefc2c541bf37591108f78f5daefeaeb14cec3b408a14e855c9650",
+  "unit_tests_passed": 45,
+  "base_primary_episodes": 500000,
+  "residual_updates": 7271,
+  "residual_primary_episodes": 465344,
+  "training_contrasts": 65536,
+  "actual_routing": "straight_through",
+  "all_current_component_gradients_finite": true,
+  "current_expert_gradient_exposure": [
+    true,
+    true,
+    true,
+    true
+  ],
+  "charged_seconds_including_base_and_development": 4101.406996589736,
+  "allowance_seconds": 14400,
+  "remaining_seconds": 10298.593003410264,
+  "base_and_development_credit_seconds": 2440.498843618727,
+  "LabPC_scientific_source_modified": false,
+  "final_EIG": null,
+  "LabPC_integration_path": null,
+  "GitHub_improvement_commit": null,
+  "promotion": "WAITING_FOR_FINAL_EIG_AND_REVIEW",
+  "hardware_comparison_limit": "RTX5080 versus RTX4090 reference; no equal-GPU-hour efficiency claim"
+}
+
+Confirmed pre-change findings: training-bound compression at L1024, ignored routing-mode alias causing actual relaxed reference training, expert starvation in saved late ResMoE logs. No unique cause of final EIG established. v2 retains the residual architecture, frozen base and small residual initialization, corrects actual ST routing and uses exact checkpointed L65536 training. No additional balancing loss or architecture sweep. Final comparison once on canonical2000/L1M seed1001; promotion requires positive evidence and separate CPU-only LabPC integration review.

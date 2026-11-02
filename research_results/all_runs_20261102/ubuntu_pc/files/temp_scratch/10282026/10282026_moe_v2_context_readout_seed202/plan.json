@@ -1,0 +1,64 @@
+{
+  "candidate": "MoE-sBOED-v2 residual-context design readout",
+  "source_base": "4b2bdfceca488f3b42be9d84c015dc8f9cf87a65",
+  "audit_from": "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/10272026/10272026_moe_v2_recovered_audit",
+  "training_seed": 202,
+  "arms": [
+    "v1",
+    "v2",
+    "dense",
+    "shared"
+  ],
+  "maximum_matched_updates": 8192,
+  "maximum_charged_training_seconds_per_arm": 7200,
+  "save_reserve_seconds": 15,
+  "batch_size": 2000,
+  "training_contrasts": 2000,
+  "horizon": 30,
+  "optimizer": {
+    "name": "Adam",
+    "lr": 5e-05,
+    "betas": [
+      0.8,
+      0.998
+    ],
+    "decay": 0.98,
+    "decay_after_updates": [
+      1,
+      1001,
+      2001,
+      3001,
+      4001,
+      5001,
+      6001,
+      7001,
+      8001
+    ],
+    "clip": 5
+  },
+  "balance_factor": 0.001,
+  "curve_updates": [
+    128,
+    512,
+    2048,
+    4096,
+    8192
+  ],
+  "curve_seed": 97402751,
+  "curve_N": 128,
+  "curve_L": 65536,
+  "final_development_seed": 97402752,
+  "final_replication_seed": 97402753,
+  "final_N": 512,
+  "final_L": 262144,
+  "context_fit_seed": 97402754,
+  "substitution_N": 256,
+  "substitution_L": 65536,
+  "maximum_diagnostic_seconds": 1800,
+  "checkpoint_selection": "latest common completed update, never best EIG",
+  "harmful_stop": "At or beyond4096matched updates, stop only if candidate-v1 paired upper95CI<-.1",
+  "official_seed1001_used": false,
+  "LabPC_source_modified": false,
+  "no_full_official_training": true,
+  "campaign": "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/10282026/10282026_moe_v2_context_readout_seed202"
+}

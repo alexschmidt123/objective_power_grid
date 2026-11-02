@@ -1,0 +1,48 @@
+{
+  "state": {
+    "state": "TRAINING",
+    "active_method": "dense",
+    "pid": 1209684,
+    "matched_updates": 1100,
+    "charged_training_seconds": {
+      "v1": 703.0842392960622,
+      "v2": 749.916527528927,
+      "dense": 487.44871937998687,
+      "shared": 521.8115341271332
+    },
+    "diagnostic_GPU_seconds": 5.824759015929885,
+    "checkpoint_selection": "latest common completed update, never best EIG"
+  },
+  "paired_development_milestones": [
+    {
+      "update": 128,
+      "candidate_EIG": 3.683496326986497,
+      "v1_EIG": 3.5201782413968767,
+      "difference": 0.16331808558962027,
+      "MC_SE": 0.12366032729488503,
+      "CI95": [
+        -0.07905615590835438,
+        0.40569232708759495
+      ]
+    },
+    {
+      "update": 512,
+      "candidate_EIG": 5.931144369202615,
+      "v1_EIG": 7.782961645919495,
+      "difference": -1.8518172767168815,
+      "MC_SE": 0.19472411152024247,
+      "CI95": [
+        -2.233476535296557,
+        -1.4701580181372063
+      ]
+    }
+  ],
+  "source_hash_mismatches": [],
+  "predeclared_harm_stop_code": [
+    [
+      124,
+      "   if update>=4096 and summary(values['v2']-values['v1'])['CI95'][1]<-.1:stop='PREDECLARED_HARMFUL_REGRESSION_STOP';break"
+    ]
+  ],
+  "interpretation": "Clear early candidate regression at512updates; no convergence or completed-pilot failure claim. Continue unchanged to predeclared adequate-training assessment at4096unless numerical/correctness failure or charged budget stops earlier. 2048milestone remains an observation; source code implements harmful stop only at or beyond4096when paired upper95CI<-.1. Preserve candidate/control evidence; no retuning or new variant."
+}

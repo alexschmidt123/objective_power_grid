@@ -1,0 +1,62 @@
+{
+  "training": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+  "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+  "generated_training_trajectories": 34,
+  "training_forward_trajectories": 34,
+  "contrast_training_trajectories": 0,
+  "training_trajectory_budget": 34,
+  "training_budget_unit": "primary_episodes",
+  "initialization_trajectories": 18,
+  "standardisation_trajectories": 4,
+  "score_training_trajectories": 8,
+  "policy_training_trajectories": 8,
+  "score_batch": 4,
+  "actual_score_updates": 2,
+  "actual_policy_updates": 2,
+  "training_seconds": 25.85327561700251,
+  "history": [
+    {
+      "phase": "score",
+      "step": 2,
+      "episodes": 8,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 123.09759400803122,
+        "loss_total": 30.942498680658638,
+        "loss_unweighted_total": 3.055390936625716,
+        "loss_x_component": 2.0937665316590635,
+        "loss_y_component": 28.848732148999574,
+        "loss_y_unweighted": 0.9616244049666525,
+        "param_norm": 129.56879285703522,
+        "update_norm": 0.25861183298598045
+      }
+    }
+  ],
+  "checkpoint_selection": "final",
+  "architecture": "official_4layer_256dim_8head_RFF_conservative_transformer",
+  "policy_architecture": "official_DADNet_256_16_sum_encoder",
+  "potential_hidden_dim": 128,
+  "adaptations": "1million total primary episodes including normalization and initialization; one fresh policy; 70percent remaining budget score pretraining; smaller minibatches under capped budget; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions",
+  "design_bounds": [
+    0.0,
+    100.0
+  ],
+  "bounded_mapping": "chronological feasible-time sigmoid with minimum spacing",
+  "sir_configuration": {
+    "population": 500.0,
+    "i0": 2.0,
+    "t_end": 100.0,
+    "min_spacing": 0.1,
+    "integration_steps_per_stage": 512,
+    "beta_mean": 0.5,
+    "gamma_mean": 0.10000000000000002,
+    "log_std": 0.5,
+    "sigma": 1.0
+  },
+  "runtime": {
+    "jax": "0.7.2",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  }
+}

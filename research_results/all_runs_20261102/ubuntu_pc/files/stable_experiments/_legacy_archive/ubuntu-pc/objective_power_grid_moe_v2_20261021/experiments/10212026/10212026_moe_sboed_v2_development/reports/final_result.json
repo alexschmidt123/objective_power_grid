@@ -1,0 +1,308 @@
+{
+  "model": "MoE-sBOED-v2",
+  "EIG": 11.040232101951391,
+  "MC_SE": 0.04321933853008942,
+  "charged_seconds": 13880.961698094732,
+  "actual_updates": 50000,
+  "primary_training_episodes_including_base": 3700000,
+  "resource_ledger": {
+    "schema": 2,
+    "scope": "current training phase; base cost separately attributed",
+    "counts": {
+      "fresh_complete_episodes": 3200000,
+      "true_parameter_stage_propagations": 96000000,
+      "contrast_parameter_stage_propagations": 6291456000000,
+      "scalar_conditional_log_density_evaluations": 6291552000000,
+      "actual_model_stage_evaluations_including_backward_recompute": 12583008000000
+    },
+    "optimizer_updates": {
+      "policy": 50000,
+      "critic": null,
+      "posterior": null,
+      "score": null,
+      "temperature": null
+    },
+    "replay_transition_samples": null,
+    "offline_seconds": 11439.750965494022,
+    "validation_seconds": 9.346097620902583,
+    "base_training_seconds": 358.65728018205846,
+    "ode_rhs_evaluations": null,
+    "solver_backward_work": null,
+    "gpu_occupancy_seconds": null,
+    "nle_equivalent_proxy": null,
+    "basis": "derived from native executed counters, not direct hardware measurement",
+    "limitations": [
+      "score-target and backward recomputation not counted",
+      "Unknown fields are not zero; walltime is not GPU occupancy"
+    ],
+    "likelihood_gradient_work": {
+      "scalar_stage_terms": null,
+      "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+    },
+    "base_pretraining_counts": {
+      "fresh_complete_episodes": 500000,
+      "true_parameter_stage_propagations": 15000000,
+      "contrast_parameter_stage_propagations": 15360000000,
+      "scalar_conditional_log_density_evaluations": 15375000000,
+      "actual_model_stage_evaluations_including_backward_recompute": 15375000000
+    },
+    "base_pretraining_optimizer_updates": {
+      "policy": 7813,
+      "critic": null,
+      "posterior": null,
+      "score": null,
+      "temperature": null
+    },
+    "complete_method_counts": {
+      "contrast_parameter_stage_propagations": 6306816000000,
+      "actual_model_stage_evaluations_including_backward_recompute": 12598383000000,
+      "scalar_conditional_log_density_evaluations": 6306927000000,
+      "true_parameter_stage_propagations": 111000000,
+      "fresh_complete_episodes": 3700000
+    },
+    "cpu_process_seconds": 11432.525871,
+    "waited_child_cpu_seconds_including_validation": 0.013531999999999999,
+    "compute_budget": {
+      "version": 1,
+      "start": 490003.584008285,
+      "budget_seconds": 14400.0,
+      "credit_seconds": 2440.498843618727,
+      "hardware": "NVIDIA GeForce RTX 5080",
+      "charge_validation": true,
+      "charged_diagnostics": [
+        [
+          490005.325423286,
+          490005.976852268,
+          "validation"
+        ],
+        [
+          490906.140932424,
+          490906.797679788,
+          "validation"
+        ],
+        [
+          491807.040028072,
+          491807.71030346,
+          "validation"
+        ],
+        [
+          492707.732622006,
+          492708.397188383,
+          "validation"
+        ],
+        [
+          493608.617863113,
+          493609.276577173,
+          "validation"
+        ],
+        [
+          494509.403467341,
+          494510.06667299,
+          "validation"
+        ],
+        [
+          495410.192967722,
+          495410.860856586,
+          "validation"
+        ],
+        [
+          496310.876399269,
+          496311.54447786,
+          "validation"
+        ],
+        [
+          497211.704481599,
+          497212.366925024,
+          "validation"
+        ],
+        [
+          498112.430428643,
+          498113.100508728,
+          "validation"
+        ],
+        [
+          499013.260294271,
+          499013.926616851,
+          "validation"
+        ],
+        [
+          499914.091951152,
+          499914.765859166,
+          "validation"
+        ],
+        [
+          500814.877921002,
+          500815.594364602,
+          "validation"
+        ],
+        [
+          501443.363792558,
+          501444.021300938,
+          "validation"
+        ]
+      ],
+      "excluded": [],
+      "counts": {
+        "optimizer_updates": 57813,
+        "fresh_complete_episodes": 3700000,
+        "true_parameter_stage_propagations": 111000000,
+        "contrast_parameter_stage_propagations": 6306816000000,
+        "scalar_conditional_log_density_evaluations": 6306927000000,
+        "actual_model_stage_evaluations_including_backward_recompute": 12598383000000
+      },
+      "components": {
+        "base_policy": {
+          "optimizer_updates": 7813
+        },
+        "base_pretraining": {
+          "fresh_complete_episodes": 500000,
+          "true_parameter_stage_propagations": 15000000,
+          "contrast_parameter_stage_propagations": 15360000000,
+          "scalar_conditional_log_density_evaluations": 15375000000,
+          "actual_model_stage_evaluations_including_backward_recompute": 15375000000
+        },
+        "current_training": {
+          "fresh_complete_episodes": 3200000,
+          "true_parameter_stage_propagations": 96000000,
+          "contrast_parameter_stage_propagations": 6291456000000,
+          "scalar_conditional_log_density_evaluations": 6291552000000,
+          "actual_model_stage_evaluations_including_backward_recompute": 12583008000000
+        },
+        "policy": {
+          "optimizer_updates": 50000
+        }
+      },
+      "checkpoints": [
+        {
+          "identifier": "1",
+          "charged_seconds": 2442.901467907708,
+          "eligible": true
+        },
+        {
+          "identifier": "3954",
+          "charged_seconds": 3343.7225719977287,
+          "eligible": true
+        },
+        {
+          "identifier": "7895",
+          "charged_seconds": 4244.635316399683,
+          "eligible": true
+        },
+        {
+          "identifier": "11834",
+          "charged_seconds": 5145.321878572693,
+          "eligible": true
+        },
+        {
+          "identifier": "15774",
+          "charged_seconds": 6046.201311166689,
+          "eligible": true
+        },
+        {
+          "identifier": "19713",
+          "charged_seconds": 6946.991465280706,
+          "eligible": true
+        },
+        {
+          "identifier": "23654",
+          "charged_seconds": 7847.785533734714,
+          "eligible": true
+        },
+        {
+          "identifier": "27593",
+          "charged_seconds": 8748.4693467787,
+          "eligible": true
+        },
+        {
+          "identifier": "31531",
+          "charged_seconds": 9649.291738255706,
+          "eligible": true
+        },
+        {
+          "identifier": "35468",
+          "charged_seconds": 10550.030823353736,
+          "eligible": true
+        },
+        {
+          "identifier": "39401",
+          "charged_seconds": 11450.851461771701,
+          "eligible": true
+        },
+        {
+          "identifier": "43334",
+          "charged_seconds": 12351.690665739705,
+          "eligible": true
+        },
+        {
+          "identifier": "47261",
+          "charged_seconds": 13252.519185159705,
+          "eligible": true
+        },
+        {
+          "identifier": "50000",
+          "charged_seconds": 13880.946116294712,
+          "eligible": true
+        }
+      ],
+      "stopped_at": 501444.046862761,
+      "charged_seconds": 13880.961698094732,
+      "fraction_of_allocated_budget": 0.9639556734788008,
+      "unused_seconds": 519.0383019052679,
+      "unit": "exclusive-device allocated training wall seconds",
+      "scope": "includes setup, compilation, initialization, all training, checkpoint overhead and validation; independent final evaluation reported separately",
+      "not_equal_to_FLOPs": true,
+      "overrun_seconds": 0.0
+    }
+  },
+  "independent_final_evaluation_seconds": 89.72026649402687,
+  "paired_intervals": "Bonferroni simultaneous95% over two frozen reference comparisons",
+  "training_contrasts": 65536,
+  "actual_routing_mode": "straight_through",
+  "last_expert_frequency": [
+    0.015625,
+    0.05495689655172414,
+    0.06573275862068965,
+    0.8636853448275862
+  ],
+  "gradient_exposure_fraction_of_steps": {
+    "router": 0.99996,
+    "expert_0": 0.90988,
+    "expert_1": 0.8882,
+    "expert_2": 0.90732,
+    "expert_3": 1.0
+  },
+  "last_router_saturation": 0.9973060344827586,
+  "last_residual_logit_RMS": 0.16243383307555506,
+  "comparison": [
+    {
+      "model": "MoE-sBOED-v2",
+      "EIG": 11.040232101951391,
+      "MC_SE": 0.04321933853008942,
+      "v2_minus_reference": 0.0,
+      "paired_difference_MC_SE": 0.0,
+      "paired_lower95": 0.0
+    },
+    {
+      "model": "MoE-sBOED",
+      "EIG": 10.49120085241373,
+      "MC_SE": 0.04581957528468409,
+      "v2_minus_reference": 0.5490312495376625,
+      "paired_difference_MC_SE": 0.05725535817451722,
+      "paired_lower95": 0.4206989335553014
+    },
+    {
+      "model": "ResMoE-sBOED",
+      "EIG": 10.703661917702098,
+      "MC_SE": 0.04302833051531708,
+      "v2_minus_reference": 0.33657018424929164,
+      "paired_difference_MC_SE": 0.046498302437187326,
+      "paired_lower95": 0.23234876233758023
+    }
+  ],
+  "single_seed_EIG_improvement_supported_by_paired_MC": true,
+  "hardware": "RTX5080 worker; references RTX4090, not equal hardware-normalized computation",
+  "source_base_commit": "75d2bf2",
+  "source_snapshot": "source_manifest.json includes uncommitted worker changes",
+  "promotion": "PENDING_LABPC_REVIEW",
+  "postprocessing_seconds": 6.035476989985909
+}

@@ -1,0 +1,24 @@
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/11012026_174441_moe_sboed_v6_v1_reference_seed101/source/run_v6.py", line 212, in <module>
+    elif mode=='gate':gate()
+  File "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/11012026_174441_moe_sboed_v6_v1_reference_seed101/source/run_v6.py", line 105, in gate
+    opt.zero_grad();rr=rollout(make_benchmark(raw),p,30,2000,91821130+k*104729,2000);info=rr['info'][:,-1].mean();loss=-info+p.balance_loss();loss.backward();torch.nn.utils.clip_grad_norm_(p.parameters(),5,error_if_nonfinite=True);opt.step();torch.cuda.synchronize();times.append(time.monotonic()-u)
+  File "/home/qiqi/Documents/objective_power_grid_temp/src/research/engine.py", line 56, in rollout
+    latent = (policy.sample(f,rng=decision_rng)[0]*policy.bound).double() if policy.kind=='rl_sboed' else policy(f,stage)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/qiqi/Documents/objective_power_grid_temp/src/research/deepseek_sboed.py", line 42, in forward
+    z=self.encode_context(features,stage);u=z
+  File "/home/qiqi/Documents/objective_power_grid_temp/src/research/deepseek_sboed.py", line 38, in encode_context
+    return self.input_norm(raw)+(stage/self.horizon)*self.time_vector
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/normalization.py", line 229, in forward
+    return F.layer_norm(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/functional.py", line 2935, in layer_norm
+    return torch.layer_norm(
+RuntimeError: Expected all tensors to be on the same device, but got weight is on cuda:0, different from other tensors on cpu (when checking argument in method wrapper_CUDA__native_layer_norm)

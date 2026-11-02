@@ -1,0 +1,14 @@
+|Version / variant|UbuntuPC completed runs|LabPC completed runs|
+|---|---|---|
+|V1|contextual_gradient,seed102: **20,575updates**, **41,150,000examples**, 3:59:57, **0.6997s/update**|original_shared7_top3,seed101: **29,198updates**, **58,396,000examples**, 3:59:58, **0.4931s/update**<br>contextual_gradient,seed101: **26,335updates**, **52,670,000examples**, 3:59:57, **0.5467s/update**|
+|V4|**NONE VERIFIED**|formal_utility_routing_shared7_top3,seed101: **29,464updates**, **58,928,000examples**, 3:59:30, **0.4877s/update**<br>formal_utility_routing_shared7_top3,seed102: **29,587updates**, **59,174,000examples**, 3:59:30, **0.4857s/update**|
+|V5-A auxiliary ON|V5-A auxiliary ON,seed101: **7,714updates**, **15,428,000examples**, 3:59:01, **1.8591s/update**|**NONE VERIFIED**|
+
+
+# Workload and throughput interpretation
+V4 seed101: 29,464updates,58,928,000primary examples,14370.144593chargedseconds,0.487719s/update.
+V5-A ON seed101: 7,714updates,15,428,000primary examples,14341.362073chargedseconds,1.859134s/update.
+V5/V4 update and primaryexample ratio=0.261811; chargedseconds/update ratio=3.811899. These are workload-specific descriptive ratios, NOT a measured GPU hardware speedup. V5 adds one-case conditional SMC/likelihood/gradient processing and microbatch128, truth-only replay; V4 fullbatch and utility schedule differ. Same B2000/L2000 does not match all computation.
+
+Reports: /home/qiqi/Documents/objective_power_grid_temp/scratch_runs/10312026_221500_v1_v4_v5_two_pc_audit
+rows 8 checks 8

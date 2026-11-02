@@ -1,0 +1,19 @@
+# Hardware-normalized provenance and fairness correction
+The user states most prior results were generated on UbuntuPC. This report does NOT classify all old results as LabPC runs. Staged copies indicate artifact storage/transfer origin only. Host labels below require an explicit runtime site record or direct observed launch provenance. No LabPC access was performed.
+
+|Run|Training host|GPU|Updates|Primary examples|Charged GPU lease seconds|Updates/s|Examples/s|
+|---|---|---|---:|---:|---:|---:|---:|
+|V4_formal_seed101|UNVERIFIED|UNVERIFIED|29464|58928000|14370.144592896919|2.050362110800464|4100.724221600928|
+|contextual_V1_seed101|UNVERIFIED|UNVERIFIED|UNAVAILABLE|UNAVAILABLE|UNAVAILABLE|UNAVAILABLE|UNAVAILABLE|
+|V4_formal_seed102|UNVERIFIED|UNVERIFIED|29587|59174000|14370.46342025767|2.058875843787471|4117.7516875749425|
+|contextual_V1_seed102|UNVERIFIED|UNVERIFIED|UNAVAILABLE|UNAVAILABLE|UNAVAILABLE|UNAVAILABLE|UNAVAILABLE|
+|native_vsOED_seed101_reference|labpc|NVIDIA GeForce RTX 4090|UNAVAILABLE|UNAVAILABLE|UNAVAILABLE|UNAVAILABLE|UNAVAILABLE|
+|V5A_seed101_completed|ubuntu-pc|NVIDIA GeForce RTX 5080|7714|15428000|14341.362072899006|0.5378847532604459|1075.769506520892|
+
+V4 actual host and GPU are HOST UNVERIFIED in the staged bundle: status/config files have counts/timing but no actual-host/GPU record; source code/intended target do not fill that gap. V1 original run configs/runtime records are absent; contextual checkpoint references alone provide hashes, not host/exposure. Native vsOED stagedrun_config has hardware.execution_site=labpc and computer_name=ecen-80r5x04.engr.tamu.edu plusGPU RTX4090: this SPECIFIC reference is recorded as LabPC, irrespective of where most other historical results originated. Its actual training iterations, charged GPU clock, exact checkpoint bytes and original source manifest are not staged; configured10001cycles/1000fresh trajectories do not prove attained values. Its summary reports6805.6383s training_wall, which is not silently substituted for charged leased GPU time. Its top-level/nested selection rules conflict and remain unresolved. V5 observed Ubuntu launch/worker and original compute_clockGPU5080 establish its host/hardware; saved artifacts alone lack a standalone hostname.
+
+Raw nominal settings embedded in benchmark.paper_protocol still mention a1Mepisode pilot although effectiveV5/V4 run budget is50000updates/14400own-host seconds. Use the effective top-levelrun config, actual counts and clock, not stale benchmark documentation.
+
+Cross-run: V5 primary15.428M vs V4 seed10158.928M is only26.18% of update/example exposure, not equal-training/equal-compute. The posterior, likelihood-bank work, backend/microbatch implementation and host uncertainty prevent equal-compute causal claims. No assertion that either GPU is intrinsically faster. Measured run-specific throughput describes these exact recorded workloads only. All-computation FLOPs and GPU-kernel times are UNAVAILABLE. Simulator_particle_stages is a FORWARD-particle-stage counter, not a count of Python simulator invocations; likelihood_evaluations are UNAVAILABLE unless separately instrumented. Primary lower bounds exclude extra route/replay/posterior work. Native vsOED counts cannot be inferred from proposed config alone.
+
+The new ON/OFF pilot holds Ubuntu hardware, initial model+Adam state, primary examples, batch, maincontrasts and32updates fixed. ON performs additional inference/likelihood/objective work, so it is EPISODE-MATCHED and UPDATE-MATCHED, NOT COMPUTE-MATCHED. The32update/600s bound is solely safety. Historical rows and diagnostic rows are separate; pilot arm subrows must not be added again to total. CPU test times are separate; incidental CUDA context duration in first failed test harness is UNAVAILABLE, no benchmark training occurred there.

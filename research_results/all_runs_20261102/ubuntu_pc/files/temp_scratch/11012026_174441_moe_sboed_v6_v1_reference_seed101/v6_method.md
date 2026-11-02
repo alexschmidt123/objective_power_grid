@@ -1,0 +1,3 @@
+# V6 routing exploration
+
+Only difference: training-time seeded Gumbel perturbations of original router logits choose top3. Gather original softmax weights at those indices; shared expert and fusion/head unchanged. Perturbations anneal to zero and eval always uses deterministic original routing. No extra parameters, information model, teacher, posterior, actor-critic, online search, or conditional-information loss. Existing V1 load balance.001 retained identically. Hard membership is not differentiated (native top-k approximation); gradients through selected expert features and full-softmax gathered gate weights remain. Exposure-control penalty OFF. Code audit found no stochastic route exploration in original V1.

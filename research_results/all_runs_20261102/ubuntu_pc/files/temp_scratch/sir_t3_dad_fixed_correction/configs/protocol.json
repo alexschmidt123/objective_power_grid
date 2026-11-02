@@ -1,0 +1,100 @@
+{
+  "version": "sir_t3_dad_fixed_correction_6h_v1",
+  "parent": "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/sir_ode_t3_baselines/sir_ode_t3_corrected_baselines_seed101_20261028T155016Z",
+  "original_extension": "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/sir_ode_t3_baselines/sir_ode_t3_corrected_baselines_seed101_20261028T155016Z/full_testing_4h_v2",
+  "benchmark": {
+    "system": {
+      "name": "sir_ode"
+    },
+    "N": 1,
+    "experiment": {
+      "experiment_type": "eig_based",
+      "step_number": 3,
+      "methods": [
+        "random",
+        "fixed",
+        "dad",
+        "rl_sboed",
+        "vsoed",
+        "scorebed"
+      ]
+    },
+    "observation": {
+      "noise_sigma": 1.0,
+      "sampling": "infected_count_at_continuous_time"
+    },
+    "sir_ode": {
+      "population": 500.0,
+      "i0": 2.0,
+      "t_end": 100.0,
+      "beta_mean": 0.5,
+      "gamma_mean": 0.1,
+      "log_std": 0.5,
+      "min_spacing": 0.1,
+      "integration_steps_per_stage": 512,
+      "execution_backend": "fused_rk4"
+    }
+  },
+  "seed": 101,
+  "aggregate_additional_training_seconds": 21600,
+  "method_caps": {
+    "fixed": 7200,
+    "dad": 14400
+  },
+  "order": [
+    "fixed_audit",
+    "dad_profile",
+    "fixed",
+    "dad",
+    "final_evaluation"
+  ],
+  "fixed": {
+    "screen_candidates": 64,
+    "screen_outer": 128,
+    "screen_contrasts": 16384,
+    "refined_starts": 8,
+    "refinement_batch": 512,
+    "refinement_contrasts": 16384,
+    "refinement_lr": 0.005,
+    "maximum_rounds": 2000,
+    "refinement_seconds_limit": 6000,
+    "selection_cases": 512,
+    "selection_contrasts": 65536,
+    "selection_seed": 2026103134,
+    "scheduler_decay": 0.98,
+    "scheduler_every_rounds": 250
+  },
+  "dad": {
+    "batch": 2000,
+    "contrasts": 2000,
+    "minimum_speedup": 1.5,
+    "profile_repeats": 2,
+    "native_maximum_updates": 50000,
+    "learning_rate": 5e-05,
+    "betas": [
+      0.8,
+      0.998
+    ],
+    "lr_decay": 0.98,
+    "schedule_every": 1000,
+    "gradient_clip": null,
+    "initialization": "fresh seed101, never initialize from original trained DAD"
+  },
+  "seeds": {
+    "candidate_generation": 2026103130,
+    "screen": 2026103131,
+    "refinement": 2026103132,
+    "development": 2026103133,
+    "confirmation": 2026103151,
+    "numerics": 2026103135,
+    "schedule_diagnostics": 2026103136
+  },
+  "final": {
+    "cases": 2048,
+    "contrasts": 1000000,
+    "freeze_all_candidates_before_confirmation": true
+  },
+  "charge_scope": "Fixed screening/optimization/independent candidate selection and serialization<=7200seconds; fresh corrected DAD training/setup/checkpoints<=14400seconds; combined21600seconds. Numerical DAD profiling/tests separately metered<=1200seconds. Final common evaluation separately metered. No other baseline training.",
+  "no_reallocation_between_methods": true,
+  "numerical_profile_seconds_cap": 1200
+}

@@ -1,0 +1,7 @@
+phase,seconds,device,likelihood_particle_stages,optimizer_updates,primary_trajectories,peak_allocated_vram,peak_vram_bytes,note
+CPU_posterior,21.796634166967124,cpu,737415264,0,2,,,Adds two truth-only T30 prefix-generation rollouts; per-pool rows include inference and probes
+GPU_frozen_gradient_and_Adam_probes,15.208845420042053,RTX5080,62976352,16,32*16 main plus recorded replays; no training continuation,110356480,,
+GPU_native_B2000_no_update,15.593846824020147,RTX5080,967903992,0,16000,,865215488,
+CPU_prefix_and_finite_difference,0.2973926989361644,cpu,1745691,0,,,,
+CPU_regression_final,1.8,cpu,,80 isolated synthetic feature-fitting test steps; not benchmark training,test fixtures only,,,30passed; prior failed harness run18.10s separately
+initial_test_harness_attempt,18.1,"CPU plus incidental CUDA context, no benchmark GPU training",,see preserved test_accounting.json,,,,2 harness-cap failures;28pass; no production source changes

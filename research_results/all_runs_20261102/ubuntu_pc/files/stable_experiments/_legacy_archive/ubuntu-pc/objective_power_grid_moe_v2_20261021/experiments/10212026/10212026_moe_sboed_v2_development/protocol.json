@@ -1,0 +1,32 @@
+{
+  "model_identity": "MoE-sBOED-v2",
+  "architecture": "Existing ResMoE; four64/64tanh near-zero residual experts; frozen shared native base; no new networks",
+  "training_seed": 101,
+  "residual_reference_optimizer_updates": 50000,
+  "outer_batch": 64,
+  "contrasts": 65536,
+  "chunk": 8192,
+  "objective": "Exact unchanged full-horizon sPCE; memory-bounded checkpointing",
+  "routing": "Hard-forward ST with original soft-backward gamma schedule",
+  "regularization": "Original1e-4 weak load and selector terms; no additional loss",
+  "development_seed": 1003,
+  "final_comparison_seed": 1001,
+  "evaluation_systems": 2000,
+  "evaluation_contrasts": 1000000,
+  "allowance_seconds": 14400,
+  "charge_validation": true,
+  "development_credit_seconds": 2079.3028099536896,
+  "development_credit_scope": "Conservative dedicated worker wall reservation since reference-copy preparation, including diagnostics, prototypes, tests, coding and idle gaps",
+  "hardware": "RTX5080 worker; reference runtimes RTX4090 not pooled as equal work",
+  "source_base_commit": "75d2bf2aad54f77965fb79c9d04bee7d9e12dafe",
+  "worker_changes": "Uncommitted; complete source SHA snapshot frozen; no worker Git commit or push",
+  "promotion": "Only after positive paired EIG evidence and isolated LabPC review/test; no automatic merge",
+  "reference_routing": "Actual relaxed despite declared ST, due ignored alias; historical labels/checkpoints preserved",
+  "evaluation_bank_sha256": {
+    "location_cases.npz": "cbd2632af41a8c6ca8cbe55066d77b98791565b7ac301b0bea1965e84ec50f5b",
+    "location_contrasts.npy": "703671b0fb01ddf74dfe60d51e44914c71647c92e7e5ee51d111a9acfcecfde8"
+  },
+  "tests_passed": 45,
+  "native_probes": "Native10-update high-contrast run and final two-update complete accounting pipeline passed",
+  "full_five_seed_release": false
+}

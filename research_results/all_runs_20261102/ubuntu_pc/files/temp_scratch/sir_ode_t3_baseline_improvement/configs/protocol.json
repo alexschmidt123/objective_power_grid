@@ -1,0 +1,104 @@
+{
+  "version": "sir_t3_improvement_12h_total_v1",
+  "parent": "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/sir_ode_t3_baselines/sir_ode_t3_corrected_baselines_seed101_20261028T155016Z",
+  "original_extension": "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/sir_ode_t3_baselines/sir_ode_t3_corrected_baselines_seed101_20261028T155016Z/full_testing_4h_v2",
+  "benchmark": {
+    "system": {
+      "name": "sir_ode"
+    },
+    "N": 1,
+    "experiment": {
+      "experiment_type": "eig_based",
+      "step_number": 3,
+      "methods": [
+        "random",
+        "fixed",
+        "dad",
+        "rl_sboed",
+        "vsoed",
+        "scorebed"
+      ]
+    },
+    "observation": {
+      "noise_sigma": 1.0,
+      "sampling": "infected_count_at_continuous_time"
+    },
+    "sir_ode": {
+      "population": 500.0,
+      "i0": 2.0,
+      "t_end": 100.0,
+      "beta_mean": 0.5,
+      "gamma_mean": 0.1,
+      "log_std": 0.5,
+      "min_spacing": 0.1,
+      "integration_steps_per_stage": 512,
+      "execution_backend": "fused_rk4"
+    }
+  },
+  "seed": 101,
+  "aggregate_additional_training_seconds": 43200,
+  "method_caps": {
+    "random": 0,
+    "fixed": 7200,
+    "dad": 14400,
+    "rl_sboed": 7200,
+    "vsoed": 0,
+    "scorebed": 14400
+  },
+  "order": [
+    "fixed",
+    "dad",
+    "rl_sboed",
+    "scorebed",
+    "final_evaluation"
+  ],
+  "fixed": {
+    "screen_candidates": 64,
+    "screen_outer": 128,
+    "screen_contrasts": 16384,
+    "refined_starts": 8,
+    "refinement_batch": 512,
+    "refinement_contrasts": 16384,
+    "refinement_lr": 0.005,
+    "maximum_rounds": 2000,
+    "refinement_seconds_limit": 6000,
+    "selection_cases": 512,
+    "selection_contrasts": 65536,
+    "selection_seed": 2026103034
+  },
+  "dad": {
+    "batch": 2000,
+    "contrasts": 2000,
+    "minimum_speedup": 1.05,
+    "profile_repeats": 2,
+    "maximum_native_updates": 50000,
+    "learning_rate": 5e-05,
+    "betas": [
+      0.8,
+      0.998
+    ],
+    "lr_decay": 0.98,
+    "schedule_every": 1000
+  },
+  "rl": {
+    "continuation_collections": 100000000,
+    "collection_batch": 100,
+    "contrasts": 100000,
+    "replay_batch": 4096,
+    "gradient_steps": 64
+  },
+  "seeds": {
+    "screen": 2026103031,
+    "refinement": 2026103032,
+    "development": 2026103033,
+    "confirmation": 2026103051,
+    "numerics": 2026103035
+  },
+  "final": {
+    "cases": 2048,
+    "contrasts": 1000000,
+    "freeze_all_candidates_before_confirmation": true
+  },
+  "charge_scope": "All new GPU profiling/numerical tests, screening, refinement, development-driven Fixed selection, training and checkpoints count to per-method and43200s aggregate. Independent final evaluation separately metered.",
+  "no_reallocation_between_methods": true
+}

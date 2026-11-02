@@ -1,0 +1,68 @@
+{
+  "method": "MoE-sBOED-v2 candidate; unregistered scientific status",
+  "training_seed": 201,
+  "initialization": "Native v1 common modules copied to candidate/shared/dense; independent routed readouts; all train from scratch",
+  "batch_size": 2000,
+  "contrasts": 2000,
+  "horizon": 30,
+  "optimizer": {
+    "name": "Adam",
+    "lr": 5e-05,
+    "betas": [
+      0.8,
+      0.998
+    ],
+    "lr_decay": 0.98,
+    "lr_decay_after_updates": [
+      1,
+      1001,
+      2001,
+      3001
+    ],
+    "clip": 5
+  },
+  "balance_factor": 0.001,
+  "matched_methods": [
+    "v1",
+    "v2",
+    "dense",
+    "shared"
+  ],
+  "curve_updates": [
+    128,
+    512,
+    2048,
+    4096
+  ],
+  "maximum_updates": 4096,
+  "training_GPU_seconds": 7200,
+  "diagnostic_GPU_seconds": 1800,
+  "maximum_total_GPU_seconds": 9000,
+  "curve_seed": 97402631,
+  "heldout_seed": 97402632,
+  "confirmation_seed": 97402633,
+  "context_fit_seed": 97402634,
+  "curve_systems": 128,
+  "curve_contrasts": 65536,
+  "final_systems": 512,
+  "final_contrasts": 262144,
+  "context_fit_systems": 512,
+  "intervention_stages": [
+    1,
+    10,
+    20,
+    29
+  ],
+  "contexts": "Stage1 single negative-control bin; stages10/20/29 fitting-split median of observable mean previous log signal; no theta/expert/utility labels",
+  "intervention": "Replace weakest routed slot by candidate expert unless already in top2; keep original slot weights, top3cardinality/shared/head; propagate full remaining horizon",
+  "multiplicity": "Holm family-wise.05 for stage/context/expert differences and pairwise context interactions; independent sign and effect replication",
+  "minimum_interaction_effect": 0.02,
+  "minimum_meaningful_updates": 2048,
+  "pilot_noninferiority_margin": 0.05,
+  "routing_promising_margin": 0.02,
+  "readiness": "At least2048 matched updates, finite/stable gradients; heldout and confirmation v2-v1 lower95CI>-.05; routed-mask improvement lower95CI>0 and point>=.02; learned-uniform lower95CI>-.02 and point>=0; competence interactions exploratory Holm and independent replication; dense comparison disclosed. Otherwise harmful/inconclusive, never automatic full campaign",
+  "official_seed1001_used": false,
+  "full_LabPC_training_authorized_by_this_pilot": false,
+  "config_sha256": "b2c920b9830babf3cec75a6fc6c0c305e5ae1a1104744d3c9f368101f360d8b0",
+  "source_revision": "4b2bdfceca488f3b42be9d84c015dc8f9cf87a65"
+}

@@ -1,0 +1,76 @@
+{
+  "status": "PASS",
+  "scope": "location_finding_corrected_native_algorithms_with_disclosed_resource_adaptations",
+  "source_commit": "705872eb34bc62e246d87dba691a995828e2755d",
+  "CPU_tests": [
+    [
+      "/home/qiqi/miniconda3/envs/mocu_optimized/bin/python",
+      "tools/baseline_reference/decision_tests.py"
+    ],
+    [
+      "/home/qiqi/miniconda3/envs/mocu_optimized/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "tools/tests/test_e1_switching_fidelity.py",
+      "tools/tests/test_st_dselect1.py",
+      "tools/tests/test_moe_family.py"
+    ]
+  ],
+  "native_reference_tests": {
+    "status": "PASS",
+    "tests": [
+      {
+        "test": "DAD_actions_physics_loss_gradients_update",
+        "status": "PASS",
+        "evidence": {
+          "actions_likelihood_loss_gradients_one_Adam_step": true,
+          "rtol": 1e-08,
+          "atol": 1e-09,
+          "scope": "Exact upstream class/loss bodies; deterministic trace harness replaces stochastic trace construction only; common bounded mapping applied to both"
+        }
+      },
+      {
+        "test": "RL_native_Pyro_physics",
+        "status": "PASS",
+        "evidence": {
+          "native_Pyro_source_likelihood": true,
+          "max_absolute_error": 9.571444614664415e-08,
+          "prior": "four independent standard-normal coordinates"
+        }
+      },
+      {
+        "test": "RL_networks_rewards_native_update",
+        "status": "PASS",
+        "evidence": {
+          "native_network_outputs_distribution_logprob_and_one_full_update": true,
+          "native_factorized_reward": true,
+          "updated_parameters_bitwise_equal": true,
+          "discount": 0.9,
+          "critics": 2,
+          "subset": 2
+        }
+      },
+      {
+        "test": "vsOED_native_full_update",
+        "status": "PASS",
+        "evidence": {
+          "native_model_actor_critic_GMM_posterior_one_update": true,
+          "all_parameters_bitwise_equal": true,
+          "model_discrepancy": "Executable upstream SOURCE applies natural log to signal; shared benchmark follows executable source"
+        }
+      }
+    ],
+    "ScoreBED": "Separate JAX tests pending"
+  },
+  "scorebed": {
+    "arrays_compared": 289,
+    "max_absolute_difference": 0.0,
+    "EMA_bridge_max_absolute_error": 0.0,
+    "checkpoint_roundtrip": "PASS",
+    "single_policy": true
+  },
+  "switching_tests": "43 passed;1 optional historical test skipped; checkpoint-specific reuse separately verified",
+  "time": "2026-10-18T04:48:43.108850+00:00",
+  "SIR": "UNVERIFIED_native_adapter_gates_pending"
+}

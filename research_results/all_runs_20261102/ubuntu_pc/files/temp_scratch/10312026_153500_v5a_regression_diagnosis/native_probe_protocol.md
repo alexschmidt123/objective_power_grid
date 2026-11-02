@@ -1,0 +1,1 @@
+Predeclared native-size scale check: four B2000/L2000 batches per model, stages0,5,15,25, fresh diagnostic RNG73201000+i*997. Exact production microbatch128 main gradient including native balance. One executed production auxiliary per batch. No optimizer steps. GPU cap180seconds, existing lock, no policy/checkpoint changes.

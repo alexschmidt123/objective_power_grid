@@ -1,0 +1,284 @@
+     1	"""V5-A empirical-SMC conditional auxiliary; one guarded GPU seed at a time."""
+     2	import time
+     3	ENTRY=time.monotonic()
+     4	from pathlib import Path
+     5	import argparse,copy,csv,fcntl,hashlib,importlib.util,json,math,os,signal,subprocess,sys,traceback
+     6	import numpy as np
+     7	import torch,yaml
+     8	from src.research.deepseek_sboed import DeepSeekPolicy
+     9	from src.research.engine import rollout,generator
+    10	from src.research.benchmarks import make_benchmark
+    11	from src.research.compute_budget import ComputeClock
+    12	from src.research.moe_v5_experiment import verified_reference,load_policy
+    13	from src.research.moe_v5a_sampler import conditional_auxiliary
+    14	
+    15	ROOT=Path(__file__).resolve().parents[2]
+    16	def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+    17	def write(p,data):
+    18	    p=Path(p);p.parent.mkdir(parents=True,exist_ok=True);tmp=p.with_name(p.name+f'.{os.getpid()}.tmp');tmp.write_text(json.dumps(data,indent=2,allow_nan=False)+'\n');tmp.replace(p)
+    19	def acquire():
+    20	    handles=[]
+    21	    try:
+    22	        for path in [ROOT/'.gpu0.lock',ROOT.parent/'objective_power_grid/.gpu0.lock',Path.home()/'.cache/objective_power_grid/device_0.lock']:
+    23	            f=path.open('a+');handles.append(f);fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    24	        busy=subprocess.check_output(['nvidia-smi','--query-compute-apps=pid','--format=csv,noheader'],text=True).strip()
+    25	        if busy:raise BlockingIOError('Existing GPU compute process '+busy)
+    26	        return handles
+    27	    except BaseException:
+    28	        for f in handles:f.close()
+    29	        raise
+    30	
+    31	def freeze(out,cfg):
+    32	    paths=[ROOT/'src/research'/x for x in ['deepseek_sboed.py','dad_location_policy.py','policies.py','engine.py','benchmarks.py','compute_budget.py','location_posterior.py','journal_validation.py','location_evaluation.py','moe_v5_conditional.py','moe_v5a_sampler.py','moe_v5a_training.py','moe_v5a_validation.py','moe_v5_experiment.py']]+[ROOT/'src/online_cli.py',ROOT/'run.sh']
+    33	    hashes={}
+    34	    import shutil
+    35	    for p in paths:
+    36	        rel=str(p.relative_to(ROOT));dest=out/'frozen_source'/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,dest);hashes[rel]=sha(p)
+    37	    write(out/'source_manifest.json',dict(commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),sha256=hashes))
+    38	    write(out/'configuration.json',cfg);return hashes
+    39	def verify_source(hashes):
+    40	    bad=[p for p,h in hashes.items() if sha(ROOT/p)!=h]
+    41	    if bad:raise RuntimeError('Frozen training source changed: '+','.join(bad))
+    42	
+    43	def draws(benchmark,batch,contrasts,seed,device):
+    44	    with torch.device(device):
+    45	        g=generator(seed);truth=benchmark.sample((batch,),g);bank=benchmark.sample((batch,contrasts),g)
+    46	        noise=torch.stack([torch.randn(batch,1,generator=g,dtype=torch.float64) for _ in range(30)],1)
+    47	    return truth,bank,noise
+    48	
+    49	def primary_backward(benchmark,model,truth,bank,noise,seed,microbatch=128):
+    50	    """Exact effective-batch objective with global detached balance frequency.
+    51	
+    52	    The cheap truth-only pass fixes global assignment frequencies. Microbatch
+    53	    sPCE and balance gradients sum to the original B-wide loss; no optimizer
+    54	    update occurs between chunks. This is not an L/B reduction.
+    55	    """
+    56	    batch=len(truth);contrasts=bank.shape[1];calls=benchmark.calls
+    57	    with torch.no_grad():
+    58	        first=rollout(benchmark,model,30,batch,seed,0,truth=truth,noise=noise,prior_particles=truth.new_empty(batch,0,4))
+    59	        ids=torch.cat([x[1] for x in model._gate_cache]);frequency=torch.nn.functional.one_hot(ids,7).sum(1).double().mean(0)*(7/3)
+    60	        del first,ids
+    61	    model._gate_cache=[];mean=0.;saturated=0;balance_value=0.
+    62	    for start in range(0,batch,microbatch):
+    63	        n=min(microbatch,batch-start)
+    64	        result=rollout(benchmark,model,30,n,seed,contrasts,truth=truth[start:start+n],noise=noise[start:start+n],prior_particles=bank[start:start+n])
+    65	        info=result['info'][:,-1];prob=torch.cat([x[0] for x in model._gate_cache]).mean(0)
+    66	        balance=model.balance_factor*(frequency.detach()*prob).sum()
+    67	        loss=(-info.mean()+balance)*(n/batch);loss.backward()
+    68	        mean+=float(info.detach().sum())/batch;saturated+=int((info.detach()>math.log(contrasts+1)-.1).sum());balance_value+=float(balance.detach())*(n/batch)
+    69	        model._gate_cache=[];del result,info,prob,balance,loss
+    70	    return dict(main_spce=mean,saturation_fraction=saturated/batch,balance=balance_value,
+    71	        main_likelihood_particle_stages=benchmark.calls-calls,extra_truth_only_replay_trajectories=batch)
+    72	
+    73	def auxiliary_backward(benchmark,model,truth,noise,seed,cfg,stage_override=None):
+    74	    g=torch.Generator(device=truth.device).manual_seed(seed)
+    75	    index=int(torch.randint(0,len(truth),(1,),generator=g,device=truth.device))
+    76	    stage=int(torch.randint(0,30,(1,),generator=g,device=truth.device)) if stage_override is None else stage_override
+    77	    estimate,stats=conditional_auxiliary(benchmark,model,truth[index:index+1],noise[index:index+1],stage,seed+2000003,cfg['conditional_negatives'],cfg['posterior_particles'],cfg['posterior_moves'])
+    78	    gradients=torch.autograd.grad(cfg['alpha_cond']*estimate,tuple(model.parameters()),retain_graph=True,allow_unused=True)
+    79	    groups={};total=0.
+    80	    for (name,p),grad in zip(model.named_parameters(),gradients):
+    81	        if grad is None:continue
+    82	        if not torch.isfinite(grad).all():raise FloatingPointError('Nonfinite conditional policy gradient')
+    83	        norm=float(grad.square().sum());total+=norm
+    84	        key='head' if name.startswith('emitter') else '.'.join(name.split('.')[:2]) if name.startswith('routed.') else name.split('.')[0]
+    85	        groups[key]=groups.get(key,0.)+norm
+    86	    (-cfg['alpha_cond']*estimate).backward();model._gate_cache=[]
+    87	    stats.update(alpha=cfg['alpha_cond'],auxiliary_gradient_norm=math.sqrt(total),
+    88	        auxiliary_gradient_groups={k:math.sqrt(v) for k,v in groups.items()},
+    89	        sampling_distribution_gradient='STOPPED; biased auxiliary gradient, original full-sPCE remains anchor')
+    90	    return stats
+    91	
+    92	def utility_module(reference):
+    93	    file=reference/'source/src/research/v4_utility_routing.py';spec=importlib.util.spec_from_file_location('v5a_frozen_v4_utility',file);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
+    94	
+    95	def snapshot(out,model,optimizer,scheduler,update,clock,cfg,hashes,label):
+    96	    verify_source(hashes);p=out/'checkpoints'/f'update{update}_{label}.pt';p.parent.mkdir(exist_ok=True)
+    97	    tmp=p.with_suffix('.partial');torch.save(dict(method='MoE-sBOED-v5',variant='V5-A_empirical_SMC_detached_gradient',state_dict={k:v.detach().cpu().clone() for k,v in model.state_dict().items()},optimizer=optimizer.state_dict(),scheduler=scheduler.state_dict(),update=update,seed=cfg['seed'],configuration=cfg,config_sha256=sha(out/'configuration.json'),source_sha256=hashes,rng_cpu=torch.get_rng_state(),rng_cuda=torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],charged_seconds=clock.spent(),initialization='FROM_SCRATCH_NATIVE_V4_SEED'),tmp);tmp.replace(p)
+    98	    h=sha(p);mark=clock.checkpoint(str(p));row=dict(path=str(p),sha256=h,update=update,charged_seconds=clock.spent(),eligible=mark['eligible'])
+    99	    write(p.with_suffix('.json'),row);return row
+   100	
+   101	def train(args,cfg):
+   102	    ref,receipt=verified_reference(ROOT/cfg['reference_bundle']);validation=json.loads((ROOT/cfg['posterior_validation']).read_text())
+   103	    if validation['status']!='PASS_EMPIRICAL_APPROXIMATE_SAMPLER':raise ValueError('Posterior validation failed')
+   104	    if validation['particles']!=cfg['posterior_particles'] or validation['moves']!=cfg['posterior_moves']:raise ValueError('Sampler settings differ from validated settings')
+   105	    smoke=args.action=='smoke';out=Path(args.output).resolve();out.mkdir(parents=True,exist_ok=False)
+   106	    locks=acquire();torch.set_num_threads(4);torch.cuda.init();torch.manual_seed(args.seed)
+   107	    effective=copy.deepcopy(cfg);effective['seed']=args.seed
+   108	    if smoke:effective.update(batch=32,contrasts=32,microbatch=16,native_max_updates=3,budget_seconds=180,WORKABILITY_ONLY=True)
+   109	    if effective['budget_seconds']!=14400 and not smoke:raise ValueError('Native four-hour cap required')
+   110	    hashes=freeze(out,effective);write(out/'posterior_validation.json',validation)
+   111	    resume=None;credit=0.;previous_status=None
+   112	    if args.resume_checkpoint:
+   113	        oldpath=Path(args.resume_checkpoint).resolve();resume=torch.load(oldpath,map_location='cpu',weights_only=False)
+   114	        verify_source(resume['source_sha256'])
+   115	        if resume['configuration']!=effective:raise ValueError('Resume configuration differs from frozen training identity')
+   116	        oldclock=json.loads((oldpath.parent.parent/'compute_clock.json').read_text())
+   117	        if 'stopped_at' not in oldclock:raise ValueError('Unaccounted interrupted time; exact automatic resume is unsafe')
+   118	        previous_status=json.loads((oldpath.parent.parent/'run_status.json').read_text())
+   119	        pid=previous_status['PID']
+   120	        if Path(f'/proc/{pid}').exists():raise RuntimeError('Previous worker still exists; no duplicate resume')
+   121	        credit=oldclock['credit_seconds']+oldclock['stopped_at']-oldclock['start']-sum(b-a for a,b,_ in oldclock['excluded'])
+   122	        if credit>=effective['budget_seconds']:raise ValueError('No charged allowance remains')
+   123	    clock=ComputeClock(out/'compute_clock.json',effective['budget_seconds'],credit_seconds=credit,hardware=torch.cuda.get_device_name(0),start=float(os.environ.get('BOED_V5A_ENTRY_MONOTONIC',ENTRY)))
+   124	    p=DeepSeekPolicy().cuda().train();optimizer=torch.optim.Adam(p.parameters(),lr=5e-5,betas=(.8,.998));scheduler=torch.optim.lr_scheduler.ExponentialLR(optimizer,.98)
+   125	    with torch.device('cuda:0'):b=make_benchmark(effective['benchmark'])
+   126	    original_utility=utility_module(ref);latest=None;bound=1.;update=0;aux_seconds=0.;next_checkpoint=300.;last={};stopping=[False]
+   127	    if resume is not None:
+   128	        p.load_state_dict(resume['state_dict'],strict=True);optimizer.load_state_dict(copy.deepcopy(resume['optimizer']));scheduler.load_state_dict(resume['scheduler']);update=resume['update']
+   129	        torch.set_rng_state(resume['rng_cpu'].cpu());torch.cuda.set_rng_state_all(resume['rng_cuda'])
+   130	        b.calls=previous_status['last_metrics']['actual_particle_stages'];aux_seconds=previous_status['last_metrics']['total_conditional_seconds']
+   131	    def stop(signum,frame):stopping[0]=True
+   132	    signal.signal(signal.SIGTERM,stop);signal.signal(signal.SIGINT,stop)
+   133	    def status(state,**kw):
+   134	        row=dict(state=state,method='MoE-sBOED-v5',variant='V5-A_empirical_SMC_detached_gradient',seed=args.seed,PID=os.getpid(),update=update,charged_seconds=clock.spent(),primary_training_trajectories=update*effective['batch'],latest_checkpoint=latest,last_metrics=last,UTC=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),**kw)
+   135	        write(out/'run_status.json',row)
+   136	        if not smoke:write(out.parent/'run_status.json',row)
+   137	    status('RUNNING',gpu=torch.cuda.get_device_name(0),gpu_process_start_verified=True,initialization='FROM_SCRATCH_NO_V4_TRAINED_WEIGHTS')
+   138	    try:
+   139	        while update<effective['native_max_updates'] and clock.can_start(max(60.,2*bound)) and not stopping[0]:
+   140	            started=time.monotonic();attempted_update=update+1;optimizer.zero_grad(set_to_none=True)
+   141	            with torch.device('cuda:0'):
+   142	                truth,bank,noise=draws(b,effective['batch'],effective['contrasts'],args.seed+attempted_update*104729,'cuda:0')
+   143	                main=primary_backward(b,p,truth,bank,noise,args.seed+attempted_update*104729,effective['microbatch'])
+   144	                primary_router=p.router.weight.grad.detach().clone();a_start=time.monotonic()
+   145	                auxiliary=auxiliary_backward(b,p,truth,noise,61000000+args.seed*100000+attempted_update,effective)
+   146	                elapsed=time.monotonic()-a_start;aux_seconds+=elapsed
+   147	                old_credit=None
+   148	                if attempted_update%100==0:
+   149	                    now=p.router.weight.grad.clone();p.router.weight.grad=primary_router.clone()
+   150	                    record=original_utility.paired_credit(b,p,39600000+args.seed*100000+attempted_update,64,1024)
+   151	                    old_credit=original_utility.add_credit(p,record,.05);delta=p.router.weight.grad-primary_router;p.router.weight.grad=now+delta
+   152	                norm=torch.nn.utils.clip_grad_norm_(p.parameters(),5,error_if_nonfinite=True);optimizer.step()
+   153	                if (attempted_update-1)%1000==0:scheduler.step()
+   154	                torch.cuda.synchronize()
+   155	            update=attempted_update;bound=max(bound,time.monotonic()-started)
+   156	            last=dict(update=update,**main,conditional=auxiliary,conditional_seconds=elapsed,total_conditional_seconds=aux_seconds,gradient_norm=float(norm),learning_rate=optimizer.param_groups[0]['lr'],native_v4_utility_credit=old_credit,charged_seconds=clock.spent(),actual_particle_stages=b.calls,peak_cuda_bytes=torch.cuda.max_memory_allocated())
+   157	            with (out/'train_seed101.log' if args.seed==101 else out/f'train_seed{args.seed}.log').open('a') as f:f.write(json.dumps(last)+'\n')
+   158	            print(json.dumps(last),flush=True)
+   159	            if not all(math.isfinite(x) for x in [main['main_spce'],auxiliary['conditional_score'],float(norm)]):raise FloatingPointError('Nonfinite training state')
+   160	            if update==1 or clock.spent()>=next_checkpoint:
+   161	                latest=snapshot(out,p,optimizer,scheduler,update,clock,effective,hashes,'recovery');next_checkpoint=clock.spent()+300
+   162	            status('RUNNING')
+   163	            if smoke and args.smoke_stop_after is not None and update>=args.smoke_stop_after:stopping[0]=True
+   164	            del truth,bank,noise
+   165	        latest=snapshot(out,p,optimizer,scheduler,update,clock,effective,hashes,'final' if not stopping[0] else 'interrupted')
+   166	        if not latest['eligible']:raise RuntimeError('Final checkpoint exceeded charged budget')
+   167	        report=clock.stop();status('INTERRUPTED_RECOVERABLE' if stopping[0] else 'COMPLETE_TRAINING',compute=report,native_schedule_complete=update>=effective['native_max_updates'])
+   168	        with (out/'compute_accounting.csv').open('w',newline='') as f:
+   169	            w=csv.writer(f);w.writerow(['seed','optimizer_updates','fresh_training_trajectories','main_contrasts','actual_simulator_particle_stages','charged_seconds','conditional_seconds','peak_vram_bytes','status']);w.writerow([args.seed,update,update*effective['batch'],effective['contrasts'],b.calls,report['charged_seconds'],aux_seconds,torch.cuda.max_memory_allocated(),'WORKABILITY_ONLY' if smoke else 'COMPUTE_LIMITED' if update<50000 else 'NATIVE_SCHEDULE_COMPLETE'])
+   170	        if not smoke and not stopping[0]:
+   171	            try:evaluate(out,effective,latest)
+   172	            except Exception as exc:write(out/'evaluation_pending.json',dict(state='PENDING',error=str(exc),command='See next_commands.sh; training checkpoint is preserved'))
+   173	    except BaseException as exc:
+   174	        try:
+   175	            latest=snapshot(out,p,optimizer,scheduler,update,clock,effective,hashes,'failure_evidence')
+   176	        except Exception:pass
+   177	        write(out/'failure.json',dict(error=str(exc),traceback=traceback.format_exc(),last_checkpoint=latest,clock=clock.stop()));status('FAILED',error=str(exc));raise
+   178	    finally:
+   179	        for f in locks:f.close()
+   180	
+   181	def evaluate(out,cfg,checkpoint):
+   182	    from src.research.journal_validation import CommonValidation
+   183	    files=ROOT/cfg['matched_evaluation_directory'];cases_path=files/'location_cases.npz';bank_path=files/'location_contrasts.npy'
+   184	    if sha(cases_path)!=cfg['cases_sha256'] or sha(bank_path)!=cfg['bank_sha256']:raise ValueError('Matched bank identity mismatch')
+   185	    with torch.device('cpu'):
+   186	        saved=torch.load(checkpoint['path'],map_location='cpu',weights_only=False);p=DeepSeekPolicy().eval();p.load_state_dict(saved['state_dict'],strict=True)
+   187	    # Existing explicit-likelihood evaluator; checkpoint frozen before these reads.
+   188	    v=CommonValidation(cfg['benchmark'],30,1001,2000,1000000,16,16384,device='cuda:0')
+   189	    a=np.load(cases_path);v.truth=torch.from_numpy(a['truth']).double();v.noise=torch.from_numpy(a['noise']).double();v.bank=torch.from_numpy(np.load(bank_path)).double();v.identity=hashlib.sha256(v.truth.numpy().tobytes()+v.noise.numpy().tobytes()+v.bank.numpy().tobytes()).hexdigest()
+   190	    scores,cost=v(p);np.save(out/f'dev_scores_seed{cfg["seed"]}.npy',scores)
+   191	    def stats(x):
+   192	        mean=float(x.mean());se=float(x.std(ddof=1)/len(x)**.5);return dict(mean=mean,MC_SE=se,CI95=[mean-1.96*se,mean+1.96*se])
+   193	    result=dict(v5a=stats(scores),metadata=cost,checkpoint=checkpoint,evaluation_seed=1001,training_seed=cfg['seed'])
+   194	    baseline=np.load(files/f'v4_seed{cfg["seed"]}_scores.npy');result['v5a_minus_v4']=stats(scores-baseline)
+   195	    if cfg['seed']==101:
+   196	        old=json.loads((files/'vsoed_seed101_scores.json').read_text());key=cfg.get('vsoed_score_key','spce')
+   197	        bs=np.array([row[key] for row in old]);result['v5a_minus_native_vsoed']=stats(scores-bs)
+   198	    write(out/f'paired_eig_seed{cfg["seed"]}.json',result)
+   199	    with (out/f'dev_eig_seed{cfg["seed"]}.csv').open('w',newline='') as f:
+   200	        w=csv.writer(f);w.writerow(['method','training_seed','eig','MC_SE','evaluation_seed','cases','contrasts']);w.writerow(['V5-A_empirical_SMC',cfg['seed'],result['v5a']['mean'],result['v5a']['MC_SE'],1001,2000,1000000])
+   201	
+   202	def main(argv=None):
+   203	    p=argparse.ArgumentParser();p.add_argument('--config',required=True);p.add_argument('--output',required=True);p.add_argument('--seed',type=int,choices=[101,102,103,104,105],default=101);p.add_argument('--action',choices=['train','smoke','evaluate'],default='train');p.add_argument('--evaluate-checkpoint');p.add_argument('--resume-checkpoint');p.add_argument('--smoke-stop-after',type=int)
+   204	    a=p.parse_args(argv);cfg=yaml.safe_load(Path(a.config).read_text())
+   205	    if cfg['alpha_cond']!=.1 or cfg.get('v5_b_enabled'):raise ValueError('Frozen V5-A-only configuration required')
+   206	    if a.smoke_stop_after is not None and a.action!='smoke':raise ValueError('No artificial update cutoff is allowed in primary training')
+   207	    if a.action=='evaluate':
+   208	        out=Path(a.output);out.mkdir(parents=True,exist_ok=False);saved=torch.load(a.evaluate_checkpoint,map_location='cpu',weights_only=False);evaluate(out,saved['configuration'],dict(path=a.evaluate_checkpoint,sha256=sha(a.evaluate_checkpoint)));return
+   209	    train(a,cfg)
+   210	
+   211	if __name__=='__main__':main()
+     1	"""V5-only conditional SMC adapter; never used by baseline trainers.
+     2	
+     3	Finite, correlated resample-move particles and stopped inference gradients make
+     4	this an explicitly approximate auxiliary, not a certified conditional bound.
+     5	"""
+     6	import time,math
+     7	import torch
+     8	from src.research.location_posterior import LocationSMC
+     9	from src.research.moe_v5_conditional import PosteriorQuality,require_quality
+    10	
+    11	class AuditedSMC(LocationSMC):
+    12	    def __init__(self,*args,**kwargs):
+    13	        super().__init__(*args,**kwargs);self.resampling_unique=[]
+    14	    def resample(self):
+    15	        index=super().resample();self.resampling_unique.append(float(index.unique().numel()/index.numel()));return index
+    16	
+    17	@torch.no_grad()
+    18	def sample_prefix(benchmark,actions,observations,negatives,seed,particles=512,moves=8):
+    19	    if benchmark.name!='location_finding':raise ValueError('Only the verified location likelihood is adapted')
+    20	    if len(actions)!=len(observations) or negatives>particles:raise ValueError('Invalid prefix/particle dimensions')
+    21	    if any(len(a)!=1 or len(y)!=1 for a,y in zip(actions,observations)):raise ValueError('One independently sampled history per pool')
+    22	    started=time.monotonic();calls=benchmark.calls
+    23	    rng=torch.Generator(device=torch.empty(0).device).manual_seed(int(seed))
+    24	    smc=AuditedSMC(benchmark,1,particles,rng,moves=moves)
+    25	    for action,y in zip(actions,observations):smc.update(action.detach(),y.detach())
+    26	    theta=smc.theta[0];unique=float(torch.unique(theta,dim=0).shape[0]/particles)
+    27	    acceptance=min((float(x['mh_acceptance'][0]) for x in smc.diagnostics),default=1.)
+    28	    pre_ess=min((x['minimum_ess']/particles for x in smc.diagnostics),default=1.)
+    29	    finite=bool(torch.isfinite(theta).all());quality_ok=finite and unique>=.5 and acceptance>=.005 and pre_ess>=.79
+    30	    selected=torch.randperm(particles,generator=rng,device=theta.device)[:negatives]
+    31	    draws=theta[selected].detach()
+    32	    q=PosteriorQuality(len(actions),renewed=True,exact=False,validated=quality_ok,ess_fraction=pre_ess,unique_fraction=unique,
+    33	        mixing_checked=acceptance>=.005,symmetry_checked=True,proposal_weights_checked=True,
+    34	        sampling_gradient='SMC/resampling and history-conditioning distribution detached; heuristic policy gradient')
+    35	    require_quality(q,len(actions))
+    36	    return draws,q,dict(status='PASS_EMPIRICAL_POOL_CHECKS',conditioning_observations=len(actions),
+    37	        particle_count=particles,negative_count=negatives,pre_resampling_minimum_ess_fraction=pre_ess,
+    38	        final_ess_is_uniform_after_resampling=True,final_unique_fraction=unique,
+    39	        minimum_mh_acceptance=acceptance,resampling_unique_minimum=min(smc.resampling_unique,default=1.),
+    40	        symmetry_label_fraction=float((theta[:,0]<theta[:,2]).double().mean()),
+    41	        likelihood_particle_stages=benchmark.calls-calls,posterior_proposals=particles*moves*sum(x['tempering_steps'] for x in smc.diagnostics),
+    42	        seconds=time.monotonic()-started,exact=False,independent_draws_certified=False,
+    43	        estimate_type='APPROXIMATE_POSTERIOR_HEURISTIC_NOT_A_CERTIFIED_LOWER_BOUND'),theta
+    44	
+    45	def conditional_auxiliary(benchmark,policy,truth,noise,stage,seed,negatives=128,particles=512,moves=8):
+    46	    """One uniform time/sample yields T*C, an unbiased stage-sum *selection*.
+    47	
+    48	    Inference and selection are separate from the primary RNG. Only the
+    49	    prefix[:stage] is supplied to SMC. No y_stage or truth enters inference.
+    50	    """
+    51	    from src.research.engine import rollout
+    52	    batch=len(truth)
+    53	    if batch!=1:raise ValueError('The frozen first candidate uses one auxiliary case/update')
+    54	    start=time.monotonic();calls=benchmark.calls
+    55	    result=rollout(benchmark,policy,policy.horizon,batch,seed,0,truth=truth,noise=noise,prior_particles=truth.new_empty(batch,0,4))
+    56	    a=[x.detach() for x in result['actions'][:stage]];y=[x.detach() for x in result['observations'][:stage]]
+    57	    # The validated CPU sampler is used verbatim; all inference wall time is
+    58	    # charged while the GPU lease remains held. Only small draws return to GPU.
+    59	    with torch.device('cpu'):
+    60	        draws,q,stats,_=sample_prefix(benchmark,[x.cpu() for x in a],[x.cpu() for x in y],negatives,seed+15485863,particles,moves)
+    61	    draws=draws.to(truth.device)
+    62	    action=result['actions'][stage];observation=result['observations'][stage]
+    63	    theta=torch.cat((truth[:,None],draws[None]),1)
+    64	    mean,_=benchmark.forward(theta,benchmark.initial(theta.shape[:2]),action[:,None].expand(-1,negatives+1,-1))
+    65	    ll=benchmark.log_likelihood(observation[:,None],mean)
+    66	    c=ll[:,0]-torch.logsumexp(ll,-1)+math.log(negatives+1)
+    67	    if not torch.isfinite(c).all():raise FloatingPointError('Nonfinite V5-A conditional score')
+    68	    estimate=policy.horizon*c.mean()
+    69	    stats.update(stage=stage,conditional_score=float(c.detach().mean()),stage_sum_estimate=float(estimate.detach()),
+    70	        stage_sampling_probability=1/policy.horizon,stage_sampling_weight=policy.horizon,
+    71	        total_auxiliary_likelihood_particle_stages=benchmark.calls-calls,
+    72	        seconds=time.monotonic()-start,extra_primary_replay_trajectories=1)
+    73	    return estimate,stats

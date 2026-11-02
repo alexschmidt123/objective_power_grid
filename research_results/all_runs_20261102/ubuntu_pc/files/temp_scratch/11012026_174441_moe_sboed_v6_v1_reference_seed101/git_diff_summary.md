@@ -1,0 +1,110 @@
+# Preserved working tree
+
+ M run.sh
+ M src/online_cli.py
+ M src/research/benchmarks.py
+ M src/research/engine.py
+ M src/research/family_training.py
+ M src/research/journal_checkpoints.py
+ M src/research/journal_run.py
+ M src/research/journal_scorebed_bridge.py
+ M src/research/journal_validation.py
+ M src/research/moe_architecture_controls.py
+ M src/research/moe_family.py
+ M src/research/runner.py
+ M src/research/scorebed.py
+ M src/research/scorebed_worker.py
+ M src/research/sir_dad.py
+ M src/research/sir_scorebed.py
+ M src/research/sir_scorebed_model.py
+ M src/research/sir_scorebed_worker.py
+ M src/research/sir_upstream_vsoed.py
+ M src/research/strategy_moe.py
+ M src/research/training.py
+ M src/research/upstream_vsoed.py
+ M tools/tests/test_st_dselect1.py
+?? .gpu0.lock
+?? configs/deepseek_sboed_location.yaml
+?? configs/moe_sboed_v5_combined.yaml
+?? configs/moe_sboed_v5_conditional.yaml
+?? configs/moe_sboed_v5_diagnostics.yaml
+?? configs/moe_sboed_v5_expert_credit.yaml
+?? configs/moe_sboed_v5a_train_20261031.yaml
+?? reports/
+?? src/research/baseline_fidelity.py
+?? src/research/compute_budget.py
+?? src/research/current_moe_evaluation.py
+?? src/research/deepseek_sboed.py
+?? src/research/deepseek_sboed_experiment.py
+?? src/research/e1_confirmation.py
+?? src/research/fh_moe_v3_context.py
+?? src/research/fh_moe_v3_discovery.py
+?? src/research/gradient_variance_analysis.py
+?? src/research/gradient_variance_audit.py
+?? src/research/jax_checkpoint.py
+?? src/research/moe_v2_context.py
+?? src/research/moe_v2_context_training.py
+?? src/research/moe_v2_decision.py
+?? src/research/moe_v2_pilot.py
+?? src/research/moe_v2_research.py
+?? src/research/moe_v5_conditional.py
+?? src/research/moe_v5_credit.py
+?? src/research/moe_v5_diagnostics.py
+?? src/research/moe_v5_experiment.py
+?? src/research/moe_v5a_sampler.py
+?? src/research/moe_v5a_training.py
+?? src/research/moe_v5a_validation.py
+?? src/research/native_checkpoint_evaluation.py
+?? src/research/native_rl_reference.py
+?? src/research/original_protocol.py
+?? src/research/pimoe.py
+?? src/research/pimoe_experiment.py
+?? src/research/pimoe_ic.py
+?? src/research/pimoe_ic_experiment.py
+?? src/research/pimoe_validation.py
+?? src/research/project_scope.py
+?? src/research/resource_ledger.py
+?? src/research/sa_moe.py
+?? src/research/sa_moe_experiment.py
+?? src/research/sa_moe_offline.py
+?? src/research/sir_native_rl.py
+?? src/research/sir_scorebed_compat.py
+?? src/research/sir_scorebed_gru.py
+?? src/research/sir_t3_campaign.py
+?? src/research/sir_t3_common.py
+?? src/research/sir_t3_dad_fixed.py
+?? src/research/sir_t3_evaluation.py
+?? src/research/sir_t3_full_score.py
+?? src/research/sir_t3_fulltest.py
+?? src/research/sir_t3_fused.py
+?? src/research/sir_t3_improvement.py
+?? src/research/sir_t3_improvement_numerics.py
+?? src/research/sir_t3_native_rl.py
+?? src/research/sir_t3_native_vsoed.py
+?? src/research/sir_t3_profile.py
+?? src/research/sir_t3_recovery.py
+?? src/research/sir_t3_regression.py
+?? src/research/sir_t3_reports.py
+?? src/research/sir_t3_scorebed_profile.py
+?? src/research/vendor/rl_boed/
+?? sync_receipt.json
+?? tools/moe_v5_test_accounting.py
+?? tools/moe_v5a_evaluate_guarded.py
+?? tools/moe_v5a_supervisor.py
+?? tools/storage_policy.py
+?? tools/tests/test_deepseek_sboed.py
+?? tools/tests/test_moe_v2_context.py
+?? tools/tests/test_moe_v2_decision.py
+?? tools/tests/test_moe_v5_conditional.py
+?? tools/tests/test_moe_v5_credit.py
+?? tools/tests/test_moe_v5_diagnostics.py
+?? tools/tests/test_moe_v5_dispatch.py
+?? tools/tests/test_moe_v5a_training.py
+?? tools/tests/test_sir_baseline_corrections.py
+?? tools/tests/test_sir_dad_fixed_budget.py
+?? tools/tests/test_sir_t3_campaign.py
+?? tools/tests/test_sir_t3_recovery.py
+?? tools/tests/test_storage_policy.py
+?? tools/update_ubuntu_sir_draft.py
+
+No production source modified. New model/runner exist only in this scratch directory.

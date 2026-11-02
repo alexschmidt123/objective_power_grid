@@ -1,0 +1,108 @@
+{
+  "method": "MoE-sBOED-v5",
+  "variant": "V5-A_empirically_validated_SMC_detached_gradient",
+  "status": "DEVELOPMENT_UNVALIDATED",
+  "reference_bundle": "scratch_runs/10312026_054200_moe_sboed_v5_ubuntu/labpc_v4_reference",
+  "benchmark": {
+    "system": {
+      "name": "location_finding"
+    },
+    "N": 1,
+    "experiment": {
+      "experiment_type": "eig_based",
+      "step_number": 30,
+      "methods": [
+        "random",
+        "fixed",
+        "dad",
+        "rl_sboed",
+        "vsoed",
+        "scorebed",
+        "moe_sboed"
+      ]
+    },
+    "observation": {
+      "noise_sigma": 0.5,
+      "sampling": "normal_log_signal"
+    },
+    "location_finding": {
+      "design_bounds": [
+        -4.0,
+        4.0
+      ],
+      "random_design_distribution": "truncated_standard_normal"
+    },
+    "research": {
+      "paper_protocol": {
+        "reference": "https://arxiv.org/html/2306.10430v2",
+        "official_code": "https://github.com/wgshen/vsOED",
+        "upstream_commit": "d0884f9ba30fbddc56618841c68af2f3bfe16539",
+        "case": "two_source_common_bounded_box",
+        "regime": "one_million_episode_pilot",
+        "corrected_methods": true,
+        "correction_note": "All methods train and evaluate in [-4,4]^2. Random uses standard normal conditioned on the box; source prior remains iid standard normal. Equal1million primary training episodes. ScoreBED uses feasibility-only sigmoid adapter.",
+        "nominal_training_trajectories": 1000000,
+        "evaluation": "shared_prior_bank_streamed_sPCE",
+        "training_device": "cuda",
+        "checkpoint_selection": "final",
+        "observation_discrepancy": "Paper Section 4.2 omits log; SOURCE.deterministic returns log(signal). Follow executable code.",
+        "training_budget_unit": "primary_episodes",
+        "extensions": "All fresh observed training episodes count, including MoE specialist and ScoreBED score pretraining. Contrast likelihood work, replay updates, validation and runtime reported separately."
+      }
+    }
+  },
+  "horizon": 30,
+  "batch": 32,
+  "contrasts": 32,
+  "microbatch": 16,
+  "native_max_updates": 3,
+  "budget_seconds": 180,
+  "learning_rate": 5e-05,
+  "betas": [
+    0.8,
+    0.998
+  ],
+  "lr_decay": 0.98,
+  "lr_schedule_every": 1000,
+  "gradient_clip": 5,
+  "balance": 0.001,
+  "alpha_cond": 0.0,
+  "alpha_origin": "Single predeclared value in Codex_V5_Train_Now_UbuntuPC_20261031.md",
+  "v5_b_enabled": false,
+  "posterior_particles": 512,
+  "posterior_moves": 8,
+  "conditional_negatives": 128,
+  "auxiliary_cases_per_update": 1,
+  "stage_sampling": "one independent uniform stage; multiply score by30",
+  "posterior_backend": "validated_CPU",
+  "sampler_guarantee": "Finite correlated resample-move SMC, detached history-conditioning sampler; heuristic auxiliary, not certified bound or unbiased full-policy gradient",
+  "posterior_validation": "scratch_runs/10312026_073000_moe_sboed_v5_train/posterior_validation.json",
+  "posterior_validation_sha256": "9e3265d38e960dcd1adcbffc23a0f88396649d96913f1c1bf7d881f030e4c733",
+  "initialization": "FROM_SCRATCH_RECORDED_SEED101_NEW_ADAM_MATCH_ON_RECIPE",
+  "training_seeds": [
+    101
+  ],
+  "original_v4_credit": {
+    "enabled": true,
+    "every": 100,
+    "batch": 64,
+    "contrasts": 1024,
+    "router_gradient_fraction": 0.05,
+    "new_v5_b_refinement": false
+  },
+  "checkpoint_selection": "last_update7714_only_no_validation_selection",
+  "finalization_reserve_seconds": 60,
+  "matched_evaluation_directory": "scratch_runs/10312026_073000_moe_sboed_v5_train/matched_evaluation",
+  "cases_sha256": "cbd2632af41a8c6ca8cbe55066d77b98791565b7ac301b0bea1965e84ec50f5b",
+  "bank_sha256": "703671b0fb01ddf74dfe60d51e44914c71647c92e7e5ee51d111a9acfcecfde8",
+  "development_evaluation_seed": 1001,
+  "reserved_final_seed": 8831001,
+  "evaluation_systems": 2000,
+  "evaluation_contrasts": 1000000,
+  "vsoed_score_key": "spce",
+  "seed": 101,
+  "auxiliary_off_control": true,
+  "v5_c_enabled": false,
+  "budget_type": "7714_actual_updates_15428000_primary_examples;24h_safety_watchdog_only_not_training_budget",
+  "WORKABILITY_ONLY": true
+}

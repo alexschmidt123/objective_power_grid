@@ -1,0 +1,72 @@
+{
+  "status": "PASS",
+  "fixture": "Completed LabPC seed1 cpu_roundtrip.pt + cpu_tests.json utility/primary-gradient scalar replay; trained checkpoint comparisons use frozen LabPC rollout source on Ubuntu",
+  "checkpoint_parities": [
+    {
+      "seed": 101,
+      "checkpoint_sha256": "d4b8c7fe3f80d650832e556fbbd112b4901b34d01b8fed96ec737db4ff22d5de",
+      "configuration_sha256": "9563093ec4062fc7172fd32fb21a98778a0702f6f1ea48e81bc8adad05c872b2",
+      "state_dict_strict": true,
+      "action_and_sPCE_parity": true,
+      "gradient_max_absolute_error": 0.0,
+      "trajectory_count": 4,
+      "contrasts": 16
+    },
+    {
+      "seed": 102,
+      "checkpoint_sha256": "d470f54959a0b91e2708d429bf06474777d1c9d85739f572010cdcf69f518860",
+      "configuration_sha256": "bb99e3b4932688cb5724abe5417178546461d4b730151061128f900550439d4a",
+      "state_dict_strict": true,
+      "action_and_sPCE_parity": true,
+      "gradient_max_absolute_error": 0.0,
+      "trajectory_count": 4,
+      "contrasts": 16
+    }
+  ],
+  "cpu_reference_replay": {
+    "enabled": true,
+    "rms": 9.632053329492872e-05,
+    "mean_advantage": 2.813694266201594e-05,
+    "positive_fraction": 0.375,
+    "maximum_normalized_advantage": 1.0,
+    "applied": true,
+    "scale": 0.00025888949022056677,
+    "auxiliary_gradient_norm": 0.00010727022158681156,
+    "primary_router_gradient_norm": 0.002145404431736231,
+    "fraction_cap": 0.05
+  },
+  "counts": {
+    "total_parameters": 8434,
+    "activated_parameters_per_context": 6898,
+    "shared_experts": 1,
+    "routed_experts": 7,
+    "top_k": 3,
+    "expert_feature_dimension": 16,
+    "routed_FFN_width": 8,
+    "shared_FFN_width": 8,
+    "FFN_linear_FLOPs_per_context": 3072,
+    "history_encoder_linear_FLOPs_per_observation": 9728,
+    "router_linear_FLOPs_per_context": 224,
+    "action_head_linear_FLOPs_per_context": 64,
+    "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs"
+  },
+  "training_resolution_contrasts": 2000,
+  "native_max_updates": 50000,
+  "formal_cap": 14400,
+  "benchmark": "location_finding_T30",
+  "vsoed_target": {
+    "seed": 101,
+    "mean": 12.48084688744761,
+    "mcse": 0.041680056885260414,
+    "cases_sha256": "cbd2632af41a8c6ca8cbe55066d77b98791565b7ac301b0bea1965e84ec50f5b",
+    "bank_sha256": "703671b0fb01ddf74dfe60d51e44914c71647c92e7e5ee51d111a9acfcecfde8",
+    "seed102_native_vsoed_checkpoint": "NOT_VERIFIED"
+  },
+  "wall_seconds": 0.8499807640910149,
+  "optimizer_updates": 0,
+  "trajectory_accounting": {
+    "credit_replay": 16,
+    "primary_reference_replay": 4,
+    "trained_checkpoint_parity_per_seed": 4
+  }
+}

@@ -1,0 +1,160 @@
+version: sir_ode_t3_continuous_v1
+benchmark:
+  system:
+    name: sir_ode
+  N: 1
+  experiment:
+    experiment_type: eig_based
+    step_number: 3
+    methods:
+    - random
+    - fixed
+    - dad
+    - rl_sboed
+    - vsoed
+    - scorebed
+  observation:
+    noise_sigma: 1.0
+    sampling: infected_count_at_continuous_time
+  sir_ode:
+    population: 500.0
+    i0: 2.0
+    t_end: 100.0
+    beta_mean: 0.5
+    gamma_mean: 0.1
+    log_std: 0.5
+    min_spacing: 0.1
+    integration_steps_per_stage: 512
+    execution_backend: fused_rk4
+training_seed: 101
+seeds:
+  development: 2026102831
+  resolution: 2026102832
+  confirmation: 2026102833
+  restart_selection: 2026102834
+  numerics: 2026102835
+  profiling: 2026102836
+training_budget_seconds: 14400
+profile_budget_seconds: 1200
+checkpoint_seconds:
+- 1800
+- 3600
+- 7200
+- 14400
+evaluation_systems: 2048
+contrast_candidates:
+- 16384
+- 65536
+- 262144
+- 1000000
+resolution_thresholds:
+  mean_absolute_change_nats: 0.02
+  paired_change_nats: 0.02
+  maximum_MCSE_multiple: 0.25
+selection: latest fully serialized budget-eligible checkpoint; no test selection
+stopping: native finite schedule completion or charged time cap; no adaptive favorable
+  stopping
+feasibility_gate:
+  dad_minimum_projected_updates: 1000
+  fixed_minimum_projected_updates: 1000
+  rl_minimum_projected_postwarm_collections: 100
+  vsoed_minimum_projected_actor_updates: 1000
+  scorebed: full50000 score updates and500 policy updates per restart;10restarts or
+    explicitly compute-limited restart allocation with full score phase
+methods:
+  dad:
+    batch_size: 2000
+    contrasts: 2000
+    lr: 5.0e-05
+    betas:
+    - 0.8
+    - 0.998
+    reference_updates: 50000
+  fixed:
+    batch_size: 2000
+    contrasts: 2000
+    lr: 5.0e-05
+    betas:
+    - 0.8
+    - 0.998
+    reference_updates: 50000
+    contrast_sampling: One fresh iid prior bank shared across outer cases per update;
+      unbiased same expected finite-L objective; altered within-minibatch gradient
+      covariance
+  rl_sboed:
+    collection_batch: 100
+    contrasts: 100000
+    replay_batch: 4096
+    replay_capacity: 1000000
+    warm_transitions: 100000
+    gradient_steps_per_collection: 64
+    actor_lr: 0.0001
+    critic_lr: 0.0003
+    tau: 0.001
+    discount: 0.9
+    reference_trajectories: 100000000
+  vsoed:
+    initial_replay: 20000
+    new_trajectories: 1000
+    replay_batch: 10000
+    replay_capacity: 1000000
+    posterior_updates: 5
+    critic_updates: 5
+    actor_lr: 0.0005
+    posterior_lr: 0.0005
+    critic_lr: 0.001
+    lr_decay: 0.9999
+    discount: 1.0
+    exploration: 5.0
+    exploration_decay: 0.9999
+    target_rate: 0.1
+    transition: 10000
+    log_every: 100
+    n_incre: 1
+    posterior_coordinate_reference: log_parameters
+    updates: 1000000000
+    schedule_status: Native algorithm/LR schedule, nonbinding safety ceiling; stop
+      by4h, no verified finite-convergence claim
+  scorebed:
+    batch_size: 1024
+    score_reference_updates: 50000
+    policy_reference_updates: 500
+    restarts: 10
+    upstream_commit: cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4
+execution_implementation: sir_t3_common.T3SIR, identical float64 adaptive RK4 with
+  per-block zero-padding elimination and validated FMA
+convergence_assessment:
+  stop_early: false
+  requires_last_three_timepoints: true
+  minimum_interval_seconds: 1500
+  maximum_two_sided_95percent_change_bound_nats: 0.05
+full_testing:
+  parent_campaign: /home/qiqi/Documents/objective_power_grid_temp/scratch_runs/sir_ode_t3_baselines/sir_ode_t3_corrected_baselines_seed101_20261028T155016Z
+  authorization: User explicitly retained4hcap and requested every method be tested
+  dad: Run native fullbatch under4h; previous1000-update gate withdrawn, not a scientific
+    convergence threshold
+  fixed: Continue original optimizer/scheduler/RNG; original6822s credited toward
+    same14400s total; no reset or extra4h
+  scorebed:
+    maximum_score_updates: 18100
+    score_phase_charged_seconds_limit: 12600
+    native_score_LR_schedule_steps: 50000
+    native_policy_LR_schedule_steps: 500
+    restarts: 10
+    maximum_policy_updates_per_restart: 500
+    policy_rounds: Round-robin one native update per restart; retain last complete
+      matched round; stop with120s serialization reserve
+    primary_restart: 0
+    other_restarts: Evaluate all ten; report per-restart EIG and secondary mean/spread;
+      no highest-test selection
+    deviation: 'COMPUTE_LIMITED_NATIVE_STAGE_TRUNCATION: score pretraining capped
+      by time, optimizer/LR horizons uncompressed'
+  final_evaluation: All six on common2048confirmationcases and common development-calibrated
+    contrast resolution; reused original frozen confirmation seed, never training
+    or selection
+  cpu_smoke: batch4,2scoresteps,2restarts x1step,unchangedphysicalODE; correctness
+    only, discarded
+  no_interruption: true
+  full_resolution_seed: 2026102852
+  full_checkpoint_assessment_seed: 2026102851
+  checkpoint_assessment_trajectories: 2048

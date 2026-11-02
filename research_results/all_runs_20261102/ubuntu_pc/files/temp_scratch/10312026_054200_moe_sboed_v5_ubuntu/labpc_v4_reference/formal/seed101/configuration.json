@@ -1,0 +1,103 @@
+{
+  "method": "moe_sboed_v4_formal",
+  "status": "DEVELOPMENT_UNVALIDATED",
+  "seed": 101,
+  "initialization": "FROM_SCRATCH_NO_HISTORICAL_WEIGHTS",
+  "benchmark": {
+    "system": {
+      "name": "location_finding"
+    },
+    "N": 1,
+    "experiment": {
+      "experiment_type": "eig_based",
+      "step_number": 30,
+      "methods": [
+        "random",
+        "fixed",
+        "dad",
+        "rl_sboed",
+        "vsoed",
+        "scorebed",
+        "moe_sboed"
+      ]
+    },
+    "observation": {
+      "noise_sigma": 0.5,
+      "sampling": "normal_log_signal"
+    },
+    "location_finding": {
+      "design_bounds": [
+        -4.0,
+        4.0
+      ],
+      "random_design_distribution": "truncated_standard_normal"
+    },
+    "research": {
+      "paper_protocol": {
+        "reference": "https://arxiv.org/html/2306.10430v2",
+        "official_code": "https://github.com/wgshen/vsOED",
+        "upstream_commit": "d0884f9ba30fbddc56618841c68af2f3bfe16539",
+        "case": "two_source_common_bounded_box",
+        "regime": "one_million_episode_pilot",
+        "corrected_methods": true,
+        "correction_note": "All methods train and evaluate in [-4,4]^2. Random uses standard normal conditioned on the box; source prior remains iid standard normal. Equal1million primary training episodes. ScoreBED uses feasibility-only sigmoid adapter.",
+        "nominal_training_trajectories": 1000000,
+        "evaluation": "shared_prior_bank_streamed_sPCE",
+        "training_device": "cuda",
+        "checkpoint_selection": "final",
+        "observation_discrepancy": "Paper Section 4.2 omits log; SOURCE.deterministic returns log(signal). Follow executable code.",
+        "training_budget_unit": "primary_episodes",
+        "extensions": "All fresh observed training episodes count, including MoE specialist and ScoreBED score pretraining. Contrast likelihood work, replay updates, validation and runtime reported separately."
+      }
+    }
+  },
+  "horizon": 30,
+  "batch": 2000,
+  "contrasts": 2000,
+  "learning_rate": 5e-05,
+  "betas": [
+    0.8,
+    0.998
+  ],
+  "lr_decay": 0.98,
+  "lr_schedule_every": 1000,
+  "gradient_clip": 5,
+  "balance": 0.001,
+  "budget_seconds": 14400,
+  "auxiliary_every": 100,
+  "auxiliary_batch": 64,
+  "auxiliary_contrasts": 1024,
+  "auxiliary_router_gradient_fraction": 0.05,
+  "auxiliary_normalization": "detached RMS, clamp[-1,1]",
+  "safety": "skip nonfinite targets, RMS<1e-8 or RMS>100; never increase coefficient",
+  "checkpoint_updates": [
+    1000,
+    3000,
+    5000
+  ],
+  "development_seed": 395101,
+  "final_seed": 1001,
+  "diagnostic_seed": 395201,
+  "official_seed1001_unused": "Used only after final checkpoint freeze, per formal request; never for development or selection",
+  "contextual_checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/_legacy_archive/labpc/objective_power_grid_v1_specialization_integration/experiments/10262026/10262026_v1_cgs_seed101/models/full/selected.pt",
+  "contextual_sha256": "b680081479f1ca0227f250265642cea0452ce57e110d26220746d7966b50edfd",
+  "original_checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/_legacy_archive/labpc/objective_power_grid_deepseekmoe_20261023/experiments/10232026/10232026_deepseekmoe_sboed/models/full/selected.pt",
+  "original_sha256": "f110766019e3628bb02c93815becd7e5795b3abc05626eabd91b7dbeb0381ee7",
+  "original_reference_lookup": {
+    "registered_sha256": "f110766019e3628bb02c93815becd7e5795b3abc05626eabd91b7dbeb0381ee7",
+    "candidates": 6,
+    "found": true
+  },
+  "formal_not_pilot": true,
+  "native_maximum_updates": 50000,
+  "historical_arrays_directory": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/_legacy_archive/labpc/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/benchmarks/location_seed101_matched_compute/evaluations",
+  "historical_cases_sha256": "cbd2632af41a8c6ca8cbe55066d77b98791565b7ac301b0bea1965e84ec50f5b",
+  "historical_bank_sha256": "703671b0fb01ddf74dfe60d51e44914c71647c92e7e5ee51d111a9acfcecfde8",
+  "historical_reported_EIG": 11.04404166,
+  "hourly_checkpoints_seconds": [
+    3600,
+    7200,
+    10800,
+    14400
+  ]
+}

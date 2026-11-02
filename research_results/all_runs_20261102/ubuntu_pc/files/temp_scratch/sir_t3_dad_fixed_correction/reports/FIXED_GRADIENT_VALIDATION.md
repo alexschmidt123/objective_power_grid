@@ -1,0 +1,92 @@
+# FIXED GRADIENT VALIDATION
+
+[
+  {
+    "times": [
+      0.1001,
+      0.2002,
+      99.999
+    ],
+    "gradient_norm": 5.1070057623129816e-05,
+    "checks": [
+      {
+        "epsilon": 0.0001,
+        "autograd": -2.016088464386225e-05,
+        "central_finite_difference": -2.0160926261780787e-05,
+        "absolute_error": 4.161791853659171e-11
+      },
+      {
+        "epsilon": 1e-05,
+        "autograd": -2.016088464386225e-05,
+        "central_finite_difference": -2.0161072811220038e-05,
+        "absolute_error": 1.8816735778711237e-10
+      }
+    ]
+  },
+  {
+    "times": [
+      10.0,
+      20.0,
+      30.0
+    ],
+    "gradient_norm": 0.0,
+    "checks": [
+      {
+        "epsilon": 0.0001,
+        "autograd": -1.8859792198874002e-230,
+        "central_finite_difference": 0.0,
+        "absolute_error": 1.8859792198874002e-230
+      },
+      {
+        "epsilon": 1e-05,
+        "autograd": -1.8859792198874002e-230,
+        "central_finite_difference": 0.0,
+        "absolute_error": 1.8859792198874002e-230
+      }
+    ]
+  },
+  {
+    "times": [
+      25.0,
+      50.0,
+      75.0
+    ],
+    "gradient_norm": 1.3412533807179194,
+    "checks": [
+      {
+        "epsilon": 0.0001,
+        "autograd": 0.29783601397105985,
+        "central_finite_difference": 0.29783598000321376,
+        "absolute_error": 3.3967846091442766e-08
+      },
+      {
+        "epsilon": 1e-05,
+        "autograd": 0.29783601397105985,
+        "central_finite_difference": 0.29783601351862643,
+        "absolute_error": 4.5243342405854037e-10
+      }
+    ]
+  },
+  {
+    "times": [
+      54.97239610199098,
+      64.94378976169158,
+      67.49268462533506
+    ],
+    "gradient_norm": 0.015402732587384647,
+    "checks": [
+      {
+        "epsilon": 0.0001,
+        "autograd": 0.003724926153662847,
+        "central_finite_difference": 0.003724926234127679,
+        "absolute_error": 8.046483184614983e-11
+      },
+      {
+        "epsilon": 1e-05,
+        "autograd": 0.003724926153662847,
+        "central_finite_difference": 0.0037249261453098366,
+        "absolute_error": 8.353010557543561e-12
+      }
+    ]
+  }
+]

@@ -1,0 +1,38 @@
+[run.sh] Default results: experiments/MMDDYYYY/MMDDYYYY_<time>_<objective_parameters>/
+dad update 1: train sPCE=1.369450
+dad journal validation {'checkpoint': 1, 'episodes': 4, 'training_seconds': 0.40037815901450813, 'eig': 1.3499733437970973, 'mc_standard_error': 0.5497935730691864, 'paired_improvement_from_anchor': None, 'improvement_threshold': None, 'patience_used': 0, 'selected': False, 'status': 'training', 'update': 1, 'validation': {'seed': 771001, 'systems': 4, 'contrasts': 8, 'paired_draws_sha256': '8d7db6e662029bce531854502b7d4b43f3e3442369922c7573cc0360a66a65a7', 'seconds': 0.027537032001418993, 'forward_particle_stages': 1080, 'device': 'cpu', 'mode': 'hard_deployed_policy', 'secondary_parameter_inference': False}}
+dad update 2: train sPCE=2.042230
+dad journal validation {'checkpoint': 2, 'episodes': 8, 'training_seconds': 0.42230336999637075, 'eig': 1.3512747665359242, 'mc_standard_error': 0.5463481453312048, 'paired_improvement_from_anchor': 0.0013014227388268296, 'improvement_threshold': 0.01, 'patience_used': 1, 'selected': True, 'status': 'fixed_budget_complete', 'update': 2, 'validation': {'seed': 771001, 'systems': 4, 'contrasts': 8, 'paired_draws_sha256': '8d7db6e662029bce531854502b7d4b43f3e3442369922c7573cc0360a66a65a7', 'seconds': 0.026687353994930163, 'forward_particle_stages': 1080, 'device': 'cpu', 'mode': 'hard_deployed_policy', 'secondary_parameter_inference': False}}
+dad paper evaluation: 2/2 trajectories, L=8
+/home/qiqi/Documents/objective_power_grid_e1_20261018_v2/src/research/vendor/rl_boed/garage/distributions/tanh_normal.py:23: UserWarning: <class 'src.research.native_rl_reference.TanhNormal'> does not define `arg_constraints`. Please set `arg_constraints = {}` or initialize the distribution with `validate_args=False` to turn off validation.
+  super().__init__()
+rl_sboed journal validation {'checkpoint': 1, 'episodes': 4, 'training_seconds': 0.05858669799636118, 'eig': 2.15208034609852, 'mc_standard_error': 0.024398537454705806, 'paired_improvement_from_anchor': None, 'improvement_threshold': None, 'patience_used': 0, 'selected': False, 'status': 'training', 'update': 2, 'validation': {'seed': 771001, 'systems': 4, 'contrasts': 8, 'paired_draws_sha256': '8d7db6e662029bce531854502b7d4b43f3e3442369922c7573cc0360a66a65a7', 'seconds': 0.04799786297371611, 'forward_particle_stages': 1080, 'device': 'cpu', 'mode': 'native_stochastic_policy', 'secondary_parameter_inference': False}}
+native RL-BOED {'primary_episodes': 8, 'collection_iterations': 4, 'gradient_updates': 4, 'training_spce': 4.036666077896731, 'alpha': 0.9996002316474915, 'target_entropy': -2.000285714285715}
+rl_sboed journal validation {'checkpoint': 2, 'episodes': 8, 'training_seconds': 0.10760342702269554, 'eig': 1.9280332445347184, 'mc_standard_error': 0.23133411513744992, 'paired_improvement_from_anchor': -0.22404710156380148, 'improvement_threshold': 0.437810447544344, 'patience_used': 1, 'selected': True, 'status': 'fixed_budget_complete', 'update': 4, 'validation': {'seed': 771001, 'systems': 4, 'contrasts': 8, 'paired_draws_sha256': '8d7db6e662029bce531854502b7d4b43f3e3442369922c7573cc0360a66a65a7', 'seconds': 0.04734696101513691, 'forward_particle_stages': 1080, 'device': 'cpu', 'mode': 'native_stochastic_policy', 'secondary_parameter_inference': False}}
+rl_sboed paper evaluation: 2/2 trajectories, L=8
+ERROR:2026-10-18 00:50:41,665:jax._src.xla_bridge:487: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid_e1_20261018_v2/.venv_scorebed/lib/python3.11/site-packages/jax/_src/xla_bridge.py", line 485, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/home/qiqi/Documents/objective_power_grid_e1_20261018_v2/.venv_scorebed/lib/python3.11/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/home/qiqi/Documents/objective_power_grid_e1_20261018_v2/.venv_scorebed/lib/python3.11/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: CUDA_ERROR_NO_DEVICE
+ERROR:jax._src.xla_bridge:Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid_e1_20261018_v2/.venv_scorebed/lib/python3.11/site-packages/jax/_src/xla_bridge.py", line 485, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/home/qiqi/Documents/objective_power_grid_e1_20261018_v2/.venv_scorebed/lib/python3.11/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/home/qiqi/Documents/objective_power_grid_e1_20261018_v2/.venv_scorebed/lib/python3.11/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: CUDA_ERROR_NO_DEVICE
+ScoreBED official {'phase': 'score', 'step': 2, 'episodes': 8, 'metrics': {'clip_applied': 0.0, 'grad_norm_preclip': 571.54541015625, 'loss_total': 118.87171173095703, 'loss_unweighted_total': 5.489055156707764, 'loss_x_component': 1.5793087482452393, 'loss_y_component': 117.29240417480469, 'loss_y_unweighted': 3.9097468852996826, 'param_norm': 129.09640502929688, 'update_norm': 0.34563952684402466}}
+ScoreBED official {'phase': 'policy', 'restart': 0, 'step': 2, 'episodes': 8, 'restart_episodes': 8, 'metrics': {'clip_applied': 1.0, 'grad_norm_preclip': 66.32244873046875, 'param_norm': 10.725757598876953, 'update_norm': 0.002452410524711013}}
+ScoreBED common journal validation {'checkpoint': 1, 'episodes': 34, 'training_seconds': 20.913149240019266, 'eig': 1.9737913352141487, 'mc_standard_error': 0.2227304489462273, 'paired_improvement_from_anchor': None, 'improvement_threshold': None, 'patience_used': 0, 'selected': True, 'status': 'fixed_budget_complete', 'update': 2, 'validation': {'seed': 771001, 'systems': 4, 'contrasts': 8, 'paired_draws_sha256': '8d7db6e662029bce531854502b7d4b43f3e3442369922c7573cc0360a66a65a7', 'seconds': 0.06170526999630965, 'forward_particle_stages': 1080, 'device': 'cpu', 'mode': 'hard_deployed_policy', 'secondary_parameter_inference': False}}
+SCOREBED_OFFICIAL_TRAINING_COMPLETE
+scorebed paper evaluation: 2/2 trajectories, L=8
+RESULT_DIR=/home/qiqi/Documents/objective_power_grid_e1_20261018_v2/experiments/10182026/10182026_e1_original_methods_v2/readiness/native_launchers

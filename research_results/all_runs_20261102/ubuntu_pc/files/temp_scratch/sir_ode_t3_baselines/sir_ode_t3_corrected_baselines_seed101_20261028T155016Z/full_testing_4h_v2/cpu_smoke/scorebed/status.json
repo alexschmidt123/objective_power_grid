@@ -1,0 +1,56 @@
+{
+  "method": "scorebed",
+  "state": "TRAINING_COMPLETE",
+  "PID": 1306241,
+  "charged_seconds": 32.855712743941694,
+  "score_updates": 2,
+  "policy_rounds": 1,
+  "restarts": 2,
+  "batch_size": 4,
+  "actual_score_updates": 2,
+  "result": {
+    "status": "CPU_SMOKE_PASS",
+    "charged_training_seconds": 32.85559005988762,
+    "budget_seconds": 600,
+    "budget_eligible": true,
+    "score_updates": 2,
+    "native_score_reference_updates": 50000,
+    "policy_updates_per_restart": 1,
+    "native_policy_reference_updates_per_restart": 500,
+    "policy_restarts": 2,
+    "standardisation_trajectories": 32,
+    "generated_training_trajectories": 62,
+    "score_batch": 4,
+    "policy_batch": 4,
+    "training_seed": 101,
+    "checkpoint_selection": "Final budget-eligible EMA per restart; primary restart0 predeclared, all ten evaluated; no favorable EIG selection",
+    "native_schedule_complete": false,
+    "allocation_rule": {
+      "maximum_score_updates": 18100,
+      "score_phase_charged_seconds_limit": 12600,
+      "native_score_LR_schedule_steps": 50000,
+      "native_policy_LR_schedule_steps": 500,
+      "restarts": 10,
+      "maximum_policy_updates_per_restart": 500,
+      "policy_rounds": "Round-robin one native update per restart; retain last complete matched round; stop with120s serialization reserve",
+      "primary_restart": 0,
+      "other_restarts": "Evaluate all ten; report per-restart EIG and secondary mean/spread; no highest-test selection",
+      "deviation": "COMPUTE_LIMITED_NATIVE_STAGE_TRUNCATION: score pretraining capped by time, optimizer/LR horizons uncompressed"
+    },
+    "native_state_paths": [
+      {
+        "restart": 0,
+        "path": "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/sir_ode_t3_baselines/sir_ode_t3_corrected_baselines_seed101_20261028T155016Z/full_testing_4h_v2/cpu_smoke/scorebed/restart0_round1_final.msgpack",
+        "sha256": "f9e622119c33a5012b26e5d18b7cac431a1269354f4425c9a9d045dff92677a8",
+        "updates": 1
+      },
+      {
+        "restart": 1,
+        "path": "/home/qiqi/Documents/objective_power_grid_temp/scratch_runs/sir_ode_t3_baselines/sir_ode_t3_corrected_baselines_seed101_20261028T155016Z/full_testing_4h_v2/cpu_smoke/scorebed/restart1_round1_final.msgpack",
+        "sha256": "89edabd2d977577410398796a308e65515dcda78c6a5c71c936a1ed19e60b95e",
+        "updates": 1
+      }
+    ],
+    "source_manifest_sha256": null
+  }
+}

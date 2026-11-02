@@ -1,0 +1,147 @@
+{
+  "status": "PASS",
+  "method": "vsoed",
+  "total_seconds": 1.3223020189907402,
+  "records": [
+    {
+      "phase": "native_actor_critic_posterior_cycle",
+      "seconds": 1.2188394030090421,
+      "update": 1,
+      "episodes": 21000
+    },
+    {
+      "phase": "native_actor_critic_posterior_cycle",
+      "seconds": 1.2680823609698564,
+      "update": 2,
+      "episodes": 22000
+    },
+    {
+      "phase": "native_actor_critic_posterior_cycle",
+      "seconds": 1.3158166399225593,
+      "update": 3,
+      "episodes": 23000
+    },
+    {
+      "phase": "complete_native_initialization_and_3cycles",
+      "seconds": 1.12447489798069,
+      "data": {
+        "training": "official_vsOED_GMM_SIR_ODE_adapter",
+        "upstream_commit": "d0884f9ba30fbddc56618841c68af2f3bfe16539",
+        "profile": {
+          "initial_replay": 20000,
+          "new_trajectories": 1000,
+          "replay_batch": 10000,
+          "replay_capacity": 1000000,
+          "posterior_updates": 5,
+          "critic_updates": 5,
+          "actor_lr": 0.0005,
+          "posterior_lr": 0.0005,
+          "critic_lr": 0.001,
+          "lr_decay": 0.9999,
+          "discount": 1.0,
+          "exploration": 5.0,
+          "exploration_decay": 0.9999,
+          "target_rate": 0.1,
+          "transition": 10000,
+          "log_every": 1,
+          "n_incre": 1,
+          "posterior_coordinate_reference": "log_parameters",
+          "updates": 3
+        },
+        "device": "cuda:0",
+        "selected_update": 3,
+        "checkpoint_selection": "final, as upstream",
+        "policy_parameters": 133889,
+        "history": [
+          {
+            "Epoch": "0",
+            "Reward/MeanReward": "-14.670473098754883",
+            "Reward/StdReward": "10.298482894897461",
+            "Design/MeanDesign": "[48.439273834228516]",
+            "Design/StdDesign": "[0.19057022035121918]",
+            "ReplayBuffer/buffer_size": "20000"
+          },
+          {
+            "Epoch": "1",
+            "Reward/MeanReward": "-7.045110702514648",
+            "Reward/StdReward": "5.531412124633789",
+            "Design/MeanDesign": "[46.810237884521484]",
+            "Design/StdDesign": "[0.20936381816864014]",
+            "ReplayBuffer/buffer_size": "21000"
+          }
+        ],
+        "training_seconds": 1.1243927080649883,
+        "generated_training_trajectories": 23000,
+        "contrast_training_trajectories": 0,
+        "training_forward_trajectories": 23000,
+        "training_trajectory_budget": null,
+        "reward_discount": 1.0,
+        "implementation_adaptations": "Common bounded action space; published raw network inputs and Adam actor updates; no added actor trust constraint; explicit episode cap; reward discount recorded separately; vendor unchanged",
+        "posterior_optimizer_updates": 15,
+        "critic_optimizer_updates": 15,
+        "actor_update_trust_radius": null,
+        "actor_backtracks": 0,
+        "replay_batch_size": 10000,
+        "actor_optimizer_updates": 3,
+        "forward_particle_stages": 69000,
+        "native_optimizer_updates": {
+          "actor": 3,
+          "critic": 15,
+          "posterior": 15
+        },
+        "auxiliary_checkpoint_role": "last_training_state; selected actor is separately validated",
+        "benchmark_adaptation": "Explicit ODE and Gaussian-noise sampler, native log-rate coordinates and upstream training prior convention, native percentage-time history; hidden ODE states never exposed; published SIR used a stochastic data bank",
+        "selected_checkpoint": {
+          "update": 3
+        },
+        "resource_ledger": {
+          "schema": 2,
+          "scope": "current training phase; base cost separately attributed",
+          "counts": {
+            "fresh_complete_episodes": 23000,
+            "true_parameter_stage_propagations": 69000,
+            "contrast_parameter_stage_propagations": 0,
+            "scalar_conditional_log_density_evaluations": 0
+          },
+          "optimizer_updates": {
+            "policy": 3,
+            "critic": 15,
+            "posterior": 15,
+            "score": null,
+            "temperature": null
+          },
+          "replay_transition_samples": null,
+          "offline_seconds": 1.1243927080649883,
+          "validation_seconds": null,
+          "base_training_seconds": null,
+          "ode_rhs_evaluations": null,
+          "solver_backward_work": null,
+          "gpu_occupancy_seconds": null,
+          "nle_equivalent_proxy": null,
+          "basis": "derived from native executed counters, not direct hardware measurement",
+          "limitations": [
+            "score-target and backward recomputation not counted",
+            "Unknown fields are not zero; walltime is not GPU occupancy"
+          ],
+          "likelihood_gradient_work": {
+            "scalar_stage_terms": null,
+            "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+          },
+          "replay_work": {
+            "minibatch_trajectories": 10000,
+            "optimizer_steps": {
+              "policy": 3,
+              "critic": 15,
+              "posterior": 15,
+              "score": null,
+              "temperature": null
+            },
+            "note": "Posterior steps may include stage-specific nets; stored data are not fresh episodes"
+          }
+        }
+      }
+    }
+  ],
+  "hardware": "NVIDIA GeForce RTX 5080",
+  "GPU_utilization_snapshot": "10 %, 947 MiB\n"
+}

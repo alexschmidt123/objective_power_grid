@@ -1,0 +1,47 @@
+F..........................                                              [100%]
+=================================== FAILURES ===================================
+_______ test_effective_batch_gradient_accumulation_preserves_native_loss _______
+
+    def test_effective_batch_gradient_accumulation_preserves_native_loss():
+     torch.manual_seed(611001);a=DeepSeekPolicy().train();b=copy.deepcopy(a);x=bench();truth,bank,noise=draws(x,8,16,611002,'cpu')
+     r=rollout(x,a,30,8,611002,16,truth=truth,noise=noise,prior_particles=bank)
+     loss=-r['info'][:,-1].mean()+a.balance_loss();loss.backward()
+>    stats=primary_backward(bench(),b,truth,bank,noise,611002,2)
+
+tools/tests/test_moe_v5a_training.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/research/moe_v5a_training.py:64: in primary_backward
+    result=rollout(benchmark,model,30,n,seed,contrasts,truth=truth[start:start+n],noise=noise[start:start+n],prior_particles=bank[start:start+n])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<src.research.benchmarks.LocationFinding object at 0x7c7b00d0e9e0>, DeepSeekPolicy(
+  (encoder): Sequential(
+    (0):...features=16, bias=False)
+    )
+  )
+  (router): Linear(in_features=16, out_features=7, bias=False)
+), 30, 2, 611002, 16)
+kwargs = {'truth': tensor([[ 0.0884, -0.8492,  0.9943, -0.1700],
+        [-0.5737,  2.0650, -2.0086, -0.1530]], dtype=torch.flo...,
+         [-0.5948, -0.1185,  0.2535, -0.5828],
+         [-0.6470,  0.3481, -0.6303, -1.2321]]], dtype=torch.float64)}
+
+    def counted(*args,**kwargs):
+        horizon=args[2] if len(args)>2 else kwargs['horizon']
+        batch=args[3] if len(args)>3 else kwargs['batch']
+        contrasts=args[5] if len(args)>5 else kwargs['contrasts']
+        r=row()
+>       if contrasts>32 or r['trajectories']+batch>16:raise AssertionError('Test exceeds per-mode tiny smoke cap')
+E       AssertionError: Test exceeds per-mode tiny smoke cap
+
+tools/moe_v5_test_accounting.py:17: AssertionError
+=============================== warnings summary ===============================
+tools/tests/test_deepseek_sboed.py::test_dad_raw_encoder_empty_history_and_order_symmetry
+  /home/qiqi/Documents/objective_power_grid_temp/tools/tests/test_deepseek_sboed.py:32: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+    if stage>0:assert float(m.input_norm(m.encode(f,stage)).square().mean().sqrt())<1.01
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tools/tests/test_moe_v5a_training.py::test_effective_batch_gradient_accumulation_preserves_native_loss
+1 failed, 26 passed, 1 warning in 1.01s

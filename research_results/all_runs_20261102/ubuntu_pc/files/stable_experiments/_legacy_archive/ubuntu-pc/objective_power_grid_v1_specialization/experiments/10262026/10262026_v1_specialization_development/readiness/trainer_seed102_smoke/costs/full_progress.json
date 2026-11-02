@@ -1,0 +1,116 @@
+{
+  "records": [
+    {
+      "update": 1,
+      "train_spce": 2.4010645909642534,
+      "total_loss": -2.400037045042862,
+      "preclip_gradient_norm": 4.057169039717882,
+      "charged_seconds": 1.4755922480253503,
+      "action_boundary_fraction": 0.0,
+      "nearly_repeated_fraction": 0.4804137931034483,
+      "action_std": [
+        0.01730392742052568,
+        0.020696074812592676
+      ],
+      "routing": {
+        "fraction_contexts_selected": [
+          1.0,
+          0.03333333333333333,
+          0.6113833333333334,
+          0.38861666666666667,
+          0.0,
+          0.8076500000000001,
+          0.15901666666666667
+        ],
+        "mean_softmax": [
+          0.15205268820522488,
+          0.13616219168777796,
+          0.14478438064094384,
+          0.14308212108953874,
+          0.13833731671269525,
+          0.14530606094453907,
+          0.1402752407192803
+        ],
+        "effective_gate_experts": 6.994998558944939,
+        "distinct_selected_experts": 6,
+        "mean_selected_gate_mass": 0.4433729908458372,
+        "top_k": 3
+      },
+      "shared_gradient": 0.006716072916551219,
+      "router_gradient": 0.0011276131171889857,
+      "routed_gradient": [
+        0.0007344046927024265,
+        0.0,
+        0.0014304902767145863,
+        0.00018641186850699447,
+        0.0,
+        0.0014474031934645956,
+        0.0002948820932854341
+      ],
+      "normalized_late_context_RMS": 0.999999809688732,
+      "raw_encoder_has_no_bounded_saturating_activation": true,
+      "learning_rate": 4.9e-05,
+      "context_gradient": null,
+      "specialization_seconds_this_update": 0.0,
+      "training_seed": 102
+    }
+  ],
+  "clock": {
+    "version": 1,
+    "start": 873770.953814862,
+    "budget_seconds": 60.0,
+    "credit_seconds": 0.0,
+    "hardware": "NVIDIA GeForce RTX 5080",
+    "excluded": [],
+    "counts": {
+      "fresh_complete_primary_trajectories": 4000,
+      "true_parameter_stages": 120000,
+      "contrast_parameter_stages": 240000000,
+      "scalar_conditional_likelihood_evaluations": 240120000,
+      "policy_optimizer_updates": 2,
+      "shared_FFN_contexts": 60000,
+      "routed_FFN_contexts": 180000
+    },
+    "components": {
+      "readiness_probe_discarded_weights": {
+        "fresh_complete_primary_trajectories": 2000,
+        "true_parameter_stages": 60000,
+        "contrast_parameter_stages": 120000000,
+        "scalar_conditional_likelihood_evaluations": 120060000,
+        "policy_optimizer_updates": 1
+      },
+      "training": {
+        "fresh_complete_primary_trajectories": 2000,
+        "true_parameter_stages": 60000,
+        "contrast_parameter_stages": 120000000,
+        "scalar_conditional_likelihood_evaluations": 120060000,
+        "policy_optimizer_updates": 1,
+        "shared_FFN_contexts": 60000,
+        "routed_FFN_contexts": 180000
+      }
+    },
+    "checkpoints": [],
+    "charged_seconds": 1.4818461070535704,
+    "fraction_of_allocated_budget": 0.024697663101445264,
+    "unused_seconds": 58.51813043397851,
+    "unit": "exclusive-device allocated training wall seconds",
+    "scope": "includes setup, compilation, initialization, all training phases, replay and checkpoint overhead; excludes logged evaluation intervals",
+    "not_equal_to_FLOPs": true
+  },
+  "forward_parameter_stages": 120060000,
+  "counts": {
+    "total_parameters": 8434,
+    "activated_parameters_per_context": 6898,
+    "shared_experts": 1,
+    "routed_experts": 7,
+    "top_k": 3,
+    "expert_feature_dimension": 16,
+    "routed_FFN_width": 8,
+    "shared_FFN_width": 8,
+    "FFN_linear_FLOPs_per_context": 3072,
+    "history_encoder_linear_FLOPs_per_observation": 9728,
+    "router_linear_FLOPs_per_context": 224,
+    "action_head_linear_FLOPs_per_context": 64,
+    "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs"
+  }
+}

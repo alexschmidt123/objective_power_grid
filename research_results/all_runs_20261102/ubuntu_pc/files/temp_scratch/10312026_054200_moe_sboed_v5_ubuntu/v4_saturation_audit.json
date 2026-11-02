@@ -1,0 +1,92 @@
+{
+  "status": "saturation_confirmed",
+  "criterion": "At least25percent of original L2000 training trajectories within0.1nat of finite contrast ceiling",
+  "evidence": "Completed immutable native-training logs, not the theoretical bound or tiny L32 smoke alone",
+  "training_ceiling": 7.601402334583733,
+  "historical_measurements": [
+    {
+      "seed": 101,
+      "sha256": "067c5c63d93b0be54b610ef1b1a83d5de19dacb1756a6943f0b02dc71ff04931",
+      "remote_origin": "labpc:/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/moe_sboed_v4_formal_seeds101_102/seed101/logs/training.jsonl",
+      "bytes": 1074522,
+      "logged_batches": 1179,
+      "batch_size": 2000,
+      "training_contrasts": 2000,
+      "last_logged_update": 29450,
+      "last_training_spce": 7.533762211479517,
+      "last_fraction_within_point10": 0.9045,
+      "late_window_batches": 100,
+      "late_window_logged_trajectories": 200000,
+      "late_mean_fraction_within_point10": 0.914245,
+      "late_mean_training_spce": 7.532092263068583,
+      "definition": "info > log(2001)-0.1, measured on each logged native B2000 training batch; checked against frozen formal trainer source",
+      "within_point01": "NOT_LOGGED",
+      "stagewise_training_resolution_saturation": "NOT_LOGGED"
+    },
+    {
+      "seed": 102,
+      "sha256": "544d57b5fef85c9e69551f7b0d02ede44dbd36cab342cb16bc819c15e446198a",
+      "remote_origin": "labpc:/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/moe_sboed_v4_formal_seeds101_102/seed102/logs/training.jsonl",
+      "bytes": 1078596,
+      "logged_batches": 1184,
+      "batch_size": 2000,
+      "training_contrasts": 2000,
+      "last_logged_update": 29575,
+      "last_training_spce": 7.515475244658968,
+      "last_fraction_within_point10": 0.8885000000000001,
+      "late_window_batches": 100,
+      "late_window_logged_trajectories": 200000,
+      "late_mean_fraction_within_point10": 0.917055,
+      "late_mean_training_spce": 7.534602211363877,
+      "definition": "info > log(2001)-0.1, measured on each logged native B2000 training batch; checked against frozen formal trainer source",
+      "within_point01": "NOT_LOGGED",
+      "stagewise_training_resolution_saturation": "NOT_LOGGED"
+    }
+  ],
+  "new_tiny_diagnostics": {
+    "101": {
+      "contrasts": 32,
+      "near_ceiling_point10": 1.0,
+      "gradient_norms_training_loss_including_original_balance": {
+        "encoder": 0.0029939192107864433,
+        "shared": 3.0256635660510963e-05,
+        "router": 0.00028038363606789024,
+        "head": 0.0004586355014491881,
+        "routed.0": 4.384231439631418e-06,
+        "routed.1": 7.62184646389173e-06,
+        "routed.2": 8.329342683249673e-07,
+        "routed.3": 2.1384698424642304e-06,
+        "routed.4": 1.1653774074705026e-06,
+        "routed.5": 1.3652477860151562e-06,
+        "routed.6": 4.152423892428486e-06,
+        "time_vector": 1.0458453445862617e-05,
+        "input_norm": 6.392549498046693e-05
+      },
+      "gradient_parity_max_absolute_error": 0.0
+    },
+    "102": {
+      "contrasts": 32,
+      "near_ceiling_point10": 1.0,
+      "gradient_norms_training_loss_including_original_balance": {
+        "encoder": 0.002558349065867629,
+        "shared": 0.00018125066069816007,
+        "router": 0.00033448217859670994,
+        "head": 0.0021315758500906213,
+        "routed.0": 3.274628285038218e-05,
+        "routed.1": 4.9500527437539936e-05,
+        "routed.2": 5.126802854095258e-05,
+        "routed.3": 1.9723684983158906e-06,
+        "routed.4": 1.5328411835960303e-05,
+        "routed.5": 2.9384583646103468e-05,
+        "routed.6": 1.2889538718263409e-05,
+        "time_vector": 1.075204540608227e-05,
+        "input_norm": 0.0013420012575708214
+      },
+      "gradient_parity_max_absolute_error": 0.0
+    }
+  },
+  "within_point01_at_L2000": "NOT_MEASURED",
+  "conditional_auxiliary_enabled": false,
+  "reason": "Location posterior negatives remain unvalidated; renewed-posterior objective stays disabled",
+  "conclusion": "Finite-contrast training saturation is empirically present; this does not prove V5-A improves EIG or that all training gradients vanish"
+}

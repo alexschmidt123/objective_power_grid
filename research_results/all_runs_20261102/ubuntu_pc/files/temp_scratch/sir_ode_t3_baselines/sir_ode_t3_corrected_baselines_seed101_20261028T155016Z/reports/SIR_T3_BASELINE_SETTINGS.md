@@ -1,0 +1,14 @@
+# Native baseline settings
+
+All methods share the physical benchmark, feasible-action mapping and final paired explicit-likelihood evaluator. Objectives and optimizer counts differ by method. Values below are frozen BEFORE primary training.
+
+|Method|Training objective|Architecture|Optimizer/LR|Batch|Training contrasts|Replay|Schedule|Alignment/adaptation|
+|---|---|---|---|---:|---:|---|---|---|
+|Random|None|Sequential conditional uniform feasible times|None|N/A|N/A|None|No training|SIR_ADAPTED continuous map|
+|Optimized Fixed|Terminal full-horizon sPCE|Three trainable nonadaptive logits|Adam5e-5,beta(.8,.998)|2000|2000|None|50000 prescribed offline updates, gamma.98 after1,1001,...;4hcap|SIR_ADAPTED; shared iid contrast bank changes batch covariance, not expected objective; exact deterministic reuse|
+|DAD|Original terminal sequential sPCE|Observed(time,count) ->256ReLU->16 sum->shared emitter|Adam5e-5,beta(.8,.998),no added gradient clip|2000|2000|None|Native50000updates, gamma.98 after1,1001,...;4hcap|PAPER_ALIGNED objective/optimizer; SIR_ADAPTED normalized history/action; readiness may block|
+|RL-sBOED|Native incremental sPCE rewards with SAC/REDQ,discount.9|Native128x128 history encoder,64encoding;128x128 actor and two native Q nets|ActorAdam1e-4,QAdam3e-4,native temperature optimizer|100 collected trajectories;4096 replay|100000|Capacity1M transitions,warm100000 transitions,64updates/collection,tau.001,M2|Preserve entropy annealing and native replay;4hcap|PAPER_ALIGNED native kernels/schedule; SIR_ADAPTED physics/history/time action; COMPUTE_LIMITED unless supported plateau|
+|vsOED|Native variational BA actor/critic/posterior|Actor/critic256x3ReLU;8component joint GMM posterior|Actor/postAdam5e-4,criticAdam1e-3,gamma.9999|1000 new;10000 replay|None during training|Initial20000,capacity1M,5critic+5posterior/actor,tau.1|discount1,exploration5 decays.9999,transition10000,n_incre1;4hcap|Native pinned algorithm; SIR_ADAPTED log-rate posterior and invertible time/count input units; no fully trained paper reproduction claim|
+|ScoreBED|Native conservative score matching then score-gradient policy training|4layer256dim8headRFF Transformer;potential head256;native2GRU64 policy with256encoder/emitter|Native score warmup-cosine2e-4->1e-5;policyAdam1e-4|1024;policy chunks256|1024 inner for policy gradient;none for score fitting|No replay|50000scoreupdates;500policyupdates per restart;10restarts|Native stages/restarts preserved in required schedule. SIR_ADAPTED scalar head/ODE. No shortened primary launched if infeasible|
+
+Native reference alignment is separate from SIR-specific architecture/physics adaptation and training completion. Profiled weights are discarded, never promoted as well-trained results. Native settings are not weakened to fit a convenient episode count.
