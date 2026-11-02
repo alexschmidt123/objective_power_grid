@@ -1,0 +1,2 @@
+# Focused mechanism study
+After E1 freeze:single versus four experts; capacity-matched single policy; fixed versus learned routing; relaxed versus ST; base/single-residual/ResMoE; forced-reroute versus learned switching. Predeclare capacity/cost controls. Limited expert count1/2/4/8, router schedule, noise and horizon sensitivity; no factorial search. Five seeds for decisive contrasts. No ablation training released yet.

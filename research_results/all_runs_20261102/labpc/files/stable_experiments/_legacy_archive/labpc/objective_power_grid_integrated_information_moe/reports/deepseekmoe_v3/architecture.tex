@@ -1,0 +1,11 @@
+\begin{tikzpicture}[node distance=8mm, every node/.style={draw,align=center}]
+\node (h) {Observed history};
+\node[below=of h] (z) {Shared sum-history encoder + stage embedding};
+\node[below left=15mm and 12mm of z] (s) {Always-active shared FFN};
+\node[below right=15mm and 12mm of z] (g) {Softmax router: top 3 of 7 FFNs};
+\node[below=38mm of z] (u) {Residual feature sum + design head};
+\node[below=of u] (a) {Feasible next experiment};
+\draw[->] (h)--(z); \draw[->] (z)--(s); \draw[->] (z)--(g);
+\draw[->] (s)--(u); \draw[->] (g)--(u); \draw[->] (u)--(a);
+\end{tikzpicture}
+% Requires tikz libraries positioning and arrows.meta. All optimization offline.

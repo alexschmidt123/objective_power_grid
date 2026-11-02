@@ -1,0 +1,37 @@
+/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/utils/checkpoint.py:1399: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with device_autocast_ctx, torch.cpu.amp.autocast(**cpu_autocast_kwargs), recompute_context:  # type: ignore[attr-defined]
+IR_STATUS FAILED_PRESERVED
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_integrated_information_moe/src/research/ir_moe_experiment.py", line 284, in <module>
+    if __name__=='__main__':main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_integrated_information_moe/src/research/ir_moe_experiment.py", line 283, in main
+    a=p.parse_args();run(Path(a.campaign).resolve(),yaml.safe_load(Path(a.config).read_text()),a.smoke)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_integrated_information_moe/src/research/ir_moe_experiment.py", line 248, in run
+    start=time.monotonic();write(C/'readiness/gpu_equivalence.json',gpu_correctness(cfg))
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_integrated_information_moe/src/research/ir_moe_experiment.py", line 113, in gpu_correctness
+    (-a['info'][:,-1].mean()).backward();(-b['info'][:,-1].mean()).backward()
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/_tensor.py", line 512, in backward
+    return handle_torch_function(
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/overrides.py", line 1630, in handle_torch_function
+    result = mode.__torch_function__(public_api, types, args, kwargs)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/utils/_device.py", line 79, in __torch_function__
+    return func(*args, **kwargs)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/_tensor.py", line 521, in backward
+    torch.autograd.backward(
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/autograd/__init__.py", line 289, in backward
+    _engine_run_backward(
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/autograd/graph.py", line 768, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/utils/checkpoint.py", line 1116, in unpack_hook
+    frame.recompute_fn(*args)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/utils/checkpoint.py", line 1400, in recompute_fn
+    fn(*args, **kwargs)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_integrated_information_moe/src/research/ir_moe.py", line 127, in chunk_scores
+    likelihood, _, prefixes = replay_likelihood(counted, parameters, history[:horizon], history[horizon:])
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_integrated_information_moe/src/research/engine.py", line 27, in replay_likelihood
+    cumulative = cumulative + benchmark.log_likelihood(y[:,None],mean)
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!

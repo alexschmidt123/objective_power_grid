@@ -1,0 +1,2 @@
+# Location pilot readiness
+Five canonical launcher/ledger checks PASS.41 Torch regression tests plus native JAX fixtures passed. Original-source deterministic DAD/RL/vs full-update fixtures PASS, with both implementations on the same CPU. Initial missing-fixture-path and cross-device-fixture failures preserved; no training-method changes were made to hide failures. ScoreBED P1 native training uses paper schedule190k/10k and batch1024; bounded domain is disclosed adaptation. Pilots are ready; adequacy not established.

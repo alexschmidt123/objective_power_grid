@@ -1,0 +1,512 @@
+{
+  "scope": "Equal-additional-budget DAD-MLP control",
+  "interpretation": "The elapsed-time-matched continued DAD-MLP exceeds ResMoE on the paired development cases.",
+  "models": [
+    {
+      "name": "Original DAD-MLP",
+      "run": "experiments/10142026/10142026_moe_controlled_diagnosis/controls",
+      "checkpoint": "experiments/10142026/10142026_moe_controlled_diagnosis/controls/models/sum_single.pt",
+      "checkpoint_sha256": "ec309d224a5c69a9b8ab9574b094f5d4225db506b2c352bbe88e4453865ac300",
+      "source_git_commit": "ddf95d5e6b7f209a195ad5d494b83bc1aef4ab8e",
+      "source_manifest": "experiments/10142026/10142026_moe_controlled_diagnosis/controls/source_manifest.json",
+      "config": "experiments/10142026/10142026_moe_controlled_diagnosis/controls/run_config.json",
+      "training_metadata": "experiments/10142026/10142026_moe_controlled_diagnosis/controls/models/sum_single_training.json",
+      "base_provenance": {},
+      "settings": {
+        "batch_size": 64,
+        "learning_rate": 5e-05,
+        "hidden": 64,
+        "contrasts": 1024,
+        "spce_adam_beta1": 0.8,
+        "spce_adam_beta2": 0.998,
+        "spce_lr_decay": 0.98,
+        "spce_lr_schedule_every": 1000,
+        "moe_gradient_clip_mode": "component",
+        "eval_systems": 2000,
+        "eval_contrasts": 1000000,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 16384
+      },
+      "hardware": {
+        "execution_site": "labpc",
+        "cluster": null,
+        "computer_name": "ecen-80r5x04.engr.tamu.edu",
+        "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+        "gpu_model": "NVIDIA GeForce RTX 4090"
+      },
+      "eig": {
+        "n": 2000,
+        "mean": 10.66259855342537,
+        "mc_standard_error": 0.04577697109916897,
+        "conditional_95_interval": [
+          10.572875690071,
+          10.752321416779742
+        ]
+      },
+      "case_sha256": "e0bc3597ebe69379616126f445c5ed15be05e87d9a1398c2cefa233d41e7a494",
+      "bank_sha256": "703671b0fb01ddf74dfe60d51e44914c71647c92e7e5ee51d111a9acfcecfde8",
+      "optimizer_updates": 15625,
+      "training_cost": {
+        "primary_episodes": 1000000,
+        "contrast_trajectories": 1024000000,
+        "truth_inclusive_likelihood_trajectories": 1025000000,
+        "particle_stage_forward_likelihood_evaluations": 30750000000
+      },
+      "total_training_cost": {
+        "primary_episodes": 1000000,
+        "contrast_trajectories": 1024000000,
+        "truth_inclusive_likelihood_trajectories": 1025000000,
+        "particle_stage_forward_likelihood_evaluations": 30750000000
+      },
+      "additional_training_seconds": 0.0,
+      "base_training_seconds": 729.7960161538795,
+      "total_training_seconds": 729.7960161538795,
+      "diagnostic_validation_seconds": 2.354442903306335,
+      "training_budget_unit": "primary_episodes",
+      "requested_training_seconds": null,
+      "time_budget_reached": null,
+      "checkpoint_selection": "final",
+      "evaluation_seconds": 1001.682914552046,
+      "secondary_parameter_inference": true,
+      "mean_online_decision_seconds": 8.574162660321842e-06,
+      "total_parameters": 58900,
+      "trainable_parameters": 58900
+    },
+    {
+      "name": "DAD-MLP +1m episodes",
+      "run": "experiments/10152026/10152026_013344_moe_fairness_controls_seed101/continued_dad_mlp",
+      "checkpoint": "experiments/10152026/10152026_013344_moe_fairness_controls_seed101/continued_dad_mlp/models/sum_single.pt",
+      "checkpoint_sha256": "baba752b81233d217a6afd50c47a3f3a9118b9bffb4bdafc9dcecdd3ae023379",
+      "source_git_commit": "4aac3ca384d2bfd6afa06cc6bfdc8a9b2660daba",
+      "source_manifest": "experiments/10152026/10152026_013344_moe_fairness_controls_seed101/continued_dad_mlp/source_manifest.json",
+      "config": "experiments/10152026/10152026_013344_moe_fairness_controls_seed101/continued_dad_mlp/run_config.json",
+      "training_metadata": "experiments/10152026/10152026_013344_moe_fairness_controls_seed101/continued_dad_mlp/models/sum_single_training.json",
+      "base_provenance": {
+        "pretrained": true,
+        "path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_moe_controlled_diagnosis/controls/models/sum_single.pt",
+        "sha256": "ec309d224a5c69a9b8ab9574b094f5d4225db506b2c352bbe88e4453865ac300",
+        "input_dim": 772,
+        "benchmark": "location_finding",
+        "training_episodes": 1000000,
+        "training_seconds": 729.7960161538795,
+        "action_scale": 4.0,
+        "obs_scale": 3.0
+      },
+      "settings": {
+        "batch_size": 64,
+        "learning_rate": 5e-05,
+        "hidden": 64,
+        "contrasts": 1024,
+        "spce_adam_beta1": 0.8,
+        "spce_adam_beta2": 0.998,
+        "spce_lr_decay": 0.98,
+        "spce_lr_schedule_every": 1000,
+        "moe_gradient_clip_mode": "component",
+        "eval_systems": 2000,
+        "eval_contrasts": 1000000,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 16384
+      },
+      "hardware": {
+        "execution_site": "labpc",
+        "cluster": null,
+        "computer_name": "ecen-80r5x04.engr.tamu.edu",
+        "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+        "gpu_model": "NVIDIA GeForce RTX 4090"
+      },
+      "eig": {
+        "n": 2000,
+        "mean": 10.562851512225606,
+        "mc_standard_error": 0.04755277463814575,
+        "conditional_95_interval": [
+          10.46964807393484,
+          10.656054950516372
+        ]
+      },
+      "case_sha256": "e0bc3597ebe69379616126f445c5ed15be05e87d9a1398c2cefa233d41e7a494",
+      "bank_sha256": "703671b0fb01ddf74dfe60d51e44914c71647c92e7e5ee51d111a9acfcecfde8",
+      "optimizer_updates": 15625,
+      "training_cost": {
+        "primary_episodes": 1000000,
+        "contrast_trajectories": 1024000000,
+        "truth_inclusive_likelihood_trajectories": 1025000000,
+        "particle_stage_forward_likelihood_evaluations": 30750000000
+      },
+      "total_training_cost": {
+        "primary_episodes": 2000000,
+        "contrast_trajectories": 2048000000,
+        "truth_inclusive_likelihood_trajectories": 2050000000,
+        "particle_stage_forward_likelihood_evaluations": 61500000000
+      },
+      "additional_training_seconds": 812.5713216010481,
+      "base_training_seconds": 729.7960161538795,
+      "total_training_seconds": 1542.3673377549276,
+      "diagnostic_validation_seconds": 0.0,
+      "training_budget_unit": "primary_episodes",
+      "requested_training_seconds": null,
+      "time_budget_reached": null,
+      "checkpoint_selection": "final",
+      "evaluation_seconds": 2452.818142812932,
+      "secondary_parameter_inference": true,
+      "mean_online_decision_seconds": 8.88270589445407e-06,
+      "total_parameters": 58900,
+      "trainable_parameters": 58900
+    },
+    {
+      "name": "DAD-MLP +matched elapsed time",
+      "run": "experiments/10152026/10152026_equal_compute_dad_control_v2/continued_dad_mlp_walltime",
+      "checkpoint": "experiments/10152026/10152026_equal_compute_dad_control_v2/continued_dad_mlp_walltime/models/sum_single.pt",
+      "checkpoint_sha256": "9cd260dda94a7f877428535fed7976fe0a47a128a85cabd2755f3f20a6f06fc3",
+      "source_git_commit": "b8149e4876e4cde72ea825aaafb552d0e344c808",
+      "source_manifest": "experiments/10152026/10152026_equal_compute_dad_control_v2/continued_dad_mlp_walltime/source_manifest.json",
+      "config": "experiments/10152026/10152026_equal_compute_dad_control_v2/continued_dad_mlp_walltime/run_config.json",
+      "training_metadata": "experiments/10152026/10152026_equal_compute_dad_control_v2/continued_dad_mlp_walltime/models/sum_single_training.json",
+      "base_provenance": {
+        "pretrained": true,
+        "path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_moe_controlled_diagnosis/controls/models/sum_single.pt",
+        "sha256": "ec309d224a5c69a9b8ab9574b094f5d4225db506b2c352bbe88e4453865ac300",
+        "input_dim": 772,
+        "benchmark": "location_finding",
+        "training_episodes": 1000000,
+        "training_seconds": 729.7960161538795,
+        "action_scale": 4.0,
+        "obs_scale": 3.0
+      },
+      "settings": {
+        "batch_size": 64,
+        "learning_rate": 5e-05,
+        "hidden": 64,
+        "contrasts": 1024,
+        "spce_adam_beta1": 0.8,
+        "spce_adam_beta2": 0.998,
+        "spce_lr_decay": 0.98,
+        "spce_lr_schedule_every": 1000,
+        "moe_gradient_clip_mode": "component",
+        "eval_systems": 2000,
+        "eval_contrasts": 1000000,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 16384
+      },
+      "hardware": {
+        "execution_site": "labpc",
+        "cluster": null,
+        "computer_name": "ecen-80r5x04.engr.tamu.edu",
+        "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+        "gpu_model": "NVIDIA GeForce RTX 4090"
+      },
+      "eig": {
+        "n": 2000,
+        "mean": 10.94265537409217,
+        "mc_standard_error": 0.045844301907237636,
+        "conditional_95_interval": [
+          10.852800542353986,
+          11.032510205830356
+        ]
+      },
+      "case_sha256": "e0bc3597ebe69379616126f445c5ed15be05e87d9a1398c2cefa233d41e7a494",
+      "bank_sha256": "703671b0fb01ddf74dfe60d51e44914c71647c92e7e5ee51d111a9acfcecfde8",
+      "optimizer_updates": 37272,
+      "training_cost": {
+        "primary_episodes": 2385408,
+        "contrast_trajectories": 2442657792,
+        "truth_inclusive_likelihood_trajectories": 2445043200,
+        "particle_stage_forward_likelihood_evaluations": 73351296000
+      },
+      "total_training_cost": {
+        "primary_episodes": 3385408,
+        "contrast_trajectories": 3466657792,
+        "truth_inclusive_likelihood_trajectories": 3470043200,
+        "particle_stage_forward_likelihood_evaluations": 104101296000
+      },
+      "additional_training_seconds": 1736.8737829341553,
+      "base_training_seconds": 729.7960161538795,
+      "total_training_seconds": 2466.669799088035,
+      "diagnostic_validation_seconds": 0.0,
+      "training_budget_unit": "additional_elapsed_seconds",
+      "requested_training_seconds": 1736.8317570788786,
+      "time_budget_reached": true,
+      "checkpoint_selection": "final",
+      "evaluation_seconds": 32.37628492084332,
+      "secondary_parameter_inference": false,
+      "mean_online_decision_seconds": 7.924461287135878e-06,
+      "total_parameters": 58900,
+      "trainable_parameters": 58900
+    },
+    {
+      "name": "ResMoE-sBOED",
+      "run": "experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/resmoe",
+      "checkpoint": "experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/resmoe/models/resmoe.pt",
+      "checkpoint_sha256": "e9ac1228b83ecd459801c7802b1aa24e595b99a494307f068fae01bfa81ffcbb",
+      "source_git_commit": "cb145c5b9aa528380ddb242dea477c37f58d0a27",
+      "source_manifest": "experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/resmoe/source_manifest.json",
+      "config": "experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/resmoe/run_config.json",
+      "training_metadata": "experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/resmoe/models/resmoe_training.json",
+      "base_provenance": {
+        "pretrained": true,
+        "path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_moe_controlled_diagnosis/controls/models/sum_single.pt",
+        "sha256": "ec309d224a5c69a9b8ab9574b094f5d4225db506b2c352bbe88e4453865ac300",
+        "input_dim": 772,
+        "benchmark": "location_finding",
+        "training_episodes": 1000000,
+        "training_seconds": 729.7960161538795,
+        "action_scale": 4.0,
+        "obs_scale": 3.0
+      },
+      "settings": {
+        "batch_size": 64,
+        "learning_rate": 5e-05,
+        "hidden": 64,
+        "contrasts": 1024,
+        "spce_adam_beta1": 0.8,
+        "spce_adam_beta2": 0.998,
+        "spce_lr_decay": 0.98,
+        "spce_lr_schedule_every": 1000,
+        "moe_gradient_clip_mode": "component",
+        "eval_systems": 2000,
+        "eval_contrasts": 1000000,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 16384
+      },
+      "hardware": {
+        "execution_site": "labpc",
+        "cluster": null,
+        "computer_name": "ecen-80r5x04.engr.tamu.edu",
+        "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+        "gpu_model": "NVIDIA GeForce RTX 4090"
+      },
+      "eig": {
+        "n": 2000,
+        "mean": 10.847645339824671,
+        "mc_standard_error": 0.04384357159518798,
+        "conditional_95_interval": [
+          10.761711939498102,
+          10.93357874015124
+        ]
+      },
+      "case_sha256": "e0bc3597ebe69379616126f445c5ed15be05e87d9a1398c2cefa233d41e7a494",
+      "bank_sha256": "703671b0fb01ddf74dfe60d51e44914c71647c92e7e5ee51d111a9acfcecfde8",
+      "optimizer_updates": 15625,
+      "training_cost": {
+        "primary_episodes": 1000000,
+        "contrast_trajectories": 1024000000,
+        "truth_inclusive_likelihood_trajectories": 1025000000,
+        "particle_stage_forward_likelihood_evaluations": 30750000000
+      },
+      "total_training_cost": {
+        "primary_episodes": 2000000,
+        "contrast_trajectories": 2048000000,
+        "truth_inclusive_likelihood_trajectories": 2050000000,
+        "particle_stage_forward_likelihood_evaluations": 61500000000
+      },
+      "additional_training_seconds": 1736.8317570788786,
+      "base_training_seconds": 729.7960161538795,
+      "total_training_seconds": 2466.627773232758,
+      "diagnostic_validation_seconds": 0.0,
+      "training_budget_unit": "primary_episodes",
+      "requested_training_seconds": null,
+      "time_budget_reached": null,
+      "checkpoint_selection": "final",
+      "evaluation_seconds": 1116.7660680110566,
+      "secondary_parameter_inference": true,
+      "mean_online_decision_seconds": 3.219317127562438e-05,
+      "total_parameters": 126306,
+      "trainable_parameters": 67406
+    }
+  ],
+  "paired_differences": {
+    "resmoe_minus_original_dad": {
+      "n": 2000,
+      "mean": 0.1850467863992996,
+      "mc_standard_error": 0.038313449724007125,
+      "conditional_95_interval": [
+        0.10995242494024565,
+        0.26014114785835357
+      ]
+    },
+    "resmoe_minus_equal_episode_dad": {
+      "n": 2000,
+      "mean": 0.28479382759906524,
+      "mc_standard_error": 0.048544659527173774,
+      "conditional_95_interval": [
+        0.18964629492580465,
+        0.37994136027232583
+      ]
+    },
+    "resmoe_minus_elapsed_matched_dad": {
+      "n": 2000,
+      "mean": -0.0950100342674991,
+      "mc_standard_error": 0.046972978210962274,
+      "conditional_95_interval": [
+        -0.18707707156098516,
+        -0.00294299697401304
+      ]
+    },
+    "elapsed_matched_dad_minus_original": {
+      "n": 2000,
+      "mean": 0.28005682066679866,
+      "mc_standard_error": 0.04921991933869276,
+      "conditional_95_interval": [
+        0.18358577876296084,
+        0.3765278625706365
+      ]
+    }
+  },
+  "shared_base_validation": {
+    "seconds": 2.354442903306335,
+    "cases": 512,
+    "contrasts_per_case": 65536,
+    "parameter_updates": 0,
+    "truth_inclusive_likelihood_trajectories": 33554944,
+    "particle_stage_forward_likelihood_evaluations": 1006648320,
+    "used_for_checkpoint_selection": false
+  },
+  "eig_only_verification": {
+    "verified": true,
+    "systems": 2000,
+    "max_absolute_errors": {
+      "spce": 0.0,
+      "actions": 0.0,
+      "observations": 0.0
+    },
+    "score_tolerance": 1e-09,
+    "action_observation_tolerance": 1e-10,
+    "secondary_inference": "omitted only; primary estimator unchanged"
+  },
+  "frozen_base_verification": {
+    "exact_frozen_base_state_preserved": true,
+    "parameter_tensors": 11,
+    "head_shapes": {
+      "head.0.weight": [
+        64,
+        772
+      ],
+      "head.0.bias": [
+        64
+      ],
+      "head.2.weight": [
+        64,
+        64
+      ],
+      "head.2.bias": [
+        64
+      ],
+      "head.4.weight": [
+        2,
+        64
+      ],
+      "head.4.bias": [
+        2
+      ]
+    },
+    "first_design": [
+      -0.026379865310654615,
+      0.02618225489682286
+    ]
+  },
+  "commands": {
+    "resmoe_evaluation_only": [
+      "bash",
+      "run.sh",
+      "--config",
+      "configs/location_finding_eig.yaml",
+      "--seed",
+      "101",
+      "--eval-seeds",
+      "1001",
+      "--eig-only",
+      "--source-check-manifest",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_equal_compute_dad_control_v2/source_guard.json",
+      "--variant",
+      "resmoe",
+      "--family-evaluate-from",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/resmoe/models/resmoe.pt",
+      "--output",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_equal_compute_dad_control_v2/resmoe_eig_only_replay"
+    ],
+    "continued_dad_training_and_evaluation": [
+      "bash",
+      "run.sh",
+      "--config",
+      "configs/location_finding_eig.yaml",
+      "--seed",
+      "101",
+      "--eval-seeds",
+      "1001",
+      "--eig-only",
+      "--source-check-manifest",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_equal_compute_dad_control_v2/source_guard.json",
+      "--method",
+      "sum_single",
+      "--dad-mlp-continue-from",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_moe_controlled_diagnosis/controls/models/sum_single.pt",
+      "--continuation-seconds",
+      "1736.8317570788786",
+      "--continuation-max-episodes",
+      "5000000",
+      "--output",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_equal_compute_dad_control_v2/continued_dad_mlp_walltime"
+    ],
+    "historical_resmoe_training_and_evaluation": [
+      "bash",
+      "run.sh",
+      "--config",
+      "configs/location_finding_eig.yaml",
+      "--variant",
+      "resmoe",
+      "--base-checkpoint",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_moe_controlled_diagnosis/controls/models/sum_single.pt",
+      "--seed",
+      "101",
+      "--eval-seeds",
+      "1001",
+      "--source-check-manifest",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/source_guard.json",
+      "--output",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/resmoe"
+    ],
+    "historical_equal_episode_dad_training_and_evaluation": [
+      "bash",
+      "run.sh",
+      "--config",
+      "configs/location_finding_eig.yaml",
+      "--method",
+      "sum_single",
+      "--dad-mlp-continue-from",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_moe_controlled_diagnosis/controls/models/sum_single.pt",
+      "--seed",
+      "101",
+      "--eval-seeds",
+      "1001",
+      "--source-check-manifest",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_004321_resmoe_switchresmoe_seed101/source_guard.json",
+      "--output",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_013344_moe_fairness_controls_seed101/continued_dad_mlp"
+    ]
+  },
+  "correctness": {
+    "focused_tests_passed": 63,
+    "log": "experiments/10152026/10152026_equal_compute_dad_control_v2/focused_correctness.log",
+    "eig_only_full_replay_exact": true,
+    "frozen_base_tensors_exact": true
+  },
+  "implementation_changes": [
+    "src/research/moe_architecture_controls.py: optional elapsed stopping only for explicit complete-base DAD continuation; default episode training unchanged",
+    "src/research/runner.py: continuation duration/safety cap and optional secondary-inference omission; common EIG unchanged",
+    "tools/early_family_eig.py: native complete-policy loading and validation of actual episode/time budget",
+    "tools/report_equal_budget_dad.py: strict fixed-artifact pairing, cost accounting and reproducible report",
+    "Focused continuation, EIG-only, checkpoint-replay and report tests; README and framework status updates"
+  ],
+  "caveats": [
+    "All results use training seed101 and repeatedly used development evaluation seed1001; seed8831001 remains unused. No final/publication result is claimed.",
+    "Intervals are mean +/-1.96 paired trajectory standard errors, conditional on fixed checkpoints and one shared contrast bank. They exclude training-seed and contrast-bank variability.",
+    "Elapsed training includes simulation, backward/optimizer work and diagnostics. The historical residual run overlapped CUDA posterior inference; the timed control waits for an idle GPU. Equal elapsed time is not exact GPU-FLOP matching.",
+    "The additional one-million-episode control matches simulator/likelihood counts; the elapsed-time control may use more episodes. Both views are reported without presenting them as simultaneously matched.",
+    "Fresh Adam is used for both additional-training phases because the saved base contains weights, not optimizer moments; LR decay restarts at the same initial value.",
+    "ResMoE freezes the pretrained encoder, base head and first design; DAD continuation fine-tunes all original parameters. ResMoE also has more parameters and explicitly adds stage to its193-dimensional residual/router input; the original native772 DAD head keeps its original sum representation without adding a new stage input. A positive result alone cannot isolate sparse routing from residual parametrization, freezing or capacity.",
+    "Both phases use seed101 and per-update seed101+(step+1)*104729; the first million additional draws reuse the original training random stream. Counts refer to generated episodes, not guaranteed unique draws across phases.",
+    "Frozen dominant-expert routing matches learned ResMoE within paired uncertainty (difference +0.00826178, 95% interval [-0.04730444,+0.06382801]); useful learned sparse routing is not established. Forced routing can induce out-of-distribution histories.",
+    "Training sPCE L1024 has ceiling log1025=6.93244789; high-precision held-out EIG uses L1000000. These are different bound resolutions.",
+    "Only final predeclared checkpoints are evaluated; no EIG-based checkpoint selection or MSE training is used. Secondary MSE inference is omitted only for the new timed run and replay; EIG replay equivalence was verified on all2000 cases."
+  ],
+  "next_experiment": "Replicate this paired ResMoE versus continued DAD-MLP experiment for independent training seeds102 and103. Within each seed, share the same independently pretrained DAD-MLP base, freeze hyperparameters and budget rules beforehand, measure training costs without overlapping GPU jobs, and evaluate the frozen checkpoints on untouched paired cases. Report variation across complete training pipelines as well as trajectory MC uncertainty. Do not tune from the new evaluation outcomes. This is one replication experiment, not an architecture search."
+}
