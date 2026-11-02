@@ -1,0 +1,104 @@
+# V1/V6 routing and gradient diagnosis
+
+{
+  "v1": {
+    "min_expert_mean_selection": 0.20390625,
+    "mean_offdiag_cosine": 0.06447429222421457,
+    "mean_spce": 7.548652132138788,
+    "mean_gap": 0.05275020244494577,
+    "zero_gradient_fraction": 0.0,
+    "gradient_groups": {
+      "shared": {
+        "mean": 2.2209882682983517,
+        "CV": 0.9291600285022626
+      },
+      "router": {
+        "mean": 0.2303921627823447,
+        "CV": 0.8474165759826616
+      },
+      "head": {
+        "mean": 21.262078003343806,
+        "CV": 0.9936506225749973
+      },
+      "expert0": {
+        "mean": 0.3160038940664088,
+        "CV": 0.8585014867270142
+      },
+      "expert1": {
+        "mean": 0.4112698794011883,
+        "CV": 0.7933700309224322
+      },
+      "expert2": {
+        "mean": 0.11665367859909127,
+        "CV": 1.148059004930725
+      },
+      "expert3": {
+        "mean": 0.04912623419683243,
+        "CV": 1.1016248736313217
+      },
+      "expert4": {
+        "mean": 0.1040417347193062,
+        "CV": 1.1825334809691943
+      },
+      "expert5": {
+        "mean": 0.36355611730002585,
+        "CV": 1.0586180687119262
+      },
+      "expert6": {
+        "mean": 0.10481884595107288,
+        "CV": 0.6428515020444683
+      }
+    }
+  },
+  "v6": {
+    "min_expert_mean_selection": 0.287890625,
+    "mean_offdiag_cosine": 0.19291772200964846,
+    "mean_spce": 7.521458502620326,
+    "mean_gap": 0.0799438319634076,
+    "zero_gradient_fraction": 0.0,
+    "gradient_groups": {
+      "shared": {
+        "mean": 1.8733459114715831,
+        "CV": 0.3299544719228188
+      },
+      "router": {
+        "mean": 0.2993645273430816,
+        "CV": 0.3903091918536658
+      },
+      "head": {
+        "mean": 15.882384945344201,
+        "CV": 0.4633332149565624
+      },
+      "expert0": {
+        "mean": 0.10275692796481303,
+        "CV": 0.3348972327773833
+      },
+      "expert1": {
+        "mean": 0.4334032503381528,
+        "CV": 0.39182533115354906
+      },
+      "expert2": {
+        "mean": 0.40928979488309825,
+        "CV": 0.3507901147811137
+      },
+      "expert3": {
+        "mean": 0.20232129380800276,
+        "CV": 0.38335740345599223
+      },
+      "expert4": {
+        "mean": 0.06519532743697168,
+        "CV": 0.4656165004774409
+      },
+      "expert5": {
+        "mean": 0.15699455751670063,
+        "CV": 0.3311335422760331
+      },
+      "expert6": {
+        "mean": 0.056034721644157764,
+        "CV": 0.3435875430673851
+      }
+    }
+  }
+}
+
+Saved weights remained bitwise unchanged. Primary gradients exclude balance loss. Diagnostics use observed histories and independent simulation draws, no inferred posterior claims. Existing paired 2000/1M interventions are retained; small deltas do not prove specialization. Gradient CV uses four fixed batches and is imprecise. No new full candidate is automatically launched.

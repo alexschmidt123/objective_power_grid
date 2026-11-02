@@ -1,0 +1,87 @@
+{
+  "status": "FROZEN_AUTHORIZED",
+  "training_seed": 101,
+  "training_order": [
+    "v6",
+    "v1_matched"
+  ],
+  "updates": 18000,
+  "primary_per_update": 2000,
+  "primary_total": 36000000,
+  "contrasts": 2000,
+  "horizon": 30,
+  "architecture": {
+    "total_parameters": 8434,
+    "activated_parameters_per_context": 6898,
+    "shared_experts": 1,
+    "routed_experts": 7,
+    "top_k": 3,
+    "expert_feature_dimension": 16,
+    "routed_FFN_width": 8,
+    "shared_FFN_width": 8,
+    "FFN_linear_FLOPs_per_context": 3072,
+    "history_encoder_linear_FLOPs_per_observation": 9728,
+    "router_linear_FLOPs_per_context": 224,
+    "action_head_linear_FLOPs_per_context": 64,
+    "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs"
+  },
+  "learning_rate": 5e-05,
+  "adam_betas": [
+    0.8,
+    0.998
+  ],
+  "lr_decay": 0.98,
+  "original_lr_interval": 1000,
+  "original_update_horizon": 50000,
+  "common_lr_interval": 360,
+  "common_lr_interpretation": "Rescale original50k schedule to18k for BOTH arms: gamma.98 after first update then each360; common control adaptation, not uninterrupted historical V1.",
+  "gradient_clip": 5,
+  "balance_factor": 0.001,
+  "exposure_penalty": 0.0,
+  "gumbel_initial_scale": 0.1,
+  "gumbel_plateau_fraction": 0.2,
+  "gumbel_end_fraction": 0.8,
+  "gumbel_schedule": "0.10 until20%; cosine to0 at80%; zero for remainder; eval always0",
+  "gate_weights": "original unperturbed softmax, gathered at noisy top3; not renormalized; hard indices, no STE; selected expert gradients plus smooth softmax/router gradients, no gradient through sampled membership",
+  "initial_state_sha256": "98bafda5f4703da1fb616913e3f02a264fceaac8985e12303ff6d80925da953a",
+  "routing_seed": 7100101,
+  "rollout_seed_mapping": "101 + successful_update*104729, same both arms; route RNG separate",
+  "time_cap": 43200,
+  "safety_checkpoint_stop": 41400,
+  "checkpoint_selection": "last fully serialized18k-work checkpoint; never best EIG",
+  "evaluation": {
+    "seed": 2026110117081001,
+    "systems": 2000,
+    "contrasts": 1000000,
+    "bank_sha256": "a2cc2e6bea0f8b1dbaf7b7f30574b9bc5770729b53a758e5228ab851c5f99ff3",
+    "bank_file_sha256": "c3171762dc21926874b273adca01971b8d3833e30ae9355d9df3166417bf764e",
+    "reserved_final": "NOT COPIED, NOT USED;2026110117081002 remains reserved on LabPC"
+  },
+  "historical_reference": "original V1 f1107660,10.98906590nats; not contextual V1 b6800814,11.04404166nats",
+  "historical_not_matched": true,
+  "source_head": "6a592c8d2ad10eb890f1d351e579ee4129939227",
+  "software": {
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8"
+  },
+  "tf32": false,
+  "matmul_precision": "highest",
+  "native_simulator_changed": false,
+  "conditional_information_auxiliary": false,
+  "routing_scale_validation": {
+    "observed_logit_std": 0.031570221926328364,
+    "scale_to_logit_std": 3.1675418764352687,
+    "initial_expert_traffic": [
+      0.3556,
+      0.6218166666666667,
+      0.3474666666666667,
+      0.3831833333333334,
+      0.3686166666666667,
+      0.39993333333333336,
+      0.5233833333333333
+    ],
+    "coefficient_selection": "Predeclared0.10; not tuned by EIG",
+    "exposure_penalty_enabled": false
+  },
+  "hardware": "NVIDIA GeForce RTX 5080, 16303 MiB, 595.99.02"
+}

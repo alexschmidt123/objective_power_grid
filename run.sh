@@ -155,6 +155,11 @@ for _scope_arg in "$@"; do
     fi
 done
 python3 -m src.research.project_scope guard -- "$@" || return 2 2>/dev/null || exit 2
+for _baseline_arg in "$@"; do
+    if [[ "$_baseline_arg" == "--location-baselines-five-seed" ]]; then
+        exec python3 -m src.research.location_baseline_campaign "$@"
+    fi
+done
 for _v4_arg in "$@"; do
     if [[ "$_v4_arg" == "--moe-sboed-v4-development" ]]; then
         exec python3 -m src.research.moe_v4_pilot "$@"

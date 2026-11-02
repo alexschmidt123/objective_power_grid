@@ -204,6 +204,9 @@ def main(args,raw,root):
                 elif t['generated_training_trajectories']>=cap and compute_cfg.get('safety_cap_is_measured_compute_limit',False):
                     t['stop_reason']='predeclared_compute_update_limit'
                 t['native_schedule_completed']=t['generated_training_trajectories']>=reference_episodes
+                if method=='scorebed' and 'scorebed_declared_full_score_updates' in s:
+                    t['native_schedule_completed']=(t.get('actual_score_updates',0)>=s['scorebed_declared_full_score_updates'] and t.get('actual_policy_updates',0)>=s['scorebed_declared_full_policy_updates'])
+                    t['declared_full_native_schedule']=dict(score_updates=s['scorebed_declared_full_score_updates'],policy_updates=s['scorebed_declared_full_policy_updates'])
                 t['training_status']='NATIVE_FINITE_SCHEDULE_COMPLETE' if t['native_schedule_completed'] else 'COMPUTE_LIMITED_NATIVE_IMPLEMENTATION'
                 t['compute_budget']['overrun_seconds']=max(0.,t['compute_budget']['charged_seconds']-t['compute_budget']['budget_seconds'])
                 if t['stop_reason']=='incomplete_or_interrupted':

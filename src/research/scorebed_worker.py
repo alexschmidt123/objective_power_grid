@@ -69,7 +69,14 @@ def run(args):
     journal_plan=json.loads(pathlib.Path(args.journal_plan).read_text()) if args.journal_plan else None
     score_count=8 if tiny else (min(int(journal_plan['score_pretraining_episodes']),remaining-1) if journal_plan else int(.7*remaining))
     policy_count=remaining-score_count
-    if not tiny:
+    native=bool(journal_plan and journal_plan.get('scorebed_native_reference_schedule'))
+    use_ema=args.reference_sampler or native
+    if native and not tiny:
+        score_count=int(journal_plan['score_schedule_reference_steps'])*batch
+        policy_count=int(journal_plan['policy_schedule_reference_steps'])*batch*restarts
+        if initialization+score_count+policy_count!=budget:raise ValueError('Native ScoreBED full-stage accounting mismatch')
+        allocation=dict(initialization=initialization,score=score_count,policy=policy_count,total=budget,native_reference_schedule=True)
+    elif not tiny:
         from src.research.original_protocol import score_allocation
         allocation=score_allocation(budget,'location_finding',initialization,batch)
         if journal_plan and int(journal_plan['score_pretraining_episodes'])!=allocation['score']:raise ValueError('Frozen ScoreBED plan disagrees with published allocation')
@@ -96,7 +103,7 @@ def run(args):
     target.compute_standardisation(stats_count)
     np.savez(out/'scorebed_normalization.npz',**{k:np.asarray(v) for k,v in target.get_std_stats_dict().items()})
     key=jax.random.key(args.seed)
-    if args.reference_sampler:
+    if use_ema:
         from policy_learning.utils.jax import derive_key
         key=derive_key(args.seed,'score_trainer')
     score,key=load_score_trainer(key,cfg,target,callbacks=[])
@@ -130,7 +137,8 @@ def run(args):
     data_score,design_score=score.get_unbatched_score_fns()
     restart_records=[];restart_params=[];policy_spent=0;policy_updates=0
     for restart in range(restarts):
-        if args.reference_sampler:key=derive_key(args.seed,'policy_trainer',restart)
+        if compute_clock is not None and not compute_clock.can_start(native_unit_bound):break
+        if use_ema:key=derive_key(args.seed,'policy_trainer',restart)
         policy,key=load_policy_trainer(key,cfg,target,grad_fn=noop,callbacks=[])
         quota=policy_count//restarts+int(restart<policy_count%restarts)
         local_spent=0;last_n=None
@@ -154,10 +162,10 @@ def run(args):
             if compute_clock is not None:
                 from src.research.baseline_fidelity import scorebed_reported_params
                 from src.research.journal_scorebed_bridge import maybe_validate
-                if maybe_validate(scorebed_reported_params(policy.training_state,args.reference_sampler),args.journal_plan,initialization+score_spent+policy_spent,policy_updates,start):break
+                if maybe_validate(scorebed_reported_params(policy.training_state,use_ema),args.journal_plan,initialization+score_spent+policy_spent,policy_updates,start):break
         if compute_clock is not None and policy_updates==0:raise RuntimeError('Compute quota produced no native policy update; do not report a trained ScoreBED policy')
         from src.research.baseline_fidelity import scorebed_reported_params
-        params=scorebed_reported_params(policy.training_state,args.reference_sampler)
+        params=scorebed_reported_params(policy.training_state,use_ema)
         from src.research.jax_checkpoint import save_state
         save_state(out/f'policy_training_state_restart{restart}.msgpack',policy.training_state)
         restart_params.append(params)
@@ -175,7 +183,8 @@ def run(args):
             maybe_validate(params,str(plan_path),initialization+score_spent+policy_spent,step,start,force=True)
             state=json.loads((folder/'scorebed_journal_progress.json').read_text());result['validation_eig']=state['records'][-1]['eig']
         restart_records.append(result)
-    chosen=max(range(restarts),key=lambda i:restart_records[i].get('validation_eig',-i))
+    if not restart_records:raise RuntimeError('Native ScoreBED score stage used the allowance; no trained policy restart')
+    chosen=max(range(len(restart_records)),key=lambda i:restart_records[i].get('validation_eig',-i))
     params=restart_params[chosen]
     if args.journal_plan:
         from src.research.journal_scorebed_bridge import maybe_validate,restored_params
@@ -210,13 +219,14 @@ def run(args):
         contrast_training_trajectories=0,training_trajectory_budget=budget,training_budget_unit='primary_episodes',
         initialization_trajectories=initialization,standardisation_trajectories=stats_count,
         score_training_trajectories=score_spent,policy_training_trajectories=policy_spent,
-        reported_policy_parameters='params_ema' if args.reference_sampler else 'params',
+        reported_policy_parameters='params_ema' if use_ema else 'params',
         policy_ema_rate=float(policy.training_state.ema_rate),
-        random_streams='official derive_key: score_trainer, policy_trainer/restart' if args.reference_sampler else 'historical sequential split keys',
+        random_streams='official derive_key: score_trainer, policy_trainer/restart' if use_ema else 'historical sequential split keys',
         restart_selection='best independent-validation EIG among final EMA policies' if restarts>1 else 'single final policy',
         budget_reconciliation=allocation if not tiny else dict(smoke=True),score_batch=batch,actual_score_updates=int(score.training_state.step),actual_policy_updates=policy_updates,policy_restarts=restart_records,selected_restart=chosen,reference_sampler=args.reference_sampler,
         training_seconds=time.perf_counter()-start,phase_timings=phase_timings,history=records,checkpoint_selection='final',
         architecture='official_4layer_256dim_8head_RFF_conservative_transformer',policy_architecture='official_DADNet_256_16_sum_encoder',
+        native_reference_schedule=native,completed_restarts=sum(r['primary_policy_episodes']==r['planned_policy_episodes'] for r in restart_records),
         adaptations='Declared native phase allocation including normalization and initialization; predeclared native final-policy restarts and paper AR1 sampler when enabled; capped score/policy allocation; independent validation restart selection; native batch1024, P1 location95:5 allocation; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions',
         design_bounds=args.design_bounds,bounded_mapping='lo+(hi-lo)*sigmoid(raw_policy_output); teacher design sampler mapped into same box' if args.design_bounds else None,
         runtime=dict(jax=jax.__version__,devices=[str(d) for d in jax.devices()]))

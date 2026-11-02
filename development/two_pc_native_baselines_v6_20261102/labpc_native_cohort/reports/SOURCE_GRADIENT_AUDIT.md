@@ -1,0 +1,4 @@
+# Correctness and fidelity
+
+CPU native-method tests PASS (logs/cpu_tests.log). Prior source-identical DAD terminal sPCE finite differences and future-history gradients passed; receipt remains dad_location_seed101_native_schedule_20261101T191159Z/DAD_IMPLEMENTATION_AUDIT.json. Explicit-likelihood numerator truth, denominator truth-inclusive, cumulative joint likelihood, negative maximization loss, no detached future history. Bounded physical map unchanged. Native SAC/REDQ and actor/critic/posterior G-I kernels retained. Score native two-stage score matching/score policy-gradient retained with full five restart targets.
+Potential periodic-boundary stale-restart restore is guarded in cohort-local score_native_worker.py: do not overwrite the independently selected final restart with previous periodic weights. No core working-tree edits. Probe verifies selected export bitwise equals selected restart. Old P1 outcomes do not imply five-restart alignment.
