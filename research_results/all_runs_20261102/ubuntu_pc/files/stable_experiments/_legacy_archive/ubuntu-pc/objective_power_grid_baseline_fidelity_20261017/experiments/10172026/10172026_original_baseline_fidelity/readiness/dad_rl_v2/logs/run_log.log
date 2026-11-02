@@ -1,0 +1,33 @@
+dad update 1: train sPCE=1.369450
+dad journal validation {'checkpoint': 1, 'episodes': 4, 'training_seconds': 0.4011918979813345, 'eig': 1.3499733437970973, 'mc_standard_error': 0.5497935730691864, 'paired_improvement_from_anchor': None, 'improvement_threshold': None, 'patience_used': 0, 'selected': False, 'status': 'training', 'update': 1, 'validation': {'seed': 771001, 'systems': 4, 'contrasts': 8, 'paired_draws_sha256': '8d7db6e662029bce531854502b7d4b43f3e3442369922c7573cc0360a66a65a7', 'seconds': 0.03326532998471521, 'forward_particle_stages': 1080, 'device': 'cpu', 'mode': 'hard_deployed_policy', 'secondary_parameter_inference': False}}
+dad update 2: train sPCE=2.042230
+dad journal validation {'checkpoint': 2, 'episodes': 8, 'training_seconds': 0.4240396110108122, 'eig': 1.3512747665359242, 'mc_standard_error': 0.5463481453312048, 'paired_improvement_from_anchor': 0.0013014227388268296, 'improvement_threshold': 0.01, 'patience_used': 1, 'selected': True, 'status': 'fixed_budget_complete', 'update': 2, 'validation': {'seed': 771001, 'systems': 4, 'contrasts': 8, 'paired_draws_sha256': '8d7db6e662029bce531854502b7d4b43f3e3442369922c7573cc0360a66a65a7', 'seconds': 0.027517616981640458, 'forward_particle_stages': 1080, 'device': 'cpu', 'mode': 'hard_deployed_policy', 'secondary_parameter_inference': False}}
+dad paper evaluation: 2/2 trajectories, L=8
+/home/qiqi/Documents/objective_power_grid_baseline_fidelity_20261017/src/research/vendor/rl_boed/garage/distributions/tanh_normal.py:23: UserWarning: <class 'TanhNormal'> does not define `arg_constraints`. Please set `arg_constraints = {}` or initialize the distribution with `validate_args=False` to turn off validation.
+  super().__init__()
+Traceback (most recent call last):
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/qiqi/Documents/objective_power_grid_baseline_fidelity_20261017/src/online_cli.py", line 60, in <module>
+    if __name__=='__main__':main()
+  File "/home/qiqi/Documents/objective_power_grid_baseline_fidelity_20261017/src/online_cli.py", line 25, in main
+    research(argv if any(a.split("=")[0]=="--config" for a in argv) else ["--config",known.config,*argv])
+  File "/home/qiqi/Documents/objective_power_grid_baseline_fidelity_20261017/src/research/runner.py", line 239, in main
+    return journal_main(args,raw,root)
+  File "/home/qiqi/Documents/objective_power_grid_baseline_fidelity_20261017/src/research/journal_run.py", line 91, in main
+    p,t=train_rl_sboed(b,h,s,seed,out/'models',cap,observer=observer)
+  File "/home/qiqi/Documents/objective_power_grid_baseline_fidelity_20261017/src/research/native_rl_reference.py", line 106, in train_native_rl
+    if observer is not None and observer.check(p,episodes,updates,algo._policy_optimizer,force=episodes==trajectory_budget):break
+  File "/home/qiqi/Documents/objective_power_grid_baseline_fidelity_20261017/src/research/journal_validation.py", line 104, in check
+    try:scores,cost=self.validator(policy)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/qiqi/Documents/objective_power_grid_baseline_fidelity_20261017/src/research/journal_validation.py", line 79, in __call__
+    buffer=io.BytesIO();torch.save(policy,buffer);buffer.seek(0)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/serialization.py", line 1004, in save
+    _save(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/serialization.py", line 1254, in _save
+    pickler.dump(obj)
+_pickle.PicklingError: Can't pickle <class 'AdaptiveTanhGaussianPolicy'>: attribute lookup AdaptiveTanhGaussianPolicy on builtins failed

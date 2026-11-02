@@ -1,0 +1,149 @@
+{
+  "training": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+  "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+  "generated_training_trajectories": 74,
+  "training_forward_trajectories": 74,
+  "contrast_training_trajectories": 0,
+  "training_trajectory_budget": 74,
+  "training_budget_unit": "primary_episodes",
+  "initialization_trajectories": 58,
+  "standardisation_trajectories": 4,
+  "score_training_trajectories": 8,
+  "policy_training_trajectories": 8,
+  "score_batch": 4,
+  "actual_score_updates": 2,
+  "actual_policy_updates": 5,
+  "policy_restarts": [
+    {
+      "restart": 0,
+      "primary_policy_episodes": 2,
+      "final_update": 1,
+      "validation_eig": 2.0908634675254807
+    },
+    {
+      "restart": 1,
+      "primary_policy_episodes": 2,
+      "final_update": 1,
+      "validation_eig": 2.1899770042225044
+    },
+    {
+      "restart": 2,
+      "primary_policy_episodes": 2,
+      "final_update": 1,
+      "validation_eig": 1.9942361350071338
+    },
+    {
+      "restart": 3,
+      "primary_policy_episodes": 1,
+      "final_update": 1,
+      "validation_eig": 1.875661359483423
+    },
+    {
+      "restart": 4,
+      "primary_policy_episodes": 1,
+      "final_update": 1,
+      "validation_eig": 1.92866991759985
+    }
+  ],
+  "selected_restart": 1,
+  "reference_sampler": true,
+  "training_seconds": 32.13514328000019,
+  "history": [
+    {
+      "phase": "score",
+      "step": 2,
+      "episodes": 8,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 144.04354858398438,
+        "loss_total": 107.47802734375,
+        "loss_unweighted_total": 3.884019374847412,
+        "loss_x_component": 0.31181231141090393,
+        "loss_y_component": 107.16621398925781,
+        "loss_y_unweighted": 3.572206974029541,
+        "param_norm": 129.08792114257812,
+        "update_norm": 0.33729130029678345
+      }
+    },
+    {
+      "phase": "policy",
+      "restart": 0,
+      "step": 1,
+      "episodes": 2,
+      "restart_episodes": 2,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 25.19565773010254,
+        "param_norm": 10.59915828704834,
+        "update_norm": 0.00331566552631557
+      }
+    },
+    {
+      "phase": "policy",
+      "restart": 1,
+      "step": 1,
+      "episodes": 4,
+      "restart_episodes": 2,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 12.500432968139648,
+        "param_norm": 11.122053146362305,
+        "update_norm": 0.003430468263104558
+      }
+    },
+    {
+      "phase": "policy",
+      "restart": 2,
+      "step": 1,
+      "episodes": 6,
+      "restart_episodes": 2,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 18.08400535583496,
+        "param_norm": 10.743856430053711,
+        "update_norm": 0.003228847635909915
+      }
+    },
+    {
+      "phase": "policy",
+      "restart": 3,
+      "step": 1,
+      "episodes": 7,
+      "restart_episodes": 1,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 31.289024353027344,
+        "param_norm": 11.052778244018555,
+        "update_norm": 0.003242295002564788
+      }
+    },
+    {
+      "phase": "policy",
+      "restart": 4,
+      "step": 1,
+      "episodes": 8,
+      "restart_episodes": 1,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 6.755579471588135,
+        "param_norm": 11.025166511535645,
+        "update_norm": 0.0033701660577207804
+      }
+    }
+  ],
+  "checkpoint_selection": "final",
+  "architecture": "official_4layer_256dim_8head_RFF_conservative_transformer",
+  "policy_architecture": "official_DADNet_256_16_sum_encoder",
+  "adaptations": "1million total primary episodes including normalization and initialization; predeclared native final-policy restarts and paper AR1 sampler when enabled; capped score/policy allocation; independent validation restart selection; smaller minibatches under capped budget; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions",
+  "design_bounds": [
+    -4.0,
+    4.0
+  ],
+  "bounded_mapping": "lo+(hi-lo)*sigmoid(raw_policy_output); teacher design sampler mapped into same box",
+  "runtime": {
+    "jax": "0.7.2",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  }
+}

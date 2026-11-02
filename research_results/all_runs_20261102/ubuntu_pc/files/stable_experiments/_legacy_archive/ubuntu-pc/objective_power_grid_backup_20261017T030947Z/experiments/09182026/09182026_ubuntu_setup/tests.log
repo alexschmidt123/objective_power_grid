@@ -1,0 +1,474 @@
+EEE.......E...EE
+======================================================================
+ERROR: setUpClass (tools.tests.test_endpoint_rocof.EndpointRocofTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_endpoint_rocof.py", line 13, in setUpClass
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmp1te8o9fj/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: setUpClass (tools.tests.test_rocof_pathwise.RocofPathwiseTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_rocof_pathwise.py", line 15, in setUpClass
+    from src.domains.swing.continuous_rocof import MaxRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmp4jjxkgb9/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_all_six_methods_work_with_online_state_and_continuous_actions (tools.tests.test_continuous_eig.ContinuousEIGTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_continuous_eig.py", line 129, in test_all_six_methods_work_with_online_state_and_continuous_actions
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmpzb0dm7oi/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_two_stage_pathwise_gradient_includes_carried_state (tools.tests.test_continuous_eig.ContinuousEIGTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_continuous_eig.py", line 60, in test_two_stage_pathwise_gradient_includes_carried_state
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmp0wm2xtmr/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_endpoint_state_carry_and_time_step_convergence (tools.tests.test_ieee14_gpu.IEEE14GPUTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 24, in test_endpoint_state_carry_and_time_step_convergence
+    gpu=self.make(c,bus)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmpp03k1h3d/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (T=3, method='dad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 76, in test_full_and_conditional_gradients
+    with self.subTest(T=T,method=method):self.direction(T,method)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmp64a1gn62/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (T=3, method='fixed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 76, in test_full_and_conditional_gradients
+    with self.subTest(T=T,method=method):self.direction(T,method)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmp0n5nb059/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (T=3, method='moe_sboed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 76, in test_full_and_conditional_gradients
+    with self.subTest(T=T,method=method):self.direction(T,method)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmpfra6bvt_/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (T=4, method='dad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 76, in test_full_and_conditional_gradients
+    with self.subTest(T=T,method=method):self.direction(T,method)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmpl256t80d/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (T=4, method='fixed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 76, in test_full_and_conditional_gradients
+    with self.subTest(T=T,method=method):self.direction(T,method)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmpzjfbsgl8/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (T=4, method='moe_sboed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 76, in test_full_and_conditional_gradients
+    with self.subTest(T=T,method=method):self.direction(T,method)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmpq8sf2u1y/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (T=5, method='dad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 76, in test_full_and_conditional_gradients
+    with self.subTest(T=T,method=method):self.direction(T,method)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmp3oh33o9g/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (T=5, method='fixed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 76, in test_full_and_conditional_gradients
+    with self.subTest(T=T,method=method):self.direction(T,method)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmpl3hohfms/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (T=5, method='moe_sboed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 76, in test_full_and_conditional_gradients
+    with self.subTest(T=T,method=method):self.direction(T,method)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmp66kemalm/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (prefix=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 78, in test_full_and_conditional_gradients
+    with self.subTest(prefix=prefix):self.direction(3,'dad',prefix)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmpnwcahre0/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_full_and_conditional_gradients (tools.tests.test_ieee14_gpu.IEEE14GPUTests) (prefix=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 78, in test_full_and_conditional_gradients
+    with self.subTest(prefix=prefix):self.direction(3,'dad',prefix)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 43, in direction
+    observer=self.make();engine=OnlineEIG(config(),observer,horizon=T,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmpct_d2k62/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+======================================================================
+ERROR: test_scalar_reference_spce (tools.tests.test_ieee14_gpu.IEEE14GPUTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 81, in test_scalar_reference_spce
+    c=config();obs=self.make();engine=OnlineEIG(c,obs,horizon=3,sigma=.005,contrasts=4)
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 15, in make
+    from src.domains.swing.continuous_rocof import EndpointRocofObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_rocof.py", line 3, in <module>
+    from src.domains.swing.continuous_cuda import CudaContinuousSwingObserver
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/continuous_cuda.py", line 6, in <module>
+    from src.domains.swing.cuda import CUDA_DELTA_F_KERNEL
+  File "/home/qiqi/Documents/objective_power_grid/src/domains/swing/cuda.py", line 160, in <module>
+    _mod = SourceModule(CUDA_KERNEL, options=["--use_fast_math"])
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 348, in __init__
+    cubin = compile(
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 295, in compile
+    return compile_plain(source, options, keep, nvcc, cache_dir, target)
+  File "/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/compiler.py", line 150, in compile_plain
+    raise CompileError(
+pycuda.driver.CompileError: nvcc compilation of /tmp/tmp244pplxt/kernel.cu failed
+[command: nvcc --cubin --use_fast_math -arch sm_120 -I/home/qiqi/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/pycuda/cuda kernel.cu]
+[stderr:
+gcc: No such file or directory
+nvcc fatal   : Failed to preprocess host compiler properties.
+]
+
+----------------------------------------------------------------------
+Ran 15 tests in 3.469s
+
+FAILED (errors=17)

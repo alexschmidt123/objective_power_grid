@@ -1,0 +1,3 @@
+# Four-variant ST verification
+
+Actual serialized configuration checked for all four, not defaults. Switching revision2 verified in both checkpoints. Shared StrategyManager hard-forward gate and expert surrogates are the corrected location implementation; component-level tests cover informative gate/router VJPs, carried state, reset, forced continue/reroute and hard sparse inference. SIR-only adaptations change history dimensions and chronological action mapping. Residual base hashes match and all frozen base tensors are bitwise unchanged. SIR runtime and loss/gradient fixtures recorded separately. No relaxed fallback selected.

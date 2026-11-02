@@ -1,0 +1,137 @@
+# Durations strictly increase at every horizon, with a minimum 0.01-second gap.
+# Non-reset only. u_bounds is continuous; solver_scan_points only brackets roots.
+system:
+  name: ieee9
+N: 3
+data:
+  observation_backend: online_continuous_swing
+  uses_probe_bank: false
+  uses_control_bank: false
+  generate_if_missing: false
+observation:
+  N_obs: 0  # One scalar maximum absolute RoCoF, not zero observations.
+  noise_sigma: 0.005  # Hz/s; noise is added after extracting the clean peak.
+  sampling: max_absolute_rocof_over_fixed_recording_window
+swing_equation:
+  topology: ieee9
+  physical_bus_count: 9
+  dynamic_machine_buses:
+  - 1
+  - 2
+  - 3
+  retained_bus_map:
+  - 1
+  - 2
+  - 3
+  bus_label_conventions:
+    physical_bus_numbering: one_based_ieee
+    probe_bus_indexing: zero_based_physical
+    observation_bus_field: one_based_physical
+    control_bus_indexing: zero_based_reduced_dynamic
+    reduced_index_to_physical_bus:
+      0: 1
+      1: 2
+      2: 3
+  observation_bus: 1
+  base_frequency_hz: 60.0
+  base_power_mva: 100.0
+  coupling_strength: 1.0
+  damping: 0.0
+  latent_model: machinewise_mk
+  M_lower_nodes:
+  - 0.0877898665
+  - 0.0237671385
+  - 0.0111779822
+  M_upper_nodes:
+  - 0.1630383235
+  - 0.0441389715
+  - 0.0207591098
+  K_lower_nodes:
+  - 0.029375
+  - 0.013125
+  - 0.0075
+  K_upper_nodes:
+  - 0.29375
+  - 0.13125
+  - 0.075
+  use_node_specific_damping: true
+  D_nodes:
+  - 0.01254141
+  - 0.003395306
+  - 0.001596855
+  P_m_nodes:
+  - 0.0
+  - 0.0
+  - 0.0
+  theta0_nodes:
+  - 0.0
+  - 0.0
+  - 0.0
+  omega0_nodes:
+  - 0.0
+  - 0.0
+  - 0.0
+  enforce_initial_equilibrium: true
+  probe_buses:
+  - 0
+  probe_amplitudes:
+  - 0.05
+  reset_after_probe: false
+  T_obs_sec: 3.0
+  ode_dt: 0.0015625
+  fs_hz: 40.0
+  sigma: 0.2
+  probe_duration_bounds:
+  - 0.2
+  - 3.0
+prior:
+  mc_samples: 512
+  mc_support_seed: 1
+experiment:
+  mode: continuous_duration_no_reset
+  experiment_type: eig_based
+  step_number: 3
+  methods:
+  - dad
+  - rl_sboed
+  - step_dad
+  - myopic
+  - fixed
+  - random
+  min_duration_separation: 0.01
+control:
+  rocof_limit_hz_s: 22.0
+  delta_f_nadir_hz: -0.2
+  T_obs_sec: 10.0
+  ode_dt: 0.0015625
+  fs_hz: 40.0
+  contingency:
+    bus: 0
+    magnitude: -0.45
+    units: pu
+  profile:
+    bus: 0
+    t_start: 0.0
+    duration: 10.0
+    shape: step
+    units: pu
+  posterior_coverage: 0.9
+  robust_rule: quantile
+  safety_margin: 0.0
+  initial_state: carried_terminal_probe_state
+  u_bounds:
+  - 0.0
+  - 0.5
+  solver_scan_points: 33
+  solver_tolerance: 1.0e-05
+nonreset_backend_status: implemented_ieee9
+training:
+  eig_based:
+    updates: 2000
+    batch_size: 64
+  msc_based:
+    updates: 2000
+    batch_size: 64
+  objective_based:
+    updates: 2000
+    batch_size: 64

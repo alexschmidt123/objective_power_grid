@@ -1,0 +1,26 @@
+{
+  "training_run": "/home/qiqi/Documents/objective_power_grid/experiments/09152026/09152026_endpoint_rocof_T4-5_train101_eval1001_rerun12h/T4/run",
+  "training_seed": 101,
+  "source_config_sha256": "304c9dea9fa26a063a7eec10c1f5eceda9bd5176db7cb56ccd7200aa8ee89cb8",
+  "checkpoints": {
+    "dad": {
+      "path": "/home/qiqi/Documents/objective_power_grid/experiments/09152026/09152026_endpoint_rocof_T4-5_train101_eval1001_rerun12h/T4/run/models/dad.pth",
+      "sha256": "060e5ad79242f17529491679fe7ec476390af3410519ea0a29356aa383b38537"
+    }
+  },
+  "evaluation_overrides": {
+    "eval_systems": {
+      "source": 128,
+      "evaluation": 512
+    },
+    "methods": {
+      "source": "dad,rl_sboed,step_dad,myopic,fixed,random",
+      "evaluation": "step_dad"
+    },
+    "refinement_updates": {
+      "source": 16,
+      "evaluation": 4
+    }
+  },
+  "source_code_check": "exact hashes; continuous_eig scientific AST permits CLI-only changes; online_cli dispatch excluded"
+}

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "confirmed_defect": "Two-output conservative-potential LayerNorm is numerically flat in trained SIR adapter",
+  "original_score_max_abs": 1.2469177964461498e-12,
+  "compatible_head_score_max_abs": 2.63802292960325e-05,
+  "trained_base_output_range": [
+    -12.249045820621134,
+    11.946392310008047
+  ],
+  "original_layernorm_jacobian_max": 2.833797918544434e-10,
+  "native_loss": 35.29982346950845,
+  "native_gradient_norm": 2.88820368273268,
+  "correction": "Enable pinned upstream potential_hidden_dim=256 only for scalar-observation/scalar-design SIR; unchanged Transformer, loss, policy and optimizers",
+  "upstream_source": "policy_learning/score_nets.py:ConservativeScoreNetwork potential_hidden_dim",
+  "training_in_diagnostic": "One native update on diagnostic clone, no policy retraining or checkpoint replacement"
+}

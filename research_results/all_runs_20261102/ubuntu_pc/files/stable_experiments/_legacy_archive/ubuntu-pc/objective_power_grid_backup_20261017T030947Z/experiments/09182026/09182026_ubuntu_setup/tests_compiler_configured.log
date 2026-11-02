@@ -1,0 +1,28 @@
+..../home/qiqi/Documents/objective_power_grid/tools/tests/test_rocof_pathwise.py:84: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  self.assertGreater(float((units*(1-units)).min()),.01)
+...[online-design] fixed update=0 validation_utility=0.880292
+[online-design] fixed update=1 validation_utility=0.880603
+[online-design] dad update=0 validation_utility=0.472325
+[online-design] dad update=1 validation_utility=0.494295
+[online-design] rl_sboed update=0 validation_utility=0.498369
+[online-design] rl_sboed update=1 validation_utility=0.517276
+[online-design] evaluated dad: 0.2s
+[online-design] evaluated rl_sboed: 0.2s
+[online-design] evaluated step_dad: 1.8s
+[online-design] evaluated myopic: 0.6s
+[online-design] evaluated fixed: 0.2s
+[online-design] evaluated random: 0.2s
+............F..
+======================================================================
+FAIL: test_endpoint_state_carry_and_time_step_convergence (tools.tests.test_ieee14_gpu.IEEE14GPUTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qiqi/Documents/objective_power_grid/tools/tests/test_ieee14_gpu.py", line 37, in test_endpoint_state_carry_and_time_step_convergence
+    self.assertLessEqual(fine_err,coarse_err+2e-8)
+AssertionError: np.float64(3.718962721110941e-08) not less than or equal to np.float64(2.9669473555184993e-08)
+
+----------------------------------------------------------------------
+Ran 22 tests in 263.847s
+
+FAILED (failures=1)
