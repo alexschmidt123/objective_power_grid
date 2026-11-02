@@ -1,0 +1,405 @@
+{
+  "schema": "finite_loss_adaptive_space_v1",
+  "status": "complete",
+  "phase": "confirm",
+  "system": "ieee14",
+  "device": "cuda",
+  "budget": {
+    "inner": 32,
+    "outer": 16,
+    "first_candidates": 12,
+    "fixed_restarts": 4,
+    "calibration": 256,
+    "histories_per_batch": 16,
+    "actions_per_batch": 6,
+    "bootstrap": 2000
+  },
+  "horizons": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "audit_noise_seeds": [
+    101,
+    202,
+    303
+  ],
+  "n_support": 384,
+  "n_actions": 84,
+  "N_obs": 5,
+  "noise_sigma": 0.005,
+  "alpha": 0.05,
+  "penalty": 20.0,
+  "terminal_rule": "quantile",
+  "validation_indices": [
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127
+  ],
+  "prior_bayes_risk": 0.02330729166666666,
+  "prior_control": 0.4,
+  "practical_gain_reference": 0.0011653645833333331,
+  "support_sha256": "d7f31c14b8d5ac7526e5df3308f9d839e84e94c8cf9961d68469a9c60fcf3aaf",
+  "validation_sha256": "2fe0e1cee28c0ea846c22fe518ae6ca454f8ed59d85170abf88db96baca2da88",
+  "planning": "receding two-step; immediate-best plus diverse first candidates; all second actions",
+  "fixed": "greedy multistart on independent in-support calibration simulations",
+  "evaluation": "off-support validation half; final test bank untouched; paired action/step noise",
+  "claim_scope": "approximate planner witness, not an upper bound on DAD-family performance",
+  "physical_safety_certified": false,
+  "results": {
+    "2": {
+      "methods": {
+        "fixed": {
+          "mean_loss": 0.008750000000000006,
+          "std_across_seed_means": 0.0008267972847076859,
+          "bank_coverage": 0.9947916666666666,
+          "control_levels": [
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 1.0
+        },
+        "myopic": {
+          "mean_loss": 0.007812500000000005,
+          "std_across_seed_means": 0.00027063293868263583,
+          "bank_coverage": 1.0,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 5.666666666666667
+        },
+        "lookahead": {
+          "mean_loss": 0.008177083333333337,
+          "std_across_seed_means": 0.0008018127249135758,
+          "bank_coverage": 1.0,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 5.0
+        }
+      },
+      "adaptive_gain": {
+        "mean": 0.0005729166666666686,
+        "ci95": [
+          -0.0011458333333333325,
+          0.003072916666666671
+        ],
+        "sample_std_across_theta": 0.008899887788365804,
+        "n_theta": 64,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": 0.02458100558659227
+      },
+      "nonmyopic_gain": {
+        "mean": -0.0003645833333333336,
+        "ci95": [
+          -0.0009374999999999999,
+          0.00020833333333333294
+        ],
+        "sample_std_across_theta": 0.002309186278722717,
+        "n_theta": 64,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.015642458100558677
+      },
+      "fixed_sequence": [
+        77,
+        80
+      ],
+      "fixed_calibration_loss": 0.01079736522895742,
+      "verdict": "material_gain_not_shown_by_this_planner"
+    },
+    "3": {
+      "methods": {
+        "fixed": {
+          "mean_loss": 0.010729166666666673,
+          "std_across_seed_means": 0.0011727427342914276,
+          "bank_coverage": 0.9791666666666666,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 1.0
+        },
+        "myopic": {
+          "mean_loss": 0.00848958333333334,
+          "std_across_seed_means": 0.0023918671881677186,
+          "bank_coverage": 0.9895833333333334,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 28.0
+        },
+        "lookahead": {
+          "mean_loss": 0.009114583333333339,
+          "std_across_seed_means": 0.0029328975469377298,
+          "bank_coverage": 0.9895833333333334,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 42.0
+        }
+      },
+      "adaptive_gain": {
+        "mean": 0.0016145833333333355,
+        "ci95": [
+          -0.0006250000000000002,
+          0.004845052083333332
+        ],
+        "sample_std_across_theta": 0.011424040796183942,
+        "n_theta": 64,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": 0.06927374301675988
+      },
+      "nonmyopic_gain": {
+        "mean": -0.0006249999999999995,
+        "ci95": [
+          -0.004687500000000003,
+          0.003489583333333337
+        ],
+        "sample_std_across_theta": 0.015823932046012644,
+        "n_theta": 64,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.026815642458100544
+      },
+      "fixed_sequence": [
+        58,
+        69,
+        71
+      ],
+      "fixed_calibration_loss": 0.009083528164346885,
+      "verdict": "inconclusive_increase_planning_or_validation_budget"
+    },
+    "4": {
+      "methods": {
+        "fixed": {
+          "mean_loss": 0.008072916666666673,
+          "std_across_seed_means": 0.002189359328852471,
+          "bank_coverage": 0.9895833333333334,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 1.0
+        },
+        "myopic": {
+          "mean_loss": 0.00677083333333334,
+          "std_across_seed_means": 0.0014768173832039417,
+          "bank_coverage": 0.9947916666666666,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 54.333333333333336
+        },
+        "lookahead": {
+          "mean_loss": 0.007916666666666673,
+          "std_across_seed_means": 0.0015175835712847375,
+          "bank_coverage": 0.9895833333333334,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 62.0
+        }
+      },
+      "adaptive_gain": {
+        "mean": 0.00015625000000000003,
+        "ci95": [
+          -0.003645833333333337,
+          0.0040625000000000045
+        ],
+        "sample_std_across_theta": 0.015796654117410915,
+        "n_theta": 64,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": 0.006703910614525143
+      },
+      "nonmyopic_gain": {
+        "mean": -0.0011458333333333338,
+        "ci95": [
+          -0.004687500000000004,
+          0.001979166666666669
+        ],
+        "sample_std_across_theta": 0.013880553054054444,
+        "n_theta": 64,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.04916201117318439
+      },
+      "fixed_sequence": [
+        62,
+        75,
+        77,
+        83
+      ],
+      "fixed_calibration_loss": 0.008342592828985166,
+      "verdict": "inconclusive_increase_planning_or_validation_budget"
+    },
+    "5": {
+      "methods": {
+        "fixed": {
+          "mean_loss": 0.008072916666666673,
+          "std_across_seed_means": 0.0033157904254993795,
+          "bank_coverage": 0.984375,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 1.0
+        },
+        "myopic": {
+          "mean_loss": 0.005781250000000004,
+          "std_across_seed_means": 0.00027063293868263757,
+          "bank_coverage": 1.0,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 62.0
+        },
+        "lookahead": {
+          "mean_loss": 0.009270833333333341,
+          "std_across_seed_means": 0.004897218332465213,
+          "bank_coverage": 0.9791666666666666,
+          "control_levels": [
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41
+          ],
+          "mean_unique_sequences": 64.0
+        }
+      },
+      "adaptive_gain": {
+        "mean": -0.0011979166666666672,
+        "ci95": [
+          -0.006302083333333338,
+          0.0038020833333333374
+        ],
+        "sample_std_across_theta": 0.021458028327826718,
+        "n_theta": 64,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.05139664804469277
+      },
+      "nonmyopic_gain": {
+        "mean": -0.0034895833333333376,
+        "ci95": [
+          -0.007760416666666674,
+          -0.00010416666666666846
+        ],
+        "sample_std_across_theta": 0.01616089394016701,
+        "n_theta": 64,
+        "uncertainty_scope": "paired theta-cluster bootstrap, conditional on banks and calibrated Fixed",
+        "fraction_of_prior_bayes_risk": -0.14972067039106168
+      },
+      "fixed_sequence": [
+        58,
+        62,
+        71,
+        73,
+        77
+      ],
+      "fixed_calibration_loss": 0.0076379930197857954,
+      "verdict": "material_gain_not_shown_by_this_planner"
+    }
+  },
+  "elapsed_seconds": 141.41857528395485
+}

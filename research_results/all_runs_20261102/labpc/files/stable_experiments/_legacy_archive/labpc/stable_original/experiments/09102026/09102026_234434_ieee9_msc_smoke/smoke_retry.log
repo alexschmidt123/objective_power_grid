@@ -1,0 +1,86 @@
+Log file: experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005/logs/run_log.log
+=== run.sh (config=experiments/09102026_234434_ieee9_msc_smoke/ieee9_msc.yaml type=msc_based T=3 N_obs=5 noise_sigma=0.005 seed=101 methods=dad,rl_sboed,step_dad,myopic,fixed,random) ===
+Result folder: experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005
+Evaluate: dad rl_sboed step_dad myopic fixed random
+Train: dad rl_sboed
+=== data_generation (config=experiments/09102026_234434_ieee9_msc_smoke/ieee9_msc.yaml type=msc_based T=3 N_obs=5 noise_sigma=0.005 seed=101 methods=dad,rl_sboed,step_dad,myopic,fixed,random) ===
+[full-bank] ensure and validate -> /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01; 281 durations from 0.20 to 3.00 s
+[bank] legacy bank without verified physics manifest: /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01
+Using existing physical bank → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01
+  (skipping CUDA generation; pass --force to regenerate)
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01 (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[generate-data] type=msc_based config=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/ieee9_msc.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005 smoke=True force=False methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random']
+[generate-data] dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/physical_subset
+Using existing physical bank → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/physical_subset
+  (skipping CUDA generation; pass --force to regenerate)
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/physical_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[generate-data] reused=True type=msc_based train=None test=None actions=None
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005
+[mocu-bank] complete and matched -> /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/control; skipping generation
+=== training method=dad (config=experiments/09102026_234434_ieee9_msc_smoke/ieee9_msc.yaml type=msc_based T=3 N_obs=5 noise_sigma=0.005 seed=101) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/physical_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[mocu-bank] separate control bank -> /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/control
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[fixed] WARNING: using trivial sequence [0..T-1] (smoke / allow_trivial_fixed); not a valid Fixed baseline
+[train] type=msc_based DAD config=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/ieee9_msc.yaml N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005
+[train] DAD checkpoint selection: joint_score=MSC-0*unique_frac; soft_floor=OFF (uniq>=26/256, mocu_slack=0.0025)
+[train] DAD device=cuda updates=3 traj/update=4 total_trajectories=12 val_every=2 val_rollouts=4 entropy_coef=0.1→0.005 entropy_anneal_fraction=0.8 diversity_w=0.0 dense_cf=0.0 dense_branch=0.0
+[train] DAD update=1/3 mean_u=0.3875 entropy=3.963 entropy_coef=0.10000 update_s=0.24 traj=4/12 elapsed=0.2s eta=0.5s
+[train] DAD update=2/3 mean_u=0.3950 entropy=3.964 entropy_coef=0.05250 update_s=0.02 traj=8/12 elapsed=0.3s eta=0.1s
+[train] DAD val update=2 mean_u=0.3900 msc=0.3900 under=0.000 unique_seq=1/4 seq_H=-0.000 joint_score=0.3900 floor=MISS
+[train] WARNING DAD: deterministic unique_seq=1 after update=2 (open-loop collapse). Consider higher entropy_coefficient or checking belief conditioning.
+[train] DAD update=3/3 mean_u=0.3925 entropy=3.964 entropy_coef=0.00500 update_s=0.01 traj=12/12 elapsed=0.3s eta=0.0s
+[train] DAD val update=3 mean_u=0.3925 msc=0.3925 under=0.000 unique_seq=2/4 seq_H=0.562 joint_score=0.3925 floor=ok
+[train] WARNING DAD: best checkpoint still misses unique-seq floor (unique=1/4). Policy may be open-loop.
+[train] DAD finished updates=3 trajectories=12 elapsed=0.4s best_val_msc=0.3900 unique=1 score=0.3900 → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005/model/dad.pth
+[train] DAD 0s
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005
+=== training method=rl_sboed (config=experiments/09102026_234434_ieee9_msc_smoke/ieee9_msc.yaml type=msc_based T=3 N_obs=5 noise_sigma=0.005 seed=101) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/physical_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[mocu-bank] separate control bank -> /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/control
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[fixed] WARNING: using trivial sequence [0..T-1] (smoke / allow_trivial_fixed); not a valid Fixed baseline
+[train] type=msc_based RL-sBOED config=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/ieee9_msc.yaml N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005
+[train] RL-sBOED checkpoint selection: joint_score=MSC-0*unique_frac; soft_floor=OFF (uniq>=26/256, mocu_slack=0.0025)
+[train] RL-sBOED device=cuda updates=3 traj/update=4 total_trajectories=12 val_every=2 val_rollouts=4 entropy_coef=0.1→0.005 entropy_anneal_fraction=0.8 diversity_w=0.0 dense_cf=0.0 dense_branch=0.0
+[train] RL-sBOED update=1/3 mean_u=0.3875 entropy=3.961 entropy_coef=0.10000 update_s=0.25 traj=4/12 elapsed=0.2s eta=0.5s
+[train] RL-sBOED update=2/3 mean_u=0.3950 entropy=3.956 entropy_coef=0.05250 update_s=0.03 traj=8/12 elapsed=0.3s eta=0.1s
+[train] RL-sBOED val update=2 mean_u=0.3825 msc=0.3825 under=0.250 unique_seq=1/4 seq_H=-0.000 joint_score=0.3825 floor=MISS
+[train] WARNING RL-sBOED: deterministic unique_seq=1 after update=2 (open-loop collapse). Consider higher entropy_coefficient or checking belief conditioning.
+[train] RL-sBOED update=3/3 mean_u=0.3925 entropy=3.953 entropy_coef=0.00500 update_s=0.02 traj=12/12 elapsed=0.3s eta=0.0s
+[train] RL-sBOED val update=3 mean_u=0.3825 msc=0.3825 under=0.250 unique_seq=1/4 seq_H=-0.000 joint_score=0.3825 floor=MISS
+[train] WARNING RL-sBOED: best checkpoint still misses unique-seq floor (unique=1/4). Policy may be open-loop.
+[train] RL-sBOED finished updates=3 trajectories=12 elapsed=0.4s best_val_msc=0.3825 unique=1 score=0.3825 → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005/model/rl_sboed.pth
+[train] RL-sBOED 0s
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005
+=== crossed evaluation train_seed=101 eval_seed=1001 ===
+=== evaluation (config=experiments/09102026_234434_ieee9_msc_smoke/ieee9_msc.yaml type=msc_based T=3 N_obs=5 noise_sigma=0.005 seed=101 methods=dad,rl_sboed,step_dad,myopic,fixed,random) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/physical_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[mocu-bank] separate control bank -> /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/control
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[fixed] WARNING: using trivial sequence [0..T-1] (smoke / allow_trivial_fixed); not a valid Fixed baseline
+[evaluate] type=msc_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1001 N_obs=5 mode=sampled_delta_f exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005
+[ieee9] evaluating DAD n=4 eval_seed=1001
+[ieee9] DAD runtime=0.141s (0.035305s/rollout)
+[ieee9] evaluating RL-sBOED n=4 eval_seed=1001
+[ieee9] RL-sBOED runtime=0.019s (0.004783s/rollout)
+[ieee9] evaluating Step-DAD n=4 eval_seed=1001
+[ieee9] Step-DAD runtime=0.644s (0.161040s/rollout)
+[ieee9] evaluating Myopic n=4 eval_seed=1001
+[ieee9] Myopic runtime=0.231s (0.057725s/rollout)
+[ieee9] evaluating Fixed n=4 eval_seed=1001
+[ieee9] Fixed runtime=0.001s (0.000247s/rollout)
+[ieee9] evaluating Random n=4 eval_seed=1001
+[ieee9] Random runtime=0.008s (0.000250s/rollout)
+[ieee9] oracle + safety
+  oracle θ 1/4
+  oracle θ 2/4
+  oracle θ 3/4
+  oracle θ 4/4
+Summary → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005/summary.md
+Done → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005
+
+Done config=experiments/09102026_234434_ieee9_msc_smoke/ieee9_msc.yaml type=msc_based T=3.
+EXP_DIR=experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005
+LOG_FILE=experiments/09102026_234437_ieee9_MSC_T3_Nobs5_sigma0p005/logs/run_log.log

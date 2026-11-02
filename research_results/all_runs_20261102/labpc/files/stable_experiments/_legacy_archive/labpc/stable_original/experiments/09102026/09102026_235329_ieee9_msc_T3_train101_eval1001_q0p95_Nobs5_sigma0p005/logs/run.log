@@ -1,0 +1,27 @@
+Log file: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_235329_ieee9_msc_T3_train101_eval1001_q0p95_Nobs5_sigma0p005/runs/09102026_235332_ieee9_MSC_T3_Nobs5_sigma0p005/logs/run_log.log
+=== run.sh (config=configs/ieee9_mocu.yaml type=msc_based T=3 N_obs=5 noise_sigma=0.005 seed=101 methods=dad,rl_sboed,step_dad,myopic,fixed,random) ===
+Result folder: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_235329_ieee9_msc_T3_train101_eval1001_q0p95_Nobs5_sigma0p005/runs/09102026_235332_ieee9_MSC_T3_Nobs5_sigma0p005
+Evaluate: dad rl_sboed step_dad myopic fixed random
+Train: dad rl_sboed
+=== data_generation (config=configs/ieee9_mocu.yaml type=msc_based T=3 N_obs=5 noise_sigma=0.005 seed=101 methods=dad,rl_sboed,step_dad,myopic,fixed,random) ===
+[full-bank] ensure and validate -> /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01; 281 durations from 0.20 to 3.00 s
+[bank] legacy bank without verified physics manifest: /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01
+Using existing physical bank → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01
+  (skipping CUDA generation; pass --force to regenerate)
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01 (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[generate-data] type=msc_based config=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_235329_ieee9_msc_T3_train101_eval1001_q0p95_Nobs5_sigma0p005/source_snapshot/configs/ieee9_mocu.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_235329_ieee9_msc_T3_train101_eval1001_q0p95_Nobs5_sigma0p005/runs/09102026_235332_ieee9_MSC_T3_Nobs5_sigma0p005 smoke=False force=False methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random']
+[generate-data] dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/physical_subset
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_235329_ieee9_msc_T3_train101_eval1001_q0p95_Nobs5_sigma0p005/source_snapshot/src/experiment.py", line 1148, in <module>
+    main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_235329_ieee9_msc_T3_train101_eval1001_q0p95_Nobs5_sigma0p005/source_snapshot/src/experiment.py", line 1142, in main
+    args.func(args)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_235329_ieee9_msc_T3_train101_eval1001_q0p95_Nobs5_sigma0p005/source_snapshot/src/experiment.py", line 458, in cmd_generate_data
+    rep = generate_physical_bank(cfg, smoke=args.smoke, force=False)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_235329_ieee9_msc_T3_train101_eval1001_q0p95_Nobs5_sigma0p005/source_snapshot/src/banks/power_grid.py", line 650, in generate_physical_bank
+    raise RuntimeError(f"Bank configuration mismatch at {destination}; "
+RuntimeError: Bank configuration mismatch at /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09102026_234434_ieee9_msc_smoke/banks/physical_subset; choose a new dataset directory or explicitly regenerate.

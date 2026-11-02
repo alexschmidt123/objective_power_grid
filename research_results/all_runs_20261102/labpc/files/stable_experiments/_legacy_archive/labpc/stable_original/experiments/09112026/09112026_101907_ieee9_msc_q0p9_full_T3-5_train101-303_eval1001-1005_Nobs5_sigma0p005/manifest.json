@@ -1,0 +1,82 @@
+{
+  "status": "terminated_by_user",
+  "source_commit": "2677ec6319dbb0a6df8eaedf266dcb723f6c6c4f",
+  "archive_sha256": "240fa0ba9285cfd846b4f658b8525cb54215ce98575e6ed2ded74bfae3fe0407",
+  "resolved_config_sha256": "78849ba327cc6fe1922b61a8ff09a98db941243d579351928af590d1f2df8e0e",
+  "objective": "msc",
+  "posterior_coverage": 0.9,
+  "horizons": [
+    3,
+    4,
+    5
+  ],
+  "training_seeds": [
+    101,
+    202,
+    303
+  ],
+  "evaluation_seeds": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005
+  ],
+  "methods": [
+    "dad",
+    "rl_sboed",
+    "step_dad",
+    "myopic",
+    "fixed",
+    "random"
+  ],
+  "N_obs": 5,
+  "noise_sigma": 0.005,
+  "durations": [
+    1.75,
+    2.15,
+    2.4,
+    2.74,
+    2.79,
+    2.97
+  ],
+  "updates": 2000,
+  "trajectories_per_update": 128,
+  "smoke": false,
+  "expected_evaluation_summaries": 45,
+  "estimated_hours": [
+    20,
+    30
+  ],
+  "hprc_su": 0,
+  "command": [
+    "bash",
+    "sweep_run.sh",
+    "--configs",
+    "ieee9_mocu",
+    "--experiment_type",
+    "msc_based",
+    "--T",
+    "3,4,5",
+    "--N_obs",
+    "5",
+    "--noise_sigma",
+    "0.005",
+    "--seed",
+    "101,202,303",
+    "--eval-seeds",
+    "1001,1002,1003,1004,1005",
+    "--method",
+    "dad,rl_sboed,step_dad,myopic,fixed,random"
+  ],
+  "data": {
+    "dataset_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9/probe_subsets/eba8db9e23a48ced",
+    "reuse_bank_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9/probe_master",
+    "mocu_dataset_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9/control_banks/f977c0cd2518626e",
+    "generate_if_missing": false
+  },
+  "reporting": "MSC/control, oracle MSC, physical safety; deduplicate baseline evaluation-seed copies when aggregating.",
+  "pid": 1520088,
+  "launch_time_utc": "2026-09-11T15:19:08.311289+00:00",
+  "termination_recorded_utc": "2026-09-12T02:29:52.010523+00:00"
+}
