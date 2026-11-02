@@ -1,0 +1,22 @@
+{
+  "training_run": "/scratch/user/g.lin/Documents/objective_power_grid/experiments/09182026/09182026_ubuntu_ieee9_conference_no_stepdad/T5/train303",
+  "training_seed": 303,
+  "source_config_sha256": "15511da037e66696f82a7174e59394ac8d18bce88e4820824df224c773ad69ac",
+  "checkpoints": {
+    "dad": {
+      "path": "/scratch/user/g.lin/Documents/objective_power_grid/experiments/09182026/09182026_ubuntu_ieee9_conference_no_stepdad/T5/train303/models/dad.pth",
+      "sha256": "96d51510e67a62bb9f1ea07d848b8e45c09a3bf194ef6e21778466ad9c9d849b"
+    }
+  },
+  "evaluation_overrides": {
+    "methods": {
+      "source": "dad,rl_sboed,fixed",
+      "evaluation": "step_dad"
+    },
+    "refinement_updates": {
+      "source": 16,
+      "evaluation": 4
+    }
+  },
+  "source_code_check": "exact hashes; continuous_eig scientific AST permits CLI-only changes; online_cli dispatch excluded"
+}

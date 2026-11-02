@@ -1,0 +1,164 @@
+{
+  "protocol": "moe_sboed_research_v1",
+  "settings": {
+    "updates": 2,
+    "batch_size": 4,
+    "learning_rate": 0.001,
+    "hidden": 64,
+    "contrasts": 8,
+    "validation_contrasts": 8,
+    "validation_systems": 4,
+    "validate_every": 1,
+    "eval_systems": 2,
+    "eval_contrasts": 8,
+    "posterior_particles": 16,
+    "posterior_steps": 4,
+    "posterior_chains": 2,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 8,
+    "search_candidates": 4,
+    "search_rounds": 1,
+    "fantasies": 4,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 1,
+    "vsoed_critic_updates": 1,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 2,
+    "evaluation_contrast_chunk": 16384,
+    "threads": 4
+  },
+  "benchmark": {
+    "system": {
+      "name": "location_finding"
+    },
+    "N": 1,
+    "experiment": {
+      "experiment_type": "eig_based",
+      "step_number": 30,
+      "methods": [
+        "random",
+        "fixed",
+        "myopic",
+        "dad",
+        "vsoed",
+        "moe_sboed"
+      ]
+    },
+    "observation": {
+      "noise_sigma": 0.5,
+      "sampling": "normal_log_signal"
+    },
+    "location_finding": {
+      "design_bounds": [
+        -4.0,
+        4.0
+      ],
+      "random_design_distribution": "uniform_box"
+    },
+    "research": {
+      "enabled": true,
+      "settings": {
+        "updates": 10000,
+        "batch_size": 1000,
+        "contrasts": 1024,
+        "validation_contrasts": 16384,
+        "validation_systems": 128,
+        "validate_every": 100,
+        "eval_systems": 2000,
+        "eval_contrasts": 1000000,
+        "evaluation_batch_size": 16,
+        "evaluation_contrast_chunk": 16384
+      },
+      "paper_protocol": {
+        "reference": "https://arxiv.org/html/2306.10430v2",
+        "official_code": "https://github.com/wgshen/vsOED",
+        "upstream_commit": "d0884f9ba30fbddc56618841c68af2f3bfe16539",
+        "case": "1a_two_sources_poi_inference",
+        "regime": "limited_budget",
+        "nominal_training_trajectories": 10000000,
+        "evaluation": "shared_prior_bank_streamed_sPCE",
+        "training_device": "cuda",
+        "checkpoint_selection": "final",
+        "observation_discrepancy": "Paper Section 4.2 omits log; SOURCE.deterministic returns log(signal). Follow executable code.",
+        "extensions": "Fixed, Myopic, MoE are additions; DAD-style and MoE share sPCE settings. Count primary trajectories and contrast likelihood evaluations separately."
+      },
+      "upstream_vsoed": {
+        "variant": "vsOED-G-I",
+        "updates": 10001,
+        "new_trajectories": 1000,
+        "replay_batch": 10000,
+        "initial_replay": 20000,
+        "replay_capacity": 1000000,
+        "posterior_updates": 5,
+        "critic_updates": 5,
+        "posterior_lr": 0.001,
+        "actor_lr": 0.001,
+        "critic_lr": 0.001,
+        "lr_decay": 0.9999,
+        "discount": 0.9,
+        "exploration": 0.5,
+        "exploration_decay": 0.9999,
+        "target_rate": 0.1,
+        "transition": 0,
+        "log_every": 100
+      },
+      "plan": {
+        "horizons": [
+          30
+        ],
+        "routing": "four_expert_dense_soft",
+        "primary_metric": "common_sPCE_L1000000",
+        "secondary_metric": "parameter_MSE",
+        "exclusions": [
+          "rl_sboed",
+          "step_dad",
+          "mocu",
+          "msc",
+          "cost_utility",
+          "growing_tree"
+        ]
+      }
+    },
+    "_config_path": "/home/grads/g/g.lin/Documents/objective_power_grid/configs/location_finding_eig.yaml"
+  },
+  "hardware": {
+    "execution_site": "labpc",
+    "cluster": null,
+    "computer_name": "ecen-80r5x04.engr.tamu.edu",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+    "gpu_model": "NVIDIA GeForce RTX 4090"
+  },
+  "train_seed": 48563549,
+  "eval_seeds": [
+    63777278
+  ],
+  "methods": [
+    "random",
+    "fixed",
+    "myopic",
+    "dad",
+    "vsoed",
+    "moe_sboed"
+  ],
+  "horizon": 30,
+  "smoke": true,
+  "primary_metric": "held-out sPCE lower-bound estimate (nats)",
+  "secondary_metric": "posterior parameter MSE",
+  "mse_inference": "truth-excluded importance initialization plus random-walk MH in prior coordinates",
+  "location_estimation": "posterior samples aligned to MAP particle; final permutation-invariant squared error",
+  "history": "ordered padded design-observation pairs and stage index; history only",
+  "online_policy_optimization": false,
+  "online_myopic_search": "conditional one-step EIG only",
+  "grid_protocol": "fixed physical bus 1, amplitude .05 pu, full state carry, increasing durations",
+  "gradient": "Torch pathwise; grid uses existing numerical state/duration Jacobians",
+  "limitations": [
+    "Smoke establishes workability, not superiority",
+    "EIG contrast sensitivity and posterior convergence required before paper claims",
+    "vsOED is a documented adaptation, not an exact reproduction"
+  ]
+}

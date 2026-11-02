@@ -1,0 +1,396 @@
+{
+  "protocol": "continuous_no_reset_increasing_eig_endpoint_rocof_v1",
+  "settings": {
+    "config": "/scratch/user/g.lin/Documents/objective_power_grid/experiments/09202026/09202026_ieee14_eig_conference_ubuntu_source/source/configs/ieee14_mocu.yaml",
+    "objective": "eig",
+    "experiment_type": null,
+    "coverage": null,
+    "numerical_gradient_scale": 0.01,
+    "numerical_gradient_directions": 4,
+    "output": "/scratch/user/g.lin/Documents/objective_power_grid/experiments/09212026/09212026_ieee14_eig_conference_step4/T5/train101",
+    "evaluate_from": null,
+    "T": 5,
+    "N_obs": 0,
+    "noise_sigma": 0.005,
+    "duration_min": 0.2,
+    "duration_max": 3.0,
+    "min_duration_separation": 0.01,
+    "bus": 1,
+    "amplitude": 0.05,
+    "window": 3.5,
+    "observation_kind": "endpoint_rocof",
+    "seed": 101,
+    "eval_seed": 1001,
+    "eval_seeds": "1001,1002,1003",
+    "methods": "dad,rl_sboed,step_dad,myopic,fixed,random",
+    "moe_training_mode": "legacy",
+    "fixed_initialization_from": null,
+    "moe_fantasies": 4,
+    "updates": 2000,
+    "batch_size": 32,
+    "contrasts": 128,
+    "validation_systems": 128,
+    "validate_every": 100,
+    "eval_systems": 512,
+    "planner_particles": 128,
+    "search_candidates": 16,
+    "search_rounds": 3,
+    "fantasies": 32,
+    "refinement_updates": 4,
+    "learning_rate": 0.001,
+    "redq_critics": 10,
+    "redq_updates_per_batch": 5,
+    "preflight_max_hours": 0.0,
+    "smoke": false,
+    "estimate_only": false
+  },
+  "hardware": {
+    "execution_site": "hprc",
+    "cluster": "grace",
+    "computer_name": "g083",
+    "cpu_model": "Intel(R) Xeon(R) Gold 6248R CPU @ 3.00GHz",
+    "gpu_model": "NVIDIA A100-PCIE-40GB"
+  },
+  "comparison_revision": "ordered_pathwise_dad_redq_stepdad_v1",
+  "gradient_backend": "pathwise chain rule; numerical state/duration Jacobians (1e-5); signed endpoint RoCoF",
+  "history_representation": "ordered stage slots; no permutation pooling",
+  "duration_order": "strictly_increasing",
+  "method_implementations": {
+    "dad": "deterministic continuous DAD with pathwise sPCE gradients",
+    "rl_sboed": "REDQ-style off-policy actor, replay and critic ensemble; telescoping sPCE rewards; gamma=1",
+    "step_dad": "prefix-conditioned pathwise refinement after each observation; warm-start previous adapted policy",
+    "fixed": "validation-selected feasible initialization followed by pathwise sequence optimization",
+    "myopic": "one-step posterior-particle information search",
+    "random": "uniform over remaining feasible duration intervals"
+  },
+  "publication_validation_complete": false,
+  "observation_kind": "endpoint_rocof",
+  "observation_dimension": 1,
+  "noise_units": "Hz/s",
+  "rocof_sample_dt": 0.025,
+  "numerical_gradient_caveat": null,
+  "recording_window_s": 3.5,
+  "observation_times_within_stage_s": [
+    3.5
+  ],
+  "measurement_bus_physical": 1,
+  "prior_lower": [
+    0.01485446,
+    0.024138498,
+    0.018568076,
+    0.018568076,
+    0.018568076,
+    0.0078431373,
+    0.012745098,
+    0.0098039216,
+    0.0098039216,
+    0.0098039216
+  ],
+  "prior_upper": [
+    0.027586856,
+    0.044828642,
+    0.034483236,
+    0.034483236,
+    0.034483236,
+    0.0784313725,
+    0.1274509804,
+    0.0980392157,
+    0.0980392157,
+    0.0980392157
+  ],
+  "physical_config": {
+    "system": {
+      "name": "ieee14"
+    },
+    "N": 5,
+    "data": {
+      "observation_backend": "online_continuous_swing",
+      "uses_probe_bank": false,
+      "uses_control_bank": false
+    },
+    "observation": {
+      "N_obs": 0,
+      "noise_sigma": 0.005,
+      "dimension": 1,
+      "sampling": "signed_rocof_at_window_end",
+      "noise_units": "Hz/s"
+    },
+    "swing_equation": {
+      "topology": "ieee14",
+      "physical_bus_count": 14,
+      "dynamic_machine_buses": [
+        1,
+        2,
+        3,
+        6,
+        8
+      ],
+      "retained_bus_map": [
+        1,
+        2,
+        3,
+        6,
+        8
+      ],
+      "bus_label_conventions": {
+        "physical_bus_numbering": "one_based_ieee",
+        "probe_bus_indexing": "zero_based_physical",
+        "observation_bus_field": "one_based_physical",
+        "control_bus_indexing": "zero_based_reduced_dynamic",
+        "reduced_index_to_physical_bus": {
+          "0": 1,
+          "1": 2,
+          "2": 3,
+          "3": 6,
+          "4": 8
+        }
+      },
+      "observation_bus": 1,
+      "base_frequency_hz": 60.0,
+      "base_power_mva": 100.0,
+      "coupling_strength": 1.0,
+      "damping": 0.0,
+      "latent_model": "machinewise_mk",
+      "M_lower_nodes": [
+        0.01485446,
+        0.024138498,
+        0.018568076,
+        0.018568076,
+        0.018568076
+      ],
+      "M_upper_nodes": [
+        0.027586856,
+        0.044828642,
+        0.034483236,
+        0.034483236,
+        0.034483236
+      ],
+      "K_lower_nodes": [
+        0.0078431373,
+        0.012745098,
+        0.0098039216,
+        0.0098039216,
+        0.0098039216
+      ],
+      "K_upper_nodes": [
+        0.0784313725,
+        0.1274509804,
+        0.0980392157,
+        0.0980392157,
+        0.0980392157
+      ],
+      "use_node_specific_damping": true,
+      "D_nodes": [
+        0.002122066,
+        0.003448357,
+        0.002652582,
+        0.002652582,
+        0.002652582
+      ],
+      "P_m_nodes": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "theta0_nodes": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "omega0_nodes": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "enforce_initial_equilibrium": true,
+      "probe_buses": [
+        0
+      ],
+      "probe_amplitudes": [
+        0.05
+      ],
+      "reset_after_probe": false,
+      "T_obs_sec": 3.5,
+      "ode_dt": 0.0015625,
+      "fs_hz": 40.0,
+      "sigma": 0.2,
+      "probe_duration_bounds": [
+        0.2,
+        3.0
+      ]
+    },
+    "prior": {
+      "mc_samples": 512,
+      "mc_support_seed": 1
+    },
+    "experiment": {
+      "mode": "continuous_duration_no_reset",
+      "experiment_type": "eig_based",
+      "step_number": 5,
+      "methods": [
+        "dad",
+        "rl_sboed",
+        "step_dad",
+        "myopic",
+        "fixed",
+        "random"
+      ]
+    },
+    "control": {
+      "posterior_coverage": 0.9,
+      "rocof_limit_hz_s": 22.0,
+      "delta_f_nadir_hz": -0.2,
+      "T_obs_sec": 10.0,
+      "ode_dt": 0.00625,
+      "fs_hz": 40.0,
+      "contingency": {
+        "bus": 0,
+        "magnitude": -0.45,
+        "units": "pu"
+      },
+      "profile": {
+        "bus": 0,
+        "t_start": 0.0,
+        "duration": 10.0,
+        "shape": "step",
+        "units": "pu"
+      },
+      "robust_rule": "quantile",
+      "safety_margin": 0.0,
+      "initial_state": "carried_terminal_probe_state",
+      "u_bounds": [
+        0.0,
+        0.5
+      ],
+      "solver_scan_points": 33,
+      "solver_tolerance": 1e-05
+    },
+    "nonreset_backend_status": "eig_implemented_validation_required_msc_mocu_inactive",
+    "training": {
+      "eig_based": {
+        "updates": 2000,
+        "batch_size": 64
+      },
+      "msc_based": {
+        "updates": 2000,
+        "batch_size": 64
+      },
+      "objective_based": {
+        "updates": 2000,
+        "batch_size": 64
+      }
+    }
+  },
+  "uses_probe_bank": false,
+  "estimator": "sequential prior-contrastive lower bound",
+  "bound_ceiling_nats": 4.859812404361672,
+  "smoke_not_performance": false,
+  "source_hashes": {
+    "src/layout.py": "212c337f6c5aa6480cbc90c4ac388000002009c1cbe782034941078bd34352bf",
+    "src/checkpoint_evaluation.py": "2c823ffbc8645079c6f81285b04a8ab9315383febf3de17454eeaaa9e46e5d87",
+    "src/experiment.py": "c54bed959f0005cd86da4d09740e640d798d59696a76b36fa25dfaa6ab22d24e",
+    "src/config.py": "dddc1eef5b299a7f77143ecb7aa50f54b0e1d28c5497d53f4b8fe2010ac281b8",
+    "src/online_cli.py": "6eb754ce110c852623d090982f301b6b369f01cd3ecbe1a5d935d615f91b3a89",
+    "src/hardware.py": "98ca568cb0c65cb135d5e2de1757301aa86008623804807f40ef609605f3ce9f",
+    "src/observations/noise.py": "4a84f657f8a053bf40a00b62fc5083cb1267a8677f9fcabe64d3e891e09c2d64",
+    "src/observations/carry_state.py": "174667b6ed21245ce121fa8c1d7829a3f05040fd6980e8a8acd374842919143f",
+    "src/observations/__init__.py": "246f5d4f798e0dd209812d01a1b6797b262509ccd2e98f6f13216193e0df10e0",
+    "src/observations/compress.py": "9606abb02cbd58906a339a5aaa298cf2a43cef3c79490fe60d741026d57c0fcd",
+    "src/observations/likelihood.py": "b301f3c0a9ec92c164120ffda6a27bc4e85172c0c42b87a64d05cc1dabeed04a",
+    "src/policies/__init__.py": "299d3dd2997d8ab87906288b6db440b56b7450d4e0e57f247fe8170c809cfbac",
+    "src/policies/rl_sboed.py": "8b69abfc918077a18c48b2160aff3988602eaf5bf0c6ffffdae263bc4ac5da3b",
+    "src/policies/dad.py": "0eecc0c0e01163796d5413a61ea6a3aa67a730d7200c878005c1147a51bf04b1",
+    "src/policies/moe.py": "99a99fb41d243e12546e4c642ef72e63d607405a7c82f9920d24c7e94649762f",
+    "src/banks/diagnose_duration.py": "a22d7e97c1b984d8662871b29144030a51eeded8c5b60d28c156662c2bd66313",
+    "src/banks/diagnose_control.py": "82144d653d6549c48752959646f5f59eddf71b2db60c79e399e9e4cd7d0dc5be",
+    "src/banks/control_u.py": "27d53dfde583f79d20c78a04d26a62c6ec77e8fd6f50ca6ba026609343cdb9e8",
+    "src/banks/__init__.py": "4ba36b02ab8446dca1da74db812b0fe3a6e8fdb4a732ba502b130713c9927a05",
+    "src/banks/quality.py": "dadc601f4077b8ecc15d7ecf2383a9738d5361d1d87b7c7d1a959ca74269a0ed",
+    "src/banks/paths.py": "b75ac0efa0def8c901cde788aa100b634fdae9fc238c49103fe2e0150661c4b4",
+    "src/banks/power_grid.py": "b700868644a8bca1bfc8c908b59f21f80dfdb85a0bb0fb640b23adb6cbd0d714",
+    "src/banks/tables.py": "1eaf04dad437a73d99a806758bf8cf9ae9e23e2d100b56585f42289c9e368cb0",
+    "src/banks/generate_control.py": "d7eccae5fff87d91e30d0a318d5c06dfec7b311078ee558ac88c1b796f6d1cb0",
+    "src/banks/transaction.py": "3e06b5499ccc6d6c3fda59d82c5d449afcbc135d93f0cdb816d6a5940404525d",
+    "src/control/u_req.py": "ed3d3e770d371aa998d642229e3bc56a3b3cdca778ad8d295241e799b18cc062",
+    "src/control/__init__.py": "bf1d1f5790359c2fc9d878baed32e1e8a6e58e2d3e133088277330bbd8cc49e3",
+    "src/control/fixed_search.py": "80336c038142eec745ae6c020f63e61eaf95f56cdcf24b7f32a13047762d37cc",
+    "src/control/terminal_rule.py": "55c1f9838da9d2f9728344b35b0a33494e32bc7af7736824daa2c5a2603f7d2f",
+    "src/control/posterior_ctrl.py": "2f739577f0f663cc9f29dbce02ac43c431da6803dc20db5966aff242b33199c4",
+    "src/control/myopic.py": "eb43e0deb40dbb83f91b0abf665d7da1a15a4e7f40e72862da585b0859a53572",
+    "src/control/cuda_control.py": "b086f62f03c4bac4c47bc47840c0e6a6c8b040c3cec95a66ca56050b7c556a8f",
+    "src/control/continuous_control.py": "9dc8e4f8ab76b09cca78145fe1a7230b39629f25ce0024b54c741975fbdc0d5a",
+    "src/control/oracle_u_ctrl.py": "500c1b91837c162b31863e9b39ea817b16e164b7714e6ad370c030e4fe0ca76f",
+    "src/objectives/__init__.py": "ed9de9c8de9e0513d4b1e8f45625ebf19800cb92921dc6c1f35f80747158c9b9",
+    "src/objectives/eig/dad_rollout.py": "e45dcd588addf4109502655b9ef9e34bd3e25945bf0bb2ccc0306866f24950f4",
+    "src/objectives/eig/rollout.py": "f4b23f42eea1b9dfc97ec5768fa5d3c3254dfe6c3dd1690e9fc7fe41411e0a5f",
+    "src/objectives/eig/continuous_redq.py": "4ba36794c590f77811aef214ddded2e846694756a6644fd7f1cbe5aaa63da11c",
+    "src/objectives/eig/__init__.py": "90e41de8d47eec8fab784a7ce9794ab63a53453b5b9d16980b059f29d0121baa",
+    "src/objectives/eig/continuous_eig.py": "139140294919f52af9b2586a9ccc757c980c4a9b73902cff198a4431883b2017",
+    "src/objectives/eig/cli.py": "e1733e3cc845e48102e51d6e56781b5b38efe6f2f64a09844e575bd136e9077b",
+    "src/objectives/eig/pipeline.py": "03d5a8bdf1d5d1725326d7594c19c1b14473c8cf10918d0c1c27a0b5e6bc5801",
+    "src/objectives/eig/methods.py": "f67fe3980eae9e9f67e89d3535f572d0b9eefbf7c06db9d84facbd10175cebd4",
+    "src/objectives/eig/continuous_pathwise.py": "4b65ed07336fefba3ffa45772107a8f0aa1d998fd773e9c64c9c14783b34cb34",
+    "src/objectives/eig/vector.py": "ab8b102be25ce976a6e52b4a1a98be016ed01bb091ede1c348b4cc6d622401a0",
+    "src/objectives/msc/objective.py": "5c28aa1588ff54c0f56fa0dc3ed569f87bf871ee007910238e53fa89b6818d4c",
+    "src/objectives/msc/__init__.py": "c38038850bb1624da87d3c8403247036ce5c1eec2fbb1234b4517b896313f81a",
+    "src/objectives/msc/continuous_msc.py": "fbe200a2a9d4a3affeabdf137ffc7a592bd3447d78cb4588104cb4dbb413ee49",
+    "src/objectives/msc/continuous_numerical.py": "2b14d74ccb39b6b79f3af5d3aac7a1ecdfde47006222212b79165d09f9dc387a",
+    "src/objectives/mocu/diagnostics.py": "59d1a774b3832c448ab48dc4512d752bb997a18ba8085f2e7daea2c368c4ead5",
+    "src/objectives/mocu/calibrate.py": "ddb097e89716787365703f73d2ced11201984283f440cb3e91f64cec350acfb1",
+    "src/objectives/mocu/evaluate.py": "fbab5fd543db1c258b44f2f1167ceee5ee779937316335a9b2081c0d2f28a4a1",
+    "src/objectives/mocu/preflight.py": "c87f892d720b17c43ecc91f0e7df902fb872df48c5f97556eed15c66148ab03f",
+    "src/objectives/mocu/__init__.py": "4f30a157cfa0c0f8335581da2a5af729c6d081e015a2c95fdf94523930d367e8",
+    "src/objectives/mocu/rewards.py": "26720b2cc634941d9a6c231f6f3c5f60b0ed73f7b3b4400d15f17a613b28497c",
+    "src/objectives/mocu/step_dad.py": "08040f8e6fd632734f332a02d563fa675f2b73a6cc1e17d14ef359a2dc1cbbc9",
+    "src/objectives/mocu/train.py": "9b4fa7382cdf1035eb01c57b7005c1984395f242123bcc47e775669b459b9acb",
+    "src/objectives/mocu/context.py": "f21c44e74eace1ce58fcaf53a1096b1cb1f13abf8f31d90c746a26678eef099c",
+    "src/objectives/mocu/moe_diagnostics.py": "d60648fced3d44cc99429c4073cfa62599354a997bb4d68b46a38a1e554d2fb4",
+    "src/results/plots.py": "964cc2c3ed5213b81b9b30e869dbde9cb4474019b8b6297b5aa01c9b09c10471",
+    "src/results/summary.py": "a7ed55240603ad6bffe68609c5acd32761652e098e7c652e96ff567112dd8c4c",
+    "src/results/publication_tables.py": "d9af05ac2c762d5d82afaa971176c543691db290db18212eb87c4d3686f21266",
+    "src/results/__init__.py": "b40ca73a0302e333b20f5518160c94ebf674945319402b849e675583d0ec0bb5",
+    "src/results/tables.py": "eef070ce4a5e49412172dc4d57db10a29b07c4e22b619e5060c1723725f85bce",
+    "src/domains/__init__.py": "c20cf9f1a50c25db36e64d90840f72859f9aadc20e786589e46bf6565f96ac8b",
+    "src/domains/sir/banks.py": "76884a9828ca3b5ddb297b29b1ce00690f82d960bad4a8593a15d0149400f3e6",
+    "src/domains/sir/__init__.py": "1b334f66a511573ce1fbe19606c2171047f88f6fb0e74130c9d3039b32f1a634",
+    "src/domains/sir/design.py": "69c302660760b684ab38cd4618389bfe7440f355cf161956ae838439cf5e8360",
+    "src/domains/sir/context.py": "bf33bda23cd42ca85b4fff9211017b3d220edc05fe8d332869f6c8038112a13a",
+    "src/domains/sir/simulator.py": "c51d08b2b3a5f0b3d7768ad7ec2ad59122b2606095f8b77bcdc5121b9679b3e5",
+    "src/domains/swing/continuous.py": "c4f64477692729ab40c81a5e35cf9eb0f3ddf0cf67f56f03a916c5ed381bbdeb",
+    "src/domains/swing/__init__.py": "7d95795aaddc232e6481cf8a28ddad935be88b55634d439223ab090c07f7ad73",
+    "src/domains/swing/design.py": "28c02f9c534eb8cc84d8b9e39d505b7bbfbd8cfa1e00656725ca143fe8774c68",
+    "src/domains/swing/continuous_rocof.py": "8ff83f57b0a1a677b947335a13896653afce191e70b819585f10fe4fa311cced",
+    "src/domains/swing/cuda.py": "deffdb8ca066c8008cbb8a6aad8d9f76de88c690b8632c055b17a552cd68ebac",
+    "src/domains/swing/continuous_cuda.py": "f4cde4e718e81e67a377fd8c2f2580b08c7de975637de698ff5609d5793a2bfa",
+    "src/domains/swing/simulator.py": "3d91982d60c79fe71c94ae9e1d291767570ecda855316449b68da03a8b1f4c42"
+  },
+  "rocof_difference_times_within_stage_s": [
+    3.475,
+    3.5
+  ],
+  "stage_start_times_s": [
+    0.0,
+    3.5,
+    7.0,
+    10.5,
+    14.0
+  ],
+  "observation_absolute_times_s": [
+    3.5,
+    7.0,
+    10.5,
+    14.0,
+    17.5
+  ],
+  "total_simulated_time_s": 17.5,
+  "interstage_gap_s": 0.0,
+  "initial_state": "equilibrium once; full state carry thereafter",
+  "control_action_space": null,
+  "optimization_caveat": null
+}

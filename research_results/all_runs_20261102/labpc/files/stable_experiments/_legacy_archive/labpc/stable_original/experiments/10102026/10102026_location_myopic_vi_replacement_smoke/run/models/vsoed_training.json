@@ -1,0 +1,52 @@
+{
+  "training": "official_vsOED_GMM_I",
+  "upstream_commit": "d0884f9ba30fbddc56618841c68af2f3bfe16539",
+  "profile": {
+    "variant": "vsOED-G-I",
+    "updates": 2,
+    "paper_reference_updates": 10001,
+    "budget_note": "Exact paper/code iteration settings; 20000 warmup plus 10001*1000 new trajectories generates 10021000. The paper calls this nominally 10 million.",
+    "new_trajectories": 4,
+    "replay_batch": 4,
+    "initial_replay": 8,
+    "replay_capacity": 32,
+    "posterior_updates": 1,
+    "critic_updates": 1,
+    "posterior_lr": 0.001,
+    "actor_lr": 0.001,
+    "critic_lr": 0.001,
+    "lr_decay": 0.9999,
+    "discount": 0.9,
+    "exploration": 0.5,
+    "exploration_decay": 0.9999,
+    "target_rate": 0.1,
+    "transition": 0,
+    "log_every": 1
+  },
+  "device": "cuda:0",
+  "selected_update": 2,
+  "checkpoint_selection": "final, as upstream",
+  "policy_parameters": 162306,
+  "history": [
+    {
+      "Epoch": "0",
+      "Reward/MeanReward": "-7.509065628051758",
+      "Reward/StdReward": "4.330097675323486",
+      "Design/MeanDesign": "[0.09316093474626541, -0.09948860853910446]",
+      "Design/StdDesign": "[0.018145445734262466, 0.03655361384153366]",
+      "ReplayBuffer/buffer_size": "8"
+    },
+    {
+      "Epoch": "1",
+      "Reward/MeanReward": "-2.9482946395874023",
+      "Reward/StdReward": "2.9910473823547363",
+      "Design/MeanDesign": "[-0.098061203956604, -0.058081384748220444]",
+      "Design/StdDesign": "[0.06971190124750137, 0.025234786793589592]",
+      "ReplayBuffer/buffer_size": "12"
+    }
+  ],
+  "training_seconds": 0.5338568219449371,
+  "generated_training_trajectories": 16,
+  "forward_particle_stages": 480,
+  "checkpoint_sha256": "7545c63dd3f6089822ad8eea74c2f9dc130a6a6e5ff1e20337c6c725b3c70b3c"
+}

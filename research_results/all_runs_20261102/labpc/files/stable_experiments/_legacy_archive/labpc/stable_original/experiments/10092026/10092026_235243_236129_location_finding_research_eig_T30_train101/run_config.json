@@ -1,0 +1,120 @@
+{
+  "protocol": "moe_sboed_research_v1",
+  "settings": {
+    "updates": 500,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "hidden": 64,
+    "contrasts": 1024,
+    "validation_contrasts": 1024,
+    "validation_systems": 64,
+    "validate_every": 50,
+    "eval_systems": 64,
+    "eval_contrasts": 16384,
+    "posterior_particles": 1024,
+    "posterior_steps": 64,
+    "posterior_chains": 4,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 128,
+    "search_candidates": 16,
+    "search_rounds": 3,
+    "fantasies": 32,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 3,
+    "vsoed_critic_updates": 5,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 8,
+    "threads": 4
+  },
+  "benchmark": {
+    "system": {
+      "name": "location_finding"
+    },
+    "N": 1,
+    "experiment": {
+      "experiment_type": "eig_based",
+      "step_number": 30,
+      "methods": [
+        "random",
+        "fixed",
+        "myopic",
+        "dad",
+        "vsoed",
+        "moe_sboed"
+      ]
+    },
+    "observation": {
+      "noise_sigma": 0.5,
+      "sampling": "normal_log_signal"
+    },
+    "research": {
+      "enabled": true,
+      "settings": {
+        "eval_systems": 2048,
+        "eval_contrasts": 16384
+      },
+      "plan": {
+        "source": "User-provided ChatGPT research plan",
+        "horizons": [
+          30
+        ],
+        "training_repetitions": 5,
+        "test_trajectories": 2048,
+        "routing": "four_expert_dense_soft",
+        "training_criterion": "sPCE",
+        "online_policy_refinement": false,
+        "primary_metric": "independent_total_EIG_estimate",
+        "secondary_metric": "parameter_MSE",
+        "exclusions": [
+          "rl_sboed",
+          "step_dad",
+          "mocu",
+          "msc",
+          "cost_utility",
+          "growing_tree"
+        ]
+      }
+    },
+    "_config_path": "/home/grads/g/g.lin/Documents/objective_power_grid/configs/location_finding_eig.yaml"
+  },
+  "hardware": {
+    "execution_site": "labpc",
+    "cluster": null,
+    "computer_name": "ecen-80r5x04.engr.tamu.edu",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+    "gpu_model": "NVIDIA GeForce RTX 4090"
+  },
+  "train_seed": 101,
+  "eval_seeds": [
+    1001
+  ],
+  "methods": [
+    "random",
+    "fixed",
+    "myopic",
+    "dad",
+    "vsoed",
+    "moe_sboed"
+  ],
+  "horizon": 30,
+  "smoke": false,
+  "primary_metric": "held-out sPCE lower-bound estimate (nats)",
+  "secondary_metric": "posterior parameter MSE",
+  "mse_inference": "truth-excluded importance initialization plus random-walk MH in prior coordinates",
+  "location_estimation": "posterior samples aligned to MAP particle; final permutation-invariant squared error",
+  "history": "ordered padded design-observation pairs and stage index; history only",
+  "online_policy_optimization": false,
+  "online_myopic_search": "conditional one-step EIG only",
+  "grid_protocol": "fixed physical bus 1, amplitude .05 pu, full state carry, increasing durations",
+  "gradient": "Torch pathwise; grid uses existing numerical state/duration Jacobians",
+  "limitations": [
+    "Smoke establishes workability, not superiority",
+    "EIG contrast sensitivity and posterior convergence required before paper claims",
+    "vsOED is a documented adaptation, not an exact reproduction"
+  ]
+}
