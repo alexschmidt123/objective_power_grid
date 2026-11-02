@@ -1,0 +1,43 @@
+{
+  "study": "Location frozen expert information competence",
+  "foundation": "13681d7091189a4e68056e6a2864dc58f9d5700b",
+  "audit_base": "04b221d2155a59e2afb9d0108c45b22a5702eb8b",
+  "checkpoint_sha256": "f110766019e3628bb02c93815becd7e5795b3abc05626eabd91b7dbeb0381ee7",
+  "fitting_seed": 98302601,
+  "heldout_seed": 98302602,
+  "confirmation_seed": 98302603,
+  "pilot_seed": 98302604,
+  "fitting_N": 1024,
+  "pilot_N": 256,
+  "pilot_L": 65536,
+  "final_L": 262144,
+  "final_N_candidates": [
+    2048,
+    4096
+  ],
+  "precision_target_paired_MC_SE": 0.01,
+  "minimum_eligible_cases_per_context": 128,
+  "stages": [
+    1,
+    10,
+    20,
+    29
+  ],
+  "context": "Two bins at each stage, divided at fitting-split median of mean observed log-signal over prefix. Only original-policy observed histories; no information scores, theta or expert IDs.",
+  "intervention": "Keep original top-two routed experts and all original top-three slot weights. Replace third/weakest selected slot by target e if e is not in top-two; otherwise no-op. Exactly three DISTINCT experts and identical total gate mass. All other modules frozen. Intervene once; rerun all subsequent adaptive observations/decisions.",
+  "expert_comparison_estimand": "Mean terminal sPCE difference within frozen observable bin AND common eligibility for both compared candidates (neither in kept top-two). Do not rank experts across different eligibility domains.",
+  "router_comparison": "Per prefix, average four unselected-eligible substitutions minus original selection. Paired mean by context; lower utility for alternatives supports original router only on this intervention domain.",
+  "utility": "Native full-horizon T30 explicit-likelihood sPCE including truth in denominator; same exogenous truth/noise/shared prior contrast bank across all policies in a phase. Independent phase banks. MCSE conditional on shared contrast bank.",
+  "multiplicity": "Two-sided normal-approximation Bonferroni family316 per heldout/confirmation phase:56expert-versus-native context means+168pairwise expert/context means+84context interactions+8router aggregate means. Alpha.05. Report point and simultaneous CIs. Require independent confirmation with same sign, not isolated maxima.",
+  "minimum_meaningful_advantage_nats": 0.02,
+  "success": "At least one same expert-pair/stage has opposite context advantages exceeding0.02nats with simultaneous CIs excluding those margins in BOTH heldout and confirmation; context interaction simultaneous CI excludes0; >=128common-eligible cases each bin. No architecture superiority claim.",
+  "sample_size_rule": "Use pilot paired SEs only: choose2048if90th percentile projected eligible contrast SE<=.01,else4096. Use larger N only if remaining budget projects both final phases plus20percentreserve. Otherwise2048and mark precision shortfall. Never choose N by mean effect or ranking.",
+  "maximum_new_GPU_locked_seconds": 1800,
+  "soft_budget_seconds": 1650,
+  "hard_alarm_seconds": 1800,
+  "no_optimizer_updates": true,
+  "no_online_EIG_search": true,
+  "no_gradient_grouping": true,
+  "official_seed1001_used": false,
+  "reserved_SIR_seed8831001_used": false
+}

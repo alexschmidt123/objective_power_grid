@@ -1,0 +1,15 @@
+# LabPC integration and independent audit
+
+The final development task finished normally on UbuntuPC with status FAILED_CONTEXT_DISCOVERY_NO_MAIN_TRAINING. Scientific gates, source files and thresholds were unchanged during the running task. The source archive SHA256 was independently identical on UbuntuPC and LabPC:015fd19403d567bd0c686df7c13aefbbf799dc1e91c40c6a259f688a323d6b3b.
+
+New isolated integration worktree:/home/grads/g/g.lin/Documents/objective_power_grid_fh_moe_v3, based on original DeepSeekMoE-v1 commit13681d7091189a4e68056e6a2864dc58f9d5700b. Original dirty main worktrees and previous research worktrees were not modified.
+
+LabPC repeated the full23-test CPU correctness suite:23passed in1.86s. Original six foundation files and the runtime source freeze verified byte-for-byte. The small-case suite includes exact native terminal gradients, intermediate full-horizon finite differences, live history derivatives, reference independence from routed modules, synthetic grouping acceptance/rejection, deterministic fitting, normalized responsibilities, checkpoint roundtrips, action constraints and frozen deployment without gradients/optimizer calls. No specialist allocation/joint-training checks are claimed because discovery did not qualify that stage.
+
+All16 original experiment artifacts, including raw gradient datasets and preparation checkpoints, were copied to the dated LabPC campaign with SHA256 verification. The LabPC CPU-only artifact audit reconstructed every context gate/check and summary exactly, with maximum summary error0, and independently recovered the paired development EIG statistics from raw arrays. Audit CPU wall0.128039s. This is additional development/integration cost. No new GPU job was required on LabPC. Receipt:fh_moe_v3_evidence/LabPC_artifact_audit.json.
+
+The report diagram was compiled from TikZ and visually verified; the scientific diagnostic plot was generated from saved records and visually verified. Large/raw checkpoint and dataset artifacts are excluded from Git, retained on both PCs under experiments/10262026/10262026_fh_moe_v3_router_independent. Small paired development score arrays, logs, gate, cost and source records are included. artifact_manifest.json explicitly records each file, size, checksum and Git inclusion/exclusion reason.
+
+Only LabPC commits/pushes this negative discovery record. This is preservation of a correctness-validated scientific failure, not promotion of a successful specialization method. No merge into main. The final commit SHA, checked against GitHub and both worktrees, is the source revision; no main experiment was launched on either PC.
+
+The correctly revised main protocol remains:14400charged optimization seconds on LabPC seed101, all trainable stages included; Ubuntu seed102 matches exactly its final optimizer count with no independent time cutoff. Discovery/development is separately charged in end-to-end reporting. Both main update counts and main costs are0 for this candidate. Official seed1001 and predeclared confirmation seed98102791 were not evaluated.

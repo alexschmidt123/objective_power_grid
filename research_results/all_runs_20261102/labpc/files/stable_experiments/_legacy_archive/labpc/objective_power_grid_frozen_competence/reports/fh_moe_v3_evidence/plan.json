@@ -1,0 +1,57 @@
+{
+  "method": "FH-MoE-sBOED-v3",
+  "foundation": "13681d7091189a4e68056e6a2864dc58f9d5700b",
+  "training_seed": 98102711,
+  "training_updates_per_arm": 600,
+  "maximum_training_pair_seconds": 1500,
+  "batch_size": 2000,
+  "contrasts": 2000,
+  "horizon": 30,
+  "learning_rate": 5e-05,
+  "adam_betas": [
+    0.8,
+    0.998
+  ],
+  "lr_decay": 0.98,
+  "lr_schedule": "after update1 and every1000 thereafter, native v1",
+  "gradient_clip": 5.0,
+  "precision": "float64",
+  "dataset_seeds": [
+    98102721,
+    98102722,
+    98102723
+  ],
+  "dataset_batches_per_split": 4,
+  "dataset_batch": 2000,
+  "stages": [
+    1,
+    10,
+    20,
+    29
+  ],
+  "development_seed": 98102731,
+  "development_N": 512,
+  "development_L": 262144,
+  "context_components": 2,
+  "ridge": 0.01,
+  "temperature": 0.25,
+  "required_passed_stages": 2,
+  "gate": {
+    "prediction": "heldout MSE difference vs constant upper95<0",
+    "minimum_context_fraction": 0.1,
+    "minimum_split_cosine": 0.8,
+    "minimum_coherence": 0.1,
+    "minimum_mean_SNR": 3,
+    "maximum_between_cosine": 0.8,
+    "minimum_assignment_kappa": 0.6,
+    "minimum_float32_assignment_agreement": 0.99
+  },
+  "context_labels": "No routed expert indices or exposure are used anywhere in discovery",
+  "pilot_sequence": "shared-only reference/native paired prep, discovery, specialize ONLY if discovery passes",
+  "matched_native": "same initialized full model, draws, batch, contrasts, completed preparation updates; reference is NOT claimed to be v3",
+  "future_specialization_gate": "correctness; contexts at>=2stages; positive full-minus-mask and learned-minus-uniform estimates; matched native EIG difference lower95>-.1",
+  "primary_LabPC_seconds": 14400,
+  "Ubuntu_replication": "exact final primary update count, no independent cutoff",
+  "official_seed1001_used": false,
+  "confirmation_seed_reserved": 98102791
+}
