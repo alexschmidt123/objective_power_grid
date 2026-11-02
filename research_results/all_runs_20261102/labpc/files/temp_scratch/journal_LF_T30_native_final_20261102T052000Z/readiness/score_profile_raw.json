@@ -1,0 +1,235 @@
+{
+  "seconds": 152.40901871595997,
+  "metadata": {
+    "training": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+    "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+    "generated_training_trajectories": 30534,
+    "training_forward_trajectories": 30534,
+    "contrast_training_trajectories": 0,
+    "training_trajectory_budget": 30534,
+    "training_budget_unit": "primary_episodes",
+    "initialization_trajectories": 10054,
+    "standardisation_trajectories": 10000,
+    "score_training_trajectories": 10240,
+    "policy_training_trajectories": 10240,
+    "reported_policy_parameters": "params_ema",
+    "policy_ema_rate": 0.9900000095367432,
+    "random_streams": "official derive_key: score_trainer, policy_trainer/restart",
+    "restart_selection": "best independent-validation EIG among final EMA policies",
+    "budget_reconciliation": {
+      "initialization": 10054,
+      "score": 10240,
+      "policy": 10240,
+      "total": 30534,
+      "native_reference_schedule": true
+    },
+    "score_batch": 1024,
+    "actual_score_updates": 10,
+    "actual_policy_updates": 10,
+    "policy_restarts": [
+      {
+        "restart": 0,
+        "primary_policy_episodes": 2048,
+        "planned_policy_episodes": 2048,
+        "final_update": 2,
+        "validation_eig": 4.3234677272317
+      },
+      {
+        "restart": 1,
+        "primary_policy_episodes": 2048,
+        "planned_policy_episodes": 2048,
+        "final_update": 2,
+        "validation_eig": 4.511442839878028
+      },
+      {
+        "restart": 2,
+        "primary_policy_episodes": 2048,
+        "planned_policy_episodes": 2048,
+        "final_update": 2,
+        "validation_eig": 4.264641279243859
+      },
+      {
+        "restart": 3,
+        "primary_policy_episodes": 2048,
+        "planned_policy_episodes": 2048,
+        "final_update": 2,
+        "validation_eig": 3.939732929183993
+      },
+      {
+        "restart": 4,
+        "primary_policy_episodes": 2048,
+        "planned_policy_episodes": 2048,
+        "final_update": 2,
+        "validation_eig": 3.8136472945434257
+      }
+    ],
+    "selected_restart": 1,
+    "reference_sampler": false,
+    "training_seconds": 150.21829529607203,
+    "phase_timings": {
+      "startup_seconds": 17.807105651008897,
+      "score_unit_seconds": [
+        36.25075155298691,
+        25.258635355974548,
+        0.08192484697792679,
+        0.07988495205063373,
+        0.07898747699800879,
+        0.08000806695781648,
+        0.07980571303050965,
+        0.07782550307456404,
+        0.07940555398818105,
+        0.08000067807734013
+      ],
+      "policy_unit_seconds": [
+        10.292300974018872,
+        0.022391707985661924,
+        7.139276612899266,
+        0.022767225978896022,
+        7.1550987139344215,
+        0.02300022402778268,
+        7.171933500096202,
+        0.02284958295058459,
+        7.500204020994715,
+        0.023206728976219893
+      ]
+    },
+    "history": [
+      {
+        "phase": "score",
+        "step": 10,
+        "episodes": 10240,
+        "metrics": {
+          "clip_applied": 0.0,
+          "grad_norm_preclip": 30.412132263183594,
+          "loss_total": 127.57183074951172,
+          "loss_unweighted_total": 12.26142692565918,
+          "loss_x_component": 8.28520679473877,
+          "loss_y_component": 119.28662109375,
+          "loss_y_unweighted": 3.9762206077575684,
+          "param_norm": 129.09075927734375,
+          "update_norm": 0.03413999080657959
+        }
+      },
+      {
+        "phase": "policy",
+        "restart": 0,
+        "step": 2,
+        "episodes": 2048,
+        "restart_episodes": 2048,
+        "metrics": {
+          "clip_applied": 1.0,
+          "grad_norm_preclip": 20.129247665405273,
+          "param_norm": 10.845337867736816,
+          "update_norm": 0.0032240492291748524
+        }
+      },
+      {
+        "phase": "policy",
+        "restart": 1,
+        "step": 2,
+        "episodes": 4096,
+        "restart_episodes": 2048,
+        "metrics": {
+          "clip_applied": 1.0,
+          "grad_norm_preclip": 40.71097183227539,
+          "param_norm": 10.942370414733887,
+          "update_norm": 0.0033634586725383997
+        }
+      },
+      {
+        "phase": "policy",
+        "restart": 2,
+        "step": 2,
+        "episodes": 6144,
+        "restart_episodes": 2048,
+        "metrics": {
+          "clip_applied": 1.0,
+          "grad_norm_preclip": 36.789031982421875,
+          "param_norm": 10.924880981445312,
+          "update_norm": 0.0033852490596473217
+        }
+      },
+      {
+        "phase": "policy",
+        "restart": 3,
+        "step": 2,
+        "episodes": 8192,
+        "restart_episodes": 2048,
+        "metrics": {
+          "clip_applied": 1.0,
+          "grad_norm_preclip": 13.250666618347168,
+          "param_norm": 10.999720573425293,
+          "update_norm": 0.003158378880470991
+        }
+      },
+      {
+        "phase": "policy",
+        "restart": 4,
+        "step": 2,
+        "episodes": 10240,
+        "restart_episodes": 2048,
+        "metrics": {
+          "clip_applied": 1.0,
+          "grad_norm_preclip": 26.004283905029297,
+          "param_norm": 10.973129272460938,
+          "update_norm": 0.0033043448347598314
+        }
+      }
+    ],
+    "checkpoint_selection": "final",
+    "architecture": "official_4layer_256dim_8head_RFF_conservative_transformer",
+    "policy_architecture": "official_DADNet_256_16_sum_encoder",
+    "native_reference_schedule": true,
+    "completed_restarts": 5,
+    "adaptations": "Declared native phase allocation including normalization and initialization; predeclared native final-policy restarts and paper AR1 sampler when enabled; capped score/policy allocation; independent validation restart selection; native batch1024, P1 location95:5 allocation; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions",
+    "design_bounds": [
+      -4.0,
+      4.0
+    ],
+    "bounded_mapping": "lo+(hi-lo)*sigmoid(raw_policy_output); teacher design sampler mapped into same box",
+    "runtime": {
+      "jax": "0.7.2",
+      "devices": [
+        "cuda:0"
+      ]
+    },
+    "resource_ledger": {
+      "schema": 2,
+      "scope": "current training phase; base cost separately attributed",
+      "counts": {
+        "fresh_complete_episodes": 30534,
+        "true_parameter_stage_propagations": 916020,
+        "contrast_parameter_stage_propagations": 0,
+        "scalar_conditional_log_density_evaluations": null
+      },
+      "optimizer_updates": {
+        "policy": 10,
+        "critic": null,
+        "posterior": null,
+        "score": 10,
+        "temperature": null
+      },
+      "replay_transition_samples": null,
+      "offline_seconds": 150.21829529607203,
+      "validation_seconds": null,
+      "base_training_seconds": null,
+      "ode_rhs_evaluations": null,
+      "solver_backward_work": null,
+      "gpu_occupancy_seconds": null,
+      "nle_equivalent_proxy": {
+        "value": 307200,
+        "unit": "conditional Gaussian stage terms differentiated for score targets",
+        "basis": "model estimate, not equal-cost hardware work"
+      },
+      "basis": "derived from native executed counters, not direct hardware measurement",
+      "limitations": [
+        "score-target and backward recomputation not counted",
+        "Unknown fields are not zero; walltime is not GPU occupancy"
+      ],
+      "likelihood_gradient_work": {
+        "scalar_stage_terms": 307200,
+        "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+      }
+    }
+  }
+}

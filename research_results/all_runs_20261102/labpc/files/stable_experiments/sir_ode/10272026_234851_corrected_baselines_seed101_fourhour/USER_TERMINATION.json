@@ -1,0 +1,192 @@
+{
+  "state": "STOPPED_BY_USER",
+  "reason": "User rejected current SIR results as undertrained and explicitly requested stopping remaining campaign",
+  "timestamp_utc": "2026-10-28T13:27:24Z",
+  "previous_status": {
+    "state": "RUNNING",
+    "stage": "TRAINING",
+    "active_method": "rl_sboed",
+    "pid": 803459,
+    "coordinator_pid": 771862,
+    "charged_training_seconds": 1984.7231870379183,
+    "cap_seconds": 14400,
+    "heartbeat_utc": "2026-10-28T13:27:19Z",
+    "log": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/sir_ode/10272026_234851_corrected_baselines_seed101_fourhour/logs/rl_sboed.log"
+  },
+  "actions": [
+    {
+      "pid": 771862,
+      "signal": "SIGTERM",
+      "command": "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/bin/python -u -m tools.sir_seed101_campaign run --campaign /home/grads/g/g.lin/Documents/objective_power_grid/experiments/sir_ode/10272026_234851_corrected_baselines_seed101_fourhour "
+    },
+    {
+      "pid": 803459,
+      "signal": "SIGTERM",
+      "command": "python3 -m src.online_cli --config /home/grads/g/g.lin/Documents/objective_power_grid/experiments/sir_ode/10272026_234851_corrected_baselines_seed101_fourhour/configs/rl_sboed.yaml --journal --train-only --seed 101 --eval-seeds 1001 --eig-only --methods rl_sboed --source-check-manifest /home/grads/g/g.lin/Documents/objective_power_grid/experiments/sir_ode/10272026_234851_corrected_baselines_seed101_fourhour/source_manifest.json --output /home/grads/g/g.lin/Documents/objective_power_grid/experiments/sir_ode/10272026_234851_corrected_baselines_seed101_fourhour/runs/rl_sboed "
+    }
+  ],
+  "automatic_restart_allowed": false,
+  "new_training_authorized": false,
+  "interrupted_method_clock_snapshot": {
+    "version": 2,
+    "start": 479050.198439192,
+    "budget_seconds": 14400.0,
+    "credit_seconds": 0.0,
+    "hardware": "NVIDIA GeForce RTX 4090",
+    "finalization_reserve_seconds": 60.0,
+    "excluded": [
+      [
+        479352.774991935,
+        479362.722501098,
+        "validation"
+      ],
+      [
+        479682.921016189,
+        479692.847885551,
+        "validation"
+      ],
+      [
+        480000.267787368,
+        480010.1947349,
+        "validation"
+      ],
+      [
+        480323.777342019,
+        480333.701126603,
+        "validation"
+      ],
+      [
+        480651.252901865,
+        480661.179878114,
+        "validation"
+      ],
+      [
+        480977.734249946,
+        480987.662436544,
+        "validation"
+      ]
+    ],
+    "counts": {},
+    "components": {},
+    "checkpoints": [
+      {
+        "identifier": "13",
+        "charged_seconds": 302.57908083999064,
+        "eligible": true
+      },
+      {
+        "identifier": "26",
+        "charged_seconds": 622.7775941999862,
+        "eligible": true
+      },
+      {
+        "identifier": "39",
+        "charged_seconds": 930.1974917819025,
+        "eligible": true
+      },
+      {
+        "identifier": "52",
+        "charged_seconds": 1243.7800012299558,
+        "eligible": true
+      },
+      {
+        "identifier": "65",
+        "charged_seconds": 1561.3318375909002,
+        "eligible": true
+      },
+      {
+        "identifier": "78",
+        "charged_seconds": 1877.8862171669025,
+        "eligible": true
+      }
+    ]
+  },
+  "charged_seconds_at_stop_estimate": 1989.4708776709158,
+  "preserved_checkpoint_sha256": {
+    "runs/rl_sboed/models/rl_sboed_progress_26.pt": "7efcbfd6228ccb62cf4d2f7ffbb7c6520f1d091ae8704a8723c0ff66c15b0e6c",
+    "runs/rl_sboed/models/rl_sboed_progress_78.pt": "f076483b2d0c32a59d2544b949d64a65e4bf353b0300ffd3bd06641a4a8cfe32",
+    "runs/rl_sboed/models/rl_sboed_progress_52.pt": "12a2bdd2e963eab696461fa7451ab1d17465258f9bc9aa11eaf6ecc81302eab7",
+    "runs/rl_sboed/models/rl_sboed_progress_39.pt": "2c6bc10fe54d622fa6f7319d760eb2da1440434521c33802f71dcf18043ea09f",
+    "runs/rl_sboed/models/rl_sboed_journal_last.pt": "48464687793705b4f9f7a4f755bf9fd6ca869c8a6fac074ce533f7319c7ece7d",
+    "runs/rl_sboed/models/rl_sboed_journal_best.pt": "f076483b2d0c32a59d2544b949d64a65e4bf353b0300ffd3bd06641a4a8cfe32",
+    "runs/rl_sboed/models/rl_sboed_progress_13.pt": "1b9471388749516ab789edd0f145c867896a8d7eeb15f7c9b147c1558b8e27dc",
+    "runs/rl_sboed/models/rl_sboed_progress_65.pt": "71b7a73be4ef2ee4ac1f575b9309afcf1de60b63d2202ca60a874e409899ac1d",
+    "runs/dad/models/dad_progress_45.pt": "ba6b2d4889674b9dba6c28a356cc73ee4cbf071f09c0ee96890c25c60a2aac6b",
+    "runs/dad/models/dad_progress_117.pt": "5a2ba0a57e69e91f4c3bf9085b1fb849d21f54da138ff347b2572bcc13b6cab0",
+    "runs/dad/models/dad_progress_72.pt": "6821448de091be1023a11970ca79c36839d69bc2982390c22189b2e1fb77f568",
+    "runs/dad/models/dad_progress_263.pt": "7e51e267685fa747e6f75d56d52a86b6c5a5d1b0d4d445ca3dfaaddc6a6b9bfc",
+    "runs/dad/models/dad_progress_303.pt": "0e001f9e5e87cb50c7372d9d24aae616c8bace04f9848583017c00576406932a",
+    "runs/dad/models/dad_progress_27.pt": "f6da9335cfb9bea091d2a47dc1378829c94dec4020b3a325586d96f22c6d1c04",
+    "runs/dad/models/dad_progress_283.pt": "4c6f3f4574f84aab4bf5bd3264c1b3b0f3b816b75afd415d83d0e74a35a79c4a",
+    "runs/dad/models/dad_progress_108.pt": "bc2c6eaf18d983d0b84c3bfa420ce21144da69d9735789b5909cdf81fc1ca261",
+    "runs/dad/models/dad_progress_233.pt": "b927cd0f30d5add07929f388c0c62303b8d1808cbabff1ec44b412f22e4eace6",
+    "runs/dad/models/dad_progress_273.pt": "30ceb3cd423d2a3ec362818ff56888e2e6faa1d92e11a821a2a57a4b877d6a84",
+    "runs/dad/models/dad_progress_293.pt": "7d30faf635a695fa9443d4b09b6b0aa09f61150206a94f71dff1498284a2b080",
+    "runs/dad/models/dad.pt": "179b60f6a0e280cb3e3342d1ab2a27e08a08760569396bf997777352c32a00cb",
+    "runs/dad/models/dad_progress_203.pt": "40931e03941e39158eda9e144c5a43504e47eb8916407fe413a30ce32ea6bc9d",
+    "runs/dad/models/dad_journal_last.pt": "52f3b3e994e4745ba316c86c0c84dc02ec4e1341c8d9dcbeed9e19ccf3e0de3d",
+    "runs/dad/models/dad_progress_63.pt": "2c0347f56af8c1b32355d0c88fc4a9bd730293326d151d183e3068eb3cb2fe0d",
+    "runs/dad/models/dad_progress_54.pt": "607136a49e0216b01e2957e6878aef1156d474891a96c2626863d9dd84725038",
+    "runs/dad/models/dad_progress_243.pt": "64a5c96b7930b2fcd5d49a30d3e46e36570cbdad1a98f58af5741fa59b395c8a",
+    "runs/dad/models/dad_journal_best.pt": "9d7777b3ab0c0dd76f8162381c990bab7274026ddf410a1713571aa95386caee",
+    "runs/dad/models/dad_progress_144.pt": "afc824a0b0209c18c750e901a154921c8574fe103246fa554d2d8a2de1a9fd1f",
+    "runs/dad/models/dad_progress_90.pt": "024ed101c9c39fc12e61d3f40e1c567d4a2b158ba97f7eb61b25725ae4334366",
+    "runs/dad/models/dad_progress_81.pt": "f75dedb2eba468860afc501333800b9bad7461187d5e839ffc9fc72029a2fac6",
+    "runs/dad/models/dad_progress_213.pt": "47c817071b6fff0577e93261831574e5739c032c6b1cad9d5d0ac06414b1abfe",
+    "runs/dad/models/dad_progress_193.pt": "81ae84cd152eb9016c0824ea3bdffa04748d9530158a57701f89ae656bf1893f",
+    "runs/dad/models/dad_progress_126.pt": "85dfd84e797773bd566a1097632b710d1b5b98db22ce3de3902492d3fbc92eb1",
+    "runs/dad/models/dad_progress_316.pt": "9d7777b3ab0c0dd76f8162381c990bab7274026ddf410a1713571aa95386caee",
+    "runs/dad/models/dad_progress_313.pt": "6d352abb9e35eb2ccd0ef696338aefb1060bde6c119dd29d54fcf92eb6ef5763",
+    "runs/dad/models/dad_progress_99.pt": "f0a633f215840f03f14288bcbfb113e757dfd096f65aae6652de4b23c8180b19",
+    "runs/dad/models/dad_progress_18.pt": "c1b9f241f3d920618d95dceb82c10ddb926dcf562a988568b35ace5399591998",
+    "runs/dad/models/dad_progress_183.pt": "c76f71c193cd26698e05bd9d49d43fd5dc4531a4475a47e470dfacd580e85aa1",
+    "runs/dad/models/dad_progress_9.pt": "f18c763fd54fb656a4557c1c7b753acc57b31e9cbc4869e90017c9aeb7428d79",
+    "runs/dad/models/dad_progress_163.pt": "86fee447383a5abab9feab4ca241439b54e67dee941cb28c0c1918be96300427",
+    "runs/dad/models/dad_progress_135.pt": "8a587658cc70a1fbb9f6fe1130674a65f3db9bd40bb5928ac243687b193ef681",
+    "runs/dad/models/dad_progress_154.pt": "aa1d89121b8d4b532af0997d62710848d658032a573a85b6cfc8c7e303442c99",
+    "runs/dad/models/dad_progress_253.pt": "b74ea7366b312aa11fb29b8a951143d8621d909a85e8ccc02828cc0213d0280e",
+    "runs/dad/models/dad_progress_223.pt": "7bef22488930788f8b195d746dd99701e8b66a915c23b310ef4c9ea22b4776e3",
+    "runs/dad/models/dad_progress_36.pt": "f7b56511019b6131c52705d4a1de8d7c9b3dafd05c334eb8330620a59e0c04d8",
+    "runs/dad/models/dad_progress_173.pt": "eb5ff93d7699275128957383df91e029b9623ee1ca20c7a57e5eada586a9c9f9",
+    "runs/fixed/models/fixed_progress_56.pt": "222d3cf13d213221e3889fc4477de68ecdcf8888c0a23ada7452b8d444cc609e",
+    "runs/fixed/models/fixed_progress_288.pt": "9ec39f7175b74ba553069e7719aa5cd60d3d703e24cba6608a57e6a1cca0699f",
+    "runs/fixed/models/fixed_progress_80.pt": "2c2b0ebdc74fa430aca773de4455e9de8e81ee61d6f392e7969b1da8355e33df",
+    "runs/fixed/models/fixed_journal_best.pt": "da69053da3f83107b45efdab480b7d587c70bb1cbab475571bcc5a34ab93e219",
+    "runs/fixed/models/fixed_progress_24.pt": "dc6c25520c2ef95eb7c19663a33d0d70c7c00491dcd817cae858ec995dffcec1",
+    "runs/fixed/models/fixed_progress_200.pt": "9744fd67d246b2bb3cfb6a50466ddf66ee10c7957a194536de63884a5bca7652",
+    "runs/fixed/models/fixed_progress_136.pt": "d415ca523e857be5c2322c5762e6e957afc7d2254bf04c05f5ad4a4c0ceef5af",
+    "runs/fixed/models/fixed_progress_96.pt": "90d69f6455966f73a40ff2012a1a5b62fc2a6efe2b0a2271c35787b017471b75",
+    "runs/fixed/models/fixed_progress_256.pt": "50a13c4d684275ff87fa0bd53d2fe6a2bf3eeda21ad1c2265820edaa2bf189b1",
+    "runs/fixed/models/fixed_progress_48.pt": "bc0e3efb5c9938ce970252dbaa1c055636a4977c7e6b2632bd70fedbc5fed596",
+    "runs/fixed/models/fixed_progress_88.pt": "19e5d2e0a8fcf5e1e7396d37f84beda93edeaf04004b941d9497a6b8066dbbc2",
+    "runs/fixed/models/fixed_journal_last.pt": "b39912feec7c5144451efea1c0e4863098dcc80e20afe965475783acb43e1131",
+    "runs/fixed/models/fixed.pt": "839b355ba6851498ed11ed9946fa735b8693442668038783f49f89eae885f58a",
+    "runs/fixed/models/fixed_progress_144.pt": "d427c2b54a71888fb42da09edbd47c74443c54eacd22251998989f2d082fbce7",
+    "runs/fixed/models/fixed_progress_120.pt": "d9f1dd34cb63a978867cc2ac9525815d00e45ff1f96392fa2d757186c9e64af3",
+    "runs/fixed/models/fixed_progress_192.pt": "b42502b9d7ab51efe804492c3add5e095d1d38284aecc8811d33684a43efcc0d",
+    "runs/fixed/models/fixed_progress_232.pt": "c544d86a888234514594afd988ae7eb94c51f11f378f8d4fae94a5d599db7841",
+    "runs/fixed/models/fixed_progress_40.pt": "2cde3fc22a24feccaf7f712bb24702369f64de32ba29c3908d92a09f23f88ae4",
+    "runs/fixed/models/fixed_progress_64.pt": "cd27227dd4f6561d70e4150f19138952916581d8af1763e4e679f930ed4f4010",
+    "runs/fixed/models/fixed_progress_294.pt": "da69053da3f83107b45efdab480b7d587c70bb1cbab475571bcc5a34ab93e219",
+    "runs/fixed/models/fixed_progress_240.pt": "5f44f6501d68c6b40582ab08f5c40eca4ebafc90a764f06fe75cf7dae284d49c",
+    "runs/fixed/models/fixed_progress_208.pt": "8cf02438ea36a7215fe6acace9933745c539ceba2b6af548f25e697921763a37",
+    "runs/fixed/models/fixed_progress_16.pt": "5d65d33c28a2cca2559c2a7346448fa792a337ba54a7e7adb8949f4bae3fa038",
+    "runs/fixed/models/fixed_progress_176.pt": "6eed44c9a343d1aa1da48c70d27174879a5182621e0b6a18455020109bd85686",
+    "runs/fixed/models/fixed_progress_128.pt": "2e390d3f388944f1a57cb4defa525f4e0011109c9a770578b50bc890deb6ae17",
+    "runs/fixed/models/fixed_progress_112.pt": "3a2e502d13a5ea866f81c8f1aa35c10b9547dace4617449778d51b8e91d8aadc",
+    "runs/fixed/models/fixed_progress_224.pt": "9e131d5eb0c5c4b7f934524ecb1197027b867427ce1e8b5b38377f054c5bd0e4",
+    "runs/fixed/models/fixed_progress_264.pt": "5571bfe262c8d42d7d3662f1fefaa2ca38fc5773941e79b465ea9a93accf2df6",
+    "runs/fixed/models/fixed_progress_216.pt": "5b925c0ca82e87dcfeace70e7653a3c79269dc08cf5b85777e948b71b8ae51d1",
+    "runs/fixed/models/fixed_progress_184.pt": "c49005ca8a4a1f1a0597f523abe5e24d88be088c774de783c20b8f47c7d654d3",
+    "runs/fixed/models/fixed_progress_72.pt": "1d91dc7ed6a7e0c936bf7a25491535cfdfb03a76f1719b1b8fb0f770b76752e1",
+    "runs/fixed/models/fixed_progress_32.pt": "784e4447925731ad66bc10be53de8595a9f7c63356444e9cbd0c21e8792acbd9",
+    "runs/fixed/models/fixed_progress_152.pt": "c04acc21f400288963da739543e68098044f4162487b43760c40884176b24b20",
+    "runs/fixed/models/fixed_progress_8.pt": "61986db4f90fdadbcf336e32d1468bb132230d9cbcded26143e81f668a6e5157",
+    "runs/fixed/models/fixed_progress_248.pt": "36cffd28928b901c27565498a9a5cd9604d16e4777ecba086532d7a1a4b9fc1e",
+    "runs/fixed/models/fixed_progress_272.pt": "b752e3bc6d7ff2680c98afc1bcad0b8158daa24a34ee7592dfbcad36ac500e05",
+    "runs/fixed/models/fixed_progress_168.pt": "7495406be89b28d9f97fb8acd7b192423f19acf2997caea7daabd3afde5f4b91",
+    "runs/fixed/models/fixed_progress_104.pt": "323ea45142d8150fec9714ceec1d8f4b63919e1f0c87efed8f89c6ac2e1baf07",
+    "runs/fixed/models/fixed_progress_280.pt": "4cf739d1f21fdbb2dcb7a9eea3da032f04a2090f135632125f899e7f1a77bbda",
+    "runs/fixed/models/fixed_progress_160.pt": "92fb5daf8c885e491654d281fe4303a4c4ed705698cb1e29d18bd1514c6b3f12"
+  }
+}

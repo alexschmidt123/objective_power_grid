@@ -1,0 +1,66 @@
+{
+  "system": {
+    "name": "location_finding"
+  },
+  "N": 1,
+  "experiment": {
+    "experiment_type": "eig_based",
+    "step_number": 30,
+    "methods": [
+      "fixed",
+      "dad",
+      "rl_sboed",
+      "vsoed",
+      "scorebed",
+      "moe_v1",
+      "random"
+    ]
+  },
+  "observation": {
+    "noise_sigma": 0.5,
+    "sampling": "normal_log_signal"
+  },
+  "location_finding": {
+    "design_bounds": [
+      -4.0,
+      4.0
+    ],
+    "random_design_distribution": "truncated_standard_normal"
+  },
+  "research": {
+    "enabled": true,
+    "settings": {
+      "updates": 50000,
+      "hidden": 64,
+      "threads": 4,
+      "batch_size": 2000,
+      "contrasts": 2000,
+      "training_bound": 4,
+      "primary_episode_budget": 1,
+      "spce_trajectory_budget_unit": "primary_episodes",
+      "spce_curriculum": 1,
+      "learning_rate": 5e-05,
+      "spce_adam_beta1": 0.8,
+      "spce_adam_beta2": 0.998,
+      "spce_lr_decay": 0.98,
+      "spce_lr_schedule_every": 1000,
+      "spce_gradient_clip": null,
+      "first_design_revision": 1,
+      "validate_every": 100,
+      "validation_systems": 64,
+      "validation_contrasts": 1000000,
+      "eval_systems": 2000,
+      "eval_contrasts": 1000000,
+      "evaluation_population_systems": 2000,
+      "evaluation_batch_size": 16,
+      "evaluation_contrast_chunk": 16384
+    },
+    "paper_protocol": {
+      "corrected_methods": true,
+      "checkpoint_selection": "latest_budget_eligible_checkpoint",
+      "regime": "native_algorithms_training_sufficiency_five_seed",
+      "adaptations": "Common bounded [-4,4]^2 design box; executable log-signal likelihood; method-specific native schedules; resource ceilings do not establish convergence"
+    }
+  },
+  "scope_note": "New conventional baseline campaign; no MoE training or historical initialization"
+}

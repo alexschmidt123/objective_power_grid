@@ -1,0 +1,5 @@
+# Ledger
+
+Prepared before final EIG access. No active worker interrupted. Existing scientific source snapshot preserved. Only requested control markers may change old queue state.
+
+Detached unified coordinator launched: {"coordinator_pid": 1222582, "created_utc": "2026-11-01T20:09:18.371113+00:00", "command": ["/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/bin/python", "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z/source/formal.py", "run", "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z"], "status": "WAITING_FOR_SAFE_QUEUE_HANDOFF", "log": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z/logs/coordinator.log"}. Five native seed101 checkpoints and three formal MoE checkpoints are reusable;20 baseline and12 MoE training jobs remain. Native old failures/recovery/2M remain distinct. Active RL receives no signal. Reserved final bank remains unscored.

@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_temp/src/online_cli.py", line 63, in <module>
+    if __name__=='__main__':main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_temp/src/online_cli.py", line 28, in main
+    research(argv if any(a.split("=")[0]=="--config" for a in argv) else ["--config",known.config,*argv])
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_temp/src/research/runner.py", line 264, in main
+    return journal_main(args,raw,root)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_temp/src/research/journal_run.py", line 126, in main
+    p,t=train_scorebed(b,h,s,seed,out/'models',cap,observer=observer)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_temp/src/research/scorebed.py", line 72, in train_scorebed
+    start=time.perf_counter();subprocess.run(command,cwd=root,env=env,check=True)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/grads/g/g.lin/Documents/objective_power_grid_temp/.venv_scorebed/bin/python', '/home/grads/g/g.lin/Documents/objective_power_grid_temp/src/research/scorebed_worker.py', '--output', '/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/10312026_location_baselines_seed101_105_fourhour/runs/seed102/scorebed/models', '--horizon', '30', '--seed', '102', '--budget', '191190814', '--batch-size', '1024', '--reference-sampler', '--journal-plan', '/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/10312026_location_baselines_seed101_105_fourhour/runs/seed102/scorebed/models/scorebed_journal_plan.json', '--design-bounds', '-4.0', '4.0']' returned non-zero exit status 1.

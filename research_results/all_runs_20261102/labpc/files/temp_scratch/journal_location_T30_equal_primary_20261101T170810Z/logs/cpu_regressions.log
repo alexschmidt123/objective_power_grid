@@ -1,0 +1,52 @@
+..........FF.........                                                    [100%]
+=================================== FAILURES ===================================
+_ LocationCorrectionTests.test_full_trajectory_gradient_against_finite_difference _
+
+self = <tools.tests.test_location_corrections.LocationCorrectionTests testMethod=test_full_trajectory_gradient_against_finite_difference>
+
+    def test_full_trajectory_gradient_against_finite_difference(self):
+        b=benchmark();torch.manual_seed(701)
+>       p=make_policy(b,5,'moe_sboed',8)
+
+tools/tests/test_location_corrections.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+benchmark = <src.research.benchmarks.LocationFinding object at 0x7ef5d81cdb70>
+horizon = 5, kind = 'moe_sboed', hidden = 8, settings = {}
+
+    def make_policy(benchmark, horizon, kind, hidden, settings=None):
+        settings=settings or {}
+>       if kind not in {'dad','fixed'}:raise ValueError('Retired MoE; sparse replacement is validation-only')
+E       ValueError: Retired MoE; sparse replacement is validation-only
+
+src/research/policies.py:51: ValueError
+_ LocationCorrectionTests.test_shared_history_permutation_invariance_and_parameter_control _
+
+self = <tools.tests.test_location_corrections.LocationCorrectionTests testMethod=test_shared_history_permutation_invariance_and_parameter_control>
+
+    def test_shared_history_permutation_invariance_and_parameter_control(self):
+        b=benchmark(); rng=generator(700)
+        a=[b.feasible(b.random_latent(2,rng),[],30) for _ in range(4)]
+        y=[torch.randn(2,1,generator=rng,dtype=torch.float64) for _ in range(4)]
+        f=history_features(b,a,y,2,30)
+        perm=[3,1,0,2]
+        g=history_features(b,[a[i] for i in perm],[y[i] for i in perm],2,30)
+        for kind in ['dad','moe_sboed','uniform_moe','matched_dense']:
+>           p=make_policy(b,30,kind,64)
+
+tools/tests/test_location_corrections.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+benchmark = <src.research.benchmarks.LocationFinding object at 0x7ef4f4f39a80>
+horizon = 30, kind = 'moe_sboed', hidden = 64, settings = {}
+
+    def make_policy(benchmark, horizon, kind, hidden, settings=None):
+        settings=settings or {}
+>       if kind not in {'dad','fixed'}:raise ValueError('Retired MoE; sparse replacement is validation-only')
+E       ValueError: Retired MoE; sparse replacement is validation-only
+
+src/research/policies.py:51: ValueError
+=========================== short test summary info ============================
+FAILED tools/tests/test_location_corrections.py::LocationCorrectionTests::test_full_trajectory_gradient_against_finite_difference
+FAILED tools/tests/test_location_corrections.py::LocationCorrectionTests::test_shared_history_permutation_invariance_and_parameter_control
+2 failed, 19 passed in 1.38s

@@ -1,0 +1,31 @@
+..............ss.......F......................................           [100%]
+=================================== FAILURES ===================================
+_______________ test_all_baseline_entrypoints_have_budget_hooks ________________
+
+    def test_all_baseline_entrypoints_have_budget_hooks():
+        # Legacy family_training is deliberately excluded from the six-baseline study.
+        from pathlib import Path
+        root=Path(__file__).resolve().parents[2]/"src/research"
+        for name in ["training.py","native_rl_reference.py","sir_native_rl.py"]:
+            assert "observer.allow_next_unit" in (root/name).read_text()
+        for name in ["scorebed_worker.py","sir_scorebed_worker.py"]:
+>           code=(root/name).read_text();assert "compute_clock_from_plan" in code and "while score_spent<score_count" in code and "compute_clock.can_start" in code
+E           assert ('compute_clock_from_plan' in '"""Pinned official ScoreBED training, with an explicit primary-episode cap."""\nimport os,sys,json,time,math,argparse...ment(\'--smoke\',action=\'store_true\');ap.add_argument(\'--design-bounds\',type=float,nargs=2);run(ap.parse_args())\n')
+
+tools/tests/test_compute_budget.py:84: AssertionError
+=============================== warnings summary ===============================
+tools/tests/test_e1_sir_dad_fidelity.py::test_native_sir_spce_gradient_and_one_adam_step
+tools/tests/test_sir_execution.py::test_eight_step_blocks_match_reference[0.11]
+tools/tests/test_sir_execution.py::test_eight_step_blocks_match_reference[24.0]
+tools/tests/test_sir_execution.py::test_eight_step_blocks_match_reference[99.0]
+  /home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/utils/checkpoint.py:1399: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+    with device_autocast_ctx, torch.cpu.amp.autocast(**cpu_autocast_kwargs), recompute_context:  # type: ignore[attr-defined]
+
+tools/tests/test_sir_native_rl.py::test_native_sir_observed_history_and_replay_one_update
+  /home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/distributions/distribution.py:55: UserWarning: <class 'src.research.native_rl_reference.TanhNormal'> does not define `arg_constraints`. Please set `arg_constraints = {}` or initialize the distribution with `validate_args=False` to turn off validation.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tools/tests/test_compute_budget.py::test_all_baseline_entrypoints_have_budget_hooks
+1 failed, 59 passed, 2 skipped, 5 warnings in 7.22s

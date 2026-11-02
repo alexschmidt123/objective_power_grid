@@ -1,0 +1,69 @@
+{
+  "training": "pinned_original_RL_BOED_source_SAC_REDQ",
+  "publication_algorithm_equivalence": "reference_kernels_and_native_networks; see executable tests",
+  "generated_training_trajectories": 4000,
+  "training_forward_trajectories": 4000,
+  "contrast_training_trajectories": 400000000,
+  "forward_particle_stages": 12000120000,
+  "training_seconds": 15.566623223014176,
+  "history": [
+    {
+      "primary_episodes": 4000,
+      "collection_iterations": 40,
+      "gradient_updates": 448,
+      "training_spce": 4.547703071291489,
+      "alpha": 0.9565441012382507,
+      "target_entropy": -2.000500000000001
+    }
+  ],
+  "gradient_updates": 448,
+  "critic_updates": 896,
+  "actor_updates": 448,
+  "temperature_updates": 448,
+  "gamma": 0.9,
+  "target_rate": 0.001,
+  "policy_lr": 0.0001,
+  "critic_lr": 0.0003,
+  "gradient_steps_per_collection": 64,
+  "replay_batch": 4096,
+  "replay_capacity": 1000000,
+  "contrasts": 100000,
+  "resource_departures": [
+    "Method-specific declared schedule; native contrasts, replay and source-location settings preserved"
+  ],
+  "stochastic_deployment": "native source.py policy evaluation samples tanh Gaussian; independent decision RNG",
+  "resource_ledger": {
+    "schema": 2,
+    "scope": "current training phase; base cost separately attributed",
+    "counts": {
+      "fresh_complete_episodes": 4000,
+      "true_parameter_stage_propagations": 120000,
+      "contrast_parameter_stage_propagations": 12000000000,
+      "scalar_conditional_log_density_evaluations": 12000120000
+    },
+    "optimizer_updates": {
+      "policy": 448,
+      "critic": 896,
+      "posterior": null,
+      "score": null,
+      "temperature": 448
+    },
+    "replay_transition_samples": 1835008,
+    "offline_seconds": 15.566623223014176,
+    "validation_seconds": null,
+    "base_training_seconds": null,
+    "ode_rhs_evaluations": null,
+    "solver_backward_work": null,
+    "gpu_occupancy_seconds": null,
+    "nle_equivalent_proxy": null,
+    "basis": "derived from native executed counters, not direct hardware measurement",
+    "limitations": [
+      "score-target and backward recomputation not counted",
+      "Unknown fields are not zero; walltime is not GPU occupancy"
+    ],
+    "likelihood_gradient_work": {
+      "scalar_stage_terms": null,
+      "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+    }
+  }
+}

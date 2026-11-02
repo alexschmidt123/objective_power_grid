@@ -1,0 +1,85 @@
+{
+  "status": "PASS",
+  "returncode": 0,
+  "command": [
+    "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tools/tests/test_dad_reference_budget.py",
+    "tools/tests/test_compute_budget.py",
+    "tools/tests/test_fixed_budget_selection.py",
+    "tools/tests/test_primary_budget.py",
+    "tools/tests/test_baseline_readiness.py",
+    "tools/tests/test_location_bounded.py",
+    "tools/tests/test_baseline_eig_reporting.py",
+    "tools/tests/test_original_protocol.py",
+    "tools/tests/test_deepseek_sboed.py"
+  ],
+  "log": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z/logs/targeted_cpu.log",
+  "previous_DAD_numeric_audit": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/dad_location_seed101_native_schedule_20261101T191159Z/DAD_IMPLEMENTATION_AUDIT.json",
+  "previous_complete_pipeline_profiles": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_equal_primary_20261101T170810Z/profiles/results.json",
+  "score_recovery_cpu_evidence": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/11012026_scorebed_budget_recovery/manifest.json",
+  "cuda": "WAITING_GPU; reuse bounded source-identical evidence; only minimal integration smoke after handoff",
+  "cpu_passed": 51,
+  "cpu_skipped": 2,
+  "skip_reason": "Two tests require local native-vsOED smoke fixtures that were discarded; archived actual native checkpoint validation and separately executed bitwise native full-update reference tests cover those components.",
+  "native_reference_log": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z/logs/native_reference.log",
+  "moe_cpu": {
+    "status": "PASS",
+    "V6_OFF_bitwise_V1": true,
+    "V6_all7_exploration_gradients": true,
+    "V4_only_router_credit": true,
+    "V4_same_history_prefix": true,
+    "parameter_count": 8434,
+    "shared": 1,
+    "routed": 7,
+    "topk": 3
+  },
+  "native_reference_receipt": {
+    "status": "PASS",
+    "tests": [
+      {
+        "test": "DAD_actions_physics_loss_gradients_update",
+        "status": "PASS",
+        "evidence": {
+          "actions_likelihood_loss_gradients_one_Adam_step": true,
+          "rtol": 1e-08,
+          "atol": 1e-09,
+          "scope": "Exact upstream class/loss bodies; deterministic trace harness replaces stochastic trace construction only; common bounded mapping applied to both"
+        }
+      },
+      {
+        "test": "RL_native_Pyro_physics",
+        "status": "PASS",
+        "evidence": {
+          "native_Pyro_source_likelihood": true,
+          "max_absolute_error": 9.571444614664415e-08,
+          "prior": "four independent standard-normal coordinates"
+        }
+      },
+      {
+        "test": "RL_networks_rewards_native_update",
+        "status": "PASS",
+        "evidence": {
+          "native_network_outputs_distribution_logprob_and_one_full_update": true,
+          "native_factorized_reward": true,
+          "updated_parameters_bitwise_equal": true,
+          "discount": 0.9,
+          "critics": 2,
+          "subset": 2
+        }
+      },
+      {
+        "test": "vsOED_native_full_update",
+        "status": "PASS",
+        "evidence": {
+          "native_model_actor_critic_GMM_posterior_one_update": true,
+          "all_parameters_bitwise_equal": true,
+          "model_discrepancy": "Executable upstream SOURCE applies natural log to signal; shared benchmark follows executable source"
+        }
+      }
+    ],
+    "ScoreBED": "Separate JAX tests pending"
+  }
+}

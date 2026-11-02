@@ -1,0 +1,19 @@
+pid	ppid	pgid	uid	start_ticks	state	cwd	command
+1251546	1	1251546	332008387	87905255	S	/home/grads/g/g.lin/Documents/objective_power_grid_temp	/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/bin/python /home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z/source/resume.py
+1252017	1	1252017	332008387	87918959	S	/home/grads/g/g.lin	"python3 -c """"""Read-only telemetry, never launches/stops a GPU job or acquires its lock.""""""
+import pathlib,json,time,csv,subprocess,sys,datetime,os
+C=pathlib.Path(sys.argv[1]);path=C/'reports/gpu_samples_after_path_repair.csv'
+with path.open('x') as f:csv.writer(f).writerow(['utc','method','seed','worker_pid','device_used_MiB','device_busy_percent','device_power_W','basis'])
+while True:
+ try:
+  state=json.loads((C/'status.json').read_text());phase=state.get('state');pid=state.get('coordinator_pid')
+  if phase in ['COMPLETE','BLOCKED_CORRECTNESS_OR_SOURCE','TRAINING_INCOMPLETE_FINAL_BANK_UNOPENED','FINAL_EVALUATION_FAILED']:break
+  if pid and not pathlib.Path('/proc',str(pid)).exists():break
+  if phase=='RUNNING':
+   values=subprocess.check_output(['nvidia-smi','--query-gpu=memory.used,utilization.gpu,power.draw','--format=csv,noheader,nounits'],text=True).strip().split(',')
+   with path.open('a') as f:csv.writer(f).writerow([datetime.datetime.now(datetime.timezone.utc).isoformat(),state.get('method'),state.get('seed'),state.get('worker_pid'),*[v.strip() for v in values],'sampled whole-device values during exclusive allocation; not CUDA allocator peak or exact kernel-active time'])
+ except Exception as e:
+  with (C/'logs/telemetry_errors.log').open('a') as f:f.write(str(e)+'\n')
+ time.sleep(5)
+ /home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z"
+1255234	1251546	1255234	332008387	88028882	S	/home/grads/g/g.lin/Documents/objective_power_grid_temp	/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/bin/python /home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z/source/native_entry.py --config /home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z/configs/dad.yaml --journal --methods dad --seed 102 --train-only --output /home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z/runs/seed102/dad --source-check-manifest /home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z/source_manifest.json

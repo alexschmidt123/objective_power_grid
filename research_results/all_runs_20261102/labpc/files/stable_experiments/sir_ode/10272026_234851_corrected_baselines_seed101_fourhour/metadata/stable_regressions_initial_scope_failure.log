@@ -1,0 +1,30 @@
+..............ss.......F......................................           [100%]
+=================================== FAILURES ===================================
+_______________ test_all_baseline_entrypoints_have_budget_hooks ________________
+
+    def test_all_baseline_entrypoints_have_budget_hooks():
+        from pathlib import Path
+        root=Path(__file__).resolve().parents[2]/"src/research"
+        for name in ["training.py","family_training.py","native_rl_reference.py","sir_native_rl.py"]:
+>           assert "observer.allow_next_unit" in (root/name).read_text()
+E           assert 'observer.allow_next_unit' in '"""Separate Strategy-MoE trainer, preserving the original sparse MoE learner.\n\nSame full-horizon likelihood, optimi...4\'],\n        gradient_clip_mode=\'component\',load_penalty_weight=1e-4,selector_entropy_weight_max=1e-4,**journal)\n'
+E            +  where '"""Separate Strategy-MoE trainer, preserving the original sparse MoE learner.\n\nSame full-horizon likelihood, optimi...4\'],\n        gradient_clip_mode=\'component\',load_penalty_weight=1e-4,selector_entropy_weight_max=1e-4,**journal)\n' = read_text()
+E            +    where read_text = (PosixPath('/home/grads/g/g.lin/Documents/objective_power_grid/src/research') / 'family_training.py').read_text
+
+tools/tests/test_compute_budget.py:81: AssertionError
+=============================== warnings summary ===============================
+tools/tests/test_e1_sir_dad_fidelity.py::test_native_sir_spce_gradient_and_one_adam_step
+tools/tests/test_sir_execution.py::test_eight_step_blocks_match_reference[0.11]
+tools/tests/test_sir_execution.py::test_eight_step_blocks_match_reference[24.0]
+tools/tests/test_sir_execution.py::test_eight_step_blocks_match_reference[99.0]
+  /home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/utils/checkpoint.py:1399: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+    with device_autocast_ctx, torch.cpu.amp.autocast(**cpu_autocast_kwargs), recompute_context:  # type: ignore[attr-defined]
+
+tools/tests/test_sir_native_rl.py::test_native_sir_observed_history_and_replay_one_update
+  /home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/distributions/distribution.py:55: UserWarning: <class 'src.research.native_rl_reference.TanhNormal'> does not define `arg_constraints`. Please set `arg_constraints = {}` or initialize the distribution with `validate_args=False` to turn off validation.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tools/tests/test_compute_budget.py::test_all_baseline_entrypoints_have_budget_hooks
+1 failed, 59 passed, 2 skipped, 5 warnings in 7.38s

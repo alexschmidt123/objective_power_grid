@@ -1,0 +1,3 @@
+# Launcher-only compatibility repair
+
+Native guard rejected the requested journal_location... directory before output creation or any optimizer update. Native scientific sources and frozen configurations remain byte-identical. New native_entry.py adapts only the path guard in memory, accepting resolved outputs strictly under this campaign/runs or /readiness. It invokes the same native online_cli and adds no algorithm changes. Existing failed integration log preserved. Zero primary training attempts consumed budget. Root run.sh environment setup is reproduced by the explicitly selected same conda interpreter.

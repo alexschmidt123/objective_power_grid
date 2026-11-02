@@ -1,0 +1,47 @@
+{
+  "cohort": "NATIVE_SCHEDULE",
+  "method": "dad",
+  "seed": 101,
+  "horizon": 30,
+  "maximum_successful_updates": 50000,
+  "batch_size": 2000,
+  "contrasts": 2000,
+  "optimizer": "Adam",
+  "learning_rate": 5e-05,
+  "betas": [
+    0.8,
+    0.998
+  ],
+  "lr_decay": 0.98,
+  "lr_every": 1000,
+  "lr_semantics": "Native gamma applied after successful update1 then1001,2001,etc; unchanged",
+  "gradient_clip": null,
+  "first_design_revision": 1,
+  "charged_limit_seconds": 14400,
+  "safe_training_stop_seconds": 14280,
+  "checkpoint_selection": "latest fully serialized checkpoint within charged budget; never best EIG",
+  "checkpoint_every_updates": 1000,
+  "from_scratch": true,
+  "warm_start": false,
+  "evaluation_bank": {
+    "seed": 2026110117081001,
+    "bank_id": "journal_location_T30_equal_primary_20261101T170810Z_development",
+    "path": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_equal_primary_20261101T170810Z/banks/development.npz",
+    "file_sha256": "c3171762dc21926874b273adca01971b8d3833e30ae9355d9df3166417bf764e",
+    "paired_draws_sha256": "a2cc2e6bea0f8b1dbaf7b7f30574b9bc5770729b53a758e5228ab851c5f99ff3",
+    "cases": 2000,
+    "contrasts": 1000000,
+    "used_for_policy_evaluation": false
+  },
+  "original_2M_score": 8.150681345146676,
+  "original_2M_mcse": 0.05069002991859373,
+  "original_artifact": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_2M_seed101_105_20261101T172522Z/runs/seed101/dad",
+  "evaluation_comparators": [
+    "original_2M_dad",
+    "random",
+    "fixed"
+  ],
+  "budget_comparison": "Not equal-exposure to2M cohort; separate native-schedule result",
+  "queue_rule": "Wait passively on all established device locks; never modify current supervisor or preempt workers. Existing controller retains locks across its full queue, so this may wait beyond current RL job.",
+  "no_performance_threshold": true
+}

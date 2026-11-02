@@ -1,0 +1,12 @@
+# Actual run status
+
+{
+  "state": "RUNNING",
+  "coordinator_pid": 1251546,
+  "worker_pid": 1255234,
+  "method": "dad",
+  "seed": 102,
+  "log": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/journal_location_T30_labpc_native4h_complete_20261101T194734Z/logs/dad_seed102.log"
+}
+
+Formal five-seed EIG results NOT AVAILABLE until all checkpoint freezes and final evaluation. No queued job claimed completed.

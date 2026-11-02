@@ -1,0 +1,94 @@
+{
+  "id": "journal_LF_T30_native_final_20261102T052000Z",
+  "methods": [
+    "random",
+    "fixed",
+    "dad",
+    "rl_sboed",
+    "vsoed",
+    "scorebed"
+  ],
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "benchmark": {
+    "system": {
+      "name": "location_finding"
+    },
+    "N": 1,
+    "experiment": {
+      "experiment_type": "eig_based",
+      "step_number": 30,
+      "methods": [
+        "dad"
+      ]
+    },
+    "observation": {
+      "noise_sigma": 0.5,
+      "sampling": "normal_log_signal"
+    },
+    "location_finding": {
+      "design_bounds": [
+        -4.0,
+        4.0
+      ],
+      "random_design_distribution": "truncated_standard_normal"
+    },
+    "scope_note": "New conventional baseline campaign; no MoE training or historical initialization",
+    "research": {
+      "paper_protocol": {
+        "corrected_methods": true
+      }
+    }
+  },
+  "hard_continuous_seconds": 43200,
+  "soft_deadline_seconds": 37800,
+  "checkpoint_selection": "last successful native-target state; soft-deadline state separately time-limited, never selected by EIG",
+  "comparison": "METHOD_SPECIFIC_NATIVE_SCHEDULES; NOT EQUAL_COMPUTE OR EQUAL_SAMPLES",
+  "targets": {
+    "fixed": {
+      "updates": 50000,
+      "B": 2000,
+      "L": 2000,
+      "lr": 0.0001,
+      "gamma": 0.98
+    },
+    "dad": {
+      "updates": 50000,
+      "B": 2000,
+      "L": 2000,
+      "lr": 5e-05,
+      "gamma": 0.98
+    },
+    "rl_sboed": {
+      "episodes": 2000000,
+      "classification": "PRACTICAL_BUDGET_LIMITED; not published convergence claim"
+    },
+    "vsoed": {
+      "variant": "G-I",
+      "cycles": 10001,
+      "warmup": 20000,
+      "new_per_cycle": 1000,
+      "reason": "Verified local native adapter hardcodes use_NFs=False; NF-I is not silently claimed"
+    },
+    "scorebed": {
+      "score_updates": 50000,
+      "policy_updates_per_restart": 20000,
+      "restarts": 5,
+      "batch": 1024,
+      "reference": "author pinned cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4 config/experiment/location_finding.yaml; contradicts proposed190k/10k/P1",
+      "score_sampler": "native configured random mixture, not old custom AR1 override"
+    }
+  },
+  "source_head": "763a28dc38401fb9ac63f52bc2751338624c2b98",
+  "torch": "2.4.0+cu121",
+  "cuda": "12.1",
+  "precision": "unchanged native float64 pathwise / native float32 RL,vsOED / JAX ScoreBED; TF32 disabled",
+  "exact_resume": "NOT_ESTABLISHED: no automatic restart of interrupted native pipeline; preserve checkpoint and classify INCOMPLETE",
+  "final_bank": "SEALED until explicit user MoE freeze",
+  "budgets": "12h all-phase wall clock watchdog; native clock exclusions separately disclosed, never extends hard wall cap"
+}

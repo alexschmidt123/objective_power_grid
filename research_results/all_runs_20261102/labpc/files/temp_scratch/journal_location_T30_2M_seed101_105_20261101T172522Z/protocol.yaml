@@ -1,0 +1,288 @@
+cohort: equal_primary_low_budget_2M
+benchmark: location_T30
+name: journal_location_T30_2M_seed101_105_20261101T172522Z
+training_seeds:
+- 101
+- 102
+- 103
+- 104
+- 105
+methods:
+- random
+- fixed
+- dad
+- rl_sboed
+- vsoed
+- scorebed
+- moe_v1
+primary_budget_per_trained_method: 2000000
+training_time_hard_cap: 43200
+safe_stop_seconds: 41400
+queue_order: seed-major101..105, method order Fixed,DAD,RL-sBOED,vsOED,ScoreBED,MoE-V1
+settings:
+  dad:
+    batch_size: 2000
+    contrasts: 2000
+    learning_rate: 5.0e-05
+    spce_adam_beta1: 0.8
+    spce_adam_beta2: 0.998
+    spce_lr_decay: 0.98
+    spce_lr_schedule_every: 1000
+    spce_gradient_clip: null
+    first_design_revision: 1
+    primary_episode_budget: 1
+    spce_curriculum: 1
+    hidden: 64
+    updates: 1000
+  moe_v1:
+    batch_size: 2000
+    contrasts: 2000
+    learning_rate: 5.0e-05
+    spce_adam_beta1: 0.8
+    spce_adam_beta2: 0.998
+    spce_lr_decay: 0.98
+    spce_lr_schedule_every: 1000
+    spce_gradient_clip: 5
+    first_design_revision: 1
+    primary_episode_budget: 1
+    spce_curriculum: 1
+    hidden: 64
+    updates: 1000
+    balance_factor: 0.001
+    architecture: DeepSeekPolicy full;8434 parameters;1shared7routedtop3; conditional
+      auxiliary OFF
+  fixed:
+    batch_size: 64
+    contrasts: 1024
+    learning_rate: 5.0e-05
+    spce_adam_beta1: 0.8
+    spce_adam_beta2: 0.998
+    spce_lr_decay: 0.98
+    spce_lr_schedule_every: 1000
+    spce_gradient_clip: 5
+    first_design_revision: 2
+    primary_episode_budget: 1
+    spce_curriculum: 1
+    hidden: 64
+    updates: 31250
+    initialization: native fresh source-prior locations, seed+817, no simulation/validation
+      selection
+  rl_sboed:
+    updates: 20000
+    rl_native_contrasts: 100000
+    rl_native_replay_capacity: 1000000
+    fresh_per_collection: 100
+    replay_batch: 4096
+    gradient_cycles: 64
+    warmup_transitions: 100000
+    algorithm: native SAC/REDQ
+    actor_lr: 0.0001
+    critic_lr: 0.0003
+    gamma: 0.9
+    target_tau: 0.001
+  vsoed:
+    updates: 1980
+    new_trajectories: 1000
+    replay_batch: 10000
+    initial_replay: 20000
+    replay_capacity: 1000000
+    posterior_updates: 5
+    critic_updates: 5
+    posterior_lr: 0.001
+    actor_lr: 0.001
+    critic_lr: 0.001
+    lr_decay: 0.9999
+    discount: 0.9
+    exploration: 0.5
+    exploration_decay: 0.9999
+    target_rate: 0.1
+    transition: 0
+    log_every: 100
+    n_incre: 30
+    posterior_coordinate_reference: source_coordinates
+  scorebed:
+    budget: 2000000
+    initialization: 10014
+    score: 1890486
+    policy: 99500
+    score_fraction: 19/20
+    batch: 1024
+    score_updates: 1847
+    policy_updates: 98
+    score_final_batch: 182
+    policy_final_batch: 172
+    rounding: floor score allocation; remainder to policy; partial final minibatches
+      only
+    score_schedule_reference_steps: 190000
+    policy_schedule_reference_steps: 10000
+    policy_restarts: 1
+    reference_sampler: true
+    batch_size: 1024
+    learning_rate_schedule: native uncompressed reference horizons; partial final
+      minibatches
+    checkpoint: final native EMA params
+queue:
+- method: fixed
+  seed: 101
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: dad
+  seed: 101
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: rl_sboed
+  seed: 101
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: vsoed
+  seed: 101
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: scorebed
+  seed: 101
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: moe_v1
+  seed: 101
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: fixed
+  seed: 102
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: dad
+  seed: 102
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: rl_sboed
+  seed: 102
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: vsoed
+  seed: 102
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: scorebed
+  seed: 102
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: moe_v1
+  seed: 102
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: fixed
+  seed: 103
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: dad
+  seed: 103
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: rl_sboed
+  seed: 103
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: vsoed
+  seed: 103
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: scorebed
+  seed: 103
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: moe_v1
+  seed: 103
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: fixed
+  seed: 104
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: dad
+  seed: 104
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: rl_sboed
+  seed: 104
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: vsoed
+  seed: 104
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: scorebed
+  seed: 104
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: moe_v1
+  seed: 104
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: fixed
+  seed: 105
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: dad
+  seed: 105
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: rl_sboed
+  seed: 105
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: vsoed
+  seed: 105
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: scorebed
+  seed: 105
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+- method: moe_v1
+  seed: 105
+  status: QUEUED
+  primary_target: 2000000
+  primary_current: 0
+source_revision: 763a28dc38401fb9ac63f52bc2751338624c2b98
+checkpoint_selection: latest final checkpoint after exactly2M; no best-validation
+  selection
+failure_rule: Any interrupted attempt INCOMPLETE. Never resume partial native state.
+  No automatic retry; any explicit restart from original seed must retain cumulative
+  charges and remaining ceiling.
+evaluation: Frozen development bank2000paired/1000000contrasts, same source-hashed
+  CommonValidation for all methods. Reserved final bank untouched.
+interpretation: Sample efficiency; not convergence, equal compute or ultimate native
+  method superiority
+exact_resume_not_a_start_gate: true
+seed102_105_rule: Each method eligible only after its seed101 training completes validly;
+  no performance gate
+created_utc: 20261101T172522Z

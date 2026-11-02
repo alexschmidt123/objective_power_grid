@@ -1,0 +1,133 @@
+{
+  "cohort": "LABPC_NATIVE_4H_PRIMARY",
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "baselines": [
+    "random",
+    "fixed",
+    "dad",
+    "rl_sboed",
+    "vsoed",
+    "scorebed"
+  ],
+  "moe_comparators": [
+    "moe_v1",
+    "moe_v4",
+    "moe_v6"
+  ],
+  "cap_seconds": 14400,
+  "random": "five independent policy realizations paired to the same final truths/noise/contrasts; decision seed=final_seed+10000+train-seed-label, zero training",
+  "training_fairness": "same maximum training-time allowance, not equal trajectories/FLOPs/convergence",
+  "native_targets": {
+    "fixed": "50000updates,B64,L1024",
+    "dad": "50000updates,B2000,L2000",
+    "rl_sboed": "native20001collections*100; native replay4096 and64 SAC/REDQ cycles;4h first",
+    "vsoed": "10001nativecycles+20000warmup",
+    "scorebed": "P1 native190000score/10000policy ceilings; previously tested4h recovery allocation142500/7500 with native reference LR horizons; explicitly compute-limited",
+    "moe": "50000native ceiling or4h; save18000 checkpoint only if reached; V6 verified exploration horizon18k and common-rescaled LR360 from authorized V6 config"
+  },
+  "checkpoint_selection": "last complete serialized checkpoint within native target/4h; no best validation or final EIG selection",
+  "formal_evaluation": "fresh reserved final bank once all trained checkpoints selected and protocol locked",
+  "primary_contrasts": [
+    "moe_v6-moe_v1",
+    "moe_v6-dad",
+    "moe_v6-vsoed"
+  ],
+  "multiple_testing": "Holm across3 primary contrasts; separate within-policy case MCSE and across5-training-seed SD/paired t intervals",
+  "training_resume": "No automatic retries. No exact resume claimed without full state and continuation tests. Any failed new-cohort attempt retains charged time; later authorized fresh retry must use remaining allowance.",
+  "historical_failures": "separate immutable old cohorts; no inherited weights/optimizer/data from failed runs; costs disclosed separately",
+  "source_revision": "763a28dc38401fb9ac63f52bc2751338624c2b98",
+  "config_sha256": {
+    "configs/random.yaml": "47ea3d4440c98849d2a2be91072ed0d34b91ae418b5cdb094908595fe89ebcb0",
+    "configs/fixed.yaml": "e14629fb8fe7c3304edd9de53381b404018df753253e65c88461a99638d01d4b",
+    "configs/dad.yaml": "2822d69a7304dc7565a6c41f8f2dce0fa97dcfccf65146db151e11a213836dd1",
+    "configs/rl_sboed.yaml": "004f4361d1b491c4b2f4207228f840e10c360bbf0d7e19be50bac04f1ea334df",
+    "configs/vsoed.yaml": "544091b396135b29a8ceca6a47bfff2b18dbfc7558fca52dec484806af11d19f",
+    "configs/scorebed.yaml": "44bd9baf9a8ffe5bc2336c3e34c62bf56801ff3cba379232a8785dc55a0413c4"
+  },
+  "final_seed": 2026110119401107,
+  "created_utc": "2026-11-01T19:47:34.888837+00:00",
+  "moe_secondary18k": "matched exposure only when every included arm reaches exact18000 under4h; recipe differences disclosed; no extension above primary cap",
+  "moe_recipes": {
+    "moe_v1": {
+      "batch": 2000,
+      "contrasts": 2000,
+      "horizon": 30,
+      "max_updates": 50000,
+      "budget_seconds": 14400,
+      "learning_rate": 5e-05,
+      "betas": [
+        0.8,
+        0.998
+      ],
+      "lr_decay": 0.98,
+      "gradient_clip": 5,
+      "balance_coefficient": 0.001,
+      "architecture": "Verified DeepSeekPolicy full8434total/6898active,1shared7routedtop3, original gate weights and feasibility mapping",
+      "from_scratch": true,
+      "no_conditional_information_auxiliary": true,
+      "method": "moe_v1",
+      "lr_interval": 1000
+    },
+    "moe_v4": {
+      "batch": 2000,
+      "contrasts": 2000,
+      "horizon": 30,
+      "max_updates": 50000,
+      "budget_seconds": 14400,
+      "learning_rate": 5e-05,
+      "betas": [
+        0.8,
+        0.998
+      ],
+      "lr_decay": 0.98,
+      "gradient_clip": 5,
+      "balance_coefficient": 0.001,
+      "architecture": "Verified DeepSeekPolicy full8434total/6898active,1shared7routedtop3, original gate weights and feasibility mapping",
+      "from_scratch": true,
+      "no_conditional_information_auxiliary": true,
+      "method": "moe_v4",
+      "lr_interval": 1000,
+      "utility_every_updates": 100,
+      "utility_batch": 64,
+      "utility_contrasts": 1024,
+      "router_gradient_fraction_cap": 0.05,
+      "utility_source_sha256": "7ef3aceb7f266d9f3b737f4a68de3e66691cc1808b8b48d3663b627a51485024",
+      "seed_mapping": "39600000+seed*100000+update"
+    },
+    "moe_v6": {
+      "batch": 2000,
+      "contrasts": 2000,
+      "horizon": 30,
+      "max_updates": 50000,
+      "budget_seconds": 14400,
+      "learning_rate": 5e-05,
+      "betas": [
+        0.8,
+        0.998
+      ],
+      "lr_decay": 0.98,
+      "gradient_clip": 5,
+      "balance_coefficient": 0.001,
+      "architecture": "Verified DeepSeekPolicy full8434total/6898active,1shared7routedtop3, original gate weights and feasibility mapping",
+      "from_scratch": true,
+      "no_conditional_information_auxiliary": true,
+      "method": "moe_v6",
+      "lr_interval": 360,
+      "exploration_scale": 0.1,
+      "plateau_fraction": 0.2,
+      "cosine_zero_fraction": 0.8,
+      "exploration_schedule_horizon": 18000,
+      "route_seed_mapping": "7100000+training_seed",
+      "source_sha256": "7fc6b164fd4c854755005c3c7edfebf442761b29b1121f855c54d2ae53765a6c",
+      "lr_interpretation": "Preserved verified V6 common-rescaled18k recipe, interval360; continues unaltered during full4h extension. V1/V4 retain their native1000 interval; formal method comparison is not sole-routing ablation."
+    }
+  },
+  "secondary18k_interpretation": "Matched main updates only. Native LR schedules differ. V4 additional auxiliary fresh cases and counterfactual simulations disclosed; no strict equal-total36M or isolated-mechanism claim.",
+  "configs_frozen_before_final_EIG": true
+}

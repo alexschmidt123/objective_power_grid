@@ -1,0 +1,108 @@
+status: PREFLIGHT_NOT_APPROVED_FOR_PRODUCTION
+common_primary_budget: null
+candidates:
+- 2000000
+- 1000000
+seeds:
+- 101
+- 102
+- 103
+- 104
+- 105
+physical:
+  T: 30
+  source_count: 2
+  source_dimension: 2
+  prior: 4 iid standard normal coordinates
+  design_bounds:
+  - -4
+  - 4
+  observation_sigma: 0.5
+  signal: log(0.1 + sum_k 1/(1e-4 + squared_distance_to_source_k))
+  random_distribution: truncated_standard_normal
+max_cumulative_charged_seconds: 43200
+planned_completion_ceiling_seconds: 37800
+safe_stop_seconds: 41400
+checkpoint_selection: latest complete exact-exposure checkpoint; no EIG selection
+moe: 'V1 DeepSeekPolicy full: one shared seven routed top3, 8434 parameters; no conditional
+  auxiliary'
+candidate_scorebed_allocations:
+  '2000000':
+    budget: 2000000
+    initialization: 10014
+    score: 1890486
+    policy: 99500
+    score_fraction: 19/20
+    batch: 1024
+    score_updates: 1847
+    policy_updates: 98
+    score_final_batch: 182
+    policy_final_batch: 172
+    rounding: floor score allocation; remainder to policy; partial final minibatches
+      only
+  '1000000':
+    budget: 1000000
+    initialization: 10014
+    score: 940486
+    policy: 49500
+    score_fraction: 19/20
+    batch: 1024
+    score_updates: 919
+    policy_updates: 49
+    score_final_batch: 454
+    policy_final_batch: 348
+    rounding: floor score allocation; remainder to policy; partial final minibatches
+      only
+vsOED_allocations:
+  '2000000':
+    updates: 1980
+    new_trajectories: 1000
+    replay_batch: 10000
+    initial_replay: 20000
+    replay_capacity: 1000000
+    posterior_updates: 5
+    critic_updates: 5
+    posterior_lr: 0.001
+    actor_lr: 0.001
+    critic_lr: 0.001
+    lr_decay: 0.9999
+    discount: 0.9
+    exploration: 0.5
+    exploration_decay: 0.9999
+    target_rate: 0.1
+    transition: 0
+    log_every: 100
+    n_incre: 30
+    posterior_coordinate_reference: source_coordinates
+  '1000000':
+    updates: 980
+    new_trajectories: 1000
+    replay_batch: 10000
+    initial_replay: 20000
+    replay_capacity: 1000000
+    posterior_updates: 5
+    critic_updates: 5
+    posterior_lr: 0.001
+    actor_lr: 0.001
+    critic_lr: 0.001
+    lr_decay: 0.9999
+    discount: 0.9
+    exploration: 0.5
+    exploration_decay: 0.9999
+    target_rate: 0.1
+    transition: 0
+    log_every: 100
+    n_incre: 30
+    posterior_coordinate_reference: source_coordinates
+comparison: sample efficiency, not ultimate fully trained method superiority
+gate: Full native checkpoint/restart state and exact exposure counters must be tested
+  before formal launch. Missing state is a repairable readiness blocker, not a mathematical
+  infeasibility proof.
+final_analysis:
+  primary: paired across-training-seed MoE minus each conventional trainable method;
+    Holm correction across five primary method contrasts
+  mc_se: within fixed checkpoint over paired test trajectories
+  training_variability: separate across five training seeds; never replace with within-checkpoint
+    MC SE
+  missing: exclude incomplete policy from primary exact-exposure table and report
+    explicitly

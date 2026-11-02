@@ -1,0 +1,62 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_____________________ test_grid_unchanged_simulator[ieee9] _____________________
+
+name = 'ieee9'
+
+    @pytest.mark.parametrize('name',['ieee9','ieee14'])
+    def test_grid_unchanged_simulator(name):
+     if shutil.which('nvcc') is None or not torch.cuda.is_available():pytest.skip('Grid numerical test requires GPU and compiler; no numerical substitute')
+>    cfg=yaml.safe_load((ROOT/f'configs/{name}_research_eig.yaml').read_text());a=PredictiveAdapter(cfg);x=a.b.sample((2,),torch.Generator().manual_seed(21));assert torch.isfinite(a.signatures(x)).all()
+
+tools/tests/test_moe_sboed_v4.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/research/moe_v4_partition.py:9: in __init__
+    self.raw=copy.deepcopy(raw);self.b=make_benchmark(raw)
+src/research/benchmarks.py:272: in make_benchmark
+    benchmark = cls(raw)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <src.research.benchmarks.Grid object at 0x75dddabe56c0>
+raw = {'N': 3, 'experiment': {'experiment_type': 'eig_based', 'methods': ['random', 'fixed', 'dad', 'vsoed'], 'min_duration_...ettings': {'eval_contrasts': 16384, 'eval_systems': 2048, 'moe_density_updates': 4, 'moe_revision': 4, ...}, ...}, ...}
+
+    def __init__(self, raw):
+        from src.config import load_config
+        from src.domains.swing.continuous_rocof import EndpointRocofObserver, MaxRocofObserver
+        self.name = raw['system']['name']
+>       cfg = load_config(raw['_config_path'])
+E       KeyError: '_config_path'
+
+src/research/benchmarks.py:205: KeyError
+____________________ test_grid_unchanged_simulator[ieee14] _____________________
+
+name = 'ieee14'
+
+    @pytest.mark.parametrize('name',['ieee9','ieee14'])
+    def test_grid_unchanged_simulator(name):
+     if shutil.which('nvcc') is None or not torch.cuda.is_available():pytest.skip('Grid numerical test requires GPU and compiler; no numerical substitute')
+>    cfg=yaml.safe_load((ROOT/f'configs/{name}_research_eig.yaml').read_text());a=PredictiveAdapter(cfg);x=a.b.sample((2,),torch.Generator().manual_seed(21));assert torch.isfinite(a.signatures(x)).all()
+
+tools/tests/test_moe_sboed_v4.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/research/moe_v4_partition.py:9: in __init__
+    self.raw=copy.deepcopy(raw);self.b=make_benchmark(raw)
+src/research/benchmarks.py:272: in make_benchmark
+    benchmark = cls(raw)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <src.research.benchmarks.Grid object at 0x75dddaae0d00>
+raw = {'N': 5, 'experiment': {'experiment_type': 'eig_based', 'methods': ['random', 'fixed', 'dad', 'vsoed'], 'min_duration_...ettings': {'eval_contrasts': 16384, 'eval_systems': 2048, 'moe_density_updates': 4, 'moe_revision': 4, ...}, ...}, ...}
+
+    def __init__(self, raw):
+        from src.config import load_config
+        from src.domains.swing.continuous_rocof import EndpointRocofObserver, MaxRocofObserver
+        self.name = raw['system']['name']
+>       cfg = load_config(raw['_config_path'])
+E       KeyError: '_config_path'
+
+src/research/benchmarks.py:205: KeyError
+=========================== short test summary info ============================
+FAILED tools/tests/test_moe_sboed_v4.py::test_grid_unchanged_simulator[ieee9]
+FAILED tools/tests/test_moe_sboed_v4.py::test_grid_unchanged_simulator[ieee14]
+2 failed in 0.49s

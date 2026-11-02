@@ -1,0 +1,3 @@
+# Location baseline readiness: NOT COMPLETE
+
+Official references pinned; component-level audit and core reference comparisons saved. Corrected DAD/RL/ScoreBEDfull runs are not yet complete. ExistingvsOEDfive-seed provenance still needs final artifact verification. Numerical equivalence establishes local update behavior only, not convergence or five-seed performance. The original ten-method table is historical and must not be recertified by changing labels. No revised final confirmation set has been used or drawn. A fresh untouched set will be designated only after configurations, analyses and resource-sensitivity decisions are frozen.

@@ -1,0 +1,150 @@
+[
+  {
+    "arm": "v1_context",
+    "seconds": 0.7622830430045724,
+    "batch": 32,
+    "contrasts": 131072,
+    "train_sPCE": 2.5591483101309107,
+    "loss": -2.5581290739735834,
+    "gradient_norm": 6.883825659823729,
+    "peak_memory_bytes": 9632135680,
+    "counts": {
+      "total_parameters": 8434,
+      "activated_parameters_per_context": 6898,
+      "shared_experts": 1,
+      "routed_experts": 7,
+      "top_k": 3,
+      "expert_feature_dimension": 16,
+      "routed_FFN_width": 8,
+      "shared_FFN_width": 8,
+      "FFN_linear_FLOPs_per_context": 3072,
+      "history_encoder_linear_FLOPs_per_observation": 9728,
+      "router_linear_FLOPs_per_context": 224,
+      "action_head_linear_FLOPs_per_context": 64,
+      "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs"
+    },
+    "context_gradient_applied": true
+  },
+  {
+    "arm": "v4",
+    "seconds": 0.30449223303003237,
+    "batch": 32,
+    "contrasts": 131072,
+    "train_sPCE": 2.552730554389167,
+    "loss": -0.5005278314077879,
+    "gradient_norm": 7.7628217316739185,
+    "peak_memory_bytes": 9632135680,
+    "counts": {
+      "total_parameters": 11206,
+      "deployed_active_parameters": 9602,
+      "routed_experts": 4,
+      "top_k": 2,
+      "role_heads": 4,
+      "always_active_FFN_experts": 0,
+      "offline_auxiliary_experts_per_context": 4
+    },
+    "context_gradient_applied": false,
+    "role_losses": [
+      0.15125208899505477,
+      1.0359866041109065,
+      0.1721065196143787,
+      1.081286966075812
+    ],
+    "minimum_prior_group_particles": 26690,
+    "identity_max_error": 8.881784197001252e-16
+  },
+  {
+    "arm": "no_role",
+    "seconds": 0.23753853305242956,
+    "batch": 32,
+    "contrasts": 131072,
+    "train_sPCE": 2.552730554389167,
+    "loss": -2.552730554389167,
+    "gradient_norm": 7.751981275235099,
+    "peak_memory_bytes": 9632135680,
+    "counts": {
+      "total_parameters": 11206,
+      "deployed_active_parameters": 9602,
+      "routed_experts": 4,
+      "top_k": 2,
+      "role_heads": 4,
+      "always_active_FFN_experts": 0,
+      "offline_auxiliary_experts_per_context": 4
+    },
+    "context_gradient_applied": false
+  },
+  {
+    "arm": "dense",
+    "seconds": 0.20092037797439843,
+    "batch": 32,
+    "contrasts": 131072,
+    "train_sPCE": 2.458978497689917,
+    "loss": -2.458978497689917,
+    "gradient_norm": 7.107317605909698,
+    "peak_memory_bytes": 9632135680,
+    "counts": {
+      "total_parameters": 11225,
+      "deployed_active_parameters": 11225,
+      "routed_experts": 0,
+      "top_k": 0,
+      "role_heads": 0,
+      "always_active_FFN_experts": 0,
+      "offline_auxiliary_experts_per_context": 0
+    },
+    "context_gradient_applied": false
+  },
+  {
+    "arm": "uniform_top2",
+    "seconds": 0.2965871390188113,
+    "batch": 32,
+    "contrasts": 131072,
+    "train_sPCE": 2.5520763936303945,
+    "loss": -0.5191899155660438,
+    "gradient_norm": 9.257096483428695,
+    "peak_memory_bytes": 9632135680,
+    "counts": {
+      "total_parameters": 11206,
+      "deployed_active_parameters": 9602,
+      "routed_experts": 4,
+      "top_k": 2,
+      "role_heads": 4,
+      "always_active_FFN_experts": 0,
+      "offline_auxiliary_experts_per_context": 4
+    },
+    "context_gradient_applied": false,
+    "role_losses": [
+      0.14769880620848305,
+      1.0330436261046188,
+      0.16372526693506373,
+      1.073192163806432
+    ],
+    "minimum_prior_group_particles": 26690,
+    "identity_max_error": 8.881784197001252e-16
+  },
+  {
+    "arm": "native_v1",
+    "seconds": 1.0107947930227965,
+    "batch": 2000,
+    "contrasts": 2000,
+    "train_sPCE": 2.482710917305116,
+    "loss": -2.481690226467837,
+    "gradient_norm": 33.156141352592286,
+    "peak_memory_bytes": 11344126464,
+    "counts": {
+      "total_parameters": 8434,
+      "activated_parameters_per_context": 6898,
+      "shared_experts": 1,
+      "routed_experts": 7,
+      "top_k": 3,
+      "expert_feature_dimension": 16,
+      "routed_FFN_width": 8,
+      "shared_FFN_width": 8,
+      "FFN_linear_FLOPs_per_context": 3072,
+      "history_encoder_linear_FLOPs_per_observation": 9728,
+      "router_linear_FLOPs_per_context": 224,
+      "action_head_linear_FLOPs_per_context": 64,
+      "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs"
+    },
+    "context_gradient_applied": true
+  }
+]

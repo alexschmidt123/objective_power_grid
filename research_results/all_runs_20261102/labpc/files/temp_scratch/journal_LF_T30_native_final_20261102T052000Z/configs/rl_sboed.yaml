@@ -1,0 +1,183 @@
+system:
+  name: location_finding
+N: 1
+experiment:
+  experiment_type: eig_based
+  step_number: 30
+  methods:
+  - rl_sboed
+observation:
+  noise_sigma: 0.5
+  sampling: normal_log_signal
+location_finding:
+  design_bounds:
+  - -4.0
+  - 4.0
+  random_design_distribution: truncated_standard_normal
+research:
+  enabled: true
+  settings:
+    updates: 50000
+    hidden: 64
+    threads: 4
+    batch_size: 2000
+    contrasts: 2000
+    training_bound: 4
+    primary_episode_budget: 1
+    spce_trajectory_budget_unit: primary_episodes
+    spce_curriculum: 1
+    learning_rate: 5.0e-05
+    spce_adam_beta1: 0.8
+    spce_adam_beta2: 0.998
+    spce_lr_decay: 0.98
+    spce_lr_schedule_every: 1000
+    spce_gradient_clip: null
+    first_design_revision: 1
+    validate_every: 100
+    validation_systems: 64
+    validation_contrasts: 1000000
+    eval_systems: 2000
+    eval_contrasts: 1000000
+    evaluation_population_systems: 2000
+    evaluation_batch_size: 16
+    evaluation_contrast_chunk: 16384
+  paper_protocol:
+    corrected_methods: true
+    checkpoint_selection: latest_budget_eligible_checkpoint
+    regime: native_algorithms_training_sufficiency_five_seed
+    adaptations: Common bounded [-4,4]^2 design box; executable log-signal likelihood;
+      method-specific native schedules; resource ceilings do not establish convergence
+  journal_protocol:
+    version: validation_convergence_v1
+    study_id: journal_LF_T30_native_final_20261102T052000Z
+    training_seeds:
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    development_training_seeds:
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    evaluation_seeds:
+    - 2026110205150102
+    checkpoint_selection_mode: final_compute_budget
+    training_device: cuda_if_available
+    preserve_progress_checkpoints: true
+    validation:
+      seed: 2026110205150103
+      systems: 64
+      contrasts: 1000000
+      batch_size: 16
+      chunk: 16384
+      device: cuda_if_available
+    stopping_rule:
+      minimum_episodes: 1
+      minimum_checkpoints: 8
+      validation_every_episodes: 1000000000
+      patience: 6
+      minimum_improvement: 0.05
+      noise_multiplier: 1.96
+      maximum_episodes: 1000000000
+      maximum_training_seconds: 43200
+    method_settings:
+      dad:
+        batch_size: 2000
+        contrasts: 2000
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        spce_gradient_clip: null
+        first_design_revision: 1
+        primary_episode_budget: 1
+        spce_curriculum: 1
+        spce_trajectory_budget_unit: primary_episodes
+        reference_optimizer_updates: 50000
+        reference_training_episodes: 100000000
+        reference_schedule_episodes: 100000000
+      fixed:
+        batch_size: 64
+        contrasts: 1024
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        spce_gradient_clip: 5.0
+        first_design_revision: 2
+        primary_episode_budget: 1
+        spce_curriculum: 1
+        spce_trajectory_budget_unit: primary_episodes
+        reference_optimizer_updates: 50000
+        reference_training_episodes: 3200000
+        reference_schedule_episodes: 3200000
+      rl_sboed:
+        rl_original_reference: true
+        rl_native_contrasts: 100000
+        rl_native_replay_capacity: 1000000
+        reference_schedule_episodes: 2000000
+      vsoed:
+        reference_schedule_episodes: 10021000
+      scorebed:
+        scorebed_batch_size: 1024
+        scorebed_restarts: 1
+        scorebed_reference_sampler: true
+        score_schedule_reference_steps: 190000
+        policy_schedule_reference_steps: 10000
+        scorebed_declared_full_score_updates: 190000
+        scorebed_declared_full_policy_updates: 10000
+        scorebed_pretraining_episodes: 181621760
+        reference_schedule_episodes: 191190814
+        scorebed_compute_phase_plan:
+          hardware: NVIDIA GeForce RTX 4090
+          score_updates: 177365
+          policy_updates: 9335
+          phase_ratio: 19
+          estimated_seconds: 13679.133742374821
+          allowance_seconds: 14400
+          reserve_seconds: 720
+          native_batch_size: 1024
+          original_score_scheduler_updates: 190000
+          original_policy_scheduler_updates: 10000
+          timing_based: true
+          selection_used_EIG: false
+          provenance: Archived seed101 hardware timing calibration b9776095457953ec54170e5b2410009eb040a4210514fec40419aca57f878c40
+    common_pathwise_settings: {}
+    native_vsoed_profile:
+      updates: 10001
+      new_trajectories: 1000
+      replay_batch: 10000
+      initial_replay: 20000
+      replay_capacity: 1000000
+      posterior_updates: 5
+      critic_updates: 5
+      posterior_lr: 0.001
+      actor_lr: 0.001
+      critic_lr: 0.001
+      lr_decay: 0.9999
+      discount: 0.9
+      exploration: 0.5
+      exploration_decay: 0.9999
+      target_rate: 0.1
+      transition: 0
+      log_every: 100
+      n_incre: 30
+      posterior_coordinate_reference: source_coordinates
+    compute_budget:
+      seconds: 43200
+      hardware: NVIDIA GeForce RTX 4090
+      checkpoint_seconds: 3600
+      finalization_reserve_seconds: 120
+      require_prelaunch_start: true
+    stopping: Native finite schedule or charged resource ceiling; no poor-score stopping.
+      Plateau assessed separately, not assumed.
+    final_evaluation:
+      seed: 2026110205150102
+      systems: 2000
+      contrasts: 1000000
+scope_note: New conventional baseline campaign; no MoE training or historical initialization

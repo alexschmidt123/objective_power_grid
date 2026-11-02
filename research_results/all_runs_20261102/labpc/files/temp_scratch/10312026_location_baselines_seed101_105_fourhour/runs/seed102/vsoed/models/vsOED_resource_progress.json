@@ -1,0 +1,45 @@
+{
+  "schema": 2,
+  "scope": "current training phase; base cost separately attributed",
+  "counts": {
+    "fresh_complete_episodes": 10020000,
+    "true_parameter_stage_propagations": 300600000,
+    "contrast_parameter_stage_propagations": 0,
+    "scalar_conditional_log_density_evaluations": 0
+  },
+  "optimizer_updates": {
+    "policy": 10000,
+    "critic": 50000,
+    "posterior": 1500000,
+    "score": null,
+    "temperature": null
+  },
+  "replay_transition_samples": null,
+  "offline_seconds": 6769.172655349015,
+  "validation_seconds": null,
+  "base_training_seconds": null,
+  "ode_rhs_evaluations": null,
+  "solver_backward_work": null,
+  "gpu_occupancy_seconds": null,
+  "nle_equivalent_proxy": null,
+  "basis": "derived from native executed counters, not direct hardware measurement",
+  "limitations": [
+    "score-target and backward recomputation not counted",
+    "Unknown fields are not zero; walltime is not GPU occupancy"
+  ],
+  "likelihood_gradient_work": {
+    "scalar_stage_terms": null,
+    "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+  },
+  "replay_work": {
+    "minibatch_trajectories": 10000,
+    "optimizer_steps": {
+      "policy": 10000,
+      "critic": 50000,
+      "posterior": 1500000,
+      "score": null,
+      "temperature": null
+    },
+    "note": "Posterior steps may include stage-specific nets; stored data are not fresh episodes"
+  }
+}
