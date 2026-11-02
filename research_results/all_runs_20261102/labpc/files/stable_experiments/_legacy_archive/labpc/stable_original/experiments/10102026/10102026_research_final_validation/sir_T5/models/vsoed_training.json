@@ -1,0 +1,46 @@
+{
+  "training": "variational_actor_critic_adaptation",
+  "gamma": 1.0,
+  "policy_parameters": 5313,
+  "posterior_parameters": 23848,
+  "critic_parameters": 18945,
+  "selected_update": 2,
+  "validation_spce": 2.0274751008784744,
+  "history": [
+    {
+      "update": 0,
+      "validation_spce": 2.0260338927872956
+    },
+    {
+      "update": 1,
+      "validation_spce": 2.0266976388981632,
+      "posterior_nll": 3.0577147939242297,
+      "critic_mse": 0.03774542359423736,
+      "actor_loss": -0.11153025761065467,
+      "variational_terminal_reward": 0.02830086616795524,
+      "exploration": 0.15,
+      "replay_size": 4
+    },
+    {
+      "update": 2,
+      "validation_spce": 2.0274751008784744,
+      "posterior_nll": 3.590621998592521,
+      "critic_mse": 0.06821706714366668,
+      "actor_loss": -0.179097126338197,
+      "variational_terminal_reward": 0.3752153032728649,
+      "exploration": 0.03,
+      "replay_size": 8
+    }
+  ],
+  "training_seconds": 0.845761233009398,
+  "forward_particle_stages": 580,
+  "grid_particle_propagations_including_jacobians": 0,
+  "upstream": "https://github.com/wgshen/vsOED/tree/d0884f9ba30fbddc56618841c68af2f3bfe16539",
+  "adaptations": [
+    "shared ordered history and benchmark feasibility map",
+    "joint diagonal-Gaussian mixture in transformed prior coordinates",
+    "latent-action critic; incremental rewards; gamma=1",
+    "shared sPCE validation checkpoint selection"
+  ],
+  "checkpoint_sha256": "d8c9b279897cc27adfb4554fbde731d41c4e392db4807860ca39bea7778d926a"
+}

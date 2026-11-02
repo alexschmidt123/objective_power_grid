@@ -1,0 +1,71 @@
+{
+  "training": "RL-sBOED-I SAC_REDQ_two_critic_adaptation",
+  "policy_architecture": "rl_sboed_incremental_pce_unbounded_stable_v2",
+  "reward": "incremental PCE; rewards telescope to terminal PCE",
+  "gamma": 1.0,
+  "checkpoint_selection": "final",
+  "generated_training_trajectories": 8,
+  "contrast_training_trajectories": 64,
+  "training_forward_trajectories": 72,
+  "training_trajectory_budget": null,
+  "training_budget_unit": "primary_episodes",
+  "training_seconds": 0.20798204489983618,
+  "history": [
+    {
+      "update": 1,
+      "training_EIG": 2.1972074478709134,
+      "training_forward_trajectories": 36,
+      "replay_transitions": 120,
+      "gradient_updates": 2,
+      "alpha": 0.009997997432947159,
+      "policy_kl": 0.00026709248777478933,
+      "rejected_actor_steps": 0,
+      "maximum_rollout_action": 1.5001691579818726
+    },
+    {
+      "update": 2,
+      "training_EIG": 2.1971295827179116,
+      "training_forward_trajectories": 72,
+      "replay_transitions": 240,
+      "gradient_updates": 4,
+      "alpha": 0.009995995089411736,
+      "policy_kl": 1.985169728868641e-05,
+      "rejected_actor_steps": 0,
+      "maximum_rollout_action": 1.4529125690460205
+    }
+  ],
+  "actual_updates": 2,
+  "gradient_updates": 4,
+  "critic_count": 2,
+  "target_subset": 2,
+  "target_rate": 0.001,
+  "actor_lr": 0.0001,
+  "critic_lr": 0.0003,
+  "replay_capacity": 256,
+  "replay_batch": 8,
+  "minimum_replay_transitions": 4,
+  "gradient_steps_per_update": 2,
+  "target_entropy": -2,
+  "entropy_coordinates": "unbounded_Gaussian",
+  "unbounded_stabilization": {
+    "history": "asinh,masked_mean,layer_norm",
+    "critic_actions": "asinh",
+    "critic_actor_value": "minimum_two_Q",
+    "gradient_clip": 1.0,
+    "policy_kl_penalty": 1.0,
+    "maximum_rollout_reference_mean_kl": 0.02
+  },
+  "policy_parameters": 50756,
+  "simulator_gradients_required": false,
+  "upstream": "https://github.com/csiro-mlai/RL-BOED",
+  "upstream_commit": "54fdc7b6d23849ab1df8fd85d42af7c8961f930e",
+  "adaptations": [
+    "gamma1 undiscounted EIG",
+    "common L and forward cap",
+    "shared fixed history normalization with stage index",
+    "stochastic evaluation with independent decision RNG",
+    "standalone Torch implementation without Garage"
+  ],
+  "publication_algorithm_equivalence": false,
+  "checkpoint_sha256": "b6642977265da5f0c2ea78911200d818a65ea29b0868388438ae770a306d7a23"
+}

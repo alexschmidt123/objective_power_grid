@@ -1,0 +1,29 @@
+RESULT_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10122026/10122026_moe_v2_restored_validation/run
+moe_sboed update 1: train sPCE=1.310428
+moe_sboed update 1: BA reward=0.125856
+moe_sboed update 1: train sPCE=1.242236
+moe_sboed update 2: train sPCE=1.860096
+moe_sboed paper evaluation: 2/2 trajectories, L=8
+moe_sboed seed 1001: sPCE=1.814867; normalized MSE=1.292913
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/online_cli.py", line 54, in <module>
+    if __name__=='__main__':main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/online_cli.py", line 25, in main
+    research(argv if any(a.split("=")[0]=="--config" for a in argv) else ["--config",known.config,*argv])
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/runner.py", line 325, in main
+    policy,training=train_strategy_moe(benchmark,method,horizon,train_settings,args.seed,output/'models',
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/strategy_training.py", line 82, in train_strategy_moe
+    p,r=train_spce(b,kind,h,stage_settings,seed+1009,directory,final_checkpoint=True,policy=p)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/training.py", line 97, in train_spce
+    result = rollout(benchmark,policy,horizon,batch,seed+update*104729,
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/engine.py", line 61, in rollout
+    weights,proposals = policy.components(f)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/moe_system.py", line 83, in components
+    proposals=torch.stack([expert(context[:,i]) for i,expert in enumerate(self.experts)],1)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1729, in __getattr__
+    raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+AttributeError: 'MoESBOED' object has no attribute 'experts'

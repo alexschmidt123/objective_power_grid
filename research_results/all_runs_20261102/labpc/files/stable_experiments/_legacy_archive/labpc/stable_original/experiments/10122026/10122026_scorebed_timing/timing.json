@@ -1,0 +1,41 @@
+{
+  "training": "ScoreBED_two_stage_marginal_score_matching_EIG_gradient",
+  "training_seconds": 1.6196567870210856,
+  "generated_training_trajectories": 12800,
+  "contrast_training_trajectories": 0,
+  "training_forward_trajectories": 12800,
+  "training_trajectory_budget": 12800,
+  "score_training_trajectories": 8960,
+  "policy_training_trajectories": 3840,
+  "actual_policy_updates": 30,
+  "score_batch": 128,
+  "score_network_width": 64,
+  "score_y_weight": 30,
+  "score_learning_rate": 0.0002,
+  "score_sampling": "iid/correlated Gaussian; loguniform scales .3 to3; independent of policy",
+  "policy_learning_rate": 5e-05,
+  "history": [
+    {
+      "phase": "score",
+      "update": 1,
+      "loss": 141.38648986816406,
+      "forward_trajectories": 128
+    },
+    {
+      "phase": "score",
+      "update": 70,
+      "loss": 118.95643615722656,
+      "forward_trajectories": 8960
+    },
+    {
+      "phase": "policy",
+      "update": 30,
+      "gradient_norm": 744927.9578495788,
+      "forward_trajectories": 12800
+    }
+  ],
+  "checkpoint_selection": "final",
+  "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+  "publication_algorithm_equivalence": false,
+  "adaptation": "Torch conservative set attention replaces JAX Transformer; budget70percent score30percent policy; one policy/no restart"
+}

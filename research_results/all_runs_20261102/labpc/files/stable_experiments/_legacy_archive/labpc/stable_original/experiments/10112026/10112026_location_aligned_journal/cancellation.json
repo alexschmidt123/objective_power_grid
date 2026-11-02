@@ -1,0 +1,19 @@
+{
+  "reason": "User replaced five-seed campaign with train101/eval1001 pilot",
+  "time_utc": "2026-10-11T03:31:23.558002+00:00",
+  "processes": [
+    {
+      "pid": 1504026,
+      "command": "python3 -m src.online_cli --sweep --configs location_finding_eig --T 30 --seed 55101,55102,55103,55104,55105 --eval-seeds 551001,551002,551003,551004,551005 --journal --method fixed,dad,vsoed,moe_sboed --ablations "
+    },
+    {
+      "pid": 1504054,
+      "command": "python3 -m src.online_cli --config location_finding_eig --T 30 --N_obs 0 --seed 55101 --eval-seeds 551001,551002,551003,551004,551005 --journal --method fixed,dad,vsoed,moe_sboed --ablations "
+    },
+    {
+      "pid": 1504158,
+      "command": "python3 -m src.online_cli --config configs/location_finding_eig.yaml --T 30 --seed 55101 --eval-seeds 551001,551002,551003,551004,551005 --journal --method random,myopic --output experiments/10112026/10112026_location_aligned_journal/online_baselines "
+    }
+  ],
+  "partial_results_preserved": true
+}

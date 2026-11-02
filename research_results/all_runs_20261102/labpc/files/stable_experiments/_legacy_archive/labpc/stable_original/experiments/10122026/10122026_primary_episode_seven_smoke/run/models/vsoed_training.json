@@ -1,0 +1,61 @@
+{
+  "training": "official_vsOED_GMM_I",
+  "upstream_commit": "d0884f9ba30fbddc56618841c68af2f3bfe16539",
+  "profile": {
+    "variant": "vsOED-G-I",
+    "updates": 2,
+    "paper_reference_updates": 10001,
+    "budget_note": "20000 warmup plus 980*1000 new episodes equals 1000000; unbounded designs and discount1 are declared adaptations.",
+    "new_trajectories": 4,
+    "replay_batch": 4,
+    "initial_replay": 8,
+    "replay_capacity": 32,
+    "posterior_updates": 1,
+    "critic_updates": 1,
+    "posterior_lr": 0.001,
+    "actor_lr": 0.001,
+    "critic_lr": 0.001,
+    "lr_decay": 0.9999,
+    "discount": 1.0,
+    "exploration": 0.5,
+    "exploration_decay": 0.9999,
+    "target_rate": 0.1,
+    "transition": 0,
+    "log_every": 1
+  },
+  "device": "cuda:0",
+  "selected_update": 2,
+  "checkpoint_selection": "final, as upstream",
+  "policy_parameters": 162306,
+  "history": [
+    {
+      "Epoch": "0",
+      "Reward/MeanReward": "-0.10236585140228271",
+      "Reward/StdReward": "2.343452215194702",
+      "Design/MeanDesign": "[-0.06201811879873276, -0.06091458722949028]",
+      "Design/StdDesign": "[0.018463099375367165, 0.013471592217683792]",
+      "ReplayBuffer/buffer_size": "8"
+    },
+    {
+      "Epoch": "1",
+      "Reward/MeanReward": "-3.2124037742614746",
+      "Reward/StdReward": "3.8730154037475586",
+      "Design/MeanDesign": "[-0.09863340854644775, -0.054932355880737305]",
+      "Design/StdDesign": "[0.03382241725921631, 0.02004886046051979]",
+      "ReplayBuffer/buffer_size": "12"
+    }
+  ],
+  "training_seconds": 1.0335504547692835,
+  "generated_training_trajectories": 16,
+  "contrast_training_trajectories": 0,
+  "training_forward_trajectories": 16,
+  "training_trajectory_budget": 1000000,
+  "reward_discount": 1.0,
+  "implementation_adaptations": "Profile budget and discount are explicit; pinned vendor code unchanged",
+  "posterior_optimizer_updates": 2,
+  "critic_optimizer_updates": 2,
+  "replay_batch_size": 4,
+  "actor_optimizer_updates": 2,
+  "forward_particle_stages": 480,
+  "checkpoint_sha256": "b281c21270289e5f71b77ef159ea58f2a39a5ba0b7bfef978178cc2d1c1d3dbe"
+}

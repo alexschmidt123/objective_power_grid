@@ -1,0 +1,236 @@
+{
+  "training": "isolated_specialists_density_prefit_then_router_calibration_and_joint_EIG",
+  "policy_architecture": "method_network_moe_v4_value_baseline",
+  "strategy_names": [
+    "DAD-style sPCE",
+    "iDAD-style InfoNCE",
+    "vsOED-style BA actor-critic",
+    "pathwise BA"
+  ],
+  "available_experts": [
+    true,
+    true,
+    true,
+    true
+  ],
+  "specialist_phases": [
+    {
+      "branch": "DAD-style sPCE",
+      "training": "sPCE_pathwise_plus_routing_score",
+      "policy_architecture": "method_network_moe_v4_value_baseline",
+      "policy_parameters": 310638,
+      "selected_update": 2,
+      "validation_spce": null,
+      "history": [
+        {
+          "update": 0,
+          "validation_spce": null
+        },
+        {
+          "update": 2,
+          "train_spce": 1.482012767092037,
+          "routing_score_loss": -0.0,
+          "validation_spce": null,
+          "posterior_nll": 5.739154507929028,
+          "critic_mse": 1.820348113755811,
+          "gradient_norm": 40.11817773304494,
+          "learning_rate": 4.9e-05,
+          "routing_value_mse": 3.757830616728635,
+          "router_calibration": false,
+          "training_contrasts": 8,
+          "training_spce_ceiling": 2.1972245773362196,
+          "saturation_gap": 0.7152118102441825
+        }
+      ],
+      "initialization_candidates": [],
+      "training_seconds": 0.7051762510091066,
+      "actual_updates": 2,
+      "generated_training_trajectories": 8,
+      "contrast_training_trajectories": 64,
+      "training_forward_trajectories": 72,
+      "training_trajectory_budget": null,
+      "primary_trajectories_by_contrast": {
+        "8": 8
+      },
+      "spce_curriculum": 1,
+      "moe_revision": 4,
+      "moe_router_temperature": 1.0,
+      "checkpoint_selection": "final",
+      "initial_learning_rate": 5e-05,
+      "lr_decay": 0.98,
+      "adam_betas": [
+        0.8,
+        0.998
+      ],
+      "lr_schedule_every": 1000,
+      "batch_size": 4,
+      "forward_particle_stages": 2160,
+      "grid_particle_propagations_including_jacobians": 0
+    },
+    {
+      "branch": "iDAD-style InfoNCE",
+      "training": "InfoNCE_pathwise_adaptation",
+      "history": [
+        {
+          "update": 1,
+          "training_bound": 0.015325843903463948,
+          "gradient_norm": 0.004166057692155284
+        },
+        {
+          "update": 2,
+          "training_bound": 0.03536122113019047,
+          "gradient_norm": 0.004662987502616622
+        }
+      ],
+      "training_forward_trajectories": 32,
+      "generated_training_trajectories": 32,
+      "contrast_training_trajectories": 0,
+      "density_updates_per_policy_update": 4,
+      "negative_parameter_scores": 256
+    },
+    {
+      "branch": "vsOED-style BA actor-critic",
+      "training": "variational_BA_actor_critic_adaptation",
+      "gamma": 1.0,
+      "likelihood_required": false,
+      "simulator_gradients_required": false,
+      "checkpoint_selection": "final",
+      "generated_training_trajectories": 32,
+      "contrast_training_trajectories": 0,
+      "training_forward_trajectories": 32,
+      "training_trajectory_budget": null,
+      "policy_architecture": "method_network_moe_v4_value_baseline",
+      "policy_parameters": 310638,
+      "posterior_parameters": 76440,
+      "critic_parameters": 67852,
+      "selected_update": 2,
+      "validation_spce": null,
+      "history": [
+        {
+          "update": 0,
+          "validation_spce": null
+        },
+        {
+          "update": 2,
+          "validation_spce": null,
+          "posterior_nll": 6.3931231912553965,
+          "critic_mse": 0.007217885675567619,
+          "actor_loss": -0.129921219979721,
+          "variational_terminal_reward": 0.008153783304539142,
+          "exploration": 0.03,
+          "replay_size": 32
+        }
+      ],
+      "training_seconds": 0.5866876759100705,
+      "forward_particle_stages": 960,
+      "grid_particle_propagations_including_jacobians": 0,
+      "upstream": "https://github.com/wgshen/vsOED/tree/d0884f9ba30fbddc56618841c68af2f3bfe16539",
+      "adaptations": [
+        "shared ordered history and benchmark feasibility map",
+        "joint diagonal-Gaussian mixture in transformed prior coordinates",
+        "latent-action critic; incremental rewards; gamma=1",
+        "final checkpoint for sample-only MoE; sPCE validation for explicit vsOED"
+      ]
+    },
+    {
+      "branch": "pathwise BA",
+      "training": "BA_pathwise_adaptation",
+      "history": [
+        {
+          "update": 1,
+          "training_bound": 0.13487035779069373,
+          "gradient_norm": 0.20347508946282086
+        },
+        {
+          "update": 2,
+          "training_bound": 0.0525498340766542,
+          "gradient_norm": 0.11070955383815327
+        }
+      ],
+      "training_forward_trajectories": 32,
+      "generated_training_trajectories": 32,
+      "contrast_training_trajectories": 0,
+      "density_updates_per_policy_update": 4,
+      "negative_parameter_scores": 0
+    }
+  ],
+  "final_phase": {
+    "training": "sPCE_pathwise_plus_routing_score",
+    "policy_architecture": "method_network_moe_v4_value_baseline",
+    "policy_parameters": 310638,
+    "selected_update": 2,
+    "validation_spce": null,
+    "history": [
+      {
+        "update": 0,
+        "validation_spce": null
+      },
+      {
+        "update": 1,
+        "train_spce": 1.5249436142520576,
+        "routing_score_loss": 62.89875669410691,
+        "validation_spce": null,
+        "posterior_nll": 5.664658186699012,
+        "critic_mse": 0.307994465510446,
+        "gradient_norm": 17.06839332853699,
+        "learning_rate": 9.800000000000001e-06,
+        "routing_value_mse": 2.871507659699464,
+        "router_calibration": false,
+        "training_contrasts": 8,
+        "training_spce_ceiling": 2.1972245773362196,
+        "saturation_gap": 0.672280963084162
+      },
+      {
+        "update": 2,
+        "train_spce": 2.1592302359309703,
+        "routing_score_loss": 85.18378794515326,
+        "validation_spce": null,
+        "posterior_nll": 5.986122055440048,
+        "critic_mse": 0.47939647034070615,
+        "gradient_norm": 13.400163628181128,
+        "learning_rate": 9.800000000000001e-06,
+        "routing_value_mse": 4.49812579908341,
+        "router_calibration": false,
+        "training_contrasts": 8,
+        "training_spce_ceiling": 2.1972245773362196,
+        "saturation_gap": 0.037994341405249266
+      }
+    ],
+    "initialization_candidates": [],
+    "training_seconds": 0.7992152799852192,
+    "actual_updates": 2,
+    "generated_training_trajectories": 8,
+    "contrast_training_trajectories": 64,
+    "training_forward_trajectories": 72,
+    "training_trajectory_budget": null,
+    "primary_trajectories_by_contrast": {
+      "8": 8
+    },
+    "spce_curriculum": 1,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "checkpoint_selection": "final",
+    "initial_learning_rate": 1e-05,
+    "lr_decay": 0.98,
+    "adam_betas": [
+      0.8,
+      0.998
+    ],
+    "lr_schedule_every": 1000,
+    "batch_size": 4,
+    "forward_particle_stages": 2160,
+    "grid_particle_propagations_including_jacobians": 0
+  },
+  "training_forward_trajectories": 240,
+  "generated_training_trajectories": 112,
+  "contrast_training_trajectories": 128,
+  "training_trajectory_budget": null,
+  "training_seconds": 3.4832314199302346,
+  "checkpoint_selection": "final",
+  "publication_algorithm_equivalence": false,
+  "mixture_semantics": "policy: categorical distribution over expert proposals; posterior: normalized density mixture; value: convex Q mixture",
+  "training_scope": "independent history encoders; density prefit; router calibration then joint fine-tuning; no exact baseline equivalence",
+  "specialist_budget_fraction": 0.25,
+  "moe_training_revision": 4,
+  "checkpoint_sha256": "35b04e24068fb8f5306337dc452da739892ec7bfb72c99fff230585cfad0db2f"
+}

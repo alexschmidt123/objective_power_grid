@@ -1,0 +1,45 @@
+{
+  "training": "variational_actor_critic_adaptation",
+  "gamma": 1.0,
+  "policy_parameters": 5313,
+  "posterior_parameters": 40360,
+  "critic_parameters": 18945,
+  "selected_update": 2,
+  "validation_spce": 0.2507682143936556,
+  "history": [
+    {
+      "update": 0,
+      "validation_spce": -0.026712101012376976
+    },
+    {
+      "update": 1,
+      "validation_spce": 0.11658512969020851,
+      "posterior_nll": 19.629231278074982,
+      "critic_mse": 1.639927948048103,
+      "actor_loss": -0.2358055025780203,
+      "variational_terminal_reward": -0.3608722377923823,
+      "exploration": 0.15,
+      "replay_size": 4
+    },
+    {
+      "update": 2,
+      "validation_spce": 0.2507682143936556,
+      "posterior_nll": 29.93279427702988,
+      "critic_mse": 16.8652563525933,
+      "actor_loss": -0.2428657965958317,
+      "variational_terminal_reward": -4.784356955782028,
+      "exploration": 0.03,
+      "replay_size": 8
+    }
+  ],
+  "training_seconds": 2.7839648460503668,
+  "forward_particle_stages": 580,
+  "upstream": "https://github.com/wgshen/vsOED/tree/d0884f9ba30fbddc56618841c68af2f3bfe16539",
+  "adaptations": [
+    "shared ordered history and benchmark feasibility map",
+    "joint diagonal-Gaussian mixture in transformed prior coordinates",
+    "latent-action critic; incremental rewards; gamma=1",
+    "shared sPCE validation checkpoint selection"
+  ],
+  "checkpoint_sha256": "536c60777115afe59d47a97b3669e296cd0b7a7d965fcb7d1c61107105bb602f"
+}

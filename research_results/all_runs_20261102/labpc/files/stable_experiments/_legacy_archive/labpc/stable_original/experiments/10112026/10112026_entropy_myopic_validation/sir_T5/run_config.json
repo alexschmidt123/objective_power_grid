@@ -1,0 +1,170 @@
+{
+  "protocol": "moe_sboed_research_v1",
+  "settings": {
+    "first_design_revision": 1,
+    "training_bound": 1,
+    "variational_policy_lr": 0.0002,
+    "variational_density_lr": 0.001,
+    "variational_density_hidden": 128,
+    "variational_mixtures": 16,
+    "variational_density_updates": 1,
+    "variational_warmup": 1,
+    "smc_moves": 8,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "spce_curriculum": 1,
+    "updates": 2,
+    "batch_size": 4,
+    "learning_rate": 0.001,
+    "hidden": 64,
+    "contrasts": 8,
+    "validation_contrasts": 8,
+    "validation_systems": 4,
+    "validate_every": 1,
+    "eval_systems": 2,
+    "eval_contrasts": 8,
+    "posterior_particles": 16,
+    "posterior_steps": 4,
+    "posterior_chains": 2,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 8,
+    "search_candidates": 4,
+    "search_rounds": 1,
+    "fantasies": 4,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 1,
+    "vsoed_critic_updates": 1,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 2,
+    "evaluation_contrast_chunk": 16384,
+    "threads": 4,
+    "myopic_vi_num_steps": 2,
+    "myopic_vi_lr": 0.001,
+    "myopic_vi_gamma": 0.9,
+    "myopic_vi_momentum": 0.1,
+    "myopic_oed_num_steps": 2,
+    "myopic_oed_lr": 0.001,
+    "myopic_oed_gamma": 0.9,
+    "myopic_oed_momentum": 0.1,
+    "myopic_oed_inner_samples": 8,
+    "myopic_oed_outer_samples": 4,
+    "myopic_map_restarts": 2,
+    "myopic_map_max_nfev": 12,
+    "myopic_jacobian_step": 0.0001,
+    "myopic_prior_samples": 4,
+    "myopic_design_candidates": 16,
+    "myopic_design_rounds": 2,
+    "myopic_candidate_chunk": 8
+  },
+  "benchmark": {
+    "system": {
+      "name": "sir_ode"
+    },
+    "N": 1,
+    "experiment": {
+      "experiment_type": "eig_based",
+      "step_number": 5,
+      "methods": [
+        "myopic"
+      ]
+    },
+    "observation": {
+      "noise_sigma": 1.0,
+      "sampling": "infected_count_at_continuous_time"
+    },
+    "sir_ode": {
+      "population": 500.0,
+      "i0": 2.0,
+      "t_end": 100.0,
+      "beta_mean": 0.5,
+      "gamma_mean": 0.1,
+      "log_std": 0.5,
+      "min_spacing": 0.1,
+      "integration_steps_per_stage": 512
+    },
+    "research": {
+      "enabled": true,
+      "settings": {
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "myopic_candidate_chunk": 8
+      },
+      "plan": {
+        "source": "User-provided ChatGPT research plan",
+        "horizons": [
+          5,
+          10
+        ],
+        "training_repetitions": 5,
+        "test_trajectories": 2048,
+        "routing": "four_expert_dense_soft",
+        "training_criterion": "sPCE",
+        "online_policy_refinement": false,
+        "primary_metric": "independent_total_EIG_estimate",
+        "secondary_metric": "parameter_MSE",
+        "exclusions": [
+          "rl_sboed",
+          "step_dad",
+          "mocu",
+          "msc",
+          "cost_utility",
+          "growing_tree"
+        ],
+        "moe_architecture": "method_network_moe_v1"
+      },
+      "myopic_definition": "expected one-step posterior entropy reduction; fixed prior support and posterior-predictive fantasies"
+    },
+    "_config_path": "/home/grads/g/g.lin/Documents/objective_power_grid/configs/sir_ode_research.yaml"
+  },
+  "hardware": {
+    "execution_site": "labpc",
+    "cluster": null,
+    "computer_name": "ecen-80r5x04.engr.tamu.edu",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+    "gpu_model": "NVIDIA GeForce RTX 4090"
+  },
+  "train_seed": 101,
+  "eval_seeds": [
+    1001
+  ],
+  "methods": [
+    "myopic"
+  ],
+  "horizon": 5,
+  "smoke": true,
+  "primary_metric": "held-out sPCE lower-bound estimate (nats)",
+  "secondary_metric": "posterior parameter MSE",
+  "mse_inference": "truth-excluded importance initialization plus random-walk MH in prior coordinates",
+  "location_estimation": "posterior samples aligned to MAP particle; final permutation-invariant squared error",
+  "history": "ordered padded design-observation pairs and stage index; history only",
+  "online_policy_optimization": false,
+  "online_myopic_search": "expected one-step posterior entropy reduction",
+  "grid_protocol": "fixed physical bus 1, amplitude .05 pu, full state carry, increasing durations",
+  "gradient": "Torch pathwise; grid uses existing numerical state/duration Jacobians",
+  "limitations": [
+    "Smoke establishes workability, not superiority",
+    "EIG contrast sensitivity and posterior convergence required before paper claims",
+    "vsOED is a documented adaptation, not an exact reproduction",
+    "Myopic optimizes a local linear-Gaussian information surrogate; a single mode does not represent multimodal posterior uncertainty"
+  ],
+  "algorithm_implementations": {
+    "myopic": "Myopic expected one-step posterior entropy reduction; feasible continuous candidate search"
+  },
+  "myopic_reference": "project SIR VectorEIGEngine.action_scores; expected posterior entropy reduction",
+  "comparison_protocol": {
+    "enforced": false,
+    "workability_only": true,
+    "study": "development",
+    "evaluation_metric": "common likelihood-based sPCE in nats",
+    "inference_metric": "secondary parameter MSE; not policy objective"
+  },
+  "training_bound": "sPCE with auxiliary density/value fitting for MoE",
+  "spce_training_schedule": "fixed contrasts"
+}

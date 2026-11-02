@@ -1,0 +1,120 @@
+{
+  "training": "RL-sBOED-I SAC_REDQ_two_critic_adaptation",
+  "policy_architecture": "rl_sboed_incremental_pce_location_adapter_v1",
+  "reward": "incremental PCE; rewards telescope to terminal PCE",
+  "gamma": 1.0,
+  "checkpoint_selection": "final",
+  "generated_training_trajectories": 9756,
+  "contrast_training_trajectories": 9990144,
+  "training_forward_trajectories": 9999900,
+  "training_trajectory_budget": 10000000,
+  "training_seconds": 71.66292455303483,
+  "history": [
+    {
+      "update": 10,
+      "training_EIG": 5.753506501032669,
+      "training_forward_trajectories": 1025000,
+      "replay_transitions": 30000,
+      "gradient_updates": 0,
+      "alpha": 0.009999999776482582
+    },
+    {
+      "update": 20,
+      "training_EIG": 5.917271607290111,
+      "training_forward_trajectories": 2050000,
+      "replay_transitions": 60000,
+      "gradient_updates": 0,
+      "alpha": 0.009999999776482582
+    },
+    {
+      "update": 30,
+      "training_EIG": 5.766964008471837,
+      "training_forward_trajectories": 3075000,
+      "replay_transitions": 90000,
+      "gradient_updates": 0,
+      "alpha": 0.009999999776482582
+    },
+    {
+      "update": 40,
+      "training_EIG": 6.345862911547215,
+      "training_forward_trajectories": 4100000,
+      "replay_transitions": 120000,
+      "gradient_updates": 448,
+      "alpha": 0.009725076146423817
+    },
+    {
+      "update": 50,
+      "training_EIG": 5.97065682204651,
+      "training_forward_trajectories": 5125000,
+      "replay_transitions": 150000,
+      "gradient_updates": 1088,
+      "alpha": 0.009722154587507248
+    },
+    {
+      "update": 60,
+      "training_EIG": 6.454964455017719,
+      "training_forward_trajectories": 6150000,
+      "replay_transitions": 180000,
+      "gradient_updates": 1728,
+      "alpha": 0.009506474249064922
+    },
+    {
+      "update": 70,
+      "training_EIG": 6.542987350406913,
+      "training_forward_trajectories": 7175000,
+      "replay_transitions": 210000,
+      "gradient_updates": 2368,
+      "alpha": 0.008956456556916237
+    },
+    {
+      "update": 80,
+      "training_EIG": 6.690581561292309,
+      "training_forward_trajectories": 8200000,
+      "replay_transitions": 240000,
+      "gradient_updates": 3008,
+      "alpha": 0.008347893133759499
+    },
+    {
+      "update": 90,
+      "training_EIG": 6.681265059273849,
+      "training_forward_trajectories": 9225000,
+      "replay_transitions": 270000,
+      "gradient_updates": 3648,
+      "alpha": 0.007873857393860817
+    },
+    {
+      "update": 98,
+      "training_EIG": 6.575440994892543,
+      "training_forward_trajectories": 9999900,
+      "replay_transitions": 292680,
+      "gradient_updates": 4160,
+      "alpha": 0.007580230478197336
+    }
+  ],
+  "actual_updates": 98,
+  "gradient_updates": 4160,
+  "critic_count": 2,
+  "target_subset": 2,
+  "target_rate": 0.001,
+  "actor_lr": 0.0001,
+  "critic_lr": 0.0003,
+  "replay_capacity": 1000000,
+  "replay_batch": 4096,
+  "minimum_replay_transitions": 100000,
+  "gradient_steps_per_update": 64,
+  "target_entropy": -2,
+  "entropy_coordinates": "normalized_tanh_minus1_plus1",
+  "policy_parameters": 50756,
+  "simulator_gradients_required": false,
+  "upstream": "https://github.com/csiro-mlai/RL-BOED",
+  "upstream_commit": "54fdc7b6d23849ab1df8fd85d42af7c8961f930e",
+  "adaptations": [
+    "gamma1 undiscounted EIG",
+    "common L and forward cap",
+    "shared fixed history normalization with stage index",
+    "stochastic evaluation with independent decision RNG",
+    "standalone Torch implementation without Garage"
+  ],
+  "publication_algorithm_equivalence": false,
+  "checkpoint_sha256": "02427850005e13ee375d1e4624dd195353aaa6e1c1bcdadfb61b3383db0d530a"
+}

@@ -1,0 +1,213 @@
+{
+  "training": "method_specialist_initialization_then_information_routing",
+  "policy_architecture": "method_network_moe_v1",
+  "strategy_names": [
+    "DAD-style sPCE",
+    "iDAD-style InfoNCE",
+    "vsOED-style BA actor-critic",
+    "pathwise BA"
+  ],
+  "available_experts": [
+    true,
+    true,
+    true,
+    true
+  ],
+  "specialist_phases": [
+    {
+      "branch": "DAD-style sPCE",
+      "training": "pathwise_sPCE",
+      "policy_architecture": "method_network_moe_v1",
+      "policy_parameters": 296230,
+      "selected_update": 1,
+      "validation_spce": null,
+      "history": [
+        {
+          "update": 0,
+          "validation_spce": null
+        },
+        {
+          "update": 1,
+          "train_spce": 1.3104282235610274,
+          "validation_spce": null,
+          "posterior_nll": 5.127701147812813,
+          "critic_mse": 0.5664466786652811,
+          "gradient_norm": 13.400826961226388,
+          "learning_rate": 4.9e-05,
+          "training_contrasts": 8,
+          "training_spce_ceiling": 2.1972245773362196,
+          "saturation_gap": 0.8867963537751922
+        }
+      ],
+      "initialization_candidates": [],
+      "training_seconds": 0.18174505908973515,
+      "actual_updates": 1,
+      "generated_training_trajectories": 4,
+      "contrast_training_trajectories": 32,
+      "training_forward_trajectories": 36,
+      "training_trajectory_budget": null,
+      "primary_trajectories_by_contrast": {
+        "8": 4
+      },
+      "spce_curriculum": 1,
+      "moe_revision": 4,
+      "moe_router_temperature": 1.0,
+      "checkpoint_selection": "final",
+      "initial_learning_rate": 5e-05,
+      "lr_decay": 0.98,
+      "adam_betas": [
+        0.8,
+        0.998
+      ],
+      "lr_schedule_every": 1000,
+      "batch_size": 4,
+      "forward_particle_stages": 1080,
+      "grid_particle_propagations_including_jacobians": 0
+    },
+    {
+      "branch": "iDAD-style InfoNCE",
+      "training": "InfoNCE_pathwise_adaptation",
+      "history": [
+        {
+          "update": 1,
+          "training_bound": 0.001377378923533512,
+          "gradient_norm": 0.5027911627117124
+        }
+      ],
+      "training_forward_trajectories": 4,
+      "generated_training_trajectories": 4,
+      "contrast_training_trajectories": 0,
+      "negative_parameter_scores": 32
+    },
+    {
+      "branch": "vsOED-style BA actor-critic",
+      "training": "variational_BA_actor_critic_adaptation",
+      "gamma": 1.0,
+      "likelihood_required": false,
+      "simulator_gradients_required": false,
+      "checkpoint_selection": "final",
+      "generated_training_trajectories": 4,
+      "contrast_training_trajectories": 0,
+      "training_forward_trajectories": 4,
+      "training_trajectory_budget": null,
+      "policy_architecture": "method_network_moe_v1",
+      "policy_parameters": 296230,
+      "posterior_parameters": 76440,
+      "critic_parameters": 67852,
+      "selected_update": 1,
+      "validation_spce": null,
+      "history": [
+        {
+          "update": 0,
+          "validation_spce": null
+        },
+        {
+          "update": 1,
+          "validation_spce": null,
+          "posterior_nll": 6.407662436417065,
+          "critic_mse": 0.0016860752436074036,
+          "actor_loss": -0.06815414123206581,
+          "variational_terminal_reward": 0.1259041263184031,
+          "exploration": 0.03,
+          "replay_size": 4
+        }
+      ],
+      "training_seconds": 0.21807631012052298,
+      "forward_particle_stages": 120,
+      "grid_particle_propagations_including_jacobians": 0,
+      "upstream": "https://github.com/wgshen/vsOED/tree/d0884f9ba30fbddc56618841c68af2f3bfe16539",
+      "adaptations": [
+        "shared ordered history and benchmark feasibility map",
+        "joint diagonal-Gaussian mixture in transformed prior coordinates",
+        "latent-action critic; incremental rewards; gamma=1",
+        "final checkpoint for sample-only MoE; sPCE validation for explicit vsOED"
+      ]
+    },
+    {
+      "branch": "pathwise BA",
+      "training": "BA_pathwise_adaptation",
+      "history": [
+        {
+          "update": 1,
+          "training_bound": 0.0008301346926804509,
+          "gradient_norm": 0.7816624546794643
+        }
+      ],
+      "training_forward_trajectories": 4,
+      "generated_training_trajectories": 4,
+      "contrast_training_trajectories": 0,
+      "negative_parameter_scores": 0
+    }
+  ],
+  "final_phase": {
+    "training": "pathwise_sPCE",
+    "policy_architecture": "method_network_moe_v1",
+    "policy_parameters": 296230,
+    "selected_update": 2,
+    "validation_spce": null,
+    "history": [
+      {
+        "update": 0,
+        "validation_spce": null
+      },
+      {
+        "update": 1,
+        "train_spce": 1.2163810781019038,
+        "validation_spce": null,
+        "posterior_nll": 5.621643335575199,
+        "critic_mse": 0.1625125336340139,
+        "gradient_norm": 55.498452156603605,
+        "learning_rate": 4.9e-05,
+        "training_contrasts": 8,
+        "training_spce_ceiling": 2.1972245773362196,
+        "saturation_gap": 0.9808434992343158
+      },
+      {
+        "update": 2,
+        "train_spce": 1.8597273439291393,
+        "validation_spce": null,
+        "posterior_nll": 5.93285035367461,
+        "critic_mse": 0.4000962098435509,
+        "gradient_norm": 3.455537277821128,
+        "learning_rate": 4.9e-05,
+        "training_contrasts": 8,
+        "training_spce_ceiling": 2.1972245773362196,
+        "saturation_gap": 0.33749723340708027
+      }
+    ],
+    "initialization_candidates": [],
+    "training_seconds": 0.6049379981122911,
+    "actual_updates": 2,
+    "generated_training_trajectories": 8,
+    "contrast_training_trajectories": 64,
+    "training_forward_trajectories": 72,
+    "training_trajectory_budget": null,
+    "primary_trajectories_by_contrast": {
+      "8": 8
+    },
+    "spce_curriculum": 1,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "checkpoint_selection": "final",
+    "initial_learning_rate": 5e-05,
+    "lr_decay": 0.98,
+    "adam_betas": [
+      0.8,
+      0.998
+    ],
+    "lr_schedule_every": 1000,
+    "batch_size": 4,
+    "forward_particle_stages": 2160,
+    "grid_particle_propagations_including_jacobians": 0
+  },
+  "training_forward_trajectories": 120,
+  "generated_training_trajectories": 24,
+  "contrast_training_trajectories": 96,
+  "training_trajectory_budget": null,
+  "training_seconds": 1.317218960961327,
+  "checkpoint_selection": "final",
+  "publication_algorithm_equivalence": false,
+  "mixture_semantics": "policy: convex latent-action proposals; posterior: normalized density mixture; value: convex Q mixture",
+  "training_scope": "distinct specialist initialization, then jointly fine-tuned; no guarantee of retaining exact baseline policies",
+  "checkpoint_sha256": "6a9de907cc49936c5c789ade91642101cd1c930da56ccf1e709a6b18b2d592a1"
+}
