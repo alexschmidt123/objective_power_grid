@@ -1,0 +1,53 @@
+location 101 switchmoe complete
+location 102 fixed complete
+location 102 dad complete
+location 102 rl_sboed complete
+location 102 vsoed complete
+location 102 scorebed complete
+location 102 moe complete
+location 102 base complete
+location 102 resmoe complete
+location 102 switchmoe complete
+location 102 switchresmoe complete
+location 103 fixed complete
+location 103 dad complete
+location 103 rl_sboed complete
+location 103 vsoed complete
+location 103 scorebed complete
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/tools/journal_campaign.py", line 495, in <module>
+    try:main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/tools/journal_campaign.py", line 489, in main
+    elif args.action=='location':run_location()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/tools/journal_campaign.py", line 265, in run_location
+    else:run_phase('location',seed,method)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/tools/journal_campaign.py", line 245, in run_phase
+    failure=dict(type=type(exc).__name__,message=str(exc),classification='computational_limit' if isinstance(exc,subprocess.TimeoutExpired) else 'requires_inspection',native_failure=read(out/'failure.json') if (out/'failure.json').exists() else None)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/tools/journal_campaign.py", line 17, in read
+    def read(path):return json.loads(Path(path).read_text())
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+OSError: [Errno 28] No space left on device
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/tools/journal_campaign.py", line 497, in <module>
+    if C.exists():write(C/'coordinator_failure.json',dict(type=type(exc).__name__,message=str(exc),traceback=traceback.format_exc()))
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/tools/journal_campaign.py", line 21, in write
+    tmp.write_text(json.dumps(data,indent=2,allow_nan=False)+'\n');os.replace(tmp,path)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/pathlib.py", line 1154, in write_text
+    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:
+OSError: [Errno 28] No space left on device
