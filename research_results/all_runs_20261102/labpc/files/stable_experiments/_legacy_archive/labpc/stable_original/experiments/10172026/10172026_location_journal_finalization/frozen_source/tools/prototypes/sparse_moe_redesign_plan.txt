@@ -1,0 +1,126 @@
+MoE-sBOED sparse redesign: audit and mathematical implementation plan
+Date: 2026-10-12. Status: isolated prototype; no full-scale sparse training.
+
+1. Audit findings
+The active src/research/moe_system.py has four separate history encoders,
+four policy heads, posterior heads, Q critics, InfoNCE heads, and role-specific
+routers. Policy routing also computes critic values and posterior uncertainty.
+src/research/strategy_training.py manually names branches DAD-style sPCE,
+iDAD-style InfoNCE, vsOED-style BA actor-critic, and pathwise BA. All policy
+experts and auxiliary routing networks execute under dense routing. This is
+not the requested automatic specialization among homogeneous policy experts.
+The earlier src/research/moe_policy.py supplies a reusable shared token encoder,
+masked attention, mean and last-history summaries. Reuse that architecture,
+with independently parameterized expert heads and learned attention queries.
+
+2. New design
+MoE-sBOED = shared observed-history encoding + four independently parameterized
+policy experts + a history-conditioned sparse selector + existing feasible map.
+Keep the existing learned shared first design where the benchmark uses one;
+record that this stage has no expert dispatch. All subsequent specialization
+is learned from histories; never prescribe experts by parameter, stage or model.
+Remove every posterior, critic, InfoNCE predictor, auxiliary feedback path,
+method-specific specialist phase and single-expert refresh curriculum from this
+new architecture. No baseline teacher/checkpoint or future-EIG prediction.
+The complete method is trained fresh using the original terminal sPCE objective.
+
+3. Router mathematics
+For four experts, encode their indices with two bits: 00,01,10,11.
+For k=1 or k=2, the router predicts k pairs of real selector logits u_j(history)
+and k mixing logits a_j(history). Let b_j = S_gamma(u_j), componentwise, where
+S_gamma(u)=0 below -gamma/2, 1 above gamma/2, and
+S_gamma(u) = -2*(u/gamma)^3 + 1.5*(u/gamma) + 0.5 inside that interval.
+For expert i with binary code c_i, define
+r_ji = product_over_bits [b_jbit if c_ibit=1, otherwise (1-b_jbit)].
+w_i = sum_j softmax(a)_j * r_ji.
+The nonnegative weights sum to one. The action proposal is sum_i w_i E_i(h).
+Apply the SAME benchmark feasible map as every other method afterwards.
+In relaxed training, more than k experts may execute. When selector bits become
+binary, at most k distinct experts have nonzero weight. Two selectors can choose
+the same expert; report distinct active experts, not an assumed count of two.
+At deployment, harden each bit by the sign of its logit, then dispatch only the
+rows with nonzero weights to the corresponding expert. This is DSelect-1/2,
+not literally selection of the largest one/two softmax logits.
+
+4. Gradients and objective
+Blind hard top-1 followed by normalization makes its only weight equal to one;
+it provides no ordinary pathwise gradient for expert selection. Avoid that.
+The proposed smooth selector permits exact autodiff of the RELAXED terminal
+sPCE objective, including all observation/history dependence. This does not
+claim an unbiased gradient of the HARD discrete-routing objective.
+Minimize: negative terminal sPCE + lambda_c * collapse_penalty
+                              + lambda_b * selector_entropy.
+The reported main objective/metric remains EIG; log regularizers separately.
+Use a small soft anti-collapse penalty only for aggregate expert mass above
+0.75, rather than forcing every expert to 25% usage. Include lambda_c=0 as a
+control. Candidate lambda_c values: 0, 1e-4, 1e-3; select with validation EIG.
+Selector entropy/gradual gamma annealing encourage binary choices. Initialize
+selector bits within the smooth interval; saturated bits have zero derivatives.
+Do not freeze a coefficient or annealing schedule until small validation runs
+show trainability and acceptable relaxed-to-hard EIG differences. Strong early
+hardening can freeze the wrong selection and is a specific validation risk.
+
+5. Causal architecture comparison
+Use the same shared history encoder and four head shapes for pure-policy dense
+MoE and sparse DSelect-1/2. The new dense control trains ONLY sPCE, making routing
+the main architectural difference. Include a single wide DAD-style policy head
+with matched TOTAL trainable parameters, including the reference router; report
+the small integer-width mismatch. Original DAD and vsOED remain separately named
+external baselines with their own published training approaches/adaptations.
+Retain the old multi-objective dense MoE as a historical/reference result only;
+its extra heads and training phases make it unsuitable as the sole routing control.
+
+6. Benchmark and evaluation protocol
+Location: explicit two-source log-signal likelihood, unbounded designs, T=30.
+SIR ODE: use existing explicit observation model and chronological feasible map.
+Swing equation: use existing machine-specific physics, increasing probe durations,
+fixed bus/amplitude and complete state carry. All particles follow actual designs.
+Each method receives histories only; hidden parameters are simulator labels only.
+For location pilots use 1million PRIMARY episodes per learned method, train101;
+record contrast likelihood work and optimization/inference costs separately.
+Use final evaluation seed1001, 2000 paired trajectories and L=1000000 for location.
+Do not silently apply location budgets/noise to SIR or grid; freeze each benchmark
+protocol before any full experiment. Use a common likelihood EIG evaluator WITHIN
+each benchmark. MSE is secondary and uses the same truth-excluded inference.
+Seed1001 is development evidence, not an untouched publication confirmation set.
+
+7. Required reporting
+Held-out EIG and paired differences; EIG against primary simulator episodes and
+contrast-inclusive simulator/likelihood work; routing mass and dispatch counts;
+distinct active experts per history; utilization per step; relaxed/hard mismatch;
+pairwise expert proposal distances on the SAME held-out histories and AFTER the
+feasible map; selection stability; total/active parameters; offline time; actual
+online latency at batch1 and representative batch sizes. Full proposal diagnostics
+may execute all experts offline; never count that instrumentation as sparse inference.
+Do not assume sparse dispatch is faster for only four small experts.
+
+8. Validation gates before full-scale training
+Completed prototype checks: gate simplex and autodiff finite differences;
+actual selected-only dispatch for k1/k2; duplicate selectors; exact relaxed/hard
+agreement when bits are binary; T30 sPCE router gradient vs finite differences;
+expert gradients; masked/empty history behavior; no auxiliary network attributes;
+single-head total parameter matching within 1%.
+Still required: bounded training diagnostics for specialization/collapse; actual
+relaxed-to-hard EIG differences with common random numbers; gamma/regularizer
+sensitivity; end-to-end SIR and grid feasibility/gradient checks; latency benchmark;
+checkpoint/reload/routing-mode checks and common evaluator integration.
+Never authorize a full-scale sparse campaign merely because unit tests passed.
+
+9. Implementation isolation
+Prototype: tools/prototypes/sparse_moe.py.
+Tests: tools/tests/test_sparse_prototype.py (6 tests passed, 0.258 seconds CPU).
+The active campaign and its scientific implementation remain unchanged. The
+prototype is not exposed as an active CLI method or substituted into that run.
+
+References
+Shazeer et al. 2017: https://arxiv.org/abs/1701.06538
+Fedus et al. 2022: https://jmlr.org/papers/v23/21-0998.html
+Hazimeh et al. 2021: https://arxiv.org/abs/2106.03760
+Official DSelect-k code:
+https://github.com/google-research/google-research/tree/master/dselect_k_moe
+
+Scientific hypothesis
+History-dependent sparse specialization may reduce interference between policies
+for different posterior/observation regimes and avoid averaging incompatible
+proposals. These mechanisms are hypotheses. Neither cited MoE results nor greater
+model capacity guarantee higher EIG than dense DAD or vsOED.

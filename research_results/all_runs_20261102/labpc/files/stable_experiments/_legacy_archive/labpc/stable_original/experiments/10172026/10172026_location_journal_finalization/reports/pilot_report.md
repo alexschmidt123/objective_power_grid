@@ -1,0 +1,92 @@
+# Relaxed-warmup pilot
+
+Actual two-seed development results. Do not replace original/ST five-seed tables. All intervals below are trajectory-level MC, not training-replication intervals.
+
+```json
+[
+  {
+    "seed": 103,
+    "hard_eig": 10.493057198413029,
+    "relaxed_eig": 10.493057198413029,
+    "mc_se": 0.04799537486045105,
+    "vs_original": {
+      "difference": 4.239840148749434,
+      "mc_se": 0.06979212531005148,
+      "ci95": [
+        4.103047583141733,
+        4.376632714357135
+      ]
+    },
+    "vs_ST": {
+      "difference": -0.30075423703378723,
+      "mc_se": 0.05025706541809509,
+      "ci95": [
+        -0.3992580852532536,
+        -0.20225038881432084
+      ]
+    },
+    "soft_minus_hard": {
+      "difference": 0.0,
+      "mc_se": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "expert_usage": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "training_episodes": 1000000,
+    "training_seconds": 1648.5734559923876,
+    "relaxed_evaluation_seconds": 34.31160757387988,
+    "checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10172026/10172026_location_journal_finalization/location/seed103/moe/models/moe.pt",
+    "checkpoint_sha256": "5414aa307268c4d23059cbc2e8263aab820bb7fa7ca45f634048a7388a285eb0"
+  },
+  {
+    "seed": 105,
+    "hard_eig": 8.966951709032648,
+    "relaxed_eig": 8.966337249578558,
+    "mc_se": 0.04959287990762019,
+    "vs_original": {
+      "difference": -1.732689441241244,
+      "mc_se": 0.06095556443224364,
+      "ci95": [
+        -1.8521623475284414,
+        -1.6132165349540464
+      ]
+    },
+    "vs_ST": {
+      "difference": -1.8757573105630767,
+      "mc_se": 0.06060107711089319,
+      "ci95": [
+        -1.9945354217004274,
+        -1.756979199425726
+      ]
+    },
+    "soft_minus_hard": {
+      "difference": -0.0006144594540880401,
+      "mc_se": 0.0038815900125957915,
+      "ci95": [
+        -0.008222375878775792,
+        0.006993456970599711
+      ]
+    },
+    "expert_usage": [
+      0.008448275862068965,
+      0.725396551724138,
+      0.07689655172413794,
+      0.18925862068965518
+    ],
+    "training_episodes": 1000000,
+    "training_seconds": 1630.9479206188116,
+    "relaxed_evaluation_seconds": 34.09910590108484,
+    "checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10172026/10172026_location_journal_finalization/location/seed105/moe/models/moe.pt",
+    "checkpoint_sha256": "a98eff7bd36cdc124fbce4cc01c888ea7690ef54e1aba1117eb64033d177377d"
+  }
+]
+```
+
+Routing adoption requires review of final EIG, training exposure, expert proposals and observation dependence. No automatic five-seed launch or reserved evaluation.
