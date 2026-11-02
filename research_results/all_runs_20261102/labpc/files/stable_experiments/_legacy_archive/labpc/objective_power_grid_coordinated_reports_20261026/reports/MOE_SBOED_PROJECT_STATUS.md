@@ -1,0 +1,39 @@
+# Coordinated project status
+
+```json
+{
+  "TASK1_METHODS": "VERIFIED_COMPLETE",
+  "cleanup_commit": "5a9f8117692fbe5e9a36ac63bd328422d1ee2b40",
+  "TASK2_SIR_BASELINES": "RUNNING",
+  "SIR_completed_evaluations": 0,
+  "SIR_valid_training_inputs": 2,
+  "SIR_training_status": {
+    "state": "TRAINING_LABPC_SEED101",
+    "method": "dad",
+    "pid": 465405,
+    "output": "/home/grads/g/g.lin/Documents/objective_power_grid_sir_journal_r2_20261026/experiments/10262026/10262026_sir_journal_corrected_seed101_r2/runs/dad"
+  },
+  "SIR_evaluation_status": {
+    "state": "TRAINING_LABPC_SEED101",
+    "method": "dad",
+    "pid": 465405,
+    "output": "/home/grads/g/g.lin/Documents/objective_power_grid_sir_journal_r2_20261026/experiments/10262026/10262026_sir_journal_corrected_seed101_r2/runs/dad"
+  },
+  "TASK3_MOE_V2_DEVELOPMENT": "RUNNING",
+  "MoE_last_recorded_updates": 2400,
+  "MoE_source": "4b2bdfceca488f3b42be9d84c015dc8f9cf87a65",
+  "MoE_pilot_status": {
+    "state": "PREDECLARED_READY_FOR_GPU_GATE",
+    "matched_updates": 0
+  },
+  "MoE_context_competence_status": "PENDING",
+  "SIR_source": "839bb7d7c232f555a4f2f34b86fd9a00cc0b0eea",
+  "SIR_config_sha256": "cc2fb1a2a327f9d8034d46d72dc7dca5aea0097aa6e0fb98fd35ff6ca2ec1114",
+  "no_main_merge": true,
+  "no_Ubuntu_GitHub_push": true
+}
+```
+
+Task1 cleanup was verified, not repeated. New explicit identifier enforcement rejects ambiguous generic/DeepSeek public aliases; legacy checkpoint serialization is preserved. LabPC has exclusive priority for the six SIR baselines. UbuntuPC runs the matched location pilot independently. Earlier Ubuntu strict Score recovery was terminated at the user’s request; its checkpoint/partial evaluation are preserved and not relabeled as a LabPC primary result.
+
+No final EIG, specialization, dense superiority or multi-seed claim is made without actual output. Pending evaluations, runtime caps and unresolved contrast resolution remain explicit. Corrected source and reports publish from LabPC only; no main merge.

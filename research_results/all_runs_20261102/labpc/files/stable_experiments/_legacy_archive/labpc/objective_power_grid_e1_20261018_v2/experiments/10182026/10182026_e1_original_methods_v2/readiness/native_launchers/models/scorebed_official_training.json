@@ -1,0 +1,76 @@
+{
+  "training": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+  "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+  "generated_training_trajectories": 34,
+  "training_forward_trajectories": 34,
+  "contrast_training_trajectories": 0,
+  "training_trajectory_budget": 34,
+  "training_budget_unit": "primary_episodes",
+  "initialization_trajectories": 18,
+  "standardisation_trajectories": 4,
+  "score_training_trajectories": 8,
+  "policy_training_trajectories": 8,
+  "reported_policy_parameters": "params_ema",
+  "policy_ema_rate": 0.9900000095367432,
+  "random_streams": "official derive_key: score_trainer, policy_trainer/restart",
+  "restart_selection": "single final policy",
+  "score_batch": 4,
+  "actual_score_updates": 2,
+  "actual_policy_updates": 2,
+  "policy_restarts": [
+    {
+      "restart": 0,
+      "primary_policy_episodes": 8,
+      "final_update": 2
+    }
+  ],
+  "selected_restart": 0,
+  "reference_sampler": true,
+  "training_seconds": 25.122224813094363,
+  "history": [
+    {
+      "phase": "score",
+      "step": 2,
+      "episodes": 8,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 571.54541015625,
+        "loss_total": 118.87171173095703,
+        "loss_unweighted_total": 5.489055156707764,
+        "loss_x_component": 1.5793087482452393,
+        "loss_y_component": 117.29240417480469,
+        "loss_y_unweighted": 3.9097468852996826,
+        "param_norm": 129.09640502929688,
+        "update_norm": 0.34563952684402466
+      }
+    },
+    {
+      "phase": "policy",
+      "restart": 0,
+      "step": 2,
+      "episodes": 8,
+      "restart_episodes": 8,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 66.32244873046875,
+        "param_norm": 10.725757598876953,
+        "update_norm": 0.002452410524711013
+      }
+    }
+  ],
+  "checkpoint_selection": "final",
+  "architecture": "official_4layer_256dim_8head_RFF_conservative_transformer",
+  "policy_architecture": "official_DADNet_256_16_sum_encoder",
+  "adaptations": "1million total primary episodes including normalization and initialization; predeclared native final-policy restarts and paper AR1 sampler when enabled; capped score/policy allocation; independent validation restart selection; smaller minibatches under capped budget; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions",
+  "design_bounds": [
+    -4.0,
+    4.0
+  ],
+  "bounded_mapping": "lo+(hi-lo)*sigmoid(raw_policy_output); teacher design sampler mapped into same box",
+  "runtime": {
+    "jax": "0.7.2",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  }
+}

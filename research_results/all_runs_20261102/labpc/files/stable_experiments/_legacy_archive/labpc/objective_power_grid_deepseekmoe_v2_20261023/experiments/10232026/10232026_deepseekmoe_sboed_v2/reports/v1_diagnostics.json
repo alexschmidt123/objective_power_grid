@@ -1,0 +1,4739 @@
+{
+  "interventions": {
+    "full": {
+      "mean": 10.745049872026994,
+      "MC_SE": 0.09625752354061946,
+      "replicates": 1,
+      "metadata": {
+        "seed": 1031,
+        "systems": 256,
+        "contrasts": 262144,
+        "paired_draws_sha256": "96ee5ca31ec293ee6b5ad725793132718f60d403f496dd87df0e06c69c35ddd5",
+        "seconds": 1.9106783230090514,
+        "forward_particle_stages": 2013273600,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      },
+      "intervention": "Frozen unchangedweights; no retraining; uniform preserves original routed feature mass"
+    },
+    "shared_only": {
+      "mean": 10.714972530454743,
+      "MC_SE": 0.10220967322214927,
+      "replicates": 1,
+      "metadata": {
+        "seed": 1031,
+        "systems": 256,
+        "contrasts": 262144,
+        "paired_draws_sha256": "96ee5ca31ec293ee6b5ad725793132718f60d403f496dd87df0e06c69c35ddd5",
+        "seconds": 1.4315425249951659,
+        "forward_particle_stages": 2013273600,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      },
+      "intervention": "Frozen unchangedweights; no retraining; uniform preserves original routed feature mass",
+      "paired_difference_from_full": -0.030077341572253113,
+      "paired_MC_SE": 0.09007779991728278
+    },
+    "routed_only": {
+      "mean": 10.61666709856564,
+      "MC_SE": 0.10842061298090148,
+      "replicates": 1,
+      "metadata": {
+        "seed": 1031,
+        "systems": 256,
+        "contrasts": 262144,
+        "paired_draws_sha256": "96ee5ca31ec293ee6b5ad725793132718f60d403f496dd87df0e06c69c35ddd5",
+        "seconds": 1.7514393230085261,
+        "forward_particle_stages": 2013273600,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      },
+      "intervention": "Frozen unchangedweights; no retraining; uniform preserves original routed feature mass",
+      "paired_difference_from_full": -0.12838277346135335,
+      "paired_MC_SE": 0.1090821618151046
+    },
+    "uniform_weights_fixed_selection": {
+      "mean": 10.743507364039571,
+      "MC_SE": 0.0944343725677944,
+      "replicates": 1,
+      "metadata": {
+        "seed": 1031,
+        "systems": 256,
+        "contrasts": 262144,
+        "paired_draws_sha256": "96ee5ca31ec293ee6b5ad725793132718f60d403f496dd87df0e06c69c35ddd5",
+        "seconds": 1.7731840400083456,
+        "forward_particle_stages": 2013273600,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      },
+      "intervention": "Frozen unchangedweights; no retraining; uniform preserves original routed feature mass",
+      "paired_difference_from_full": -0.0015425079874245226,
+      "paired_MC_SE": 0.02838745974984889
+    },
+    "uniform_subset_scale_preserved": {
+      "mean": 10.707053527214029,
+      "MC_SE": 0.087980063107359,
+      "replicates": 3,
+      "metadata": {
+        "seed": 1031,
+        "systems": 256,
+        "contrasts": 262144,
+        "paired_draws_sha256": "96ee5ca31ec293ee6b5ad725793132718f60d403f496dd87df0e06c69c35ddd5",
+        "seconds": 1.8117235130048357,
+        "forward_particle_stages": 2013273600,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      },
+      "intervention": "Frozen unchangedweights; no retraining; uniform preserves original routed feature mass",
+      "paired_difference_from_full": -0.037996344812966154,
+      "paired_MC_SE": 0.06669559868468837
+    }
+  },
+  "reproduction": {
+    "max_score_error": 0.0,
+    "mean": 10.841145022747202,
+    "original_mean": 10.841145022747202
+  },
+  "native_frozen_weight_seconds": [
+    0.515291061004973,
+    0.4743385269975988,
+    0.4715175610035658,
+    0.46758254400629085
+  ],
+  "native_profile_operators": [
+    {
+      "operator": "aten::linear",
+      "count": 820,
+      "self_CPU_us": 779.778999999895,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::mm",
+      "count": 2372,
+      "self_CPU_us": 15310.12700000092,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_32x32_16x5_tn_align1>(cutlass_80_tensorop_d884gemm_32x32_16x5_tn_align1::Params)",
+      "count": 767,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::_unique2",
+      "count": 30,
+      "self_CPU_us": 812.7420000001421,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::_local_scalar_dense",
+      "count": 30,
+      "self_CPU_us": 111.59999999993306,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "cudaStreamSynchronize",
+      "count": 264,
+      "self_CPU_us": 38298.67699999998,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::nonzero_numpy",
+      "count": 204,
+      "self_CPU_us": 219.90299999996205,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::nonzero",
+      "count": 204,
+      "self_CPU_us": 3553.8229999994983,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at_cuda_detail::cub::DeviceReduceKernel<at_cuda_detail::cub::DeviceReducePolicy<int, int, at_cuda_detail::cub::Sum>::Policy600, at_cuda_detail::cub::TransformInputIterator<bool, at::native::(anonymous namespace)::NonZeroOp<bool>, bool const*, long>, int, at_cuda_detail::cub::Sum, int>(at_cuda_detail::cub::TransformInputIterator<bool, at::native::(anonymous namespace)::NonZeroOp<bool>, bool const*, long>, int*, int, at_cuda_detail::cub::GridEvenShare<int>, at_cuda_detail::cub::Sum)",
+      "count": 204,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at_cuda_detail::cub::DeviceSelectSweepKernel<at_cuda_detail::cub::DispatchSelectIf<at_cuda_detail::cub::CountingInputIterator<long, long>, at_cuda_detail::cub::TransformInputIterator<bool, at::native::(anonymous namespace)::NonZeroOp<bool>, bool const*, long>, long*, int*, at_cuda_detail::cub::NullType, at_cuda_detail::cub::NullType, int, false, false>::PtxSelectIfPolicyT, at_cuda_detail::cub::CountingInputIterator<long, long>, at_cuda_detail::cub::TransformInputIterator<bool, at::native::(anonymous namespace)::NonZeroOp<bool>, bool const*, long>, long*, int*, at_cuda_detail::cub::ScanTileState<int, true>, at_cuda_detail::cub::NullType, at_cuda_detail::cub::NullType, int, false>(at_cuda_detail::cub::CountingInputIterator<long, long>, at_cuda_detail::cub::TransformInputIterator<bool, at::native::(anonymous namespace)::NonZeroOp<bool>, bool const*, long>, long*, int*, at_cuda_detail::cub::ScanTileState<int, true>, at_cuda_detail::cub::NullType, at_cuda_detail::cub::NullType, int, int)",
+      "count": 204,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::index",
+      "count": 408,
+      "self_CPU_us": 3097.4070000000775,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<8> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<8> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&)::{lambda(int)#1}>(long, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<8> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<8> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&)::{lambda(int)#1})",
+      "count": 408,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::index_add_",
+      "count": 204,
+      "self_CPU_us": 1301.225000000064,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::indexFuncLargeIndex<double, long, unsigned int, 2, 2, -2, true, at::native::(anonymous namespace)::ReduceAdd>(at::cuda::detail::TensorInfo<double, unsigned int>, at::cuda::detail::TensorInfo<double const, unsigned int>, at::cuda::detail::TensorInfo<long const, unsigned int>, int, int, unsigned int, unsigned int, long, long, at::native::(anonymous namespace)::ReduceAdd const&, double)",
+      "count": 201,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::addmm",
+      "count": 88,
+      "self_CPU_us": 1279.8519999999698,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<double, double>(at::TensorIteratorBase&, double)::{lambda(double)#1}, at::detail::Array<char*, 2> >(int, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<double, double>(at::TensorIteratorBase&, double)::{lambda(double)#1}, at::detail::Array<char*, 2>)",
+      "count": 60,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::masked_fill_kernel(at::TensorIterator&, c10::Scalar const&)::{lambda()#1}::operator()() const::{lambda()#6}::operator()() const::{lambda(double, bool)#1}, at::detail::Array<char*, 3> >(int, at::native::(anonymous namespace)::masked_fill_kernel(at::TensorIterator&, c10::Scalar const&)::{lambda()#1}::operator()() const::{lambda()#6}::operator()() const::{lambda(double, bool)#1}, at::detail::Array<char*, 3>)",
+      "count": 30,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_64x32_16x4_tn_align1>(cutlass_80_tensorop_d884gemm_64x32_16x4_tn_align1::Params)",
+      "count": 5,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::launch_clamp_scalar(at::TensorIteratorBase&, c10::Scalar, c10::Scalar, at::native::detail::ClampLimits)::{lambda()#1}::operator()() const::{lambda()#6}::operator()() const::{lambda(double)#1}, at::detail::Array<char*, 2> >(int, at::native::(anonymous namespace)::launch_clamp_scalar(at::TensorIteratorBase&, c10::Scalar, c10::Scalar, at::native::detail::ClampLimits)::{lambda()#1}::operator()() const::{lambda()#6}::operator()() const::{lambda(double)#1}, at::detail::Array<char*, 2>)",
+      "count": 29,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::indexFuncSmallIndex<double, long, unsigned int, 2, 2, -2, at::native::(anonymous namespace)::ReduceAdd>(at::cuda::detail::TensorInfo<double, unsigned int>, at::cuda::detail::TensorInfo<double const, unsigned int>, at::cuda::detail::TensorInfo<long const, unsigned int>, int, int, unsigned int, long, long, at::native::(anonymous namespace)::ReduceAdd const&, double)",
+      "count": 3,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_32x64_16x4_tn_align1>(cutlass_80_tensorop_d884gemm_32x64_16x4_tn_align1::Params)",
+      "count": 24,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_128x64_16x3_tn_align1>(cutlass_80_tensorop_d884gemm_128x64_16x3_tn_align1::Params)",
+      "count": 1,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "ampere_dgemm_128x64_tn",
+      "count": 23,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::scatter_",
+      "count": 31,
+      "self_CPU_us": 167.740000000078,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::_scatter_gather_elementwise_kernel<128, 4, at::native::_cuda_scatter_fill_internal_kernel<at::native::OpaqueType<8> >::operator()<at::native::TensorAssign>(at::TensorIterator&, at::native::OpaqueType<8>, long, long, long, at::native::TensorAssign const&)::{lambda(int)#1}>(int, at::native::_cuda_scatter_fill_internal_kernel<at::native::OpaqueType<8> >::operator()<at::native::TensorAssign>(at::TensorIterator&, at::native::OpaqueType<8>, long, long, long, at::native::TensorAssign const&)::{lambda(int)#1})",
+      "count": 1,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "autograd::engine::evaluate_function: AddmmBackward0",
+      "count": 88,
+      "self_CPU_us": 625.3749999999127,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "AddmmBackward0",
+      "count": 88,
+      "self_CPU_us": 294.42500000083237,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "autograd::engine::evaluate_function: IndexAddBackward0",
+      "count": 204,
+      "self_CPU_us": 637.8709999993443,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "IndexAddBackward0",
+      "count": 204,
+      "self_CPU_us": 311.9279999998398,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::index_select",
+      "count": 204,
+      "self_CPU_us": 883.4879999995173,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "autograd::engine::evaluate_function: IndexBackward0",
+      "count": 408,
+      "self_CPU_us": 1566.2370000007504,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "IndexBackward0",
+      "count": 408,
+      "self_CPU_us": 685.3810000005178,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "aten::_index_put_impl_",
+      "count": 408,
+      "self_CPU_us": 5149.712999998796,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "autograd::engine::evaluate_function: MmBackward0",
+      "count": 732,
+      "self_CPU_us": 2828.3739999996033,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "MmBackward0",
+      "count": 732,
+      "self_CPU_us": 1937.427999999083,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_32x32_16x5_nn_align1>(cutlass_80_tensorop_d884gemm_32x32_16x5_nn_align1::Params)",
+      "count": 780,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_32x32_16x5_nt_align1>(cutlass_80_tensorop_d884gemm_32x32_16x5_nt_align1::Params)",
+      "count": 788,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::(anonymous namespace)::GammaBetaBackwardCUDAKernel<double, double>(long, long, double const*, double const*, double const*, double const*, double*, double*)",
+      "count": 60,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::(anonymous namespace)::indexSelectLargeIndex<double, long, unsigned int, 2, 2, -2, true>(at::cuda::detail::TensorInfo<double, unsigned int>, at::cuda::detail::TensorInfo<double const, unsigned int>, at::cuda::detail::TensorInfo<long const, unsigned int>, int, int, unsigned int, unsigned int, long)",
+      "count": 201,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void (anonymous namespace)::elementwise_kernel_with_index<int, at::native::arange_cuda_out(c10::Scalar const&, c10::Scalar const&, c10::Scalar const&, at::Tensor&)::{lambda()#1}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}>(int, at::native::arange_cuda_out(c10::Scalar const&, c10::Scalar const&, c10::Scalar const&, at::Tensor&)::{lambda()#1}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, function_traits<at::native::arange_cuda_out(c10::Scalar const&, c10::Scalar const&, c10::Scalar const&, at::Tensor&)::{lambda()#1}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}>::result_type*)",
+      "count": 408,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void (anonymous namespace)::indexing_backward_kernel_stride_1<double>(long const*, long const*, double const*, double*, long, long, long, long, bool)",
+      "count": 204,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void (anonymous namespace)::indexing_backward_kernel_small_stride<double>(long const*, long const*, double const*, double*, long, long, long, long, bool)",
+      "count": 204,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::_scatter_gather_elementwise_kernel<128, 4, at::native::_cuda_scatter_gather_internal_kernel<true, at::native::OpaqueType<8> >::operator()<at::native::TensorAssign>(at::TensorIterator&, long, long, long, at::native::TensorAssign const&)::{lambda(int)#1}>(int, at::native::_cuda_scatter_gather_internal_kernel<true, at::native::OpaqueType<8> >::operator()<at::native::TensorAssign>(at::TensorIterator&, long, long, long, at::native::TensorAssign const&)::{lambda(int)#1})",
+      "count": 30,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "ampere_dgemm_64x64_nn",
+      "count": 4,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_64x32_16x4_nt_align1>(cutlass_80_tensorop_d884gemm_64x32_16x4_nt_align1::Params)",
+      "count": 24,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_32x64_16x4_nt_align1>(cutlass_80_tensorop_d884gemm_32x64_16x4_nt_align1::Params)",
+      "count": 8,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "ampere_dgemm_128x64_nn",
+      "count": 13,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_32x64_16x4_nn_align1>(cutlass_80_tensorop_d884gemm_32x64_16x4_nn_align1::Params)",
+      "count": 11,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_128x64_16x3_nn_align1>(cutlass_80_tensorop_d884gemm_128x64_16x3_nn_align1::Params)",
+      "count": 3,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void cutlass::Kernel<cutlass_80_tensorop_d884gemm_64x32_16x4_nn_align1>(cutlass_80_tensorop_d884gemm_64x32_16x4_nn_align1::Params)",
+      "count": 9,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "cudaDeviceSynchronize",
+      "count": 2,
+      "self_CPU_us": 30667.936000000045,
+      "self_CUDA_us": 0.0
+    },
+    {
+      "operator": "void at::native::(anonymous namespace)::indexSelectSmallIndex<double, long, unsigned int, 2, 2, -2>(at::cuda::detail::TensorInfo<double, unsigned int>, at::cuda::detail::TensorInfo<double const, unsigned int>, at::cuda::detail::TensorInfo<long const, unsigned int>, int, int, unsigned int, long)",
+      "count": 3,
+      "self_CPU_us": 0,
+      "self_CUDA_us": 0.0
+    }
+  ],
+  "stage_diagnostics": [
+    {
+      "stage": 0,
+      "selection_fraction": [
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "mean_softmax": [
+        0.14435643750354718,
+        0.14416352173614677,
+        0.14243108261656695,
+        0.14197504914884604,
+        0.14222666889279648,
+        0.14198440785003813,
+        0.14286283225205845
+      ],
+      "mean_softmax_entropy": 1.9458889241779984,
+      "effective_gate_count": 6.999851427435519,
+      "dominant_subset_fraction": 1.0,
+      "expert_feature_cosine_including_shared": [
+        [
+          0.9999999999999999,
+          0.36797000212866315,
+          0.26488808988956414,
+          0.3786061865920098,
+          0.1586360773657654,
+          -0.0019925474818522255,
+          -0.18599601402854424,
+          0.4220793436476157
+        ],
+        [
+          0.36797000212866315,
+          0.9999999999999999,
+          0.9280838533490742,
+          0.7836919242816769,
+          0.4276723844364907,
+          0.10976391752483818,
+          0.675277360518807,
+          0.6902550308185115
+        ],
+        [
+          0.26488808988956414,
+          0.9280838533490742,
+          1.0,
+          0.8304862243956722,
+          0.2980397670788014,
+          0.11151162795731845,
+          0.6303744310253295,
+          0.6448588860862146
+        ],
+        [
+          0.3786061865920098,
+          0.7836919242816769,
+          0.8304862243956722,
+          0.9999999999999999,
+          0.2984911282687817,
+          0.22165628369731352,
+          0.607370461001157,
+          0.7146734742194283
+        ],
+        [
+          0.1586360773657654,
+          0.4276723844364907,
+          0.2980397670788014,
+          0.2984911282687817,
+          1.0,
+          0.2997190418366219,
+          0.5146825341144403,
+          0.1282314754022982
+        ],
+        [
+          -0.0019925474818522255,
+          0.10976391752483818,
+          0.11151162795731845,
+          0.22165628369731352,
+          0.2997190418366219,
+          1.0000000000000002,
+          0.3390670601410787,
+          -0.1527117551947514
+        ],
+        [
+          -0.18599601402854424,
+          0.675277360518807,
+          0.6303744310253295,
+          0.607370461001157,
+          0.5146825341144403,
+          0.3390670601410787,
+          0.9999999999999999,
+          0.2650971452523661
+        ],
+        [
+          0.4220793436476157,
+          0.6902550308185115,
+          0.6448588860862146,
+          0.7146734742194283,
+          0.1282314754022982,
+          -0.1527117551947514,
+          0.2650971452523661,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        3.082702156397453e-05,
+        0.00011312488979231648,
+        5.5377580377079005e-05,
+        2.144374557082602e-05,
+        4.839162747493705e-05,
+        1.7317882303127372e-05,
+        1.9394643391517625e-05,
+        3.383700634530547e-05
+      ],
+      "shared_to_routed_norm_ratio": 1.1222619511876035,
+      "residual_z_norm": 0.0642084066712018
+    },
+    {
+      "stage": 1,
+      "selection_fraction": [
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "mean_softmax": [
+        0.0617768571327878,
+        0.046284369151449095,
+        0.25236878957937287,
+        0.28899926090395717,
+        0.1590590794391117,
+        0.12213906392622165,
+        0.06937257986709969
+      ],
+      "mean_softmax_entropy": 1.754715827807264,
+      "effective_gate_count": 5.781822990409385,
+      "dominant_subset_fraction": 1.0,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.7248947242826855,
+          0.8332347310151439,
+          0.8620949095361331,
+          0.1769632970671414,
+          -0.3157633013077604,
+          -0.7471345083584605,
+          0.664386030699589
+        ],
+        [
+          0.7248947242826855,
+          1.0,
+          0.7351876130483201,
+          0.9057762988086613,
+          -0.16622345952132395,
+          -0.6401375190467318,
+          -0.7308833172939755,
+          0.3780480675737976
+        ],
+        [
+          0.8332347310151439,
+          0.7351876130483201,
+          1.0,
+          0.9016025756111375,
+          0.2682824125548224,
+          -0.1105997416275275,
+          -0.8474018166437439,
+          0.7537779247675783
+        ],
+        [
+          0.8620949095361331,
+          0.9057762988086613,
+          0.9016025756111375,
+          1.0,
+          0.05632064887720007,
+          -0.3346928868726069,
+          -0.8568205515016177,
+          0.6207454123349891
+        ],
+        [
+          0.1769632970671414,
+          -0.16622345952132395,
+          0.2682824125548224,
+          0.05632064887720007,
+          1.0,
+          0.4996379704446938,
+          -0.28104534263195313,
+          0.5888204192551442
+        ],
+        [
+          -0.3157633013077604,
+          -0.6401375190467318,
+          -0.1105997416275275,
+          -0.3346928868726069,
+          0.4996379704446938,
+          1.0,
+          0.1368153903674889,
+          0.16928350362555802
+        ],
+        [
+          -0.7471345083584605,
+          -0.7308833172939755,
+          -0.8474018166437439,
+          -0.8568205515016177,
+          -0.28104534263195313,
+          0.1368153903674889,
+          1.0,
+          -0.700982552217913
+        ],
+        [
+          0.664386030699589,
+          0.3780480675737976,
+          0.7537779247675783,
+          0.6207454123349891,
+          0.5888204192551442,
+          0.16928350362555802,
+          -0.700982552217913,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.0711785661487616,
+        0.49160769559548995,
+        0.2186763692257859,
+        0.09994152914826687,
+        0.3738026401340957,
+        0.05742925165739751,
+        0.16903665995210002,
+        0.17600463182060846
+      ],
+      "shared_to_routed_norm_ratio": 0.6041295863458098,
+      "residual_z_norm": 4.0130116784569125
+    },
+    {
+      "stage": 2,
+      "selection_fraction": [
+        0.0,
+        0.0,
+        0.953125,
+        1.0,
+        0.75,
+        0.296875,
+        0.0
+      ],
+      "mean_softmax": [
+        0.061032372070825194,
+        0.05553149189648887,
+        0.21240606982155155,
+        0.2480047249494671,
+        0.16817860683493435,
+        0.16056439828409227,
+        0.09428233614264067
+      ],
+      "mean_softmax_entropy": 1.8159329017201962,
+      "effective_gate_count": 6.151186660653779,
+      "dominant_subset_fraction": 0.703125,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          -0.23656931376456444,
+          -0.2559237015430054,
+          -0.08949216393104233,
+          0.02077971889501357,
+          -0.25714448697631254,
+          -0.47543286105939375,
+          -0.16136337724761315
+        ],
+        [
+          -0.23656931376456444,
+          1.0,
+          0.8559152228626503,
+          0.7091710535279147,
+          0.09568190180295741,
+          0.23477814445112213,
+          0.1256416777269492,
+          0.5484950729306797
+        ],
+        [
+          -0.2559237015430054,
+          0.8559152228626503,
+          1.0,
+          0.8503375074328439,
+          0.23284878751725038,
+          0.3940935661937312,
+          -0.01616359125551707,
+          0.7472066148793667
+        ],
+        [
+          -0.08949216393104233,
+          0.7091710535279147,
+          0.8503375074328439,
+          1.0,
+          0.21417814950188824,
+          0.44417776794959113,
+          -0.10458927015123393,
+          0.7249660696829772
+        ],
+        [
+          0.02077971889501357,
+          0.09568190180295741,
+          0.23284878751725038,
+          0.21417814950188824,
+          1.0,
+          0.2722055981186554,
+          -0.025697629514332968,
+          0.43156281203661273
+        ],
+        [
+          -0.25714448697631254,
+          0.23477814445112213,
+          0.3940935661937312,
+          0.44417776794959113,
+          0.2722055981186554,
+          1.0,
+          0.0548473507509601,
+          0.37230218617438504
+        ],
+        [
+          -0.47543286105939375,
+          0.1256416777269492,
+          -0.01616359125551707,
+          -0.10458927015123393,
+          -0.025697629514332968,
+          0.0548473507509601,
+          1.0,
+          -0.1993293846661075
+        ],
+        [
+          -0.16136337724761315,
+          0.5484950729306797,
+          0.7472066148793667,
+          0.7249660696829772,
+          0.43156281203661273,
+          0.37230218617438504,
+          -0.1993293846661075,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.13416566713843275,
+        0.6033619680339704,
+        0.20239434819478952,
+        0.0802906394941941,
+        0.1884330128005648,
+        0.09282505688418186,
+        0.05410487498579017,
+        0.13472482722311377
+      ],
+      "shared_to_routed_norm_ratio": 2.9647556555575854,
+      "residual_z_norm": 3.9829809863544408
+    },
+    {
+      "stage": 3,
+      "selection_fraction": [
+        0.046875,
+        0.15625,
+        0.484375,
+        0.671875,
+        0.546875,
+        0.765625,
+        0.328125
+      ],
+      "mean_softmax": [
+        0.08963107208669882,
+        0.09971960816523288,
+        0.1593812052196058,
+        0.1782523273816893,
+        0.15676022197541944,
+        0.18115331798682843,
+        0.13510224718452535
+      ],
+      "mean_softmax_entropy": 1.8810044185455805,
+      "effective_gate_count": 6.566107273224725,
+      "dominant_subset_fraction": 0.296875,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          -0.4093032195509459,
+          -0.08135657424768672,
+          0.02526234615006436,
+          -0.16139264092869612,
+          -0.15505888445999222,
+          -0.30875251671294424,
+          -0.09120993789510282
+        ],
+        [
+          -0.4093032195509459,
+          1.0,
+          0.3454944276965169,
+          0.16991762368403363,
+          0.36152677642083814,
+          0.28932969798233665,
+          0.34061741497166065,
+          0.2612638179094791
+        ],
+        [
+          -0.08135657424768672,
+          0.3454944276965169,
+          1.0,
+          0.4748908343517729,
+          0.0368484821071042,
+          0.05783287999592395,
+          0.27297914777755755,
+          0.3132718339113054
+        ],
+        [
+          0.02526234615006436,
+          0.16991762368403363,
+          0.4748908343517729,
+          1.0,
+          0.11989910970167333,
+          0.09892718098618522,
+          -0.09556334903510019,
+          0.36416217990758953
+        ],
+        [
+          -0.16139264092869612,
+          0.36152677642083814,
+          0.0368484821071042,
+          0.11989910970167333,
+          1.0,
+          0.37987766928765354,
+          -0.09581921734325571,
+          0.20534321388498872
+        ],
+        [
+          -0.15505888445999222,
+          0.28932969798233665,
+          0.05783287999592395,
+          0.09892718098618522,
+          0.37987766928765354,
+          1.0,
+          0.1251149865785787,
+          0.033056635216856076
+        ],
+        [
+          -0.30875251671294424,
+          0.34061741497166065,
+          0.27297914777755755,
+          -0.09556334903510019,
+          -0.09581921734325571,
+          0.1251149865785787,
+          1.0,
+          -0.28370220108709815
+        ],
+        [
+          -0.09120993789510282,
+          0.2612638179094791,
+          0.3132718339113054,
+          0.36416217990758953,
+          0.20534321388498872,
+          0.033056635216856076,
+          -0.28370220108709815,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.23004677895643075,
+        0.36134076612157073,
+        0.1613329099154875,
+        0.05605230069032395,
+        0.1363708922843773,
+        0.09956145745493666,
+        0.07456670997738893,
+        0.11510974798732168
+      ],
+      "shared_to_routed_norm_ratio": 7.392579362326532,
+      "residual_z_norm": 3.9795536416416257
+    },
+    {
+      "stage": 4,
+      "selection_fraction": [
+        0.296875,
+        0.578125,
+        0.15625,
+        0.28125,
+        0.34375,
+        0.625,
+        0.71875
+      ],
+      "mean_softmax": [
+        0.1401862096385031,
+        0.1704801053104939,
+        0.11338885332544361,
+        0.11764579874541911,
+        0.1289767006081915,
+        0.16679526664505806,
+        0.16252706572689074
+      ],
+      "mean_softmax_entropy": 1.8738285904088063,
+      "effective_gate_count": 6.523780969473075,
+      "dominant_subset_fraction": 0.296875,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          -0.038569515359045,
+          0.31809380610859733,
+          -0.08609495702353755,
+          0.0719583627290761,
+          0.1237794816538403,
+          0.06647046498779535,
+          -0.016711508355129624
+        ],
+        [
+          -0.038569515359045,
+          1.0,
+          0.2180987651697196,
+          -0.011347984971675131,
+          0.2599434158260567,
+          0.163474532768342,
+          0.12874978580788554,
+          0.15901924002501816
+        ],
+        [
+          0.31809380610859733,
+          0.2180987651697196,
+          1.0,
+          0.36203453973940775,
+          0.1590321905938283,
+          0.0026818770387323655,
+          -0.002927828699259653,
+          0.3316757265495314
+        ],
+        [
+          -0.08609495702353755,
+          -0.011347984971675131,
+          0.36203453973940775,
+          1.0,
+          0.054598884849654944,
+          -0.07085733493884859,
+          -0.4828424748588954,
+          0.3582639645257584
+        ],
+        [
+          0.0719583627290761,
+          0.2599434158260567,
+          0.1590321905938283,
+          0.054598884849654944,
+          1.0,
+          0.33430688090510935,
+          -0.19746332756129392,
+          0.28372031279274035
+        ],
+        [
+          0.1237794816538403,
+          0.163474532768342,
+          0.0026818770387323655,
+          -0.07085733493884859,
+          0.33430688090510935,
+          1.0,
+          -0.001700678731426656,
+          -0.024911180480858493
+        ],
+        [
+          0.06647046498779535,
+          0.12874978580788554,
+          -0.002927828699259653,
+          -0.4828424748588954,
+          -0.19746332756129392,
+          -0.001700678731426656,
+          1.0,
+          -0.48458713194502523
+        ],
+        [
+          -0.016711508355129624,
+          0.15901924002501816,
+          0.3316757265495314,
+          0.3582639645257584,
+          0.28372031279274035,
+          -0.024911180480858493,
+          -0.48458713194502523,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.29253869454183756,
+        0.22201004623017398,
+        0.316458774238327,
+        0.15128145223918157,
+        0.1450610558699013,
+        0.08067599530888693,
+        0.14397278406630865,
+        0.20765226746002302
+      ],
+      "shared_to_routed_norm_ratio": 5.865291728661582,
+      "residual_z_norm": 4.002727805223387
+    },
+    {
+      "stage": 5,
+      "selection_fraction": [
+        0.671875,
+        0.875,
+        0.03125,
+        0.09375,
+        0.109375,
+        0.3125,
+        0.90625
+      ],
+      "mean_softmax": [
+        0.19584469360661846,
+        0.23288338827664234,
+        0.0859734076912164,
+        0.080144097670381,
+        0.10260358266081678,
+        0.13801972871057644,
+        0.1645311013837486
+      ],
+      "mean_softmax_entropy": 1.8270461988233149,
+      "effective_gate_count": 6.229772756998743,
+      "dominant_subset_fraction": 0.671875,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.2176572281705676,
+          0.477050947070067,
+          -0.04496606170889594,
+          0.40306716925437885,
+          0.22007571640150092,
+          0.10320469310292564,
+          0.21089582284170094
+        ],
+        [
+          0.2176572281705676,
+          1.0,
+          0.4921301680006029,
+          0.2541388412621604,
+          0.18972041624300198,
+          -0.04202890414395685,
+          -0.17211323550929908,
+          0.3708951963648427
+        ],
+        [
+          0.477050947070067,
+          0.4921301680006029,
+          1.0,
+          0.5060286162918288,
+          0.39678769849325374,
+          0.10842963435248149,
+          -0.29767665848374547,
+          0.6030033338824641
+        ],
+        [
+          -0.04496606170889594,
+          0.2541388412621604,
+          0.5060286162918288,
+          1.0,
+          0.06332382415343124,
+          -0.07750401820704236,
+          -0.696059502528333,
+          0.5393481648588359
+        ],
+        [
+          0.40306716925437885,
+          0.18972041624300198,
+          0.39678769849325374,
+          0.06332382415343124,
+          1.0,
+          0.2980079938416749,
+          -0.09981527185273908,
+          0.3746736839589381
+        ],
+        [
+          0.22007571640150092,
+          -0.04202890414395685,
+          0.10842963435248149,
+          -0.07750401820704236,
+          0.2980079938416749,
+          1.0,
+          0.03536864008897527,
+          0.015848093623556152
+        ],
+        [
+          0.10320469310292564,
+          -0.17211323550929908,
+          -0.29767665848374547,
+          -0.696059502528333,
+          -0.09981527185273908,
+          0.03536864008897527,
+          1.0,
+          -0.5024529917073901
+        ],
+        [
+          0.21089582284170094,
+          0.3708951963648427,
+          0.6030033338824641,
+          0.5393481648588359,
+          0.3746736839589381,
+          0.015848093623556152,
+          -0.5024529917073901,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.35783012211568865,
+        0.27443577724950785,
+        0.5074869478557877,
+        0.34543275561675024,
+        0.16873628939398183,
+        0.06050218822888741,
+        0.211185377234604,
+        0.32256879249104153
+      ],
+      "shared_to_routed_norm_ratio": 2.859867508187109,
+      "residual_z_norm": 4.039687525257664
+    },
+    {
+      "stage": 6,
+      "selection_fraction": [
+        0.90625,
+        0.921875,
+        0.09375,
+        0.03125,
+        0.078125,
+        0.09375,
+        0.875
+      ],
+      "mean_softmax": [
+        0.23554249764045992,
+        0.2593916088663776,
+        0.08300673096354887,
+        0.0704984382113574,
+        0.08880471981038976,
+        0.11448110522104696,
+        0.14827489928681953
+      ],
+      "mean_softmax_entropy": 1.7959082067528973,
+      "effective_gate_count": 6.035056640122067,
+      "dominant_subset_fraction": 0.8125,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.3640480033405548,
+          0.5740069222941765,
+          0.29068118875613774,
+          0.4708834228030467,
+          0.10149123031425861,
+          -0.042695059317471216,
+          0.4767205849485329
+        ],
+        [
+          0.3640480033405548,
+          1.0,
+          0.5555451274602939,
+          0.6012831527487388,
+          0.28246422506719593,
+          -0.11178261455492139,
+          -0.3902654649640093,
+          0.5993784970795546
+        ],
+        [
+          0.5740069222941765,
+          0.5555451274602939,
+          1.0,
+          0.6576122628453214,
+          0.3459480740656158,
+          0.15537297790472637,
+          -0.461190360967375,
+          0.7952561376241287
+        ],
+        [
+          0.29068118875613774,
+          0.6012831527487388,
+          0.6576122628453214,
+          1.0,
+          0.10684123535015119,
+          -0.12640262667480198,
+          -0.6289112785026012,
+          0.6495847382498025
+        ],
+        [
+          0.4708834228030467,
+          0.28246422506719593,
+          0.3459480740656158,
+          0.10684123535015119,
+          1.0,
+          0.2629800963653486,
+          -0.06869577948064018,
+          0.3525818093726712
+        ],
+        [
+          0.10149123031425861,
+          -0.11178261455492139,
+          0.15537297790472637,
+          -0.12640262667480198,
+          0.2629800963653486,
+          1.0,
+          0.042590608806352605,
+          0.029105337310619605
+        ],
+        [
+          -0.042695059317471216,
+          -0.3902654649640093,
+          -0.461190360967375,
+          -0.6289112785026012,
+          -0.06869577948064018,
+          0.042590608806352605,
+          1.0,
+          -0.5214698894290535
+        ],
+        [
+          0.4767205849485329,
+          0.5993784970795546,
+          0.7952561376241287,
+          0.6495847382498025,
+          0.3525818093726712,
+          0.029105337310619605,
+          -0.5214698894290535,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.40679132386562644,
+        0.37919549020883886,
+        0.5460080204679669,
+        0.5046904985353431,
+        0.22531295776186447,
+        0.0613291888089176,
+        0.2122997018176157,
+        0.35846318987165005
+      ],
+      "shared_to_routed_norm_ratio": 1.949737864265289,
+      "residual_z_norm": 4.071602789369704
+    },
+    {
+      "stage": 7,
+      "selection_fraction": [
+        0.96875,
+        0.90625,
+        0.359375,
+        0.09375,
+        0.015625,
+        0.03125,
+        0.625
+      ],
+      "mean_softmax": [
+        0.24983481758582918,
+        0.2480555324412349,
+        0.10151333365747275,
+        0.08270855737056923,
+        0.08740186548991417,
+        0.10261126737373043,
+        0.12787462608124936
+      ],
+      "mean_softmax_entropy": 1.8061496830515296,
+      "effective_gate_count": 6.096212696437918,
+      "dominant_subset_fraction": 0.609375,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.6321028839892296,
+          0.5526928731150241,
+          0.48649957194585647,
+          0.35451931722915336,
+          -0.2941998194593157,
+          -0.10534123282172042,
+          0.5452104645210989
+        ],
+        [
+          0.6321028839892296,
+          1.0,
+          0.5158993457213108,
+          0.6555136758101455,
+          0.24994707835280594,
+          -0.3246652133910621,
+          -0.30324436553794054,
+          0.609572151476925
+        ],
+        [
+          0.5526928731150241,
+          0.5158993457213108,
+          1.0,
+          0.5679776067264432,
+          0.17939202891945466,
+          -0.12274814952621038,
+          -0.36923659141118637,
+          0.7625546097712881
+        ],
+        [
+          0.48649957194585647,
+          0.6555136758101455,
+          0.5679776067264432,
+          1.0,
+          0.21568207275708942,
+          -0.4223183615715811,
+          -0.4567920246254671,
+          0.6516418454867338
+        ],
+        [
+          0.35451931722915336,
+          0.24994707835280594,
+          0.17939202891945466,
+          0.21568207275708942,
+          1.0,
+          0.04832890471956348,
+          0.009981417040356466,
+          0.16036916364353354
+        ],
+        [
+          -0.2941998194593157,
+          -0.3246652133910621,
+          -0.12274814952621038,
+          -0.4223183615715811,
+          0.04832890471956348,
+          1.0,
+          0.17167200419915604,
+          -0.24339830319165504
+        ],
+        [
+          -0.10534123282172042,
+          -0.30324436553794054,
+          -0.36923659141118637,
+          -0.4567920246254671,
+          0.009981417040356466,
+          0.17167200419915604,
+          1.0,
+          -0.4166336383273373
+        ],
+        [
+          0.5452104645210989,
+          0.609572151476925,
+          0.7625546097712881,
+          0.6516418454867338,
+          0.16036916364353354,
+          -0.24339830319165504,
+          -0.4166336383273373,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.4143566987949828,
+        0.43169664167758853,
+        0.40390025426551374,
+        0.5115368102395569,
+        0.29198812018103437,
+        0.09141499198498394,
+        0.1537347881023567,
+        0.28784650614386437
+      ],
+      "shared_to_routed_norm_ratio": 1.8538364918379817,
+      "residual_z_norm": 4.090226097576322
+    },
+    {
+      "stage": 8,
+      "selection_fraction": [
+        0.953125,
+        0.765625,
+        0.609375,
+        0.234375,
+        0.046875,
+        0.015625,
+        0.375
+      ],
+      "mean_softmax": [
+        0.2319236044514197,
+        0.20894034042763582,
+        0.1381772760508132,
+        0.11573957779939398,
+        0.09624223472005182,
+        0.10093750352922633,
+        0.10803946302145917
+      ],
+      "mean_softmax_entropy": 1.8354875968493216,
+      "effective_gate_count": 6.278063673608553,
+      "dominant_subset_fraction": 0.390625,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.7175875651288317,
+          0.36671069923124455,
+          0.5938560296045254,
+          0.3948306462965941,
+          -0.4243070869922867,
+          0.0513444257293177,
+          0.459779626272966
+        ],
+        [
+          0.7175875651288317,
+          1.0,
+          0.39002861232808195,
+          0.6549050952639925,
+          0.2666335400790224,
+          -0.49346964602448473,
+          -0.15161765968112545,
+          0.5481256585052108
+        ],
+        [
+          0.36671069923124455,
+          0.39002861232808195,
+          1.0,
+          0.22791097376588854,
+          0.17595570519653558,
+          0.011456921015908571,
+          -0.10266683034264043,
+          0.5763642107738944
+        ],
+        [
+          0.5938560296045254,
+          0.6549050952639925,
+          0.22791097376588854,
+          1.0,
+          0.22545527206435392,
+          -0.37937304005031347,
+          -0.12951682669766326,
+          0.4849750337166775
+        ],
+        [
+          0.3948306462965941,
+          0.2666335400790224,
+          0.17595570519653558,
+          0.22545527206435392,
+          1.0,
+          0.01868344655825672,
+          0.23123819095176018,
+          -0.001804965260118488
+        ],
+        [
+          -0.4243070869922867,
+          -0.49346964602448473,
+          0.011456921015908571,
+          -0.37937304005031347,
+          0.01868344655825672,
+          1.0,
+          0.16798132828279824,
+          -0.16968326151710253
+        ],
+        [
+          0.0513444257293177,
+          -0.15161765968112545,
+          -0.10266683034264043,
+          -0.12951682669766326,
+          0.23123819095176018,
+          0.16798132828279824,
+          1.0,
+          -0.2234642831767832
+        ],
+        [
+          0.459779626272966,
+          0.5481256585052108,
+          0.5763642107738944,
+          0.4849750337166775,
+          -0.001804965260118488,
+          -0.16968326151710253,
+          -0.2234642831767832,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.36974390848481015,
+        0.4073132754846213,
+        0.2563741440467937,
+        0.3994902817070756,
+        0.40406321563101905,
+        0.13444299945326724,
+        0.1067213608637296,
+        0.21599752829235133
+      ],
+      "shared_to_routed_norm_ratio": 2.1734305870417825,
+      "residual_z_norm": 4.088029585612949
+    },
+    {
+      "stage": 9,
+      "selection_fraction": [
+        0.796875,
+        0.453125,
+        0.8125,
+        0.53125,
+        0.203125,
+        0.015625,
+        0.1875
+      ],
+      "mean_softmax": [
+        0.19578928137073998,
+        0.16356856343398835,
+        0.17635538845829463,
+        0.1543914641120471,
+        0.10887696441942546,
+        0.10678304929336935,
+        0.09423528891213515
+      ],
+      "mean_softmax_entropy": 1.8562215124722607,
+      "effective_gate_count": 6.405670712596846,
+      "dominant_subset_fraction": 0.34375,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.6259217119394919,
+          0.20320885380274406,
+          0.6179392995221795,
+          0.44174089666717076,
+          -0.28581148494362724,
+          0.24665377628389878,
+          0.22122541113285732
+        ],
+        [
+          0.6259217119394919,
+          1.0,
+          0.3575110795727564,
+          0.46291622529811927,
+          0.3099536822269223,
+          -0.5733191358648079,
+          -0.07656761256586786,
+          0.39502627300236004
+        ],
+        [
+          0.20320885380274406,
+          0.3575110795727564,
+          1.0,
+          -0.006437574417867872,
+          0.21545720912748823,
+          -0.029655095242754895,
+          0.062479092162764795,
+          0.41386508161618163
+        ],
+        [
+          0.6179392995221795,
+          0.46291622529811927,
+          -0.006437574417867872,
+          1.0,
+          0.2601234824207042,
+          -0.18253562226811176,
+          0.1600232076502894,
+          0.2689081405532763
+        ],
+        [
+          0.44174089666717076,
+          0.3099536822269223,
+          0.21545720912748823,
+          0.2601234824207042,
+          1.0,
+          0.005269141683423661,
+          0.3214920699142555,
+          -0.14455738006262656
+        ],
+        [
+          -0.28581148494362724,
+          -0.5733191358648079,
+          -0.029655095242754895,
+          -0.18253562226811176,
+          0.005269141683423661,
+          1.0,
+          0.2892555082985221,
+          -0.154556140571142
+        ],
+        [
+          0.24665377628389878,
+          -0.07656761256586786,
+          0.062479092162764795,
+          0.1600232076502894,
+          0.3214920699142555,
+          0.2892555082985221,
+          1.0,
+          -0.18348635123549656
+        ],
+        [
+          0.22122541113285732,
+          0.39502627300236004,
+          0.41386508161618163,
+          0.2689081405532763,
+          -0.14455738006262656,
+          -0.154556140571142,
+          -0.18348635123549656,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.30497820549877697,
+        0.3832924061706784,
+        0.1443884576879288,
+        0.2678086386770333,
+        0.42453018241114504,
+        0.15674547259730398,
+        0.08145575062752795,
+        0.15501738541084412
+      ],
+      "shared_to_routed_norm_ratio": 2.3940081899906325,
+      "residual_z_norm": 4.0684962970346605
+    },
+    {
+      "stage": 10,
+      "selection_fraction": [
+        0.578125,
+        0.234375,
+        0.890625,
+        0.765625,
+        0.296875,
+        0.125,
+        0.109375
+      ],
+      "mean_softmax": [
+        0.15951640428703426,
+        0.12903370757598018,
+        0.20251541620510216,
+        0.18415447242545724,
+        0.12017554643153641,
+        0.1167053873098378,
+        0.08789906576505194
+      ],
+      "mean_softmax_entropy": 1.8640736089146208,
+      "effective_gate_count": 6.454421248600388,
+      "dominant_subset_fraction": 0.359375,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.3373910310016317,
+          0.0478837173397197,
+          0.5330710736664851,
+          0.4549342833326596,
+          -0.020789421720547804,
+          0.342202941873766,
+          -0.02362900551759361
+        ],
+        [
+          0.3373910310016317,
+          1.0,
+          0.3855295352312479,
+          0.3144170893082415,
+          0.35200690854489813,
+          -0.5946297737845422,
+          -0.07986352897367166,
+          0.2652694866771859
+        ],
+        [
+          0.0478837173397197,
+          0.3855295352312479,
+          1.0,
+          -0.1043705199908071,
+          0.2882238345997528,
+          -0.1558764332557883,
+          -0.027862190313261634,
+          0.2797344860826704
+        ],
+        [
+          0.5330710736664851,
+          0.3144170893082415,
+          -0.1043705199908071,
+          1.0,
+          0.30311810717626325,
+          -0.0038948103162918194,
+          0.23453687819422644,
+          0.12802915190523184
+        ],
+        [
+          0.4549342833326596,
+          0.35200690854489813,
+          0.2882238345997528,
+          0.30311810717626325,
+          1.0,
+          -0.023702854353496065,
+          0.26547402264288245,
+          -0.2089240140758822
+        ],
+        [
+          -0.020789421720547804,
+          -0.5946297737845422,
+          -0.1558764332557883,
+          -0.0038948103162918194,
+          -0.023702854353496065,
+          1.0,
+          0.3481262206046567,
+          -0.22800389395158852
+        ],
+        [
+          0.342202941873766,
+          -0.07986352897367166,
+          -0.027862190313261634,
+          0.23453687819422644,
+          0.26547402264288245,
+          0.3481262206046567,
+          1.0,
+          -0.19017203733562008
+        ],
+        [
+          -0.02362900551759361,
+          0.2652694866771859,
+          0.2797344860826704,
+          0.12802915190523184,
+          -0.2089240140758822,
+          -0.22800389395158852,
+          -0.19017203733562008,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.2759509874877258,
+        0.3881013858982203,
+        0.10620201911848656,
+        0.16658231992553987,
+        0.3543559931994686,
+        0.15344332156564183,
+        0.07264398096102287,
+        0.11751862194602777
+      ],
+      "shared_to_routed_norm_ratio": 4.403711709152072,
+      "residual_z_norm": 4.041978084563892
+    },
+    {
+      "stage": 11,
+      "selection_fraction": [
+        0.328125,
+        0.140625,
+        0.9375,
+        0.859375,
+        0.421875,
+        0.25,
+        0.0625
+      ],
+      "mean_softmax": [
+        0.14078071796444552,
+        0.11540893664388434,
+        0.208133356332585,
+        0.19337116734930468,
+        0.1263701813262069,
+        0.12724703733629478,
+        0.08868860304727877
+      ],
+      "mean_softmax_entropy": 1.8708732557096888,
+      "effective_gate_count": 6.497753992738411,
+      "dominant_subset_fraction": 0.421875,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          -0.021445776865210698,
+          -0.008553734114015612,
+          0.320106381586649,
+          0.35412388754970964,
+          0.22920144296575024,
+          0.41209117138053153,
+          -0.1762907809127151
+        ],
+        [
+          -0.021445776865210698,
+          1.0,
+          0.3820642919679942,
+          0.3823291168094092,
+          0.24604493610235148,
+          -0.6014854853262911,
+          -0.14517949243405476,
+          0.22220816947181313
+        ],
+        [
+          -0.008553734114015612,
+          0.3820642919679942,
+          1.0,
+          -0.0753881582818424,
+          0.19327433438505937,
+          -0.2744893376252989,
+          -0.06511984655361608,
+          0.2246273363110965
+        ],
+        [
+          0.320106381586649,
+          0.3823291168094092,
+          -0.0753881582818424,
+          1.0,
+          0.245467061849633,
+          -0.05506131021455279,
+          0.2201935174951351,
+          0.06974446144238389
+        ],
+        [
+          0.35412388754970964,
+          0.24604493610235148,
+          0.19327433438505937,
+          0.245467061849633,
+          1.0,
+          0.025896039841153965,
+          0.1377049333520367,
+          -0.26463107868364977
+        ],
+        [
+          0.22920144296575024,
+          -0.6014854853262911,
+          -0.2744893376252989,
+          -0.05506131021455279,
+          0.025896039841153965,
+          1.0,
+          0.2686800625506266,
+          -0.27729674142054234
+        ],
+        [
+          0.41209117138053153,
+          -0.14517949243405476,
+          -0.06511984655361608,
+          0.2201935174951351,
+          0.1377049333520367,
+          0.2686800625506266,
+          1.0,
+          -0.24145923486986914
+        ],
+        [
+          -0.1762907809127151,
+          0.22220816947181313,
+          0.2246273363110965,
+          0.06974446144238389,
+          -0.26463107868364977,
+          -0.27729674142054234,
+          -0.24145923486986914,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.3028881439672381,
+        0.39127796741347654,
+        0.10602942867035275,
+        0.12202788595972755,
+        0.2769451837635756,
+        0.1370479369508158,
+        0.06336031706834373,
+        0.09710142450937312
+      ],
+      "shared_to_routed_norm_ratio": 8.43816785720455,
+      "residual_z_norm": 4.021554128579577
+    },
+    {
+      "stage": 12,
+      "selection_fraction": [
+        0.328125,
+        0.171875,
+        0.875,
+        0.828125,
+        0.21875,
+        0.5,
+        0.078125
+      ],
+      "mean_softmax": [
+        0.1342839254773582,
+        0.11568271159880679,
+        0.2008579038046246,
+        0.18843794974651962,
+        0.12900055714651953,
+        0.13708981006473503,
+        0.09464714216143626
+      ],
+      "mean_softmax_entropy": 1.8830872552651163,
+      "effective_gate_count": 6.577031627927614,
+      "dominant_subset_fraction": 0.4375,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          -0.1926955594109699,
+          0.13178204937494853,
+          -0.028877450115059287,
+          0.31565946668685446,
+          0.33796706167975127,
+          0.33680535201405654,
+          -0.23650870902031496
+        ],
+        [
+          -0.1926955594109699,
+          1.0,
+          0.21934815771355834,
+          0.46307332076581964,
+          0.237037775373484,
+          -0.5370072887403674,
+          -0.05711363699458035,
+          0.16695941369455453
+        ],
+        [
+          0.13178204937494853,
+          0.21934815771355834,
+          1.0,
+          -0.10076299666226236,
+          0.16533166802364327,
+          -0.15889851122091248,
+          -0.05339960056208761,
+          0.14766113756177168
+        ],
+        [
+          -0.028877450115059287,
+          0.46307332076581964,
+          -0.10076299666226236,
+          1.0,
+          0.16161416766254194,
+          -0.23456003586299262,
+          0.09206525330775721,
+          0.14077436227492696
+        ],
+        [
+          0.31565946668685446,
+          0.237037775373484,
+          0.16533166802364327,
+          0.16161416766254194,
+          1.0,
+          0.062415854818254686,
+          -0.025093429361417938,
+          -0.1904230660331223
+        ],
+        [
+          0.33796706167975127,
+          -0.5370072887403674,
+          -0.15889851122091248,
+          -0.23456003586299262,
+          0.062415854818254686,
+          1.0,
+          0.08164262015316677,
+          -0.3319049699944845
+        ],
+        [
+          0.33680535201405654,
+          -0.05711363699458035,
+          -0.05339960056208761,
+          0.09206525330775721,
+          -0.025093429361417938,
+          0.08164262015316677,
+          1.0,
+          -0.04672526851151507
+        ],
+        [
+          -0.23650870902031496,
+          0.16695941369455453,
+          0.14766113756177168,
+          0.14077436227492696,
+          -0.1904230660331223,
+          -0.3319049699944845,
+          -0.04672526851151507,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.3567750005262887,
+        0.3812332262329132,
+        0.11653034185134399,
+        0.12002605309964008,
+        0.21829063870788926,
+        0.11691634527582405,
+        0.06025896903121873,
+        0.08207570726831609
+      ],
+      "shared_to_routed_norm_ratio": 10.154434972219265,
+      "residual_z_norm": 4.008351962104431
+    },
+    {
+      "stage": 13,
+      "selection_fraction": [
+        0.40625,
+        0.21875,
+        0.8125,
+        0.765625,
+        0.109375,
+        0.578125,
+        0.109375
+      ],
+      "mean_softmax": [
+        0.14237232456295307,
+        0.13024418832766693,
+        0.18227742033733282,
+        0.17031643279673536,
+        0.12709517789435004,
+        0.14351203759972342,
+        0.10418241848123838
+      ],
+      "mean_softmax_entropy": 1.895866837152462,
+      "effective_gate_count": 6.663669699819262,
+      "dominant_subset_fraction": 0.484375,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          -0.20134275619179906,
+          0.367674040010767,
+          -0.29366811157131884,
+          0.32558335181995535,
+          0.24956520654992548,
+          0.3061718959322194,
+          -0.06999867274200351
+        ],
+        [
+          -0.20134275619179906,
+          1.0,
+          0.0879008858716919,
+          0.44667159870717577,
+          0.2024738326519893,
+          -0.4245789214732485,
+          -0.029625599554539545,
+          0.13445557617418608
+        ],
+        [
+          0.367674040010767,
+          0.0879008858716919,
+          1.0,
+          -0.16062005172421082,
+          0.23057220375493753,
+          -0.11590073587848591,
+          -0.016297319455670846,
+          0.16949517537677355
+        ],
+        [
+          -0.29366811157131884,
+          0.44667159870717577,
+          -0.16062005172421082,
+          1.0,
+          0.03503050610915705,
+          -0.331185226788142,
+          -0.05690845938641162,
+          0.12404393213667711
+        ],
+        [
+          0.32558335181995535,
+          0.2024738326519893,
+          0.23057220375493753,
+          0.03503050610915705,
+          1.0,
+          0.07687781298687422,
+          -0.021298990925657773,
+          -0.11999570654391971
+        ],
+        [
+          0.24956520654992548,
+          -0.4245789214732485,
+          -0.11590073587848591,
+          -0.331185226788142,
+          0.07687781298687422,
+          1.0,
+          -0.016674114307327386,
+          -0.2220660948787524
+        ],
+        [
+          0.3061718959322194,
+          -0.029625599554539545,
+          -0.016297319455670846,
+          -0.05690845938641162,
+          -0.021298990925657773,
+          -0.016674114307327386,
+          1.0,
+          -0.049562648509150445
+        ],
+        [
+          -0.06999867274200351,
+          0.13445557617418608,
+          0.16949517537677355,
+          0.12404393213667711,
+          -0.11999570654391971,
+          -0.2220660948787524,
+          -0.049562648509150445,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.41100563427452746,
+        0.30415623438189676,
+        0.16231375867072514,
+        0.17865342693509495,
+        0.16813054679514597,
+        0.10464040738509432,
+        0.07895716628438679,
+        0.08765095224783016
+      ],
+      "shared_to_routed_norm_ratio": 12.444835217335548,
+      "residual_z_norm": 4.006076618041263
+    },
+    {
+      "stage": 14,
+      "selection_fraction": [
+        0.5625,
+        0.4375,
+        0.625,
+        0.546875,
+        0.078125,
+        0.609375,
+        0.140625
+      ],
+      "mean_softmax": [
+        0.15583359818136824,
+        0.1478713242034702,
+        0.16535647179722343,
+        0.15274279581502137,
+        0.12256181114001463,
+        0.14392675257956772,
+        0.11170724628333441
+      ],
+      "mean_softmax_entropy": 1.8990610953228475,
+      "effective_gate_count": 6.685980209072325,
+      "dominant_subset_fraction": 0.328125,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.06394704810517336,
+          0.47928192667622616,
+          -0.2822794578538685,
+          0.2348948891334582,
+          0.06082470422037736,
+          0.299963486697222,
+          0.037046810605116026
+        ],
+        [
+          0.06394704810517336,
+          1.0,
+          0.3028337475766902,
+          0.19631557488730783,
+          0.16483879050333816,
+          -0.3622184516112723,
+          0.0743528746206937,
+          0.10331862588564755
+        ],
+        [
+          0.47928192667622616,
+          0.3028337475766902,
+          1.0,
+          -0.22046838718918635,
+          0.22643069497649337,
+          -0.17458167334138042,
+          0.11137844953920176,
+          0.16827066621721282
+        ],
+        [
+          -0.2822794578538685,
+          0.19631557488730783,
+          -0.22046838718918635,
+          1.0,
+          0.01448974437013994,
+          -0.3587266798472352,
+          -0.2150558633748631,
+          0.13369913746295567
+        ],
+        [
+          0.2348948891334582,
+          0.16483879050333816,
+          0.22643069497649337,
+          0.01448974437013994,
+          1.0,
+          -0.013565418416444108,
+          0.026229333489661933,
+          -0.08903160191197027
+        ],
+        [
+          0.06082470422037736,
+          -0.3622184516112723,
+          -0.17458167334138042,
+          -0.3587266798472352,
+          -0.013565418416444108,
+          1.0,
+          0.008599416125212735,
+          -0.22416077727515613
+        ],
+        [
+          0.299963486697222,
+          0.0743528746206937,
+          0.11137844953920176,
+          -0.2150558633748631,
+          0.026229333489661933,
+          0.008599416125212735,
+          1.0,
+          -0.09510373989711449
+        ],
+        [
+          0.037046810605116026,
+          0.10331862588564755,
+          0.16827066621721282,
+          0.13369913746295567,
+          -0.08903160191197027,
+          -0.22416077727515613,
+          -0.09510373989711449,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.4245758749140502,
+        0.2613759142375877,
+        0.1997572476592669,
+        0.2630063661383711,
+        0.1545882841546056,
+        0.09808228014946241,
+        0.09511332492910475,
+        0.08774924610202625
+      ],
+      "shared_to_routed_norm_ratio": 10.039993696860016,
+      "residual_z_norm": 4.010249164923032
+    },
+    {
+      "stage": 15,
+      "selection_fraction": [
+        0.578125,
+        0.5,
+        0.578125,
+        0.484375,
+        0.09375,
+        0.5,
+        0.265625
+      ],
+      "mean_softmax": [
+        0.17329492429391677,
+        0.16808523464745348,
+        0.15006273127247027,
+        0.13663231053900332,
+        0.11636134705869157,
+        0.1392265374976701,
+        0.11633691469079445
+      ],
+      "mean_softmax_entropy": 1.8905124828378708,
+      "effective_gate_count": 6.628676473092091,
+      "dominant_subset_fraction": 0.328125,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.16525778654934248,
+          0.48047945822390514,
+          -0.18591652522783791,
+          0.23856119930042113,
+          -0.07706104032373941,
+          0.23060173897844122,
+          0.21347651295312176
+        ],
+        [
+          0.16525778654934248,
+          1.0,
+          0.3400273539385572,
+          0.12767525029512308,
+          0.19090035403073186,
+          -0.27008838481526254,
+          0.08629115133418883,
+          0.09621929399186405
+        ],
+        [
+          0.48047945822390514,
+          0.3400273539385572,
+          1.0,
+          -0.09586206822528913,
+          0.18746461048863688,
+          -0.22518056652592766,
+          0.10244308838494817,
+          0.29097916514474653
+        ],
+        [
+          -0.18591652522783791,
+          0.12767525029512308,
+          -0.09586206822528913,
+          1.0,
+          0.07331286732495386,
+          -0.451648420484595,
+          -0.37767069794237423,
+          0.17950699694471522
+        ],
+        [
+          0.23856119930042113,
+          0.19090035403073186,
+          0.18746461048863688,
+          0.07331286732495386,
+          1.0,
+          -0.06413752453884891,
+          0.0042940403349294685,
+          0.03260654437074957
+        ],
+        [
+          -0.07706104032373941,
+          -0.27008838481526254,
+          -0.22518056652592766,
+          -0.451648420484595,
+          -0.06413752453884891,
+          1.0,
+          0.14472510369984812,
+          -0.23933088690546567
+        ],
+        [
+          0.23060173897844122,
+          0.08629115133418883,
+          0.10244308838494817,
+          -0.37767069794237423,
+          0.0042940403349294685,
+          0.14472510369984812,
+          1.0,
+          -0.192584891816227
+        ],
+        [
+          0.21347651295312176,
+          0.09621929399186405,
+          0.29097916514474653,
+          0.17950699694471522,
+          0.03260654437074957,
+          -0.23933088690546567,
+          -0.192584891816227,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.42399166431902346,
+        0.24964383011037788,
+        0.2187896012687725,
+        0.363636283563698,
+        0.16553190864853637,
+        0.0936554146575255,
+        0.110849295900056,
+        0.11038604527061333
+      ],
+      "shared_to_routed_norm_ratio": 8.734454477160698,
+      "residual_z_norm": 4.0206714790150615
+    },
+    {
+      "stage": 16,
+      "selection_fraction": [
+        0.71875,
+        0.65625,
+        0.515625,
+        0.296875,
+        0.109375,
+        0.4375,
+        0.265625
+      ],
+      "mean_softmax": [
+        0.1875332802062182,
+        0.1796406498326107,
+        0.14255710118900258,
+        0.12748338296413592,
+        0.11229424899899236,
+        0.133924052121966,
+        0.11656728468707422
+      ],
+      "mean_softmax_entropy": 1.8871166984138794,
+      "effective_gate_count": 6.606943473976296,
+      "dominant_subset_fraction": 0.265625,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.346496784797476,
+          0.4432484285304994,
+          -0.052974126289972764,
+          0.07479485760802236,
+          -0.2609687173669055,
+          0.17021022012618672,
+          0.30034568561405683
+        ],
+        [
+          0.346496784797476,
+          1.0,
+          0.4337358257880796,
+          0.1153747669227441,
+          0.08956789103787693,
+          -0.3041749882174666,
+          0.0416001888399732,
+          0.1898072132394388
+        ],
+        [
+          0.4432484285304994,
+          0.4337358257880796,
+          1.0,
+          -0.07599334346422112,
+          0.04813396909362561,
+          -0.17319427425166425,
+          0.1801828319848712,
+          0.2667112274490065
+        ],
+        [
+          -0.052974126289972764,
+          0.1153747669227441,
+          -0.07599334346422112,
+          1.0,
+          0.1209326468038981,
+          -0.5024194663666157,
+          -0.48851167916661076,
+          0.2974521829309167
+        ],
+        [
+          0.07479485760802236,
+          0.08956789103787693,
+          0.04813396909362561,
+          0.1209326468038981,
+          1.0,
+          -0.10728323793863631,
+          0.017135308354034057,
+          -0.05016902452927345
+        ],
+        [
+          -0.2609687173669055,
+          -0.3041749882174666,
+          -0.17319427425166425,
+          -0.5024194663666157,
+          -0.10728323793863631,
+          1.0,
+          0.2642653139212781,
+          -0.28012524982067677
+        ],
+        [
+          0.17021022012618672,
+          0.0416001888399732,
+          0.1801828319848712,
+          -0.48851167916661076,
+          0.017135308354034057,
+          0.2642653139212781,
+          1.0,
+          -0.21153396056390586
+        ],
+        [
+          0.30034568561405683,
+          0.1898072132394388,
+          0.2667112274490065,
+          0.2974521829309167,
+          -0.05016902452927345,
+          -0.28012524982067677,
+          -0.21153396056390586,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.38299006523371404,
+        0.2298483637551093,
+        0.2049036353470049,
+        0.41801008726590466,
+        0.18335309083387397,
+        0.10478423421032043,
+        0.10093236223898636,
+        0.10478918279551826
+      ],
+      "shared_to_routed_norm_ratio": 6.852364636336279,
+      "residual_z_norm": 4.030562752165613
+    },
+    {
+      "stage": 17,
+      "selection_fraction": [
+        0.75,
+        0.6875,
+        0.625,
+        0.28125,
+        0.078125,
+        0.328125,
+        0.25
+      ],
+      "mean_softmax": [
+        0.1923476500565639,
+        0.1798898882684539,
+        0.1446028386091646,
+        0.12801190174403393,
+        0.11133999295228342,
+        0.1296712237651279,
+        0.11413650460437237
+      ],
+      "mean_softmax_entropy": 1.8900537525369423,
+      "effective_gate_count": 6.624108611778912,
+      "dominant_subset_fraction": 0.296875,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.44605674054569294,
+          0.2765955181608536,
+          0.14948574807674317,
+          0.05020184562403999,
+          -0.3868154040781739,
+          0.06594216954841275,
+          0.31781074068204124
+        ],
+        [
+          0.44605674054569294,
+          1.0,
+          0.25200829596738494,
+          0.1764245879981849,
+          -0.0030331773213764304,
+          -0.312730986410391,
+          0.011696408378525272,
+          0.19200903580785716
+        ],
+        [
+          0.2765955181608536,
+          0.25200829596738494,
+          1.0,
+          -0.16053853179619632,
+          -0.005978445334916899,
+          0.0011535268032114333,
+          0.25840110080604917,
+          0.15821509962687114
+        ],
+        [
+          0.14948574807674317,
+          0.1764245879981849,
+          -0.16053853179619632,
+          1.0,
+          0.15353657327508874,
+          -0.5213504127435614,
+          -0.4551543186437668,
+          0.3167724360898756
+        ],
+        [
+          0.05020184562403999,
+          -0.0030331773213764304,
+          -0.005978445334916899,
+          0.15353657327508874,
+          1.0,
+          -0.09986233415312179,
+          0.012772379883020255,
+          -0.09889753849895118
+        ],
+        [
+          -0.3868154040781739,
+          -0.312730986410391,
+          0.0011535268032114333,
+          -0.5213504127435614,
+          -0.09986233415312179,
+          1.0,
+          0.35473589286179,
+          -0.2461678097981492
+        ],
+        [
+          0.06594216954841275,
+          0.011696408378525272,
+          0.25840110080604917,
+          -0.4551543186437668,
+          0.012772379883020255,
+          0.35473589286179,
+          1.0,
+          -0.22023005151232333
+        ],
+        [
+          0.31781074068204124,
+          0.19200903580785716,
+          0.15821509962687114,
+          0.3167724360898756,
+          -0.09889753849895118,
+          -0.2461678097981492,
+          -0.22023005151232333,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.3285160415488819,
+        0.20454415813629634,
+        0.17045307517976546,
+        0.40928290962905844,
+        0.2439731946431319,
+        0.12087785859946615,
+        0.0928177772940382,
+        0.09840682037172771
+      ],
+      "shared_to_routed_norm_ratio": 5.61985082679049,
+      "residual_z_norm": 4.035458648596259
+    },
+    {
+      "stage": 18,
+      "selection_fraction": [
+        0.796875,
+        0.671875,
+        0.671875,
+        0.328125,
+        0.09375,
+        0.25,
+        0.1875
+      ],
+      "mean_softmax": [
+        0.18877659239864739,
+        0.17428156365612135,
+        0.1504663877364772,
+        0.13334047350015787,
+        0.1126012513303682,
+        0.1285757096788017,
+        0.11195802169942629
+      ],
+      "mean_softmax_entropy": 1.8934874743229377,
+      "effective_gate_count": 6.64617272367034,
+      "dominant_subset_fraction": 0.34375,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.4192246213191894,
+          0.18678773033514104,
+          0.208145914632985,
+          0.07973224550406578,
+          -0.3673328800864821,
+          0.04857371637985415,
+          0.2376651890478075
+        ],
+        [
+          0.4192246213191894,
+          1.0,
+          0.21626618087108115,
+          0.22060998825553907,
+          0.06804912166279434,
+          -0.3439695429975364,
+          0.04669150560835536,
+          0.16232981039731578
+        ],
+        [
+          0.18678773033514104,
+          0.21626618087108115,
+          1.0,
+          -0.2343457187742074,
+          0.000772359452757488,
+          0.11861461690333108,
+          0.3390015694102717,
+          0.12472429022325898
+        ],
+        [
+          0.208145914632985,
+          0.22060998825553907,
+          -0.2343457187742074,
+          1.0,
+          0.1626121977424872,
+          -0.5080060700026869,
+          -0.45139418240278195,
+          0.24374469693629175
+        ],
+        [
+          0.07973224550406578,
+          0.06804912166279434,
+          0.000772359452757488,
+          0.1626121977424872,
+          1.0,
+          -0.06865988344490416,
+          0.10370947917770688,
+          -0.1138487375894626
+        ],
+        [
+          -0.3673328800864821,
+          -0.3439695429975364,
+          0.11861461690333108,
+          -0.5080060700026869,
+          -0.06865988344490416,
+          1.0,
+          0.41469746798438634,
+          -0.19907146533735337
+        ],
+        [
+          0.04857371637985415,
+          0.04669150560835536,
+          0.3390015694102717,
+          -0.45139418240278195,
+          0.10370947917770688,
+          0.41469746798438634,
+          1.0,
+          -0.15919962385082675
+        ],
+        [
+          0.2376651890478075,
+          0.16232981039731578,
+          0.12472429022325898,
+          0.24374469693629175,
+          -0.1138487375894626,
+          -0.19907146533735337,
+          -0.15919962385082675,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.2763105223792328,
+        0.19288665954038003,
+        0.1442143067521926,
+        0.367956125369373,
+        0.27841139111007185,
+        0.1300975916352727,
+        0.08285514350497507,
+        0.0926346672083702
+      ],
+      "shared_to_routed_norm_ratio": 4.83558892976942,
+      "residual_z_norm": 4.033541631916297
+    },
+    {
+      "stage": 19,
+      "selection_fraction": [
+        0.796875,
+        0.59375,
+        0.65625,
+        0.390625,
+        0.09375,
+        0.265625,
+        0.203125
+      ],
+      "mean_softmax": [
+        0.18511140101352117,
+        0.16951320784379983,
+        0.15487640021998095,
+        0.13752961370435485,
+        0.11403023083763084,
+        0.1287577818990994,
+        0.11018136448161296
+      ],
+      "mean_softmax_entropy": 1.8968691249488059,
+      "effective_gate_count": 6.668445554489742,
+      "dominant_subset_fraction": 0.28125,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.32758739376689594,
+          0.16334786901020715,
+          0.0978362750055458,
+          0.058021237250944026,
+          -0.20650950708994226,
+          0.1292331444113701,
+          0.1596791647568708
+        ],
+        [
+          0.32758739376689594,
+          1.0,
+          0.1358973782204722,
+          0.26298744247037575,
+          0.07069433453505344,
+          -0.2940239219539005,
+          0.09030817258919696,
+          0.08649157414110889
+        ],
+        [
+          0.16334786901020715,
+          0.1358973782204722,
+          1.0,
+          -0.25733190845093734,
+          0.027804698945924626,
+          0.19186284492287228,
+          0.28507974786623913,
+          0.054103063821288176
+        ],
+        [
+          0.0978362750055458,
+          0.26298744247037575,
+          -0.25733190845093734,
+          1.0,
+          0.22633099967583434,
+          -0.561336511560342,
+          -0.4286170642719312,
+          0.25060922281023745
+        ],
+        [
+          0.058021237250944026,
+          0.07069433453505344,
+          0.027804698945924626,
+          0.22633099967583434,
+          1.0,
+          -0.08572979163039939,
+          0.042633970018032624,
+          -0.12893595688096238
+        ],
+        [
+          -0.20650950708994226,
+          -0.2940239219539005,
+          0.19186284492287228,
+          -0.561336511560342,
+          -0.08572979163039939,
+          1.0,
+          0.41650859946702623,
+          -0.15941437807730885
+        ],
+        [
+          0.1292331444113701,
+          0.09030817258919696,
+          0.28507974786623913,
+          -0.4286170642719312,
+          0.042633970018032624,
+          0.41650859946702623,
+          1.0,
+          -0.17970213181397104
+        ],
+        [
+          0.1596791647568708,
+          0.08649157414110889,
+          0.054103063821288176,
+          0.25060922281023745,
+          -0.12893595688096238,
+          -0.15941437807730885,
+          -0.17970213181397104,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.2508051425150496,
+        0.1920649898774573,
+        0.12888668439368767,
+        0.3398553502847046,
+        0.2851660570171616,
+        0.13759757893273777,
+        0.07464188495214572,
+        0.0874226817896393
+      ],
+      "shared_to_routed_norm_ratio": 4.088474784590575,
+      "residual_z_norm": 4.030609798012831
+    },
+    {
+      "stage": 20,
+      "selection_fraction": [
+        0.765625,
+        0.546875,
+        0.703125,
+        0.4375,
+        0.078125,
+        0.25,
+        0.21875
+      ],
+      "mean_softmax": [
+        0.17968958267414165,
+        0.1640952797475794,
+        0.1581404621683205,
+        0.14127702660706865,
+        0.11605057909533549,
+        0.13094734681446324,
+        0.10979972289309106
+      ],
+      "mean_softmax_entropy": 1.902273479428934,
+      "effective_gate_count": 6.704423964191984,
+      "dominant_subset_fraction": 0.28125,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.13721503143156233,
+          0.1859190250832192,
+          0.026312159200480745,
+          -0.0070727831145430825,
+          -0.13888166678664787,
+          0.16023342276277516,
+          0.15594105939842923
+        ],
+        [
+          0.13721503143156233,
+          1.0,
+          0.02988611482564099,
+          0.4071318031713223,
+          0.07908738173496913,
+          -0.3580738333150757,
+          -0.015265468572331235,
+          0.021414467104057856
+        ],
+        [
+          0.1859190250832192,
+          0.02988611482564099,
+          1.0,
+          -0.18703969163710732,
+          0.020485671099210546,
+          0.13326804374561846,
+          0.21406331451359742,
+          0.03407835983246847
+        ],
+        [
+          0.026312159200480745,
+          0.4071318031713223,
+          -0.18703969163710732,
+          1.0,
+          0.22347397699429677,
+          -0.6053687312769311,
+          -0.41280985497626044,
+          0.1398448149164036
+        ],
+        [
+          -0.0070727831145430825,
+          0.07908738173496913,
+          0.020485671099210546,
+          0.22347397699429677,
+          1.0,
+          -0.024514477662097425,
+          0.049569931874245715,
+          -0.14512036661166577
+        ],
+        [
+          -0.13888166678664787,
+          -0.3580738333150757,
+          0.13326804374561846,
+          -0.6053687312769311,
+          -0.024514477662097425,
+          1.0,
+          0.4251276123509351,
+          -0.13555883964946697
+        ],
+        [
+          0.16023342276277516,
+          -0.015265468572331235,
+          0.21406331451359742,
+          -0.41280985497626044,
+          0.049569931874245715,
+          0.4251276123509351,
+          1.0,
+          -0.1444409136460507
+        ],
+        [
+          0.15594105939842923,
+          0.021414467104057856,
+          0.03407835983246847,
+          0.1398448149164036,
+          -0.14512036661166577,
+          -0.13555883964946697,
+          -0.1444409136460507,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.23632366403588162,
+        0.18383559454029952,
+        0.11940501822791212,
+        0.3120661112792619,
+        0.2823843237835482,
+        0.14317349684706698,
+        0.06758275265561806,
+        0.07559086494729826
+      ],
+      "shared_to_routed_norm_ratio": 4.175807274786915,
+      "residual_z_norm": 4.025507893075354
+    },
+    {
+      "stage": 21,
+      "selection_fraction": [
+        0.765625,
+        0.53125,
+        0.71875,
+        0.453125,
+        0.0625,
+        0.296875,
+        0.171875
+      ],
+      "mean_softmax": [
+        0.17346205222498529,
+        0.15846564972659366,
+        0.1609746658356601,
+        0.14447767754519147,
+        0.11831064489724749,
+        0.1341227727582216,
+        0.11018653701210035
+      ],
+      "mean_softmax_entropy": 1.9099865167072259,
+      "effective_gate_count": 6.755233164012463,
+      "dominant_subset_fraction": 0.28125,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.01219563600481264,
+          0.23210960478000123,
+          -0.04364993224708618,
+          -0.01149127697678557,
+          -0.0678908038506916,
+          0.2452508428837444,
+          0.162151052826678
+        ],
+        [
+          0.01219563600481264,
+          1.0,
+          -0.05831795170056965,
+          0.39443105263464434,
+          0.16249245017927952,
+          -0.346854474948406,
+          0.012153368333487263,
+          -0.025735806461934876
+        ],
+        [
+          0.23210960478000123,
+          -0.05831795170056965,
+          1.0,
+          -0.20061677213749107,
+          0.025611198298930445,
+          0.15656317706336725,
+          0.20682876211697102,
+          0.0500625698115959
+        ],
+        [
+          -0.04364993224708618,
+          0.39443105263464434,
+          -0.20061677213749107,
+          1.0,
+          0.18258610089656044,
+          -0.615293776901862,
+          -0.30996827609676925,
+          0.0853351549120729
+        ],
+        [
+          -0.01149127697678557,
+          0.16249245017927952,
+          0.025611198298930445,
+          0.18258610089656044,
+          1.0,
+          0.008416616336615765,
+          0.06713991771489139,
+          -0.16489502560847802
+        ],
+        [
+          -0.0678908038506916,
+          -0.346854474948406,
+          0.15656317706336725,
+          -0.615293776901862,
+          0.008416616336615765,
+          1.0,
+          0.34080243126291065,
+          -0.09889579564873122
+        ],
+        [
+          0.2452508428837444,
+          0.012153368333487263,
+          0.20682876211697102,
+          -0.30996827609676925,
+          0.06713991771489139,
+          0.34080243126291065,
+          1.0,
+          -0.12907575690324616
+        ],
+        [
+          0.162151052826678,
+          -0.025735806461934876,
+          0.0500625698115959,
+          0.0853351549120729,
+          -0.16489502560847802,
+          -0.09889579564873122,
+          -0.12907575690324616,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.2282078992572977,
+        0.17000845136361797,
+        0.11608228596543732,
+        0.27451849387114824,
+        0.2743839082563804,
+        0.145398894181445,
+        0.06765071628715341,
+        0.0735775792473568
+      ],
+      "shared_to_routed_norm_ratio": 3.9636713531517103,
+      "residual_z_norm": 4.01868578445028
+    },
+    {
+      "stage": 22,
+      "selection_fraction": [
+        0.703125,
+        0.40625,
+        0.734375,
+        0.5625,
+        0.09375,
+        0.359375,
+        0.140625
+      ],
+      "mean_softmax": [
+        0.1683703196980817,
+        0.15512959058375916,
+        0.16245891978725485,
+        0.14711153606407743,
+        0.11994905586180224,
+        0.13628322521269834,
+        0.11069735279232631
+      ],
+      "mean_softmax_entropy": 1.9116467235955665,
+      "effective_gate_count": 6.766398540107065,
+      "dominant_subset_fraction": 0.296875,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.025646239354306308,
+          0.2521421904037034,
+          -0.08369506948443584,
+          0.043069911627651856,
+          0.01373917336499169,
+          0.29989871850473265,
+          0.21356679991364338
+        ],
+        [
+          0.025646239354306308,
+          1.0,
+          0.08417824901617715,
+          0.3731668595883949,
+          0.2513761888757432,
+          -0.35444764980301413,
+          0.09002066385920178,
+          -0.03618172169138831
+        ],
+        [
+          0.2521421904037034,
+          0.08417824901617715,
+          1.0,
+          -0.08055307630525962,
+          0.13197668114670316,
+          0.029359300820154255,
+          0.1661308387870498,
+          0.11363069858383668
+        ],
+        [
+          -0.08369506948443584,
+          0.3731668595883949,
+          -0.08055307630525962,
+          1.0,
+          0.18164724616116498,
+          -0.567027662017296,
+          -0.21821960681072683,
+          0.06745200504654708
+        ],
+        [
+          0.043069911627651856,
+          0.2513761888757432,
+          0.13197668114670316,
+          0.18164724616116498,
+          1.0,
+          0.05117025903155212,
+          0.09125949771511019,
+          -0.14454842453999417
+        ],
+        [
+          0.01373917336499169,
+          -0.35444764980301413,
+          0.029359300820154255,
+          -0.567027662017296,
+          0.05117025903155212,
+          1.0,
+          0.26141200093629724,
+          -0.1171789704673193
+        ],
+        [
+          0.29989871850473265,
+          0.09002066385920178,
+          0.1661308387870498,
+          -0.21821960681072683,
+          0.09125949771511019,
+          0.26141200093629724,
+          1.0,
+          -0.08268903925449456
+        ],
+        [
+          0.21356679991364338,
+          -0.03618172169138831,
+          0.11363069858383668,
+          0.06745200504654708,
+          -0.14454842453999417,
+          -0.1171789704673193,
+          -0.08268903925449456,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.23318074479687628,
+        0.18046306538261556,
+        0.11547051687329728,
+        0.25055542168357775,
+        0.2548195238293048,
+        0.14030551114692744,
+        0.07436388181015859,
+        0.08498035486050047
+      ],
+      "shared_to_routed_norm_ratio": 4.280408243320933,
+      "residual_z_norm": 4.012362898138365
+    },
+    {
+      "stage": 23,
+      "selection_fraction": [
+        0.734375,
+        0.421875,
+        0.6875,
+        0.5,
+        0.078125,
+        0.421875,
+        0.15625
+      ],
+      "mean_softmax": [
+        0.16320500362847834,
+        0.15267282037537358,
+        0.1612062458029322,
+        0.14860180140222407,
+        0.12199007990066603,
+        0.13969654729087344,
+        0.11262750159945235
+      ],
+      "mean_softmax_entropy": 1.9132284169254308,
+      "effective_gate_count": 6.777410695376674,
+      "dominant_subset_fraction": 0.25,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          -0.002891839491570909,
+          0.28617030947515243,
+          -0.14161893774811513,
+          0.030715269841373988,
+          0.012840641819942829,
+          0.3108954299088907,
+          0.2174522791451474
+        ],
+        [
+          -0.002891839491570909,
+          1.0,
+          0.21406962804924512,
+          0.3598676329593926,
+          0.21102334002761328,
+          -0.35264816802595106,
+          0.08949467109643694,
+          -0.03742367878469621
+        ],
+        [
+          0.28617030947515243,
+          0.21406962804924512,
+          1.0,
+          0.02018051199643756,
+          0.1460276336383208,
+          -0.03504813493409403,
+          0.15769674365548722,
+          0.11817314137094143
+        ],
+        [
+          -0.14161893774811513,
+          0.3598676329593926,
+          0.02018051199643756,
+          1.0,
+          0.16720458095743718,
+          -0.4502635954864521,
+          -0.2513939341870609,
+          0.022762282297896258
+        ],
+        [
+          0.030715269841373988,
+          0.21102334002761328,
+          0.1460276336383208,
+          0.16720458095743718,
+          1.0,
+          0.037403784848493056,
+          0.11666793710379728,
+          -0.0953102736189209
+        ],
+        [
+          0.012840641819942829,
+          -0.35264816802595106,
+          -0.03504813493409403,
+          -0.4502635954864521,
+          0.037403784848493056,
+          1.0,
+          0.24024256776957298,
+          -0.09637608097634856
+        ],
+        [
+          0.3108954299088907,
+          0.08949467109643694,
+          0.15769674365548722,
+          -0.2513939341870609,
+          0.11666793710379728,
+          0.24024256776957298,
+          1.0,
+          -0.006629199996604534
+        ],
+        [
+          0.2174522791451474,
+          -0.03742367878469621,
+          0.11817314137094143,
+          0.022762282297896258,
+          -0.0953102736189209,
+          -0.09637608097634856,
+          -0.006629199996604534,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.23096644406569852,
+        0.18229192311779369,
+        0.12331253144539103,
+        0.2417206598454801,
+        0.22071282044975427,
+        0.13314858023852189,
+        0.08209091150783633,
+        0.08918113945021212
+      ],
+      "shared_to_routed_norm_ratio": 4.394031155449949,
+      "residual_z_norm": 4.005565749562406
+    },
+    {
+      "stage": 24,
+      "selection_fraction": [
+        0.59375,
+        0.5,
+        0.640625,
+        0.484375,
+        0.109375,
+        0.53125,
+        0.140625
+      ],
+      "mean_softmax": [
+        0.16254281045977936,
+        0.15381580191571442,
+        0.15726180128683626,
+        0.146979869615653,
+        0.12289790222191303,
+        0.1413594347113738,
+        0.11514237978873004
+      ],
+      "mean_softmax_entropy": 1.9139490646597097,
+      "effective_gate_count": 6.781852191431241,
+      "dominant_subset_fraction": 0.25,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.02193416471126274,
+          0.2441791459821945,
+          -0.14137455186626785,
+          -0.0514569577599025,
+          -0.010180254927729192,
+          0.2134702352377026,
+          0.17874556133696004
+        ],
+        [
+          0.02193416471126274,
+          1.0,
+          0.3396081366057899,
+          0.117117929991293,
+          0.14930601987272368,
+          -0.19873383416204848,
+          0.1614551017767258,
+          0.013719513208475444
+        ],
+        [
+          0.2441791459821945,
+          0.3396081366057899,
+          1.0,
+          -0.04562452644525173,
+          0.09468655941859734,
+          0.0353754938199125,
+          0.2286676259971133,
+          0.05478474671053931
+        ],
+        [
+          -0.14137455186626785,
+          0.117117929991293,
+          -0.04562452644525173,
+          1.0,
+          0.14746288365721588,
+          -0.39354302621099185,
+          -0.2533964887860465,
+          0.057853119651443394
+        ],
+        [
+          -0.0514569577599025,
+          0.14930601987272368,
+          0.09468655941859734,
+          0.14746288365721588,
+          1.0,
+          0.04211195813473355,
+          0.03688757500560409,
+          -0.17170645293264242
+        ],
+        [
+          -0.010180254927729192,
+          -0.19873383416204848,
+          0.0353754938199125,
+          -0.39354302621099185,
+          0.04211195813473355,
+          1.0,
+          0.2278143877809924,
+          -0.1766645476789571
+        ],
+        [
+          0.2134702352377026,
+          0.1614551017767258,
+          0.2286676259971133,
+          -0.2533964887860465,
+          0.03688757500560409,
+          0.2278143877809924,
+          1.0,
+          0.026879446211488613
+        ],
+        [
+          0.17874556133696004,
+          0.013719513208475444,
+          0.05478474671053931,
+          0.057853119651443394,
+          -0.17170645293264242,
+          -0.1766645476789571,
+          0.026879446211488613,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.2381050603213441,
+        0.19056365220856117,
+        0.12598134510202408,
+        0.24793591656883238,
+        0.1990994002053097,
+        0.12307014124572112,
+        0.09313355879402394,
+        0.08684979628799094
+      ],
+      "shared_to_routed_norm_ratio": 5.2139067736401525,
+      "residual_z_norm": 4.003211385727103
+    },
+    {
+      "stage": 25,
+      "selection_fraction": [
+        0.640625,
+        0.5,
+        0.59375,
+        0.5,
+        0.09375,
+        0.59375,
+        0.078125
+      ],
+      "mean_softmax": [
+        0.16203050318446244,
+        0.15538542295678204,
+        0.15254319859713153,
+        0.14418449240723646,
+        0.12397379092690955,
+        0.14334329572255017,
+        0.11853929620492785
+      ],
+      "mean_softmax_entropy": 1.9160791657557428,
+      "effective_gate_count": 6.795813138171365,
+      "dominant_subset_fraction": 0.296875,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.030624510877903525,
+          0.2711120755938331,
+          -0.09129966792003583,
+          -0.03691265844450833,
+          -0.09266463489956683,
+          0.14569702354036063,
+          0.1461970377447263
+        ],
+        [
+          0.030624510877903525,
+          1.0,
+          0.36411105780435493,
+          0.001198824332572141,
+          0.04417877859876125,
+          -0.08450687359264848,
+          0.23155863866118206,
+          -0.03454064291356471
+        ],
+        [
+          0.2711120755938331,
+          0.36411105780435493,
+          1.0,
+          -0.08498300723154383,
+          0.049450158518231,
+          0.04749616715256458,
+          0.2967232951716958,
+          0.027454186259432748
+        ],
+        [
+          -0.09129966792003583,
+          0.001198824332572141,
+          -0.08498300723154383,
+          1.0,
+          0.10792875815231442,
+          -0.39664821093759833,
+          -0.21936741666325582,
+          0.00456525065205516
+        ],
+        [
+          -0.03691265844450833,
+          0.04417877859876125,
+          0.049450158518231,
+          0.10792875815231442,
+          1.0,
+          0.04415116309184083,
+          0.0341213436367714,
+          -0.13581189981626218
+        ],
+        [
+          -0.09266463489956683,
+          -0.08450687359264848,
+          0.04749616715256458,
+          -0.39664821093759833,
+          0.04415116309184083,
+          1.0,
+          0.2384321222465311,
+          -0.0990376017904234
+        ],
+        [
+          0.14569702354036063,
+          0.23155863866118206,
+          0.2967232951716958,
+          -0.21936741666325582,
+          0.0341213436367714,
+          0.2384321222465311,
+          1.0,
+          -0.028046538379142828
+        ],
+        [
+          0.1461970377447263,
+          -0.03454064291356471,
+          0.027454186259432748,
+          0.00456525065205516,
+          -0.13581189981626218,
+          -0.0990376017904234,
+          -0.028046538379142828,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.2341757459771932,
+        0.18821254313043514,
+        0.11808806910787856,
+        0.254658024625345,
+        0.1867345423379032,
+        0.11318011306926809,
+        0.11150581677728733,
+        0.08148210537059283
+      ],
+      "shared_to_routed_norm_ratio": 5.0199480308353746,
+      "residual_z_norm": 4.002214993122945
+    },
+    {
+      "stage": 26,
+      "selection_fraction": [
+        0.5625,
+        0.515625,
+        0.609375,
+        0.4375,
+        0.109375,
+        0.625,
+        0.140625
+      ],
+      "mean_softmax": [
+        0.163374816697846,
+        0.1579475441632863,
+        0.14853228427704085,
+        0.14152646534637028,
+        0.12444770560674773,
+        0.14299487883867062,
+        0.1211763050700382
+      ],
+      "mean_softmax_entropy": 1.9156405871881732,
+      "effective_gate_count": 6.79305428100364,
+      "dominant_subset_fraction": 0.265625,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.1005524009295957,
+          0.18426570353023974,
+          0.019236743935902148,
+          -0.024030219405209347,
+          -0.16597983271851233,
+          0.06054442427366555,
+          0.2190779696309678
+        ],
+        [
+          0.1005524009295957,
+          1.0,
+          0.301657567956711,
+          -0.06481044142301416,
+          -0.03002044036686935,
+          -0.011180561668282546,
+          0.23776233671468233,
+          -0.03973216417854736
+        ],
+        [
+          0.18426570353023974,
+          0.301657567956711,
+          1.0,
+          0.043235361004983014,
+          -0.0020996120661934646,
+          -0.003477179301138429,
+          0.25474130191073846,
+          -0.016451558774738317
+        ],
+        [
+          0.019236743935902148,
+          -0.06481044142301416,
+          0.043235361004983014,
+          1.0,
+          0.12534692459575209,
+          -0.35411159728306657,
+          -0.2225927762478806,
+          -0.013941776119664115
+        ],
+        [
+          -0.024030219405209347,
+          -0.03002044036686935,
+          -0.0020996120661934646,
+          0.12534692459575209,
+          1.0,
+          0.002009466247885767,
+          0.007160380166490501,
+          -0.12991475548852968
+        ],
+        [
+          -0.16597983271851233,
+          -0.011180561668282546,
+          -0.003477179301138429,
+          -0.35411159728306657,
+          0.002009466247885767,
+          1.0,
+          0.33847269071944985,
+          -0.07845338800328196
+        ],
+        [
+          0.06054442427366555,
+          0.23776233671468233,
+          0.25474130191073846,
+          -0.2225927762478806,
+          0.007160380166490501,
+          0.33847269071944985,
+          1.0,
+          0.011720971847889491
+        ],
+        [
+          0.2190779696309678,
+          -0.03973216417854736,
+          -0.016451558774738317,
+          -0.013941776119664115,
+          -0.12991475548852968,
+          -0.07845338800328196,
+          0.011720971847889491,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.22351554444257338,
+        0.16586248640772536,
+        0.11390411308007656,
+        0.26146428636157354,
+        0.182903555843293,
+        0.10608525595652041,
+        0.11397466515480013,
+        0.08816239316697277
+      ],
+      "shared_to_routed_norm_ratio": 5.2188165035189975,
+      "residual_z_norm": 4.003359456985855
+    },
+    {
+      "stage": 27,
+      "selection_fraction": [
+        0.515625,
+        0.53125,
+        0.609375,
+        0.421875,
+        0.1875,
+        0.578125,
+        0.15625
+      ],
+      "mean_softmax": [
+        0.16106393920341552,
+        0.15525318196035096,
+        0.14843150985165723,
+        0.14241139716103265,
+        0.12650082661352113,
+        0.14386317258740913,
+        0.12247597262261335
+      ],
+      "mean_softmax_entropy": 1.9188051131223176,
+      "effective_gate_count": 6.814480627635099,
+      "dominant_subset_fraction": 0.234375,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.11169690032352447,
+          0.21550652990168528,
+          0.09446572632657702,
+          -0.040855424440568736,
+          -0.17860224306708422,
+          -0.0187224409381162,
+          0.21453866661616897
+        ],
+        [
+          0.11169690032352447,
+          1.0,
+          0.254552613028051,
+          0.021464839721749437,
+          -0.11233836704073291,
+          -0.018389529459363382,
+          0.17001350719233987,
+          -0.05458561450683905
+        ],
+        [
+          0.21550652990168528,
+          0.254552613028051,
+          1.0,
+          0.1122096189950789,
+          0.012042204155019769,
+          -0.03332800761915196,
+          0.1829909662739816,
+          0.026644135060847424
+        ],
+        [
+          0.09446572632657702,
+          0.021464839721749437,
+          0.1122096189950789,
+          1.0,
+          0.08969947010162761,
+          -0.3265149916807315,
+          -0.23444630603416172,
+          -0.03337185963633753
+        ],
+        [
+          -0.040855424440568736,
+          -0.11233836704073291,
+          0.012042204155019769,
+          0.08969947010162761,
+          1.0,
+          -0.008955977541117757,
+          -0.004329121818404797,
+          -0.08028617918132655
+        ],
+        [
+          -0.17860224306708422,
+          -0.018389529459363382,
+          -0.03332800761915196,
+          -0.3265149916807315,
+          -0.008955977541117757,
+          1.0,
+          0.3534196471196289,
+          -0.06861704976565107
+        ],
+        [
+          -0.0187224409381162,
+          0.17001350719233987,
+          0.1829909662739816,
+          -0.23444630603416172,
+          -0.004329121818404797,
+          0.3534196471196289,
+          1.0,
+          -0.015118896457995981
+        ],
+        [
+          0.21453866661616897,
+          -0.05458561450683905,
+          0.026644135060847424,
+          -0.03337185963633753,
+          -0.08028617918132655,
+          -0.06861704976565107,
+          -0.015118896457995981,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.20151381195189483,
+        0.14336752594199131,
+        0.10201439250629901,
+        0.24531876597038998,
+        0.1930523124941418,
+        0.10623007474391048,
+        0.10183041414220427,
+        0.08421304952735223
+      ],
+      "shared_to_routed_norm_ratio": 5.138079798327137,
+      "residual_z_norm": 4.002236207298405
+    },
+    {
+      "stage": 28,
+      "selection_fraction": [
+        0.53125,
+        0.421875,
+        0.59375,
+        0.453125,
+        0.171875,
+        0.578125,
+        0.25
+      ],
+      "mean_softmax": [
+        0.1540960863817466,
+        0.14967299608701387,
+        0.15023748467305534,
+        0.14587783330454052,
+        0.1295385160349053,
+        0.14642225697344075,
+        0.12415482654529768
+      ],
+      "mean_softmax_entropy": 1.9200558220410686,
+      "effective_gate_count": 6.8234931924896305,
+      "dominant_subset_fraction": 0.21875,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.10210943628362622,
+          0.1367707164854933,
+          0.038139901360133774,
+          -0.02886213932348023,
+          -0.1456183621037624,
+          -0.01488560198042756,
+          0.16153898062648234
+        ],
+        [
+          0.10210943628362622,
+          1.0,
+          0.2543488269119603,
+          0.15472040276359741,
+          0.006456534844489013,
+          -0.0549446556550054,
+          0.17003487857100327,
+          -0.06660223729975595
+        ],
+        [
+          0.1367707164854933,
+          0.2543488269119603,
+          1.0,
+          0.11014178124084702,
+          0.018864845291653887,
+          0.0490465849068964,
+          0.21842952939624283,
+          0.02540780893078568
+        ],
+        [
+          0.038139901360133774,
+          0.15472040276359741,
+          0.11014178124084702,
+          1.0,
+          0.06717324711243494,
+          -0.27179635969972427,
+          -0.16774170915310452,
+          -0.09653370178949575
+        ],
+        [
+          -0.02886213932348023,
+          0.006456534844489013,
+          0.018864845291653887,
+          0.06717324711243494,
+          1.0,
+          -0.0008266547571682496,
+          -0.010442214010418796,
+          -0.04401691634839157
+        ],
+        [
+          -0.1456183621037624,
+          -0.0549446556550054,
+          0.0490465849068964,
+          -0.27179635969972427,
+          -0.0008266547571682496,
+          1.0,
+          0.3222609871099136,
+          -0.07272450269825445
+        ],
+        [
+          -0.01488560198042756,
+          0.17003487857100327,
+          0.21842952939624283,
+          -0.16774170915310452,
+          -0.010442214010418796,
+          0.3222609871099136,
+          1.0,
+          0.06066998404958284
+        ],
+        [
+          0.16153898062648234,
+          -0.06660223729975595,
+          0.02540780893078568,
+          -0.09653370178949575,
+          -0.04401691634839157,
+          -0.07272450269825445,
+          0.06066998404958284,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.17905880516249406,
+        0.1477292637017019,
+        0.10557048700291924,
+        0.21139522028389432,
+        0.18368082974957697,
+        0.10679931567929202,
+        0.09925523619723112,
+        0.08067150955757563
+      ],
+      "shared_to_routed_norm_ratio": 4.934047581880749,
+      "residual_z_norm": 3.9984040580894407
+    },
+    {
+      "stage": 29,
+      "selection_fraction": [
+        0.421875,
+        0.421875,
+        0.5625,
+        0.5,
+        0.234375,
+        0.609375,
+        0.25
+      ],
+      "mean_softmax": [
+        0.15057686659236524,
+        0.14899222869671686,
+        0.1469860575422154,
+        0.14443017759617138,
+        0.13119183986646804,
+        0.14974925046522292,
+        0.1280735792408402
+      ],
+      "mean_softmax_entropy": 1.9214432257168712,
+      "effective_gate_count": 6.832706513983885,
+      "dominant_subset_fraction": 0.234375,
+      "expert_feature_cosine_including_shared": [
+        [
+          1.0,
+          0.035364648273742874,
+          0.11143705407646756,
+          -0.022543985647938698,
+          -0.032226970112331395,
+          -0.10367844031108944,
+          0.11354000026843625,
+          0.1383749967585933
+        ],
+        [
+          0.035364648273742874,
+          1.0,
+          0.19210943401585417,
+          0.15396094297676644,
+          -0.0008576689433215899,
+          -0.011897262796982144,
+          0.18142361097233384,
+          -0.13994243399226938
+        ],
+        [
+          0.11143705407646756,
+          0.19210943401585417,
+          1.0,
+          0.13284629119302238,
+          0.01680891967275179,
+          0.024244608122129988,
+          0.05909099419027801,
+          -0.03323546001766645
+        ],
+        [
+          -0.022543985647938698,
+          0.15396094297676644,
+          0.13284629119302238,
+          1.0,
+          0.01669793092873341,
+          -0.2584444891456059,
+          -0.24686544532603488,
+          -0.14330586907100207
+        ],
+        [
+          -0.032226970112331395,
+          -0.0008576689433215899,
+          0.01680891967275179,
+          0.01669793092873341,
+          1.0,
+          0.03850945784330563,
+          -0.014744805531584065,
+          -0.061730646688794036
+        ],
+        [
+          -0.10367844031108944,
+          -0.011897262796982144,
+          0.024244608122129988,
+          -0.2584444891456059,
+          0.03850945784330563,
+          1.0,
+          0.3493058895577855,
+          -0.07283964791346548
+        ],
+        [
+          0.11354000026843625,
+          0.18142361097233384,
+          0.05909099419027801,
+          -0.24686544532603488,
+          -0.014744805531584065,
+          0.3493058895577855,
+          1.0,
+          -0.052323432722343716
+        ],
+        [
+          0.1383749967585933,
+          -0.13994243399226938,
+          -0.03323546001766645,
+          -0.14330586907100207,
+          -0.061730646688794036,
+          -0.07283964791346548,
+          -0.052323432722343716,
+          1.0
+        ]
+      ],
+      "mean_feature_norm": [
+        0.17059474331401842,
+        0.162468041841482,
+        0.09941971676847985,
+        0.19538870728698415,
+        0.15816026656004054,
+        0.10269117131697994,
+        0.10971511985083957,
+        0.07983259482818818
+      ],
+      "shared_to_routed_norm_ratio": 4.408601088006435,
+      "residual_z_norm": 3.997452372974091
+    }
+  ],
+  "uncertainty_contexts": [
+    {
+      "episode": 0,
+      "stage": 1,
+      "relative_canonical_posterior_variance": 0.917563142296524,
+      "selected": [
+        3,
+        2,
+        4
+      ],
+      "softmax": [
+        0.06239558746480245,
+        0.0464378877412635,
+        0.25399953652288515,
+        0.289183909391651,
+        0.15822279128813838,
+        0.12092082826801707,
+        0.06883945932324255
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 0,
+      "stage": 5,
+      "relative_canonical_posterior_variance": 0.7256978605221017,
+      "selected": [
+        1,
+        0,
+        6
+      ],
+      "softmax": [
+        0.2257532497480701,
+        0.2841066638407112,
+        0.0621510690784404,
+        0.05164453502188455,
+        0.08282248450694665,
+        0.11896128447870478,
+        0.17456071332524237
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 0,
+      "stage": 15,
+      "relative_canonical_posterior_variance": 0.3381727264839681,
+      "selected": [
+        2,
+        3,
+        4
+      ],
+      "softmax": [
+        0.12693211985007707,
+        0.09589398851154525,
+        0.2201197072806998,
+        0.21792780848624288,
+        0.13263733122667115,
+        0.12734136645453276,
+        0.07914767819023102
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 0,
+      "stage": 29,
+      "relative_canonical_posterior_variance": 0.026499945797783513,
+      "selected": [
+        5,
+        4,
+        3
+      ],
+      "softmax": [
+        0.13253738466211998,
+        0.13821536432737347,
+        0.1333052942494367,
+        0.141584504321228,
+        0.14361242663256638,
+        0.16949580543067744,
+        0.14124922037659818
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 1,
+      "stage": 1,
+      "relative_canonical_posterior_variance": 1.120973067319571,
+      "selected": [
+        3,
+        2,
+        4
+      ],
+      "softmax": [
+        0.06011809047887162,
+        0.04512702031474093,
+        0.25095969200700247,
+        0.2893717740147379,
+        0.16226166622927726,
+        0.12106515455355017,
+        0.07109660240181968
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 1,
+      "stage": 5,
+      "relative_canonical_posterior_variance": 0.5036397630449128,
+      "selected": [
+        5,
+        3,
+        4
+      ],
+      "softmax": [
+        0.08267051704458031,
+        0.09170231779093703,
+        0.15336278576307102,
+        0.1711712940528795,
+        0.16441893411183203,
+        0.19360752765617792,
+        0.1430666235805222
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 1,
+      "stage": 15,
+      "relative_canonical_posterior_variance": 0.2996183163511791,
+      "selected": [
+        2,
+        5,
+        3
+      ],
+      "softmax": [
+        0.1198885677057939,
+        0.11751394354834506,
+        0.17304659324459595,
+        0.16265603378501525,
+        0.137973044832767,
+        0.16970363332897323,
+        0.1192181835545097
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 1,
+      "stage": 29,
+      "relative_canonical_posterior_variance": 0.12087537530616668,
+      "selected": [
+        1,
+        5,
+        6
+      ],
+      "softmax": [
+        0.14899828719322708,
+        0.1619778641617772,
+        0.13190687038232102,
+        0.11958088354626178,
+        0.12908691092906022,
+        0.15824952648931156,
+        0.1501996572980412
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 2,
+      "stage": 1,
+      "relative_canonical_posterior_variance": 0.8335922050495596,
+      "selected": [
+        3,
+        2,
+        4
+      ],
+      "softmax": [
+        0.06278547045726596,
+        0.04698729853219002,
+        0.2535970036292888,
+        0.28879467764315886,
+        0.15737598068008404,
+        0.12181558711728929,
+        0.06864398194072294
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 2,
+      "stage": 5,
+      "relative_canonical_posterior_variance": 0.4716726637846568,
+      "selected": [
+        1,
+        0,
+        6
+      ],
+      "softmax": [
+        0.23527165595830984,
+        0.2882504162201308,
+        0.06293036444190285,
+        0.0504806307486885,
+        0.08003264934052605,
+        0.11453379641997175,
+        0.16850048687047017
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 2,
+      "stage": 15,
+      "relative_canonical_posterior_variance": 0.08856021147925634,
+      "selected": [
+        1,
+        0,
+        6
+      ],
+      "softmax": [
+        0.22482152651485313,
+        0.2474144331966809,
+        0.08953654817065193,
+        0.07104265714742054,
+        0.09044488883723541,
+        0.13321657509956164,
+        0.1435233710335964
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 2,
+      "stage": 29,
+      "relative_canonical_posterior_variance": 0.04109116734951678,
+      "selected": [
+        2,
+        3,
+        5
+      ],
+      "softmax": [
+        0.15067701677314813,
+        0.1342741150106758,
+        0.17008551089213825,
+        0.15905114005322746,
+        0.12495846175813541,
+        0.15765701632627668,
+        0.1032967391863984
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 3,
+      "stage": 1,
+      "relative_canonical_posterior_variance": 0.9083273848772814,
+      "selected": [
+        3,
+        2,
+        4
+      ],
+      "softmax": [
+        0.062424527209404695,
+        0.046515289510724686,
+        0.2539757019677168,
+        0.28907925734747697,
+        0.15811691673212852,
+        0.1210650729852947,
+        0.06882323424725369
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 3,
+      "stage": 5,
+      "relative_canonical_posterior_variance": 0.7248086690702626,
+      "selected": [
+        1,
+        0,
+        6
+      ],
+      "softmax": [
+        0.2283756177231426,
+        0.28935117723900905,
+        0.05946813443604665,
+        0.04954039565042328,
+        0.08124190956238085,
+        0.11552083157488574,
+        0.17650193381411186
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 3,
+      "stage": 15,
+      "relative_canonical_posterior_variance": 0.40686812947854634,
+      "selected": [
+        1,
+        0,
+        6
+      ],
+      "softmax": [
+        0.2635992811987988,
+        0.27363515947550837,
+        0.0821512080419207,
+        0.06471502166188309,
+        0.0789169586565492,
+        0.10647272707033612,
+        0.13050964389500383
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 3,
+      "stage": 29,
+      "relative_canonical_posterior_variance": 0.325510479465921,
+      "selected": [
+        5,
+        2,
+        4
+      ],
+      "softmax": [
+        0.13113936269225684,
+        0.12783266376538308,
+        0.14686747990476026,
+        0.13997526683194125,
+        0.14096310238831866,
+        0.17729605507092194,
+        0.135926069346418
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 4,
+      "stage": 1,
+      "relative_canonical_posterior_variance": 0.7039137246600103,
+      "selected": [
+        3,
+        2,
+        4
+      ],
+      "softmax": [
+        0.06108035959186109,
+        0.04634778108061772,
+        0.25007629489726513,
+        0.2900132609618801,
+        0.15886554616349402,
+        0.12428546099567116,
+        0.06933129630921081
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 4,
+      "stage": 5,
+      "relative_canonical_posterior_variance": 0.29320325024229066,
+      "selected": [
+        1,
+        0,
+        6
+      ],
+      "softmax": [
+        0.2785214492051557,
+        0.30844324388308414,
+        0.06344544805449794,
+        0.04947939017109626,
+        0.07106342770936214,
+        0.08923550503874167,
+        0.1398115359380622
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 4,
+      "stage": 15,
+      "relative_canonical_posterior_variance": 0.06352964100390396,
+      "selected": [
+        1,
+        0,
+        6
+      ],
+      "softmax": [
+        0.21729118849597728,
+        0.25063264730416007,
+        0.08738868535658555,
+        0.08219399624221876,
+        0.09500913063948772,
+        0.1267713550803407,
+        0.14071299688122996
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 4,
+      "stage": 29,
+      "relative_canonical_posterior_variance": 0.007994578192754986,
+      "selected": [
+        5,
+        6,
+        1
+      ],
+      "softmax": [
+        0.13119946349869704,
+        0.1471699093775497,
+        0.1281129017521023,
+        0.1451657936039316,
+        0.14544274547786376,
+        0.1545315902659704,
+        0.14837759602388506
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 5,
+      "stage": 1,
+      "relative_canonical_posterior_variance": 0.8174434389273189,
+      "selected": [
+        3,
+        2,
+        4
+      ],
+      "softmax": [
+        0.06281816673394384,
+        0.04697001743923327,
+        0.2537644176508747,
+        0.28872337120742875,
+        0.1573767931721865,
+        0.12170603338890518,
+        0.06864120040742776
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 5,
+      "stage": 5,
+      "relative_canonical_posterior_variance": 0.4346161333469242,
+      "selected": [
+        1,
+        0,
+        6
+      ],
+      "softmax": [
+        0.22983284562591394,
+        0.2922999473823922,
+        0.0590095686540922,
+        0.04941187386655263,
+        0.0804227434097428,
+        0.11469872784410966,
+        0.1743242932171966
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 5,
+      "stage": 15,
+      "relative_canonical_posterior_variance": 0.0684770096762978,
+      "selected": [
+        2,
+        3,
+        0
+      ],
+      "softmax": [
+        0.15422845685478723,
+        0.12295453171392084,
+        0.19101407004493084,
+        0.15906502581301915,
+        0.1345758205173762,
+        0.13415093757697394,
+        0.10401115747899174
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 5,
+      "stage": 29,
+      "relative_canonical_posterior_variance": 0.006436616608330241,
+      "selected": [
+        1,
+        6,
+        5
+      ],
+      "softmax": [
+        0.16288506193108737,
+        0.19556812734758583,
+        0.09045914966010318,
+        0.0832849678600396,
+        0.12052011759929596,
+        0.16772643687777308,
+        0.1795561387241149
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 6,
+      "stage": 1,
+      "relative_canonical_posterior_variance": 0.8798137771206068,
+      "selected": [
+        3,
+        2,
+        4
+      ],
+      "softmax": [
+        0.06272637950072608,
+        0.04678159291345876,
+        0.2541457678661839,
+        0.28871633548362746,
+        0.1576355685817625,
+        0.12129357463495215,
+        0.0687007810192891
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 6,
+      "stage": 5,
+      "relative_canonical_posterior_variance": 0.6201381756596255,
+      "selected": [
+        1,
+        0,
+        6
+      ],
+      "softmax": [
+        0.24053654741944633,
+        0.29188453569812883,
+        0.06207329610089551,
+        0.05002767953078848,
+        0.07848852037917013,
+        0.11155021244751187,
+        0.16543920842405885
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 6,
+      "stage": 15,
+      "relative_canonical_posterior_variance": 1.0761554236960156,
+      "selected": [
+        0,
+        1,
+        5
+      ],
+      "softmax": [
+        0.2246173145912324,
+        0.21789892775777792,
+        0.11392547210490006,
+        0.08978990355466454,
+        0.0958752204518301,
+        0.13050249561107144,
+        0.1273906659285236
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 6,
+      "stage": 29,
+      "relative_canonical_posterior_variance": 0.7922323689472399,
+      "selected": [
+        5,
+        0,
+        2
+      ],
+      "softmax": [
+        0.15464244013840214,
+        0.14033883585612456,
+        0.15179585931360493,
+        0.14001473932543473,
+        0.12817754492984365,
+        0.15584548150055902,
+        0.12918509893603097
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 7,
+      "stage": 1,
+      "relative_canonical_posterior_variance": 0.934575421919536,
+      "selected": [
+        3,
+        2,
+        4
+      ],
+      "softmax": [
+        0.06232500888662577,
+        0.04633746200342252,
+        0.2540083878987877,
+        0.28927998161534446,
+        0.15842565978229747,
+        0.12072931558571254,
+        0.06889418422780953
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 7,
+      "stage": 5,
+      "relative_canonical_posterior_variance": 0.6581907027852392,
+      "selected": [
+        1,
+        0,
+        6
+      ],
+      "softmax": [
+        0.22312304220587348,
+        0.27886525284819924,
+        0.06448122874834071,
+        0.05358629074854383,
+        0.08447525696216028,
+        0.1219074757382444,
+        0.17356145274863805
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 7,
+      "stage": 15,
+      "relative_canonical_posterior_variance": 0.653703941219406,
+      "selected": [
+        0,
+        1,
+        6
+      ],
+      "softmax": [
+        0.2613713895280958,
+        0.2566578257965839,
+        0.09333514847185334,
+        0.07199128336029957,
+        0.08249768750678012,
+        0.11004590978461691,
+        0.12410075555177043
+      ],
+      "approximate_belief": true
+    },
+    {
+      "episode": 7,
+      "stage": 29,
+      "relative_canonical_posterior_variance": 0.054127331397357564,
+      "selected": [
+        0,
+        1,
+        2
+      ],
+      "softmax": [
+        0.18483372752838034,
+        0.1583543372923449,
+        0.15559684894022713,
+        0.13896974798866338,
+        0.11581339089397492,
+        0.14067626993112922,
+        0.10575567742528023
+      ],
+      "approximate_belief": true
+    }
+  ],
+  "recorded_gradient_max": 723.3097560292559,
+  "recorded_gradient_median": 32.62048546805278,
+  "recorded_clip5_fraction": 1.0,
+  "development_curve": [
+    {
+      "update": 500,
+      "mean": 7.850730031127872,
+      "MC_SE": 0.19185182945362866,
+      "metadata": {
+        "seed": 1030,
+        "systems": 128,
+        "contrasts": 262144,
+        "paired_draws_sha256": "3f5f343ff292f8a4c745aa1696bcef935408111f7c3f2b7300a549174b9551f1",
+        "seconds": 0.8566120989999035,
+        "forward_particle_stages": 1006636800,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      }
+    },
+    {
+      "update": 5000,
+      "mean": 10.271362717552455,
+      "MC_SE": 0.1646084018632752,
+      "metadata": {
+        "seed": 1030,
+        "systems": 128,
+        "contrasts": 262144,
+        "paired_draws_sha256": "3f5f343ff292f8a4c745aa1696bcef935408111f7c3f2b7300a549174b9551f1",
+        "seconds": 0.8760183839985984,
+        "forward_particle_stages": 1006636800,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      }
+    },
+    {
+      "update": 10000,
+      "mean": 10.123190888376172,
+      "MC_SE": 0.16029613677073773,
+      "metadata": {
+        "seed": 1030,
+        "systems": 128,
+        "contrasts": 262144,
+        "paired_draws_sha256": "3f5f343ff292f8a4c745aa1696bcef935408111f7c3f2b7300a549174b9551f1",
+        "seconds": 0.8894424119935138,
+        "forward_particle_stages": 1006636800,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      }
+    },
+    {
+      "update": 15000,
+      "mean": 10.672797120100526,
+      "MC_SE": 0.13927504545930303,
+      "metadata": {
+        "seed": 1030,
+        "systems": 128,
+        "contrasts": 262144,
+        "paired_draws_sha256": "3f5f343ff292f8a4c745aa1696bcef935408111f7c3f2b7300a549174b9551f1",
+        "seconds": 0.8816369989945088,
+        "forward_particle_stages": 1006636800,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      }
+    },
+    {
+      "update": 20000,
+      "mean": 10.61714203311001,
+      "MC_SE": 0.1497708964518237,
+      "metadata": {
+        "seed": 1030,
+        "systems": 128,
+        "contrasts": 262144,
+        "paired_draws_sha256": "3f5f343ff292f8a4c745aa1696bcef935408111f7c3f2b7300a549174b9551f1",
+        "seconds": 0.8871643089951249,
+        "forward_particle_stages": 1006636800,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      }
+    },
+    {
+      "update": 25000,
+      "mean": 10.53166053260792,
+      "MC_SE": 0.14380099105240166,
+      "metadata": {
+        "seed": 1030,
+        "systems": 128,
+        "contrasts": 262144,
+        "paired_draws_sha256": "3f5f343ff292f8a4c745aa1696bcef935408111f7c3f2b7300a549174b9551f1",
+        "seconds": 0.8749257220042637,
+        "forward_particle_stages": 1006636800,
+        "device": "cuda:0",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      }
+    }
+  ],
+  "late_paired_improvement": {
+    "15000": {
+      "final_minus_checkpoint": 0.16834790264667676,
+      "paired_MC_SE": 0.1189037094647746
+    },
+    "20000": {
+      "final_minus_checkpoint": 0.2240029896371934,
+      "paired_MC_SE": 0.1438398810094392
+    },
+    "25000": {
+      "final_minus_checkpoint": 0.3094844901392864,
+      "paired_MC_SE": 0.1667704606994425
+    }
+  },
+  "wall_seconds": 23.202538072990137,
+  "optimizer_updates": 0,
+  "original_checkpoint_unchanged": true,
+  "counts": {
+    "total_parameters": 8434,
+    "activated_parameters_per_context": 6898,
+    "shared_experts": 1,
+    "routed_experts": 7,
+    "top_k": 3,
+    "expert_feature_dimension": 16,
+    "routed_FFN_width": 8,
+    "shared_FFN_width": 8,
+    "FFN_linear_FLOPs_per_context": 3072,
+    "history_encoder_linear_FLOPs_per_observation": 9728,
+    "router_linear_FLOPs_per_context": 224,
+    "action_head_linear_FLOPs_per_context": 64,
+    "FLOPs_definition": "2perlinear multiplyaccumulate; excludesnonlinearities,normalization,topk,dispatch,simulator,likelihood; not measuredGPUFLOPs"
+  }
+}

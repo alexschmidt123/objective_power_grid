@@ -1,0 +1,1 @@
+Bounded functional test with original DAD native batch2000/contrast2000, original architecture/loss/Adam/scheduler. Same50000-update reference schedule;120-second test clock. Must actually exceed25 updates and reach at least30. RTX5080 test is not a matched4090 E1 result.

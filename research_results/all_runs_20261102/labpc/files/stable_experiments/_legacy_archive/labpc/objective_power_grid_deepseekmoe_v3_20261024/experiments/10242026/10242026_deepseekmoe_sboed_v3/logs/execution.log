@@ -1,0 +1,16 @@
+QUEUED_WAITING_FOR_EXISTING_DEVICE_LOCK
+V3_STATUS FAILED_PRESERVED
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_deepseekmoe_v3_20261024/src/research/deepseek_sboed_v3_experiment.py", line 113, in <module>
+    if __name__=='__main__':main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_deepseekmoe_v3_20261024/src/research/deepseek_sboed_v3_experiment.py", line 112, in main
+    a=p.parse_args();run(Path(a.campaign).resolve(),yaml.safe_load(Path(a.config).read_text()),a.wait_for_device)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_deepseekmoe_v3_20261024/src/research/deepseek_sboed_v3_experiment.py", line 53, in run
+    lock=exclusive_device_lock(wait=wait)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid_deepseekmoe_v3_20261024/tools/journal_campaign.py", line 209, in exclusive_device_lock
+    if active:raise RuntimeError('Device already has compute processes; preserve them and defer this queue: '+active)
+RuntimeError: Device already has compute processes; preserve them and defer this queue: 141204

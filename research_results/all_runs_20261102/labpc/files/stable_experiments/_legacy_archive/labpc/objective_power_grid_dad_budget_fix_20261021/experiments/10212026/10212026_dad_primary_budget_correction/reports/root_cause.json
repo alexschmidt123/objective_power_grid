@@ -1,0 +1,30 @@
+{
+  "confirmed": true,
+  "failed_run": "/home/grads/g/g.lin/Documents/objective_power_grid_matched_compute_20261020/experiments/10202026/10202026_icml_matched_compute_protocol/benchmarks/location_seed101_matched_compute/location/seed101/dad",
+  "incorrect_expression": "ceil(trajectory_budget/((minimum_contrasts+1)*batch_size)) when primary_episode_budget missing",
+  "configuration_defect": "Matched-compute generator removed primary_episode_budget without replacing the trainer budget-unit branch",
+  "effective_cap": 100000000,
+  "maximum_episodes": 1000000000,
+  "batch_size": 2000,
+  "contrasts": 2000,
+  "planned_updates_in_failed_run": 25,
+  "actual_updates": 25,
+  "actual_primary_episodes": 49975,
+  "actual_charged_seconds": 7.501549344975501,
+  "corrected_optimizer_updates": 50000,
+  "corrected_primary_episodes": 100000000,
+  "safety_cap": 1000000000,
+  "compute_budget_seconds": 14400,
+  "optimizer_loss_architecture_changes": false,
+  "tests_passed": 41,
+  "other_affected_method": "Fixed unstarted and held; no affected Fixed checkpoint exists",
+  "other_native_methods": "Recorded independent native counters and budget units do not show this bug",
+  "failed_frozen_training_sha256": "4359de4e71226d9120d1db831be23df6f301375506162287f69736cff4f08740",
+  "reference_failed_config_sha256": "2e6e53499cade2269c6018890558b640be6a6c012b262ef6e60245e48e2c0901",
+  "corrected_source_commit": "75d2bf2",
+  "legacy_math": {
+    "planned_updates": "ceil(100000000 / ((2000+1)*2000)) = 25",
+    "actual_primary_episodes": "floor(100000000 / (2000+1)) = 49975",
+    "not_a_50000_episode_cap": true
+  }
+}
