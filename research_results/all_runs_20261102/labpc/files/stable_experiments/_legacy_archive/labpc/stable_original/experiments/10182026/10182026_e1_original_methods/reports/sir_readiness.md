@@ -1,0 +1,3 @@
+# SIR T5: not yet certified for corrected E1
+
+Existing on-the-fly solver and four-variant shape/gradient fixtures pass. Historical Ubuntu campaigns are preserved but not automatically reused. Corrected native RL adapter is currently location-only (source dimension3/action2); SIR needs an explicit state/action adaptation with native kernels. Official ScoreBED ODE score target/normalization and vsOED ODE-specific actor mapping require the existing separate SIR corrections to be audited and ported. No SIR full-budget grid is authorized by the location fidelity gate. Train SIR-specific500k bases; never import location weights. Contrast resolution2048/L16384 remains to verify on trained policies.

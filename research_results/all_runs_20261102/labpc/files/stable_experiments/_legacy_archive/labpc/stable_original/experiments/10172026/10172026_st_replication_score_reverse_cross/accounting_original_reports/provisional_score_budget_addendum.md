@@ -1,0 +1,3 @@
+# ScoreBED crossed-normalization accounting addendum
+
+The initial campaign protocol’s statement of1M total for crossed arms was incomplete. Each native method remains1M-total. A crossed diagnostic carries the frozen score bundle’s normalization plus the fixed policy seed’s different normalization, adding10000 reused calibration episodes to the data dependency:1.01M total. Native score/policy optimization counts and all observed results are unchanged. This diagnostic cannot replace a primary1M result. Preserve original reports and refer to corrected CSV/JSON. No additional score-training correction or retraining is launched.

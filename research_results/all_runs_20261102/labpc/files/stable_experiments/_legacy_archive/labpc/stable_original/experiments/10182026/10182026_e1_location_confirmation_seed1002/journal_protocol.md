@@ -1,0 +1,47 @@
+# Four-system E1
+
+{
+  "methods": [
+    "random",
+    "fixed",
+    "dad",
+    "rl_sboed",
+    "vsoed",
+    "scorebed",
+    "moe",
+    "resmoe",
+    "switchmoe",
+    "switchresmoe"
+  ],
+  "systems": [
+    "location_T30",
+    "sir_T5",
+    "ieee9_T3",
+    "ieee14_T3"
+  ],
+  "training_seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "primary_episodes": 1000000,
+  "selection": "final_budget",
+  "moe_training": "straight_through",
+  "residual_allocation": [
+    500000,
+    500000
+  ],
+  "development_seed": 1001,
+  "consumed_confirmation_seed": 8831001,
+  "location_status": "development_verified_confirmation_pending",
+  "other_systems_status": "readiness_pending",
+  "scope": "E1 only; no ablations, E2, E3 or other horizons",
+  "analysis": "paired seed differences; t95 with4df; simultaneous Bonferroni95 over six declared family contrasts; trajectory MC intervals separate"
+}
+
+Selected procedures and checkpoints are frozen before fresh confirmation. Original and resource-adapted baseline fidelity evidence is retained in the source campaigns. No guarantee of a method ranking. Random is one untrained reference, not five training replicates.
+
+
+Evaluation numbering amendment requested by user: development1001, untouched confirmation1002. All46 method/checkpoint choices and analysis rules unchanged. Earlier large-seed outputs are preserved separately and were not inspected for method selection.

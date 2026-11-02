@@ -1,0 +1,77 @@
+{
+  "initialization_episodes": 10014,
+  "score_training_episodes": 792000,
+  "policy_training_episodes": 197986,
+  "total_primary_episodes": 1000000,
+  "minibatch": 64,
+  "score_updates": 12375,
+  "policy_updates": 3094,
+  "policy_full_batches": 3093,
+  "policy_final_partial_batch": 34,
+  "original_allocation": [
+    10014,
+    692990,
+    296996
+  ],
+  "official_location_update_ratio": "50000score:20000policy (2.5:1)",
+  "generic_preset_ratio": "100000score:20000policy (5:1)",
+  "selected_ratio": "Approximately4:1 (80:20 of remaining budget)",
+  "rationale": "One modest intermediate split between pinned code presets, not95:5. Preserve >=3000policy updates (three1000-update LR intervals) with finite nonzero update norms observed in all original training traces at update3000. This is mechanical viability evidence, NOT convergence or proof of sufficient policy optimization. No held-out EIG used to choose the split. More score training trades away policy updates; negative results retained.",
+  "policy_trace_evidence": [
+    {
+      "seed": 101,
+      "step": 3000,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 903.8331909179688,
+        "param_norm": 11.020273208618164,
+        "update_norm": 0.0009291247697547078
+      },
+      "source": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10132026/10132026_bounded_location_restart/pilot/models/scorebed_official_training.json"
+    },
+    {
+      "seed": 102,
+      "step": 3000,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 49.367919921875,
+        "param_norm": 11.223679542541504,
+        "update_norm": 0.0018239719793200493
+      },
+      "source": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_journal_five_seed_fixed_budget/location/seed102/scorebed/models/scorebed_official_training.json"
+    },
+    {
+      "seed": 103,
+      "step": 3000,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 384.9859619140625,
+        "param_norm": 11.076947212219238,
+        "update_norm": 0.0007556997006759048
+      },
+      "source": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_journal_five_seed_fixed_budget/location/seed103/scorebed/models/scorebed_official_training.json"
+    },
+    {
+      "seed": 104,
+      "step": 3000,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 136.4145050048828,
+        "param_norm": 11.192437171936035,
+        "update_norm": 0.0010319212451577187
+      },
+      "source": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_journal_five_seed_fixed_budget/location/seed104/scorebed/models/scorebed_official_training.json"
+    },
+    {
+      "seed": 105,
+      "step": 3000,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 912.7152709960938,
+        "param_norm": 10.985319137573242,
+        "update_norm": 0.0009501869790256023
+      },
+      "source": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_journal_five_seed_fixed_budget/location/seed105/scorebed/models/scorebed_official_training.json"
+    }
+  ]
+}

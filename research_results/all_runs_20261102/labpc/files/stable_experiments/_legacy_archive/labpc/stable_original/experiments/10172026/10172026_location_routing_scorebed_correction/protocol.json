@@ -1,0 +1,40 @@
+{
+  "status": "development_correction_pretraining",
+  "methods": [
+    "moe",
+    "resmoe",
+    "switchmoe",
+    "switchresmoe",
+    "scorebed"
+  ],
+  "new_training_jobs": 20,
+  "reused_ST_moe_jobs": 5,
+  "training_seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "primary_total_per_model": 1000000,
+  "residual_phase_episodes": 500000,
+  "base_episodes": 500000,
+  "base_frozen": true,
+  "routing": "hard-forward native DSelect1; relaxed-backward; switching retains hard continuation/reroute threshold and differentiable previous strategy state",
+  "gamma": "unchanged1 through30%, cosine to0.001 at95%;500k residual phase clock /1M full clock",
+  "warmup_repeated": false,
+  "checkpoint_selection": "final_fixed_budget",
+  "development_evaluation": {
+    "seed": 1001,
+    "systems": 2000,
+    "contrasts": 1000000
+  },
+  "previous_final_seed8831001": "used historical final data; NEVER select corrections with it",
+  "new_confirmation": "After correction/adoption freeze choose and hash untouched seed/bank; not evaluated in this campaign automatically",
+  "statistics": "Paired training-seed t95CI; trajectoryMC separately; no guaranteed wins; preserve all seeds",
+  "additional_new_primary_training_episodes": 15000000,
+  "total_attributed_episodes_all25complete_policies": 25000000,
+  "unique_primary_episodes_including_reused_ST_and_shared_bases": 22500000,
+  "source_parent_ST": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10172026/10172026_st_replication_score_reverse_cross",
+  "historical_primary_campaign": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_journal_five_seed_fixed_budget"
+}

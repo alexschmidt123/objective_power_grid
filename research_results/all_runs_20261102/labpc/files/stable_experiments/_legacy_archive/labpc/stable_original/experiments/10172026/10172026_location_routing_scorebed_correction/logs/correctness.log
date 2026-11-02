@@ -1,0 +1,24 @@
+PASS moe_hard_forward_inference_rollout_equivalence
+PASS moe_finite_surrogate_gradients_and_frozen_base
+PASS moe_checkpoint_roundtrip
+PASS resmoe_hard_forward_inference_rollout_equivalence
+PASS resmoe_finite_surrogate_gradients_and_frozen_base
+PASS resmoe_checkpoint_roundtrip
+PASS resmoe_disabled_residual_matches_complete_base_exactly
+PASS switchmoe_hard_forward_inference_rollout_equivalence
+PASS switchmoe_hard_continuation_active
+PASS switchmoe_finite_surrogate_gradients_and_frozen_base
+PASS switchmoe_checkpoint_roundtrip
+PASS switchresmoe_hard_forward_inference_rollout_equivalence
+PASS switchresmoe_hard_continuation_active
+PASS switchresmoe_finite_surrogate_gradients_and_frozen_base
+PASS switchresmoe_checkpoint_roundtrip
+PASS switchresmoe_disabled_residual_matches_complete_base_exactly
+PASS switchmoe_always_reroute_equals_moe_ST
+PASS switchresmoe_always_reroute_equals_resmoe_ST
+PASS pretrained_base_unchanged
+PASS all_five_native_ST_checkpoints_and_actions_verified
+switchresmoe {'update': 2, 'primary_episodes': 8, 'training_eig': 2.8332133440562153, 'selector_entropy': 1.3370269303709814, 'collapse_penalty': 0.0, 'gamma': 1.0, 'gradient_norm': 1.7343473679712885e-09, 'gradient_before': {'base': 0.0, 'router': 1.734315614755838e-09, 'expert_0': 9.271236462151456e-12, 'expert_1': 4.917863058220361e-12, 'expert_2': 0.0, 'expert_3': 0.0, 'switching_gate': 6.46243764583343e-16}, 'gradient_after': {'base': 0.0, 'router': 1.734315614755838e-09, 'expert_0': 9.271236462151456e-12, 'expert_1': 4.917863058220361e-12, 'expert_2': 0.0, 'expert_3': 0.0, 'switching_gate': 6.46243764583343e-16}, 'clip_scale': None, 'gradient_clip_mode': 'component', 'component_clip_scales': {'base': 1.0, 'router': 1.0, 'expert_0': 1.0, 'expert_1': 1.0, 'expert_2': 1.0, 'expert_3': 1.0, 'switching_gate': 1.0}, 'training_score_distribution': {'quantiles': [2.8332133440562153, 2.8332133440562153, 2.8332133440562153, 2.8332133440562153, 2.8332133440562153, 2.8332133440562153], 'fraction_within_01_of_ceiling': 1.0, 'fraction_within_05_of_ceiling': 1.0}, 'training_scores': [2.8332133440562153, 2.8332133440562153, 2.8332133440562153, 2.8332133440562153], 'router_probabilities': [0.5862068965517241, 0.41379310344827586, 0.0, 0.0], 'hard_choice_frequency': [0.5862068965517241, 0.41379310344827586, 0.0, 0.0], 'execution_utilization': [0.5862068965517241, 0.41379310344827586, 0.0, 0.0], 'routing_entropy': 0.0, 'relaxed_router_probabilities': [0.27082938519597477, 0.26871159904709746, 0.2302475459412684, 0.2302114698156594], 'training_routing_mode': 'straight_through', 'training_expert_proposal_execution': 'all_four_for_router_surrogate', 'execution_utilization_interpretation': 'nonzero forward weights; all four proposals computed for backward', 'strategy_reroute_probability_mean': 0.9903448275862499, 'strategy_reroute_requested_mean': 1.0, 'strategy_actual_strategy_change_mean': 0.10344827586206896, 'strategy_consecutive_duration_mean': 4.956896551724138, 'strategy_state_interpretation': 'hard-forward continuation/reroute and expert state; relaxed surrogate backward'}
+LATE_DIAGNOSTIC_CHECKPOINT 8 None
+PASS combined_native_trainer_logging_smoke
+PASSED 21

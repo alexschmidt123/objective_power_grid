@@ -1,0 +1,3 @@
+# E1 location: INCOMPLETE
+
+All four original adaptive baselines pass tested algorithm-level fixtures with disclosed resource adaptations. DAD/RL/ScoreBED corrected1M cohorts are training, not complete. 31 prior evaluation entries were verified reusable; failed baseline launches generated no training episodes and remain separately preserved. E1 has exactly46 evaluation cells. Random is one untrained reference. Four named MoE architectures use explicit coherent training cohorts, documented in moe_e1_training_decision.md. Multi-expert specialization is not established by straight-through MoE, which collapsed to one expert. Original relaxed SwitchMoE instability and always-reroute behavior remain reportable limitations. New confirmation and SIR replication are not complete.

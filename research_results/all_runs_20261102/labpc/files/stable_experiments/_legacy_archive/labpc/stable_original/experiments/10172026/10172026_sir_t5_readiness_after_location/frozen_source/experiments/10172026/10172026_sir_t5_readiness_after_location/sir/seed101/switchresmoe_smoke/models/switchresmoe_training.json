@@ -1,0 +1,601 @@
+{
+  "training": "pathwise_full_horizon_sPCE",
+  "variant": "switchresmoe",
+  "canonical_name": "SwitchResMoE-sBOED",
+  "training_seconds": 5.606483000097796,
+  "measured_parameters": {
+    "first": {
+      "total": 88866,
+      "active": 1,
+      "trainable": 67344,
+      "pretrained": 21522,
+      "newly_initialized": 67344
+    },
+    "initial_routed": {
+      "total": 88866,
+      "active": 38744,
+      "trainable": 67344,
+      "pretrained": 21522,
+      "newly_initialized": 67344
+    },
+    "later_routed": {
+      "total": 88866,
+      "active": 38942,
+      "trainable": 67344,
+      "pretrained": 21522,
+      "newly_initialized": 67344
+    }
+  },
+  "generated_training_trajectories": 8,
+  "contrast_training_trajectories": 64,
+  "training_trajectory_budget": 8,
+  "training_budget_unit": "primary_episodes",
+  "history": [
+    {
+      "update": 1,
+      "primary_episodes": 4,
+      "training_eig": 1.8474970708238492,
+      "selector_entropy": 1.1021309130891321,
+      "collapse_penalty": 0.0,
+      "gamma": 1.0,
+      "gradient_norm": 0.0014166396617029526,
+      "gradient_before": {
+        "base": 0.0,
+        "router": 1.960980202191247e-06,
+        "expert_0": 0.000579869299243073,
+        "expert_1": 0.0006215377251172435,
+        "expert_2": 0.0007734864146802307,
+        "expert_3": 0.0008282664450664739,
+        "switching_gate": 1.2202803219636503e-11
+      },
+      "gradient_after": {
+        "base": 0.0,
+        "router": 1.960980202191247e-06,
+        "expert_0": 0.000579869299243073,
+        "expert_1": 0.0006215377251172435,
+        "expert_2": 0.0007734864146802307,
+        "expert_3": 0.0008282664450664739,
+        "switching_gate": 1.2202803219636503e-11
+      },
+      "clip_scale": null,
+      "gradient_clip_mode": "component",
+      "component_clip_scales": {
+        "base": 1.0,
+        "router": 1.0,
+        "expert_0": 1.0,
+        "expert_1": 1.0,
+        "expert_2": 1.0,
+        "expert_3": 1.0,
+        "switching_gate": 1.0
+      },
+      "training_score_distribution": {
+        "quantiles": [
+          0.7983145534494174,
+          1.2179875599666543,
+          2.1972245762548797,
+          2.1972245773362196,
+          2.19722457733622,
+          2.19722457733622
+        ],
+        "fraction_within_01_of_ceiling": 0.75,
+        "fraction_within_05_of_ceiling": 0.75
+      },
+      "training_scores": [
+        0.7983145534494174,
+        2.19722457733622,
+        2.197224577336219,
+        2.19722457517354
+      ],
+      "router_probabilities_by_stage": [
+        [
+          0.20756473529784325,
+          0.22662388500843422,
+          0.2704872301123132,
+          0.29532414958140935
+        ],
+        [
+          0.20942228936611937,
+          0.22649470891359344,
+          0.2709953714501907,
+          0.29308763027009643
+        ],
+        [
+          0.21147904245745502,
+          0.22652379872319578,
+          0.27134649995210863,
+          0.2906506588672405
+        ],
+        [
+          0.21363396670085685,
+          0.22662097053142186,
+          0.2716163984966817,
+          0.28812866427103956
+        ]
+      ],
+      "hard_choice_frequency_by_stage": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "execution_utilization_by_stage": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ],
+      "router_probabilities": [
+        0.21052500845556862,
+        0.2265658407941613,
+        0.27111137500282356,
+        0.2917977757474465
+      ],
+      "hard_choice_frequency": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "execution_utilization": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "routing_entropy": 1.377658592219809,
+      "strategy_reroute_probability_by_stage": [
+        1.0,
+        0.99,
+        0.99,
+        0.99
+      ],
+      "strategy_reroute_probability_mean": 0.9924999999999999,
+      "strategy_reroute_requested_by_stage": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "strategy_reroute_requested_mean": 1.0,
+      "strategy_actual_strategy_change_by_stage": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "strategy_actual_strategy_change_mean": 0.0,
+      "strategy_consecutive_duration_by_stage": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ],
+      "strategy_consecutive_duration_mean": 2.5,
+      "strategy_state_interpretation": "relaxed state and argmax proxies; actual hard behavior evaluated separately"
+    },
+    {
+      "update": 2,
+      "primary_episodes": 8,
+      "training_eig": 2.024027162815326,
+      "selector_entropy": 1.1026253789897353,
+      "collapse_penalty": 0.0,
+      "gamma": 1.0,
+      "gradient_norm": 0.004868821994604459,
+      "gradient_before": {
+        "base": 0.0,
+        "router": 6.499574595384185e-06,
+        "expert_0": 0.001985130928888638,
+        "expert_1": 0.0021570959995962508,
+        "expert_2": 0.0026570162938484108,
+        "expert_3": 0.002837576752899181,
+        "switching_gate": 5.579518216172687e-11
+      },
+      "gradient_after": {
+        "base": 0.0,
+        "router": 6.499574595384185e-06,
+        "expert_0": 0.001985130928888638,
+        "expert_1": 0.0021570959995962508,
+        "expert_2": 0.0026570162938484108,
+        "expert_3": 0.002837576752899181,
+        "switching_gate": 5.579518216172687e-11
+      },
+      "clip_scale": null,
+      "gradient_clip_mode": "component",
+      "component_clip_scales": {
+        "base": 1.0,
+        "router": 1.0,
+        "expert_0": 1.0,
+        "expert_1": 1.0,
+        "expert_2": 1.0,
+        "expert_3": 1.0,
+        "switching_gate": 1.0
+      },
+      "training_score_distribution": {
+        "quantiles": [
+          1.537840396832185,
+          1.7256340077114498,
+          2.18052183854645,
+          2.1972245773343033,
+          2.1972245773360277,
+          2.197224577336219
+        ],
+        "fraction_within_01_of_ceiling": 0.75,
+        "fraction_within_05_of_ceiling": 0.75
+      },
+      "training_scores": [
+        1.537840396832185,
+        2.197224577329833,
+        2.1638190997630673,
+        2.197224577336219
+      ],
+      "router_probabilities_by_stage": [
+        [
+          0.20794720240270667,
+          0.22761797069144654,
+          0.2694720463171274,
+          0.2949627805887194
+        ],
+        [
+          0.2102186100561254,
+          0.22797122750750773,
+          0.2695244671241063,
+          0.2922856953122605
+        ],
+        [
+          0.21272663603319533,
+          0.2284531215871254,
+          0.26944995834141383,
+          0.2893702840382655
+        ],
+        [
+          0.21536369622996923,
+          0.2289855162648468,
+          0.2693082673467724,
+          0.2863425201584116
+        ]
+      ],
+      "hard_choice_frequency_by_stage": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "execution_utilization_by_stage": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ],
+      "router_probabilities": [
+        0.21156403618049915,
+        0.2282569590127316,
+        0.269438684782355,
+        0.29074032002441424
+      ],
+      "hard_choice_frequency": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "execution_utilization": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "routing_entropy": 1.3782752046359041,
+      "strategy_reroute_probability_by_stage": [
+        1.0,
+        0.9900000057921429,
+        0.9900000076433346,
+        0.9900000095321057
+      ],
+      "strategy_reroute_probability_mean": 0.9925000057418958,
+      "strategy_reroute_requested_by_stage": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "strategy_reroute_requested_mean": 1.0,
+      "strategy_actual_strategy_change_by_stage": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "strategy_actual_strategy_change_mean": 0.0,
+      "strategy_consecutive_duration_by_stage": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ],
+      "strategy_consecutive_duration_mean": 2.5,
+      "strategy_state_interpretation": "relaxed state and argmax proxies; actual hard behavior evaluated separately"
+    }
+  ],
+  "diagnostic_trace": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10172026/10172026_sir_t5_readiness_after_location/frozen_source/experiments/10172026/10172026_sir_t5_readiness_after_location/sir/seed101/switchresmoe_smoke/models/switchresmoe_diagnostics.jsonl",
+  "base_checkpoint": {
+    "pretrained": true,
+    "path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10172026/10172026_sir_t5_readiness_after_location/frozen_source/experiments/10172026/10172026_sir_t5_readiness_after_location/sir/seed101/sum_single_smoke/models/sum_single.pt",
+    "sha256": "26debb43db33d79bc4e64600ced505fe2905d105796ef152cc23d146f40b4009",
+    "input_dim": 193,
+    "benchmark": "sir_ode",
+    "training_episodes": 8,
+    "training_seconds": 6.5689214169979095,
+    "action_scale": 100.0,
+    "obs_scale": 500.0
+  },
+  "additional_training_episodes": 8,
+  "total_training_episodes": 16,
+  "base_training_seconds": 6.5689214169979095,
+  "total_training_seconds": 22.218883849214762,
+  "policy_parameters": 88866,
+  "trainable_parameters": 67344,
+  "history_encoder_revision": 2,
+  "encoder_input_dim": 193,
+  "base_input_dim": 193,
+  "routing_warmup_fraction": 0.3,
+  "routing_finish_fraction": 0.95,
+  "switching_schedule": "none; preserves existing sigmoid gate",
+  "settings": {
+    "routing_mode": "learned_switch",
+    "initial_reroute_probability": 0.99,
+    "residual_scale": 1.0,
+    "residual_initial_std": 0.001,
+    "base_finetune": false
+  },
+  "checkpoint_selection": "final_predeclared_fixed_budget",
+  "training_objective": "full_horizon_sPCE",
+  "contrasts": 8,
+  "expert_ids": [
+    "E1",
+    "E2",
+    "E3",
+    "E4"
+  ],
+  "gradient_clip_mode": "component",
+  "load_penalty_weight": 0.0001,
+  "selector_entropy_weight_max": 0.0001,
+  "convergence_status": "fixed_budget_complete",
+  "journal_validation_history": [
+    {
+      "checkpoint": 1,
+      "episodes": 4,
+      "training_seconds": 3.153613748960197,
+      "eig": 2.197142622104636,
+      "mc_standard_error": 8.195523117067911e-05,
+      "paired_improvement_from_anchor": null,
+      "improvement_threshold": null,
+      "patience_used": 0,
+      "selected": false,
+      "status": "training",
+      "update": 1,
+      "validation": {
+        "seed": 772001,
+        "systems": 4,
+        "contrasts": 8,
+        "paired_draws_sha256": "2ded27e9f1a74a5c841d3899e77b9ae8b7cc5dcce0699b7cba0a333e8df19fcb",
+        "seconds": 5.0298322779126465,
+        "forward_particle_stages": 200,
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      }
+    },
+    {
+      "checkpoint": 2,
+      "episodes": 8,
+      "training_seconds": 5.580845822114497,
+      "eig": 2.197142237225074,
+      "mc_standard_error": 8.23401107290511e-05,
+      "paired_improvement_from_anchor": -3.848795622207746e-07,
+      "improvement_threshold": 0.01,
+      "patience_used": 1,
+      "selected": true,
+      "status": "fixed_budget_complete",
+      "update": 2,
+      "validation": {
+        "seed": 772001,
+        "systems": 4,
+        "contrasts": 8,
+        "paired_draws_sha256": "2ded27e9f1a74a5c841d3899e77b9ae8b7cc5dcce0699b7cba0a333e8df19fcb",
+        "seconds": 4.95137035404332,
+        "forward_particle_stages": 200,
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      }
+    }
+  ],
+  "validation_seconds": 9.981202631955966,
+  "optimization_seconds": 5.606483000097796,
+  "stopping_rule": {
+    "minimum_episodes": 8,
+    "minimum_checkpoints": 2,
+    "validation_every_episodes": 4,
+    "patience": 2,
+    "minimum_improvement": 0.01,
+    "noise_multiplier": 1.96,
+    "maximum_episodes": 8,
+    "maximum_training_seconds": 120
+  },
+  "selected_checkpoint": {
+    "checkpoint": 2,
+    "episodes": 8,
+    "training_seconds": 5.580845822114497,
+    "eig": 2.197142237225074,
+    "mc_standard_error": 8.23401107290511e-05,
+    "paired_improvement_from_anchor": -3.848795622207746e-07,
+    "improvement_threshold": 0.01,
+    "patience_used": 1,
+    "selected": true,
+    "status": "fixed_budget_complete",
+    "update": 2,
+    "validation": {
+      "seed": 772001,
+      "systems": 4,
+      "contrasts": 8,
+      "paired_draws_sha256": "2ded27e9f1a74a5c841d3899e77b9ae8b7cc5dcce0699b7cba0a333e8df19fcb",
+      "seconds": 4.95137035404332,
+      "forward_particle_stages": 200,
+      "mode": "hard_deployed_policy",
+      "secondary_parameter_inference": false
+    }
+  },
+  "validation_seed": 772001,
+  "native_elapsed_seconds": 15.649960045004264,
+  "total_offline_seconds": 15.587685632053763,
+  "journal_protocol": "validation_convergence_v1",
+  "training_cap_is_not_target": false,
+  "effective_training_settings": {
+    "strategy_routing_mode": "learned_switch",
+    "strategy_initial_reroute_probability": 0.99,
+    "strategy_diagnostics_every": 1,
+    "moe_history_encoder_revision": 1,
+    "first_design_revision": 1,
+    "training_bound": 1,
+    "variational_policy_lr": 0.0002,
+    "variational_density_lr": 0.001,
+    "variational_density_hidden": 128,
+    "variational_mixtures": 16,
+    "variational_density_updates": 2,
+    "variational_warmup": 200,
+    "smc_moves": 8,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "spce_curriculum": 1,
+    "updates": 2,
+    "batch_size": 4,
+    "learning_rate": 0.0003,
+    "hidden": 64,
+    "contrasts": 8,
+    "validation_contrasts": 1024,
+    "validation_systems": 128,
+    "validate_every": 1,
+    "eval_systems": 2,
+    "eval_contrasts": 8,
+    "posterior_particles": 1024,
+    "posterior_steps": 64,
+    "posterior_chains": 4,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 128,
+    "search_candidates": 16,
+    "search_rounds": 3,
+    "fantasies": 32,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 3,
+    "vsoed_critic_updates": 5,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 2,
+    "evaluation_contrast_chunk": 4,
+    "evaluation_population_systems": 2,
+    "threads": 2,
+    "rl_batch_size": 4,
+    "rl_replay_batch": 8,
+    "rl_replay_capacity": 64,
+    "rl_min_buffer": 1,
+    "rl_gradient_steps": 1,
+    "rl_log_every": 10,
+    "moe_specialist_budget_fraction": 0.25,
+    "moe_density_updates": 4,
+    "primary_episode_budget": 1,
+    "scorebed_batch_size": 64,
+    "moe_gradient_clip_mode": "component",
+    "moe_router_warmup_fraction": 0.3,
+    "moe_router_finish_fraction": 0.95,
+    "spce_adam_beta1": 0.8,
+    "spce_adam_beta2": 0.998,
+    "spce_lr_decay": 0.98,
+    "spce_lr_schedule_every": 1000,
+    "router_schedule_episodes": 500000
+  },
+  "resume_scope": "Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed",
+  "historical_runtime_overlap": "New runs are serialized; historical timings require separate provenance",
+  "checkpoint_sha256": "0c6cb9ab8ec418622b21c54f004e5c873dd10df0977ac264f720d4a103061e46"
+}
