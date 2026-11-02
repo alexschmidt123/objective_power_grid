@@ -1,0 +1,1475 @@
+{
+  "training": "pathwise_full_horizon_sPCE",
+  "variant": "resmoe",
+  "canonical_name": "MoE-sBOED-v2.1",
+  "model_identity": "MoE-sBOED-v2.1",
+  "model_forward_stage_evaluations_including_recompute": 1258300800,
+  "training_seconds": 1.966157021059189,
+  "optimizer_scope": "one shared Adam step for encoder, experts, router and switching gate; per-component gradient exposure separate",
+  "measured_parameters": {
+    "first": {
+      "total": 126306,
+      "active": 2,
+      "trainable": 67406,
+      "pretrained": 58900,
+      "newly_initialized": 67406
+    },
+    "initial_routed": {
+      "total": 126306,
+      "active": 76186,
+      "trainable": 67406,
+      "pretrained": 58900,
+      "newly_initialized": 67406
+    },
+    "later_routed": {
+      "total": 126306,
+      "active": 76186,
+      "trainable": 67406,
+      "pretrained": 58900,
+      "newly_initialized": 67406
+    }
+  },
+  "generated_training_trajectories": 320,
+  "contrast_training_trajectories": 20971520,
+  "training_trajectory_budget": 320,
+  "training_budget_unit": "primary_episodes",
+  "history": [
+    {
+      "update": 5,
+      "primary_episodes": 320,
+      "training_eig": 9.776387671228886,
+      "selector_entropy": 1.3316786266817269,
+      "collapse_penalty": 0.0,
+      "gamma": 1.0,
+      "gradient_norm": 25.88861954872024,
+      "gradient_before": {
+        "base": 0.0,
+        "router": 1.008350804559622,
+        "expert_0": 0.0,
+        "expert_1": 5.560053626034889,
+        "expert_2": 0.0,
+        "expert_3": 25.264394995110017
+      },
+      "gradient_after": {
+        "base": 0.0,
+        "router": 1.008350804559622,
+        "expert_0": 0.0,
+        "expert_1": 4.999999100728259,
+        "expert_2": 0.0,
+        "expert_3": 4.999999802093033
+      },
+      "clip_scale": null,
+      "gradient_clip_mode": "component",
+      "component_clip_scales": {
+        "base": 1.0,
+        "router": 1.0,
+        "expert_0": 1.0,
+        "expert_1": 0.899271740350816,
+        "expert_2": 1.0,
+        "expert_3": 0.19790696761433607
+      },
+      "optimizer_learning_rates": {
+        "experts": 4.9e-05,
+        "router": 9.800000000000001e-06
+      },
+      "training_score_distribution": {
+        "quantiles": [
+          5.817184617954361,
+          7.523208761021886,
+          10.248893027400563,
+          11.087327521250936,
+          11.09036434202149,
+          11.090369749939104
+        ],
+        "fraction_within_01_of_ceiling": 0.234375,
+        "fraction_within_05_of_ceiling": 0.40625
+      },
+      "training_scores": [
+        10.90960895897258,
+        7.370768454648221,
+        6.664768519729396,
+        10.412667441022208,
+        6.121723121066033,
+        9.179677767448144,
+        8.777852618213199,
+        11.041427312692399,
+        10.129319989919498,
+        10.108564044684822,
+        9.34602334830221,
+        5.817184617954361,
+        10.88693240511062,
+        9.57528663115701,
+        9.58342313989833,
+        10.614977041393288,
+        7.625735542138283,
+        10.650512821423746,
+        10.793987805311627,
+        11.090369749939104,
+        11.090069176006722,
+        8.564135161133127,
+        10.248994151880616,
+        10.038846073628275,
+        7.818041440562283,
+        10.995916520342115,
+        11.09007362211106,
+        10.273492272996194,
+        9.137953117389976,
+        9.93210416888379,
+        11.081521020351476,
+        7.173232912755058,
+        11.090352131987121,
+        9.443069545522135,
+        8.539062654330547,
+        9.30409998328657,
+        11.085478144553655,
+        11.07340112609366,
+        9.45382247156033,
+        8.176312414376373,
+        9.729330978925656,
+        11.088120111264057,
+        10.854591395910795,
+        11.090361165942891,
+        11.00978523588584,
+        7.6216588554741875,
+        10.835742461257706,
+        10.564538124216018,
+        10.248791902920509,
+        9.178228884530501,
+        7.48101586339947,
+        10.651514171980036,
+        11.089108235873354,
+        11.029537676775732,
+        10.313348249662088,
+        11.0571837814481,
+        6.1981773192169065,
+        9.861273161403272,
+        10.930807007238744,
+        10.15696238480858,
+        10.499898132921405,
+        10.987734149220628,
+        10.779327422889143,
+        10.1209848447069
+      ],
+      "router_probabilities_by_stage": [
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.96875,
+          0.0,
+          0.03125
+        ],
+        [
+          0.0,
+          0.515625,
+          0.0,
+          0.484375
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "hard_choice_frequency_by_stage": [
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.96875,
+          0.0,
+          0.03125
+        ],
+        [
+          0.0,
+          0.515625,
+          0.0,
+          0.484375
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "execution_utilization_by_stage": [
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.96875,
+          0.0,
+          0.03125
+        ],
+        [
+          0.0,
+          0.515625,
+          0.0,
+          0.484375
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "router_probabilities": [
+        0.0,
+        0.12015086206896551,
+        0.0,
+        0.8798491379310345
+      ],
+      "hard_choice_frequency": [
+        0.0,
+        0.12015086206896551,
+        0.0,
+        0.8798491379310345
+      ],
+      "execution_utilization": [
+        0.0,
+        0.12015086206896551,
+        0.0,
+        0.8798491379310345
+      ],
+      "routing_entropy": 0.0,
+      "residual_logit_correction_RMS": 0.0030625084085099,
+      "expert_proposal_pairwise_RMS": [
+        0.001777516267249156,
+        0.005162481080838791,
+        0.006638229204210905,
+        0.0020912636447804173,
+        0.003061996630076276,
+        0.005591859031777269
+      ],
+      "expert_gradient_exposed": [
+        false,
+        true,
+        false,
+        true
+      ],
+      "shared_encoder_status": "Frozen native base encoder; history-input derivatives retained",
+      "selector_saturated_fraction": 0.0,
+      "selector_logit_quantiles": [
+        -0.006842754397208232,
+        0.006955632304778524,
+        0.028338726514173136,
+        0.04861241226879971,
+        0.08465342101322249
+      ],
+      "relaxed_routing_entropy": 1.3775985793259244,
+      "relaxed_router_probabilities": [
+        0.21045093453827804,
+        0.2507664340751038,
+        0.2461293411974636,
+        0.2926532901891546
+      ],
+      "relaxed_router_probabilities_by_stage": [
+        [
+          0.22940979940624057,
+          0.2804307048187511,
+          0.22055408608563035,
+          0.269605409689378
+        ],
+        [
+          0.22837532170845937,
+          0.27864993477985395,
+          0.22204685930277324,
+          0.27092788420891345
+        ],
+        [
+          0.22684307263749093,
+          0.2766284954581699,
+          0.22371531288177843,
+          0.2728131190225607
+        ],
+        [
+          0.22493317249064793,
+          0.2743110284627311,
+          0.22561512985624013,
+          0.2751406691903809
+        ],
+        [
+          0.2229872236786685,
+          0.27187955422526816,
+          0.22761567227103752,
+          0.27751754982502586
+        ],
+        [
+          0.22120236256757447,
+          0.2694471414446455,
+          0.22963855819725593,
+          0.2797119377905241
+        ],
+        [
+          0.21972704394751952,
+          0.2670403482754927,
+          0.2316812795164687,
+          0.28155132826051904
+        ],
+        [
+          0.21855418215798597,
+          0.26482689479043153,
+          0.2335900353199883,
+          0.2830288877315942
+        ],
+        [
+          0.21768136671976274,
+          0.2628550183268681,
+          0.23531913401096033,
+          0.28414448094240885
+        ],
+        [
+          0.21698087290785614,
+          0.2611105298495755,
+          0.23686509576188636,
+          0.2850435014806821
+        ],
+        [
+          0.21623980140247176,
+          0.25935519792032324,
+          0.23842529489152803,
+          0.28597970578567705
+        ],
+        [
+          0.21554657652334752,
+          0.25766490300748934,
+          0.2399412836268672,
+          0.2868472368422959
+        ],
+        [
+          0.2147017596820704,
+          0.2559030475138608,
+          0.24151142536863224,
+          0.28788376743543653
+        ],
+        [
+          0.21368502642909004,
+          0.2540578389986084,
+          0.2431432305866029,
+          0.2891139039856987
+        ],
+        [
+          0.21244350640860077,
+          0.25211454032600306,
+          0.24484086203692818,
+          0.29060109122846806
+        ],
+        [
+          0.21088597059521694,
+          0.24995533520360286,
+          0.24670659783235802,
+          0.2924520963688222
+        ],
+        [
+          0.20903963762279032,
+          0.24762251047631761,
+          0.24869812910522443,
+          0.2946397227956676
+        ],
+        [
+          0.20704336963510647,
+          0.24513757681906162,
+          0.2508180606829177,
+          0.29700099286291426
+        ],
+        [
+          0.20501764813481385,
+          0.2425076531987775,
+          0.2530890356677081,
+          0.29938566299870056
+        ],
+        [
+          0.20315081071702984,
+          0.23992129437820342,
+          0.2553610009213288,
+          0.30156689398343806
+        ],
+        [
+          0.20153682562510547,
+          0.23739182796946068,
+          0.25764304191883997,
+          0.30342830448659397
+        ],
+        [
+          0.20023850410209,
+          0.23514565650088604,
+          0.2597123884472612,
+          0.3049034509497628
+        ],
+        [
+          0.19916785631639683,
+          0.23304011500773195,
+          0.26169391817514537,
+          0.3060981105007259
+        ],
+        [
+          0.19826447095241687,
+          0.2311636678105828,
+          0.26347834885748656,
+          0.3070935123795137
+        ],
+        [
+          0.19711589352364045,
+          0.22921878305583265,
+          0.2652784496539274,
+          0.30838687376659957
+        ],
+        [
+          0.19571274567718944,
+          0.227190999551809,
+          0.2671091776495552,
+          0.3099870771214463
+        ],
+        [
+          0.1940850714553726,
+          0.22496725972242582,
+          0.2690941614107689,
+          0.3118535074114327
+        ],
+        [
+          0.19226070450292748,
+          0.22259161875598887,
+          0.27119191393286557,
+          0.313955762808218
+        ],
+        [
+          0.19024650408218052,
+          0.22009711152925754,
+          0.27337341075647903,
+          0.316282973632083
+        ]
+      ],
+      "training_routing_mode": "straight_through",
+      "training_expert_proposal_execution": "all_four_for_router_surrogate",
+      "execution_utilization_interpretation": "nonzero forward weights; all four proposals computed for backward",
+      "strategy_reroute_probability_by_stage": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "strategy_reroute_probability_mean": 1.0,
+      "strategy_reroute_requested_by_stage": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "strategy_reroute_requested_mean": 1.0,
+      "strategy_actual_strategy_change_by_stage": [
+        0.0,
+        0.0,
+        0.03125,
+        0.453125,
+        0.515625,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "strategy_actual_strategy_change_mean": 0.034482758620689655,
+      "strategy_consecutive_duration_by_stage": [
+        1.0,
+        2.0,
+        2.9375,
+        2.578125,
+        1.515625,
+        2.515625,
+        3.515625,
+        4.515625,
+        5.515625,
+        6.515625,
+        7.515625,
+        8.515625,
+        9.515625,
+        10.515625,
+        11.515625,
+        12.515625,
+        13.515625,
+        14.515625,
+        15.515625,
+        16.515625,
+        17.515625,
+        18.515625,
+        19.515625,
+        20.515625,
+        21.515625,
+        22.515625,
+        23.515625,
+        24.515625,
+        25.515625
+      ],
+      "strategy_consecutive_duration_mean": 11.945043103448276,
+      "strategy_state_interpretation": "hard-forward ST expert/switch state; separate relaxed regularization state"
+    }
+  ],
+  "diagnostic_trace": "/home/qiqi/Documents/objective_power_grid_moe_v21_20261021/experiments/10212026/10212026_moe_sboed_v21_development/readiness/native_launcher_smoke/models/resmoe_diagnostics.jsonl",
+  "base_checkpoint": {
+    "pretrained": true,
+    "path": "/home/qiqi/Documents/objective_power_grid_moe_v2_20261021/experiments/10212026/10212026_moe_sboed_v2_development/location/seed101/base/models/sum_single.pt",
+    "sha256": "cc8db475d7e706780d8fa2bdb06e6d57e14329dea989a53adc8cc22b454980fe",
+    "input_dim": 772,
+    "benchmark": "location_finding",
+    "training_episodes": 500000,
+    "training_seconds": 358.65728018205846,
+    "action_scale": 4.0,
+    "obs_scale": 3.0
+  },
+  "additional_training_episodes": 320,
+  "total_training_episodes": 500320,
+  "base_training_seconds": 358.65728018205846,
+  "total_training_seconds": 360.7419718070305,
+  "policy_parameters": 126306,
+  "trainable_parameters": 67406,
+  "history_encoder_revision": 2,
+  "encoder_input_dim": 193,
+  "base_input_dim": 772,
+  "routing_warmup_fraction": 0.3,
+  "routing_finish_fraction": 0.95,
+  "switching_schedule": "none; preserves existing sigmoid gate",
+  "development_diagnostic_seconds": 0.0,
+  "settings": {
+    "routing_mode": "learned_switch",
+    "initial_reroute_probability": 0.99,
+    "residual_scale": 1.0,
+    "residual_initial_std": 0.001,
+    "base_finetune": false,
+    "training_routing_mode": "straight_through"
+  },
+  "checkpoint_selection": "latest_budget_eligible_checkpoint",
+  "training_objective": "full_horizon_sPCE",
+  "contrasts": 65536,
+  "expert_ids": [
+    "E1",
+    "E2",
+    "E3",
+    "E4"
+  ],
+  "gradient_clip_mode": "component",
+  "load_penalty_weight": 0.0001,
+  "selector_entropy_weight_max": 0.0001,
+  "actual_updates": 5,
+  "compute_budget": {
+    "version": 1,
+    "start": 513294.300811515,
+    "budget_seconds": 14400.0,
+    "credit_seconds": 361.19603366503725,
+    "hardware": "NVIDIA GeForce RTX 5080",
+    "charge_validation": true,
+    "charged_diagnostics": [
+      [
+        513295.353822319,
+        513295.408484911,
+        "validation"
+      ],
+      [
+        513296.312034074,
+        513296.36152171,
+        "validation"
+      ]
+    ],
+    "excluded": [],
+    "counts": {
+      "optimizer_updates": 7818,
+      "fresh_complete_episodes": 500320,
+      "true_parameter_stage_propagations": 15009600,
+      "contrast_parameter_stage_propagations": 15989145600,
+      "scalar_conditional_log_density_evaluations": 16004155200,
+      "actual_model_stage_evaluations_including_backward_recompute": 16633300800
+    },
+    "components": {
+      "base_policy": {
+        "optimizer_updates": 7813
+      },
+      "base_pretraining": {
+        "fresh_complete_episodes": 500000,
+        "true_parameter_stage_propagations": 15000000,
+        "contrast_parameter_stage_propagations": 15360000000,
+        "scalar_conditional_log_density_evaluations": 15375000000,
+        "actual_model_stage_evaluations_including_backward_recompute": 15375000000
+      },
+      "current_training": {
+        "fresh_complete_episodes": 320,
+        "true_parameter_stage_propagations": 9600,
+        "contrast_parameter_stage_propagations": 629145600,
+        "scalar_conditional_log_density_evaluations": 629155200,
+        "actual_model_stage_evaluations_including_backward_recompute": 1258300800
+      },
+      "policy": {
+        "optimizer_updates": 5
+      }
+    },
+    "checkpoints": [
+      {
+        "identifier": "1",
+        "charged_seconds": 362.3133352100267,
+        "eligible": true
+      },
+      {
+        "identifier": "5",
+        "charged_seconds": 363.2665399260004,
+        "eligible": true
+      }
+    ],
+    "stopped_at": 513296.397055802,
+    "charged_seconds": 363.29227795201587,
+    "fraction_of_allocated_budget": 0.025228630413334435,
+    "unused_seconds": 14036.707722047984,
+    "unit": "exclusive-device allocated training wall seconds",
+    "scope": "includes setup, compilation, initialization, all training, checkpoint overhead and validation; independent final evaluation reported separately",
+    "not_equal_to_FLOPs": true,
+    "overrun_seconds": 0.0
+  },
+  "convergence_status": "planned_schedule_complete_before_compute_cap",
+  "journal_validation_history": [
+    {
+      "checkpoint": 1,
+      "episodes": 64,
+      "training_seconds": 362.24898492801003,
+      "eig": 9.285873791207866,
+      "mc_standard_error": 0.13121544932143667,
+      "paired_improvement_from_anchor": null,
+      "improvement_threshold": null,
+      "patience_used": 0,
+      "selected": true,
+      "status": "training",
+      "update": 1,
+      "validation": {
+        "seed": 1004,
+        "systems": 16,
+        "contrasts": 16384,
+        "paired_draws_sha256": "bfe29824b53f82525c55ce33a77e615136ed4cfa3563e2e3cf0e5857f4fa43b8",
+        "seconds": 0.054145590984262526,
+        "forward_particle_stages": 7864800,
+        "device": "cpu",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      },
+      "compute_checkpoint": {
+        "identifier": "1",
+        "charged_seconds": 362.3133352100267,
+        "eligible": true
+      }
+    },
+    {
+      "checkpoint": 2,
+      "episodes": 320,
+      "training_seconds": 363.20719581103185,
+      "eig": 9.287379001711415,
+      "mc_standard_error": 0.1308564580678294,
+      "paired_improvement_from_anchor": 0.0015052105035491259,
+      "improvement_threshold": 0.01,
+      "patience_used": 1,
+      "selected": true,
+      "status": "planned_schedule_complete_before_compute_cap",
+      "update": 5,
+      "validation": {
+        "seed": 1004,
+        "systems": 16,
+        "contrasts": 16384,
+        "paired_draws_sha256": "bfe29824b53f82525c55ce33a77e615136ed4cfa3563e2e3cf0e5857f4fa43b8",
+        "seconds": 0.049397023976780474,
+        "forward_particle_stages": 7864800,
+        "device": "cpu",
+        "mode": "hard_deployed_policy",
+        "secondary_parameter_inference": false
+      },
+      "compute_checkpoint": {
+        "identifier": "5",
+        "charged_seconds": 363.2665399260004,
+        "eligible": true
+      }
+    }
+  ],
+  "validation_seconds": 0.103542614961043,
+  "optimization_seconds": 1.966157021059189,
+  "stopping_rule": {
+    "minimum_episodes": 1,
+    "minimum_checkpoints": 8,
+    "validation_every_episodes": 1000000000,
+    "patience": 6,
+    "minimum_improvement": 0.01,
+    "noise_multiplier": 1.96,
+    "maximum_episodes": 1000000000,
+    "maximum_training_seconds": 86400
+  },
+  "selected_checkpoint": {
+    "checkpoint": 2,
+    "episodes": 320,
+    "training_seconds": 363.20719581103185,
+    "eig": 9.287379001711415,
+    "mc_standard_error": 0.1308564580678294,
+    "paired_improvement_from_anchor": 0.0015052105035491259,
+    "improvement_threshold": 0.01,
+    "patience_used": 1,
+    "selected": true,
+    "status": "planned_schedule_complete_before_compute_cap",
+    "update": 5,
+    "validation": {
+      "seed": 1004,
+      "systems": 16,
+      "contrasts": 16384,
+      "paired_draws_sha256": "bfe29824b53f82525c55ce33a77e615136ed4cfa3563e2e3cf0e5857f4fa43b8",
+      "seconds": 0.049397023976780474,
+      "forward_particle_stages": 7864800,
+      "device": "cpu",
+      "mode": "hard_deployed_policy",
+      "secondary_parameter_inference": false
+    },
+    "compute_checkpoint": {
+      "identifier": "5",
+      "charged_seconds": 363.2665399260004,
+      "eligible": true
+    }
+  },
+  "validation_seed": 1004,
+  "resource_ledger": {
+    "schema": 2,
+    "scope": "current training phase; base cost separately attributed",
+    "counts": {
+      "fresh_complete_episodes": 320,
+      "true_parameter_stage_propagations": 9600,
+      "contrast_parameter_stage_propagations": 629145600,
+      "scalar_conditional_log_density_evaluations": 629155200,
+      "actual_model_stage_evaluations_including_backward_recompute": 1258300800
+    },
+    "optimizer_updates": {
+      "policy": 5,
+      "critic": null,
+      "posterior": null,
+      "score": null,
+      "temperature": null
+    },
+    "replay_transition_samples": null,
+    "offline_seconds": 2.084688509989064,
+    "validation_seconds": 0.103542614961043,
+    "base_training_seconds": 358.65728018205846,
+    "ode_rhs_evaluations": null,
+    "solver_backward_work": null,
+    "gpu_occupancy_seconds": null,
+    "nle_equivalent_proxy": null,
+    "basis": "derived from native executed counters, not direct hardware measurement",
+    "limitations": [
+      "score-target and backward recomputation not counted",
+      "Unknown fields are not zero; walltime is not GPU occupancy"
+    ],
+    "likelihood_gradient_work": {
+      "scalar_stage_terms": null,
+      "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+    },
+    "base_pretraining_counts": {
+      "fresh_complete_episodes": 500000,
+      "true_parameter_stage_propagations": 15000000,
+      "contrast_parameter_stage_propagations": 15360000000,
+      "scalar_conditional_log_density_evaluations": 15375000000,
+      "actual_model_stage_evaluations_including_backward_recompute": 15375000000
+    },
+    "base_pretraining_optimizer_updates": {
+      "policy": 7813,
+      "critic": null,
+      "posterior": null,
+      "score": null,
+      "temperature": null
+    },
+    "complete_method_counts": {
+      "scalar_conditional_log_density_evaluations": 16004155200,
+      "fresh_complete_episodes": 500320,
+      "actual_model_stage_evaluations_including_backward_recompute": 16633300800,
+      "contrast_parameter_stage_propagations": 15989145600,
+      "true_parameter_stage_propagations": 15009600
+    },
+    "cpu_process_seconds": 4.250715,
+    "waited_child_cpu_seconds_including_validation": 0.016116,
+    "compute_budget": {
+      "version": 1,
+      "start": 513294.300811515,
+      "budget_seconds": 14400.0,
+      "credit_seconds": 361.19603366503725,
+      "hardware": "NVIDIA GeForce RTX 5080",
+      "charge_validation": true,
+      "charged_diagnostics": [
+        [
+          513295.353822319,
+          513295.408484911,
+          "validation"
+        ],
+        [
+          513296.312034074,
+          513296.36152171,
+          "validation"
+        ]
+      ],
+      "excluded": [],
+      "counts": {
+        "optimizer_updates": 7818,
+        "fresh_complete_episodes": 500320,
+        "true_parameter_stage_propagations": 15009600,
+        "contrast_parameter_stage_propagations": 15989145600,
+        "scalar_conditional_log_density_evaluations": 16004155200,
+        "actual_model_stage_evaluations_including_backward_recompute": 16633300800
+      },
+      "components": {
+        "base_policy": {
+          "optimizer_updates": 7813
+        },
+        "base_pretraining": {
+          "fresh_complete_episodes": 500000,
+          "true_parameter_stage_propagations": 15000000,
+          "contrast_parameter_stage_propagations": 15360000000,
+          "scalar_conditional_log_density_evaluations": 15375000000,
+          "actual_model_stage_evaluations_including_backward_recompute": 15375000000
+        },
+        "current_training": {
+          "fresh_complete_episodes": 320,
+          "true_parameter_stage_propagations": 9600,
+          "contrast_parameter_stage_propagations": 629145600,
+          "scalar_conditional_log_density_evaluations": 629155200,
+          "actual_model_stage_evaluations_including_backward_recompute": 1258300800
+        },
+        "policy": {
+          "optimizer_updates": 5
+        }
+      },
+      "checkpoints": [
+        {
+          "identifier": "1",
+          "charged_seconds": 362.3133352100267,
+          "eligible": true
+        },
+        {
+          "identifier": "5",
+          "charged_seconds": 363.2665399260004,
+          "eligible": true
+        }
+      ],
+      "stopped_at": 513296.397055802,
+      "charged_seconds": 363.29227795201587,
+      "fraction_of_allocated_budget": 0.025228630413334435,
+      "unused_seconds": 14036.707722047984,
+      "unit": "exclusive-device allocated training wall seconds",
+      "scope": "includes setup, compilation, initialization, all training, checkpoint overhead and validation; independent final evaluation reported separately",
+      "not_equal_to_FLOPs": true,
+      "overrun_seconds": 0.0
+    }
+  },
+  "native_elapsed_seconds": 2.084688509989064,
+  "total_offline_seconds": 2.069699636020232,
+  "journal_protocol": "validation_convergence_v1",
+  "training_cap_is_not_target": true,
+  "comparison_budget_unit": "exclusive_device_training_seconds",
+  "primary_episode_safety_cap": 1000000000,
+  "reference_schedule_episodes": 320,
+  "stop_reason": "reference_schedule_completion",
+  "effective_training_settings": {
+    "strategy_routing_mode": "learned_switch",
+    "strategy_initial_reroute_probability": 0.99,
+    "strategy_diagnostics_every": 1,
+    "moe_history_encoder_revision": 1,
+    "first_design_revision": 2,
+    "training_bound": 4,
+    "variational_policy_lr": 0.0002,
+    "variational_density_lr": 0.001,
+    "variational_density_hidden": 128,
+    "variational_mixtures": 16,
+    "variational_density_updates": 2,
+    "variational_warmup": 200,
+    "smc_moves": 8,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "spce_curriculum": 1,
+    "updates": 5,
+    "batch_size": 64,
+    "learning_rate": 5e-05,
+    "hidden": 64,
+    "contrasts": 65536,
+    "validation_contrasts": 16384,
+    "validation_systems": 128,
+    "validate_every": 100,
+    "eval_systems": 16,
+    "eval_contrasts": 16384,
+    "posterior_particles": 8192,
+    "posterior_steps": 64,
+    "posterior_chains": 4,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 128,
+    "search_candidates": 16,
+    "search_rounds": 3,
+    "fantasies": 32,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 3,
+    "vsoed_critic_updates": 5,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 16,
+    "evaluation_contrast_chunk": 4096,
+    "evaluation_population_systems": 16,
+    "threads": 2,
+    "rl_batch_size": 100,
+    "rl_replay_batch": 4096,
+    "rl_replay_capacity": 1000000,
+    "rl_min_buffer": 100000,
+    "rl_gradient_steps": 2,
+    "rl_log_every": 10,
+    "moe_density_updates": 4,
+    "moe_gradient_clip_mode": "component",
+    "moe_router_finish_fraction": 0.95,
+    "moe_router_warmup_fraction": 0.3,
+    "moe_specialist_budget_fraction": 0.25,
+    "scorebed_batch_size": 64,
+    "spce_adam_beta1": 0.8,
+    "spce_adam_beta2": 0.998,
+    "spce_lr_decay": 0.98,
+    "spce_lr_schedule_every": 1000,
+    "contrast_chunk": 8192,
+    "model_identity": "MoE-sBOED-v2.1",
+    "moe_training_routing_mode": "straight_through",
+    "reference_schedule_episodes": 320,
+    "residual_initial_std": 0.001,
+    "residual_scale": 1.0,
+    "router_schedule_episodes": 3200000,
+    "training_routing_mode": "straight_through",
+    "router_learning_rate_multiplier": 0.2
+  },
+  "resume_scope": "Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed",
+  "historical_runtime_overlap": "New runs are serialized; historical timings require separate provenance",
+  "checkpoint_sha256": "969e133ac7c7af1bc11145dbe30536bb5d59400308cc64f49ed5e6b2674415ca"
+}

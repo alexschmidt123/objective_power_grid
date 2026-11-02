@@ -1,0 +1,449 @@
+MoE-sBOED-v2.1 completed development comparison
+
+{
+  "model": "MoE-sBOED-v2.1",
+  "EIG": 11.014079902581237,
+  "MC_SE": 0.04384482285060431,
+  "v2_EIG": 11.040232101951391,
+  "v21_minus_v2": -0.02615219937015434,
+  "paired_difference_MC_SE": 0.04563867685316286,
+  "paired_95_interval": [
+    -0.11560400600235354,
+    0.06329960726204487
+  ],
+  "single_seed_final_improvement_supported": false,
+  "development_seed": 1004,
+  "development_difference": -0.035720862384321275,
+  "development_paired_MC_SE": 0.08741726000169424,
+  "development_lower95": -0.20705869198764199,
+  "charged_seconds": 13675.420852854033,
+  "allowance_seconds": 14400.0,
+  "unused_seconds": 724.579147145967,
+  "stop_reason": "reference_schedule_completion",
+  "executed_updates": 50000,
+  "selected_update": 50000,
+  "primary_episodes_including_base": 3700000,
+  "training_contrasts": 65536,
+  "checkpoint_SHA256": "e8e65c0f2a1a575e4c66d661e0df7a6f5c60bc47e68cf31149344dabf28d9249",
+  "checkpoint_selection": "latest_budget_eligible_checkpoint",
+  "optimizer": {
+    "strategy_routing_mode": "learned_switch",
+    "strategy_initial_reroute_probability": 0.99,
+    "strategy_diagnostics_every": 1,
+    "moe_history_encoder_revision": 1,
+    "first_design_revision": 2,
+    "training_bound": 4,
+    "variational_policy_lr": 0.0002,
+    "variational_density_lr": 0.001,
+    "variational_density_hidden": 128,
+    "variational_mixtures": 16,
+    "variational_density_updates": 2,
+    "variational_warmup": 200,
+    "smc_moves": 8,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "spce_curriculum": 1,
+    "updates": 50000,
+    "batch_size": 64,
+    "learning_rate": 5e-05,
+    "hidden": 64,
+    "contrasts": 65536,
+    "validation_contrasts": 16384,
+    "validation_systems": 128,
+    "validate_every": 100,
+    "eval_systems": 2000,
+    "eval_contrasts": 1000000,
+    "posterior_particles": 8192,
+    "posterior_steps": 64,
+    "posterior_chains": 4,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 128,
+    "search_candidates": 16,
+    "search_rounds": 3,
+    "fantasies": 32,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 3,
+    "vsoed_critic_updates": 5,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 16,
+    "evaluation_contrast_chunk": 4096,
+    "evaluation_population_systems": 2000,
+    "threads": 2,
+    "rl_batch_size": 100,
+    "rl_replay_batch": 4096,
+    "rl_replay_capacity": 1000000,
+    "rl_min_buffer": 100000,
+    "rl_gradient_steps": 2,
+    "rl_log_every": 10,
+    "moe_density_updates": 4,
+    "moe_gradient_clip_mode": "component",
+    "moe_router_finish_fraction": 0.95,
+    "moe_router_warmup_fraction": 0.3,
+    "moe_specialist_budget_fraction": 0.25,
+    "scorebed_batch_size": 64,
+    "spce_adam_beta1": 0.8,
+    "spce_adam_beta2": 0.998,
+    "spce_lr_decay": 0.98,
+    "spce_lr_schedule_every": 1000,
+    "contrast_chunk": 8192,
+    "model_identity": "MoE-sBOED-v2.1",
+    "moe_training_routing_mode": "straight_through",
+    "reference_schedule_episodes": 3200000,
+    "residual_initial_std": 0.001,
+    "residual_scale": 1.0,
+    "router_schedule_episodes": 3200000,
+    "training_routing_mode": "straight_through",
+    "router_learning_rate_multiplier": 0.2
+  },
+  "resource_ledger": {
+    "schema": 2,
+    "scope": "current training phase; base cost separately attributed",
+    "counts": {
+      "fresh_complete_episodes": 3200000,
+      "true_parameter_stage_propagations": 96000000,
+      "contrast_parameter_stage_propagations": 6291456000000,
+      "scalar_conditional_log_density_evaluations": 6291552000000,
+      "actual_model_stage_evaluations_including_backward_recompute": 12583008000000
+    },
+    "optimizer_updates": {
+      "policy": 50000,
+      "critic": null,
+      "posterior": null,
+      "score": null,
+      "temperature": null
+    },
+    "replay_transition_samples": null,
+    "offline_seconds": 11486.848752974067,
+    "validation_seconds": 27.679317350964993,
+    "base_training_seconds": 358.65728018205846,
+    "ode_rhs_evaluations": null,
+    "solver_backward_work": null,
+    "gpu_occupancy_seconds": null,
+    "nle_equivalent_proxy": null,
+    "basis": "derived from native executed counters, not direct hardware measurement",
+    "limitations": [
+      "score-target and backward recomputation not counted",
+      "Unknown fields are not zero; walltime is not GPU occupancy"
+    ],
+    "likelihood_gradient_work": {
+      "scalar_stage_terms": null,
+      "basis": "model-derived conditional-score target terms; excludes compiler/autodiff recomputation"
+    },
+    "base_pretraining_counts": {
+      "fresh_complete_episodes": 500000,
+      "true_parameter_stage_propagations": 15000000,
+      "contrast_parameter_stage_propagations": 15360000000,
+      "scalar_conditional_log_density_evaluations": 15375000000,
+      "actual_model_stage_evaluations_including_backward_recompute": 15375000000
+    },
+    "base_pretraining_optimizer_updates": {
+      "policy": 7813,
+      "critic": null,
+      "posterior": null,
+      "score": null,
+      "temperature": null
+    },
+    "complete_method_counts": {
+      "actual_model_stage_evaluations_including_backward_recompute": 12598383000000,
+      "true_parameter_stage_propagations": 111000000,
+      "scalar_conditional_log_density_evaluations": 6306927000000,
+      "contrast_parameter_stage_propagations": 6306816000000,
+      "fresh_complete_episodes": 3700000
+    },
+    "cpu_process_seconds": 11486.245352,
+    "waited_child_cpu_seconds_including_validation": 0.016086,
+    "compute_budget": {
+      "version": 1,
+      "start": 513583.798740207,
+      "budget_seconds": 14400.0,
+      "credit_seconds": 2187.7349097940605,
+      "hardware": "NVIDIA GeForce RTX 5080",
+      "charge_validation": true,
+      "charged_diagnostics": [
+        [
+          513585.672676661,
+          513586.985442317,
+          "validation"
+        ],
+        [
+          514187.172097303,
+          514188.492193745,
+          "validation"
+        ],
+        [
+          514788.625054223,
+          514789.94957121,
+          "validation"
+        ],
+        [
+          515390.124569624,
+          515391.443347061,
+          "validation"
+        ],
+        [
+          515991.659479642,
+          515992.973405106,
+          "validation"
+        ],
+        [
+          516593.090432473,
+          516594.408316025,
+          "validation"
+        ],
+        [
+          517194.459681783,
+          517195.777315574,
+          "validation"
+        ],
+        [
+          517795.959909942,
+          517797.275657582,
+          "validation"
+        ],
+        [
+          518397.356355838,
+          518398.675605466,
+          "validation"
+        ],
+        [
+          518998.870572363,
+          519000.194189171,
+          "validation"
+        ],
+        [
+          519600.276231974,
+          519601.589257399,
+          "validation"
+        ],
+        [
+          520201.739953239,
+          520203.059456139,
+          "validation"
+        ],
+        [
+          520803.185559685,
+          520804.516503316,
+          "validation"
+        ],
+        [
+          521404.619708809,
+          521405.94380981,
+          "validation"
+        ],
+        [
+          522006.084672991,
+          522007.404211576,
+          "validation"
+        ],
+        [
+          522607.547480608,
+          522608.864957334,
+          "validation"
+        ],
+        [
+          523209.047259276,
+          523210.361945736,
+          "validation"
+        ],
+        [
+          523810.537259763,
+          523811.856318836,
+          "validation"
+        ],
+        [
+          524411.99999707,
+          524413.316696829,
+          "validation"
+        ],
+        [
+          525013.326445294,
+          525014.64435373,
+          "validation"
+        ],
+        [
+          525070.153837187,
+          525071.45840296,
+          "validation"
+        ]
+      ],
+      "excluded": [],
+      "counts": {
+        "optimizer_updates": 57813,
+        "fresh_complete_episodes": 3700000,
+        "true_parameter_stage_propagations": 111000000,
+        "contrast_parameter_stage_propagations": 6306816000000,
+        "scalar_conditional_log_density_evaluations": 6306927000000,
+        "actual_model_stage_evaluations_including_backward_recompute": 12598383000000
+      },
+      "components": {
+        "base_policy": {
+          "optimizer_updates": 7813
+        },
+        "base_pretraining": {
+          "fresh_complete_episodes": 500000,
+          "true_parameter_stage_propagations": 15000000,
+          "contrast_parameter_stage_propagations": 15360000000,
+          "scalar_conditional_log_density_evaluations": 15375000000,
+          "actual_model_stage_evaluations_including_backward_recompute": 15375000000
+        },
+        "current_training": {
+          "fresh_complete_episodes": 3200000,
+          "true_parameter_stage_propagations": 96000000,
+          "contrast_parameter_stage_propagations": 6291456000000,
+          "scalar_conditional_log_density_evaluations": 6291552000000,
+          "actual_model_stage_evaluations_including_backward_recompute": 12583008000000
+        },
+        "policy": {
+          "optimizer_updates": 50000
+        }
+      },
+      "checkpoints": [
+        {
+          "identifier": "1",
+          "charged_seconds": 2190.9315166800516,
+          "eligible": true
+        },
+        {
+          "identifier": "2630",
+          "charged_seconds": 2792.4385544200777,
+          "eligible": true
+        },
+        {
+          "identifier": "5258",
+          "charged_seconds": 3393.8959270900814,
+          "eligible": true
+        },
+        {
+          "identifier": "7885",
+          "charged_seconds": 3995.389715904079,
+          "eligible": true
+        },
+        {
+          "identifier": "10512",
+          "charged_seconds": 4596.9196305300575,
+          "eligible": true
+        },
+        {
+          "identifier": "13139",
+          "charged_seconds": 5198.354433852073,
+          "eligible": true
+        },
+        {
+          "identifier": "15765",
+          "charged_seconds": 5799.723577978089,
+          "eligible": true
+        },
+        {
+          "identifier": "18390",
+          "charged_seconds": 6401.222032328078,
+          "eligible": true
+        },
+        {
+          "identifier": "21016",
+          "charged_seconds": 7002.621898494079,
+          "eligible": true
+        },
+        {
+          "identifier": "23639",
+          "charged_seconds": 7604.140523158072,
+          "eligible": true
+        },
+        {
+          "identifier": "26259",
+          "charged_seconds": 8205.535473608063,
+          "eligible": true
+        },
+        {
+          "identifier": "28879",
+          "charged_seconds": 8807.005782925058,
+          "eligible": true
+        },
+        {
+          "identifier": "31492",
+          "charged_seconds": 9408.463034974062,
+          "eligible": true
+        },
+        {
+          "identifier": "34108",
+          "charged_seconds": 10009.89567039709,
+          "eligible": true
+        },
+        {
+          "identifier": "36720",
+          "charged_seconds": 10611.350782665075,
+          "eligible": true
+        },
+        {
+          "identifier": "39331",
+          "charged_seconds": 11212.811229684099,
+          "eligible": true
+        },
+        {
+          "identifier": "41941",
+          "charged_seconds": 11814.308298807067,
+          "eligible": true
+        },
+        {
+          "identifier": "44548",
+          "charged_seconds": 12415.80815624306,
+          "eligible": true
+        },
+        {
+          "identifier": "47154",
+          "charged_seconds": 13017.263056111056,
+          "eligible": true
+        },
+        {
+          "identifier": "49759",
+          "charged_seconds": 13618.59061614913,
+          "eligible": true
+        },
+        {
+          "identifier": "50000",
+          "charged_seconds": 13675.404761565034,
+          "eligible": true
+        }
+      ],
+      "stopped_at": 525071.484683267,
+      "charged_seconds": 13675.420852854033,
+      "fraction_of_allocated_budget": 0.949682003670419,
+      "unused_seconds": 724.579147145967,
+      "unit": "exclusive-device allocated training wall seconds",
+      "scope": "includes setup, compilation, initialization, all training, checkpoint overhead and validation; independent final evaluation reported separately",
+      "not_equal_to_FLOPs": true,
+      "overrun_seconds": 0.0
+    }
+  },
+  "expert_gradient_exposure": {
+    "router": 0.99998,
+    "expert_0": 0.0,
+    "expert_1": 0.12922,
+    "expert_2": 0.0,
+    "expert_3": 1.0
+  },
+  "late_expert_usage": [
+    0.0,
+    0.00683351293103447,
+    0.0,
+    0.9931664870689656
+  ],
+  "late_saturation": 0.9978375538793102,
+  "late_router_clipped_fraction": 0.963,
+  "late_residual_RMS": 0.18175704075991883,
+  "mean_decision_seconds": 3.303466845536605e-05,
+  "final_evaluation_seconds": 89.56391143403016,
+  "hardware": "NVIDIA GeForce RTX 5080; same worker GPU as v2; no RTX4090 equivalence claim",
+  "source_manifest": "source_manifest.json",
+  "promotion": "DO_NOT_PROMOTE",
+  "limitations": [
+    "One training seed, not five-seed superiority",
+    "Seed1001 previously consumed reference bank; not fresh confirmation",
+    "Gradient exposure and usage are not proof of useful specialization",
+    "Only one focused intervention; no sweep or favorable restart selection"
+  ]
+}
