@@ -1,0 +1,41 @@
+{
+  "campaign": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_221203_matched_sum_single_193",
+  "reference": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_moe_controlled_diagnosis/encoder_correction/corrected_seed101",
+  "started_utc": "2026-10-15T03:12:03.218173+00:00",
+  "changes": {
+    "src/research/moe_architecture_controls.py": {
+      "before_sha256": "cea5454568629082b4093773b6c9bcbe64f2acaed396de13516fc70c027fe557",
+      "after_sha256": "cce53e89e0ee8f5e6f501c5750d985313597a7f25931aa96b3bea9961c96a708"
+    },
+    "src/research/runner.py": {
+      "before_sha256": "7566bf417f68c2e69ce4ba6b530b9530a1c669d87d34b76e3bb680dc923d1829",
+      "after_sha256": "cb0d98922cb01d5e1adb8b60d6f214f16641cd38394a2c66e4416d6f7b4f32b9"
+    }
+  },
+  "moe_training_source_unchanged": true,
+  "reference_checkpoint_sha256": "cd0feabe760910fb9272e0bea50cfab0be26068235dd4f2db4fc668a260c0e06",
+  "single_total_parameters": 21844,
+  "single_active_nonfirst_parameters": 21842,
+  "moe_total_parameters": 72544,
+  "moe_active_nonfirst_parameters": 22424,
+  "initialization": "Same fresh reference sum encoder/first design/expert0 at seed101; no trained weights loaded",
+  "first_action": "Separate learned raw0 initialization; identical treatment, not fixed to the trained MoE action",
+  "unchanged": [
+    "sum16encoder",
+    "193inputcontext and stage",
+    "64/64tanhhead",
+    "bounded action mapping",
+    "Adam LR/betas/decay",
+    "component norm5 clipping",
+    "1million primary training episodes",
+    "L1024training",
+    "2000/L1000000paired evaluation",
+    "final checkpoint"
+  ],
+  "differences": [
+    "one head instead of four experts/router",
+    "single has no intrinsic router penalties",
+    "total parameter count differs; active head and encoder are matched"
+  ],
+  "no_other_experiments_authorized": true
+}

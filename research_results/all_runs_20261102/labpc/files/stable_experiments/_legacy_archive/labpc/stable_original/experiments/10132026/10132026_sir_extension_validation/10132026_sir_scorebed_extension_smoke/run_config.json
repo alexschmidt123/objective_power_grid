@@ -1,0 +1,184 @@
+{
+  "protocol": "moe_sboed_research_v1",
+  "settings": {
+    "first_design_revision": 1,
+    "training_bound": 1,
+    "variational_policy_lr": 0.0002,
+    "variational_density_lr": 0.001,
+    "variational_density_hidden": 128,
+    "variational_mixtures": 16,
+    "variational_density_updates": 1,
+    "variational_warmup": 1,
+    "smc_moves": 8,
+    "moe_revision": 4,
+    "moe_router_temperature": 1.0,
+    "spce_curriculum": 1,
+    "updates": 2,
+    "batch_size": 4,
+    "learning_rate": 0.0003,
+    "hidden": 64,
+    "contrasts": 8,
+    "validation_contrasts": 8,
+    "validation_systems": 4,
+    "validate_every": 1,
+    "eval_systems": 2,
+    "eval_contrasts": 8,
+    "posterior_particles": 16,
+    "posterior_steps": 4,
+    "posterior_chains": 2,
+    "posterior_proposal_scale": 0.15,
+    "planner_particles": 8,
+    "search_candidates": 4,
+    "search_rounds": 1,
+    "fantasies": 4,
+    "vsoed_hidden": 128,
+    "vsoed_mixtures": 8,
+    "vsoed_critic_lr": 0.001,
+    "vsoed_posterior_lr": 0.001,
+    "vsoed_posterior_updates": 1,
+    "vsoed_critic_updates": 1,
+    "replay_capacity": 8192,
+    "vsoed_exploration": 0.3,
+    "target_rate": 0.01,
+    "evaluation_batch_size": 2,
+    "evaluation_contrast_chunk": 128,
+    "evaluation_population_systems": 2,
+    "threads": 2,
+    "rl_batch_size": 4,
+    "rl_replay_batch": 8,
+    "rl_replay_capacity": 256,
+    "rl_min_buffer": 4,
+    "rl_gradient_steps": 2,
+    "rl_log_every": 1,
+    "moe_specialist_budget_fraction": 0.25,
+    "moe_density_updates": 4,
+    "primary_episode_budget": 1,
+    "scorebed_batch_size": 64
+  },
+  "benchmark": {
+    "system": {
+      "name": "sir_ode"
+    },
+    "N": 1,
+    "experiment": {
+      "experiment_type": "eig_based",
+      "step_number": 5,
+      "methods": [
+        "scorebed"
+      ]
+    },
+    "observation": {
+      "noise_sigma": 1.0,
+      "sampling": "infected_count_at_continuous_time"
+    },
+    "sir_ode": {
+      "population": 500.0,
+      "i0": 2.0,
+      "t_end": 100.0,
+      "beta_mean": 0.5,
+      "gamma_mean": 0.1,
+      "log_std": 0.5,
+      "min_spacing": 0.1,
+      "integration_steps_per_stage": 512
+    },
+    "research": {
+      "enabled": true,
+      "settings": {
+        "eval_systems": 2048,
+        "eval_contrasts": 16384,
+        "moe_revision": 4,
+        "moe_router_temperature": 1.0,
+        "moe_specialist_budget_fraction": 0.25,
+        "moe_density_updates": 4,
+        "updates": 31250,
+        "batch_size": 32,
+        "learning_rate": 0.0003,
+        "training_bound": 1,
+        "primary_episode_budget": 1,
+        "contrasts": 1024,
+        "evaluation_population_systems": 2048,
+        "evaluation_batch_size": 8,
+        "evaluation_contrast_chunk": 128,
+        "validation_systems": 128,
+        "validation_contrasts": 1024,
+        "rl_batch_size": 32,
+        "rl_replay_batch": 256,
+        "rl_replay_capacity": 100000,
+        "rl_min_buffer": 1024,
+        "rl_gradient_steps": 2,
+        "rl_log_every": 10,
+        "scorebed_batch_size": 64,
+        "threads": 2
+      },
+      "plan": {
+        "source": "User-provided ChatGPT research plan",
+        "horizons": [
+          5,
+          10
+        ],
+        "training_repetitions": 5,
+        "test_trajectories": 2048,
+        "routing": "four-expert DSelect1 sparse MoE",
+        "training_criterion": "sPCE",
+        "online_policy_refinement": false,
+        "primary_metric": "common explicit-likelihood held-out EIG (sPCE)",
+        "secondary_metric": "parameter_MSE",
+        "exclusions": [
+          "step_dad",
+          "myopic",
+          "mocu",
+          "msc",
+          "cost_utility",
+          "growing_tree"
+        ],
+        "moe_architecture": "same sPCE-only sparse policy as location; no auxiliary networks",
+        "data_source": "on-the-fly deterministic SIR ODE; no finite latent bank",
+        "legacy_results": "Separate provenance only; discrete bank metrics not pooled",
+        "scope": "implementation and bounded CPU validation; full training not launched"
+      },
+      "training_episode_cap": 1000000
+    },
+    "_config_path": "/home/grads/g/g.lin/Documents/objective_power_grid/development/sir_offline_extension/configs/sir_ode_research.yaml"
+  },
+  "hardware": {
+    "execution_site": "labpc",
+    "cluster": null,
+    "computer_name": "ecen-80r5x04.engr.tamu.edu",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700F",
+    "gpu_model": "NVIDIA GeForce RTX 4090"
+  },
+  "train_seed": 101,
+  "eval_seeds": [
+    1001
+  ],
+  "methods": [
+    "scorebed"
+  ],
+  "horizon": 5,
+  "smoke": true,
+  "evaluation_population_systems": 2,
+  "evaluation_subset_rule": "first N paired cases",
+  "primary_metric": "EIG (nats), estimated by common held-out sPCE",
+  "secondary_metric": "posterior parameter MSE",
+  "mse_inference": "truth-excluded importance initialization plus random-walk MH in prior coordinates",
+  "location_estimation": "posterior samples aligned to MAP particle; final permutation-invariant squared error",
+  "history": "ordered padded design-observation pairs and stage index; history only",
+  "online_policy_optimization": false,
+  "online_design_optimization": false,
+  "grid_protocol": "fixed physical bus 1, amplitude .05 pu, full state carry, increasing durations",
+  "gradient": "Torch pathwise; grid uses existing numerical state/duration Jacobians",
+  "limitations": [
+    "Smoke establishes workability, not superiority",
+    "EIG contrast sensitivity and posterior convergence required before paper claims",
+    "vsOED is a documented adaptation, not an exact reproduction"
+  ],
+  "comparison_protocol": {
+    "enforced": false,
+    "workability_only": true,
+    "study": "development",
+    "evaluation_metric": "common likelihood-based sPCE in nats",
+    "inference_metric": "secondary parameter MSE; not policy objective"
+  },
+  "training_bound": "Official ScoreBED score-matching and score EIG policy gradient; same feasible design space at training and evaluation; common held-out EIG evaluator",
+  "spce_training_schedule": "fixed contrasts"
+}

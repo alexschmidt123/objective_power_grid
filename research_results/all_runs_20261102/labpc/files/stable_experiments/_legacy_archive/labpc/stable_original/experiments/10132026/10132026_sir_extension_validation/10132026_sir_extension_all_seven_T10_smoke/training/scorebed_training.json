@@ -1,0 +1,76 @@
+{
+  "training": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+  "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+  "generated_training_trajectories": 34,
+  "training_forward_trajectories": 34,
+  "contrast_training_trajectories": 0,
+  "training_trajectory_budget": 34,
+  "training_budget_unit": "primary_episodes",
+  "initialization_trajectories": 18,
+  "standardisation_trajectories": 4,
+  "score_training_trajectories": 8,
+  "policy_training_trajectories": 8,
+  "score_batch": 4,
+  "actual_score_updates": 2,
+  "actual_policy_updates": 2,
+  "training_seconds": 28.902200045995414,
+  "history": [
+    {
+      "phase": "score",
+      "step": 2,
+      "episodes": 8,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 0.003178219708457149,
+        "loss_total": 31.48515008734823,
+        "loss_unweighted_total": 1.4169383040130235,
+        "loss_x_component": 0.38010341493249894,
+        "loss_y_component": 31.10504667241573,
+        "loss_y_unweighted": 1.0368348890805246,
+        "param_norm": 129.071927506022,
+        "update_norm": 0.2621271881832893
+      }
+    },
+    {
+      "phase": "policy",
+      "step": 2,
+      "episodes": 8,
+      "metrics": {
+        "clip_applied": 0.0,
+        "grad_norm_preclip": 4.547830030787736e-06,
+        "param_norm": 11.624544143676758,
+        "update_norm": 0.001615704968571663
+      }
+    }
+  ],
+  "checkpoint_selection": "final",
+  "architecture": "official_4layer_256dim_8head_RFF_conservative_transformer",
+  "policy_architecture": "official_DADNet_256_16_sum_encoder",
+  "adaptations": "1million total primary episodes including normalization and initialization; one fresh policy; 70percent remaining budget score pretraining; smaller minibatches under capped budget; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions",
+  "design_bounds": [
+    0.0,
+    100.0
+  ],
+  "bounded_mapping": "chronological feasible-time sigmoid with minimum spacing",
+  "sir_configuration": {
+    "population": 500.0,
+    "i0": 2.0,
+    "t_end": 100.0,
+    "min_spacing": 0.1,
+    "integration_steps_per_stage": 512,
+    "beta_mean": 0.5,
+    "gamma_mean": 0.10000000000000002,
+    "log_std": 0.5,
+    "sigma": 1.0
+  },
+  "runtime": {
+    "jax": "0.7.2",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  },
+  "policy_bridge_max_absolute_error": 4.800173272201391e-06,
+  "policy_parameters": 4897,
+  "implementation": "Official ScoreBED method with independently verified deterministic SIR ODE adapter; not original published SIR results",
+  "checkpoint_sha256": "9ec377c0116c8f1877019fd2d8c908cbca0f5cf2a53fd8f065e8fb340f59eb03"
+}

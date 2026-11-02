@@ -1,0 +1,87 @@
+RESULT_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10132026/10132026_vsoed_pilot_101_1001/run
+upstream vsOED-G-I update 0: variational reward=-3.128472328186035
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/online_cli.py", line 54, in <module>
+    if __name__=='__main__':main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/online_cli.py", line 25, in main
+    research(argv if any(a.split("=")[0]=="--config" for a in argv) else ["--config",known.config,*argv])
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/runner.py", line 327, in main
+    policy,training=train_upstream_vsoed(benchmark,horizon,settings,args.seed,output/'models',profile)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/upstream_vsoed.py", line 101, in train_upstream_vsoed
+    algorithm.train(n_update=cfg['updates'], n_newtraj=cfg['new_trajectories'],
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/vsoed/pg_vsoed.py", line 567, in train
+    self.asses(self.n_newtraj, self.design_noise_scale, True, self.use_PCE, self.use_PCE_incre, self.n_contrastive_sample)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/vsoed/pg_vsoed.py", line 834, in asses
+    rewards_hist[:, k] += self.get_rewards(k,
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/vsoed/vsoed.py", line 128, in get_rewards
+    kld_rewards = self.kld_rw_f(stage, ds_hist, ys_hist, xps_hist, params)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/vsoed/post_approx.py", line 577, in reward_fun
+    log_poi_post = self.log_poi_post(stage=stage, params=params, inputs=X)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/vsoed/post_approx.py", line 496, in log_poi_post
+    return self.log_post(stage, ds_hist, ys_hist, params, inputs, 'poi')
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/vsoed/post_approx.py", line 481, in log_post
+    logpost[idxs] = self.poi_post_nets[stage][m_idx](X[idxs], params[idxs])
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/vsoed/post_approx.py", line 220, in forward
+    normal = torch.distributions.Normal(mus[..., self.idxs_norm], sigmas[..., self.idxs_norm])
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (1000, 8, 4)) of distribution Normal(loc: torch.Size([1000, 8, 4]), scale: torch.Size([1000, 8, 4])) to satisfy the constraint Real(), but found invalid values:
+tensor([[[nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         ...,
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan]],
+
+        [[nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         ...,
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan]],
+
+        [[nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         ...,
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan]],
+
+        ...,
+
+        [[nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         ...,
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan]],
+
+        [[nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         ...,
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan]],
+
+        [[nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         ...,
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan],
+         [nan, nan, nan, nan]]], device='cuda:0')

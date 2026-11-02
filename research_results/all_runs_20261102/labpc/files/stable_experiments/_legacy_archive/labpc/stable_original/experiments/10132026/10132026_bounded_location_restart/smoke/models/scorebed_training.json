@@ -1,0 +1,65 @@
+{
+  "training": "official_ScoreBED_JAX_score_matching_and_score_EIG_gradient",
+  "upstream_commit": "cc8e996e3ee3237ab4c9bd3ef80e2e4b4aa9cee4",
+  "generated_training_trajectories": 34,
+  "training_forward_trajectories": 34,
+  "contrast_training_trajectories": 0,
+  "training_trajectory_budget": 34,
+  "training_budget_unit": "primary_episodes",
+  "initialization_trajectories": 18,
+  "standardisation_trajectories": 4,
+  "score_training_trajectories": 8,
+  "policy_training_trajectories": 8,
+  "score_batch": 4,
+  "actual_score_updates": 2,
+  "actual_policy_updates": 2,
+  "training_seconds": 27.804536952171475,
+  "history": [
+    {
+      "phase": "score",
+      "step": 2,
+      "episodes": 8,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 1669.0126953125,
+        "loss_total": 124.67891693115234,
+        "loss_unweighted_total": 5.26450777053833,
+        "loss_x_component": 1.1467697620391846,
+        "loss_y_component": 123.53215026855469,
+        "loss_y_unweighted": 4.117738246917725,
+        "param_norm": 129.08106994628906,
+        "update_norm": 0.3285559415817261
+      }
+    },
+    {
+      "phase": "policy",
+      "step": 2,
+      "episodes": 8,
+      "metrics": {
+        "clip_applied": 1.0,
+        "grad_norm_preclip": 6.194043159484863,
+        "param_norm": 10.86536979675293,
+        "update_norm": 0.0022088494151830673
+      }
+    }
+  ],
+  "checkpoint_selection": "final",
+  "architecture": "official_4layer_256dim_8head_RFF_conservative_transformer",
+  "policy_architecture": "official_DADNet_256_16_sum_encoder",
+  "adaptations": "1million total primary episodes including normalization and initialization; one fresh policy; 70percent remaining budget score pretraining; smaller minibatches under capped budget; final partial minibatches; fast-sampler keyword-argument compatibility fix; no architecture or estimator substitutions",
+  "design_bounds": [
+    -4.0,
+    4.0
+  ],
+  "bounded_mapping": "lo+(hi-lo)*sigmoid(raw_policy_output); teacher design sampler mapped into same box",
+  "runtime": {
+    "jax": "0.7.2",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  },
+  "policy_bridge_max_absolute_error": 4.76837158203125e-07,
+  "policy_parameters": 5170,
+  "reported_eig": "shared held-out explicit-likelihood evaluator, never score network estimates",
+  "checkpoint_sha256": "57b434ef7d3f7ad8cfc55cf7f1fcb93c370dd942f7439114a81fb14419183c4c"
+}

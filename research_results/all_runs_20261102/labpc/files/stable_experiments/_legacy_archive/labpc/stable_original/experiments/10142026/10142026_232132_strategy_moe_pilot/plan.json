@@ -1,0 +1,40 @@
+{
+  "campaign": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10142026/10142026_232132_strategy_moe_pilot",
+  "protected_original_source_hashes": {
+    "src/research/sparse_moe.py": "2d40c602854087b1cdcd83403171c149313dec134a4b0be7c67912c738c3e73c",
+    "src/research/shared_history.py": "dc8c3fc7e2f8c66aca36881f3163278ae549e7c84a6b18e52702cb026129f4aa",
+    "src/research/engine.py": "89db755390e357fd6f0494e7ce5c9e23b094abde5ad39ef7083277fa42ef2b8c",
+    "src/research/location_evaluation.py": "64c67b6547c77f4823b487493ed0703efbd3f04d7308019e875d145505695f2f",
+    "src/research/location_posterior.py": "93a8bed7ba145a19ef8971075df06195ca05692f2eafe2591a8bd33ec017971f",
+    "src/research/benchmarks.py": "0aea3db50fb451ae038ac22ad5a9abe7576197e725dc668db9387bffbf4f5173",
+    "run.sh": "8f831b8b33175f4f7c51683aaa1771b75e4b88e16817185993034edfa73d1967"
+  },
+  "training_seed": 101,
+  "evaluation_seed": 1001,
+  "evaluation_seed_role": "development",
+  "training_episodes": 1000000,
+  "train_L": 1024,
+  "eval_trajectories": 2000,
+  "eval_L": 1000000,
+  "full_training_runs": 1,
+  "model": "separate Strategy-MoE",
+  "switch_initial_probability": 0.99,
+  "switch_schedule": "none",
+  "routing_schedule": "original corrected sum-MoE legacy quadratic to0.001 by80percent",
+  "comparisons": "DAD/source sum-MoE reused; always_reroute/always_continue/learned evaluated with the same learned Strategy checkpoint; mode interventions are not independent training runs",
+  "initial_cost_estimate_minutes": [
+    50,
+    75
+  ],
+  "unchanged": [
+    "sum encoder",
+    "four independent64/64tanh experts",
+    "DSelect1",
+    "component norm5 clipping",
+    "sPCE L1024",
+    "optimizer and regularizers",
+    "first action",
+    "simulator and evaluator"
+  ],
+  "started_utc": "2026-10-15T04:21:32.489954+00:00"
+}

@@ -1,0 +1,58 @@
+{
+  "created": "2026-10-13T21:08:54.743363",
+  "host": "LabPC RTX4090",
+  "design_bounds": [
+    -4.0,
+    4.0
+  ],
+  "random_distribution": "standard normal conditioned on common box",
+  "prior": "iid standard normal source coordinates",
+  "observation": "normal logged signal sigma0.5",
+  "horizon": 30,
+  "primary_episodes_per_training": 1000000,
+  "training_contrasts": 1024,
+  "primary_episode_budget_unit": true,
+  "training_seeds": [
+    101,
+    102,
+    103
+  ],
+  "evaluation_seed": 1002,
+  "evaluation_systems": 2000,
+  "evaluation_contrasts": 1000000,
+  "validation_seed": 10000120,
+  "validation_systems": 128,
+  "validation_contrasts": 65536,
+  "controls": [
+    "dad",
+    "sum_single",
+    "attention_single",
+    "attention_dense_moe",
+    "attention_sparse_moe",
+    "attention_matched_dense",
+    "attention_matched_sparse",
+    "attention_uniform_moe"
+  ],
+  "routing_algorithm": "unchanged DSelect1",
+  "sparse_schedule": "original gamma1->.001 over80percent",
+  "optimization": "original global norm5 clipping; no intervention before controls",
+  "checkpoint_selection": "final",
+  "causal_comparisons": [
+    "attention_single versus sum_single: same dense head",
+    "attention_dense_moe versus attention_single: experts with same full attention encoder",
+    "attention_sparse_moe versus attention_dense_moe: same encoder and expert heads",
+    "MoE versus matching wide dense control: capacity",
+    "dense learned versus uniform routing: learned specialization"
+  ],
+  "limitations": [
+    "sum encoder native16 output is fixed-zero-padded to same head input; attention output772",
+    "three training seeds exploratory",
+    "validation cost separately counted, no checkpoint selection",
+    "common final sPCE finite-contrast EIG estimate"
+  ],
+  "scientific_source_manifest": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/10132026/10132026_bounded_location_restart/provenance/source_manifest.json",
+  "estimated_controls_hours": [
+    14,
+    20
+  ]
+}

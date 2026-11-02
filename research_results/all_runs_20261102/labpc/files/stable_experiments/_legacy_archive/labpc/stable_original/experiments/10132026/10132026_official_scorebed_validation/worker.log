@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/scorebed/policy_learning/trainers/train_scores.py", line 145, in _sample_target
+    return sampler_fn(
+           ^^^^^^^^^^^
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/scorebed/policy_learning/bed_models/location_finding.py", line 766, in fast_sample
+    return fast_sampler(
+           ^^^^^^^^^^^^^
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/scorebed/policy_learning/bed_models/base.py", line 40, in fast_sampler
+    xi, design_aux_data, key = design_sampler(key, batch_shape, theta=theta)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: LocationFinding.sample_designs() got an unexpected keyword argument 'sampler_weights_by_type'
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/scorebed_worker.py", line 110, in <module>
+    ap=argparse.ArgumentParser();ap.add_argument('--output',required=True);ap.add_argument('--budget',type=int,default=1000000);ap.add_argument('--horizon',type=int,default=30);ap.add_argument('--seed',type=int,default=101);ap.add_argument('--smoke',action='store_true');run(ap.parse_args())
+                                                                                                                                                                                                                                                                               ^^^^^^^^^^^^^^^^^^^^
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/scorebed_worker.py", line 55, in run
+    y,x,theta,aux,score.key=score._sample_target(score.key,(n,),use_fast_sampler=True)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/vendor/scorebed/policy_learning/trainers/train_scores.py", line 155, in _sample_target
+    raise TypeError(
+TypeError: Target model does not support sampler_type/sampler_kwargs in sample/fast_sample

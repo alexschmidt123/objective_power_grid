@@ -1,0 +1,61 @@
+{
+  "training": "official_vsOED_GMM_I",
+  "upstream_commit": "d0884f9ba30fbddc56618841c68af2f3bfe16539",
+  "profile": {
+    "variant": "vsOED-G-I",
+    "updates": 2,
+    "paper_reference_updates": 10001,
+    "budget_note": "20000 warmup plus 980*1000 new episodes equals 1000000; unbounded designs and discount1 are declared adaptations.",
+    "new_trajectories": 4,
+    "replay_batch": 4,
+    "initial_replay": 8,
+    "replay_capacity": 32,
+    "posterior_updates": 1,
+    "critic_updates": 1,
+    "posterior_lr": 0.001,
+    "actor_lr": 0.001,
+    "critic_lr": 0.001,
+    "lr_decay": 0.9999,
+    "discount": 1.0,
+    "exploration": 0.5,
+    "exploration_decay": 0.9999,
+    "target_rate": 0.1,
+    "transition": 0,
+    "log_every": 1
+  },
+  "device": "cuda:0",
+  "selected_update": 2,
+  "checkpoint_selection": "final, as upstream",
+  "policy_parameters": 162306,
+  "history": [
+    {
+      "Epoch": "0",
+      "Reward/MeanReward": "-0.10719496011734009",
+      "Reward/StdReward": "2.343055009841919",
+      "Design/MeanDesign": "[-0.00017712166300043464, -5.898011295357719e-05]",
+      "Design/StdDesign": "[0.00019971758592873812, 0.00013385609781835228]",
+      "ReplayBuffer/buffer_size": "8"
+    },
+    {
+      "Epoch": "1",
+      "Reward/MeanReward": "-3.232089042663574",
+      "Reward/StdReward": "3.858825922012329",
+      "Design/MeanDesign": "[-0.008965633809566498, 0.007332820910960436]",
+      "Design/StdDesign": "[0.002540179993957281, 0.0012987215304747224]",
+      "ReplayBuffer/buffer_size": "12"
+    }
+  ],
+  "training_seconds": 2.0717203950043768,
+  "generated_training_trajectories": 16,
+  "contrast_training_trajectories": 0,
+  "training_forward_trajectories": 16,
+  "training_trajectory_budget": 1000000,
+  "reward_discount": 1.0,
+  "implementation_adaptations": "Unbounded raw actor final-layer initialization gain0.01 and zero bias; upstream BA actor-critic objectives unchanged; vendor unchanged",
+  "posterior_optimizer_updates": 2,
+  "critic_optimizer_updates": 2,
+  "replay_batch_size": 4,
+  "actor_optimizer_updates": 2,
+  "forward_particle_stages": 480,
+  "checkpoint_sha256": "9f0095c2213c89086e0e95545a5576d09fd0901d3919d4fa674cc788cca005c9"
+}

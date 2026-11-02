@@ -1,0 +1,55 @@
+{
+  "training": "variational_actor_critic_adaptation",
+  "gamma": 1.0,
+  "likelihood_required": true,
+  "simulator_gradients_required": false,
+  "checkpoint_selection": "final",
+  "generated_training_trajectories": 8,
+  "contrast_training_trajectories": 0,
+  "training_forward_trajectories": 8,
+  "training_trajectory_budget": null,
+  "training_budget_unit": "primary_episodes",
+  "policy_architecture": "Policy",
+  "policy_parameters": 6273,
+  "posterior_parameters": 25768,
+  "critic_parameters": 20865,
+  "selected_update": 2,
+  "validation_spce": null,
+  "history": [
+    {
+      "update": 0,
+      "validation_spce": null
+    },
+    {
+      "update": 1,
+      "validation_spce": null,
+      "posterior_nll": 3.0302630096716805,
+      "critic_mse": 0.0029794517206866377,
+      "actor_loss": -0.10332551231125112,
+      "variational_terminal_reward": 0.081318686083108,
+      "exploration": 0.15,
+      "replay_size": 4
+    },
+    {
+      "update": 2,
+      "validation_spce": null,
+      "posterior_nll": 3.5671419460959894,
+      "critic_mse": 0.027654289346666822,
+      "actor_loss": 0.01748368262866974,
+      "variational_terminal_reward": 0.42239281099776727,
+      "exploration": 0.03,
+      "replay_size": 8
+    }
+  ],
+  "training_seconds": 0.6567620460409671,
+  "forward_particle_stages": 80,
+  "grid_particle_propagations_including_jacobians": 0,
+  "upstream": "https://github.com/wgshen/vsOED/tree/d0884f9ba30fbddc56618841c68af2f3bfe16539",
+  "adaptations": [
+    "shared ordered history and benchmark feasibility map",
+    "joint diagonal-Gaussian mixture in transformed prior coordinates",
+    "latent-action critic; incremental rewards; gamma=1",
+    "final checkpoint for sample-only MoE; sPCE validation for explicit vsOED"
+  ],
+  "checkpoint_sha256": "0c93d9a630aa196edd0ad275a426092a0e47f4337d81e8e96e8eec93d6fe6377"
+}
