@@ -1,0 +1,1205 @@
+{
+  "observation": "sir_infected_count",
+  "n_obs": 1,
+  "device": "cuda",
+  "eval_seed": 1002,
+  "eig_data_audit": {
+    "support_shape": [
+      100,
+      1024,
+      1
+    ],
+    "finite_support": true,
+    "informative_actions": 100,
+    "n_test_systems": 3000
+  },
+  "fixed_calibration_seed": 104729,
+  "fixed_artifact": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_120001_sir_ode_EIG_T3_Nobs1_sigma1/model/fixed_eig_T3.json",
+  "random_design_replicates_per_system": 8,
+  "paired_summaries": [
+    {
+      "comparison": "step_dad - fixed_open_loop",
+      "left_method": "step_dad",
+      "right_method": "fixed_open_loop",
+      "n_paired_systems": 4,
+      "mean_diff": -0.6111676434399789,
+      "ci95_low": -1.439421424223025,
+      "ci95_high": 0.21708613734306725,
+      "win_fraction": 0.25,
+      "eval_seed": 1002,
+      "pairing_note": "paired by held-out theta; randomized baseline is averaged over its design replicates before differencing"
+    },
+    {
+      "comparison": "step_dad - myopic_delta_h",
+      "left_method": "step_dad",
+      "right_method": "myopic_delta_h",
+      "n_paired_systems": 4,
+      "mean_diff": -0.487953766383701,
+      "ci95_low": -1.525027144350467,
+      "ci95_high": 0.549119611583065,
+      "win_fraction": 0.25,
+      "eval_seed": 1002,
+      "pairing_note": "paired by held-out theta; randomized baseline is averaged over its design replicates before differencing"
+    },
+    {
+      "comparison": "step_dad - random",
+      "left_method": "step_dad",
+      "right_method": "random",
+      "n_paired_systems": 4,
+      "mean_diff": 0.41981356049576735,
+      "ci95_low": -0.9827932148944429,
+      "ci95_high": 1.8224203358859776,
+      "win_fraction": 0.75,
+      "eval_seed": 1002,
+      "pairing_note": "paired by held-out theta; randomized baseline is averaged over its design replicates before differencing"
+    },
+    {
+      "comparison": "step_dad - dad_eig",
+      "left_method": "step_dad",
+      "right_method": "dad_eig",
+      "n_paired_systems": 4,
+      "mean_diff": 0.002429585314492888,
+      "ci95_low": -0.0023323742359501907,
+      "ci95_high": 0.007191544864935967,
+      "win_fraction": 0.5,
+      "eval_seed": 1002,
+      "pairing_note": "paired by held-out theta; randomized baseline is averaged over its design replicates before differencing"
+    },
+    {
+      "comparison": "dad_eig - fixed_open_loop",
+      "left_method": "dad_eig",
+      "right_method": "fixed_open_loop",
+      "n_paired_systems": 4,
+      "mean_diff": -0.6135972287544718,
+      "ci95_low": -1.446285872289541,
+      "ci95_high": 0.21909141478059746,
+      "win_fraction": 0.25,
+      "eval_seed": 1002,
+      "pairing_note": "paired by held-out theta; randomized baseline is averaged over its design replicates before differencing"
+    },
+    {
+      "comparison": "dad_eig - myopic_delta_h",
+      "left_method": "dad_eig",
+      "right_method": "myopic_delta_h",
+      "n_paired_systems": 4,
+      "mean_diff": -0.4903833516981939,
+      "ci95_low": -1.5313703450728264,
+      "ci95_high": 0.5506036416764386,
+      "win_fraction": 0.25,
+      "eval_seed": 1002,
+      "pairing_note": "paired by held-out theta; randomized baseline is averaged over its design replicates before differencing"
+    },
+    {
+      "comparison": "dad_eig - random",
+      "left_method": "dad_eig",
+      "right_method": "random",
+      "n_paired_systems": 4,
+      "mean_diff": 0.41738397518127446,
+      "ci95_low": -0.9894651450381533,
+      "ci95_high": 1.8242330954007022,
+      "win_fraction": 0.75,
+      "eval_seed": 1002,
+      "pairing_note": "paired by held-out theta; randomized baseline is averaged over its design replicates before differencing"
+    },
+    {
+      "comparison": "rl_sboed_eig - fixed_open_loop",
+      "left_method": "rl_sboed_eig",
+      "right_method": "fixed_open_loop",
+      "n_paired_systems": 4,
+      "mean_diff": -0.1885056151077158,
+      "ci95_low": -0.4170888243319176,
+      "ci95_high": 0.04007759411648598,
+      "win_fraction": 0.0,
+      "eval_seed": 1002,
+      "pairing_note": "paired by held-out theta; randomized baseline is averaged over its design replicates before differencing"
+    },
+    {
+      "comparison": "rl_sboed_eig - myopic_delta_h",
+      "left_method": "rl_sboed_eig",
+      "right_method": "myopic_delta_h",
+      "n_paired_systems": 4,
+      "mean_diff": -0.06529173805143795,
+      "ci95_low": -0.5333968084856257,
+      "ci95_high": 0.40281333238274974,
+      "win_fraction": 0.5,
+      "eval_seed": 1002,
+      "pairing_note": "paired by held-out theta; randomized baseline is averaged over its design replicates before differencing"
+    },
+    {
+      "comparison": "rl_sboed_eig - random",
+      "left_method": "rl_sboed_eig",
+      "right_method": "random",
+      "n_paired_systems": 4,
+      "mean_diff": 0.8424755888280304,
+      "ci95_low": 0.18474094969221067,
+      "ci95_high": 1.50021022796385,
+      "win_fraction": 1.0,
+      "eval_seed": 1002,
+      "pairing_note": "paired by held-out theta; randomized baseline is averaged over its design replicates before differencing"
+    }
+  ],
+  "summaries": [
+    {
+      "method": "dad_eig",
+      "n": 4,
+      "n_design_replicates": 4,
+      "design_replicates_per_system": 1,
+      "design_replication_note": "one deterministic design per held-out system",
+      "terminal_eig_mean": 6.268160588476647,
+      "terminal_eig_std": 0.8570653757920691,
+      "ci95_low": 5.42823652020042,
+      "ci95_high": 7.108084656752874,
+      "seconds": 0.301275840960443,
+      "offline_training_or_calibration_seconds": 14.230223153019324,
+      "training_time_seconds": 14.230223153019324,
+      "online_seconds_per_rollout": 0.07531896024011075,
+      "n_unique_sequences": 1,
+      "eval_seed": 1002,
+      "timing_scope": "offline=method-specific preparation; online=CUDA-synchronized warm action selection + observation lookup + posterior update; shared physical-bank generation excluded"
+    },
+    {
+      "method": "rl_sboed_eig",
+      "n": 4,
+      "n_design_replicates": 4,
+      "design_replicates_per_system": 1,
+      "design_replication_note": "one deterministic design per held-out system",
+      "terminal_eig_mean": 6.693252202123403,
+      "terminal_eig_std": 0.32645655233375354,
+      "ci95_low": 6.373324780836324,
+      "ci95_high": 7.0131796234104815,
+      "seconds": 0.019720145035535097,
+      "offline_training_or_calibration_seconds": 14.523859077016823,
+      "training_time_seconds": 14.523859077016823,
+      "online_seconds_per_rollout": 0.004930036258883774,
+      "n_unique_sequences": 2,
+      "eval_seed": 1002,
+      "timing_scope": "offline=method-specific preparation; online=CUDA-synchronized warm action selection + observation lookup + posterior update; shared physical-bank generation excluded"
+    },
+    {
+      "method": "step_dad",
+      "n": 4,
+      "n_design_replicates": 4,
+      "design_replicates_per_system": 1,
+      "design_replication_note": "one deterministic design per held-out system",
+      "terminal_eig_mean": 6.27059017379114,
+      "terminal_eig_std": 0.8527680665941233,
+      "ci95_low": 5.434877468528899,
+      "ci95_high": 7.106302879053381,
+      "seconds": 0.7395910080522299,
+      "offline_training_or_calibration_seconds": 14.230223153019324,
+      "training_time_seconds": 14.230223153019324,
+      "online_seconds_per_rollout": 0.18489775201305747,
+      "n_unique_sequences": 2,
+      "eval_seed": 1002,
+      "timing_scope": "offline=method-specific preparation; online=CUDA-synchronized warm action selection + observation lookup + posterior update; shared physical-bank generation excluded"
+    },
+    {
+      "method": "myopic_delta_h",
+      "n": 4,
+      "n_design_replicates": 4,
+      "design_replicates_per_system": 1,
+      "design_replication_note": "one deterministic design per held-out system",
+      "terminal_eig_mean": 6.758543940174841,
+      "terminal_eig_std": 0.32626151337094633,
+      "ci95_low": 6.4388076570713135,
+      "ci95_high": 7.078280223278368,
+      "seconds": 0.015896673081442714,
+      "offline_training_or_calibration_seconds": 0.0,
+      "training_time_seconds": 0.0,
+      "online_seconds_per_rollout": 0.0039741682703606784,
+      "n_unique_sequences": 4,
+      "eval_seed": 1002,
+      "timing_scope": "offline=method-specific preparation; online=CUDA-synchronized warm action selection + observation lookup + posterior update; shared physical-bank generation excluded"
+    },
+    {
+      "method": "fixed_open_loop",
+      "n": 4,
+      "n_design_replicates": 4,
+      "design_replicates_per_system": 1,
+      "design_replication_note": "one deterministic design per held-out system",
+      "terminal_eig_mean": 6.881757817231119,
+      "terminal_eig_std": 0.09630164827923869,
+      "ci95_low": 6.787382201917465,
+      "ci95_high": 6.976133432544772,
+      "seconds": 0.0017281649634242058,
+      "offline_training_or_calibration_seconds": 0.07198101305402815,
+      "training_time_seconds": 0.07198101305402815,
+      "online_seconds_per_rollout": 0.00043204124085605145,
+      "n_unique_sequences": 1,
+      "eval_seed": 1002,
+      "timing_scope": "offline=method-specific preparation; online=CUDA-synchronized warm action selection + observation lookup + posterior update; shared physical-bank generation excluded"
+    },
+    {
+      "method": "random",
+      "n": 4,
+      "n_design_replicates": 32,
+      "design_replicates_per_system": 8,
+      "design_replication_note": "expected performance averaged over randomized designs",
+      "terminal_eig_mean": 5.8507766132953725,
+      "terminal_eig_std": 0.7776643123484018,
+      "ci95_low": 5.088665587193939,
+      "ci95_high": 6.612887639396806,
+      "seconds": 0.014246494974941015,
+      "offline_training_or_calibration_seconds": 0.0,
+      "training_time_seconds": 0.0,
+      "online_seconds_per_rollout": 0.0004452029679669067,
+      "n_unique_sequences": 32,
+      "eval_seed": 1002,
+      "timing_scope": "offline=method-specific preparation; online=CUDA-synchronized warm action selection + observation lookup + posterior update; shared physical-bank generation excluded"
+    }
+  ],
+  "rollouts": [
+    {
+      "method": "dad_eig",
+      "rollout_id": 0,
+      "sequence": [
+        11,
+        12,
+        19
+      ],
+      "terminal_eig": 5.130413174629211,
+      "step_eig": [
+        3.8750743865966797,
+        0.3331913948059082,
+        0.9221473932266235
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 0
+    },
+    {
+      "method": "dad_eig",
+      "rollout_id": 1,
+      "sequence": [
+        11,
+        12,
+        19
+      ],
+      "terminal_eig": 6.0830711126327515,
+      "step_eig": [
+        3.9031758308410645,
+        0.6514084339141846,
+        1.5284868478775024
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 0
+    },
+    {
+      "method": "dad_eig",
+      "rollout_id": 2,
+      "sequence": [
+        11,
+        12,
+        19
+      ],
+      "terminal_eig": 6.927686284529045,
+      "step_eig": [
+        4.6563005447387695,
+        0.6096718311309814,
+        1.6617139086592942
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 0
+    },
+    {
+      "method": "dad_eig",
+      "rollout_id": 3,
+      "sequence": [
+        11,
+        12,
+        19
+      ],
+      "terminal_eig": 6.93147178211558,
+      "step_eig": [
+        4.173283100128174,
+        0.42362523078918457,
+        2.334563451198221
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 0
+    },
+    {
+      "method": "rl_sboed_eig",
+      "rollout_id": 0,
+      "sequence": [
+        11,
+        13,
+        22
+      ],
+      "terminal_eig": 6.875378668308258,
+      "step_eig": [
+        3.8750743865966797,
+        0.40818309783935547,
+        2.592121183872223
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 0
+    },
+    {
+      "method": "rl_sboed_eig",
+      "rollout_id": 1,
+      "sequence": [
+        11,
+        13,
+        17
+      ],
+      "terminal_eig": 6.2171303033828735,
+      "step_eig": [
+        3.9031758308410645,
+        0.9814736843109131,
+        1.332480788230896
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 0
+    },
+    {
+      "method": "rl_sboed_eig",
+      "rollout_id": 2,
+      "sequence": [
+        11,
+        13,
+        17
+      ],
+      "terminal_eig": 6.7490280121564865,
+      "step_eig": [
+        4.6563005447387695,
+        0.8837573528289795,
+        1.2089701145887375
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 0
+    },
+    {
+      "method": "rl_sboed_eig",
+      "rollout_id": 3,
+      "sequence": [
+        11,
+        13,
+        17
+      ],
+      "terminal_eig": 6.931471824645993,
+      "step_eig": [
+        4.173283100128174,
+        1.322525978088379,
+        1.4356627464294403
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 0
+    },
+    {
+      "method": "step_dad",
+      "rollout_id": 0,
+      "sequence": [
+        11,
+        13,
+        19
+      ],
+      "terminal_eig": 5.14013147354126,
+      "step_eig": [
+        3.8750743865966797,
+        0.40818309783935547,
+        0.8568739891052246
+      ],
+      "router_trace": [],
+      "step_dad_refine_at": 1,
+      "step_dad_refinement_seconds": 0.17216780094895512,
+      "step_dad_refinement_updates": 2,
+      "step_dad_fantasy_rollouts": 8,
+      "theta_id": 0,
+      "design_replicate": 0
+    },
+    {
+      "method": "step_dad",
+      "rollout_id": 1,
+      "sequence": [
+        11,
+        12,
+        19
+      ],
+      "terminal_eig": 6.0830711126327515,
+      "step_eig": [
+        3.9031758308410645,
+        0.6514084339141846,
+        1.5284868478775024
+      ],
+      "router_trace": [],
+      "step_dad_refine_at": 1,
+      "step_dad_refinement_seconds": 0.09639301500283182,
+      "step_dad_refinement_updates": 2,
+      "step_dad_fantasy_rollouts": 8,
+      "theta_id": 1,
+      "design_replicate": 0
+    },
+    {
+      "method": "step_dad",
+      "rollout_id": 2,
+      "sequence": [
+        11,
+        12,
+        19
+      ],
+      "terminal_eig": 6.927686284529045,
+      "step_eig": [
+        4.6563005447387695,
+        0.6096718311309814,
+        1.6617139086592942
+      ],
+      "router_trace": [],
+      "step_dad_refine_at": 1,
+      "step_dad_refinement_seconds": 0.09729910106398165,
+      "step_dad_refinement_updates": 2,
+      "step_dad_fantasy_rollouts": 8,
+      "theta_id": 2,
+      "design_replicate": 0
+    },
+    {
+      "method": "step_dad",
+      "rollout_id": 3,
+      "sequence": [
+        11,
+        13,
+        19
+      ],
+      "terminal_eig": 6.931471824461503,
+      "step_eig": [
+        4.173283100128174,
+        1.322525978088379,
+        1.43566274624495
+      ],
+      "router_trace": [],
+      "step_dad_refine_at": 1,
+      "step_dad_refinement_seconds": 0.0964918970130384,
+      "step_dad_refinement_updates": 2,
+      "step_dad_fantasy_rollouts": 8,
+      "theta_id": 3,
+      "design_replicate": 0
+    },
+    {
+      "method": "myopic_delta_h",
+      "rollout_id": 0,
+      "sequence": [
+        10,
+        42,
+        44
+      ],
+      "terminal_eig": 6.931471824301842,
+      "step_eig": [
+        3.6102399826049805,
+        3.263814754784107,
+        0.05741708691275432
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 0
+    },
+    {
+      "method": "myopic_delta_h",
+      "rollout_id": 1,
+      "sequence": [
+        18,
+        27,
+        29
+      ],
+      "terminal_eig": 6.9016251638531685,
+      "step_eig": [
+        4.15904974937439,
+        2.7723838492529467,
+        -0.029808434774167836
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 0
+    },
+    {
+      "method": "myopic_delta_h",
+      "rollout_id": 2,
+      "sequence": [
+        12,
+        23,
+        27
+      ],
+      "terminal_eig": 6.269606947898865,
+      "step_eig": [
+        4.64796257019043,
+        2.28346905754006,
+        -0.661824679831625
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 0
+    },
+    {
+      "method": "myopic_delta_h",
+      "rollout_id": 3,
+      "sequence": [
+        10,
+        30,
+        33
+      ],
+      "terminal_eig": 6.931471824645488,
+      "step_eig": [
+        4.023920059204102,
+        2.907551765441886,
+        -5.002240983559866e-13
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 0
+    },
+    {
+      "method": "fixed_open_loop",
+      "rollout_id": 0,
+      "sequence": [
+        14,
+        17,
+        30
+      ],
+      "terminal_eig": 6.931471824645996,
+      "step_eig": [
+        4.278730869293213,
+        0.33307671546936035,
+        2.319664239883423
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 0
+    },
+    {
+      "method": "fixed_open_loop",
+      "rollout_id": 1,
+      "sequence": [
+        14,
+        17,
+        30
+      ],
+      "terminal_eig": 6.737344041466713,
+      "step_eig": [
+        4.705684185028076,
+        1.5720123052597046,
+        0.4596475511789322
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 0
+    },
+    {
+      "method": "fixed_open_loop",
+      "rollout_id": 2,
+      "sequence": [
+        14,
+        17,
+        30
+      ],
+      "terminal_eig": 6.92674357816577,
+      "step_eig": [
+        4.372190952301025,
+        2.541291583329439,
+        0.013261042535305023
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 0
+    },
+    {
+      "method": "fixed_open_loop",
+      "rollout_id": 3,
+      "sequence": [
+        14,
+        17,
+        30
+      ],
+      "terminal_eig": 6.931471824645996,
+      "step_eig": [
+        4.6838483810424805,
+        2.247623436623129,
+        6.980386491051149e-09
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 0
+    },
+    {
+      "method": "random",
+      "rollout_id": 0,
+      "sequence": [
+        59,
+        71,
+        92
+      ],
+      "terminal_eig": 6.931440772474161,
+      "step_eig": [
+        5.464302897453308,
+        1.4668678200687282,
+        0.00027005495212506503
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 0
+    },
+    {
+      "method": "random",
+      "rollout_id": 1,
+      "sequence": [
+        41,
+        93,
+        99
+      ],
+      "terminal_eig": 6.931471824645996,
+      "step_eig": [
+        6.490879029035568,
+        0.44059279560709486,
+        3.333008282096617e-12
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 1
+    },
+    {
+      "method": "random",
+      "rollout_id": 2,
+      "sequence": [
+        67,
+        70,
+        77
+      ],
+      "terminal_eig": 6.901456896215677,
+      "step_eig": [
+        5.370203733444214,
+        0.8791846036911011,
+        0.6520685590803623
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 2
+    },
+    {
+      "method": "random",
+      "rollout_id": 3,
+      "sequence": [
+        58,
+        98,
+        99
+      ],
+      "terminal_eig": 6.408723950386047,
+      "step_eig": [
+        5.133007287979126,
+        0.9481459856033325,
+        0.32757067680358887
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 3
+    },
+    {
+      "method": "random",
+      "rollout_id": 4,
+      "sequence": [
+        85,
+        94,
+        95
+      ],
+      "terminal_eig": 5.680533170700073,
+      "step_eig": [
+        5.078083395957947,
+        0.47368407249450684,
+        0.12876570224761963
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 4
+    },
+    {
+      "method": "random",
+      "rollout_id": 5,
+      "sequence": [
+        59,
+        73,
+        76
+      ],
+      "terminal_eig": 6.7019234001636505,
+      "step_eig": [
+        5.518015146255493,
+        0.9870195686817169,
+        0.19688868522644043
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 5
+    },
+    {
+      "method": "random",
+      "rollout_id": 6,
+      "sequence": [
+        32,
+        62,
+        64
+      ],
+      "terminal_eig": 6.923427379690111,
+      "step_eig": [
+        5.47171151638031,
+        1.238476425409317,
+        0.2132394379004836
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 6
+    },
+    {
+      "method": "random",
+      "rollout_id": 7,
+      "sequence": [
+        64,
+        91,
+        95
+      ],
+      "terminal_eig": 6.578236222267151,
+      "step_eig": [
+        5.3877363204956055,
+        1.071846067905426,
+        0.11865383386611938
+      ],
+      "router_trace": [],
+      "theta_id": 0,
+      "design_replicate": 7
+    },
+    {
+      "method": "random",
+      "rollout_id": 8,
+      "sequence": [
+        47,
+        93,
+        97
+      ],
+      "terminal_eig": 6.0052449107170105,
+      "step_eig": [
+        4.781980991363525,
+        0.887574315071106,
+        0.33568960428237915
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 0
+    },
+    {
+      "method": "random",
+      "rollout_id": 9,
+      "sequence": [
+        22,
+        95,
+        98
+      ],
+      "terminal_eig": 6.931471463748238,
+      "step_eig": [
+        4.23723840713501,
+        2.6942330645194374,
+        -7.906209020802635e-09
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 1
+    },
+    {
+      "method": "random",
+      "rollout_id": 10,
+      "sequence": [
+        84,
+        91,
+        95
+      ],
+      "terminal_eig": 4.963151693344116,
+      "step_eig": [
+        4.512406826019287,
+        0.35949230194091797,
+        0.09125256538391113
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 2
+    },
+    {
+      "method": "random",
+      "rollout_id": 11,
+      "sequence": [
+        87,
+        91,
+        95
+      ],
+      "terminal_eig": 4.6027281284332275,
+      "step_eig": [
+        4.12076473236084,
+        0.27193403244018555,
+        0.21002936363220215
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 3
+    },
+    {
+      "method": "random",
+      "rollout_id": 12,
+      "sequence": [
+        33,
+        56,
+        98
+      ],
+      "terminal_eig": 5.809862375259399,
+      "step_eig": [
+        5.057797193527222,
+        0.5978156328201294,
+        0.15424954891204834
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 4
+    },
+    {
+      "method": "random",
+      "rollout_id": 13,
+      "sequence": [
+        78,
+        95,
+        98
+      ],
+      "terminal_eig": 5.161246061325073,
+      "step_eig": [
+        4.40533447265625,
+        0.6876596212387085,
+        0.06825196743011475
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 5
+    },
+    {
+      "method": "random",
+      "rollout_id": 14,
+      "sequence": [
+        63,
+        71,
+        72
+      ],
+      "terminal_eig": 5.692300796508789,
+      "step_eig": [
+        4.798347473144531,
+        0.6817303895950317,
+        0.21222293376922607
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 6
+    },
+    {
+      "method": "random",
+      "rollout_id": 15,
+      "sequence": [
+        90,
+        96,
+        99
+      ],
+      "terminal_eig": 4.607429504394531,
+      "step_eig": [
+        4.0185041427612305,
+        0.31026148796081543,
+        0.27866387367248535
+      ],
+      "router_trace": [],
+      "theta_id": 1,
+      "design_replicate": 7
+    },
+    {
+      "method": "random",
+      "rollout_id": 16,
+      "sequence": [
+        93,
+        94,
+        96
+      ],
+      "terminal_eig": 2.9741201400756836,
+      "step_eig": [
+        2.0556740760803223,
+        0.48869752883911133,
+        0.42974853515625
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 0
+    },
+    {
+      "method": "random",
+      "rollout_id": 17,
+      "sequence": [
+        52,
+        75,
+        89
+      ],
+      "terminal_eig": 5.299550294876099,
+      "step_eig": [
+        4.312189340591431,
+        0.8689107894897461,
+        0.11845016479492188
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 1
+    },
+    {
+      "method": "random",
+      "rollout_id": 18,
+      "sequence": [
+        85,
+        95,
+        97
+      ],
+      "terminal_eig": 2.954101324081421,
+      "step_eig": [
+        2.6573472023010254,
+        0.22423791885375977,
+        0.07251620292663574
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 2
+    },
+    {
+      "method": "random",
+      "rollout_id": 19,
+      "sequence": [
+        37,
+        47,
+        83
+      ],
+      "terminal_eig": 6.870981674641371,
+      "step_eig": [
+        5.265307903289795,
+        1.6563858166337013,
+        -0.05071204528212547
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 3
+    },
+    {
+      "method": "random",
+      "rollout_id": 20,
+      "sequence": [
+        86,
+        91,
+        93
+      ],
+      "terminal_eig": 3.1593291759490967,
+      "step_eig": [
+        2.613424777984619,
+        0.34508538246154785,
+        0.2008190155029297
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 4
+    },
+    {
+      "method": "random",
+      "rollout_id": 21,
+      "sequence": [
+        0,
+        48,
+        57
+      ],
+      "terminal_eig": 6.600047409534454,
+      "step_eig": [
+        9.5367431640625e-07,
+        4.55435848236084,
+        2.045687973499298
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 5
+    },
+    {
+      "method": "random",
+      "rollout_id": 22,
+      "sequence": [
+        46,
+        73,
+        87
+      ],
+      "terminal_eig": 6.230241239070892,
+      "step_eig": [
+        4.729175806045532,
+        1.255611538887024,
+        0.24545389413833618
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 6
+    },
+    {
+      "method": "random",
+      "rollout_id": 23,
+      "sequence": [
+        53,
+        82,
+        97
+      ],
+      "terminal_eig": 5.511274099349976,
+      "step_eig": [
+        4.249099493026733,
+        0.9712514877319336,
+        0.2909231185913086
+      ],
+      "router_trace": [],
+      "theta_id": 2,
+      "design_replicate": 7
+    },
+    {
+      "method": "random",
+      "rollout_id": 24,
+      "sequence": [
+        43,
+        93,
+        98
+      ],
+      "terminal_eig": 6.91895395796746,
+      "step_eig": [
+        5.824984788894653,
+        0.8885977864265442,
+        0.20537138264626265
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 0
+    },
+    {
+      "method": "random",
+      "rollout_id": 25,
+      "sequence": [
+        76,
+        96,
+        97
+      ],
+      "terminal_eig": 5.586784362792969,
+      "step_eig": [
+        4.504933834075928,
+        0.7034006118774414,
+        0.3784499168395996
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 1
+    },
+    {
+      "method": "random",
+      "rollout_id": 26,
+      "sequence": [
+        85,
+        92,
+        98
+      ],
+      "terminal_eig": 5.100253343582153,
+      "step_eig": [
+        4.506942510604858,
+        0.6899850368499756,
+        -0.09667420387268066
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 2
+    },
+    {
+      "method": "random",
+      "rollout_id": 27,
+      "sequence": [
+        71,
+        94,
+        96
+      ],
+      "terminal_eig": 5.803084969520569,
+      "step_eig": [
+        4.578517436981201,
+        0.932388186454773,
+        0.2921793460845947
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 3
+    },
+    {
+      "method": "random",
+      "rollout_id": 28,
+      "sequence": [
+        26,
+        87,
+        95
+      ],
+      "terminal_eig": 6.854368254542351,
+      "step_eig": [
+        6.2946388721466064,
+        0.2930939197540283,
+        0.266635462641716
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 4
+    },
+    {
+      "method": "random",
+      "rollout_id": 29,
+      "sequence": [
+        36,
+        74,
+        98
+      ],
+      "terminal_eig": 6.931029972154647,
+      "step_eig": [
+        6.705658346414566,
+        0.22494048153748736,
+        0.000431144202593714
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 5
+    },
+    {
+      "method": "random",
+      "rollout_id": 30,
+      "sequence": [
+        30,
+        38,
+        69
+      ],
+      "terminal_eig": 6.93107758226688,
+      "step_eig": [
+        6.132331550121307,
+        0.5806300640106201,
+        0.2181159681349527
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 6
+    },
+    {
+      "method": "random",
+      "rollout_id": 31,
+      "sequence": [
+        3,
+        47,
+        54
+      ],
+      "terminal_eig": 6.669005274772644,
+      "step_eig": [
+        0.8771891593933105,
+        5.1245421171188354,
+        0.667273998260498
+      ],
+      "router_trace": [],
+      "theta_id": 3,
+      "design_replicate": 7
+    }
+  ]
+}

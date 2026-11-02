@@ -1,0 +1,264 @@
+{
+  "source_config": "/home/g.lin/objective_power_grid/configs/ieee9_eig_hprc.yaml",
+  "config_name": "ieee9_eig_hprc",
+  "data_dir": "/scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh",
+  "system_label": "IEEE-9",
+  "topology": "ieee9",
+  "run_name": "ieee9_eig_hprc",
+  "preset": "default",
+  "n_buses": 3,
+  "experiment_type": "eig_based",
+  "T": 3,
+  "step_number": 3,
+  "N_obs": 5,
+  "noise_sigma": 0.01,
+  "seed": 303,
+  "methods": [
+    "dad",
+    "rl_sboed",
+    "step_dad",
+    "myopic",
+    "fixed",
+    "random"
+  ],
+  "system": {
+    "name": "ieee9"
+  },
+  "N": 3,
+  "data": {
+    "dataset_dir": "data/ieee9_eig_hprc_fresh",
+    "mocu_dataset_dir": "data/ieee9_mocu_duration_adaptive",
+    "generate_if_missing": true
+  },
+  "observation": {
+    "sampling": "uniform",
+    "objective_based": {
+      "N_obs": 5,
+      "noise_sigma": 0.005
+    },
+    "eig_based": {
+      "N_obs": 5,
+      "noise_sigma": 0.01
+    },
+    "N_obs": 5,
+    "noise_sigma": 0.01
+  },
+  "swing_equation": {
+    "topology": "ieee9",
+    "physical_bus_count": 9,
+    "dynamic_machine_buses": [
+      1,
+      2,
+      3
+    ],
+    "retained_bus_map": [
+      1,
+      2,
+      3
+    ],
+    "bus_label_conventions": {
+      "physical_bus_numbering": "one_based_ieee",
+      "probe_bus_indexing": "zero_based_physical",
+      "observation_bus_field": "one_based_physical",
+      "control_bus_indexing": "zero_based_reduced_dynamic",
+      "reduced_index_to_physical_bus": {
+        "0": 1,
+        "1": 2,
+        "2": 3
+      }
+    },
+    "observation_bus": 1,
+    "base_frequency_hz": 60.0,
+    "base_power_mva": 100.0,
+    "coupling_strength": 1.0,
+    "damping": 0.0,
+    "latent_model": "machinewise_mk",
+    "M_lower_nodes": [
+      0.0877898665,
+      0.0237671385,
+      0.0111779822
+    ],
+    "M_upper_nodes": [
+      0.1630383235,
+      0.0441389715,
+      0.0207591098
+    ],
+    "K_lower_nodes": [
+      0.029375,
+      0.013125,
+      0.0075
+    ],
+    "K_upper_nodes": [
+      0.29375,
+      0.13125,
+      0.075
+    ],
+    "use_node_specific_damping": true,
+    "D_nodes": [
+      0.01254141,
+      0.003395306,
+      0.001596855
+    ],
+    "P_m_nodes": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "theta0_nodes": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "omega0_nodes": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "enforce_initial_equilibrium": true,
+    "probe_buses": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "probe_amplitudes": [
+      0.05
+    ],
+    "probe_durations": [
+      1.75,
+      2.15,
+      2.4,
+      2.74,
+      2.79,
+      2.97
+    ],
+    "probe_duration": 2.0,
+    "reset_after_probe": true,
+    "T_obs_sec": 4.0,
+    "ode_dt": 0.0015625,
+    "fs_hz": 40.0,
+    "sigma": 0.2
+  },
+  "prior": {
+    "mc_samples": 512,
+    "mc_support_seed": 1
+  },
+  "experiment": {
+    "mode": "duration_bus_reset",
+    "step_number": 3,
+    "methods": [
+      "dad",
+      "rl_sboed",
+      "step_dad",
+      "myopic",
+      "fixed",
+      "random"
+    ],
+    "experiment_type": "eig_based"
+  },
+  "data_generation": {
+    "backend": "cuda",
+    "cuda_batch_size": 128,
+    "theta_sample_size_train": 512,
+    "theta_sample_size_test": 128,
+    "train_seed": 101,
+    "test_seed": 202,
+    "reused": true,
+    "force": false,
+    "smoke": false,
+    "bank_shape_train": null,
+    "bank_shape_test": null,
+    "elapsed_seconds": null,
+    "N_sim": null,
+    "train_theta_count": null,
+    "test_theta_count": null
+  },
+  "evaluation": {
+    "eig_test_systems": 128,
+    "eig_fixed_calibration_seed": 104729,
+    "eig_random_replicates": 32,
+    "objective_eval_seed": 104729
+  },
+  "poster_eig_protocol": {
+    "horizons": [
+      3,
+      4,
+      5
+    ],
+    "N_obs": 5,
+    "noise_sigma": [
+      0.005,
+      0.01
+    ],
+    "seeds": [
+      101,
+      202,
+      303
+    ],
+    "methods": [
+      "dad",
+      "rl_sboed",
+      "step_dad",
+      "myopic",
+      "fixed",
+      "random"
+    ],
+    "claim_scope": "paired_terminal_eig"
+  },
+  "poster_mocu_protocol": {
+    "pilot_horizon": 2,
+    "horizons": [
+      2,
+      3,
+      4
+    ],
+    "N_obs": 5,
+    "noise_sigma": 0.01,
+    "alpha": 0.05,
+    "pilot_seed": 101,
+    "seeds": [
+      101,
+      202,
+      303
+    ],
+    "methods": [
+      "dad",
+      "rl_sboed",
+      "step_dad",
+      "myopic",
+      "fixed",
+      "random"
+    ],
+    "minimum_safety_rate": 0.95,
+    "promotion_gate": "paired_advantage_and_non_degenerate_terminal_control"
+  },
+  "training": {
+    "device": "auto",
+    "policy_hidden": 256,
+    "use_bank_observations": true,
+    "eig_epochs": 200,
+    "eig_steps_per_epoch": 512,
+    "batch_size": 256,
+    "learning_rate": 0.0003,
+    "entropy_coef": 0.05,
+    "eig_validation_systems": 128,
+    "eig_bc_trajectories": 96,
+    "eig_bc_lookahead": "two_step",
+    "eig_bc_temperature": 0.5,
+    "eig_bc_fantasies": 12,
+    "eig_rl_use_ppo": true,
+    "eig_prefer_unique_sequence_floor": true,
+    "eig_min_unique_sequence_fraction": 0.08,
+    "eig_unique_floor_slack": 0.03
+  },
+  "source_provenance": {
+    "available": false
+  },
+  "eval_seed": 1002,
+  "observation_model": "sampled_delta_f_vector"
+}

@@ -1,0 +1,108 @@
+{
+  "source_config": "/home/grads/g/g.lin/Documents/objective_power_grid/configs/sir_ode.yaml",
+  "config_name": "sir_ode",
+  "data_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode",
+  "system_label": "SIR-ODE",
+  "topology": "sir_ode",
+  "run_name": "sir_ode",
+  "preset": "default",
+  "n_buses": 1,
+  "experiment_type": "eig_based",
+  "T": 3,
+  "step_number": 3,
+  "N_obs": 1,
+  "noise_sigma": 1.0,
+  "seed": 202,
+  "methods": [
+    "dad",
+    "rl_sboed",
+    "step_dad",
+    "myopic",
+    "fixed",
+    "random"
+  ],
+  "system": {
+    "name": "sir_ode"
+  },
+  "N": 1,
+  "data": {
+    "dataset_dir": "data/sir_ode",
+    "generate_if_missing": true
+  },
+  "observation": {
+    "noise_sigma": 1.0,
+    "sampling": "measurement_time",
+    "N_obs": 1
+  },
+  "sir_ode": {
+    "population": 500.0,
+    "i0": 2.0,
+    "t_end": 100.0,
+    "n_grid": 10000,
+    "beta_mean": 0.5,
+    "gamma_mean": 0.1,
+    "log_std": 0.5,
+    "min_mean_infected": 1.0,
+    "n_actions": 100,
+    "likelihood_sigma": 1.0
+  },
+  "prior": {
+    "mc_samples": 1024,
+    "mc_support_seed": 1
+  },
+  "experiment": {
+    "step_number": 3,
+    "methods": [
+      "dad",
+      "rl_sboed",
+      "step_dad",
+      "myopic",
+      "fixed",
+      "random"
+    ],
+    "experiment_type": "eig_based"
+  },
+  "data_generation": {
+    "theta_sample_size_train": 10000,
+    "theta_sample_size_test": 3000,
+    "train_seed": 101,
+    "test_seed": 202,
+    "reused": true,
+    "force": false,
+    "smoke": false,
+    "bank_shape_train": null,
+    "bank_shape_test": null,
+    "elapsed_seconds": 0.0,
+    "train_theta_count": 10000,
+    "test_theta_count": 3000
+  },
+  "training": {
+    "device": "auto",
+    "policy_hidden": 256,
+    "eig_epochs": 200,
+    "eig_steps_per_epoch": 512,
+    "batch_size": 256,
+    "learning_rate": 0.0003,
+    "entropy_coef": 0.05,
+    "eig_validation_systems": 256,
+    "eig_bc_trajectories": 128,
+    "eig_bc_lookahead": "two_step",
+    "eig_bc_temperature": 0.5,
+    "eig_bc_fantasies": 16,
+    "eig_rl_use_ppo": true,
+    "eig_prefer_unique_sequence_floor": true,
+    "eig_min_unique_sequence_fraction": 0.08,
+    "eig_unique_floor_slack": 0.03
+  },
+  "evaluation": {
+    "eig_test_systems": 512
+  },
+  "source_provenance": {
+    "git_commit": "decf6e0fd43b6544574df0f2aed70f8506f2654e",
+    "dirty": true,
+    "git_status_sha256": "e1ea416aa5756acbf2f2518a97114d316c9f7144460428ee080aaf26e8d6b302",
+    "git_diff_sha256": "3ce11741b1928537d424d376a54c464f659890297af9a7678cf481a6adc07474"
+  },
+  "eval_seed": 1001,
+  "observation_model": "sir_infected_count_gaussian"
+}

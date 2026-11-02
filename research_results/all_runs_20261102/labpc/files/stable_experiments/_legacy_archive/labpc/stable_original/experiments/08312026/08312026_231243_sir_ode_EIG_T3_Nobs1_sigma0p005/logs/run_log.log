@@ -1,0 +1,34 @@
+Log file: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08312026_231243_sir_ode_EIG_T3_Nobs1_sigma0p005/logs/run_log.log
+=== run.sh (config=configs/sir_ode.yaml type=eig_based T=3 N_obs=1 noise_sigma=0.005 seed=101 methods=step_dad) ===
+Result folder: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08312026_231243_sir_ode_EIG_T3_Nobs1_sigma0p005
+Evaluate: step_dad
+Train: dad
+=== data_generation (config=configs/sir_ode.yaml type=eig_based T=3 N_obs=1 noise_sigma=0.005 seed=101 methods=step_dad) ===
+[full-bank] no data.reuse_bank_dir; nothing to ensure
+[generate-data] type=eig_based config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/sir_ode.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08312026_231243_sir_ode_EIG_T3_Nobs1_sigma0p005 smoke=False force=False methods=['step_dad']
+[generate-data] SIR ODE dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode
+[generate-data] reused=True path=/home/grads/g/g.lin/Documents/objective_power_grid/data/sir_ode train=10000 test=3000 actions=100
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08312026_231243_sir_ode_EIG_T3_Nobs1_sigma0p005
+=== training method=dad (config=configs/sir_ode.yaml type=eig_based T=3 N_obs=1 noise_sigma=0.005 seed=101) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[eig:dad_eig] BC warm-start trajectories=128 horizon=3 n_actions=100 lookahead=two_step temp=0.5 actor_critic=False obs_seed=101
+[eig:dad_eig] BC 1/128
+[eig:dad_eig] BC 16/128
+[eig:dad_eig] BC 32/128
+[eig:dad_eig] BC 48/128
+[eig:dad_eig] BC 64/128
+[eig:dad_eig] BC 80/128
+[eig:dad_eig] BC 96/128
+[eig:dad_eig] BC 112/128
+[eig:dad_eig] BC 128/128
+[train] dad_eig val_eig=6.931471824645996 uniq=3 stage=epoch_1 1156s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08312026_231243_sir_ode_EIG_T3_Nobs1_sigma0p005/model/dad_eig.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08312026_231243_sir_ode_EIG_T3_Nobs1_sigma0p005
+=== evaluation (config=configs/sir_ode.yaml type=eig_based T=3 N_obs=1 noise_sigma=0.005 seed=101 methods=step_dad) ===
+[prior] SIR using mc_samples=1024/7500 fit particles (seed=1)
+[evaluate] type=eig_based methods=['step_dad'] eval_seed=101 N_obs=1 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08312026_231243_sir_ode_EIG_T3_Nobs1_sigma0p005
+[evaluate] step_dad eig=6.9276 uniq=176 eval_seed=101
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08312026_231243_sir_ode_EIG_T3_Nobs1_sigma0p005
+
+Done config=configs/sir_ode.yaml type=eig_based T=3.
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08312026_231243_sir_ode_EIG_T3_Nobs1_sigma0p005
+LOG_FILE=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08312026_231243_sir_ode_EIG_T3_Nobs1_sigma0p005/logs/run_log.log

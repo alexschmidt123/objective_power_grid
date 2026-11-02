@@ -1,0 +1,108 @@
+Log file: /scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01/logs/run_log.log
+=== run.sh (config=configs/ieee9_eig_hprc.yaml type=eig_based T=5 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+Result folder: /scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+Evaluate: dad rl_sboed step_dad myopic fixed random
+Train: dad rl_sboed
+=== data_generation (config=configs/ieee9_eig_hprc.yaml type=eig_based T=5 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+[full-bank] no data.reuse_bank_dir; nothing to ensure
+[generate-data] type=eig_based config=/home/g.lin/objective_power_grid/configs/ieee9_eig_hprc.yaml exp_dir=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01 smoke=False force=False methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random']
+[generate-data] dataset_dir=/scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh
+Using existing physical bank → /scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh
+  (skipping CUDA generation; pass --force to regenerate)
+[bank-quality] PASSED → /scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[generate-data] reused=True type=eig_based train=None test=None actions=None
+EXP_DIR=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+=== training method=dad (config=configs/ieee9_eig_hprc.yaml type=eig_based T=5 N_obs=5 noise_sigma=0.01 seed=101) ===
+[bank-quality] PASSED → /scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[eig:dad_eig] BC warm-start trajectories=96 horizon=5 n_actions=54 lookahead=two_step temp=0.5 actor_critic=False obs_seed=101
+[eig:dad_eig] BC 1/96
+[eig:dad_eig] BC 12/96
+[eig:dad_eig] BC 24/96
+[eig:dad_eig] BC 36/96
+[eig:dad_eig] BC 48/96
+[eig:dad_eig] BC 60/96
+[eig:dad_eig] BC 72/96
+[eig:dad_eig] BC 84/96
+[eig:dad_eig] BC 96/96
+[train] dad_eig val_eig=1.0540727507323027 uniq=11 stage=behavioral_cloning 3238s → /scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01/model/dad_eig.pth
+EXP_DIR=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+=== training method=rl_sboed (config=configs/ieee9_eig_hprc.yaml type=eig_based T=5 N_obs=5 noise_sigma=0.01 seed=101) ===
+[bank-quality] PASSED → /scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[eig:rl_sboed_eig] BC warm-start trajectories=96 horizon=5 n_actions=54 lookahead=two_step temp=0.5 actor_critic=True obs_seed=101
+[eig:rl_sboed_eig] BC 1/96
+[eig:rl_sboed_eig] BC 12/96
+[eig:rl_sboed_eig] BC 24/96
+[eig:rl_sboed_eig] BC 36/96
+[eig:rl_sboed_eig] BC 48/96
+[eig:rl_sboed_eig] BC 60/96
+[eig:rl_sboed_eig] BC 72/96
+[eig:rl_sboed_eig] BC 84/96
+[eig:rl_sboed_eig] BC 96/96
+[train] rl_sboed_eig val_eig=1.0606424249708652 uniq=13 stage=epoch_9 2113s → /scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01/model/rl_sboed_eig.pth
+EXP_DIR=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+=== crossed evaluation train_seed=101 eval_seed=1001 ===
+=== evaluation (config=configs/ieee9_eig_hprc.yaml type=eig_based T=5 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+[bank-quality] PASSED → /scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1001 N_obs=5 exp_dir=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+[evaluate] dad_eig eig=0.9044 uniq=10 eval_seed=1001
+[evaluate] rl_sboed_eig eig=0.9120 uniq=14 eval_seed=1001
+[evaluate] step_dad eig=0.9066 uniq=65 eval_seed=1001
+[evaluate] myopic_delta_h eig=0.8932 uniq=128 eval_seed=1001
+[evaluate] fixed_open_loop eig=0.9189 uniq=1 eval_seed=1001
+[evaluate] random eig=0.8165 uniq=4096 eval_seed=1001
+EXP_DIR=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+=== crossed evaluation train_seed=101 eval_seed=1002 ===
+=== evaluation (config=configs/ieee9_eig_hprc.yaml type=eig_based T=5 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+[bank-quality] PASSED → /scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1002 N_obs=5 exp_dir=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+[evaluate] dad_eig eig=0.9610 uniq=11 eval_seed=1002
+[evaluate] rl_sboed_eig eig=0.9639 uniq=15 eval_seed=1002
+[evaluate] step_dad eig=0.9643 uniq=57 eval_seed=1002
+[evaluate] myopic_delta_h eig=0.9507 uniq=128 eval_seed=1002
+[evaluate] fixed_open_loop eig=0.9709 uniq=1 eval_seed=1002
+[evaluate] random eig=0.8256 uniq=4096 eval_seed=1002
+EXP_DIR=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+=== crossed evaluation train_seed=101 eval_seed=1003 ===
+=== evaluation (config=configs/ieee9_eig_hprc.yaml type=eig_based T=5 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+[bank-quality] PASSED → /scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1003 N_obs=5 exp_dir=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+[evaluate] dad_eig eig=0.9367 uniq=10 eval_seed=1003
+[evaluate] rl_sboed_eig eig=0.9451 uniq=14 eval_seed=1003
+[evaluate] step_dad eig=0.9407 uniq=59 eval_seed=1003
+[evaluate] myopic_delta_h eig=0.9280 uniq=128 eval_seed=1003
+[evaluate] fixed_open_loop eig=0.9501 uniq=1 eval_seed=1003
+[evaluate] random eig=0.8327 uniq=4096 eval_seed=1003
+EXP_DIR=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+=== crossed evaluation train_seed=101 eval_seed=1004 ===
+=== evaluation (config=configs/ieee9_eig_hprc.yaml type=eig_based T=5 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+[bank-quality] PASSED → /scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1004 N_obs=5 exp_dir=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+[evaluate] dad_eig eig=0.9615 uniq=13 eval_seed=1004
+[evaluate] rl_sboed_eig eig=0.9697 uniq=12 eval_seed=1004
+[evaluate] step_dad eig=0.9641 uniq=67 eval_seed=1004
+[evaluate] myopic_delta_h eig=0.9521 uniq=128 eval_seed=1004
+[evaluate] fixed_open_loop eig=0.9772 uniq=1 eval_seed=1004
+[evaluate] random eig=0.8301 uniq=4096 eval_seed=1004
+EXP_DIR=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+=== crossed evaluation train_seed=101 eval_seed=1005 ===
+=== evaluation (config=configs/ieee9_eig_hprc.yaml type=eig_based T=5 N_obs=5 noise_sigma=0.01 seed=101 methods=config) ===
+[bank-quality] PASSED → /scratch/user/g.lin/objective_power_grid_runtime/data/ieee9_eig_hprc_fresh (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1005 N_obs=5 exp_dir=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+[evaluate] dad_eig eig=0.9651 uniq=11 eval_seed=1005
+[evaluate] rl_sboed_eig eig=0.9711 uniq=13 eval_seed=1005
+[evaluate] step_dad eig=0.9677 uniq=52 eval_seed=1005
+[evaluate] myopic_delta_h eig=0.9559 uniq=128 eval_seed=1005
+[evaluate] fixed_open_loop eig=0.9766 uniq=1 eval_seed=1005
+[evaluate] random eig=0.8268 uniq=4096 eval_seed=1005
+EXP_DIR=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+
+Done config=configs/ieee9_eig_hprc.yaml type=eig_based T=5.
+EXP_DIR=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01
+LOG_FILE=/scratch/user/g.lin/objective_power_grid_runtime/experiments/09042026_102247_ieee9_eig_hprc_seed101_EIG_T5_Nobs5_sigma0p01/logs/run_log.log

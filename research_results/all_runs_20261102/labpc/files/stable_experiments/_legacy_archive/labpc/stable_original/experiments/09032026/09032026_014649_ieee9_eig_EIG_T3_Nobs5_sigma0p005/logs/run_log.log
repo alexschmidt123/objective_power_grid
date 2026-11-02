@@ -1,0 +1,108 @@
+Log file: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005/logs/run_log.log
+=== run.sh (config=configs/ieee9_eig.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.005 seed=202 methods=config) ===
+Result folder: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+Evaluate: dad rl_sboed step_dad myopic fixed random
+Train: dad rl_sboed
+=== data_generation (config=configs/ieee9_eig.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.005 seed=202 methods=config) ===
+[full-bank] complete -> /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_duration_dense_0p01; skipping generation
+[generate-data] type=eig_based config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/ieee9_eig.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005 smoke=False force=False methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random']
+[generate-data] dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_adaptive_subset
+Using existing physical bank → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_adaptive_subset
+  (skipping CUDA generation; pass --force to regenerate)
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_adaptive_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[generate-data] reused=True type=eig_based train=None test=None actions=None
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+=== training method=dad (config=configs/ieee9_eig.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.005 seed=202) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_adaptive_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[eig:dad_eig] BC warm-start trajectories=96 horizon=3 n_actions=54 lookahead=two_step temp=0.5 actor_critic=False obs_seed=202
+[eig:dad_eig] BC 1/96
+[eig:dad_eig] BC 12/96
+[eig:dad_eig] BC 24/96
+[eig:dad_eig] BC 36/96
+[eig:dad_eig] BC 48/96
+[eig:dad_eig] BC 60/96
+[eig:dad_eig] BC 72/96
+[eig:dad_eig] BC 84/96
+[eig:dad_eig] BC 96/96
+[train] dad_eig val_eig=1.711313416948542 uniq=1 stage=epoch_184 788s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005/model/dad_eig.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+=== training method=rl_sboed (config=configs/ieee9_eig.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.005 seed=202) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_adaptive_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[eig:rl_sboed_eig] BC warm-start trajectories=96 horizon=3 n_actions=54 lookahead=two_step temp=0.5 actor_critic=True obs_seed=202
+[eig:rl_sboed_eig] BC 1/96
+[eig:rl_sboed_eig] BC 12/96
+[eig:rl_sboed_eig] BC 24/96
+[eig:rl_sboed_eig] BC 36/96
+[eig:rl_sboed_eig] BC 48/96
+[eig:rl_sboed_eig] BC 60/96
+[eig:rl_sboed_eig] BC 72/96
+[eig:rl_sboed_eig] BC 84/96
+[eig:rl_sboed_eig] BC 96/96
+[train] rl_sboed_eig val_eig=1.711573519045487 uniq=1 stage=epoch_177 559s → /home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005/model/rl_sboed_eig.pth
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+=== crossed evaluation train_seed=202 eval_seed=1001 ===
+=== evaluation (config=configs/ieee9_eig.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.005 seed=202 methods=config) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_adaptive_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1001 N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+[evaluate] dad_eig eig=1.4903 uniq=1 eval_seed=1001
+[evaluate] rl_sboed_eig eig=1.4906 uniq=1 eval_seed=1001
+[evaluate] step_dad eig=1.4850 uniq=35 eval_seed=1001
+[evaluate] myopic_delta_h eig=1.4570 uniq=128 eval_seed=1001
+[evaluate] fixed_open_loop eig=1.4554 uniq=1 eval_seed=1001
+[evaluate] random eig=1.3554 uniq=4037 eval_seed=1001
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+=== crossed evaluation train_seed=202 eval_seed=1002 ===
+=== evaluation (config=configs/ieee9_eig.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.005 seed=202 methods=config) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_adaptive_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1002 N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+[evaluate] dad_eig eig=1.5546 uniq=1 eval_seed=1002
+[evaluate] rl_sboed_eig eig=1.5550 uniq=1 eval_seed=1002
+[evaluate] step_dad eig=1.5530 uniq=35 eval_seed=1002
+[evaluate] myopic_delta_h eig=1.5288 uniq=128 eval_seed=1002
+[evaluate] fixed_open_loop eig=1.5278 uniq=1 eval_seed=1002
+[evaluate] random eig=1.3609 uniq=4046 eval_seed=1002
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+=== crossed evaluation train_seed=202 eval_seed=1003 ===
+=== evaluation (config=configs/ieee9_eig.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.005 seed=202 methods=config) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_adaptive_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1003 N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+[evaluate] dad_eig eig=1.4973 uniq=1 eval_seed=1003
+[evaluate] rl_sboed_eig eig=1.4976 uniq=1 eval_seed=1003
+[evaluate] step_dad eig=1.4929 uniq=41 eval_seed=1003
+[evaluate] myopic_delta_h eig=1.4624 uniq=128 eval_seed=1003
+[evaluate] fixed_open_loop eig=1.4613 uniq=1 eval_seed=1003
+[evaluate] random eig=1.3657 uniq=4044 eval_seed=1003
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+=== crossed evaluation train_seed=202 eval_seed=1004 ===
+=== evaluation (config=configs/ieee9_eig.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.005 seed=202 methods=config) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_adaptive_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1004 N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+[evaluate] dad_eig eig=1.5696 uniq=1 eval_seed=1004
+[evaluate] rl_sboed_eig eig=1.5698 uniq=1 eval_seed=1004
+[evaluate] step_dad eig=1.5670 uniq=35 eval_seed=1004
+[evaluate] myopic_delta_h eig=1.5391 uniq=128 eval_seed=1004
+[evaluate] fixed_open_loop eig=1.5375 uniq=1 eval_seed=1004
+[evaluate] random eig=1.3625 uniq=4045 eval_seed=1004
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+=== crossed evaluation train_seed=202 eval_seed=1005 ===
+=== evaluation (config=configs/ieee9_eig.yaml type=eig_based T=3 N_obs=5 noise_sigma=0.005 seed=202 methods=config) ===
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_eig_duration_adaptive_subset (train U>0=1.000 Q95=0.4000; test U>0=1.000 Q95=0.4000)
+[prior] capping mc_samples=512 to 384; 128 particles are reserved as strict off-support validation
+[evaluate] type=eig_based methods=['dad', 'rl_sboed', 'step_dad', 'myopic', 'fixed', 'random'] eval_seed=1005 N_obs=5 exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+[evaluate] dad_eig eig=1.5001 uniq=1 eval_seed=1005
+[evaluate] rl_sboed_eig eig=1.5001 uniq=1 eval_seed=1005
+[evaluate] step_dad eig=1.4961 uniq=36 eval_seed=1005
+[evaluate] myopic_delta_h eig=1.4730 uniq=127 eval_seed=1005
+[evaluate] fixed_open_loop eig=1.4672 uniq=1 eval_seed=1005
+[evaluate] random eig=1.3642 uniq=4035 eval_seed=1005
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+
+Done config=configs/ieee9_eig.yaml type=eig_based T=3.
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005
+LOG_FILE=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09032026_014649_ieee9_eig_EIG_T3_Nobs5_sigma0p005/logs/run_log.log

@@ -1,0 +1,100 @@
+{
+  "system": "ieee9",
+  "config_path": "/home/grads/g/g.lin/Documents/objective_power_grid/configs/ieee9_mocu.yaml",
+  "config_hash": "4b2f56a0fe6a9e6b",
+  "n_theta_train": 512,
+  "n_theta_val": 128,
+  "n_theta_test": 128,
+  "n_designs": 54,
+  "mocu_cost_definition": "u + lambda*shortfall + rho*unsafe - u_required",
+  "undercontrol_penalty": 20.0,
+  "violation_penalty": 0.0,
+  "N_obs": 5,
+  "N_sim": 2560,
+  "observation_mode": "sampled_delta_f",
+  "compression_ratio": 0.001953125,
+  "obs_indices": [
+    0,
+    640,
+    1280,
+    1919,
+    2559
+  ],
+  "sampling": "uniform",
+  "data_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee9_mocu_duration_v2_best_subset",
+  "out_dir": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/09022026_085006_ieee9_mocu_Uctrl_T6_Nobs5_sigma0p005",
+  "methods": [
+    "Step-DAD"
+  ],
+  "primary_methods": [
+    "Step-DAD"
+  ],
+  "n_rollouts_per_method": 128,
+  "n_oracle_consistency_errors": 0,
+  "mean_oracle_u_ctrl": 0.3702125405365566,
+  "method_ranking": [
+    "Step-DAD"
+  ],
+  "minimum_valid_safety_rate": 0.95,
+  "invalid_methods": [],
+  "primary_metric": "mean_mocu",
+  "runtime_by_method": {
+    "Step-DAD": {
+      "offline_training_or_calibration_seconds": 144.2179732322693,
+      "n_rollouts": 128,
+      "total_seconds": 748.8216153319809,
+      "seconds_per_rollout": 5.8501688697811005,
+      "includes": "action selection + observation + posterior update + terminal decision"
+    }
+  },
+  "runtime_scope": "Per-method online evaluation only; training, fixed-search preprocessing, hybrid calibration, and oracle/safety evaluation are reported separately.",
+  "mocu_definition": "mean held-out Bayes regret: u_ctrl + lambda*(u_required-u_ctrl)_+ + rho*1[u_required>u_ctrl] - u_required",
+  "ranking_rule": "safety_rate >= 0.95 required; valid methods ranked by mean_mocu asc",
+  "eval_seed": 104729,
+  "summaries": [
+    {
+      "method": "Step-DAD",
+      "base_method": "step_dad",
+      "eval_mode": "deterministic_semi_amortized",
+      "n": 128,
+      "n_design_replicates": 128,
+      "mean_u_ctrl": 0.39140625,
+      "median_u_ctrl": 0.39,
+      "mean_u_ctrl_opt": 0.3702125405365566,
+      "median_u_ctrl_opt": 0.37074734669811316,
+      "mean_gap": 0.021193709463443424,
+      "median_gap": 0.019409640330188715,
+      "mean_mocu": 0.02223844708136794,
+      "median_mocu": 0.019491450471698146,
+      "mocu_ci95_low": 0.019878878035635348,
+      "mocu_ci95_high": 0.02480253658654555,
+      "mean_excess": 0.02124594634433965,
+      "under_control_rate": 0.015625,
+      "mean_shortfall": 5.2236880896225964e-05,
+      "mocu_cost_definition": "u + undercontrol_penalty*(u_required-u)_+ + violation_penalty*1[unsafe] - u_required",
+      "undercontrol_penalty": 20.0,
+      "violation_penalty": 0.0,
+      "gap_ci95_low": 0.002459389740566029,
+      "gap_ci95_high": 0.04542935583726416,
+      "safety_rate": 0.984375,
+      "valid": 1,
+      "validity_threshold": 0.95,
+      "n_unique_sequences": 34,
+      "sequence_entropy": 3.0845292708696115,
+      "unique_frac": 0.265625,
+      "stage_unique_actions": "1 1 3 4 7 7",
+      "stage_unique_prefixes": "1 1 3 7 18 34",
+      "first_action_invariant": 1,
+      "post_prior_branching": 1,
+      "n_oracle_consistency_errors": 0,
+      "offline_training_or_calibration_seconds": 144.2179732322693,
+      "training_time_seconds": 144.2179732322693,
+      "online_total_seconds": 748.8216153319809,
+      "online_seconds_per_rollout": 5.8501688697811005,
+      "eval_seed": 104729,
+      "timing_scope": "offline=method-specific preparation; online=warm action selection + observation lookup + posterior update + terminal decision; shared physical bank generation excluded and must be reported separately",
+      "rank_by_mean_gap": 1
+    }
+  ],
+  "adaptivity_eval": "Policy methods use argmax rollouts. Myopic uses common random numbers. Claim adaptivity from post-prior stage_unique_actions / stage_unique_prefixes, not stochastic first-action variation."
+}

@@ -1,0 +1,30 @@
+Log file: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08302026_085644_ieee14_mocu_duration_selected_Uctrl_T3_Nobs5_sigma0p005/logs/run_log.log
+=== run.sh (config=configs/ieee14_mocu_duration_selected.yaml type=objective_based T=3 N_obs=5 noise_sigma=0.005 seed=101 methods=dad,rl_sboed,moe_sboed,myopic,fixed,random) ===
+Result folder: /home/grads/g/g.lin/Documents/objective_power_grid/experiments/08302026_085644_ieee14_mocu_duration_selected_Uctrl_T3_Nobs5_sigma0p005
+Evaluate: dad rl_sboed moe_sboed myopic fixed random
+Train: dad rl_sboed moe_sboed
+=== data_generation (config=configs/ieee14_mocu_duration_selected.yaml type=objective_based T=3 N_obs=5 noise_sigma=0.005 seed=101 methods=dad,rl_sboed,moe_sboed,myopic,fixed,random) ===
+[generate-data] type=objective_based config=/home/grads/g/g.lin/Documents/objective_power_grid/configs/ieee14_mocu_duration_selected.yaml exp_dir=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08302026_085644_ieee14_mocu_duration_selected_Uctrl_T3_Nobs5_sigma0p005 smoke=False force=False methods=['dad', 'rl_sboed', 'moe_sboed', 'myopic', 'fixed', 'random']
+[generate-data] dataset_dir=/home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_subset
+[generate-data] target bank missing at /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_subset; selecting configured actions from larger bank /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_duration_dense_0p01.
+Reused larger physical bank → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_duration_dense_0p01
+  selected 84/3934 actions into /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_subset without CUDA simulation (0.9s)
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_subset (train U>0=1.000 Q95=0.3000; test U>0=1.000 Q95=0.3000)
+[generate-data] reused=True type=objective_based train=512 test=128 actions=84
+EXP_DIR=/home/grads/g/g.lin/Documents/objective_power_grid/experiments/08302026_085644_ieee14_mocu_duration_selected_Uctrl_T3_Nobs5_sigma0p005
+=== training method=dad (config=configs/ieee14_mocu_duration_selected.yaml type=objective_based T=3 N_obs=5 noise_sigma=0.005 seed=101) ===
+Traceback (most recent call last):
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/grads/g/g.lin/miniconda3/envs/mocu_optimized/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/experiment.py", line 1186, in <module>
+    main()
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/experiment.py", line 1180, in main
+    args.func(args)
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/experiment.py", line 543, in cmd_train
+    ctx = build_context_from_config(
+  File "/home/grads/g/g.lin/Documents/objective_power_grid/src/objectives/mocu/context.py", line 844, in build_context_from_config
+    raise FileNotFoundError(
+FileNotFoundError: MOCU control bank is incomplete; regenerate with tools/regenerate_mocu_bank.py. Missing: /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/train/theta_M.npy, /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/train/theta_K.npy, /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/train/psi_star.npy, /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/train/control_safe.npy, /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/train/ocu_table.npy, /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/test/theta_M.npy, /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/test/theta_K.npy, /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/test/psi_star.npy, /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/test/control_safe.npy, /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/test/ocu_table.npy, /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_control/meta/control_bank.yaml
+[bank-quality] PASSED → /home/grads/g/g.lin/Documents/objective_power_grid/data/ieee14_mocu_duration_selected_subset (train U>0=1.000 Q95=0.3000; test U>0=1.000 Q95=0.3000)
