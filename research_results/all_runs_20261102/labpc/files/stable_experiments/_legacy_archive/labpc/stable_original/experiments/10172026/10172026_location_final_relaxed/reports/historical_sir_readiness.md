@@ -1,0 +1,3 @@
+# SIR T5 readiness
+
+CPU/GPU finite gradients, originalODE/reference agreement, explicit likelihood, action constraints and four variants passed focused tests. NativeSIR vsOED/ScoreBED smoke adapters previously passed; explicitODE benchmark adaptation remains disclosed. Initial contrast-resolution results are saved but do not certify trained policies. Full development uses provisional2048/L16384; developed-policy resolution will be checked before final claims. Native vsOED initial replay320 +7810*128 episodes meets1M exactly. SIR-specific base500k is required; no location checkpoints. Expected pathwise cost~15 GPU hours per million at batch64. No SIR multi-seed launch in this task stage.

@@ -1,0 +1,11 @@
+{
+  "audit": [
+    "python",
+    "scripts/audit.py"
+  ],
+  "tests": "python -m pytest -q tools/tests/test_frozen_evaluation.py tools/tests/test_moe_family.py tools/tests/test_strategy_moe.py tools/tests/test_scorebed_validation_metadata.py tools/tests/test_official_scorebed.py",
+  "smoke": "bash run.sh --config ../configs/location_1000000.yaml --frozen-evaluate-from /home/grads/g/g.lin/Documents/objective_power_grid/experiments/10152026/10152026_journal_five_seed_fixed_budget/location/seed102/dad --methods dad --seed102 --eval-seeds1001 --eval-systems4 --eval-contrasts16 --eig-only",
+  "plot": "python plotting/plot_results.py",
+  "diagnostic_forward_episodes_before_confirmation": 740,
+  "new_primary_training_episodes": 0
+}

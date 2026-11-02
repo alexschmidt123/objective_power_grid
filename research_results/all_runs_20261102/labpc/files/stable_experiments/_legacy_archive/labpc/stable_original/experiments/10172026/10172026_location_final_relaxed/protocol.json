@@ -1,0 +1,70 @@
+{
+  "status": "preconfirmation_audit",
+  "benchmark": "location_finding",
+  "methods": [
+    "random",
+    "fixed",
+    "dad",
+    "rl_sboed",
+    "vsoed",
+    "scorebed",
+    "moe",
+    "resmoe",
+    "switchmoe",
+    "switchresmoe"
+  ],
+  "training_seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "total_training_episodes": 1000000,
+  "base_episodes": 500000,
+  "residual_episodes": 500000,
+  "checkpoint_selection": "final_fixed_budget",
+  "routing_training": "original_relaxed",
+  "router_schedule": "gamma1 through30%, cosine to0.001 at95%; residual phase clock500k, full policy clock1M",
+  "rejected_interventions": [
+    "gamma0.01",
+    "straight_through_as_default",
+    "100032_relaxed_warmup_plus_ST"
+  ],
+  "evaluation": {
+    "systems": 2000,
+    "contrasts": 1000000,
+    "development_seed": 1001,
+    "final_seed": 8831001
+  },
+  "primary_pairs": [
+    [
+      "resmoe",
+      "scorebed"
+    ],
+    [
+      "resmoe",
+      "dad"
+    ],
+    [
+      "resmoe",
+      "moe"
+    ],
+    [
+      "switchmoe",
+      "moe"
+    ],
+    [
+      "switchresmoe",
+      "resmoe"
+    ],
+    [
+      "switchresmoe",
+      "switchmoe"
+    ]
+  ],
+  "inference_rule": "Paired training-seed Student-t95% intervals; Bonferroni simultaneous95% over6 predeclared contrasts determines evidence labels. Conditional trajectory MC uncertainty separately; never treat10000trajectories as independent trainings.",
+  "single_residual_diagnostic": "Force development-selected dominant residual expert per seed; fixed checkpoint diagnostic only, not a retrained single-residual control or definitive causal proof.",
+  "confirmation_policy": "All algorithms, checkpoint hashes, analysis/source/config hashes frozen before seed8831001; no modification after final data; historical seeds are development-used, fresh evaluation provides conditional confirmation, not fresh independently designed training replication.",
+  "SIR": "Only after location final report; T5 readiness then benchmark-specific development. No location checkpoint reuse."
+}
