@@ -64,7 +64,12 @@ p=pathlib.Path.home()/cfg['path'];base=pathlib.Path.home()/'Documents/objective_
 def git(root,*args):return subprocess.run(['git','-C',str(root),*args],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=True)
 url=git(base,'remote','get-url','origin').stdout.strip();assert url in ['git@github.com:alexschmidt123/objective_power_grid.git','https://github.com/alexschmidt123/objective_power_grid.git'],'Unexpected worker origin'
 # Fetch changes references only; existing dirty checkouts are never switched or reset.
-git(base,'fetch','origin',cfg['branch']);remote=git(base,'rev-parse','origin/'+cfg['branch']).stdout.strip();assert remote==cfg['expected'],'Remote advanced;preserve and retry from LabPC'
+refspec='refs/heads/'+cfg['branch']+':refs/remotes/origin/'+cfg['branch']
+# Existing Ubuntu repositories may fetch only main. Add this branch without
+# replacing existing fetch rules or forcing any local branch/reference.
+current=git(base,'config','--get-all','remote.origin.fetch').stdout.splitlines()
+if refspec not in current:git(base,'config','--add','remote.origin.fetch',refspec)
+git(base,'fetch','origin',refspec);remote=git(base,'rev-parse','origin/'+cfg['branch']).stdout.strip();assert remote==cfg['expected'],'Remote advanced;preserve and retry from LabPC'
 if not p.exists():
  p.parent.mkdir(parents=True,exist_ok=True);assert not git(base,'branch','--list',cfg['branch']).stdout.strip(),'Local branch exists elsewhere;preserved'
  print(git(base,'worktree','add','--track','-b',cfg['branch'],str(p),'origin/'+cfg['branch']).stdout,flush=True)
