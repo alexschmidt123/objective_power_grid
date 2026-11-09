@@ -1,0 +1,69 @@
+{
+  "version": "HEC_v1",
+  "benchmark": "location_finding",
+  "T": 30,
+  "seed": 202611099101,
+  "parent_iteration": 12001,
+  "parent_actor_sha256": "8e4082bb7c6710ce99f229cbbf0d0b39113f124549875038fce93796e6f7a95e",
+  "parent_runtime_sha256": "56f2b8f721340f1659c365032e29f53e34dad66e0f4a39bffb2b37588cda1406",
+  "preparation_steps": 300,
+  "preparation_batch": 256,
+  "preparation_lr": 0.001,
+  "preparation_train_cases": 4096,
+  "preparation_validation_cases": 512,
+  "phase_B_updates": 200,
+  "phase_C_updates": 1800,
+  "continuation_updates": 2000,
+  "target_iteration": 14001,
+  "discount": 1.0,
+  "auxiliary_joint_weight": 0.0,
+  "command_dimensions": [
+    4,
+    6,
+    6,
+    4
+  ],
+  "feature_dimension": 64,
+  "actor_gradient_chunk": 4096,
+  "expert_teacher_replicates": 2,
+  "posterior_quadrature_nodes": 64,
+  "critic_probe_count": 3,
+  "teacher_seed": 202611099102,
+  "preparation_seed": 202611099103,
+  "evaluation_seed": 202611099104,
+  "routing_seed": 202611099105,
+  "diagnostic_seed": 202611099106,
+  "donor_seed": 202611099107,
+  "runtime": {
+    "graceful_seconds": 21600,
+    "TERM_seconds": 22200,
+    "hard_seconds": 22800,
+    "evaluation_max_seconds": 3600
+  },
+  "evaluation": {
+    "cases": 2000,
+    "prior_contrasts": 1000000,
+    "batch": 16,
+    "contrast_chunk": 16384,
+    "primary": "candidate-control",
+    "secondary": [
+      "sg",
+      "reference",
+      "vsoed",
+      "parent"
+    ],
+    "secondary_multiplicity": "Holm4;unadjustedpaired95CIs"
+  },
+  "diagnostics": {
+    "cases": 512,
+    "calibration": 256,
+    "validation": 256,
+    "commands": "fixed/stage/shuffle Holm3",
+    "coordination": "ordinary/uniform/stage Holm3",
+    "expert_removal": "Holm4;OODcaveat",
+    "task_comparisons": "4expertcompetencylossesvsconstant Holm4"
+  },
+  "no_ubuntu": true,
+  "no_final_test": true,
+  "no_other_campaigns": true
+}
