@@ -1,0 +1,33 @@
+{
+  "status": "PREFLIGHT_ONLY_NOT_A_TRAINING_LOCK",
+  "benchmark": "location_finding",
+  "T": 30,
+  "action_bounds": [
+    -4,
+    4
+  ],
+  "seed": 202611103001,
+  "calibration_cases_per_stage": 128,
+  "validation_cases_per_stage": 128,
+  "stages": [
+    0,
+    3,
+    12,
+    24,
+    29
+  ],
+  "specialist_quantile": 0.6666666666666666,
+  "specialist_weight_floor": 0.1,
+  "proposal_training_updates_per_arm": 2000,
+  "authorized_arms": [
+    "dynamic",
+    "stage_only"
+  ],
+  "training_updates_executed": 0,
+  "preparation_updates_executed": 0,
+  "evaluation_bank_access": false,
+  "training_launch_enabled": false,
+  "stop_rule": "Stop before expensive training if no substantive BOED-specific joint responsibility mechanism can be justified beyond prior competitive MoE/Top1/CIAS.",
+  "feature_conditions": "stage-calibrated upper-third scores;prior-stage ties documented,not assigned arbitrary membership",
+  "gpu_budget": "single frozen preflight only;no training launcher"
+}
