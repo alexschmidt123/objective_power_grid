@@ -1,0 +1,78 @@
+{
+  "version": "HEC_v2_query_response",
+  "benchmark": "location_finding",
+  "T": 30,
+  "seed": 202611099201,
+  "parent_iteration": 14001,
+  "parent_actor_sha256": "f8eb269c3a63668b5e7cad45dc4d91377505ce38d8896d9c420cb8f9439e8b09",
+  "parent_runtime_sha256": "19f2905763323a8b45529006cc4e011d491f6768d78453ecb699e81247b5cd0a",
+  "preparation_steps": 300,
+  "preparation_batch": 256,
+  "preparation_train_cases": 4096,
+  "preparation_validation_cases": 512,
+  "teacher_replicates": 4,
+  "continuation_updates": 2000,
+  "target_iteration": 16001,
+  "phase_B_updates": 200,
+  "phase_C_updates": 1800,
+  "phase_B": "history frozen only;all experts/commands/fusion nativeEIG trainable in all3arms",
+  "discount": 1.0,
+  "auxiliary_joint_weight": 0.0,
+  "actor_gradient_chunk": 4096,
+  "new_adapter_seed": 202611099202,
+  "frozen_audit_seed": 202611099203,
+  "preparation_seed": 202611099204,
+  "teacher_seed": 202611099205,
+  "evaluation_seed": 202611099206,
+  "routing_seed": 202611099207,
+  "diagnostic_seed": 202611099208,
+  "donor_seed": 202611099209,
+  "runtime": {
+    "graceful_seconds": 32400,
+    "TERM_seconds": 33000,
+    "hard_seconds": 33600,
+    "evaluation_max_seconds": 3600
+  },
+  "evaluation": {
+    "cases": 2000,
+    "prior_contrasts": 1000000,
+    "batch": 16,
+    "contrast_chunk": 16384,
+    "primary": [
+      "candidate-stage",
+      "candidate-continuation"
+    ],
+    "primary_multiplicity": "Holm2",
+    "secondary": [
+      "v1",
+      "sg",
+      "reference",
+      "vsoed"
+    ],
+    "secondary_multiplicity": "Holm4",
+    "initial_endpoint_adjustment": "predeclared difference-in-training-gains vsstage andcontinuation;Holm2;initials evaluatedonlyafteralltraining"
+  },
+  "e4_predictive_nodes": 8,
+  "e4_predictive_observation_quadrature": 3,
+  "no_extra_seeds": true,
+  "no_final_test": true,
+  "source_truth": "LabPC",
+  "ubuntu_sync_only": true,
+  "conditional_seed": 202611099210,
+  "diagnostics": {
+    "cases": 512,
+    "calibration": 256,
+    "validation": 256,
+    "stages": [
+      3,
+      12,
+      24
+    ],
+    "commands": "zero/stage/shuffle Holm3",
+    "coordination": "uniform/stage/linear projection Holm3",
+    "expert_contributions": "4donor and4removal separateHolm4",
+    "mechanism": "E2responseoff/E4responseoff/allresponseoff Holm3",
+    "learned_competence": "116-coordinate probes exclude12analytic response coordinates;Holm4designated;Holm4retention;Holm2newreadouts",
+    "conditional": "128prefixes x3stages x4suffixreplicas;one-step donor thenlearnedcontinuation;uncertainty-trace medianregimes;Holm24;NOTexactCMI"
+  }
+}

@@ -41,10 +41,12 @@ if selected:
  if whitespace.returncode:
   assert whitespace.returncode==2,'Git diff validation failed: '+whitespace.stderr
   headers=re.findall(r'^([^:\n]+):\d+: ',whitespace.stdout,re.M);assert headers,'Unrecognized whitespace review output'
-  prefix='development/moe_sboed/hec_20261108/';provenance=json.loads((p/prefix/'SOURCE_PROVENANCE.json').read_text())['files']
   for name in headers:
-   assert name.startswith(prefix) and name[len(prefix):] in provenance,'New whitespace error: '+name
-   assert hashlib.sha256((p/name).read_bytes()).hexdigest()==provenance[name[len(prefix):]],'Changed snapshot whitespace: '+name
+   candidates=[parent for parent in (p/name).parents if parent!=p and p in parent.parents and (parent/'SOURCE_PROVENANCE.json').is_file()]
+   assert candidates,'New whitespace error outside an immutable snapshot: '+name
+   parent=candidates[0];provenance=json.loads((parent/'SOURCE_PROVENANCE.json').read_text())['files'];relative=str((p/name).relative_to(parent))
+   assert relative in provenance,'New whitespace error: '+name
+   assert hashlib.sha256((p/name).read_bytes()).hexdigest()==provenance[relative],'Changed snapshot whitespace: '+name
   print('REVIEWED inherited frozen-source whitespace;original bytes retained',whitespace.stdout,flush=True)
  assert not git('diff','--name-only').stdout.strip(),'Working copy changed during validation'
  patch=git('diff','--cached','--binary').stdout

@@ -1,0 +1,9 @@
+# Commander and trained stage-only control
+
+Let u(h) be the inherited history/provisional-design/belief-summary context. Calibration uses only preparation-training prefixes. Store its stage mean ubar_t and initial commander logits b0_t=C0(ubar_t). Learn a stage-logit table S_t and the inherited commander C, with c(h)=tanh(C(u(h))+S_t-b0_t). Initialize S=b0, so the candidate reproduces the parent commands exactly. This makes a stage baseline and observation-conditioned residual explicit; it does not impose a diversity or history-variation objective.
+
+The candidate recomputes expert query responses and learns coordination using inherited feature-aware coordination plus a zero-initialized response-to-gate map. The stage-only control uses ubar_t instead of u(h) and fixed calibration stage feature/response contexts for coordination. Both commands AND coordination weights therefore depend only on stage in that arm. Experts and the design head still receive actual histories and the same model-derived information. Both arms instantiate and use identical parameter shapes, preparation and native budgets; differing input rank is the intended information restriction.
+
+Stage-only is a fully trained control, not the old frozen stage-mean intervention. Commands change expert computations before fusion. All four expert packets remain available. No Top-1 selection, physical-action averaging, uniform-use loss, CE teacher or router-only training is used.
+
+The constrained stage control cannot reproduce the parent's fully history-conditioned policy at initialization. Its projection and the candidate share the same parameter values, but not the same initial function. Save all initial policies before any native update, evaluate them only after all training finishes, and report predeclared difference-in-training-gain contrasts as well as final EIG. Do not attribute an inherited initial advantage to v2 learning.
