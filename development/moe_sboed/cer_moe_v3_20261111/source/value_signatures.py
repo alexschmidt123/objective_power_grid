@@ -47,7 +47,11 @@ def terminal_log_q(belief, ds, ys, theta):
     w = net.weight_net(features).exp()
     mu = net.mu_net(features).sigmoid().reshape(-1, 8, 4) * (net.mu_bounds[:, 1] - net.mu_bounds[:, 0]) + net.mu_bounds[:, 0]
     sd = net.sigma_net(features).sigmoid().reshape(-1, 8, 4) * net.max_sigmas + 1e-5
-    return gmm_log(theta[:, None], w, mu, sd)[:, 0]
+    core = gmm_log(theta[:, None], w, mu, sd)[:, 0]
+    prior = -.5 * theta.square().sum(-1) - 2 * math.log(2 * math.pi)
+    # Preserve the normalized native full-support density, including its tiny
+    # prior component. This matters in posterior tails after counterfactuals.
+    return torch.logaddexp(core, prior + math.log(1e-27)) - math.log1p(1e-27)
 
 @torch.no_grad()
 def suffix_values(model, x, actions, particles, weights, repeats, generator):

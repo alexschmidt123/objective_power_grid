@@ -47,7 +47,7 @@ def gradient_fixture():
     torch.testing.assert_close(frequency.double(),p[0].detach(),rtol=0,atol=.004)
 
 def main():
-    original.setup();gradient_fixture()
+    original.setup();torch.manual_seed(202611113105);gradient_fixture()
     # CPU fixtures must not compete with a training GPU.
     state=restore('cpu');a=state['algorithm'];parent=a.actor_net
     from src.research.vendor.vsoed.utils import Net
@@ -72,7 +72,9 @@ def main():
             torch.testing.assert_close(action,acts[torch.arange(3),info['selected']],rtol=0,atol=0)
         # Literal Gaussian likelihood and GMM log-density independently evaluated.
         th=torch.randn(3,11,4);w,mu,sd=parent.belief.params(x)
-        direct=torch.distributions.MixtureSameFamily(torch.distributions.Categorical(w),torch.distributions.Independent(torch.distributions.Normal(mu,sd),1))
+        # logits form avoids Categorical(probs=...)'s float-epsilon floor, which
+        # changes tiny posterior mixture weights in adversarial histories.
+        direct=torch.distributions.MixtureSameFamily(torch.distributions.Categorical(logits=w.clamp_min(1e-38).log()),torch.distributions.Independent(torch.distributions.Normal(mu,sd),1))
         torch.testing.assert_close(gmm_log(th,w,mu,sd),direct.log_prob(th.transpose(0,1)).T,rtol=1e-5,atol=1e-5)
         literal=torch.zeros(3,11)
         for t in range(29):
@@ -81,6 +83,13 @@ def main():
         torch.testing.assert_close(prefix_log_likelihood(x,th),literal,rtol=1e-5,atol=1e-5)
         terminal=terminal_log_q(parent.belief,ds,ys,th[:,0])
         assert terminal.shape==(3,) and torch.isfinite(terminal).all()
+        from normalized_reward import normalized_gmm_forward
+        native_terminal=normalized_gmm_forward(parent.belief.nets[29],torch.cat([ds.reshape(3,60),ys.reshape(3,30)],-1),th[:,0])
+        torch.testing.assert_close(terminal,native_terminal,rtol=1e-5,atol=1e-5)
+        tail_theta=th[:,0]+20
+        tail=terminal_log_q(parent.belief,ds,ys,tail_theta)
+        native_tail=normalized_gmm_forward(parent.belief.nets[29],torch.cat([ds.reshape(3,60),ys.reshape(3,30)],-1),tail_theta)
+        torch.testing.assert_close(tail,native_tail,rtol=1e-5,atol=1e-5)
         # Prior stage: target/proposal are both exactly N(0,I); ESS must be N.
         x0=prefix_inputs(ds,ys,torch.zeros(3,dtype=torch.long))
         _,pw,ess=conditional_particles(parent.belief,x0,128,torch.Generator().manual_seed(123))
@@ -97,7 +106,7 @@ def main():
     put(O/'evidence/IMPLEMENTATION_CHECKS.json',dict(status='PASS',all30steps=True,complete_physical_selection=True,
         finite_difference_and_score_identity=True,categorical_sampling_frequency=True,epsilon_in_policy_gradient=True,
         future_mutation_invariance=True,explicit_likelihood=True,prior_posterior_importance_identity=True,
-        terminal_native_density_shape=True,no_shared_action_head=True,all_expert_gradients=True,
+        terminal_native_density_shape=True,terminal_native_density_parity_including_tails=True,no_shared_action_head=True,all_expert_gradients=True,
         native_training_integration='PENDING_GROUP_SUPPORT; NOT_YET_VALIDATED',training_updates=0))
     print('CER_IMPLEMENTATION_CHECKS_PASS',flush=True)
 
