@@ -80,3 +80,16 @@ Current files implement the complete-proposal policy and the support audit.
 Training remains dependent on evidence supporting four meaningful groups and
 passing native integration checks. Unsupported groups are a substantive negative
 result, not an excuse based on unproven novelty.
+
+The first fixed-probe audit was invalidated because the standalone terminal
+scorer omitted the normalized density's tiny prior component. Its bytes are
+preserved, and its group results are excluded. Native density parity now covers
+ordinary draws and extreme tails. The corrected fixed-probe audit still failed
+four-group support. Because every center preferred the adaptive HEC proposal to
+the coarse fixed anchors, one additional *diagnostic*, declared in
+LOCAL_PROBE_CONFIG.json before inspecting its fresh histories, uses comparable
+local complete proposals: four axis directions at distances0.25 and0.75 from
+HEC, plus HEC itself. Thresholds are unchanged. This is an exploratory refinement
+of group discovery, not an architecture/training sweep, extra training seed,
+training extension or evidence that the original audit succeeded. There are no
+further follow-up audits or forced group assignments.

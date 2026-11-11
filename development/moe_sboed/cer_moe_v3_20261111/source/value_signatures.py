@@ -82,7 +82,19 @@ def main():
     from sklearn.cluster import KMeans
     from sklearn.metrics import silhouette_score, adjusted_rand_score
     import gc
+    if '--local-probes' in sys.argv:
+        CFG.update(json.loads((O/'LOCAL_PROBE_CONFIG.json').read_text()))
     assert not (O/'evidence/GROUP_SUPPORT.json').exists()
+    import resource, threading, subprocess
+    wall_start=time.monotonic();cpu_start=time.process_time();stop=threading.Event()
+    def telemetry():
+        while not stop.is_set():
+            gpu=subprocess.check_output(['nvidia-smi','--query-gpu=utilization.gpu,memory.used,power.draw','--format=csv,noheader,nounits'],text=True).strip()
+            row=dict(time=time.time(),CPU_seconds=time.process_time()-cpu_start,
+                     RSS_bytes=int(pathlib.Path('/proc/self/statm').read_text().split()[1])*os.sysconf('SC_PAGE_SIZE'),GPU=gpu)
+            with (O/'audit_resources.jsonl').open('a') as f:f.write(json.dumps(row)+'\n')
+            stop.wait(1)
+    threading.Thread(target=telemetry,daemon=True).start()
     original.setup(); leases = original.acquire()
     before = protected(); put(O/'evidence/PROTECTED_INPUTS_BEFORE.json', before)
     state = restore(); a = state['algorithm']; model = a.actor_net.eval().requires_grad_(False)
@@ -96,8 +108,15 @@ def main():
             x = prefix_inputs(a._runtime_buffer['ds_hist'][ids], a._runtime_buffer['ys_hist'][ids], torch.full((len(ids),), stage, device='cuda'))
             # Eight fixed complete designs plus native HEC proposal. The candidate
             # palette is a probe, not an expert role or executed action mixture.
-            anchors = x.new_tensor([[-1,-1],[-1,1],[1,-1],[1,1],[-2,0],[2,0],[0,-2],[0,2]])
-            acts = torch.cat([anchors[None].expand(len(x),-1,-1), model(x)[:,None]], 1)
+            reference=model(x)
+            if CFG.get('probe_mode')=='local_comparable':
+                directions=x.new_tensor([[1,0],[-1,0],[0,1],[0,-1]])
+                offsets=torch.cat([directions*r for r in CFG['local_probe_radii']])
+                probes=(reference[:,None]+offsets[None]).clamp(-4,4)
+            else:
+                anchors=x.new_tensor([[-1,-1],[-1,1],[1,-1],[1,1],[-2,0],[2,0],[0,-2],[0,2]])
+                probes=anchors[None].expand(len(x),-1,-1)
+            acts = torch.cat([probes, reference[:,None]], 1)
             estimates, ess_stage = [], []
             # Two independent posterior banks AND independent future simulations.
             for replica in range(2):
@@ -130,10 +149,11 @@ def main():
     preferred=centers.argmax(-1)
     within_stage={str(s):np.bincount(groups[val[stages[val]==s]],minlength=4).tolist() for s in CFG['signature_stages']}
     ess_fraction=float((ESS[val]>=CFG['minimum_posterior_ess']).mean())
-    gate=dict(occupancy=bool(occupancy.min()>=.1),distinct_preferred_designs=len(set(preferred))==4,
-              silhouette=silhouette>=.2,independent_MC_assignment_agreement=agreement>=.7,
-              within_stage_variation=all(sum(v>=4 for v in c)>=2 for c in within_stage.values()),
-              posterior_resolution=ess_fraction>=.9)
+    thresholds=CFG['group_support']
+    gate=dict(occupancy=bool(occupancy.min()>=thresholds['minimum_validation_occupancy']),distinct_preferred_designs=len(set(preferred))==thresholds['distinct_preferred_probes'],
+              silhouette=silhouette>=thresholds['minimum_silhouette'],independent_MC_assignment_agreement=agreement>=thresholds['minimum_independent_MC_assignment_agreement'],
+              within_stage_variation=all(sum(v>=4 for v in c)>=thresholds['minimum_groups_with_four_validation_histories_at_each_stage'] for c in within_stage.values()),
+              posterior_resolution=ess_fraction>=thresholds['minimum_resolved_posterior_fraction'])
     result=dict(status='SUPPORTED' if all(gate.values()) else 'FOUR_GROUPS_NOT_SUPPORTED',criteria=gate,
                 validation_occupancy=occupancy.tolist(),silhouette=silhouette,independent_MC_assignment_agreement=agreement,
                 preferred_probe_indices=preferred.tolist(),within_stage_counts=within_stage,
@@ -143,9 +163,17 @@ def main():
                              'fixed probe palette may miss optimal actions','suffix follows frozen HEC-v2, not an optimized continuation',
                              'groups must be reproducible before specialist preparation; kmeans alone does not establish four groups'],
                 simulator_observations=sum(CFG['histories_per_stage']*9*2*CFG['suffix_replicates']*(30-s) for s in CFG['signature_stages']),
-                exact_model_queries=dict(COST),seconds=time.monotonic()-tick,scientific_training_updates=0)
+                exact_model_queries=dict(COST),seconds=time.monotonic()-tick,scientific_training_updates=0,
+                probe_mode=CFG.get('probe_mode','fixed_anchors'),signature_seed=CFG['signature_seed'],
+                policy_temperature_or_rewards_changed=False)
     np.savez_compressed(O/'evidence/signatures.npz',X=X,values=V,ess=ESS,proposals=A,stages=stages,groups=groups,calibration=cal,validation=val,centers=centers,scale=scale)
     assert before==protected(),'Original artifact changed'
+    stop.set()
+    result.update(wall_seconds_including_loading_and_preservation_hashes=time.monotonic()-wall_start,
+                  process_CPU_seconds=time.process_time()-cpu_start,
+                  process_peak_RSS_bytes=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024,
+                  GPU_peak_allocated_bytes=torch.cuda.max_memory_allocated(),
+                  original_artifacts_byte_identical=True,protected_files=len(before))
     put(O/'evidence/GROUP_SUPPORT.json',result)
     print(json.dumps(result,indent=2),flush=True)
 
