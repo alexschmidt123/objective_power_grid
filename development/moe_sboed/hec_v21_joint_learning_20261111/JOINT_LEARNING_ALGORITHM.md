@@ -1,0 +1,21 @@
+# One joint mechanism:routing from decision contributions
+
+Let s(h) be shared history,first_k and resp_k the existing specialist channels,and c_k=W_k first_k+V_k resp_k their128-dimensional contributions to the actual shared decision preactivation. Let b_s include shared history and bias. The existing coordinator supplies logits ell0=10tanh(raw/10) and g0=softmax(ell0). The reference collaborative preactivation is p0=b_s+sum g0_k c_k. No standalone physical expert actions are formed or averaged.
+
+For the existing decision transform a=H(p,a_SG),compute analytically J_a(p0),then v_k=J_a(p0)c_k and t_k=g0_k(v_k-sum_j g0_j v_j). t_k is the exact local derivative of the inherited collaborative physical design with respect to its routing logit. These local features describe effects around g0,not a fixed-point solution under the corrected gate. Native output is still recomputed exactly using the original fusion operations.
+
+Use the exact location-finding likelihood derivative J_xi(theta,a_ref)=-sum_source J_theta,with sigma=.5. A per-expert model-response descriptor is4 E_q[(J_xi dot t_k)^2]. It is a sensitivity descriptor,NOT greedy EIG or an expert-quality reward. Reuse the original approximate GMM quadrature,posterior mean/variance,existing likelihood-discrimination and prospective-opportunity semantics. No additional posterior inference,critic query or deployment rollout is introduced.
+
+A trainable16-dimensional projection of sign(c)log(1+abs(c)),the two physical tangent coordinates,three scale/sensitivity statistics and four expert identity coordinates join160 shared context coordinates. One shared185->64->1 SiLU network returns correction rho_k. Final g=softmax(ell0+rho). It is not merely a new name for the old gate:its inputs include actual consumed expert channels,the shared head's local action geometry and exact likelihood responses. Softmax,attention-like scoring,analytic sensitivity and residual transfer are established mechanisms;novelty is unproven.
+
+The correction output layer starts at zero. Candidate and ordinary continuation therefore start with bitwise-identical physical actions,unchanged inherited gradients,and the same checkpoint/Adam/replay/RNG lineage. New tensors have fresh Adam moments at the inherited native learning rate. Existing expert,commander,head,critic and posterior objects/moments are retained. The new projection/hidden layer first receive gradients after the zero output layer moves;this is validated with a disposable nonzero output layer,not mistaken for starvation. No auxiliary preparation or new objective.
+
+Joint update:use the unmodified native actor loss L=-mean_{h in replay}Q_psi(h,a_theta(h)) over all30 stages,with the same native critic/posterior updates. For p=b_s+sum g_k c_k,the direct logit derivative is
+
+    dQ/dell_k = g_k grad_p Q dot(c_k-sum_j g_j c_j).
+
+Autodiff also includes expert-to-c,head-to-c,commander-to-features,and all contribution/likelihood-feature-to-rho paths. Tokens are not detached. Thus specialists and router learn together from the actual collaborative design's remaining-value native signal. No standalone-head Q auxiliary,teacher CE,diversity/load balance,cost penalty or separate reward. Full native discount1 variational information rewards and optimizer schedules remain unchanged. Learned Q/off-policy replay and variational approximation retain their original bias;this is not an unbiased exact-MI theorem.
+
+The finite-horizon reward telescopes from prior to terminal variational posterior at gamma1. It is NOT sPCE training. Main evaluation alone uses the fixed full-horizon prior-contrast lower bound. Compared with ordinary soft MoE,the changed component is consumed-contribution and model-informed coordination with full gradient chains. Compared with CIAS,there is no noisy counterfactual teacher or additional routing objective. Shared-target convergence can still occur;the mechanism must earn useful EIG and competence evidence.
+
+The existing frozen E1/E3 anchors and model-semantic functions preserve their exact functions. This does not guarantee retained utility of every adaptive pathway;retention probes and resimulated interventions are required. No claim of useful specialization follows from representation differences or variable weights alone.
