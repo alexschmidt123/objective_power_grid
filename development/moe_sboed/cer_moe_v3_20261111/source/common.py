@@ -6,7 +6,8 @@ import torch
 ROOT = pathlib.Path.home() / 'Documents/objective_power_grid_temp'
 R = ROOT / 'scratch_runs'
 OLD = R / 'moe_hec_v2_icml_20261109'
-O = pathlib.Path(os.environ.get('CER_ROOT', str(R / 'cer_moe_sboed_v3_20261111')))
+# Require an explicit isolated destination; never default back to an old audit.
+O = pathlib.Path(os.environ['CER_ROOT'])
 os.environ['MOE_V2_RUN_ROOT'] = str(OLD)
 sys.path.insert(0, str(OLD / 'source'))
 import restore_v1, train_v2

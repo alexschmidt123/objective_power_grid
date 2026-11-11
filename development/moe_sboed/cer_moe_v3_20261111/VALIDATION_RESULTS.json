@@ -1,0 +1,277 @@
+{
+  "status": "STOPPED_BEFORE_SPECIALIST_PREPARATION_FOUR_GROUPS_UNSUPPORTED",
+  "task_complete": false,
+  "trained_policy_available": false,
+  "implementation_checks": {
+    "status": "PASS",
+    "all30steps": true,
+    "complete_physical_selection": true,
+    "finite_difference_and_score_identity": true,
+    "categorical_sampling_frequency": true,
+    "epsilon_in_policy_gradient": true,
+    "future_mutation_invariance": true,
+    "explicit_likelihood": true,
+    "prior_posterior_importance_identity": true,
+    "terminal_native_density_shape": true,
+    "terminal_native_density_parity_including_tails": true,
+    "no_shared_action_head": true,
+    "all_expert_gradients": true,
+    "native_training_integration": "PENDING_GROUP_SUPPORT; NOT_YET_VALIDATED",
+    "training_updates": 0
+  },
+  "corrected_fixed_probe_audit": {
+    "status": "FOUR_GROUPS_NOT_SUPPORTED",
+    "criteria": {
+      "occupancy": false,
+      "distinct_preferred_designs": false,
+      "silhouette": true,
+      "independent_MC_assignment_agreement": true,
+      "within_stage_variation": false,
+      "posterior_resolution": true
+    },
+    "validation_occupancy": [
+      0.8541666666666666,
+      0.03125,
+      0.09375,
+      0.020833333333333332
+    ],
+    "silhouette": 0.5042447447776794,
+    "independent_MC_assignment_agreement": 0.9479166666666666,
+    "preferred_probe_indices": [
+      8,
+      8,
+      8,
+      8
+    ],
+    "within_stage_counts": {
+      "3": [
+        32,
+        0,
+        0,
+        0
+      ],
+      "12": [
+        31,
+        0,
+        1,
+        0
+      ],
+      "24": [
+        19,
+        3,
+        8,
+        2
+      ]
+    },
+    "posterior_ess_adequate_fraction": 0.9583333333333334,
+    "posterior_ess_quantiles": [
+      1.9725908041000366,
+      69.97116165161134,
+      733.038818359375,
+      2349.7481689453125,
+      3086.775634765625
+    ],
+    "conditional_value": "exact-likelihood SNIS posterior; full resimulated suffix; normalized native terminal variational log-density gain",
+    "limitations": [
+      "finite SNIS bias and missed modes remain possible",
+      "frozen variational terminal score is not exact conditional MI",
+      "fixed probe palette may miss optimal actions",
+      "suffix follows frozen HEC-v2, not an optimized continuation",
+      "groups must be reproducible before specialist preparation; kmeans alone does not establish four groups"
+    ],
+    "simulator_observations": 1880064,
+    "exact_model_queries": {
+      "frozen_belief_rows": 1880640,
+      "frozen_SG_provisional_rows": 1769664,
+      "exact_signal_evaluations": 1126597632,
+      "analytic_parameter_jacobians": 113258496,
+      "frozen_opportunity_critic_rows": 5308992
+    },
+    "seconds": 4.13416906981729,
+    "scientific_training_updates": 0
+  },
+  "local_probe_audit": {
+    "status": "FOUR_GROUPS_NOT_SUPPORTED",
+    "criteria": {
+      "occupancy": false,
+      "distinct_preferred_designs": true,
+      "silhouette": true,
+      "independent_MC_assignment_agreement": true,
+      "within_stage_variation": false,
+      "posterior_resolution": true
+    },
+    "validation_occupancy": [
+      0.19791666666666666,
+      0.6770833333333334,
+      0.08333333333333333,
+      0.041666666666666664
+    ],
+    "silhouette": 0.2519322335720062,
+    "independent_MC_assignment_agreement": 0.78125,
+    "preferred_probe_indices": [
+      1,
+      3,
+      4,
+      5
+    ],
+    "within_stage_counts": {
+      "3": [
+        1,
+        31,
+        0,
+        0
+      ],
+      "12": [
+        9,
+        20,
+        3,
+        0
+      ],
+      "24": [
+        9,
+        14,
+        5,
+        4
+      ]
+    },
+    "posterior_ess_adequate_fraction": 0.9114583333333334,
+    "posterior_ess_quantiles": [
+      1.052254557609558,
+      70.89707336425782,
+      588.207275390625,
+      2290.1876220703125,
+      2868.686279296875
+    ],
+    "conditional_value": "exact-likelihood SNIS posterior; full resimulated suffix; normalized native terminal variational log-density gain",
+    "limitations": [
+      "finite SNIS bias and missed modes remain possible",
+      "frozen variational terminal score is not exact conditional MI",
+      "fixed probe palette may miss optimal actions",
+      "suffix follows frozen HEC-v2, not an optimized continuation",
+      "groups must be reproducible before specialist preparation; kmeans alone does not establish four groups"
+    ],
+    "simulator_observations": 1880064,
+    "exact_model_queries": {
+      "frozen_belief_rows": 1880640,
+      "frozen_SG_provisional_rows": 1769664,
+      "exact_signal_evaluations": 1126597632,
+      "analytic_parameter_jacobians": 113258496,
+      "frozen_opportunity_critic_rows": 5308992
+    },
+    "seconds": 4.118010505801067,
+    "scientific_training_updates": 0,
+    "probe_mode": "local_comparable",
+    "signature_seed": 202611113106,
+    "policy_temperature_or_rewards_changed": false,
+    "wall_seconds_including_loading_and_preservation_hashes": 14.269546556985006,
+    "process_CPU_seconds": 14.365663183999999,
+    "process_peak_RSS_bytes": 1561784320,
+    "GPU_peak_allocated_bytes": 798562816,
+    "original_artifacts_byte_identical": true,
+    "protected_files": 346
+  },
+  "invalidated_first_audit": {
+    "reason": "Missing normalized native terminal density prior component",
+    "observations_spent": 1880064,
+    "excluded_from_scientific_results": true
+  },
+  "approximation_error": {
+    "paired_candidate_MCSE_nats_quantiles_10_50_90": [
+      0.1698513264005284,
+      0.3201328047221814,
+      0.5623431587888998
+    ],
+    "independent_posterior_and_suffix_replica_difference_RMS_nats": 0.6057460904121399,
+    "validation_group_mean_probe_minus_HEC_values": [
+      [
+        -0.09911097586154938,
+        -0.14817942678928375,
+        0.06500497460365295,
+        -0.11794627457857132,
+        -0.8408127427101135,
+        -0.2888432443141937,
+        -0.11549379676580429,
+        -1.1115974187850952,
+        0.0
+      ],
+      [
+        0.08122971653938293,
+        -0.06510675698518753,
+        -0.03857805207371712,
+        -0.012533248402178288,
+        -0.07865999639034271,
+        -0.4304642677307129,
+        -0.38082098960876465,
+        -0.19811740517616272,
+        0.0
+      ],
+      [
+        0.5167608857154846,
+        -0.40685105323791504,
+        0.10181128978729248,
+        -0.22209367156028748,
+        0.8625799417495728,
+        -1.8764004707336426,
+        -0.7518290281295776,
+        -1.2157901525497437,
+        0.0
+      ],
+      [
+        -0.46225056052207947,
+        -0.17984415590763092,
+        -0.6173083186149597,
+        -0.8521569967269897,
+        -1.3565903902053833,
+        0.5580903887748718,
+        -4.459428310394287,
+        -0.13015922904014587,
+        0.0
+      ]
+    ],
+    "finite_SNIS_bias_unbounded": true,
+    "frozen_variational_score_error_unbounded": true
+  },
+  "local_resource_measurement": {
+    "samples": 14,
+    "interval_seconds": 1,
+    "GPU_percent_mean_sample": 15.214285714285714,
+    "GPU_percent_max_sample": 59.0,
+    "GPU_memory_MiB_max_sample": 1435.0,
+    "GPU_power_W_max_sample": 130.81,
+    "CPU_percent_one_core": 100.67357870575043,
+    "RSS_peak_bytes": 1561784320,
+    "GPU_tensor_peak_bytes": 798562816,
+    "wall_seconds": 14.269546556985006,
+    "estimation_seconds": 4.118010505801067,
+    "process_CPU_seconds": 14.365663183999999
+  },
+  "simulator_observations_total_including_invalidated": 5640192,
+  "simulator_observations_valid_audits": 3760128,
+  "conditional_suffix_trajectories_per_audit": 110592,
+  "group_discovery_histories_per_audit": 192,
+  "calibration_histories_per_audit": 96,
+  "validation_histories_per_audit": 96,
+  "specialist_preparation_updates": 0,
+  "full_arm_updates": 0,
+  "uniform_arm_updates": 0,
+  "full_native_training_batch_integration": "NOT_EXECUTED",
+  "main_evaluation_bank_generated": false,
+  "inference_latency": "NOT_MEASURED_FOR_AN_UNTRAINED_POLICY",
+  "assessment": {
+    "beats_trained_uniform": "NOT_ESTABLISHED_NO_TRAINED_CER_POLICY",
+    "beats_each_frozen_expert": "NOT_ESTABLISHED_NO_TRAINED_CER_POLICY",
+    "useful_expert_competencies": "NOT_ESTABLISHED_NO_TRAINED_CER_POLICY",
+    "beats_HEC_v2": "NOT_ESTABLISHED_NO_TRAINED_CER_POLICY",
+    "ICML_contribution": "NOT_ESTABLISHED_NO_TRAINED_CER_POLICY"
+  },
+  "source_stage": "complete_policy_and_value_audit; native training integration not implemented after failed prerequisite",
+  "original_source_checkpoint_hashes_verified": 346,
+  "evidence_sha256": {
+    "cer_moe_sboed_v3_20261111_validated_values/evidence/GROUP_SUPPORT.json": "7da5ee2059b1269d4ca38a371814406095a02d3753fd736bb4efb04cc4129f2f",
+    "cer_moe_sboed_v3_20261111_validated_values/evidence/IMPLEMENTATION_CHECKS.json": "e39ab39614556da3ec55201cb91be3321abd873bc7cd01533fda99bd506414b0",
+    "cer_moe_sboed_v3_20261111_validated_values/evidence/signatures.npz": "aa8b93061acf84ea4b9e0e603c320dd9c36a2b18c52b2613f1f45c4cad94c979",
+    "cer_moe_sboed_v3_20261111_local_values/evidence/GROUP_SUPPORT.json": "cb0fe8d964ab5beb929661877261e1e8586a7a9c5070e83987ead61b826b86a5",
+    "cer_moe_sboed_v3_20261111_local_values/evidence/IMPLEMENTATION_CHECKS.json": "e39ab39614556da3ec55201cb91be3321abd873bc7cd01533fda99bd506414b0",
+    "cer_moe_sboed_v3_20261111_local_values/evidence/signatures.npz": "26784e4e0aa865e079adfe26dae576e95b0e15905fbb4f32eae6d3cc54cf7206"
+  }
+}
