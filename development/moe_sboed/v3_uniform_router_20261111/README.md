@@ -1,0 +1,3 @@
+# One supplementary uniform-router evaluation
+
+Read PROTOCOL.md. Run source/queue_eval.py --test for CPU-only validation of the actual V3 categorical draw implementation;it must not initialize CUDA. Then synchronize the validated code from LabPC through GitHub to Ubuntu. Copy this source/configuration/validation into the isolated queue directory,record SOURCE_LOCK.json and launch source/launch.py exactly once. Status:STATUS.json. The queue waits outside the original V3 experiment tree until its upstream driver exits successfully,and then adds a new results subdirectory under that experiment. No training or Ubuntu computation.

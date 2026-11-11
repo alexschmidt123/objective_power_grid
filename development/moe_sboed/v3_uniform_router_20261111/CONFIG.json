@@ -1,0 +1,25 @@
+{
+  "version": "one_frozen_v3_learned_vs_uniform",
+  "upstream_run": "moe_sboed_v3_model_informed_20261110",
+  "result_subdir": "uniform_router_evaluation_20261111",
+  "cases": 2000,
+  "T": 30,
+  "negative_contrasts": 1000000,
+  "batch": 16,
+  "contrast_chunk": 16384,
+  "routing": "exact uniform .25 categorical selection at every step;no coordinate averaging",
+  "paired_randomness": [
+    "truth",
+    "noise",
+    "u",
+    "eps",
+    "contrasts"
+  ],
+  "primary": "learned minus uniform",
+  "CI": "paired t95 unadjusted",
+  "p_correction": "raw and Holm3 combining this supplementary comparison with the two saved original primary comparisons;do not overwrite historical tests",
+  "telemetry_seconds": 2,
+  "evaluation_budget_seconds": 3600,
+  "training": false,
+  "wait_for_successful_upstream_completion_and_exit": true
+}
