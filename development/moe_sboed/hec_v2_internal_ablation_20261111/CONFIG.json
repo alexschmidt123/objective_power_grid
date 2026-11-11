@@ -1,0 +1,28 @@
+{
+  "method": "frozen_HECv2_internal_feature_ablation",
+  "source_run": "moe_hec_v2_icml_20261109",
+  "cases": 2000,
+  "T": 30,
+  "negative_contrasts": 1000000,
+  "batch": 16,
+  "contrast_chunk": 16384,
+  "configurations": [
+    "full",
+    "expert1",
+    "expert2",
+    "expert3",
+    "expert4",
+    "uniform",
+    "conventional_moe"
+  ],
+  "primary_Holm_family": 5,
+  "optional_secondary_comparison": "full minus conventional_moe;also supplementary Holm6",
+  "coordination": "onehot/equal feature-slot weights applied simultaneously to first and response channels",
+  "weights_frozen": true,
+  "training": false,
+  "bank": "original independent-from-training HEC-v2 development_validation_bank.npz;reused frozen diagnostic,not new final test",
+  "CI": "paired t95 unadjusted",
+  "telemetry_seconds": 2,
+  "evaluation_budget_seconds": 3600,
+  "latency_repeats": 100
+}
