@@ -1,0 +1,29 @@
+# Frozen HEC-v2 counterfactual routing pilot — 2026-11-12
+
+User requested improving V2 routing and explicitly requested immediate execution after validation. One bounded candidate, no model overwrite, no architecture/seed sweep, no automatic extension or retry of scientific runs. This is an incremental routing experiment, not a claim of a fixed coding bug or guaranteed performance gain.
+
+## Change and limits
+
+Preserve the exact HEC-v2 actor SHA90797b277846dd1a5d7de3764f6fb021047530d1fbea7db859f938ef59b73108 and all its networks. Freeze history, commander, heterogeneous experts, SG reference, approximate belief, fusion and native critic/posterior weights. The new 182→8 linear coordination-value selector chooses a gate pattern at each decision. Gate patterns are original, uniform, and six pair-favoring patterns: .5*uniform+.5*uniform_on_pair. One selected gate vector is applied to BOTH64-dimensional channels through the original head; complete designs are not averaged. All four V2 pathways still execute. This is a direct-value-trained coordinator for V2, **not** sparse expert execution, RR-MoE, or a claim that fixed-pattern selection is optimal continuous coordination.
+
+The eight-pattern search restricts adaptation to conservative coordination changes. It preserves competent full collaboration rather than forcing known poor one-hot interventions during training. Full one-hot policies are included as independent final controls. If useful gates lie outside this bank or need a changed fusion/expert representation, this pilot may fail. A uniform fallback exists as a candidate option, but noisy learned selection has no no-harm guarantee.
+
+## Training signal
+
+No frozen/live critic value is used as a routing target. Generate512 independent original-V2 episodes from the prior. Sample one intervention stage uniformly0..29 per episode. At that exact observed prefix evaluate eight gate patterns, retaining the same true latent draw, full prefix, future observation noise and1M independent prior negatives across alternatives; after the one decision continue frozen original V2 to T30. Target is paired complete-trajectory terminal prior-sPCE relative to uniform, positive included once. Simulator theta is used for scoring only; router inputs are observed-history encoding128, original gates4, eight candidate design differences relative to uniform16, four consumed expert contribution norms4, stage onehot30 (182 total). No future observations or latent parameters enter the context.
+
+Train-only standardization; a fixed ridge penalty10, exact float64 normal-equation solve with an unpenalized intercept; squared error on all eight paired advantages, no noisy winner classification, load-balancing reward, architecture search or validation tuning. The head receives multiple alternative outcomes per history but no true latent at deployment. Labels are noisy per-history single-latent samples. One-step intervention followed by original continuation is a policy-improvement target, **not** exact value for repeatedly applying the new selector; final full rollouts test this mismatch and state-distribution shift.
+
+Separate128-episode validation and a separate negative bank are diagnostic only. Fit a matched stage-only value-selector control from the same training labels. Final policies are fixed before the fresh final bank is generated; validation does not choose checkpoint, threshold, hyperparameters or architecture. Deterministic argmax is used at deployment.
+
+## Final evaluation and resources
+
+512 complete paired trajectories, T30,1M prior negatives plus positive once, independent final theta/noise/negative bank. Candidate vs original learned V2, frozen uniform, stage-only selector and all four one-hot V2 pathways. Holm7 family; unadjusted paired95% t intervals. Success only if all seven differences are positive and Holm-corrected p<.05. These comparisons are frozen internal controls, not separately trained standalone experts or a fresh external-baseline benchmark. One frozen lineage; intervals do not cover seed variance or finite-contrast bias. A512-case pilot may be inconclusive for small improvements.
+
+Predeclared1800-second all-phase scientific wall budget after acquiring the existing GPU lease. Check budget between batches/rollout steps; a single scoring chunk may overrun slightly. Queue time excluded. Batch16, teacher512+128 histories, eight branches each. No native V2 optimizer steps. All datasets/checkpoints/logs/scores stay in a new LabPC TEMP/scratch_runs directory. Imported frozen historical source files and actor/runtime are SHA-checked before/after. New source is committed/synchronized before launch; do not edit it while running. A tiny smoke fixture uses4/2 teacher histories,2 final trajectories,31 negatives and the same ridge solver; it cannot establish scientific success.
+
+## Commands
+
+Use LabPC's existing dellma environment, PYTHONDONTWRITEBYTECODE=1. Run unit tests with `python test_routing.py`. The runner requires an explicit `--run` and a nonexistent output directory under LabPC TEMP/scratch_runs; importing never executes a campaign. Run `python experiment.py --run --smoke --output NEW_SMOKE_PATH`, then the single scientific run with `python experiment.py --run --output NEW_SCIENTIFIC_PATH`. The runner obtains the existing GPU lease and waits if busy. Never interrupt another job.
+
+If scientific results fail, preserve and report them. Do not label an implementation improvement as demonstrated EIG superiority or launch a follow-up campaign automatically.
