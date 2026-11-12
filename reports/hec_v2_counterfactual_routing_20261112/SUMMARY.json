@@ -1,0 +1,356 @@
+{
+  "completion": {
+    "status": "COMPLETE",
+    "seconds": 117.10386551893316,
+    "routing_superiority_established": false,
+    "historical_artifacts_preserved": true,
+    "run_source_unchanged": true
+  },
+  "config": {
+    "train_histories": 512,
+    "validation_histories": 128,
+    "final_trajectories": 512,
+    "contrasts": 1000000,
+    "batch": 16,
+    "ridge_penalty": 10.0,
+    "wall_budget_seconds": 1800,
+    "seed": 202611125001,
+    "option_count": 8,
+    "changes": "coordination selector only; frozen full V2",
+    "smoke": false,
+    "no_budget_extension": true,
+    "criterion": "candidate beats original, uniform, stage and all four one-hot pathways with Holm7",
+    "single_pathway_not_standalone_trained_expert": true,
+    "validation": "diagnostic only; no checkpoint selection or architecture search",
+    "source_commit": "b8b27a21a0653290cbb62545c25cf88d90f7561e"
+  },
+  "validation": {
+    "candidate_minus_original": {
+      "n": 128,
+      "mean": -0.012312352657318115,
+      "MCSE": 0.030063032827061416,
+      "CI95": [
+        -0.07180166928792041,
+        0.04717696397328418
+      ],
+      "p_two_sided": 0.6828251036699403
+    },
+    "candidate_minus_uniform": {
+      "n": 128,
+      "mean": 0.01867273822426796,
+      "MCSE": 0.04047339833014518,
+      "CI95": [
+        -0.06141681302723319,
+        0.09876228947576911
+      ],
+      "p_two_sided": 0.6453307643425481
+    },
+    "selection_counts": [
+      16,
+      13,
+      25,
+      17,
+      24,
+      17,
+      5,
+      11
+    ],
+    "diagnostic_only": true
+  },
+  "results": {
+    "methods": {
+      "candidate": {
+        "n": 512,
+        "mean": 12.810432397883371,
+        "MCSE": 0.07234012424754448,
+        "CI95": [
+          12.668311743921125,
+          12.952553051845618
+        ],
+        "p_two_sided": 0.0,
+        "wall_seconds": 8.340948316035792,
+        "process_CPU_seconds": 8.344926321000003,
+        "observations": 15360,
+        "negative_density_terms": 15360000000,
+        "GPU_peak_allocated_bytes": 123684864,
+        "gate_pattern_counts": [
+          2022,
+          1420,
+          2677,
+          2151,
+          2236,
+          2269,
+          1080,
+          1505
+        ]
+      },
+      "original": {
+        "n": 512,
+        "mean": 12.901422597053468,
+        "MCSE": 0.07408695873266878,
+        "CI95": [
+          12.755870081977186,
+          13.04697511212975
+        ],
+        "p_two_sided": 0.0,
+        "wall_seconds": 7.358696190873161,
+        "process_CPU_seconds": 7.362139001999992,
+        "observations": 15360,
+        "negative_density_terms": 15360000000,
+        "GPU_peak_allocated_bytes": 123684864,
+        "gate_pattern_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "uniform": {
+        "n": 512,
+        "mean": 12.883939931399892,
+        "MCSE": 0.07001766182612398,
+        "CI95": [
+          12.746382027108982,
+          13.021497835690802
+        ],
+        "p_two_sided": 0.0,
+        "wall_seconds": 7.3804896119982,
+        "process_CPU_seconds": 7.384073295000007,
+        "observations": 15360,
+        "negative_density_terms": 15360000000,
+        "GPU_peak_allocated_bytes": 123684864,
+        "gate_pattern_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "stage": {
+        "n": 512,
+        "mean": 12.712902795881538,
+        "MCSE": 0.07536069268332042,
+        "CI95": [
+          12.564847881149138,
+          12.860957710613938
+        ],
+        "p_two_sided": 0.0,
+        "wall_seconds": 8.356176452944055,
+        "process_CPU_seconds": 8.359947566000002,
+        "observations": 15360,
+        "negative_density_terms": 15360000000,
+        "GPU_peak_allocated_bytes": 123684864,
+        "gate_pattern_counts": [
+          2048,
+          512,
+          5120,
+          1536,
+          1536,
+          1536,
+          512,
+          2560
+        ]
+      },
+      "expert1": {
+        "n": 512,
+        "mean": 11.153801689064615,
+        "MCSE": 0.09952843865794198,
+        "CI95": [
+          10.958266404365567,
+          11.349336973763663
+        ],
+        "p_two_sided": 0.0,
+        "wall_seconds": 7.3664507230278105,
+        "process_CPU_seconds": 7.3697662339999965,
+        "observations": 15360,
+        "negative_density_terms": 15360000000,
+        "GPU_peak_allocated_bytes": 123684864,
+        "gate_pattern_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "expert2": {
+        "n": 512,
+        "mean": 11.765659759849688,
+        "MCSE": 0.10089888971279248,
+        "CI95": [
+          11.56743206340592,
+          11.963887456293456
+        ],
+        "p_two_sided": 0.0,
+        "wall_seconds": 7.366338183870539,
+        "process_CPU_seconds": 7.369607381000009,
+        "observations": 15360,
+        "negative_density_terms": 15360000000,
+        "GPU_peak_allocated_bytes": 123684864,
+        "gate_pattern_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "expert3": {
+        "n": 512,
+        "mean": 11.25709914471011,
+        "MCSE": 0.10781837867249272,
+        "CI95": [
+          11.04527730108639,
+          11.468920988333831
+        ],
+        "p_two_sided": 0.0,
+        "wall_seconds": 7.357275458052754,
+        "process_CPU_seconds": 7.360466147000011,
+        "observations": 15360,
+        "negative_density_terms": 15360000000,
+        "GPU_peak_allocated_bytes": 123684864,
+        "gate_pattern_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "expert4": {
+        "n": 512,
+        "mean": 12.40638840043759,
+        "MCSE": 0.08674386653686443,
+        "CI95": [
+          12.235969906307737,
+          12.576806894567444
+        ],
+        "p_two_sided": 0.0,
+        "wall_seconds": 7.360083455918357,
+        "process_CPU_seconds": 7.363453516000007,
+        "observations": 15360,
+        "negative_density_terms": 15360000000,
+        "GPU_peak_allocated_bytes": 123684864,
+        "gate_pattern_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "paired_candidate_minus": {
+      "original": {
+        "n": 512,
+        "mean": -0.09099019917009987,
+        "MCSE": 0.05419449309425615,
+        "CI95": [
+          -0.1974616336585416,
+          0.015481235318341863
+        ],
+        "p_two_sided": 0.09377183270823332,
+        "Holm_p": 0.18754366541646664
+      },
+      "uniform": {
+        "n": 512,
+        "mean": -0.07350753351652436,
+        "MCSE": 0.05184274009925393,
+        "CI95": [
+          -0.17535867356831764,
+          0.028343606535268906
+        ],
+        "p_two_sided": 0.1568310814797355,
+        "Holm_p": 0.18754366541646664
+      },
+      "stage": {
+        "n": 512,
+        "mean": 0.09752960200183095,
+        "MCSE": 0.04995782692567443,
+        "CI95": [
+          -0.0006184051665505813,
+          0.19567760917021249
+        ],
+        "p_two_sided": 0.05145557980592577,
+        "Holm_p": 0.15436673941777732
+      },
+      "expert1": {
+        "n": 512,
+        "mean": 1.6566307088187546,
+        "MCSE": 0.101415039798327,
+        "CI95": [
+          1.457388975027638,
+          1.8558724426098712
+        ],
+        "p_two_sided": 1.43773678390758e-48,
+        "Holm_p": 1.0064157487353061e-47
+      },
+      "expert2": {
+        "n": 512,
+        "mean": 1.04477263803368,
+        "MCSE": 0.0963656198950816,
+        "CI95": [
+          0.8554510815472572,
+          1.2340941945201025
+        ],
+        "p_two_sided": 8.606084459253544e-25,
+        "Holm_p": 4.303042229626772e-24
+      },
+      "expert3": {
+        "n": 512,
+        "mean": 1.5533332531732582,
+        "MCSE": 0.10755709159103898,
+        "CI95": [
+          1.3420247386497344,
+          1.764641767696782
+        ],
+        "p_two_sided": 6.820293133014386e-40,
+        "Holm_p": 4.092175879808631e-39
+      },
+      "expert4": {
+        "n": 512,
+        "mean": 0.40404399744577985,
+        "MCSE": 0.08218375432062389,
+        "CI95": [
+          0.24258437831171148,
+          0.5655036165798482
+        ],
+        "p_two_sided": 1.1900420071723041e-06,
+        "Holm_p": 4.7601680286892166e-06
+      }
+    },
+    "all_comparisons_positive_corrected": false,
+    "one_frozen_lineage": true,
+    "final_bank_not_used_for_training_or_selection": true,
+    "finite_contrast_lower_bound": true,
+    "frozen_V2_state_unchanged": true
+  },
+  "output": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/hec_v2_counterfactual_routing_20261112_repaired_pilot",
+  "provenance": {
+    "CONFIG.json": "dd01a2d718477d05f36e16e18515d93a77cd0dbc31229652fc73a59e7b237eda",
+    "COMPLETION.json": "44983318e74d14cf942f292eb1e6cca47fed4aac0b7415def20bfbddedf50aa7",
+    "RESULTS.json": "b95a87b4a6c058500700684058ac8413c319f3960c4b51b77458fd0753a1d2c0",
+    "router.pt": "cc07dea2896f9d719655b30bac42ab5a5597d95193321dd1423c75d87ba12877",
+    "PRE_RUN_MANIFEST.json": "6db3901dbd58574e9e52de9561fe56ac64cbb10599322e59ddbe14f73361118a"
+  }
+}
