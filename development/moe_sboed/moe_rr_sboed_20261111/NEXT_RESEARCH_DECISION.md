@@ -1,23 +1,28 @@
 # RR-MoE research decision
 
-Experiment status: NOT_STARTED_OR_RUNNING.
+Experiment status: COMPLETE.
 
 SUCCESS NOT ESTABLISHED; PRESERVE NEGATIVE OR INCOMPLETE EVIDENCE
 
 ```json
 {
   "completion": {
-    "status": "NOT_STARTED_OR_RUNNING"
+    "status": "COMPLETE",
+    "seconds": 9466.07618775987,
+    "no_extension": true
   },
   "criteria": {
-    "higher_than_matched_uniform_top2": "NOT_ASSESSED",
-    "higher_than_original_HEC_v2": "NOT_ASSESSED",
-    "higher_than_uniform_HEC_base": "NOT_ASSESSED",
-    "useful_routed_corrections": "NOT_ASSESSED",
-    "useful_history_dependent_routing": "NOT_ASSESSED",
-    "conditional_specialization": "NOT_ASSESSED"
+    "higher_than_matched_uniform_top2": false,
+    "higher_than_original_HEC_v2": false,
+    "higher_than_uniform_HEC_base": false,
+    "useful_routed_corrections": false,
+    "useful_history_dependent_routing": false,
+    "conditional_specialization": false
   },
-  "preservation": null
+  "preservation": {
+    "status": "PASS",
+    "files": 645
+  }
 }
 ```
 

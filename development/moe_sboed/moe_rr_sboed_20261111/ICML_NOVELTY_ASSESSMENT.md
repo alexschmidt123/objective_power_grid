@@ -1,6 +1,6 @@
 # Algorithmic assessment
 
-Experiment status: NOT_STARTED_OR_RUNNING.
+Experiment status: COMPLETE.
 
 The specific pilot combines a frozen competent collaborative uniform HEC base with routed feature residuals and exact unordered Top2 actor-critic expectations. It preserves real HEC specialty channels instead of replacing them with four complete policies. Initial identity and explicit uniform preparation address the zero-head gradient block.
 
@@ -9,12 +9,12 @@ This pilot does not establish literature novelty or seed-robust generalization. 
 ```json
 {
   "primary_and_mechanistic_support": {
-    "higher_than_matched_uniform_top2": "NOT_ASSESSED",
-    "higher_than_original_HEC_v2": "NOT_ASSESSED",
-    "higher_than_uniform_HEC_base": "NOT_ASSESSED",
-    "useful_routed_corrections": "NOT_ASSESSED",
-    "useful_history_dependent_routing": "NOT_ASSESSED",
-    "conditional_specialization": "NOT_ASSESSED"
+    "higher_than_matched_uniform_top2": false,
+    "higher_than_original_HEC_v2": false,
+    "higher_than_uniform_HEC_base": false,
+    "useful_routed_corrections": false,
+    "useful_history_dependent_routing": false,
+    "conditional_specialization": false
   },
   "all_final_success_criteria_supported": false,
   "ICML_level_novelty_established": false

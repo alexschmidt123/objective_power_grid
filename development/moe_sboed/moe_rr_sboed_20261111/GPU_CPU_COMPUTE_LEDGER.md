@@ -1,6 +1,6 @@
 # Actual compute ledger
 
-Experiment status: NOT_STARTED_OR_RUNNING.
+Experiment status: COMPLETE.
 
 Cost is recorded only as a secondary measure,never an optimization term. Training receipts give actual optimizer/simulator calls,wall time,CPU time,peak RSS and CUDA allocations. Frozen-cache construction and internal HEC likelihood/Jacobian/provider queries are counted by model counters. Cache reuse preserves the same frozen inputs and values.
 
@@ -47,32 +47,135 @@ Device utilization/power/memory and process CPU/RSS are sampled every10seconds. 
       "frozen_base_unchanged": true,
       "trainable_parameters": 43972
     },
-    "full": null,
-    "control": null
+    "full": {
+      "status": "COMPLETE",
+      "arm": "full",
+      "updates": 2000,
+      "seconds": 4384.294179705903,
+      "process_CPU_seconds": 4359.5099177110005,
+      "process_peak_RSS_bytes": 2697830400,
+      "optimizer_steps": {
+        "actor": 2000,
+        "critic": 10000,
+        "posterior": 300000
+      },
+      "simulator_counts": {
+        "episodes": 2000000,
+        "observations": 60000000,
+        "batch_calls": 60000
+      },
+      "pair_selection_counts": [
+        1619337,
+        3663526,
+        1710822,
+        4387729,
+        1733706,
+        46884880
+      ],
+      "model_queries": {
+        "frozen_belief_rows": 638000000,
+        "frozen_SG_provisional_rows": 660000000,
+        "exact_signal_evaluations": 411840000000,
+        "analytic_parameter_jacobians": 42240000000,
+        "frozen_opportunity_critic_rows": 1980000000
+      },
+      "GPU_peak_allocated_bytes": 3371904512,
+      "actor_sha256": "e400e734ed20c4de2eeecad15b61448fd3f352bc40048ca9ee5633ce19e230b4",
+      "runtime_sha256": "6cea3c7a2515ff1282f62abcc2423f6ad5b86f09d2294ac2ee5791de7267ed03",
+      "frozen_base_unchanged": true,
+      "trainable_parameters": 43972
+    },
+    "control": {
+      "status": "COMPLETE",
+      "arm": "control",
+      "updates": 2000,
+      "seconds": 4144.2237725860905,
+      "process_CPU_seconds": 4115.245551292999,
+      "process_peak_RSS_bytes": 2703306752,
+      "optimizer_steps": {
+        "actor": 2000,
+        "critic": 10000,
+        "posterior": 300000
+      },
+      "simulator_counts": {
+        "episodes": 2000000,
+        "observations": 60000000,
+        "batch_calls": 60000
+      },
+      "pair_selection_counts": [
+        9998851,
+        10004754,
+        9999896,
+        9999539,
+        9998569,
+        9998391
+      ],
+      "model_queries": {
+        "frozen_belief_rows": 638000000,
+        "frozen_SG_provisional_rows": 660000000,
+        "exact_signal_evaluations": 411840000000,
+        "analytic_parameter_jacobians": 42240000000,
+        "frozen_opportunity_critic_rows": 1980000000
+      },
+      "GPU_peak_allocated_bytes": 3371848704,
+      "actor_sha256": "d071f0a5dbd9518ed055984e1da256aa4beccae1886c7e30be8ed221fe35df75",
+      "runtime_sha256": "18209698886fda0ac6efb45adba74115f0ab6d95db252df8e44aad73dd7906cd",
+      "frozen_base_unchanged": true,
+      "trainable_parameters": 43972
+    }
   },
   "resources": {
     "CPU_percent_one_core": {
-      "mean": 99.24325404468735,
+      "mean": 98.29082057068938,
       "maximum": 100.07115097473604
     },
     "RSS_bytes": {
-      "mean": 2106589801.2054794,
-      "maximum": 2202279936.0
+      "mean": 2185764408.40678,
+      "maximum": 2219716608.0
     },
     "GPU_percent": {
-      "mean": 57.84931506849315,
-      "maximum": 72.0
+      "mean": 60.10063559322034,
+      "maximum": 100.0
     },
     "GPU_memory_MiB": {
-      "mean": 4627.054794520548,
+      "mean": 4370.826271186441,
       "maximum": 4735.0
     },
     "GPU_power_W": {
-      "mean": 158.76671232876714,
-      "maximum": 183.4
+      "mean": 159.32144067796614,
+      "maximum": 192.22
     }
   },
-  "latency": null,
-  "evaluation_completion": null
+  "latency": {
+    "seconds_per_design": {
+      "full": 0.005502575212158262,
+      "control": 0.005539004148449749
+    },
+    "repeats": 100,
+    "stage": 12,
+    "includes_full_frozen_HEC_and_two_selected_adaptations": true
+  },
+  "evaluation_completion": {
+    "status": "COMPLETE",
+    "seconds": 725.2017276908737,
+    "policies_completed": [
+      "full",
+      "control",
+      "hec_v2",
+      "hec_uniform",
+      "sg",
+      "conventional_moe",
+      "vsoed",
+      "uniform_deployment",
+      "remove1",
+      "remove2",
+      "remove3",
+      "remove4",
+      "dad",
+      "rl_sboed",
+      "scorebed"
+    ],
+    "checkpoints_unchanged": true
+  }
 }
 ```
