@@ -3,27 +3,140 @@
     "status": "NOT_STARTED_OR_RUNNING"
   },
   "training": {
-    "preparation": null,
+    "preparation": {
+      "status": "COMPLETE",
+      "arm": "preparation",
+      "updates": 100,
+      "seconds": 206.7178191859275,
+      "process_CPU_seconds": 204.58725667,
+      "process_peak_RSS_bytes": 2681769984,
+      "optimizer_steps": {
+        "actor": 100,
+        "critic": 500,
+        "posterior": 15000
+      },
+      "simulator_counts": {
+        "episodes": 100000,
+        "observations": 3000000,
+        "batch_calls": 3000
+      },
+      "pair_selection_counts": [
+        499942,
+        499896,
+        500603,
+        500605,
+        499253,
+        499701
+      ],
+      "model_queries": {
+        "frozen_belief_rows": 31900000,
+        "frozen_SG_provisional_rows": 33000000,
+        "exact_signal_evaluations": 20592000000,
+        "analytic_parameter_jacobians": 2112000000,
+        "frozen_opportunity_critic_rows": 99000000
+      },
+      "GPU_peak_allocated_bytes": 3372894720,
+      "actor_sha256": "45c7fd8c579c9ccc0b4e8d51431bf11cd281682be0566461f4a10c4e7b98ae7a",
+      "runtime_sha256": "5b318e06d8830b3a8efdfb8a9e4627acad76c0898106e3211d57e427f88daee4",
+      "frozen_base_unchanged": true,
+      "trainable_parameters": 43972
+    },
     "full": null,
     "control": null
   },
   "evaluation": null,
   "routing": null,
   "latency": null,
-  "resource_summary": {},
+  "resource_summary": {
+    "CPU_percent_one_core": {
+      "mean": 99.24325404468735,
+      "maximum": 100.07115097473604
+    },
+    "RSS_bytes": {
+      "mean": 2106589801.2054794,
+      "maximum": 2202279936.0
+    },
+    "GPU_percent": {
+      "mean": 57.84931506849315,
+      "maximum": 72.0
+    },
+    "GPU_memory_MiB": {
+      "mean": 4627.054794520548,
+      "maximum": 4735.0
+    },
+    "GPU_power_W": {
+      "mean": 158.76671232876714,
+      "maximum": 183.4
+    }
+  },
   "goals": {
     "higher_than_matched_uniform_top2": "NOT_ASSESSED",
     "higher_than_original_HEC_v2": "NOT_ASSESSED",
     "higher_than_uniform_HEC_base": "NOT_ASSESSED",
     "useful_routed_corrections": "NOT_ASSESSED",
-    "useful_history_dependent_routing": "NOT_ASSESSED"
+    "useful_history_dependent_routing": "NOT_ASSESSED",
+    "conditional_specialization": "NOT_ASSESSED"
   },
   "preservation": null,
   "evaluation_completion": null,
   "validation": {
-    "IMPLEMENTATION_CHECKS": null,
-    "PHYSICS_CHECKS": null,
-    "PREPARATION_CHECKS": null,
-    "EVALUATION_CHECKS": null
+    "IMPLEMENTATION_CHECKS": {
+      "status": "PASS",
+      "native_batch": 10000,
+      "actor_rows": 300000,
+      "all30stages": true,
+      "initial_uniform_HEC_bitwise_identity": true,
+      "unordered_Top2_probabilities": true,
+      "finite_difference_and_score_identity": true,
+      "zero_head_blocks_router_and_adaptations": true,
+      "nonzero_head_unblocks_router_and_all_adaptations": true,
+      "no_independent_correction_bypass": true,
+      "actual_selection_changes_correction": true,
+      "base_and_target_frozen_buffers_unchanged": true,
+      "cache_prefix_alignment": true,
+      "future_mutation_invariance": true,
+      "full_native_optimizer_counts": {
+        "actor": 1,
+        "critic": 5,
+        "posterior": 150
+      },
+      "simulator_counts": {
+        "episodes": 1000,
+        "observations": 30000,
+        "batch_calls": 30
+      },
+      "fixture_update_seconds": 4.0038960601668805,
+      "checkpoint_roundtrip": true,
+      "original_checkpoint_unchanged": true,
+      "modified_native_source_sha256": "0fd834d47e8e84a0c50ffea282c58ecee74fd35009f9152bab218a4b50ec1ed0",
+      "scientific_updates": 0
+    },
+    "PHYSICS_CHECKS": {
+      "status": "PASS",
+      "explicit_likelihood_identity": true,
+      "posterior_prefix_future_mutation": true,
+      "native_undiscounted_variational_reward_telescopes": true,
+      "no_sPCE_training": true
+    },
+    "PREPARATION_CHECKS": {
+      "status": "PASS",
+      "fixture_only": true,
+      "nonzero_head_after_native_EIG_update": true,
+      "real_preparation_unblocks_router_and_all_adaptations": true,
+      "identical_actor_critic_Adam_and_LR_into_both_arms": true,
+      "no_extra_optimizer_updates": true
+    },
+    "EVALUATION_CHECKS": {
+      "status": "PASS",
+      "fixture_only": true,
+      "literal_positive_once_score": true,
+      "resimulated_entire_changed_policy": true,
+      "conditional_prefix_resume_identity": true,
+      "initial_uniform_HEC_trajectory_bitwise_identity": true,
+      "main_bank_access": false,
+      "action_bounds": true,
+      "uniform_distinct_pair_probability": true,
+      "SG_conventional_native_vsoed_compatible": true
+    }
   }
 }

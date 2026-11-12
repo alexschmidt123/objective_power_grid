@@ -13,7 +13,8 @@ This pilot does not establish literature novelty or seed-robust generalization. 
     "higher_than_original_HEC_v2": "NOT_ASSESSED",
     "higher_than_uniform_HEC_base": "NOT_ASSESSED",
     "useful_routed_corrections": "NOT_ASSESSED",
-    "useful_history_dependent_routing": "NOT_ASSESSED"
+    "useful_history_dependent_routing": "NOT_ASSESSED",
+    "conditional_specialization": "NOT_ASSESSED"
   },
   "all_final_success_criteria_supported": false,
   "ICML_level_novelty_established": false
