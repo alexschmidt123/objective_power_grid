@@ -1,6 +1,8 @@
 """Numerical and leakage tests; synthetic fixtures do not establish scientific gains."""
 import math
 import unittest
+import pathlib
+import tempfile
 import torch
 from torch import nn
 from routing import (gate_bank, fuse_options, routing_context, fit_router,
@@ -13,6 +15,15 @@ class FakeV2(nn.Module):
         self.fusion = nn.Sequential(nn.Linear(384,128),nn.ReLU(),nn.Linear(128,2))
         self.response_fusion = nn.Linear(256,128,bias=False)
         self.base = nn.Sequential(nn.Linear(117,2),nn.Tanh())
+        self.history = nn.Linear(117,128)
+
+    def forward(self,x,collect=False,routing_override=None):
+        history=self.history(x)
+        slots=history[:,None].expand(-1,4,-1)*x.new_tensor([.2,.4,.6,.8])[None,:,None]
+        info=dict(history=history,slots=slots,gates=x.new_full((len(x),4),.25))
+        gates=info['gates'] if routing_override is None else routing_override
+        action=fuse_options(self,x,info,gates[:,None])[:,0]
+        return (action,info) if collect else action
 
 
 class RoutingTests(unittest.TestCase):
@@ -77,6 +88,16 @@ class RoutingTests(unittest.TestCase):
         stage=CounterfactualRouter(stage_only=True)
         altered=x[:8].clone();altered[:,:-30]+=100
         torch.testing.assert_close(stage(x[:8]),stage(altered))
+
+    def test_counterfactual_reference_branch_is_reused_exactly(self):
+        from experiment import make_teacher
+        import time
+        with tempfile.TemporaryDirectory() as directory:
+            data=make_teacher(FakeV2().eval(),4,7,771,'cpu',
+                              pathlib.Path(directory)/'fixture.pt',2,time.monotonic()+30)
+        self.assertEqual(tuple(data['context'].shape),(4,182))
+        self.assertEqual(tuple(data['returns'].shape),(4,8))
+        self.assertFalse(data['latent_policy_inputs'])
 
     def test_holm_preserves_family(self):
         tests={'a':{'p_two_sided':.01},'b':{'p_two_sided':.04},'c':{'p_two_sided':.5}}

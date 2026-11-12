@@ -1,6 +1,6 @@
 # Frozen HEC-v2 counterfactual routing pilot — 2026-11-12
 
-User requested improving V2 routing and explicitly requested immediate execution after validation. One bounded candidate, no model overwrite, no architecture/seed sweep, no automatic extension or retry of scientific runs. This is an incremental routing experiment, not a claim of a fixed coding bug or guaranteed performance gain.
+User requested improving V2 routing and explicitly requested immediate execution after validation. One bounded candidate, no model overwrite, no architecture/seed sweep, no automatic extension or performance-driven retry of scientific runs. An implementation failure before router fitting may be repaired and revalidated, then restarted in a new preserved directory with identical seeds and budgets; it is not a performance-selected follow-up. This is an incremental routing experiment, not a claim of a fixed coding bug or guaranteed performance gain.
 
 ## Change and limits
 
@@ -24,6 +24,6 @@ Predeclared1800-second all-phase scientific wall budget after acquiring the exis
 
 ## Commands
 
-Use LabPC's existing dellma environment, PYTHONDONTWRITEBYTECODE=1. Run unit tests with `python test_routing.py`. The runner requires an explicit `--run` and a nonexistent output directory under LabPC TEMP/scratch_runs; importing never executes a campaign. Run `python experiment.py --run --smoke --output NEW_SMOKE_PATH`, then the single scientific run with `python experiment.py --run --output NEW_SCIENTIFIC_PATH`. The runner obtains the existing GPU lease and waits if busy. Never interrupt another job.
+Use LabPC's existing dellma environment, PYTHONDONTWRITEBYTECODE=1. Run unit tests with `python test_routing.py`. The runner requires an explicit `--run` and a nonexistent output directory under LabPC TEMP/scratch_runs; importing never executes a campaign. Run `python experiment.py --run --smoke --output NEW_SMOKE_PATH`, then the single scientific run with `python experiment.py --run --output NEW_SCIENTIFIC_PATH`. The original teacher branch reuses its saved complete trajectory exactly; it is not recomputed in a differently sized GEMM batch. Candidate-original action equality is checked at the intervention prefix. The runner obtains the existing GPU lease and waits if busy. Never interrupt another job.
 
 If scientific results fail, preserve and report them. Do not label an implementation improvement as demonstrated EIG superiority or launch a follow-up campaign automatically.

@@ -152,17 +152,23 @@ def make_teacher(actor, n, contrasts_count, seed, device, output, batch, deadlin
         branch_noise = eps[:, None].expand(-1, 8, -1).reshape(b*8, 30)
         branch_stage = ts[:, None].expand(-1, 8).reshape(-1)
         branch_design = designs.reshape(b*8, 2)
+        # Option zero is exactly the saved reference trajectory. Do not rerun
+        # it in a different GEMM batch and let roundoff compound through history.
+        nonreference = torch.arange(b*8, device=device) % 8 != 0
+        torch.testing.assert_close(designs[:,0], original_actions[torch.arange(b,device=device),ts],
+                                   atol=2e-5,rtol=1e-5)
         for t in range(30):
             guard(deadline)
-            at, later = branch_stage == t, branch_stage < t
+            at, later = (branch_stage == t) & nonreference, (branch_stage < t) & nonreference
             actions[at, t] = branch_design[at]
             if later.any():
                 state = packed(actions[later], observations[later], t)
                 actions[later, t] = actor(state)
-            changed = branch_stage <= t
+            changed = (branch_stage <= t) & nonreference
             observations[changed, t] = signal(branch_theta[changed].reshape(-1, 2, 2),
                                                actions[changed, t].double()) + .5*branch_noise[changed, t]
-        assert torch.allclose(actions.reshape(b,8,30,2)[:,0], original_actions, atol=2e-5, rtol=1e-5)
+        assert torch.equal(actions.reshape(b,8,30,2)[:,0], original_actions)
+        assert torch.equal(observations.reshape(b,8,30)[:,0], original_observations)
         scores = terminal_scores(actions, observations, branch_theta, contrasts).reshape(b, 8)
         contexts.append(context.cpu())
         targets.append(scores.float().cpu())
