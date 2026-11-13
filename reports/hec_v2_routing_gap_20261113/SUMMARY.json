@@ -1,0 +1,969 @@
+{
+  "status": {
+    "status": "COMPLETE",
+    "smoke": false,
+    "seconds": 1329.7942535190377,
+    "historical_artifacts_preserved": true,
+    "optimizer_steps": 0
+  },
+  "configuration": {
+    "smoke": false,
+    "stages": [
+      3,
+      14,
+      26
+    ],
+    "histories_per_stage": 8,
+    "selection_trials": 32,
+    "test_trials": 64,
+    "particles": 131072,
+    "selection_contrasts": 4000000,
+    "test_contrasts": 16000000,
+    "minimum_ESS": 256,
+    "maximum_weight": 0.05,
+    "wall_seconds": 14400,
+    "seed": 202611130701,
+    "mixtures": [
+      "learned",
+      "uniform",
+      "favor_E1",
+      "favor_E2",
+      "favor_E3",
+      "favor_E4"
+    ],
+    "primary": "selection-chosen mixture minus learned, heldout per-history means; paired95% t interval",
+    "source_commit": "dba99b230965dbd94cd5e25cde6246404e19d3b3"
+  },
+  "result": {
+    "histories": 24,
+    "selected_choices": [
+      5,
+      2,
+      1,
+      1,
+      3,
+      2,
+      4,
+      3,
+      5,
+      2,
+      3,
+      2,
+      5,
+      2,
+      1,
+      3,
+      1,
+      4,
+      3,
+      2,
+      2,
+      5,
+      4,
+      4
+    ],
+    "fixed_choice": 3,
+    "stage_choices": {
+      "3": 1,
+      "14": 3,
+      "26": 5
+    },
+    "choices_selected_using_test": false,
+    "primary_selected_minus_learned": {
+      "n": 24,
+      "mean": 0.014764699519051053,
+      "MCSE": 0.025776713390835267,
+      "CI95": [
+        -0.038558494808490926,
+        0.06808789384659303
+      ],
+      "p_two_sided": 0.5723431044097715
+    },
+    "secondary_selected_minus_fixed": {
+      "n": 24,
+      "mean": 0.04197938762858152,
+      "MCSE": 0.022391740755154797,
+      "CI95": [
+        -0.0043414572950998265,
+        0.08830023255226287
+      ],
+      "p_two_sided": 0.07357969872793599
+    },
+    "secondary_selected_minus_stage": {
+      "n": 24,
+      "mean": 0.008166587850129284,
+      "MCSE": 0.02092306163001983,
+      "CI95": [
+        -0.035116062824078025,
+        0.05144923852433659
+      ],
+      "p_two_sided": 0.6998950294515496
+    },
+    "secondary_selected_minus_uniform": {
+      "n": 24,
+      "mean": 0.017340132427244043,
+      "MCSE": 0.016684063415508876,
+      "CI95": [
+        -0.01717348232996242,
+        0.0518537471844505
+      ],
+      "p_two_sided": 0.30945770812457823
+    },
+    "heldout_mean_by_mixture": {
+      "learned": 13.589168642852451,
+      "uniform": 13.586593209944255,
+      "favor_E1": 13.552377568250835,
+      "favor_E2": 13.561953954742918,
+      "favor_E3": 13.503527421075141,
+      "favor_E4": 13.609985225673624
+    },
+    "heldout_mean_selected": 13.6039333423715,
+    "status": "COMPLETE",
+    "smoke": false,
+    "seconds": 1329.4145266211126,
+    "limitations": "Finite importance posterior approximation and finite prior-sPCE; 24 histories, one checkpoint, six mixtures, one-decision interventions only. No deployable selector or repeated-routing gain established. Secondary intervals exploratory, unadjusted."
+  },
+  "posterior_quality": [
+    {
+      "history": 0,
+      "stage": 3,
+      "accepted": true,
+      "selection": {
+        "seed": 202611140701,
+        "particles": 131072,
+        "ESS": 75065.60169204113,
+        "max_weight": 0.00013154757742875228,
+        "selected_unique": 32,
+        "posterior_mean": [
+          0.5449814631500094,
+          0.27788487790577504,
+          0.5485257018474357,
+          0.28215020126622914
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611140702,
+        "particles": 131072,
+        "ESS": 74891.93035692572,
+        "max_weight": 7.16645425106573e-05,
+        "selected_unique": 64,
+        "posterior_mean": [
+          0.5477131428064957,
+          0.2731735090594745,
+          0.5456496312193215,
+          0.2808171744838222
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 1,
+      "stage": 3,
+      "accepted": true,
+      "selection": {
+        "seed": 202611140801,
+        "particles": 131072,
+        "ESS": 75413.48153517673,
+        "max_weight": 9.43760020843102e-05,
+        "selected_unique": 32,
+        "posterior_mean": [
+          0.5986101009669426,
+          0.07897203929666574,
+          0.5973769154386936,
+          0.08041924815088562
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611140802,
+        "particles": 131072,
+        "ESS": 75147.01180039998,
+        "max_weight": 6.810055445574235e-05,
+        "selected_unique": 64,
+        "posterior_mean": [
+          0.5965679560966188,
+          0.07696983286186304,
+          0.5984797673578778,
+          0.08491009394717743
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 2,
+      "stage": 3,
+      "accepted": true,
+      "selection": {
+        "seed": 202611140901,
+        "particles": 131072,
+        "ESS": 69045.2537656887,
+        "max_weight": 0.00015228814083598569,
+        "selected_unique": 32,
+        "posterior_mean": [
+          0.1561662228719745,
+          -0.06661737072066617,
+          0.15126135340256663,
+          -0.06430870792876639
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611140902,
+        "particles": 131072,
+        "ESS": 69218.44427324613,
+        "max_weight": 0.00015658525954829761,
+        "selected_unique": 64,
+        "posterior_mean": [
+          0.1564651743409865,
+          -0.06590391954261898,
+          0.1578366808256384,
+          -0.06725705812734814
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 3,
+      "stage": 3,
+      "accepted": true,
+      "selection": {
+        "seed": 202611141001,
+        "particles": 131072,
+        "ESS": 95179.26899580847,
+        "max_weight": 0.00018392729047812567,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.9281164642442381,
+          -0.12692697581425533,
+          -0.9268908260678945,
+          -0.13805535753512146
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611141002,
+        "particles": 131072,
+        "ESS": 94505.90398973462,
+        "max_weight": 0.00017414702227211607,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.9281960353499055,
+          -0.14416723866190706,
+          -0.9259635294265314,
+          -0.13075571917800072
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 4,
+      "stage": 3,
+      "accepted": true,
+      "selection": {
+        "seed": 202611141101,
+        "particles": 131072,
+        "ESS": 87019.39121270721,
+        "max_weight": 0.00016502503839079923,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.470012245296951,
+          0.3309636574532062,
+          -0.47487257211970124,
+          0.3223456351361408
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611141102,
+        "particles": 131072,
+        "ESS": 86950.43817549372,
+        "max_weight": 0.00018233231394197582,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.47684916923980963,
+          0.32943185370416095,
+          -0.46754511581284364,
+          0.3259300121457752
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 5,
+      "stage": 3,
+      "accepted": true,
+      "selection": {
+        "seed": 202611141201,
+        "particles": 131072,
+        "ESS": 75003.31031869575,
+        "max_weight": 0.00033411743788069783,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.18291673997606822,
+          -0.2904810516330151,
+          -0.1861018845953228,
+          -0.2933207888863485
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611141202,
+        "particles": 131072,
+        "ESS": 75847.49506600099,
+        "max_weight": 0.0002502425386419159,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.1941228710069759,
+          -0.29570911771597885,
+          -0.19146937492954214,
+          -0.28955543180478266
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 6,
+      "stage": 3,
+      "accepted": true,
+      "selection": {
+        "seed": 202611141301,
+        "particles": 131072,
+        "ESS": 82138.6531454934,
+        "max_weight": 0.000548801792292267,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.4012704664665058,
+          -0.5362891394793259,
+          -0.4128343643850463,
+          -0.5290966270664977
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611141302,
+        "particles": 131072,
+        "ESS": 85118.52743463789,
+        "max_weight": 0.00027324144136833573,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.4031706161347752,
+          -0.5249518841545551,
+          -0.4056403897005183,
+          -0.5383333737446937
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 7,
+      "stage": 3,
+      "accepted": true,
+      "selection": {
+        "seed": 202611141401,
+        "particles": 131072,
+        "ESS": 78075.33510907607,
+        "max_weight": 0.00022265645922831535,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.3003151114719362,
+          0.29661096097873085,
+          -0.2967435151761727,
+          0.3014887374998517
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611141402,
+        "particles": 131072,
+        "ESS": 78111.72510023364,
+        "max_weight": 0.00022182478197344698,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.29378799497795205,
+          0.2987809139217053,
+          -0.29786018134521586,
+          0.29933287897966177
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 8,
+      "stage": 14,
+      "accepted": true,
+      "selection": {
+        "seed": 202611141501,
+        "particles": 131072,
+        "ESS": 41506.961874057124,
+        "max_weight": 8.26153161988107e-05,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.15798706569453508,
+          0.17865431452278163,
+          -0.15947635092350326,
+          0.17805457962965648
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611141502,
+        "particles": 131072,
+        "ESS": 41533.06916950838,
+        "max_weight": 8.175525856745963e-05,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.1605132444551236,
+          0.17801268007841636,
+          -0.156601657862164,
+          0.17850955269497926
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 9,
+      "stage": 14,
+      "accepted": true,
+      "selection": {
+        "seed": 202611141601,
+        "particles": 131072,
+        "ESS": 59489.018814199204,
+        "max_weight": 0.000266399101830017,
+        "selected_unique": 32,
+        "posterior_mean": [
+          1.1143011621919956,
+          0.34977722002586487,
+          1.1171063927755438,
+          0.3545994132104875
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611141602,
+        "particles": 131072,
+        "ESS": 59693.05409244009,
+        "max_weight": 0.00020578362397210862,
+        "selected_unique": 64,
+        "posterior_mean": [
+          1.1156503259781585,
+          0.3499769443162313,
+          1.115643039770139,
+          0.35201616669514546
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 10,
+      "stage": 14,
+      "accepted": true,
+      "selection": {
+        "seed": 202611141701,
+        "particles": 131072,
+        "ESS": 11077.392702346386,
+        "max_weight": 0.0031883162033252473,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.0036550577605393743,
+          -0.6824519642529083,
+          0.00858617557100639,
+          -0.6799248642464152
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611141702,
+        "particles": 131072,
+        "ESS": 11477.317221863263,
+        "max_weight": 0.0032726063276958955,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.010411727021091284,
+          -0.6810819070240541,
+          0.007957969483648599,
+          -0.6754420674050889
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 11,
+      "stage": 14,
+      "accepted": true,
+      "selection": {
+        "seed": 202611141801,
+        "particles": 131072,
+        "ESS": 14749.006073276953,
+        "max_weight": 0.0020631434225789878,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.3668365701459266,
+          0.014219616729777201,
+          -0.36675136111598927,
+          0.02143923370568205
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611141802,
+        "particles": 131072,
+        "ESS": 14746.741462740467,
+        "max_weight": 0.0015385076534294147,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.3650573987271504,
+          0.014640592949151885,
+          -0.36720588620589056,
+          0.023295636543775353
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 12,
+      "stage": 14,
+      "accepted": true,
+      "selection": {
+        "seed": 202611141901,
+        "particles": 131072,
+        "ESS": 52535.704753710794,
+        "max_weight": 0.0005770494608380026,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.5307481147560851,
+          0.2719853598210528,
+          -0.5278398063932027,
+          0.27754209240872757
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611141902,
+        "particles": 131072,
+        "ESS": 50669.364027472795,
+        "max_weight": 0.0006058348692692491,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.5272585119805736,
+          0.27470126851892546,
+          -0.5303341792470013,
+          0.2732518754112583
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 13,
+      "stage": 14,
+      "accepted": true,
+      "selection": {
+        "seed": 202611142001,
+        "particles": 131072,
+        "ESS": 17708.081363649788,
+        "max_weight": 0.000760527910146336,
+        "selected_unique": 32,
+        "posterior_mean": [
+          0.10219446878507091,
+          1.6341287764294294,
+          0.10424909567524114,
+          1.6427596844563008
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611142002,
+        "particles": 131072,
+        "ESS": 18218.183513983786,
+        "max_weight": 0.0010198856265012345,
+        "selected_unique": 64,
+        "posterior_mean": [
+          0.10456852318055018,
+          1.6451778339087233,
+          0.10285874881657574,
+          1.6318546798679945
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 14,
+      "stage": 14,
+      "accepted": true,
+      "selection": {
+        "seed": 202611142101,
+        "particles": 131072,
+        "ESS": 41142.04218265102,
+        "max_weight": 0.000426141274824522,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.7988726661708576,
+          0.21204978605492836,
+          -0.800285572159041,
+          0.21101220804445192
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611142102,
+        "particles": 131072,
+        "ESS": 42261.52894087536,
+        "max_weight": 0.0002920667515104412,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.7976915743298152,
+          0.2129328224551762,
+          -0.7983158551400176,
+          0.2105487098867974
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 15,
+      "stage": 14,
+      "accepted": true,
+      "selection": {
+        "seed": 202611142201,
+        "particles": 131072,
+        "ESS": 12298.452804841763,
+        "max_weight": 0.001575310115711871,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.3812122993914985,
+          1.1809954248921344,
+          -0.37427451825067737,
+          1.1801173254811004
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611142202,
+        "particles": 131072,
+        "ESS": 12780.537032970758,
+        "max_weight": 0.0007837569607205648,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.37966022346248507,
+          1.1781689713455517,
+          -0.38058053538866476,
+          1.1791241312118093
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 16,
+      "stage": 26,
+      "accepted": true,
+      "selection": {
+        "seed": 202611142301,
+        "particles": 131072,
+        "ESS": 18692.58361499362,
+        "max_weight": 0.00016749362512209117,
+        "selected_unique": 32,
+        "posterior_mean": [
+          0.22073668814729092,
+          0.6391285233032293,
+          0.22220213902890437,
+          0.6473792244677666
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611142302,
+        "particles": 131072,
+        "ESS": 18701.296651445413,
+        "max_weight": 0.00016549970846837134,
+        "selected_unique": 64,
+        "posterior_mean": [
+          0.2214815373112468,
+          0.6433302403756151,
+          0.22142111020239547,
+          0.6433121656051826
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 17,
+      "stage": 26,
+      "accepted": true,
+      "selection": {
+        "seed": 202611142401,
+        "particles": 131072,
+        "ESS": 2135.529739707264,
+        "max_weight": 0.003565892225723135,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.608539805460305,
+          0.42834687381389136,
+          -0.6576919557399669,
+          0.3633731217340137
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611142402,
+        "particles": 131072,
+        "ESS": 2161.2287347509314,
+        "max_weight": 0.0036198058066253054,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.6448169188054416,
+          0.3810707826348454,
+          -0.6223741176762367,
+          0.409151020682947
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 18,
+      "stage": 26,
+      "accepted": true,
+      "selection": {
+        "seed": 202611142501,
+        "particles": 131072,
+        "ESS": 779.1714171683113,
+        "max_weight": 0.005865674103966787,
+        "selected_unique": 31,
+        "posterior_mean": [
+          -0.4086297814999801,
+          1.075569599987773,
+          -0.3968504237488163,
+          1.0600944487664035
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611142502,
+        "particles": 131072,
+        "ESS": 751.6970200831998,
+        "max_weight": 0.005352492275368183,
+        "selected_unique": 63,
+        "posterior_mean": [
+          -0.4002972319092651,
+          1.0656868215579731,
+          -0.4046729045123547,
+          1.071507978624741
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 19,
+      "stage": 26,
+      "accepted": true,
+      "selection": {
+        "seed": 202611142601,
+        "particles": 131072,
+        "ESS": 6736.861708641124,
+        "max_weight": 0.001820844879689758,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.43223298017924827,
+          -0.05289672550582715,
+          -0.42464848314008397,
+          -0.05190448488620036
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611142602,
+        "particles": 131072,
+        "ESS": 6675.285911943105,
+        "max_weight": 0.00248510556828707,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.41861623343561927,
+          -0.050321014582597884,
+          -0.437985664156082,
+          -0.053713041931984805
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 20,
+      "stage": 26,
+      "accepted": true,
+      "selection": {
+        "seed": 202611142701,
+        "particles": 131072,
+        "ESS": 527.6799158456555,
+        "max_weight": 0.010606363968117136,
+        "selected_unique": 30,
+        "posterior_mean": [
+          -0.5215220317266234,
+          -0.06389158298051509,
+          -0.5273911240826223,
+          -0.05989636406622885
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611142702,
+        "particles": 131072,
+        "ESS": 560.0115162631627,
+        "max_weight": 0.00986999662601587,
+        "selected_unique": 64,
+        "posterior_mean": [
+          -0.5205719380782021,
+          -0.06687487966920067,
+          -0.5286765352195404,
+          -0.05788259989389248
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 21,
+      "stage": 26,
+      "accepted": true,
+      "selection": {
+        "seed": 202611142801,
+        "particles": 131072,
+        "ESS": 2051.497370325686,
+        "max_weight": 0.0020177033548195128,
+        "selected_unique": 32,
+        "posterior_mean": [
+          -0.9171239358190009,
+          -0.24285146093925708,
+          -0.9462241986245461,
+          -0.255985340980688
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611142802,
+        "particles": 131072,
+        "ESS": 1994.7800044137366,
+        "max_weight": 0.002090934403472131,
+        "selected_unique": 63,
+        "posterior_mean": [
+          -0.9855034486977527,
+          -0.24768022283315025,
+          -0.868636974968807,
+          -0.2326938306381761
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 22,
+      "stage": 26,
+      "accepted": true,
+      "selection": {
+        "seed": 202611142901,
+        "particles": 131072,
+        "ESS": 326.62397281332613,
+        "max_weight": 0.01808995750489948,
+        "selected_unique": 31,
+        "posterior_mean": [
+          0.10809257107759997,
+          0.7009202315649039,
+          0.13763679028304432,
+          0.9103759563128079
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611142902,
+        "particles": 131072,
+        "ESS": 310.72149545232617,
+        "max_weight": 0.015375337540992368,
+        "selected_unique": 62,
+        "posterior_mean": [
+          0.12429817861452296,
+          0.8097939497526047,
+          0.12365465288903793,
+          0.7988284988478526
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    },
+    {
+      "history": 23,
+      "stage": 26,
+      "accepted": true,
+      "selection": {
+        "seed": 202611143001,
+        "particles": 131072,
+        "ESS": 4257.981131892339,
+        "max_weight": 0.0012392435027144995,
+        "selected_unique": 32,
+        "posterior_mean": [
+          0.27387464339440215,
+          -0.26572464375967053,
+          0.30995943804254034,
+          -0.24587020565895634
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      },
+      "test": {
+        "seed": 202611143002,
+        "particles": 131072,
+        "ESS": 4317.237378467689,
+        "max_weight": 0.001015356290612416,
+        "selected_unique": 64,
+        "posterior_mean": [
+          0.2707015322938021,
+          -0.2457779228623242,
+          0.3167789414971157,
+          -0.29192204335812655
+        ],
+        "approximate": true,
+        "proposal": "0.1 prior + 0.45 GMM + 0.45 source-permuted GMM"
+      }
+    }
+  ],
+  "artifact_path": "/home/grads/g/g.lin/Documents/objective_power_grid_temp/scratch_runs/hec_v2_routing_gap_20261113"
+}
