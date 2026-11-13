@@ -118,13 +118,16 @@ def tests(actor,lib,out):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=pathlib.Path,required=True)
-    p.add_argument('--run',action='store_true');p.add_argument('--smoke',action='store_true');args=p.parse_args()
+    p.add_argument('--run',action='store_true');p.add_argument('--smoke',action='store_true')
+    p.add_argument('--refined-posterior',action='store_true',help='Locked follow-up: 2097152 particles for EVERY history, unchanged ESS criteria')
+    args=p.parse_args()
     if not args.run:p.error('Explicit --run required')
     out=args.output.expanduser().resolve();assert ROOT/'scratch_runs' in out.parents and not out.exists();out.mkdir(parents=True)
     cfg=dict(smoke=args.smoke,stages=[0,14,29] if args.smoke else [3,14,26],histories_per_stage=2 if args.smoke else 8,
              selection_trials=2 if args.smoke else 32,test_trials=3 if args.smoke else 64,
              selection_contrasts=31 if args.smoke else 4000000,test_contrasts=127 if args.smoke else 16000000,
-             particles=8192 if args.smoke else 131072,minimum_ESS=1 if args.smoke else 256,
+             particles=8192 if args.smoke else (2097152 if args.refined_posterior else 131072),minimum_ESS=1 if args.smoke else 256,
+             refined_posterior=args.refined_posterior,
              maximum_weight=1 if args.smoke else .05,seed=202611131901,wall_seconds=300 if args.smoke else 14400,
              primary='Heldout persistent-removal damage of selection-trained regime expert minus selection-chosen global expert; paired95% t over independent test histories',
              regime_features=['stage_fraction','belief_variance_trace','gate_entropy'],
