@@ -1,0 +1,9 @@
+# Completion handling for independent V2 confirmation
+
+Scientific run:LabPC TEMP/scratch_runs/hec_v2_confirmation_20261112,PID3120977 at launch. The locked scientific source/config identifies its own source commit and inputs. New source stays frozen during execution.
+
+`tools/finalize_hec_v2_confirmation.py` runs on LabPC AFTER COMPLETION.json says COMPLETE with protected files preserved. It validates4096 primary/512 secondary cases,locked seeds and contrast counts,reads the predeclared results,and writes new reports/hec_v2_confirmation_20261112/{RESULTS.md,SUMMARY.json}. It does not modify checkpoints,perform inference,fit models or change outcome labels. Smoke reporting requires --allow-smoke and an output under scratch_runs;its outcome is always INTEGRATION FIXTURE ONLY. This integration path passed against the completed seven-policy smoke.
+
+`tools/watch_hec_v2_confirmation.py` runs on the MacBook operator. It reads status through SSH,checks every30s,then calls the LabPC finalizer and the existing moe_sync.py for only the two new reports. The remote status preflight passed against the active actual job. It requires a new local log/output directory;no duplicate watcher log is overwritten. It never launches training,changes scientific budgets,interrupts a job,edits Ubuntu research code,or forces Git history. It preserves failures/timeouts in WATCHER_COMPLETION.json and leaves jobs untouched. Safe sync refuses dirty/unexpected worktrees and verifies LabPC/GitHub/Ubuntu hashes.
+
+No performance result is assumed in advance. Negative/inconclusive outcomes are reported as such. Completion reporting does not establish multi-seed robustness or readiness for publication. The complete pipeline remains bounded by the locked scientific protocol;the watcher can wait up to90min but cannot extend computation.
