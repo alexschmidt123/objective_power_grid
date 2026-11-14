@@ -9,3 +9,5 @@ Smoke02 revealed a device-context requirement in the frozen vendor posterior: in
 The smoke test uses replicated rows solely to exercise ensemble fitting with its fixed64/16/16 split. Scientific runs use96 distinct independently generated trajectories; no smoke-derived weights or scores initialize scientific runs.
 
 Not established by these tests: useful conditional expert advantages, unbiased exact-posterior labels, critic ranking failure, full-horizon performance improvement, multi-seed robustness, or ICML-level novelty. The protocol distinguishes these from code correctness.
+
+The first scientific pilot completed round1 but stopped in round2 on posterior-quality failure, preserving its partial results. A chunked importance implementation now permits larger particle fallback without weakening quality thresholds. It has an analytic check: when the proposal GMM equals the normal prior and history is empty,524,288 importance weights are uniform to relative tolerance1e-10 and estimated prior means lie within0.01 of zero. Smoke05 exercises this additional check and the full pipeline. The original native importance helper remains unchanged.

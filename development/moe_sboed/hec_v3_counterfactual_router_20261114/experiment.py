@@ -11,6 +11,7 @@ import diagnose as d
 from compare import n,PILOT,BASE
 from run import rollout
 from resolution import paired,nested_scores,signal
+from posterior import sample as chunked_posterior
 
 def frozen_digest(model):
     return n.digest({k:v for k,v in model.state_dict().items() if k.startswith(('context.','experts.'))})
@@ -86,8 +87,12 @@ def collect(model,a,lib,out,seed,deadline,smoke=False):
         if t==0:
             theta=torch.tensor(rng.standard_normal((draws,4)),device='cuda');qr=dict(ESS=None,max_weight=None,exact_prior=True)
         else:
-            for attempt,particles in enumerate([2097152,8388608]):
-                theta,qr=d.post.posterior(model.context,x[i:i+1],ds[i:i+1],ys[i:i+1],t,draws,particles,seed+1000+i*10+attempt)
+            for attempt,particles in enumerate([2097152,8388608,33554432,134217728]):
+                if attempt<2:
+                    theta,qr=d.post.posterior(model.context,x[i:i+1],ds[i:i+1],ys[i:i+1],t,draws,particles,seed+1000+i*10+attempt)
+                else:
+                    theta,qr=chunked_posterior(model.context,x[i:i+1],ds[i:i+1],ys[i:i+1],t,draws,particles,seed+1000+i*10+attempt,d.post)
+                n.put(out/'LATEST_POSTERIOR_ATTEMPT.json',dict(history=i,stage=t,attempt=attempt,**qr))
                 if qr['ESS']>=256 and qr['max_weight']<=.05:break
             if qr['ESS']<256 or qr['max_weight']>.05:raise RuntimeError('Posterior quality failed; do not train on unreliable labels')
         noise=torch.tensor(rng.standard_normal((draws,30)),device='cuda')
@@ -175,6 +180,14 @@ def main():
         raw_grad=torch.autograd.grad(-(z.softmax(-1)*v).sum(),z,retain_graph=True)[0]
         centered_grad=torch.autograd.grad(-(z.softmax(-1)*advantage(v)).sum(),z)[0]
         torch.testing.assert_close(raw_grad,centered_grad,atol=1e-6,rtol=1e-6)
+        # If all GMM components equal the prior, mixture importance weights are uniform.
+        class PriorBelief:
+            def params(self,x):return (torch.ones(1,1,device='cuda'),torch.zeros(1,1,4,device='cuda'),torch.ones(1,1,4,device='cuda'))
+        class PriorContext:belief=PriorBelief()
+        _,quality=chunked_posterior(PriorContext(),torch.zeros(1,117,device='cuda'),
+            torch.zeros(1,30,2,device='cuda'),torch.zeros(1,30,device='cuda'),0,128,524288,71,d.post)
+        assert abs(quality['ESS']/524288-1)<1e-10 and abs(quality['max_weight']*524288-1)<1e-10
+        assert max(abs(v) for v in quality['posterior_mean'])<.01
         models=dict(original=original,counterfactual=copy.deepcopy(original),critic_control=copy.deepcopy(original));lib=n.load_library()
         totals={};reports=[]
         for arm in ['counterfactual','critic_control']:
