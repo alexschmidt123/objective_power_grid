@@ -1,0 +1,7 @@
+# Completed frozen-policy validation
+
+compare.py reevaluates original V2 and new V3 on the exact original2000-case/1M-contrast bank. Full historical V2 learned/uniform score vectors reproduce within1e-9 (actual max errors2.49e-14/2.66e-14). Cases,noise,contrasts,horizon,likelihood and bounds match. All eight policies complete;actor and historical file hashes remain unchanged. This validates evaluation matching,not training-budget matching. The first attempt stopped before evaluation due to an incorrect uniform-array path;canonical internal-ablation array was located and the corrected run used a new directory,leaving the first untouched.
+
+diagnose.py hash-checks trusted selector runtime,exactly reconstructs selector-initial state,checks frozen expert weights against their standalone checkpoints,optimizer membership and250 Adam steps,and verifies actor loss/analytic logit gradients with finite nonzero router gradients.24 fresh histories use independent selection/test posterior-conditioned futures with exact-likelihood importance correction and locked quality thresholds. Native terminal-minus-prefix variational returns are scored;not reinterpreted as exact EIG. Prefixes preserve chronology. No optimizer steps occur;all protected source/checkpoint hashes unchanged.
+
+Reports retain only two causal categories:routing quality and expert design. Tested implementation paths pass;critic-ranking or complementarity claims remain limited by24 histories,approximate posterior and exploratory comparisons. No root-cause bug or successful fix is invented.
