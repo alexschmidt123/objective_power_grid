@@ -1,6 +1,6 @@
 """Publish small pilot reports; raw datasets and checkpoints stay outside Git."""
 import argparse,json,pathlib
-from experiment import ROOT,WORK
+from experiment import ROOT,WORK,n
 p=argparse.ArgumentParser();p.add_argument('--output',type=pathlib.Path,required=True);args=p.parse_args()
 out=args.output.expanduser();assert ROOT/'scratch_runs' in out.parents
 r=json.loads((out/'RESULTS.json').read_text());assert r['status']=='COMPLETE' and not r['smoke']
@@ -37,5 +37,25 @@ lines+=['','The audit table tests ensemble-selected actions against the pre-upda
     'Small history coverage, finite suffix draws, learned value approximation and one training lineage limit conclusions. '
     'No final-bank tuning, deployment-time optimization or expert retraining was performed.','',
     f'Raw authoritative artifacts: `{out}`.','']
+diagnostic=dest/'VALUE_DIAGNOSTICS.json'
+if diagnostic.exists():
+    values=json.loads(diagnostic.read_text())
+    lines+=['## Heldout value prediction','',
+        '| Counterfactual round | Ensemble advantage MSE | Zero-advantage MSE | Original critic MSE |',
+        '|---|---:|---:|---:|']
+    for row in values['rounds']:
+        if row['round'].startswith('counterfactual'):
+            lines.append(f"| {row['round']} | {row['ensemble_advantage_MSE']:.8f} | {row['zero_advantage_MSE']:.8f} | {row['critic_advantage_MSE']:.8f} |")
+    lines+=['','These16-history independent-suffix checks show whether the fitted estimator predicts advantages beyond a zero baseline. '
+        'They do not establish that conditional routing headroom is absent. Each value network has91,588 parameters, '
+        'with only64 fitting histories per round; validation early stopping limits fitting but cannot establish generalization. '
+        'Posterior quality and empirical per-history selection diagnostics are in VALUE_DIAGNOSTICS.json.','']
 (dest/'RESULTS.md').write_text('\n'.join(lines));(dest/'SUMMARY.json').write_text(json.dumps(r,indent=2)+'\n')
+protected=json.loads((out/'PRE_RUN_MANIFEST.json').read_text())
+assert all(n.sha(path)==h for path,h in protected.items())
+manifest=dict(experiment_source_commit=json.loads((out/'CONFIG.json').read_text())['source_commit'],
+    raw_directory=str(out),historical_and_source_hashes_verified=protected,
+    new_checkpoint_hashes={str(path.relative_to(out)):n.sha(path) for path in sorted(out.rglob('*.pt'))},
+    config_sha256=n.sha(out/'CONFIG.json'),results_sha256=n.sha(out/'RESULTS.json'))
+(dest/'ARTIFACTS.json').write_text(json.dumps(manifest,indent=2)+'\n')
 print(dest/'RESULTS.md')
