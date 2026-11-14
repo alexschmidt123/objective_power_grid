@@ -15,8 +15,16 @@ def main():
     artifacts=json.loads((WORK/'reports/hec_v3_counterfactual_router_20261114/ARTIFACTS.json').read_text())
     actors={name:CF/f'{folder}_round3/actor.pt' for name,folder in [('counterfactual','counterfactual'),('critic_control','critic_control')]}
     for name,path in actors.items():assert sha(path)==artifacts['new_checkpoint_hashes'][str(path.relative_to(CF))]
+    inventory=json.loads((BASE/'inputs/HISTORICAL_BASELINES.json').read_text())
+    checkpoints=dict(actors,V2=BASE/'arms/candidate/actor.pt',original_V3=PILOT/'selector/actor.pt',vsoed=BASE/'inputs/vsoed.pt')
+    for row in inventory['rows']:
+        checkpoints[row['method']]=pathlib.Path(row['checkpoint']);assert sha(row['checkpoint'])==row['checkpoint_sha256']
+    assert sha(checkpoints['V2'])=='90797b277846dd1a5d7de3764f6fb021047530d1fbea7db859f938ef59b73108'
+    assert sha(checkpoints['original_V3'])==json.loads((PILOT/'selector/RESULT.json').read_text())['actor_sha256']
+    checkpoint_hashes={k:sha(v) for k,v in checkpoints.items()};n.put(out/'CHECKPOINTS.json',checkpoint_hashes)
     protected=[BANK,UNIFORMS,SCORER,UNIFORM_SAVED,PILOT/'selector/actor.pt',*actors.values(),BASE/'inputs/vsoed.pt',
         *sorted((BASE/'evaluation').glob('*_scores.npy')),*sorted(pathlib.Path(__file__).parent.glob('*.py'))]
+    protected+=[BASE/'inputs/HISTORICAL_BASELINES.json',*checkpoints.values(),*[pathlib.Path(row['arrays_path']) for row in inventory['rows'] if row.get('arrays_path')]]
     manifest={str(f):sha(f) for f in protected};n.put(out/'MANIFEST.json',manifest)
     n.put(out/'CONFIG.json',dict(**LOCK,training_updates=0,bank=str(BANK),scorer=str(SCORER),
         source_commit=subprocess.check_output(['git','-C',str(WORK),'rev-parse','HEAD'],text=True).strip(),
@@ -72,7 +80,7 @@ def main():
         assert all(n.digest(m.state_dict())==states[k] for k,m in dict(models,V2=v2).items())
         result=dict(status='COMPLETE',protocol=LOCK,means={k:float(s.mean()) for k,s in scores.items()},comparisons=comparisons,
             historical_reproduction=repro,selection_counts=counts,seconds=time.monotonic()-start,training_updates=0,
-            historical_artifacts_preserved=True,limitations='Exact original evaluation matched; training budgets differ. Original1M prior-sPCE is ceiling limited;one lineage,not official promoted results.16M fresh-bank run is supplementary only.')
+            historical_artifacts_preserved=True,checkpoint_sha256=checkpoint_hashes,limitations='Exact original evaluation matched; training budgets differ. Original1M prior-sPCE is ceiling limited;one lineage,not official promoted results.16M fresh-bank run is supplementary only.')
         n.put(out/'RESULTS.json',result);n.put(out/'STATUS.json',dict(status='COMPLETE',seconds=result['seconds'],training_updates=0))
     except Exception as exc:n.put(out/'STATUS.json',dict(status='FAILED',error=repr(exc)));raise
     finally:
