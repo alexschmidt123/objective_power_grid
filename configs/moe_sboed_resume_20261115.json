@@ -1,0 +1,95 @@
+{
+  "status": "LOCKED",
+  "queue": [
+    {
+      "method": "MoE-sBOED-uniform",
+      "seed": 101,
+      "arm": "uniform"
+    },
+    {
+      "method": "MoE-sBOED",
+      "seed": 101,
+      "arm": "learned"
+    },
+    {
+      "method": "MoE-sBOED",
+      "seed": 102,
+      "arm": "learned"
+    },
+    {
+      "method": "MoE-sBOED-uniform",
+      "seed": 102,
+      "arm": "uniform"
+    },
+    {
+      "method": "MoE-sBOED",
+      "seed": 103,
+      "arm": "learned"
+    },
+    {
+      "method": "MoE-sBOED-uniform",
+      "seed": 103,
+      "arm": "uniform"
+    },
+    {
+      "method": "MoE-sBOED",
+      "seed": 104,
+      "arm": "learned"
+    },
+    {
+      "method": "MoE-sBOED-uniform",
+      "seed": 104,
+      "arm": "uniform"
+    },
+    {
+      "method": "MoE-sBOED",
+      "seed": 105,
+      "arm": "learned"
+    },
+    {
+      "method": "MoE-sBOED-uniform",
+      "seed": 105,
+      "arm": "uniform"
+    }
+  ],
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "methods": [
+    "MoE-sBOED",
+    "MoE-sBOED-uniform"
+  ],
+  "expert_names": [
+    "MoE-sBOED-E1",
+    "MoE-sBOED-E2",
+    "MoE-sBOED-E3",
+    "MoE-sBOED-E4"
+  ],
+  "hard_total_seconds": 14400,
+  "updates": 2000,
+  "warmup_updates": 200,
+  "joint_updates": 1800,
+  "evaluation_seed": 202611099206,
+  "trajectories": 2000,
+  "contrasts": 1000000,
+  "T": 30,
+  "initialization": "Successful final collaborative architecture;original frozen V2 runtime16001;paired new-module seed202611150000+seed;native critic/posterior/replay;fresh actor Adam;copied online target.",
+  "scope": "Five continuation RNG seeds conditional on shared pretrained initialization,not independent from-scratch lineages.",
+  "objective": "Native full-horizon variational EIG,use_PCE=False,discount1;no extra rewards.",
+  "removed_training_arms": [
+    "v2_control",
+    "router_only",
+    "encoders_only"
+  ],
+  "forbidden_inference_jobs": [
+    "correction_ablation",
+    "encoder_ablation",
+    "stage_only_ablation"
+  ],
+  "standalone": "Four independently executable exported policies after each learned checkpoint;shared context permitted;no other current expert/router;no additional training;included in4h total.",
+  "source": "Frozen validated src/research/hec_v3_study implementation;new wrapper changes scheduling,labels and evaluations only."
+}
