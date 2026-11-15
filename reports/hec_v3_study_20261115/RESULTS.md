@@ -1,11 +1,12 @@
 # V3 routing validation
 
-Status: PENDING_EXPERIMENTS. Completed 0/25 sequential runs.
+Status: PENDING_EXPERIMENTS. Completed 1/25 sequential runs.
 
 Native full-horizon variational EIG only. Four-hour total cap per run. Five continuation seeds conditional on a common pretrained V2 parent. Test-bank selection is prohibited.
 
 | Seed | Arm | EIG | MCSE | Training minutes |
 |---|---|---:|---:|---:|
+| 101 | uniform | 12.88328257 | 0.03642 | 137.0 |
 
 Primary across-seed differences: `{}`.
 

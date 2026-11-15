@@ -13,3 +13,7 @@ Current transition: V3 hec_v3_fulltrain_20261114_run01 is already running from f
 ### TEMP lifetime — user clarification 2026-11-14
 
 objective_power_grid_temp is exclusively a development workspace, not a permanent project or archive. Once the project is finished, the entire TEMP folder may be removed after verifying that all unique research source, configurations, completed/failed results, models, data and provenance worth retaining are safely integrated into objective_power_grid, all needed Git commits/refs are preserved, and no running process or required path depends on TEMP. Temporary caches, duplicate files and obsolete worktrees need not become permanent main-project clutter. Use safe Git worktree cleanup for registered worktrees; do not blindly delete shared Git metadata. The main project must remain complete and usable without TEMP. Do not remove TEMP now or interpret completion of one run as completion of the whole project.
+
+## Canonical MoE-sBOED method names — user instruction 2026-11-15
+
+Use moe-sboed for the final collaborative learned-routing method;moe-sboed-uniform for independently trained fixed-uniform routing;and moe-sboed-e1,moe-sboed-e2,moe-sboed-e3,moe-sboed-e4 for inherited single-pathway baselines. Do not present V2 and V3 as separate proposed methods. E1-E4 use inherited learned checkpoints and must not be called independently trained single-expert policies. Learned and uniform checkpoint inventories stay distinct. Preserve historical filenames and version tags as provenance. Registry:configs/moe_sboed_method_names.json.

@@ -1,0 +1,108 @@
+{
+  "methods": {
+    "moe-sboed": {
+      "role": "proposed",
+      "training": "learned-routing",
+      "aliases": [
+        "learned",
+        "full_v3",
+        "MoE-sBOED",
+        "V3 learned"
+      ]
+    },
+    "moe-sboed-uniform": {
+      "role": "internal-baseline",
+      "training": "independently-trained-fixed-uniform",
+      "aliases": [
+        "uniform",
+        "trained_uniform",
+        "V3 uniform"
+      ]
+    },
+    "moe-sboed-e1": {
+      "role": "internal-inherited-checkpoint-baseline",
+      "training": "inherited-from-corresponding-learned-checkpoint;no-independent-training-claim",
+      "aliases": [
+        "expert1",
+        "expert_1",
+        "E1"
+      ]
+    },
+    "moe-sboed-e2": {
+      "role": "internal-inherited-checkpoint-baseline",
+      "training": "inherited-from-corresponding-learned-checkpoint;no-independent-training-claim",
+      "aliases": [
+        "expert2",
+        "expert_2",
+        "E2"
+      ]
+    },
+    "moe-sboed-e3": {
+      "role": "internal-inherited-checkpoint-baseline",
+      "training": "inherited-from-corresponding-learned-checkpoint;no-independent-training-claim",
+      "aliases": [
+        "expert3",
+        "expert_3",
+        "E3"
+      ]
+    },
+    "moe-sboed-e4": {
+      "role": "internal-inherited-checkpoint-baseline",
+      "training": "inherited-from-corresponding-learned-checkpoint;no-independent-training-claim",
+      "aliases": [
+        "expert4",
+        "expert_4",
+        "E4"
+      ]
+    },
+    "vsoed": {
+      "role": "external-baseline",
+      "aliases": [
+        "vsOED"
+      ]
+    },
+    "rl-sboed": {
+      "role": "external-baseline",
+      "aliases": [
+        "rl_sboed",
+        "RL-sBOED"
+      ]
+    },
+    "scorebed": {
+      "role": "external-baseline",
+      "aliases": [
+        "ScoreBED"
+      ]
+    },
+    "dad": {
+      "role": "external-baseline",
+      "aliases": [
+        "DAD"
+      ]
+    }
+  },
+  "validation": {
+    "status": "PASS",
+    "independent_training_families": [
+      "moe-sboed",
+      "moe-sboed-uniform",
+      "vsoed",
+      "rl-sboed",
+      "scorebed",
+      "dad"
+    ],
+    "inherited_internal_baselines": [
+      "moe-sboed-e1",
+      "moe-sboed-e2",
+      "moe-sboed-e3",
+      "moe-sboed-e4"
+    ]
+  },
+  "rules": [
+    "V2/V3 are historical provenance only,not separate proposed methods.",
+    "Do not classify a learned checkpoint as a trained uniform model.",
+    "Extracted one-hot uniform ablations retain an inference-ablation qualifier;they are not independently trained uniform checkpoints.",
+    "Standalone e1-e4 inherit learned-checkpoint provenance and do not count as independent trainings.",
+    "Do not rename historical checkpoint/config/log files."
+  ]
+}

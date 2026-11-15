@@ -1,6 +1,6 @@
 # Scientific conclusions
 
-Campaign: PENDING_EXPERIMENTS; 0/25 training runs complete.
+Campaign: PENDING_EXPERIMENTS; 1/25 training runs complete.
 
 1. Learned versus independently trained uniform: PENDING.
 
