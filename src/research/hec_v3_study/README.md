@@ -1,0 +1,7 @@
+# V3 history-dependent routing validation
+
+Main-folder development study, not an official promoted result. All historical source/checkpoints remain frozen in the existing legacy archive. runtime.py relocates historical TEMP path literals in memory only; unmodified archived source and executed path-only transformations are fingerprinted. Simulator, likelihood, physical bounds, canonical scorer and native variational EIG are preserved.
+
+Protocol is locked in protocol.json before new training. Five paired continuation seeds × five arms =25 sequential runs,each capped at four hours including training/evaluation. Full/none/router-only/encoder-only form a trained2×2 factorial; uniform is independently trained. V2 control receives2000 extra native continuation updates from the same terminal V2 parent; it does not redo the original16k training. Frozen original V2 and completed V3 results remain references. Seeds are conditional on shared pretrained parent/providers,not independent end-to-end pretraining. No test-bank checkpoint selection. Preserve incomplete runs and stop on errors rather than launch duplicate retries.
+
+GPU jobs run only on LabPC. New artifacts live under the existing experiments/location_finding directory and retain DEVELOPMENT_UNVALIDATED status until separate scientific promotion. Code and lightweight reports synchronize from this main checkout. Large checkpoints/data remain outside Git.
