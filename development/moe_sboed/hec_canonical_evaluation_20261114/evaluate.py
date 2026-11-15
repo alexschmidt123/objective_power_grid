@@ -4,7 +4,8 @@ sys.dont_write_bytecode=True
 import numpy as np
 import torch
 from protocol import ROOT,WORK,BASE,LOCK,BANK,UNIFORMS,SCORER,sha,load,tests
-sys.path.insert(0,str(WORK/'development/moe_sboed/hec_v3_counterfactual_router_20261114'))
+from retired_reference import activate
+activate()
 from experiment import n,d,PILOT,rollout,paired
 CF=ROOT/'scratch_runs/hec_v3_counterfactual_router_20261114_pilot02'
 UNIFORM_SAVED=ROOT/'scratch_runs/moe_hec_v2_internal_ablation/uniform_scores.npy'

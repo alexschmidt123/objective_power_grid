@@ -1,0 +1,163 @@
+{
+  "initialization": {
+    "status": "COMPLETE",
+    "protocol": {
+      "cases": 2000,
+      "contrasts": 1000000,
+      "horizon": 30,
+      "sigma": 0.5,
+      "chunk": 16384,
+      "bank_sha256": "52c0c614c4ee3b63d58ccda60714b38b00a2c0ca35564a428fe8cc2ce8d727c5",
+      "uniforms_sha256": "6e56f0a08fe4deeefd7f0977967dba9d2910a4a383f1acfbd1736db3f358033c",
+      "scorer_sha256": "64c67b6547c77f4823b487493ed0703efbd3f04d7308019e875d145505695f2f"
+    },
+    "canonical_cases": 2000,
+    "mean": 12.929352605692825,
+    "reference_mean": 12.929352605692825,
+    "maximum_score_error": 0.0,
+    "maximum_action_error": 0.0,
+    "training_updates": 0,
+    "historical_artifacts_preserved": true,
+    "seconds": 71.59233471099287,
+    "claim": "Exact V2 initialization preservation,not an EIG improvement. Standalone policies initially match V2 one-hot pathways,not full V2."
+  },
+  "functional": {
+    "status": "PASS",
+    "exact_V2_mixed": true,
+    "exact_V2_uniform": true,
+    "exact_V2_single_pathways": true,
+    "standalone_exports": [
+      {
+        "expert": 1,
+        "parameters": 60630,
+        "private_width": 13,
+        "only_own_query_executed": true
+      },
+      {
+        "expert": 2,
+        "parameters": 67658,
+        "private_width": 28,
+        "only_own_query_executed": true
+      },
+      {
+        "expert": 3,
+        "parameters": 63926,
+        "private_width": 20,
+        "only_own_query_executed": true
+      },
+      {
+        "expert": 4,
+        "parameters": 68874,
+        "private_width": 26,
+        "only_own_query_executed": true
+      }
+    ],
+    "unobserved_prefix_NaNs_ignored": true,
+    "all_trainable_gradients_finite": true,
+    "initial_output_layers_nonzero_gradients": true,
+    "hidden_layers_connected_after_nonzero_output": true,
+    "initial_gradient_norms": {
+      "experts.0.innovation.0.weight": 0.0,
+      "experts.0.innovation.0.bias": 0.0,
+      "experts.0.innovation.2.weight": 0.0,
+      "experts.0.innovation.2.bias": 0.0,
+      "experts.0.innovation.4.weight": 0.0032993790227919817,
+      "experts.0.innovation.4.bias": 0.003423009067773819,
+      "experts.1.innovation.0.weight": 0.0,
+      "experts.1.innovation.0.bias": 0.0,
+      "experts.1.innovation.2.weight": 0.0,
+      "experts.1.innovation.2.bias": 0.0,
+      "experts.1.innovation.4.weight": 0.008808344602584839,
+      "experts.1.innovation.4.bias": 0.01696869544684887,
+      "experts.2.innovation.0.weight": 0.0,
+      "experts.2.innovation.0.bias": 0.0,
+      "experts.2.innovation.2.weight": 0.0,
+      "experts.2.innovation.2.bias": 0.0,
+      "experts.2.innovation.4.weight": 0.009073631837964058,
+      "experts.2.innovation.4.bias": 0.009156337939202785,
+      "experts.3.innovation.0.weight": 0.0,
+      "experts.3.innovation.0.bias": 0.0,
+      "experts.3.innovation.2.weight": 0.0,
+      "experts.3.innovation.2.bias": 0.0,
+      "experts.3.innovation.4.weight": 0.013706807978451252,
+      "experts.3.innovation.4.bias": 0.03414241969585419,
+      "router.0.weight": 0.0,
+      "router.0.bias": 0.0,
+      "router.2.weight": 0.011530602350831032,
+      "router.2.bias": 0.003727884730324149
+    },
+    "shapes": {
+      "history": [
+        2,
+        117
+      ],
+      "encoded": [
+        2,
+        128
+      ],
+      "commands": [
+        2,
+        20
+      ],
+      "first": [
+        2,
+        4,
+        64
+      ],
+      "response": [
+        2,
+        4,
+        64
+      ],
+      "innovation": [
+        2,
+        4,
+        128
+      ],
+      "router_input": [
+        2,
+        147
+      ],
+      "gates": [
+        2,
+        4
+      ],
+      "output": [
+        2,
+        2
+      ]
+    },
+    "stages": [
+      0,
+      14,
+      29
+    ],
+    "parameters": 169382,
+    "trainable_parameters": 65476
+  },
+  "native_smoke": {
+    "status": "COMPLETE",
+    "counts": {
+      "actor": 1,
+      "critic": 5,
+      "posterior": 150
+    },
+    "historical_artifacts_preserved": true,
+    "frozen_actor_state_preserved": true,
+    "seconds": 8.879391428083181,
+    "claim": "Native integration check only;no benchmark superiority claim"
+  },
+  "control_smoke": {
+    "status": "COMPLETE",
+    "counts": {
+      "actor": 1,
+      "critic": 5,
+      "posterior": 150
+    },
+    "purpose": "Control integration only;not a comparison result"
+  },
+  "initial_checkpoint_sha256": "987660f95df2da64823bbd918cab177639878b6e3898c6f3fbaec18093131490",
+  "active_source": "development/moe_sboed/hec_v3_feature_20261114",
+  "retired_sources": "development/moe_sboed/retired/hec_v3_20261114",
+  "legacy_reference_loading": "Verified archived hashes and loaded old actor checkpoint;finite2D forward passed"
+}

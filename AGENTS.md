@@ -34,3 +34,10 @@ Primary comparisons must use the exact saved HEC-v2 evaluation for V2, DAD, vsOE
 - Preserve all historical artifacts. New evaluation outputs go to a new TEMP/scratch_runs directory. No model training is authorized by this rule itself.
 
 The executable guard and rerun entry point are in development/moe_sboed/hec_canonical_evaluation_20261114/. This rule applies to future MoE-sBOED implementation and result reporting.
+
+
+## Active replacement V3 — 2026-11-14
+
+Active source: development/moe_sboed/hec_v3_feature_20261114/. The failed standalone-head/categorical V3 and its extra fitted-value/KL router are RETIRED_NO_RESTART under development/moe_sboed/retired/hec_v3_20261114/. Preserve their frozen source, models and results; do not restart old campaigns. The canonical retired_reference loader is read-only and verifies source hashes.
+
+Replacement V3 keeps four sBOED-specific expert query roles, the V2 joint decoder and an inherited router prior plus zero-initialized correction. Mixed initialization must reproduce V2 full trajectories and scores; single modes must run only their own current query with common providers/decoder. Initial single policies match V2 one-hot pathways, not the full V2 policy. No assumed specialization or performance win. Keep native EIG unchanged, and follow the mandatory original V2/DAD/vsOED evaluation protocol.

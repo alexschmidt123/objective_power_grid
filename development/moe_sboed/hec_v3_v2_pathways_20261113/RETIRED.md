@@ -1,0 +1,1 @@
+This failed V3 implementation is retired. Frozen source: development/moe_sboed/retired/hec_v3_20261114/. Do not restart its training. Active replacement: development/moe_sboed/hec_v3_feature_20261114/. Historical checkpoints and results remain at their original scratch paths.
