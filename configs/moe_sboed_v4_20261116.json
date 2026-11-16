@@ -1,0 +1,61 @@
+{
+  "status": "LOCKED_BEFORE_PILOT",
+  "seed": 101,
+  "methods": [
+    "MoE-sBOED-V4",
+    "MoE-sBOED-V4-uniform"
+  ],
+  "architecture": "4 specialist256->128SiLU representations,nonaffine LayerNorm128,soft weighted SUM,128->32SiLU->2 action head with4tanh;independent117->16SiLU->2 weak branch with.2tanh additive correction and finalclip.",
+  "router": "Observed history117+four normalized128 features512+remaining horizon1+belief summary14=644 ->64SiLU->4softmax. Zero output-layer initialization gives exact uniform initial weights in both arms.",
+  "shared_dependency": "Shared frozen posterior inference plus original128-dimensional history encoder and144->64Tanh->20 commander control specialist queries. No history concatenation to action head. No inherited physical policy/base/large decoder copied. Weak shared branch has no outgoing connection except final bounded add.",
+  "probe_reference": "Deterministic posterior centroid;old a0/SG/DAD-like actor is NOT executed even for probes.",
+  "normalization": "Separate nonaffine LayerNorm128 eps1e-5 per expert;no learned per-expert scalar after normalization.",
+  "parent_update": 16001,
+  "parent_actor_sha256": "90797b277846dd1a5d7de3764f6fb021047530d1fbea7db859f938ef59b73108",
+  "parent_runtime_sha256": "d38c09167c4936a6a0660d16079ecc3d5e1108c32bdbc840cc8851c1ef7266b1",
+  "initialization_seed": 202611164101,
+  "actor_lr": 0.00020186017780594276,
+  "initialization": "Same original frozen V2 runtime16001 as previous collaborative continuation. Transplant history/commander/semantic queries/belief;fresh projections,normalization,router,small head and weak branch. Fresh Adam at inherited LR;copied online target. Same inherited critic/posterior/replay in both arms.",
+  "warmup_updates": 200,
+  "joint_updates": 1800,
+  "actor_updates": 2000,
+  "critic_optimizer_updates": 10000,
+  "posterior_optimizer_updates": 300000,
+  "new_simulator_episodes": 2000000,
+  "new_simulator_observations": 60000000,
+  "replay_episodes_inherited": 1000000,
+  "native_replay_batch": 10000,
+  "new_episodes_per_update": 1000,
+  "hard_total_seconds_per_run": 14400,
+  "training_soft_seconds": 12600,
+  "evaluation_deadline_seconds": 14100,
+  "objective": "Unmodified original native full-horizon variational actor-critic EIG,discount1,use_PCE=False. No categorical actor-loss patch,no sPCE training,no additional rewards/losses.",
+  "warmup": "History query encoder frozen200;four expert semantic/projection pathways,commander/stage offsets,head and weak branch trainable. Router trainable learned only. Joint unfreezes query history encoder1800. Belief,anchor1/anchor3 and opportunity model providers remain frozen.",
+  "uniform": "Exactly.25 current expert weights in training,target and evaluation;router requires_grad=False,no router gradient/optimizer updates. All four expert pathways,head and weak correction trainable.",
+  "evaluation": {
+    "seed": 202611164901,
+    "cases": 2000,
+    "contrasts": 1000000,
+    "T": 30,
+    "sigma": 0.5,
+    "chunk": 16384,
+    "bounds": [
+      [
+        -4,
+        4
+      ],
+      [
+        -4,
+        4
+      ]
+    ],
+    "prior": "N(0,I4)",
+    "scorer_sha256": "64c67b6547c77f4823b487493ed0703efbd3f04d7308019e875d145505695f2f",
+    "bank": "Separate held-out V4 development-validation bank;all4 policies evaluated using identical truth,base noise and prior contrasts. Original benchmark test bank not read.",
+    "checkpoint_selection": "Fixed terminal2000 only;no evaluation-based tuning or checkpoint selection."
+  },
+  "competitive_margin_nats": 0.1,
+  "expansion": "Only recommend further seeds if paired learned-uniform95% CI lower>0 and V4learned-previouslearned95% CI lower>-.1nat. Never launch102-105 automatically. Stop after this one paired pilot if criteria fail.",
+  "diagnostics": "Stage means/history variation of gates,normalized expert RMS,expert/router gradient norms,weight-intervention action sensitivity,weak correction and main-action magnitudes,clipping and coordinate dominance fractions.",
+  "preservation": "Existing V2/V3/categorical code and checkpoints unchanged. Terminated categorical controller not restarted. Only this new V4 queue authorized. No SIR/grid or broad architecture search."
+}
