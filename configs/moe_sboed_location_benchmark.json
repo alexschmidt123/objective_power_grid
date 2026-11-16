@@ -1,12 +1,12 @@
 {
-  "status": "REVISED_SCOPE_AUDIT_IN_PROGRESS",
+  "status": "RUNNING_REQUIRED_QUEUE",
   "primary_training_methods": [
-    "moe-sboed",
-    "moe-sboed-uniform",
-    "vsoed",
-    "rl-sboed",
-    "scorebed",
-    "dad"
+    "MoE-sBOED",
+    "MoE-sBOED-uniform",
+    "vsOED",
+    "RL-sBOED",
+    "ScoreBED",
+    "DAD"
   ],
   "seeds": [
     101,
@@ -16,10 +16,10 @@
     105
   ],
   "inherited_internal_baselines": [
-    "moe-sboed-e1",
-    "moe-sboed-e2",
-    "moe-sboed-e3",
-    "moe-sboed-e4"
+    "MoE-sBOED-E1",
+    "MoE-sBOED-E2",
+    "MoE-sBOED-E3",
+    "MoE-sBOED-E4"
   ],
   "extra_expert_training": false,
   "excluded_pending_arms": [
@@ -46,7 +46,7 @@
     "checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/hec_v3_study_20261115/seed101_uniform/joint_actor.pt",
     "scope": "Conditional continuation from shared V2 pretrained parent;not independent end-to-end initialization."
   },
-  "learned_checkpoint_inventory": "User identifies five learned-routing checkpoints;location/provenance still to verify. Do not relabel them uniform or restart without audit.",
+  "learned_checkpoint_inventory": "Train only verified missing seed101-105 outputs from established shared-pretraining initialization;skip completed results;report continuation scope honestly.",
   "next_steps": [
     "Verify five learned checkpoint paths and pretraining independence.",
     "Verify/reuse existing DAD,vsOED,ScoreBED101-105 and evaluate on locked bank.",
@@ -55,5 +55,6 @@
     "Evaluate inherited e1-e4 separately without claiming independent training."
   ],
   "no_sir_or_power_grid": true,
-  "historical_results_preserved": true
+  "historical_results_preserved": true,
+  "authoritative_required_queue": "configs/moe_sboed_resume_20261115.json"
 }

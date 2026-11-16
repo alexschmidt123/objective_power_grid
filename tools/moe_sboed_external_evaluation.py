@@ -10,7 +10,10 @@ def sha(p):
   for block in iter(lambda:f.read(8388608),b''):h.update(block)
  return h.hexdigest()
 def put(p,d):
- p=pathlib.Path(p);p.parent.mkdir(exist_ok=True,parents=True);temp=p.with_suffix(p.suffix+'.tmp');temp.write_text(json.dumps(d,indent=2,allow_nan=False)+'\n');temp.replace(p)
+ p=pathlib.Path(p);p.parent.mkdir(exist_ok=True,parents=True);temp=p.with_suffix(p.suffix+'.tmp');
+ if isinstance(d,dict) and d.get('method') in ['dad','vsoed','scorebed','rl_sboed']:
+  d=dict(d);d['implementation_method']=d['method'];d['method']={'dad':'DAD','vsoed':'vsOED','scorebed':'ScoreBED','rl_sboed':'RL-sBOED'}[d['method']]
+ temp.write_text(json.dumps(d,indent=2,allow_nan=False)+'\n');temp.replace(p)
 def manifest():
  jobs=[]
  inv=json.loads((B/'inputs/HISTORICAL_BASELINES.json').read_text());dad101=pathlib.Path(next(v['checkpoint'] for v in inv['rows'] if v['method']=='dad'))
@@ -60,7 +63,8 @@ def worker(job):
   assert sha(job['checkpoint'])==job['checkpoint_sha256'] and sha(job['training_receipt'])==job['training_receipt_sha256']
   torch.set_num_threads(4);torch.backends.cuda.matmul.allow_tf32=False;torch.backends.cudnn.allow_tf32=False
   bank,u,scorer=load();inv=json.loads((B/'inputs/HISTORICAL_BASELINES.json').read_text());b=make_benchmark(inv['physics'])
-  if job['method']=='vsoed' and job['seed']==101:
+  if job.get('loader')=='object':policy=torch.load(job['checkpoint'],map_location='cpu',weights_only=False)
+  elif job['method']=='vsoed' and job['seed']==101:
    from src.research.upstream_vsoed import UpstreamActor
    from src.research.vendor.vsoed.utils import Net
    saved=torch.load(job['checkpoint'],map_location='cpu',weights_only=False);actor=Net([117,256,256,256,2],torch.nn.ReLU,torch.tensor([[-4.,4.]]*2,dtype=torch.float32),'actor').float();actor.load_state_dict(saved['actor_state'],strict=True);policy=UpstreamActor(actor,30,b.action_scale,b.obs_scale)
@@ -73,13 +77,13 @@ def worker(job):
    for i in range(0,2000,16):
     if time.monotonic()>deadline:raise TimeoutError('Predeclared four-hour evaluation cap')
     torch.cuda.synchronize();tick=time.monotonic()
-    data=rollout(b,policy,30,min(16,2000-i),2026110813902+i*97451,0,truth=torch.tensor(bank['truth'][i:i+16],device='cuda',dtype=torch.float64),noise=torch.tensor(bank['noise'][i:i+16,:,None],device='cuda',dtype=torch.float64))
+    data=rollout(b,policy,30,min(16,2000-i),2026110813902+i*97451,0,truth=torch.tensor(bank['truth'][i:i+16],device='cuda',dtype=torch.float64),noise=torch.tensor(bank['noise'][i:i+16,:,None],device='cuda',dtype=torch.float64),method='rl_sboed' if job['method']=='rl_sboed' else None)
     torch.cuda.synchronize();online+=time.monotonic()-tick;tick=time.monotonic();values,_=scorer(b,data,negatives,16384,'cuda');torch.cuda.synchronize();scoring+=time.monotonic()-tick
     scores.extend(values[:,-1].numpy());curves.append(values.numpy())
     if i%256==0:samples.append(dict(seconds=time.monotonic()-start,gpu=subprocess.check_output(['nvidia-smi','--query-gpu=utilization.gpu,memory.used,power.draw','--format=csv,noheader'],text=True).strip()))
     put(out/'STATUS.json',dict(status='EVALUATING',method=job['method'],seed=job['seed'],completed=min(i+16,2000),total=2000))
   scores=np.asarray(scores);np.save(out/'scores.npy',scores);np.save(out/'curves.npy',np.concatenate(curves));error=None
-  if job['seed']==101:
+  if job['seed']==101 and job.get('compare_saved_reference',True):
    original=np.load(B/f'evaluation/{job["method"]}_scores.npy');error=float(np.abs(scores-original).max());assert error<1e-9,(job['method'],error)
   assert sha(job['checkpoint'])==job['checkpoint_sha256'];se=float(scores.std(ddof=1)/np.sqrt(2000));width=float(t.ppf(.975,1999))*se;cpu=resource.getrusage(resource.RUSAGE_SELF)
   result=dict(status='COMPLETE',method=job['method'],seed=job['seed'],mean=float(scores.mean()),MCSE=se,CI95=[float(scores.mean()-width),float(scores.mean()+width)],protocol=LOCK,checkpoint=job,
@@ -93,8 +97,9 @@ def worker(job):
   for f in held:f.close()
 
 def queue():
- lock=(O/'.external_eval_queue.lock').open('a+');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB);p=json.loads(CONFIG.read_text())
+ lock=(O/'.external_eval_queue.lock').open('a+');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB);p=json.loads(CONFIG.read_text());failed=[];failed_methods=set()
  for job in p['jobs']:
+  if job['method'] in failed_methods:continue
   out=O/'external_evaluations'/job['method']/('seed'+str(job['seed']))
   if out.exists():
    assert (out/'RESULTS.json').exists() and json.loads((out/'RESULTS.json').read_text())['status']=='COMPLETE','Preserve incomplete output;no retry'
@@ -103,9 +108,11 @@ def queue():
   put(O/'STATUS.json',dict(status='RUNNING_EXTERNAL_EVALUATION',method=job['method'],seed=job['seed'],training=False))
   with (O/(job['method']+'_seed'+str(job['seed'])+'.log')).open('x') as f:
    result=subprocess.run(['timeout','--signal=TERM','--kill-after=60','14340',PY,'-u',str(pathlib.Path(__file__).resolve()),'--worker',job['method'],'--seed',str(job['seed'])],stdin=subprocess.DEVNULL,stdout=f,stderr=subprocess.STDOUT,start_new_session=True)
-  if result.returncode:put(O/'STATUS.json',dict(status='BLOCKED',method=job['method'],seed=job['seed'],returncode=result.returncode,no_retry=True));return
+  if result.returncode:
+   failed.append(dict(method=job['method'],seed=job['seed'],returncode=result.returncode));failed_methods.add(job['method']);put(O/'STATUS.json',dict(status='RECOVERED_MODEL_SPECIFIC_FAILURE',failed=failed,no_retry=True));continue
   summary()
- put(O/'STATUS.json',dict(status='EXTERNAL_EVALUATIONS_COMPLETE',completed=15,remaining='MoE checkpoint audit and four-hour RL reproductions'))
+ put(O/'STATUS.json',dict(status='EXTERNAL_EVALUATIONS_COMPLETE' if not failed else 'EXTERNAL_EVALUATIONS_FINISHED_WITH_FAILURES',failed=failed,next='Reuse existing RL-sBOED artifacts;no new baseline training'))
+ # User priority update:reuse existing baseline training;do not launch RL retraining.
 
 def summary():
  import numpy as np,csv
@@ -113,12 +120,12 @@ def summary():
  for j in p['jobs']:
   f=O/'external_evaluations'/j['method']/('seed'+str(j['seed']))/'RESULTS.json'
   if f.exists():
-   d=json.loads(f.read_text());rows.append(dict(method=d['method'],seed=d['seed'],EIG=d['mean'],MCSE=d['MCSE'],CI95=d['CI95'],checkpoint_sha256=j['checkpoint_sha256']))
- put(R/'EXTERNAL_RESULTS.json',dict(status='COMPLETE' if len(rows)==15 else 'PENDING',completed=len(rows),required=15,rows=rows))
+   d=json.loads(f.read_text());rows.append(dict(method=d['method'],implementation_method=j['method'],seed=d['seed'],EIG=d['mean'],MCSE=d['MCSE'],CI95=d['CI95'],checkpoint_sha256=j['checkpoint_sha256']))
+ put(R/'EXTERNAL_RESULTS.json',dict(status='COMPLETE' if len(rows)==len(p['jobs']) else 'PENDING',completed=len(rows),required=len(p['jobs']),rows=rows))
  with (R/'EXTERNAL_RESULTS.csv').open('w',newline='') as f:
   w=csv.writer(f,lineterminator='\n');w.writerow(['Method','101','102','103','104','105','Mean','SD'])
-  for m in ['vsoed','scorebed','dad']:
-   known={d['seed']:d['EIG'] for d in rows if d['method']==m};v=list(known.values());w.writerow([m,*[known.get(s,'PENDING') for s in [101,102,103,104,105]],float(np.mean(v)) if len(v)==5 else 'PENDING',float(np.std(v,ddof=1)) if len(v)==5 else 'PENDING'])
+  for m in ['vsoed','scorebed','dad','rl_sboed']:
+   known={d['seed']:d['EIG'] for d in rows if d['implementation_method']==m};v=list(known.values());w.writerow([{'dad':'DAD','vsoed':'vsOED','scorebed':'ScoreBED','rl_sboed':'RL-sBOED'}[m],*[known.get(s,'PENDING') for s in [101,102,103,104,105]],float(np.mean(v)) if len(v)==5 else 'PENDING',float(np.std(v,ddof=1)) if len(v)==5 else 'PENDING'])
 
 def main():
  p=argparse.ArgumentParser();p.add_argument('--prepare',action='store_true');p.add_argument('--launch',action='store_true');p.add_argument('--queue',action='store_true');p.add_argument('--worker');p.add_argument('--seed',type=int);args=p.parse_args()

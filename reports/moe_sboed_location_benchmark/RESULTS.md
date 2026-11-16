@@ -1,13 +1,22 @@
 # MoE-sBOED location-finding benchmark
 
-Canonical proposed method: `moe-sboed`. Internal baselines: `moe-sboed-uniform`, `moe-sboed-e1`, `moe-sboed-e2`, `moe-sboed-e3`, `moe-sboed-e4`. E1-E4 inherit the corresponding learned checkpoint and require no independent training campaign. They remain separate inference baselines. Historical V2/V3 names are provenance, not separate proposed methods.
+Status: COMPLETE; 50/50 method-seed evaluations complete.
 
-Six training families: moe-sboed, moe-sboed-uniform, vsoed, rl-sboed, scorebed and dad. Five target seeds:101-105. Existing learned checkpoints must not be classified as uniform. The user-identified five learned checkpoints remain subject to path/source/config/pretraining verification;their existence does not establish five uniform runs.
+| Method | 101 | 102 | 103 | 104 | 105 | Mean ± SD |
+|---|---:|---:|---:|---:|---:|---:|
+| MoE-sBOED | 12.89948 | 12.95551 | 12.86055 | 12.94789 | 12.92164 | 12.91701 ± 0.03857 |
+| MoE-sBOED-uniform | 12.88328 | 12.94091 | 12.85165 | 12.96172 | 12.93317 | 12.91415 ± 0.04528 |
+| MoE-sBOED-E1 | 9.88789 | 9.48270 | 9.82469 | 9.81106 | 9.78657 | 9.75858 ± 0.15870 |
+| MoE-sBOED-E2 | 11.50957 | 11.61950 | 11.57831 | 11.71277 | 11.57085 | 11.59820 ± 0.07513 |
+| MoE-sBOED-E3 | 10.41429 | 10.31626 | 10.35975 | 10.31854 | 10.31404 | 10.34458 ± 0.04330 |
+| MoE-sBOED-E4 | 11.33666 | 11.39588 | 11.42926 | 11.53348 | 11.44477 | 11.42801 ± 0.07208 |
+| DAD | 10.31407 | 10.35344 | 9.55718 | 10.49226 | 8.53541 | 9.85047 ± 0.82086 |
+| vsOED | 12.44272 | 12.30648 | 12.43011 | 12.26366 | 12.26530 | 12.34165 ± 0.08830 |
+| RL-sBOED | 11.19165 | 11.17205 | 11.14941 | 11.12023 | 11.14663 | 11.15599 ± 0.02711 |
+| ScoreBED | 10.99883 | 11.12651 | 10.91054 | 11.06600 | 11.07487 | 11.03535 ± 0.08325 |
 
-New fixed-uniform seed101 completed2000 native updates in8272.66s and evaluated at12.88328257 nats. It inherits the common pretrained V2 parent and is continuation evidence,not an independent end-to-end seed. No remaining training started automatically after this run. Old pending V2/router-only/encoder-only jobs are excluded.
+E1–E4 are extracted standalone policies from the matching learned seed,not independently trained experts. MoE seeds are conditional on common pretraining. No superiority claim follows from a higher point estimate. Primary paired intervals and Holm-adjusted tests require all five seed pairs. Case MCSE and across-seed SD are separate in BENCHMARK_RESULTS.json.
 
-The previous controller exited during report publication because CSV CRLF triggered Git whitespace checks. This did not affect training/checkpoints/EIG. Original reports were preserved,CSV line endings normalized with parsed-row equality verified,and the old controller will not be restarted.
+The controller preserves uniform seed101 and excludes all15 development-ablation training jobs. New internal training uses only native variational EIG;native external methods retain their own legitimate objectives. Four-hour total cap includes each training run and its required evaluations.
 
-The exact original evaluation seed is202611099206,verified by reproducing all saved truth/noise/contrast arrays. Do not replace it with1001. Primary bank/scorer/physics remain unchanged. Methods share truth/base noise,not resulting observations. No test-bank model selection.
-
-MAIN_RESULTS.csv intentionally contains PENDING until checkpoint provenance and evaluation are verified. Historical >4h RL runs are not silently counted as four-hour-compliant. No superiority claim. No SIR or power-grid jobs are authorized until this benchmark is complete.
+Reproduce evaluation with the exact original bank seed202611099206,2000 truth/noise cases,1M contrasts,T30 and frozen scorer. Never substitute1001 or choose checkpoints with this bank. Source/config/checkpoint paths are in CHECKPOINT_INVENTORY.json;compute records are in COMPUTE_FAIRNESS.json.

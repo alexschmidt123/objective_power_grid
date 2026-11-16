@@ -17,3 +17,7 @@ objective_power_grid_temp is exclusively a development workspace, not a permanen
 ## Canonical MoE-sBOED method names — user instruction 2026-11-15
 
 Use moe-sboed for the final collaborative learned-routing method;moe-sboed-uniform for independently trained fixed-uniform routing;and moe-sboed-e1,moe-sboed-e2,moe-sboed-e3,moe-sboed-e4 for inherited single-pathway baselines. Do not present V2 and V3 as separate proposed methods. E1-E4 use inherited learned checkpoints and must not be called independently trained single-expert policies. Learned and uniform checkpoint inventories stay distinct. Preserve historical filenames and version tags as provenance. Registry:configs/moe_sboed_method_names.json.
+
+## Official benchmark naming and execution — 2026-11-15
+
+Use exact paper labels MoE-sBOED,MoE-sBOED-uniform,MoE-sBOED-E1,MoE-sBOED-E2,MoE-sBOED-E3,MoE-sBOED-E4,DAD,vsOED,RL-sBOED,ScoreBED. Lowercase implementation IDs are provenance only. Required internal queue:configs/moe_sboed_resume_20261115.json;controller:tools/moe_sboed_benchmark_controller.py. Reuse completed uniform101;do not restart old25-arm controller. Four-hour total cap,2000 native updates per new internal run;extracted experts require no extra training. Current seeds share fixed pretrained initialization and are continuation robustness,not independent from-scratch training. No SIR,power-grid,new architectures or removed ablations.
