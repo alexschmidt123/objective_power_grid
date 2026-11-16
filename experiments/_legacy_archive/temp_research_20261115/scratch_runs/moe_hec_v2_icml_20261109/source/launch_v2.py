@@ -1,0 +1,4 @@
+"""Launch exactly one isolated owned process group with a bounded driver."""
+import os,sys,pathlib,json,subprocess,time,fcntl
+O=pathlib.Path(__file__).resolve().parents[1];lock=(O/'.launch.lock').open('a+');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB);receipt=O/'evidence/LAUNCH_RECEIPT.json';assert not receipt.exists(),'No repeat launch';assert (O/'PRETRAIN_MANIFEST.json').exists();env=os.environ.copy();env['PYTHONDONTWRITEBYTECODE']='1';env['OPENBLAS_NUM_THREADS']='1';env['MOE_V2_RUN_ROOT']=str(O)
+log=(O/'TRAINING_LOGS/experiment.log').open('wb');p=subprocess.Popen([sys.executable,'-u',str(O/'source/run_v2.py')],stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,env=env,start_new_session=True);receipt.write_text(json.dumps(dict(pid=p.pid,process_group=p.pid,time=time.time(),driver=str(O/'source/run_v2.py'),log=str(O/'TRAINING_LOGS/experiment.log'),one_candidate_two_controls=True,hard_seconds=33600),indent=2));print(receipt.read_text(),flush=True)

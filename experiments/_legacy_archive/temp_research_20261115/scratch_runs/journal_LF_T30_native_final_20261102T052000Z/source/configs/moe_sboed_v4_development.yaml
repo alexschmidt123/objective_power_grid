@@ -1,0 +1,35 @@
+method: moe_sboed_v4
+status: DEVELOPMENT_UNVALIDATED
+foundation_commit: 042915bfe8312faa333b1b825b94766c00c68dbf
+original_v1_commit: 13681d7091189a4e68056e6a2864dc58f9d5700b
+benchmark_recipe: configs/deepseek_sboed_location.yaml
+horizon: 30
+batch_size: 32
+contrasts: 131072
+contrast_sampling: fresh shared iid prior bank per update; same expected finite-L objective, correlated outer-case gradient noise
+training_information_ceiling_nats: 11.783509698104846
+training_seeds: [101, 102]
+primary_arms: [v4, v1_context, no_role, dense, uniform_top2]
+replication_arms: [v1_context, v4]
+supplemental_native_v1: true
+supplemental_native_v1_settings: {batch_size: 2000, contrasts: 2000, contrast_sampling: independent across outer cases, comparison: "separate native-recipe audit, never silently pooled with matched recipe"}
+training_seconds_per_arm: 7200
+milestones: [1024, 2048, 4096, 8192]
+compute_checkpoints_seconds: [900, 1800, 3600, 7200]
+optimizer: Adam
+learning_rate: 0.00005
+adam_betas: [0.8, 0.998]
+gradient_clip: 5
+lr_decay: 0.98
+lr_schedule: after updates 1,1001,2001,...
+context_gradient_reference: {specialization_every: 10, stages: [1, 10, 20, 29], unchanged_helpers: true}
+partition: {fit_samples: 8192, validation_samples: 4096, fit_seed: 86404011, validation_seed: 86404012, groups: 4, location_reference_grid: fixed5x5box, minimum_group_probability: 0.05, minimum_between_fraction: 0.05, minimum_within_relative_variance: 0.01}
+alpha: {rule: "min(1,0.1*primary_expert_gradient_norm/auxiliary_expert_gradient_norm)", scale_floor_nats: 0.1, source: one pretraining-only scale/gradient diagnostic, diagnostic_seed: 86404021, official_EIG_tuning: forbidden}
+router_regularization: 0
+uniform_control: uniformly sample two distinct experts; use identical selected-softmax weight normalization
+seeds: {development: 86404101, confirmation: 86404102, role_diagnostics: 86404103, confirmation_replication: 86404112}
+evaluation: {development_systems: 256, development_contrasts: 262144, final_systems: 1024, final_contrasts: 1000000, role_systems: 256, role_contrasts: 262144}
+checkpoint_selection: last fully serialized budget-eligible common milestone; never largest EIG
+matched_compute_reporting: latest eligible checkpoint not exceeding each common declared wall-time milestone; report actual timing/update differences
+no_STABLE_promotion: true
+no_GitHub_push: true

@@ -1,0 +1,4 @@
+import os,sys,pathlib,json,fcntl,subprocess,time
+O=pathlib.Path(__file__).resolve().parents[1];guard=(O/'.launch.lock').open('a+');fcntl.flock(guard,fcntl.LOCK_EX|fcntl.LOCK_NB);receipt=O/'evidence/LAUNCH_RECEIPT.json';assert not receipt.exists(),'No duplicate experiment';m=json.loads((O/'PRETRAIN_MANIFEST.json').read_text());assert m['status']=='LOCKED_BEFORE_TRAINING'
+with (O/'TRAINING_LOGS/experiment.log').open('xb') as log:p=subprocess.Popen([sys.executable,'-u',str(O/'source/driver.py')],stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True,env={**os.environ,'MOE_HEC_V21_ROOT':str(O),'PYTHONDONTWRITEBYTECODE':'1','OPENBLAS_NUM_THREADS':'1'})
+receipt.write_text(json.dumps(dict(pid=p.pid,time=time.time(),git_commit=m['git_commit'],status_file=str(O/'evidence/EXPERIMENT_COMPLETION.json'),log=str(O/'TRAINING_LOGS/experiment.log')),indent=2));print(receipt.read_text())
