@@ -1,8 +1,109 @@
 {
-  "status": "PENDING",
-  "rows": [],
-  "comparisons": {},
-  "decision": null,
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "method": "MoE-sBOED V5",
+      "EIG": 12.880751038170912,
+      "MCSE": 0.035603931081117826,
+      "score_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v5_history_20261119/learned/evaluation/scores.npy"
+    },
+    {
+      "method": "MoE-sBOED V5-uniform",
+      "EIG": 12.77441210208342,
+      "MCSE": 0.0387107947799489,
+      "score_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v5_history_20261119/uniform/evaluation/scores.npy"
+    },
+    {
+      "method": "Original V4 learned",
+      "EIG": 12.77000799869132,
+      "MCSE": 0.03825275816647095,
+      "score_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v5_history_20261119/previous_learned/evaluation/scores.npy"
+    },
+    {
+      "method": "Original V4-uniform",
+      "EIG": 12.715670380566443,
+      "MCSE": 0.038502510033821095,
+      "score_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v5_history_20261119/previous_uniform/evaluation/scores.npy"
+    },
+    {
+      "method": "vsOED",
+      "EIG": 12.457720404251287,
+      "MCSE": 0.04109765251778219,
+      "score_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v5_history_20261119/vsoed/evaluation/scores.npy"
+    }
+  ],
+  "comparisons": {
+    "V5_minus_V4": {
+      "n": 2000,
+      "mean": 0.11074303947959316,
+      "MCSE": 0.026716003786128133,
+      "CI95": [
+        0.05834891071314588,
+        0.16313716824604044
+      ]
+    },
+    "learned_minus_uniform": {
+      "n": 2000,
+      "mean": 0.10633893608749113,
+      "MCSE": 0.028716021177262213,
+      "CI95": [
+        0.05002247037405543,
+        0.16265540180092683
+      ]
+    },
+    "V5_minus_vsOED": {
+      "n": 2000,
+      "mean": 0.42303063391962437,
+      "MCSE": 0.04967245128366234,
+      "CI95": [
+        0.32561543554131694,
+        0.5204458322979317
+      ]
+    },
+    "uniform_V5_minus_V4": {
+      "n": 2000,
+      "mean": 0.05874172151697762,
+      "MCSE": 0.03211160587343243,
+      "CI95": [
+        -0.004233999945661739,
+        0.12171744297961698
+      ]
+    },
+    "original_routing_gap": {
+      "n": 2000,
+      "mean": 0.05433761812487557,
+      "MCSE": 0.0294550869763476,
+      "CI95": [
+        -0.0034282675300359236,
+        0.11210350377978706
+      ]
+    },
+    "gap_improvement": {
+      "n": 2000,
+      "mean": 0.05200131796261555,
+      "MCSE": 0.03755243314983933,
+      "CI95": [
+        -0.021644689640051923,
+        0.12564732556528302
+      ]
+    }
+  },
+  "decision": {
+    "primary_credible": true,
+    "secondary_credible": true,
+    "uniform_change": {
+      "n": 2000,
+      "mean": 0.05874172151697762,
+      "MCSE": 0.03211160587343243,
+      "CI95": [
+        -0.004233999945661739,
+        0.12171744297961698
+      ]
+    },
+    "automatic_expansion": false,
+    "recommend_five_seeds": true,
+    "scope": "One continuation seed,case MC uncertainty;not seed robustness. History encoder and expert conditioning are one joint intervention;not separately attributed."
+  },
   "bank_identity": {
     "sha256": "79eec9bc550a06354d9ecc28b0ccdd3757d9ee355ebb0aca9233fb72efb71abc",
     "evaluation": {
