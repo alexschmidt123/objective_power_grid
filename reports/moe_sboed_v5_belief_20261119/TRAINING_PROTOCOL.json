@@ -1,0 +1,63 @@
+{
+  "study": "ONE_MATCHED_NEW_V5_NATIVE_BELIEF_REFRESH_SEED101",
+  "seed": 101,
+  "methods": {
+    "learned": "MoE-sBOED V5",
+    "uniform": "MoE-sBOED V5-uniform"
+  },
+  "only_change": "Offline refresh actor/target frozen belief from their OWN native posterior at continuation updates200,400,...1800. No refresh after terminal2000.",
+  "architecture": "History-conditioned previous V5 unchanged:four128 experts,weighted sum128,original644->64->4 router,128->32->2 head,bounded.2 weak branch.",
+  "initialization": "Original V4 protocol/frozen V2 parent16001;never trained previousV5 runtime as initialization. Diagnostic runtime is read-only evidence only.",
+  "native_objective": "discount1,use_PCE=False,unchanged native variational actor-critic EIG;no new rewards/losses/optimization updates",
+  "warmup_updates": 200,
+  "joint_updates": 1800,
+  "actor_updates": 2000,
+  "critic_updates": 10000,
+  "posterior_updates": 300000,
+  "new_episodes": 2000000,
+  "observations": 60000000,
+  "posterior_refresh_updates": [
+    200,
+    400,
+    600,
+    800,
+    1000,
+    1200,
+    1400,
+    1600,
+    1800
+  ],
+  "hard_seconds_per_run": 14400,
+  "preparation_seconds_conservatively_charged": 79.53387975692749,
+  "no_online_optimization": true,
+  "no_test_time_posterior_updates": true,
+  "diagnostic_seed_range_fix": "Native Torch/legacyNumpy seeding modulo2**32;PCG64 development seed unchanged;failed attempt preserved",
+  "reference_limitations": "9/12 importance cases ESS>=256;finite reference not exact or guaranteed multimode coverage. Critic rank matches2/12 by noisy mean,not proof of a bug.",
+  "critic_change": "NONE:diagnostic does not justify substituting critic objective. Only native posterior snapshot mechanism changes.",
+  "evaluation": {
+    "cases": 2000,
+    "contrasts": 1000000,
+    "horizon": 30,
+    "sigma": 0.5,
+    "chunk": 16384,
+    "bank_sha256": "52c0c614c4ee3b63d58ccda60714b38b00a2c0ca35564a428fe8cc2ce8d727c5",
+    "uniforms_sha256": "6e56f0a08fe4deeefd7f0977967dba9d2910a4a383f1acfbd1736db3f358033c",
+    "scorer_sha256": "64c67b6547c77f4823b487493ed0703efbd3f04d7308019e875d145505695f2f"
+  },
+  "canonical_test_selection": false,
+  "checkpoint": "Fixed terminal2000;no canonical tuning",
+  "uniform": "Exactly.25,router bypassed/frozen throughout training,target and evaluation;all other components get matching native training and refresh schedule",
+  "expansion": "No automatic additional seeds,no broad search",
+  "frozen_history_sources": {
+    "src/research/moe_sboed_v5_history_20261119/run.py": "9c8439c092f22db2e7fc20df35bc24f9372b268b15a129ccda50ae09bd9cc9f3",
+    "src/research/moe_sboed_v5_history_20261119/history_policy.py": "2c610072e633cb4e86129db9d43d09cc879c4a72e62d365c0483ff9e4bbbcd51",
+    "configs/moe_sboed_v5_history_20261119.json": "8a284bc4deeb5d6c34dc361ec2fc13cb4a8f758fde1d7181432e928fc40fe2de",
+    "tools/moe_sboed_v5_history_20261119.py": "49dfd30cfb51e913b0588e4b8b94aa84c9e9bf8938f88ad0539a80fae37fe013",
+    "src/research/moe_sboed_v4_20261116/specialist_queries.py": "8f17b326db9839681c1d0d9ed0990cccbac1e47bb2eca37dcc720959728faa24",
+    "src/research/moe_sboed_v4_20261116/run.py": "452fd7f1fdeb88a579c9b364780c92a5d0e4025e04af85a75d5089255d9af738",
+    "src/research/moe_sboed_v4_20261116/policy.py": "e7ae0560725e262758bc1e1f45496501ef06904cd424a9ea7bdc0d91730dc321",
+    "src/research/hec_v3_study/engine.py": "31d8c6379ca0ae01bd3ae8a7b1edd7d7e6a4817d5e1bb572ba3c1214cde574b7",
+    "src/research/hec_v3_study/model.py": "445b648a3a8a73b077283f0a913474b27c55dff8805e27ef96b81368bddd9b52",
+    "src/research/hec_v3_study/runtime.py": "1111cbee2fbc67580b9129693a3f56751dc5d2787caa82b04e4c62094245d885"
+  }
+}
