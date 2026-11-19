@@ -58,6 +58,8 @@ def main():
  text+='\nController state: '+json.dumps(state)+'.\n\n'
  text+='All primary estimates are finite1M-contrast EIG lower bounds. Known estimator saturation/contrast bias is not represented by the MCSE. Optional sensitivity status: '+sensitivity['status']+'. This is one continuation seed from shared V2 pretraining,not seed robustness or independent from-scratch training.\n\n'
  text+='Replacement V5 changes the ordered history encoder and expert conditioning jointly;their individual effects are not identified. V4 fusion and action-head capacity are preserved. Learned routing must be assessed through paired EIG,not weight variation or gradient norms. No canonical-bank checkpoint/hyperparameter selection,no teacher,no new rewards,no V4-Spec masking,and no automatic extra seeds.\n'
+ primary=M/'reports/moe_sboed_v5_history_canonical_20261119/RESULTS.json'
+ if primary.exists():text='SUPPLEMENTARY development-bank analysis. Primary canonical conclusions supersede any expansion recommendation below;see reports/moe_sboed_v5_history_canonical_20261119/SCIENTIFIC_CONCLUSION.md.\n\n'+text
  (R/'SCIENTIFIC_CONCLUSION.md').write_text(text)
  put('COMPLETION_VERIFICATION.json',dict(controller=state,primary_evaluation_complete=d['status']=='COMPLETE',paired_initialization_verified=len(inits)==2,checkpoint_count=len(manifest),source_hashes_verified=True,bank_sha256=read(O/'BANK_IDENTITY.json')['sha256'],automatic_expansion=False))
  if d['status']=='COMPLETE':

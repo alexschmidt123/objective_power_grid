@@ -6,6 +6,8 @@ lock=(O/'.publisher.lock').open('a+');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_
 def receipt(value):(O/'PUBLICATION_STATUS.json').write_text(json.dumps(value,indent=2)+'\n')
 receipt(dict(status='WAITING',pid=os.getpid()))
 for _ in range(960):
+    if not (O/'STATUS.json').exists():
+        time.sleep(5);continue
     state=json.loads((O/'STATUS.json').read_text())
     if state['status'] in ['COMPLETE','FAILED_OR_CAPPED']:
         receipt(dict(status='VERIFYING_AND_PUBLISHING',pid=os.getpid(),controller=state))
