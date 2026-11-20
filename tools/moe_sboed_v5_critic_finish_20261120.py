@@ -38,6 +38,9 @@ def publish(status):
   manifest.append(dict(method=r['method'],checkpoint=str(cp),checkpoint_sha256=r['final_actor_sha256'],runtime=str(O/arm/'runtime.pkl'),runtime_sha256=sha(O/arm/'runtime.pkl'),initialization=inits[arm],training_config=str(O/arm/'CONFIG.json')))
   compute[arm]=dict(training_seconds=r['training_seconds'],logical_total_seconds=total,preparation_credit=config['preparation_credit_seconds'],counts=counts,new_training_episodes=2000000,new_training_observations=60000000,
    resources=read(O/arm/'RESOURCES.json'),evaluation=r['evaluation'],model_queries=r['training_model_derived_calls'])
+ for arm in compute:
+  extra=O/arm/'evaluation_recovery_resources/RESOURCES.json'
+  if extra.exists():compute[arm]['additional_recovery_resources']=read(extra)
  if status['status']=='COMPLETE':
   assert len(manifest)==2 and d['status']=='COMPLETE'
   for key in ['actor_digest','critic_digest','posterior_digest','actor_target_digest','critic_target_digest','optimizer_digest','replay_digest','training_rng_digest']:assert inits['learned'][key]==inits['uniform'][key],key

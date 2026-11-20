@@ -1,0 +1,33 @@
+{
+  "methods": {},
+  "preparation": {
+    "status": "PASS",
+    "phase": {
+      "status": "COMPLETE",
+      "updates": 2,
+      "counts": {
+        "actor": 2,
+        "critic": 10,
+        "posterior": 300
+      },
+      "seconds": 8.643107193056494,
+      "trainable_parameters": 339520,
+      "new_episodes": 2000,
+      "simulator_observations": 60000,
+      "frozen_state_preserved": true,
+      "objective": "Unmodified native variational actor-critic EIG;use_PCE=False"
+    },
+    "seconds": 8.686174280941486,
+    "discarded": true,
+    "posterior_context_evaluations": 2,
+    "cache_hits": 10,
+    "actor_checkpoint_not_a_formal_initialization": true
+  },
+  "notes": [
+    "Discarded preparation used2000 additional episodes and60000 observations;charged to both logical time caps but executed once.",
+    "Frozen inherited V2/provider/replay costs are shared dependencies,not zero.",
+    "Additional critic capacity and belief inference increase offline FLOPs;equal updates/episodes are not identical compute.",
+    "Training-only critic is absent from deployed actor;no online optimization or posterior refresh.",
+    "Publication/verification CPU overhead is separate from train/evaluation run timing."
+  ]
+}
