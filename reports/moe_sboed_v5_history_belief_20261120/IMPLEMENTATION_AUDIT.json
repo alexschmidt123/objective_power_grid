@@ -1,0 +1,91 @@
+{
+  "status": "PASS",
+  "CPU_only": true,
+  "source_sha256": {
+    "src/research/moe_sboed_v5_history_belief_20261120/role_evidence.py": "2fbaa6f430b4417024493f0a2e21c9a7c48d30453a76d012f6e8b35e0145e8b1",
+    "src/research/moe_sboed_v5_history_belief_20261120/expert_policy.py": "6aeace3287b3e46b663813dfb5015b8a7c61163dc5181dfbef85a90c4a856230"
+  },
+  "actor_parameters": 371136,
+  "extra_parameters": 0,
+  "extra_neural_networks": 0,
+  "previous_state_keys_and_initial_weights_identical": true,
+  "initial_actions_exactly_match_previous_V5": true,
+  "critic_and_posterior_training_unchanged": true,
+  "roles": [
+    "current uncertainty",
+    "predictive innovation under previous belief",
+    "observed information under current belief",
+    "observed belief change"
+  ],
+  "evidence_shape": [
+    10,
+    4,
+    14
+  ],
+  "expert_execution_calls": [
+    1,
+    1,
+    1,
+    1
+  ],
+  "observed_history_changes_role_evidence": [
+    0.5484433770179749,
+    0.44142594933509827,
+    0.37435588240623474,
+    0.38425371050834656
+  ],
+  "future_slots_ignored": true,
+  "no_observation_likelihood_double_counting": true,
+  "gradient_norms_after_disposable_critic_steps": {
+    "query.offset": 0.15192594456717223,
+    "query.history": 0.36744259583499583,
+    "query.commander": 0.5824846767284668,
+    "experts.0": 1.5925907001055375,
+    "experts.1": 1.3670429685080296,
+    "experts.2": 1.4686106931521719,
+    "experts.3": 1.3885517644734742,
+    "router.0": 0.0044286541132407,
+    "router.2": 0.3524264475416514,
+    "action_head.0": 2.1043405854391097,
+    "action_head.2": 1.7922510110897747,
+    "shared_small.0": 0.12557516587620765,
+    "shared_small.2": 0.08036688605890101,
+    "history_context.token": 4.342209800419043e-06,
+    "history_context.combine": 0.00019528231248155606
+  },
+  "deployment": {
+    "status": "PASS",
+    "fixed_actor_state_unchanged": true,
+    "all_actor_parameters_frozen": true,
+    "gradient_optimizer_construction_and_random_search_traps": true,
+    "actions_bitwise_equal": true,
+    "static_forward_methods": [
+      "<class 'expert_policy.Actor'>.compute",
+      "<class 'expert_policy.Actor'>.decode",
+      "<class 'expert_policy.Actor'>.forward",
+      "<class 'expert_policy.Actor'>.packets",
+      "<class 'expert_policy.Expert'>.forward",
+      "<class 'hec_policy.Belief'>.nodes",
+      "<class 'history_policy.OrderedHistory'>.forward",
+      "<class 'policy.QueryContext'>.forward",
+      "<class 'specialist_queries.SpecialistFeatures'>.forward",
+      "<class 'src.research.vendor.vsoed.post_approx.GMM_NET'>.forward",
+      "<class 'src.research.vendor.vsoed.utils.Net'>.forward"
+    ],
+    "deployed_source_sha256": {
+      "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/moe_sboed_v4_20261116/policy.py": "e7ae0560725e262758bc1e1f45496501ef06904cd424a9ea7bdc0d91730dc321",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/moe_sboed_v5_history_belief_20261120/expert_policy.py": "6aeace3287b3e46b663813dfb5015b8a7c61163dc5181dfbef85a90c4a856230",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/_legacy_archive/temp_research_20261115/scratch_runs/moe_hec_v2_icml_20261109/source/hec_policy.py": "b7e962a4a67a49405e065dc64b4107639b96c3b8b3eeb51d0459edcc761930f8",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/_legacy_archive/temp_research_20261115/scratch_runs/moe_development_migration_20261105/imported_ubuntu_tree/scratch_runs/20261104T161647Z_direct_head_moe_vsoed_seed101/source/src/research/vendor/vsoed/post_approx.py": "5e63ee1690dead869b68a7d26a1e7abd2baa7aed382fb8abb56e280062db36e7",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/moe_sboed_v4_20261116/specialist_queries.py": "8f17b326db9839681c1d0d9ed0990cccbac1e47bb2eca37dcc720959728faa24",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/_legacy_archive/temp_research_20261115/scratch_runs/moe_development_migration_20261105/imported_ubuntu_tree/scratch_runs/20261104T161647Z_direct_head_moe_vsoed_seed101/source/src/research/vendor/vsoed/utils.py": "c99d31e206a30b7911324bd1dfd92bfb2d7fb956f3b6b0e7afa0853cdae7b657",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/moe_sboed_v5_history_20261119/history_policy.py": "2c610072e633cb4e86129db9d43d09cc879c4a72e62d365c0483ff9e4bbbcd51"
+    },
+    "scope": "Runtime tests plus source inspection for this frozen implementation;fixed NN/sigma-point/probe loops remain,not iterative design optimization",
+    "offline_reference_and_suffix_code_not_in_deployed_path": true
+  },
+  "full_training_started": false,
+  "EIG_evaluations": 0,
+  "scientific_status": "Implemented untrained candidate;no claim of useful specialization,routing EIG advantage or superiority",
+  "seconds": 2.111081555020064
+}
