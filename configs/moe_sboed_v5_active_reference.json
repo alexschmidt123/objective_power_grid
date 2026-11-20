@@ -64,5 +64,23 @@
       "preserve_all_artifacts": true
     }
   ],
-  "execution": "Use existing trained checkpoints as development reference. No duplicate retraining or new architecture authorized by this status change."
+  "execution": "Use existing trained checkpoints as development reference. No duplicate retraining or new architecture authorized by this status change.",
+  "research_scope": "V4 and previous history-conditioned V5 only. Changes confined to four-expert MoE policy;native critic/posterior/objectives unchanged. No separate auxiliary networks.",
+  "v4_reference": {
+    "source": "src/research/moe_sboed_v4_20261116/",
+    "canonical_report": "reports/moe_sboed_v4_allmethods_20261117/RESULTS.json",
+    "training_seed_coverage": [
+      101,
+      102,
+      103,
+      104,
+      105
+    ]
+  },
+  "excluded_from_primary_method": [
+    "moe_sboed_v5_belief_20261119",
+    "moe_sboed_v5_critic_20261120",
+    "moe_sboed_v5_20261118"
+  ],
+  "running_job_handling": "Preserve running uniform critic-pilot job;no interruption,no expansion or restart. Completion reports remain historical diagnostics,not proposed-method promotion."
 }
