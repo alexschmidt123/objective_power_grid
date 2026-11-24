@@ -1,3 +1,13 @@
+## Experiment layout and launch rules (2026-11-23)
+
+Start every new experiment with `bash run.sh --config <path>`. Start a sweep with `bash sweep_run.sh --configs <path1>,<path2>`. Keep experiment settings in versioned configuration files and use separate configs for different protocols. Slurm scripts invoke these same root commands. Python modules, historical controllers, and shell pipeline stages are implementation details.
+
+Store each new run directly in `experiments/mmddyyyy-hhmm-<experiment_name and T value>-<method_name>/`. Use the actual local start date and 24-hour minute, the config stem followed by `_T<horizon>`, and the resolved method. For a joint comparison join method IDs with `+`. If the same name already exists in the same minute, add `_r2`, `_r3`, etc. to the experiment name before the horizon. For example, `experiments/11232026-0930-ieee9_research_eig_T3-dad/`. Each sweep cell gets a separate directory. Preserve config, seeds, settings and run provenance with the outputs. Preserve existing historical evidence and frozen source paths.
+
+Organize configs by domain under `configs/{power_grid,location_finding,sir,moe_sboed}/`. Keep shell stages in `scripts/pipeline/`, environment setup in `scripts/environment/`, and checks in `scripts/checks/`. Group versioned MoE implementations in `src/research/moe_sboed/{v4,v5}/` and their utilities in `tools/moe_sboed/{v4,v5}/`. Existing flat compatibility links support historical paths. Add new files to the corresponding group.
+
+While LabPC is unavailable, commit and push validated changes from the Sapelo2 main checkout. The layout changes do not authorize training.
+
 ## Project-wide rules — latest user instruction 2026-11-14
 
 These rules apply to ALL location-finding, SIR ODE and power-grid experiments and supersede conflicting older workflow/layout instructions below.

@@ -57,8 +57,16 @@ def enforce_storage_policy(root, argv):
             elif arg.startswith(flag + '='):
                 argv[i] = flag + '=' + str(path)
         return argv
+    # Fresh config-driven runs are unregistered working results. The explicit
+    # official output route below still requires its frozen command and sources.
+    if any(arg.split('=')[0] in ('--exp-dir', '--exp_dir') for arg in argv):
+        raise ValueError('The root launcher allocates the experiment directory')
     if sweep:
-        raise ValueError('Official sweeps require separately frozen per-run authorizations')
+        if value is not None or _option(argv, '--output') is not None:
+            raise ValueError('Each stable sweep cell allocates its own experiment directory')
+        return argv
+    if value is None and _option(argv, '--config'):
+        return argv
     if value is None:
         raise ValueError('STABLE runs require an explicit benchmark output and frozen authorization')
     path = Path(value)

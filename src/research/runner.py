@@ -1,7 +1,6 @@
 """Root-launcher implementation of the EIG research plan (not a new launcher)."""
 import argparse
 import csv
-from datetime import datetime
 import hashlib
 import json
 import math
@@ -75,7 +74,7 @@ def freeze_source(root,output):
     """Scientific snapshot only: never copy local AGENTS.md or historical data."""
     paths = [p for p in (root/'src').rglob('*.py') if '__pycache__' not in p.parts]
     paths += [root/'run.sh',root/'sweep_run.sh']
-    paths += list((root/'configs').glob('*.yaml'))
+    paths += list((root/'configs').rglob('*.yaml'))
     paths += list((root/'src'/'research'/'vendor').rglob('LICENSE'))
     paths += list((root/'src'/'research'/'vendor').rglob('PROVENANCE.json'))
     paths += list((root/'src'/'research'/'vendor'/'scorebed'/'config').rglob('*.yaml'))
@@ -364,14 +363,12 @@ def main(argv=None):
         protocol_record=validate_protocol(raw,settings,horizon,methods,args.seed,seeds,args.journal,args.smoke,args.pilot)
     except ValueError as exc:parser.error(str(exc))
     torch.set_num_threads(settings['threads'])
-    now=datetime.now()
-    default=root/'experiments'/now.strftime('%m%d%Y')/(now.strftime('%m%d%Y_%H%M%S_%f')+f"_{raw['system']['name']}_research_eig_T{horizon}_train{args.seed}")
-    output=Path(args.output).resolve() if args.output else default
-    # Explicit paths must remain within the required date-grouped hierarchy.
-    rel=output.relative_to(root/'experiments')
-    if len(rel.parts)<2 or len(rel.parts[0])!=8 or not rel.parts[0].isdigit() or not rel.parts[1].startswith(rel.parts[0]+'_'):
-        parser.error('Output must be experiments/MMDDYYYY/MMDDYYYY_<campaign>/...')
-    output.mkdir(parents=True,exist_ok=False)
+    from src.results.run_directory import allocate_run
+    if args.output:
+        output = Path(args.output).resolve()
+        output.mkdir(parents=True, exist_ok=False)
+    else:
+        output = allocate_run(root / 'experiments', config_path.stem, horizon, methods)
     (output/'models').mkdir();(output/'eval').mkdir()
     (output/'logs').mkdir()
     log_handle=(output/'logs'/'run_log.log').open('w')

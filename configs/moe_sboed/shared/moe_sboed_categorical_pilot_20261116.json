@@ -1,0 +1,63 @@
+{
+  "status": "LOCKED_BEFORE_PILOT",
+  "seed": 101,
+  "methods": [
+    "MoE-sBOED",
+    "MoE-sBOED-uniform"
+  ],
+  "architecture": "Four specialist semantic pathways,each with private history encoder/commander/418->128SiLU->2tanh head. Shared frozen posterior inference only. No shared physical policy,feature fusion,decoder or action head.",
+  "roles": [
+    "Posterior geometry",
+    "Hypothesis discrimination",
+    "Parameter sensitivity",
+    "Sequential opportunity"
+  ],
+  "execution": "Categorical inverse-CDF selection of exactly one proposal;never average action coordinates.",
+  "actor_objective": "Only native full-horizon variational EIG. Exact critic expectation -mean(sum_k p_k Q(h,a_k)) for mixture actor;unchanged native deterministic critic gradient for standalone pretraining. Native categorical Monte Carlo target backups. No other loss/reward.",
+  "router": "146 observed-history/proposal/belief/horizon inputs ->64SiLU->4softmax;zero output initialization. Uniform bypasses router and uses exact.25 in train/targets/eval.",
+  "parent_actor_sha256": "b901f93cf95556f2f39a20cdf1f039b37a2851bacdb92e59d03163a364c0b0b9",
+  "parent_runtime_sha256": "21eabace6a14a0dea6b16144e96a9d74cb32338662a1ef5cbfed4b3885576d05",
+  "parent": "Existing trained uniform101 for semantic/provider initialization;shared collaboration head/base deliberately discarded. Known inherited training costs are separate.",
+  "initialization_seed": 20261116101,
+  "router_initialization_seed": 20261116201,
+  "actor_lr": 0.001,
+  "expert_updates_each": 200,
+  "mixture_updates": 1200,
+  "total_updates_charged_each_method": 2000,
+  "critic_updates_charged_each_method": 10000,
+  "posterior_updates_charged_each_method": 300000,
+  "simulator_episodes_charged_each_method": 2050000,
+  "simulator_observations_charged_each_method": 61500000,
+  "initial_replay": 10000,
+  "new_episodes_per_update": 1000,
+  "replay_batch": 10000,
+  "hard_total_seconds_per_method": 14400,
+  "common_pretraining_hard_seconds": 7200,
+  "competitive_margin_nats": 0.1,
+  "evaluation": {
+    "seed": 202611161901,
+    "routing_seed": 202611161902,
+    "cases": 2000,
+    "contrasts": 1000000,
+    "T": 30,
+    "sigma": 0.5,
+    "chunk": 16384,
+    "bounds": [
+      [
+        -4,
+        4
+      ],
+      [
+        -4,
+        4
+      ]
+    ],
+    "prior": "N(0,I4),two exchangeable2D sources",
+    "scorer_sha256": "64c67b6547c77f4823b487493ed0703efbd3f04d7308019e875d145505695f2f",
+    "bank": "New separate development-validation draws;original benchmark test bank never read. All pilot policies use same parameters,base noise,prior contrasts and route uniforms.",
+    "checkpoint_selection": "Fixed terminal updates only;pre-router full-episode expert EIG checked for validity,not used for hyperparameter tuning or checkpoint selection."
+  },
+  "success": "Complete budgets,all4 standalone interfaces valid,paired learned-minus-uniform95% CI lower>0,and learned-minus-collaborative95% CI lower>-.1nat. One-seed evidence permits considering expansion,never automatic five-seed launch.",
+  "fairness": "Same expert pretrained weights,router weights,critic,posterior and RNG within pair;independent mixture training with same native work. All4 common expert pretraining wall/simulation costs charged to each method,not hidden. Shared pretraining/evaluation and reference scoring charged before routing cap. No end-to-end independent-seed claim.",
+  "scope": "ONE categorical pilot only;no changes to completed collaborative benchmark;no SIR/grid;no automatic expansion."
+}

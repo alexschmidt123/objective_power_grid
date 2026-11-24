@@ -18,7 +18,6 @@ import os
 from pathlib import Path
 import shutil
 import time
-from datetime import datetime
 import numpy as np
 import torch
 from scipy.special import logsumexp
@@ -540,7 +539,7 @@ def main():
     p.add_argument('--numerical-gradient-directions',type=int,default=4)
     p.add_argument('--output',default=None)
     p.add_argument('--evaluate-from',default=None,help='Opt in to evaluating matching completed checkpoints on additional seeds; no training')
-    p.add_argument('--T',type=int,default=3)
+    p.add_argument('--T',type=int)
     p.add_argument('--N-obs','--N_obs',dest='N_obs',type=int,default=0)
     p.add_argument('--noise-sigma','--noise_sigma',dest='noise_sigma',type=float,default=.005)
     p.add_argument('--duration-min',type=float,default=.2)
@@ -555,7 +554,7 @@ def main():
     p.add_argument('--seed',type=int,default=101)
     p.add_argument('--eval-seed',type=int,default=1001)
     p.add_argument('--eval-seeds',default=None)
-    p.add_argument('--methods','--method',default='dad,rl_sboed,step_dad,myopic,fixed,random')
+    p.add_argument('--methods','--method')
     p.add_argument('--moe-training-mode',choices=['legacy','stable','belief_value','belief_specialist','policy_pathwise'],default='legacy')
     p.add_argument('--fixed-initialization-from',default=None,help='Explicit completed matching Fixed run supplying only the initial sequence for a fresh direct MoE')
     p.add_argument('--moe-lr-schedule',choices=['constant','cosine'],default='constant')
@@ -585,20 +584,17 @@ def main():
     args=p.parse_args()
     from src.config import resolve_config_path
     args.config=str(resolve_config_path(args.config))
+    cfg = load_config(args.config)
+    if args.T is None:
+        args.T = cfg.step_number
+    if args.methods is None:
+        args.methods = ','.join(cfg.methods)
     requested={'eig_based':'eig','cost_utility':'cost_utility'}.get(args.experiment_type)
     if args.objective is not None and requested is not None and args.objective!=requested:
         p.error('Objective and experiment_type disagree')
     args.objective=args.objective or requested or {'eig_based':'eig','cost_utility':'cost_utility'}[load_config(args.config).raw['experiment']['experiment_type']]
     if str(load_config(args.config).raw.get('system',{}).get('name','')).lower()=='ieee14' and args.objective!='eig':
         p.error('IEEE14 continuous support is enabled for EIG only; cost_utility remain inactive')
-    if args.output is None:
-        now=datetime.now()
-        sigma_token=format(args.noise_sigma,'.12g').replace('.','p')
-        window_token=format(args.window,'.12g').replace('.','p')
-        system_name=str(load_config(args.config).raw['system']['name']).lower()
-        label=(now.strftime('%m%d%Y_%H%M%S_%f')+
-            f'_{system_name}_nonreset_{args.objective}_T{args.T}_Nobs{args.N_obs}_sigma{sigma_token}_W{window_token}_train{args.seed}')
-        args.output=str(Path(__file__).resolve().parents[3]/'experiments'/now.strftime('%m%d%Y')/label)
     eval_seeds=[int(x) for x in args.eval_seeds.split(',')] if args.eval_seeds else [args.eval_seed]
     if not eval_seeds or len(set(eval_seeds))!=len(eval_seeds):p.error('Use distinct evaluation seeds')
     if args.N_obs<0:p.error('N_obs must be nonnegative')
@@ -636,8 +632,14 @@ def main():
     root=Path(__file__).resolve().parents[3]
     if reuse:
         validate_reuse(reuse,args,root,eval_seeds)
-    output=Path(args.output).resolve()
-    output.mkdir(parents=True,exist_ok=False)
+    from src.results.run_directory import allocate_run
+    if args.output:
+        output = Path(args.output).resolve()
+        output.mkdir(parents=True, exist_ok=False)
+    else:
+        output = allocate_run(Path(__file__).resolve().parents[3] / 'experiments',
+                              Path(args.config).stem, args.T, args.methods.split(','))
+    args.output = str(output)
     import sys,traceback
     original_hook=sys.excepthook
     def record_failure(kind,value,tb):
@@ -871,7 +873,7 @@ def main():
         target=snapshot/relative
         target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copy2(root/relative,target)
-    for relative in ['scripts/continuous_eig.sh','scripts/continuous.sh','run.sh','sweep_run.sh']:
+    for relative in ['scripts/pipeline/continuous_eig.sh','scripts/pipeline/continuous.sh','src/results/run_directory.py','run.sh','sweep_run.sh']:
         target=snapshot/relative
         target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copy2(root/relative,target)

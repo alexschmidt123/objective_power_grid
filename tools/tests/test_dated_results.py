@@ -12,27 +12,26 @@ from src.online_cli import main as dispatch
 ROOT=Path(__file__).resolve().parents[2]
 
 class DatedResultsTests(unittest.TestCase):
-    def test_legacy_allocator_and_discovery_use_date_layer(self):
+    def test_allocator_and_discovery_use_flat_directory(self):
         cfg=load_config(ROOT/'configs/sir_ode_eig.yaml')
         with tempfile.TemporaryDirectory() as directory:
             base=Path(directory)
             path=allocate_result_dir(cfg,'eig_based',project_root=base,stamp='09132026_120000')
-            self.assertEqual(path.parent,base/'experiments/09132026')
-            self.assertEqual(find_latest_result_dir(cfg,'eig_based',project_root=base),path)
+            self.assertEqual(path.parent,base/'experiments')
+            self.assertTrue(path.name.startswith('09132026-1200-sir_ode_eig_T'))
+            second=allocate_result_dir(cfg,'eig_based',project_root=base,stamp='09132026_120000')
+            self.assertIn('_r2_T',second.name)
+            self.assertEqual(find_latest_result_dir(cfg,'eig_based',project_root=base),second)
 
     def test_online_default_path_is_dated_and_describes_observations(self):
         class StopBeforeSimulation(Exception):pass
-        captured=[]
-        def intercept(path,*args,**kwargs):
-            captured.append(path);raise StopBeforeSimulation()
-        with patch('sys.argv',['run.sh','--config',str(ROOT/'configs/ieee9_eig.yaml'),'--objective','eig']),patch.object(Path,'mkdir',intercept):
-            with self.assertRaises(StopBeforeSimulation):main()
-        self.assertEqual(captured[0].parent.name,datetime.now().strftime('%m%d%Y'))
-        self.assertTrue(captured[0].name.startswith(captured[0].parent.name+'_'))
-        self.assertIn('_eig_T3_Nobs0_sigma0p005_W3_',captured[0].name)
+        with patch('sys.argv',['run.sh','--config',str(ROOT/'configs/power_grid/ieee9_eig.yaml'),'--method','dad','--T','4']), patch('src.results.run_directory.allocate_run',side_effect=StopBeforeSimulation) as allocate:
+            with self.assertRaises(StopBeforeSimulation):
+                main()
+        allocate.assert_called_once_with(ROOT/'experiments','ieee9_eig',4,['dad'])
 
     def test_sweep_delegates_each_cell_to_dated_run_default(self):
-        with patch('sys.argv',['sweep_run.sh','--sweep','--T','3,4','--objective','eig']),patch('src.online_cli.subprocess.run') as run:
+        with patch('sys.argv',['sweep_run.sh','--sweep','--configs','ieee9_research_eig','--T','3,4','--objective','eig']),patch('src.online_cli.subprocess.run') as run:
             dispatch()
         self.assertEqual(run.call_count,2)
         for call in run.call_args_list:

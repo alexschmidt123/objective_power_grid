@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from src.results.online import cost_run_identity, cost_run_rows
-from src.layout import load_run_config_doc, parse_result_dir_name
+from src.layout import load_run_config_doc, read_result_identity
 
 TRAIN_SEEDS = (101, 202, 303)
 EVAL_SEEDS = (1001, 1002, 1003, 1004, 1005)
@@ -95,7 +95,7 @@ def collect(
                 crossed[(method+'::online',horizon)][key].append(row['online_seconds_per_rollout'])
                 offline[(method,horizon)][train_seed]=row['training_time_seconds']
             continue
-        parsed = parse_result_dir_name(exp_dir.name)
+        parsed = read_result_identity(exp_dir)
         if parsed is None:
             raise ValueError(f"invalid result folder name: {exp_dir.name}")
         expected_type = "eig_based" if eig else "cost_utility"

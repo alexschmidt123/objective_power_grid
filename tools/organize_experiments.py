@@ -49,6 +49,7 @@ def main():
     moves=[]
     for path in sorted(root.iterdir()):
         if not path.is_dir() or path.is_symlink():continue
+        if path.name == "_legacy_archive" or re.match(r"^\d{8}-\d{4}-.+_T\d+-", path.name):continue
         if re.fullmatch(r'\d{8}',path.name):
             datetime.strptime(path.name,'%m%d%Y');continue
         day,name=destination_name(path.name)

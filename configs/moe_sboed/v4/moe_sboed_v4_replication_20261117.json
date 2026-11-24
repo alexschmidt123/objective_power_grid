@@ -1,0 +1,139 @@
+{
+  "status": "LOCKED_BEFORE_NEW_EVALUATION",
+  "study_type": "EXPLORATORY_REPLICATION_AFTER_FAILED_PILOT_EXPANSION_CRITERION",
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "new_training_seeds": [
+    102,
+    103,
+    104,
+    105
+  ],
+  "new_training_runs": 8,
+  "retrain_seed101": false,
+  "methods": [
+    "MoE-sBOED-V4",
+    "MoE-sBOED-V4-uniform"
+  ],
+  "evaluation_seed": 202611174901,
+  "scorer_sha256": "64c67b6547c77f4823b487493ed0703efbd3f04d7308019e875d145505695f2f",
+  "frozen_source_sha256": {
+    "src/research/moe_sboed_v4_20261116/specialist_queries.py": "8f17b326db9839681c1d0d9ed0990cccbac1e47bb2eca37dcc720959728faa24",
+    "src/research/moe_sboed_v4_20261116/run.py": "452fd7f1fdeb88a579c9b364780c92a5d0e4025e04af85a75d5089255d9af738",
+    "src/research/moe_sboed_v4_20261116/policy.py": "e7ae0560725e262758bc1e1f45496501ef06904cd424a9ea7bdc0d91730dc321",
+    "configs/moe_sboed_v4_20261116.json": "e5a1785679308829d7f31eef61d4f11e9d3737ec4c54767d641ad37a402b9e23",
+    "tools/moe_sboed_v4_pilot.py": "7e21eb21e97b6b9b3b4839f600e8911d8963cab0dc0c6730449d2f5ab14c1e10",
+    "src/research/hec_v3_study/engine.py": "31d8c6379ca0ae01bd3ae8a7b1edd7d7e6a4817d5e1bb572ba3c1214cde574b7",
+    "src/research/hec_v3_study/runtime.py": "1111cbee2fbc67580b9129693a3f56751dc5d2787caa82b04e4c62094245d885",
+    "src/research/hec_v3_study/model.py": "445b648a3a8a73b077283f0a913474b27c55dff8805e27ef96b81368bddd9b52",
+    "src/research/hec_v3_study/frozen_feature_policy.py": "12f26aa0efa22b4f80782dda1ddac04721d891b3a1126509679f59149db3cbbb"
+  },
+  "original_protocol_sha256": "e5a1785679308829d7f31eef61d4f11e9d3737ec4c54767d641ad37a402b9e23",
+  "seed101_checkpoints": {
+    "learned": {
+      "path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v4_20261116/learned/joint_actor.pt",
+      "sha256": "549973f1b26fafd7964f603bb899ad2b1f575090ddc2c55a810a685292f48fb0"
+    },
+    "uniform": {
+      "path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v4_20261116/uniform/joint_actor.pt",
+      "sha256": "f22579ee1ac4f55557f7e30f385fdfd69c6a8ab8438454386fe31c12e6fb0c75"
+    }
+  },
+  "queue": [
+    {
+      "id": "train_seed102_learned",
+      "task": "train",
+      "seed": 102,
+      "arm": "learned",
+      "output": "seed102/learned"
+    },
+    {
+      "id": "train_seed102_uniform",
+      "task": "train",
+      "seed": 102,
+      "arm": "uniform",
+      "output": "seed102/uniform"
+    },
+    {
+      "id": "train_seed103_learned",
+      "task": "train",
+      "seed": 103,
+      "arm": "learned",
+      "output": "seed103/learned"
+    },
+    {
+      "id": "train_seed103_uniform",
+      "task": "train",
+      "seed": 103,
+      "arm": "uniform",
+      "output": "seed103/uniform"
+    },
+    {
+      "id": "train_seed104_learned",
+      "task": "train",
+      "seed": 104,
+      "arm": "learned",
+      "output": "seed104/learned"
+    },
+    {
+      "id": "train_seed104_uniform",
+      "task": "train",
+      "seed": 104,
+      "arm": "uniform",
+      "output": "seed104/uniform"
+    },
+    {
+      "id": "train_seed105_learned",
+      "task": "train",
+      "seed": 105,
+      "arm": "learned",
+      "output": "seed105/learned"
+    },
+    {
+      "id": "train_seed105_uniform",
+      "task": "train",
+      "seed": 105,
+      "arm": "uniform",
+      "output": "seed105/uniform"
+    },
+    {
+      "id": "evaluate_existing_seed101_learned",
+      "task": "eval101",
+      "seed": 101,
+      "arm": "learned",
+      "output": "seed101_evaluation/learned"
+    },
+    {
+      "id": "evaluate_existing_seed101_uniform",
+      "task": "eval101",
+      "seed": 101,
+      "arm": "uniform",
+      "output": "seed101_evaluation/uniform"
+    },
+    {
+      "id": "evaluate_secondary_seed101_previous_learned",
+      "task": "secondary",
+      "seed": 101,
+      "arm": "previous_learned",
+      "output": "secondary_seed101/previous_learned"
+    },
+    {
+      "id": "evaluate_secondary_seed101_previous_uniform",
+      "task": "secondary",
+      "seed": 101,
+      "arm": "previous_uniform",
+      "output": "secondary_seed101/previous_uniform"
+    }
+  ],
+  "initialization_recipe": "Template innovations seed202611150000+training_seed;V4 fresh components seed202611164000+training_seed;training CPU/CUDA/Python/NumPy RNG seed=training_seed. Exactly reproduces101;all new components vary by continuation seed.",
+  "budget": "Unmodified V4 schedule200warmup+1800joint,2000actor/10000critic/300000posterior updates,2M new episodes/60M observations,4h including evaluation.",
+  "scope": "Five independent continuation seeds conditioned on the SAME frozen V2 parent/pretraining;not five end-to-end pretraining seeds.",
+  "evaluation": "ONE new locked bank2000cases/1Mcontrasts/T30,original frozen scorer/chunk16384,common truth/base noise. Every terminal V4 checkpoint including existing101 reevaluated here. Original pilot preserved on original bank.",
+  "analysis": "Per-seed paired case intervals and n5 paired seed-level t(df4) interval kept separate;no10000-training-seed interpretation. Previous collaborative secondary coverage101only. No hyperparameter search or V5.",
+  "execution": "ONE durable sequential controller;completed valid jobs skipped;partial attempts preserved with no silent retry. No unrelated jobs interrupted. No additional training variants."
+}
