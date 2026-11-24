@@ -1,6 +1,5 @@
 """Validation-based journal path, entered exclusively through the root launcher."""
 import copy,hashlib,json,math,sys,time,traceback
-from datetime import datetime
 from pathlib import Path
 import torch
 from src.research.journal_validation import StoppingRule,CommonValidation,ValidationObserver
@@ -38,14 +37,18 @@ def main(args,raw,root):
         validation_cfg=dict(validation_cfg,systems=4,contrasts=8,batch_size=2,chunk=4)
         rule_cfg=dict(rule_cfg,minimum_episodes=8,minimum_checkpoints=2,validation_every_episodes=4,patience=2,maximum_episodes=8,maximum_training_seconds=120)
         settings.update(batch_size=4,contrasts=8,validate_every=1,eval_systems=2,eval_contrasts=8,evaluation_population_systems=2,evaluation_batch_size=2,evaluation_contrast_chunk=4,updates=2)
-    out=Path(args.output).resolve() if args.output else root/'experiments'/datetime.now().strftime('%m%d%Y')/(datetime.now().strftime('%m%d%Y_%H%M%S')+'_journal_'+raw['system']['name']+f'_T{h}_seed{seed}')
-    storage_root=root/('scratch_runs' if root.name=='objective_power_grid_temp' else 'experiments')
-    rel=out.relative_to(storage_root);parts=rel.parts
-    if parts and parts[0] in {'sir_ode','location_finding'}:parts=parts[1:]
-    dated_parent=len(parts)>=2 and len(parts[0])==8 and parts[0].isdigit() and parts[1].startswith(parts[0]+'_')
-    dated_campaign=bool(parts) and len(parts[0])>9 and parts[0][:8].isdigit() and parts[0][8]=='_'
-    if not(dated_parent or dated_campaign):raise ValueError('Use a unique dated campaign under the prescribed STABLE benchmark or TEMP scratch root')
-    out.mkdir(parents=True,exist_ok=False)
+    from src.results.run_directory import allocate_run
+    storage_root = root / ('scratch_runs' if root.name == 'objective_power_grid_temp' else 'experiments')
+    if args.output:
+        out = Path(args.output).resolve()
+        rel=out.relative_to(storage_root);parts=rel.parts
+        if parts and parts[0] in {'sir_ode','location_finding'}:parts=parts[1:]
+        dated_parent=len(parts)>=2 and len(parts[0])==8 and parts[0].isdigit() and parts[1].startswith(parts[0]+'_')
+        dated_campaign=bool(parts) and len(parts[0])>9 and parts[0][:8].isdigit() and parts[0][8]=='_'
+        if not(dated_parent or dated_campaign):raise ValueError('Use a unique dated campaign under the prescribed STABLE benchmark or TEMP scratch root')
+        out.mkdir(parents=True,exist_ok=False)
+    else:
+        out = allocate_run(storage_root, Path(args.config).stem, h, methods)
     for name in ['models','eval','logs']:(out/name).mkdir()
     handle=(out/'logs/run_log.log').open('w');sys.stdout=Tee(sys.stdout,handle);sys.stderr=Tee(sys.stderr,handle)
     raw=copy.deepcopy(raw);raw['experiment'].update(step_number=h,methods=methods)
