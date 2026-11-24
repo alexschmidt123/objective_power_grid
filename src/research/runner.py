@@ -1,7 +1,6 @@
 """Root-launcher implementation of the EIG research plan (not a new launcher)."""
 import argparse
 import csv
-from datetime import datetime
 import hashlib
 import json
 import math
@@ -18,10 +17,10 @@ from src.research.benchmarks import make_benchmark
 from src.research.engine import generator,rollout,posterior_metrics,logmeanexp
 from src.research.training import train_spce,train_vsoed
 
-METHODS = ['random','fixed','dad','vsoed','rl_sboed','scorebed','moe_sboed']
-STRATEGY_METHODS = ['strategy_moe_sboed']
-FAMILY_METHODS = ['moe','resmoe','switchmoe','switchresmoe']
-ABLATIONS = ['sum_single','attention_single','attention_dense_moe','attention_sparse_moe','attention_matched_dense','attention_matched_sparse','attention_uniform_moe','existing_moe_hard','existing_moe_relaxed','sum_single_193']
+METHODS = ['random','fixed','dad','vsoed','rl_sboed','scorebed']
+STRATEGY_METHODS = []  # Legacy strategies are archive-only.
+FAMILY_METHODS = []  # Current MoE uses its validated native v1 dispatcher.
+ABLATIONS = []  # Historical controls are not current benchmark methods.
 DEFAULTS = dict(strategy_routing_mode='learned',strategy_initial_reroute_probability=.99,strategy_diagnostics_every=1,moe_history_encoder_revision=1,first_design_revision=1,training_bound=1,variational_policy_lr=.0002,variational_density_lr=.001,
                 variational_density_hidden=128,variational_mixtures=16,variational_density_updates=2,variational_warmup=200,smc_moves=8,moe_revision=4,moe_router_temperature=1.,spce_curriculum=1,updates=2000,batch_size=32,learning_rate=.001,hidden=64,contrasts=1024,
                 validation_contrasts=1024,validation_systems=128,validate_every=100,
@@ -49,6 +48,8 @@ class Tee:
 
 
 def plot_results(output,all_rows,methods,seeds,horizon):
+    from src.research.project_scope import resolve
+    for method in methods: resolve(method)
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -58,8 +59,8 @@ def plot_results(output,all_rows,methods,seeds,horizon):
             values=np.array([r['spce_by_stage'] for r in all_rows[(method,seed)]])
             x=np.arange(1,horizon+1)
             mean=values.mean(0)
-            from src.research.moe_family import NAMES,ALIASES
-            ax.plot(x,mean,label=NAMES.get(ALIASES.get(method,method),method))
+            from src.research.project_scope import label
+            ax.plot(x,mean,label=label(method))
             if len(values)>1:
                 se=values.std(0,ddof=1)/math.sqrt(len(values))
                 ax.fill_between(x,mean-1.96*se,mean+1.96*se,alpha=.1)
@@ -73,7 +74,7 @@ def freeze_source(root,output):
     """Scientific snapshot only: never copy local AGENTS.md or historical data."""
     paths = [p for p in (root/'src').rglob('*.py') if '__pycache__' not in p.parts]
     paths += [root/'run.sh',root/'sweep_run.sh']
-    paths += list((root/'configs').glob('*.yaml'))
+    paths += list((root/'configs').rglob('*.yaml'))
     paths += list((root/'src'/'research'/'vendor').rglob('LICENSE'))
     paths += list((root/'src'/'research'/'vendor').rglob('PROVENANCE.json'))
     paths += list((root/'src'/'research'/'vendor'/'scorebed'/'config').rglob('*.yaml'))
@@ -91,6 +92,8 @@ def freeze_source(root,output):
 
 
 def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper=False,*,infer_parameters=True,evaluation_draws=None):
+    from src.research.project_scope import resolve
+    resolve(method)
     # Identity pairing is independent of training/decision RNG and batch partition.
     rng = generator(seed)
     population=settings.get('evaluation_population_systems',settings['eval_systems']) if paper else settings['eval_systems']
@@ -190,8 +193,11 @@ def evaluate(benchmark,policy,method,horizon,settings,seed,training,output,paper
 
 
 def main(argv=None):
+    from src.research.project_scope import guard
+    guard(sys.argv[1:] if argv is None else argv)
     parser=argparse.ArgumentParser(description='EIG research plan: common continuous benchmarks and offline design methods')
     parser.add_argument('--config',required=True)
+    parser.add_argument('--train-only',action='store_true',help='Save final native checkpoint without final evaluation; journal calibration precedes common scoring')
     parser.add_argument('--T','--step-number',type=int)
     parser.add_argument('--variant',choices=FAMILY_METHODS)
     parser.add_argument('--training-episodes',type=int,help='Explicit additional primary-episode budget for a family timing/pilot run')
@@ -252,7 +258,7 @@ def main(argv=None):
     if args.native_evaluate_from:
         from src.research.native_checkpoint_evaluation import main as evaluate_native
         return evaluate_native(args,raw,root)
-    if args.journal and raw['research'].get('journal_protocol',{}).get('version')=='validation_convergence_v1':
+    if args.journal and raw['research'].get('journal_protocol',{}).get('version') in {'validation_convergence_v1','sir_journal_corrected_seed101_v1','sir_seed101_native_fourhour_20261027_v1'}:
         from src.research.journal_run import main as journal_main
         return journal_main(args,raw,root)
     paper = bool(raw['research'].get('paper_protocol'))
@@ -357,14 +363,12 @@ def main(argv=None):
         protocol_record=validate_protocol(raw,settings,horizon,methods,args.seed,seeds,args.journal,args.smoke,args.pilot)
     except ValueError as exc:parser.error(str(exc))
     torch.set_num_threads(settings['threads'])
-    now=datetime.now()
-    default=root/'experiments'/now.strftime('%m%d%Y')/(now.strftime('%m%d%Y_%H%M%S_%f')+f"_{raw['system']['name']}_research_eig_T{horizon}_train{args.seed}")
-    output=Path(args.output).resolve() if args.output else default
-    # Explicit paths must remain within the required date-grouped hierarchy.
-    rel=output.relative_to(root/'experiments')
-    if len(rel.parts)<2 or len(rel.parts[0])!=8 or not rel.parts[0].isdigit() or not rel.parts[1].startswith(rel.parts[0]+'_'):
-        parser.error('Output must be experiments/MMDDYYYY/MMDDYYYY_<campaign>/...')
-    output.mkdir(parents=True,exist_ok=False)
+    from src.results.run_directory import allocate_run
+    if args.output:
+        output = Path(args.output).resolve()
+        output.mkdir(parents=True, exist_ok=False)
+    else:
+        output = allocate_run(root / 'experiments', config_path.stem, horizon, methods)
     (output/'models').mkdir();(output/'eval').mkdir()
     (output/'logs').mkdir()
     log_handle=(output/'logs'/'run_log.log').open('w')
@@ -582,3 +586,6 @@ def main(argv=None):
         write_json(output/'failure.json',dict(exception=type(exc).__name__,message=str(exc),traceback=traceback.format_exc()))
         (output/'exit_code').write_text('1\n')
         raise
+
+if __name__ == '__main__':
+    main()

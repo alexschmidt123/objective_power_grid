@@ -14,6 +14,8 @@ from typing import Any
 
 import yaml
 
+from src.results.run_directory import RUN_NAME, allocate_run
+
 from src.config import (
     SBOEDConfig,
     apply_data_meta_to_cfg,
@@ -179,6 +181,13 @@ def parse_result_dir_name(name: str) -> dict[str, Any] | None:
     }
 
 
+def read_result_identity(path: Path) -> dict[str, Any] | None:
+    if RUN_NAME.fullmatch(path.name):
+        identity = path / "run_identity.json"
+        return json.loads(identity.read_text()) if identity.is_file() else None
+    return parse_result_dir_name(path.name)
+
+
 def validate_result_dir_name(name: str) -> dict[str, Any]:
     # Reject scratch / invalid folders such as experiments/_sir_smoke_ctx
     # or experiments/plan2_trap_objective_sweep_logs.
@@ -196,6 +205,8 @@ def validate_result_dir_name(name: str) -> dict[str, Any]:
             f"Put smoke/scratch under /tmp. Run logs belong in "
             f"<experiments/...>/logs/ (never a top-level logs/ folder)."
         )
+    if match := RUN_NAME.fullmatch(basename):
+        return match.groupdict()
     parsed = parse_result_dir_name(basename)
     if parsed is None:
         raise ValueError(
@@ -228,20 +239,20 @@ def allocate_result_dir(
     *,
     project_root: Path | None = None,
     stamp: str | None = None,
+    methods: list[str] | None = None,
 ) -> Path:
     """Create a new stamped result folder under ``experiments/``."""
     root = project_root or repo_root()
     n_obs, noise_sigma = _cfg_observation_values(cfg)
-    name = make_experiment_dir_name(
-        cfg.run_slug,
-        experiment_type,
-        int(cfg.step_number),
-        stamp=stamp,
-        n_obs=n_obs,
-        noise_sigma=noise_sigma,
-    )
-    path = (root / "experiments" / name[:8] / name).resolve()
-    path.mkdir(parents=True, exist_ok=True)
+    start = datetime.strptime(stamp, "%m%d%Y_%H%M%S") if stamp else None
+    path = allocate_run(root / "experiments", cfg.run_slug, cfg.step_number,
+                        methods or cfg.methods, start=start)
+    identity = dict(config=re.sub(r"_(?:eig|cost_utility)$", "", cfg.run_slug),
+                    experiment_type=experiment_type, step_number=cfg.step_number,
+                    T=cfg.step_number, N_obs=n_obs, noise_sigma=noise_sigma,
+                    sigma_token=_folder_sigma(noise_sigma), stamp=path.name[:13],
+                    label=EXPERIMENT_FOLDER_LABELS[experiment_type])
+    (path / "run_identity.json").write_text(json.dumps(identity, indent=2) + "\n")
     return path
 
 
@@ -273,7 +284,7 @@ def find_latest_result_dir(
         # Never treat scratch dirs (e.g. _sir_smoke_ctx, _plots) as results.
         if path.name.startswith("_"):
             continue
-        parsed = parse_result_dir_name(path.name)
+        parsed = read_result_identity(path)
         if parsed is None:
             continue
         if (
@@ -286,7 +297,7 @@ def find_latest_result_dir(
             matches.append(path)
     if not matches:
         return None
-    matches.sort(key=lambda p: (p.name, p.stat().st_mtime))
+    matches.sort(key=lambda p: (datetime.strptime(p.name[:13], "%m%d%Y-%H%M") if RUN_NAME.fullmatch(p.name) else datetime.strptime(p.name[:15], "%m%d%Y_%H%M%S"), p.stat().st_mtime_ns))
     return matches[-1].resolve()
 
 

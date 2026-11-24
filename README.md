@@ -26,34 +26,19 @@ For an RTX 5080, use a Blackwell-compatible PyTorch/CUDA build rather than the o
 
 ## Run
 
-Use the root launcher. Begin with correctness checks and a smoke experiment:
+Start a single run or a sweep from the repository root with an explicit config.
+On Sapelo2, execute the launcher inside a Slurm allocation with the project Conda environment active.
 
 ```bash
-python -m pytest -q tools/tests/test_journal_campaign.py tools/tests/test_fixed_budget_selection.py tools/tests/test_moe_family.py tools/tests/test_baseline_readiness.py
-bash run.sh --config configs/journal_location_fixed_1000000.yaml --journal --variant moe --smoke --seed 101 --eval-seeds 1001
+bash run.sh --config configs/power_grid/ieee9_research_eig.yaml --method dad
+bash sweep_run.sh --configs configs/power_grid/ieee9_research_eig.yaml,configs/location_finding/location_finding_eig.yaml --method dad --T 3,5
 ```
 
-Run a full-budget nonresidual method with its native learner and final-checkpoint selection:
-
-```bash
-bash run.sh --config configs/journal_location_fixed_1000000.yaml --journal --methods dad --seed 102 --eval-seeds 1001
-bash run.sh --config configs/journal_location_fixed_1000000.yaml --journal --variant switchmoe --seed 102 --eval-seeds 1001
-```
-
-Residual training first requires a compatible internal500k base for the same benchmark and seed. Keep the complete base run directory and metadata; it is not a separate benchmark result:
-
-```bash
-bash run.sh --config configs/journal_location_fixed_500000.yaml --journal --methods sum_single --seed 102 --eval-seeds 1001
-BASE=/absolute/path/to/that_base_run/models/sum_single.pt
-bash run.sh --config configs/journal_location_fixed_500000.yaml --journal --variant resmoe --base-checkpoint "$BASE" --seed 102 --eval-seeds 1001
-bash run.sh --config configs/journal_location_fixed_500000.yaml --journal --variant switchresmoe --base-checkpoint "$BASE" --seed 102 --eval-seeds 1001
-```
-
-Location scoring uses2000 paired trajectories and1million contrasts. Final checkpoints are selected at the declared budget; validation is diagnostic only. Count contrastive likelihood work, validation and runtime separately. SIR configurations are `journal_sir_t5_fixed_1000000.yaml` and its500k counterpart; SIR full development is gated on readiness and estimator-resolution checks, and requires a SIR-specific base. T10 is deferred.
-
-On the existing LabPC repository, `python -m tools.journal_campaign prepare` audits historical seed101 artifacts and prepares the dated campaign. After its fixed-budget ScoreBED smoke check, `seal` freezes source/configuration/analysis; `location` runs missing seeds101–105 sequentially and then SIR readiness. `sir` starts only the gated T5 development study. `report` regenerates CSVs and figures. Preparation never overwrites an existing campaign. The campaign tool requires the historical artifacts for reuse; standalone root-launcher commands above train fresh policies.
-
-All configurations, commands, hashes, checkpoints, costs, failures and statistical outputs live under `experiments/MMDDYYYY/MMDDYYYY_<campaign>/`. Completed phases can be reused by the campaign controller; exact interrupted native-trainer resume is not universally supported. Never relabel a partial run as a complete budget. Model weights remain local rather than committed to GitHub.
+New run directories are direct children of `experiments/`, for example
+`11232026-0930-ieee9_research_eig_T3-dad`. The project layout, collision rule,
+and launch conventions are in [AGENTS.md](AGENTS.md).
+Historical source, configurations and reports retain their original path aliases.
+Official result registration continues to use its frozen verification procedure.
 
 The completed five-seed development results, instability audit and original-setting selected-repeat commands are in [research records](docs/research_records/20261016/README.md). The ScoreBED validation bounds fix does not establish stable training; the failed gamma0.01 trial is archived and the default remains0.001.
 

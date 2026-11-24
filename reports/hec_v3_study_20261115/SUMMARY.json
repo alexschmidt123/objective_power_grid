@@ -1,0 +1,47 @@
+{
+  "status": "PENDING_EXPERIMENTS",
+  "completed_runs": 1,
+  "required_runs": 25,
+  "seed_scope": "Five independent continuation RNGs and new-module initializations,conditional on the same frozen pretrained V2 parent/providers/replay;not five independently pretrained lineages.",
+  "rows": [
+    {
+      "seed": 101,
+      "arm": "uniform",
+      "mean": 12.883282569192746,
+      "MCSE": 0.03641566759051433,
+      "CI95": [
+        12.81186593098115,
+        12.954699207404342
+      ],
+      "training_seconds": 8220.854990880005,
+      "total_seconds": 8272.269938395126,
+      "resources": {
+        "wall_seconds": 8272.647142132977,
+        "cpu_user_seconds": 8238.522049000001,
+        "cpu_system_seconds": 16.22148,
+        "process_peak_rss_kb": 2673480,
+        "gpu_exclusive_wall_seconds": 8272.647142132977,
+        "sampled_gpu_busy_seconds_estimate": 5003.373715672224,
+        "gpu_utilization_mean_percent": 60.48816029143898,
+        "gpu_peak_sampled_memory_mib": 3943.0,
+        "torch_peak_allocated_bytes": 2743500288,
+        "torch_peak_reserved_bytes": 3483369472,
+        "sampling": "5-second nvidia-smi/process samples;busy estimate is not exact kernel time;GPU wall includes CPU/scorer/serialization gaps"
+      },
+      "new_training_episodes": 2000000,
+      "new_training_observations": 60000000,
+      "trainable_parameters": 216374,
+      "online_amortized_seconds_per_episode": 0.007816660105832852
+    }
+  ],
+  "primary_seed_contrasts": {},
+  "within_seed_case_contrasts": {},
+  "secondary_factorial_interaction": null,
+  "scientific_limits": [
+    "Five-seed t inference has small-sample assumptions.",
+    "Shared pretrained V2/providers/replay;not independently pretrained lineages.",
+    "Canonical benchmark has been observed during development;not untouched final test.",
+    "Case MCSE is conditional on fixed1M contrasts;finite-contrast bias remains.",
+    "Incomplete collections are descriptive and do not establish success."
+  ]
+}

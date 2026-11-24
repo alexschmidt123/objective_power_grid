@@ -1,19 +1,7 @@
 #!/bin/bash
-# Launch one experiment; outputs use experiments/MMDDYYYY/MMDDYYYY_<time>_<objective_parameters>/.
-#
-#   bash run.sh --config configs/ieee9_cost_utility.yaml
-#   bash run.sh --config configs/ieee9_cost_utility.yaml --T 8
-#   bash run.sh --config configs/ieee9_eig.yaml --experiment_type eig_based
-#   bash run.sh --config configs/sir_ode_eig.yaml
-#   bash run.sh --config configs/ieee9_cost_utility.yaml --method dad --force
-#
-# Result folder (allocated once, reused for all steps):
-#   experiments/MMDDYYYY/MMDDYYYY_HHMMSS_config_objective_Tnum_NobsN_sigmaX
-# Full terminal history is saved as <result_folder>/logs/run_log.log
-#
-# Nested scripts may ``source`` this file for shared env/helpers only
-# (when sourced, the main pipeline below does not run).
-
+# Launch one experiment with an explicit config. Results go under experiments/.
+#   bash run.sh --config configs/power_grid/ieee9_research_eig.yaml --method dad
+# Pipeline stages also source this file for shared helpers.
 # --- shared env / helpers (also used when this file is sourced) ---
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
@@ -22,7 +10,7 @@ cd "$ROOT"
 # standard install location so both workstations work without `conda activate`.
 _prepend_mocu_optimized() {
     local bin candidates=()
-    if [[ "${CONDA_DEFAULT_ENV:-}" == "mocu_optimized" && -x "${CONDA_PREFIX:-}/bin/python3" ]]; then
+    if [[ -n "${CONDA_DEFAULT_ENV:-}" && "${CONDA_DEFAULT_ENV}" != "base" && -x "${CONDA_PREFIX:-}/bin/python3" ]]; then
         return 0
     fi
     candidates+=(
@@ -148,6 +136,31 @@ if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
     return 0
 fi
 
+# Current project entry boundary; archived workflows cannot enter active dispatch.
+for _scope_arg in "$@"; do
+    if [[ "$_scope_arg" == "--list-current-methods" ]]; then
+        exec python3 -m src.research.project_scope list
+    fi
+done
+python3 -m src.research.project_scope guard -- "$@" || return 2 2>/dev/null || exit 2
+_scope_args=()
+for _scope_arg in "$@"; do
+    if [[ "$_scope_arg" == "--moe-sboed-v1" ]]; then
+        _scope_args+=("--deepseek-sboed")
+    else
+        _scope_args+=("$_scope_arg")
+    fi
+done
+for _scope_arg in "${_scope_args[@]}"; do
+    if [[ "$_scope_arg" == "--deepseek-sboed" ]]; then
+        exec python3 -m src.research.deepseek_sboed_experiment "${_scope_args[@]}"
+    fi
+    if [[ "$_scope_arg" == "--current-moe-evaluate" ]]; then
+        exec python3 -m src.research.current_moe_evaluation "${_scope_args[@]}"
+    fi
+done
+unset _scope_arg _scope_args
+
+
 set -euo pipefail
-echo "[run.sh] Default results: experiments/MMDDYYYY/MMDDYYYY_<time>_<objective_parameters>/"
 exec python3 -m src.online_cli "$@"

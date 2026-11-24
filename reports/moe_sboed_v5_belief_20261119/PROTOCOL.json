@@ -1,0 +1,19 @@
+{
+  "study": "NEW_V5_OFFLINE_BELIEF_AND_CRITIC_PREFLIGHT",
+  "seed": 202611196101,
+  "episodes": 64,
+  "stages": [
+    5,
+    15,
+    25
+  ],
+  "reference_cases_per_stage": 4,
+  "importance_particles": 32768,
+  "suffix_rollouts": 32,
+  "offline_only": true,
+  "training_updates": 0,
+  "test_bank_read": false,
+  "proposed_change": "Refresh actor and target frozen belief snapshots from their own native posterior BETWEEN fixed200-update training blocks;never in actor.forward or evaluation. No new inference losses or optimizer updates.",
+  "pilot_gate": "Fresh development paired per-episode mean logq native-vs-inherited lower95% CI>0;all deployment checks pass. Reference/ranking limitations disclosed.",
+  "reference": "Development-only finite importance reference and native remaining-horizon variational-return diagnostic,not a replacement EIG training objective or final scorer"
+}

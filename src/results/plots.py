@@ -24,7 +24,7 @@ from src.layout import (
     horizon_token,
     load_run_config_doc,
     make_plots_dir_name,
-    parse_result_dir_name,
+    read_result_identity,
     run_methods_from_doc,
 )
 
@@ -197,7 +197,7 @@ def group_completed_runs(
         path = Path(raw)
         if not path.is_dir():
             continue
-        parsed = cost_run_identity(path) or parse_result_dir_name(path.name)
+        parsed = cost_run_identity(path) or read_result_identity(path)
         if parsed is None:
             continue
         etype = str(parsed["experiment_type"])
@@ -265,7 +265,7 @@ def discover_seed_runs(
     for path in sorted(experiments.iterdir()):
         if not path.is_dir():
             continue
-        parsed = cost_run_identity(path) or parse_result_dir_name(path.name)
+        parsed = cost_run_identity(path) or read_result_identity(path)
         if parsed is None:
             continue
         if parsed["config"] not in want_configs:
@@ -707,7 +707,7 @@ def write_sweep_plot_bundle(
     runs: list[dict[str, Any]] = []
     for t in horizons:
         for seed, exp_dir in sorted(by_t[t].items()):
-            parsed = parse_result_dir_name(exp_dir.name) or {}
+            parsed = read_result_identity(exp_dir) or {}
             run_doc = load_run_config_doc(exp_dir)
             manifest_path = exp_dir / "evaluation_manifest.json"
             manifest = (

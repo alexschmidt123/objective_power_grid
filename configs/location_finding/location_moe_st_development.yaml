@@ -1,0 +1,334 @@
+system:
+  name: location_finding
+N: 1
+experiment:
+  experiment_type: eig_based
+  step_number: 30
+  methods:
+  - random
+  - fixed
+  - dad
+  - rl_sboed
+  - vsoed
+  - scorebed
+  - moe
+  - resmoe
+  - switchmoe
+  - switchresmoe
+observation:
+  noise_sigma: 0.5
+  sampling: normal_log_signal
+location_finding:
+  design_bounds:
+  - -4.0
+  - 4.0
+  random_design_distribution: truncated_standard_normal
+research:
+  enabled: true
+  settings:
+    updates: 20000
+    training_bound: 4
+    moe_revision: 4
+    first_design_revision: 2
+    spce_curriculum: 1
+    moe_gradient_clip_mode: component
+    moe_router_warmup_fraction: 0.3
+    moe_router_finish_fraction: 0.95
+    hidden: 64
+    learning_rate: 5.0e-05
+    spce_adam_beta1: 0.8
+    spce_adam_beta2: 0.998
+    spce_lr_decay: 0.98
+    spce_lr_schedule_every: 1000
+    batch_size: 64
+    contrasts: 1024
+    validation_contrasts: 16384
+    validation_systems: 128
+    validate_every: 100
+    eval_systems: 2000
+    eval_contrasts: 1000000
+    evaluation_batch_size: 16
+    evaluation_contrast_chunk: 16384
+    posterior_particles: 8192
+    smc_moves: 8
+    moe_router_temperature: 1.0
+    moe_specialist_budget_fraction: 0.25
+    moe_density_updates: 4
+    rl_batch_size: 100
+    rl_replay_batch: 4096
+    rl_replay_capacity: 1000000
+    rl_min_buffer: 100000
+    rl_gradient_steps: 2
+    rl_log_every: 10
+    evaluation_population_systems: 2000
+    primary_episode_budget: 1
+    scorebed_batch_size: 64
+    strategy_diagnostics_every: 1
+  training_profiles:
+    adaptive:
+      learning_rate: 5.0e-05
+      spce_lr_decay: 0.98
+      spce_adam_beta1: 0.8
+      spce_adam_beta2: 0.998
+      spce_lr_schedule_every: 1000
+    fixed:
+      learning_rate: 0.0001
+      spce_lr_decay: 0.98
+      spce_adam_beta1: 0.8
+      spce_adam_beta2: 0.998
+      spce_lr_schedule_every: 1000
+  paper_protocol:
+    reference: https://arxiv.org/html/2306.10430v2
+    official_code: https://github.com/wgshen/vsOED
+    upstream_commit: d0884f9ba30fbddc56618841c68af2f3bfe16539
+    case: two_source_common_bounded_box
+    regime: journal_1M_total_fixed_budget
+    corrected_methods: true
+    correction_note: All methods train and evaluate in [-4,4]^2. Random uses standard
+      normal conditioned on the box; source prior remains iid standard normal. Equal1million
+      primary training episodes. ScoreBED uses feasibility-only sigmoid adapter.
+    nominal_training_trajectories: 1000000
+    evaluation: shared_prior_bank_streamed_sPCE
+    training_device: cuda
+    checkpoint_selection: final
+    observation_discrepancy: Paper Section 4.2 omits log; SOURCE.deterministic returns
+      log(signal). Follow executable code.
+    training_budget_unit: primary_episodes
+    extensions: All fresh observed training episodes count, including MoE specialist
+      and ScoreBED score pretraining. Contrast likelihood work, replay updates, validation
+      and runtime reported separately.
+  upstream_vsoed:
+    variant: vsOED-G-I
+    updates: 980
+    paper_reference_updates: 10001
+    budget_note: 20000 warmup plus 980*1000 new episodes equals 1000000; bounded designs
+      with published incremental discount0.9.
+    new_trajectories: 1000
+    replay_batch: 10000
+    initial_replay: 20000
+    replay_capacity: 1000000
+    posterior_updates: 5
+    critic_updates: 5
+    posterior_lr: 0.001
+    actor_lr: 0.001
+    critic_lr: 0.001
+    lr_decay: 0.9999
+    discount: 0.9
+    exploration: 0.5
+    exploration_decay: 0.9999
+    target_rate: 0.1
+    transition: 0
+    log_every: 100
+  plan:
+    horizons:
+    - 30
+    routing: four_expert_DSelect1
+    primary_metric: EIG_nats_common_sPCE_L1000000
+    secondary_metric: parameter_MSE
+    exclusions:
+    - step_dad
+    - mocu
+    - msc
+    - cost_utility
+    - growing_tree
+    - myopic
+    moe_architecture: sPCE-only shared history encoder and four policy experts; DSelect1
+      sparse inference
+    scorebed: Official pinned score-matching/policy gradient with common bounded feasibility
+      map
+    design_space: common [-4,4]^2 for every method
+  journal_protocol:
+    version: validation_convergence_v1
+    status: controlled_straight_through_development
+    comparison: one_million_total_primary_episodes
+    budget_unit: method_specific_resource_safety_caps
+    checkpoint_selection: final_predeclared_fixed_budget
+    claim_limit: No confirmation until readiness, precision and settings are frozen;
+      historical results are separate.
+    development_training_seeds:
+    - 103
+    - 105
+    training_seeds:
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    evaluation_seeds:
+    - 1001
+    previously_used_evaluation_seeds:
+    - 1001
+    validation:
+      seed: 771001
+      systems: 512
+      contrasts: 1000000
+      batch_size: 16
+      chunk: 16384
+    stopping_rule:
+      minimum_episodes: 1000000
+      minimum_checkpoints: 8
+      validation_every_episodes: 125000
+      patience: 6
+      minimum_improvement: 0.01
+      noise_multiplier: 1.96
+      maximum_episodes: 1000000
+      maximum_training_seconds: 7200
+    common_pathwise_settings:
+      hidden: 64
+      contrasts: 1024
+      moe_gradient_clip_mode: component
+      moe_router_warmup_fraction: 0.3
+      moe_router_finish_fraction: 0.95
+      strategy_routing_mode: learned_switch
+      strategy_initial_reroute_probability: 0.99
+      diagnostic_late_logging: true
+      diagnostic_start_episodes: 0
+      diagnostic_checkpoint_episodes:
+      - 125000
+      - 250000
+      - 500000
+      - 750000
+      - 775000
+      - 800000
+      - 812544
+      - 825024
+      - 832000
+      - 850000
+      - 875000
+      - 883200
+      - 900000
+      - 925000
+      - 950000
+      - 975000
+      - 1000000
+    method_settings:
+      moe:
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        router_schedule_episodes: 1000000
+        moe_training_routing_mode: straight_through
+      resmoe:
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        router_schedule_episodes: 500000
+      switchmoe:
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        router_schedule_episodes: 1000000
+      switchresmoe:
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        router_schedule_episodes: 500000
+      sum_single:
+        learning_rate: 5.0e-05
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_decay: 0.98
+        spce_lr_schedule_every: 1000
+        router_schedule_episodes: 1000000
+      fixed:
+        learning_rate: 0.0001
+        spce_lr_decay: 0.98
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_schedule_every: 1000
+      dad:
+        learning_rate: 5.0e-05
+        spce_lr_decay: 0.98
+        spce_adam_beta1: 0.8
+        spce_adam_beta2: 0.998
+        spce_lr_schedule_every: 1000
+      scorebed:
+        scorebed_pretraining_episodes: 692990
+        scorebed_batch_size: 64
+    method_stopping: {}
+    final_evaluation:
+      systems: 2000
+      contrasts: 1000000
+      resolution_status: established_reference_but_validation_sensitivity_required
+      seed: 8831001
+    residual_base:
+      method: sum_single
+      seed_specific: true
+      share_within_seed: true
+      initially_frozen: true
+      total_cost_includes_base: true
+    independent_seeds_required: 5
+    development_resource_gate: bounded cost probes only until measured estimates and
+      total resource budget recorded
+    native_fidelity_required: true
+    checkpoint_selection_mode: final_fixed_budget
+    training_device: cuda_if_available
+    native_vsoed_profile:
+      variant: vsOED-G-I
+      updates: 980
+      paper_reference_updates: 10001
+      budget_note: 20000 warmup plus 980*1000 new episodes equals 1000000; bounded
+        designs with published incremental discount0.9.
+      new_trajectories: 1000
+      replay_batch: 10000
+      initial_replay: 20000
+      replay_capacity: 1000000
+      posterior_updates: 5
+      critic_updates: 5
+      posterior_lr: 0.001
+      actor_lr: 0.001
+      critic_lr: 0.001
+      lr_decay: 0.9999
+      discount: 0.9
+      exploration: 0.5
+      exploration_decay: 0.9999
+      target_rate: 0.1
+      transition: 0
+      log_every: 100
+    diagnostic_only: true
+  rl_execution_limit_seconds: 2400
+  legacy_fixed_budget_protocol:
+    version: bounded_primary_episode_pilot_v4
+    comparison: equal_primary_training_episode_budget
+    budget_unit: primary_episodes
+    training_seeds:
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    evaluation_seeds:
+    - 1001
+    - 1002
+    - 1003
+    - 1004
+    - 1005
+    previously_used_evaluation_seeds:
+    - 1001
+    - 63777278
+    - 82937191
+    checkpoint_selection: final_predeclared
+    common_evaluation: likelihood_sPCE_nats
+    required_architecture_controls: []
+    secondary_metric: permutation_invariant_parameter_mse
+    mse_convergence_required: true
+    contrast_convergence_required: true
+    online_cost_reported_separately: true
+    claim_limit: Equal training episode pilot; unequal computational costs reported;
+      convergence and independent seed confirmation still required.
+    pilot_training_seed: 101
+    pilot_evaluation_seed: 1001
+    design_bounds:
+    - -4.0
+    - 4.0
+    random_design_distribution: truncated_standard_normal
+    training_episode_cap: 1000000
+    full_study_training_episode_cap: 10000000

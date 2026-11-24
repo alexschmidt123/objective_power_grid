@@ -328,7 +328,7 @@ def cmd_allocate_dir(args: argparse.Namespace) -> None:
     if args.exp_dir:
         path = _resolve_exp_dir(cfg, exp_type, args.exp_dir, create_new=False)
     else:
-        path = allocate_result_dir(cfg, exp_type)
+        path = allocate_result_dir(cfg, exp_type, methods=methods_from_args(cfg, args.method))
     ensure_result_layout(path)
     # stdout is only the path so shells can capture it cleanly
     print(str(path))
@@ -779,6 +779,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     alloc.add_argument("--config", "-c", required=True)
     _add_experiment_type(alloc)
+    alloc.add_argument("--method")
     _add_exp_dir(alloc)
     _add_T(alloc)
     _add_observation_overrides(alloc)

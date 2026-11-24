@@ -1,0 +1,305 @@
+{
+  "status": "PASS",
+  "expert_execution_calls": [
+    1,
+    1,
+    1,
+    1
+  ],
+  "weighted_sum_exact": true,
+  "head_input_shape": [
+    60,
+    128
+  ],
+  "device": "CPU",
+  "histories": 60,
+  "all30_stages": true,
+  "source_parent_stage_only": false,
+  "no_old_physical_policy_module": true,
+  "no_shared_history_head_bypass": true,
+  "no_old_decoder_projection_buffers": true,
+  "weak_shared_isolated_and_bounded": true,
+  "uniform_invariant_to_router_perturbation": true,
+  "paired_initial_parameters_and_actions_bitwise_equal": true,
+  "no_future_observation_leakage": true,
+  "initial_gradient_norms": {
+    "query.offset": 0.1368445839138891,
+    "query.history": 0.3422943832817617,
+    "query.commander": 1.0641111495260245,
+    "experts.0": 1.3923541519825486,
+    "experts.1": 1.2795272976124117,
+    "experts.2": 1.4122643231486083,
+    "experts.3": 1.5026990158955578,
+    "router.0": 0.0,
+    "router.2": 0.2537801282595084,
+    "action_head.0": 2.058257508007392,
+    "action_head.2": 1.8275685563907325,
+    "shared_small.0": 0.11359302136736503,
+    "shared_small.2": 0.08837438408468047,
+    "history_context.token": 0.0,
+    "history_context.combine": 0.0
+  },
+  "gradient_norms_after_disposable_step": {
+    "query.offset": 0.17185439723249046,
+    "query.history": 0.5697634491105117,
+    "query.commander": 1.5201193401918653,
+    "experts.0": 1.728603922386803,
+    "experts.1": 1.5167125838437947,
+    "experts.2": 1.8289123251631119,
+    "experts.3": 1.8506733844560752,
+    "router.0": 0.004252650349475829,
+    "router.2": 0.3304476165326799,
+    "action_head.0": 2.555568403203661,
+    "action_head.2": 2.249482227725818,
+    "shared_small.0": 0.12659162141991848,
+    "shared_small.2": 0.10674304510900162,
+    "history_context.token": 6.081016247048912e-06,
+    "history_context.combine": 0.0003619007583523616
+  },
+  "initial_router_input_layer_zero_is_intentional": true,
+  "expert_weight_action_sensitivity": [
+    0.08747667819261551,
+    0.07821839302778244,
+    0.10457368195056915,
+    0.07916118204593658
+  ],
+  "history_audit": {
+    "neutral_initial_actions_bitwise_equal_to_V4": true,
+    "all_original_state_tensors_bitwise_equal": true,
+    "changed_observation_history_changes_context": true,
+    "ordered_pair_reversal_changes_moments": true,
+    "history_gradient_norms_after_two_native_critic_steps": {
+      "query.offset": 0.14425396740331636,
+      "query.history": 0.43393972526724306,
+      "query.commander": 1.2323120011722273,
+      "experts.0": 1.6134912658386629,
+      "experts.1": 1.4035747761222341,
+      "experts.2": 1.6973186173385177,
+      "experts.3": 1.6832341031024929,
+      "router.0": 0.004022668371750111,
+      "router.2": 0.3127034240471145,
+      "action_head.0": 2.3491002495997972,
+      "action_head.2": 2.0924747625946023,
+      "shared_small.0": 0.12178108545893446,
+      "shared_small.2": 0.09800247152458116,
+      "history_context.token": 5.575800564924407e-06,
+      "history_context.combine": 0.00032038862350372186
+    },
+    "expert_feature_effect_of_new_history": [
+      0.0011358753545209765,
+      0.0009442147566005588,
+      0.0011351745342835784,
+      0.00120705203153193
+    ],
+    "new_history_influences_router_and_actions": true,
+    "scope": "Synthetic training-only diagnostic;no EIG/adaptivity-benefit claim",
+    "limitation": "Four ordered moments are lossy;belief evolution is represented indirectly through current belief,history and learned query encoder,not stored exact posterior transitions."
+  },
+  "parameter_counts": {
+    "learned": {
+      "warmup": {
+        "query": {
+          "total": 42796,
+          "trainable": 11180,
+          "buffer_elements": 14736632
+        },
+        "E1": {
+          "total": 62340,
+          "trainable": 62340,
+          "buffer_elements": 4800
+        },
+        "E2": {
+          "total": 69498,
+          "trainable": 69498,
+          "buffer_elements": 0
+        },
+        "E3": {
+          "total": 65766,
+          "trainable": 65766,
+          "buffer_elements": 7648
+        },
+        "E4": {
+          "total": 70584,
+          "trainable": 70584,
+          "buffer_elements": 162561
+        },
+        "router": {
+          "total": 41540,
+          "trainable": 41540,
+          "buffer_elements": 0
+        },
+        "action_head": {
+          "total": 4194,
+          "trainable": 4194,
+          "buffer_elements": 0
+        },
+        "shared_small": {
+          "total": 1922,
+          "trainable": 1922,
+          "buffer_elements": 0
+        },
+        "ALL": {
+          "total": 371136,
+          "trainable": 339520,
+          "buffer_elements": 14911641
+        }
+      },
+      "joint": {
+        "query": {
+          "total": 42796,
+          "trainable": 42796,
+          "buffer_elements": 14736632
+        },
+        "E1": {
+          "total": 62340,
+          "trainable": 62340,
+          "buffer_elements": 4800
+        },
+        "E2": {
+          "total": 69498,
+          "trainable": 69498,
+          "buffer_elements": 0
+        },
+        "E3": {
+          "total": 65766,
+          "trainable": 65766,
+          "buffer_elements": 7648
+        },
+        "E4": {
+          "total": 70584,
+          "trainable": 70584,
+          "buffer_elements": 162561
+        },
+        "router": {
+          "total": 41540,
+          "trainable": 41540,
+          "buffer_elements": 0
+        },
+        "action_head": {
+          "total": 4194,
+          "trainable": 4194,
+          "buffer_elements": 0
+        },
+        "shared_small": {
+          "total": 1922,
+          "trainable": 1922,
+          "buffer_elements": 0
+        },
+        "ALL": {
+          "total": 371136,
+          "trainable": 371136,
+          "buffer_elements": 14911641
+        }
+      }
+    },
+    "uniform": {
+      "warmup": {
+        "query": {
+          "total": 42796,
+          "trainable": 11180,
+          "buffer_elements": 14736632
+        },
+        "E1": {
+          "total": 62340,
+          "trainable": 62340,
+          "buffer_elements": 4800
+        },
+        "E2": {
+          "total": 69498,
+          "trainable": 69498,
+          "buffer_elements": 0
+        },
+        "E3": {
+          "total": 65766,
+          "trainable": 65766,
+          "buffer_elements": 7648
+        },
+        "E4": {
+          "total": 70584,
+          "trainable": 70584,
+          "buffer_elements": 162561
+        },
+        "router": {
+          "total": 41540,
+          "trainable": 0,
+          "buffer_elements": 0
+        },
+        "action_head": {
+          "total": 4194,
+          "trainable": 4194,
+          "buffer_elements": 0
+        },
+        "shared_small": {
+          "total": 1922,
+          "trainable": 1922,
+          "buffer_elements": 0
+        },
+        "ALL": {
+          "total": 371136,
+          "trainable": 297980,
+          "buffer_elements": 14911641
+        }
+      },
+      "joint": {
+        "query": {
+          "total": 42796,
+          "trainable": 42796,
+          "buffer_elements": 14736632
+        },
+        "E1": {
+          "total": 62340,
+          "trainable": 62340,
+          "buffer_elements": 4800
+        },
+        "E2": {
+          "total": 69498,
+          "trainable": 69498,
+          "buffer_elements": 0
+        },
+        "E3": {
+          "total": 65766,
+          "trainable": 65766,
+          "buffer_elements": 7648
+        },
+        "E4": {
+          "total": 70584,
+          "trainable": 70584,
+          "buffer_elements": 162561
+        },
+        "router": {
+          "total": 41540,
+          "trainable": 0,
+          "buffer_elements": 0
+        },
+        "action_head": {
+          "total": 4194,
+          "trainable": 4194,
+          "buffer_elements": 0
+        },
+        "shared_small": {
+          "total": 1922,
+          "trainable": 1922,
+          "buffer_elements": 0
+        },
+        "ALL": {
+          "total": 371136,
+          "trainable": 329596,
+          "buffer_elements": 14911641
+        }
+      }
+    }
+  },
+  "disposable_native_updates": [
+    {
+      "arm": "learned",
+      "updates": 1,
+      "reduced_disposable_fixture": true
+    },
+    {
+      "arm": "uniform",
+      "updates": 1,
+      "reduced_disposable_fixture": true
+    }
+  ],
+  "original_test_bank_read": false
+}

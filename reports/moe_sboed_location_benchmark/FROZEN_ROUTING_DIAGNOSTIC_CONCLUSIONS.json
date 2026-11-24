@@ -1,0 +1,197 @@
+{
+  "status": "COMPLETE",
+  "training": false,
+  "seed": 101,
+  "elapsed_seconds": 142.26250573713332,
+  "frozen_parent": "MoE-sBOED-uniform seed101",
+  "histories": 25,
+  "adequate_posterior_histories": 24,
+  "complete_trajectory_clusters": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    7
+  ],
+  "clustered_validation_gains": {
+    "discovery_selected_validation_gain": {
+      "n": 7,
+      "mean": 0.007099423937192033,
+      "SE": 0.019552422410207628,
+      "CI95": [
+        -0.040743630176937676,
+        0.05494247805132174
+      ]
+    },
+    "critic_selected_validation_gain": {
+      "n": 7,
+      "mean": -0.012708428185399545,
+      "SE": 0.026991588176400443,
+      "CI95": [
+        -0.07875446517545848,
+        0.05333760880465938
+      ]
+    },
+    "transferred_router_validation_gain": {
+      "n": 7,
+      "mean": -0.015357149765768716,
+      "SE": 0.02402747373702312,
+      "CI95": [
+        -0.07415026000596532,
+        0.04343596047442788
+      ]
+    }
+  },
+  "individual_history_family_size": 325,
+  "globally_significant_positive_cells": [],
+  "critic_rank_correlation_mean": 0.277014652014652,
+  "critic_rank_correlation_median": 0.38186813186813184,
+  "action_spread": {
+    "minimum": 0.21741335093975067,
+    "median": 0.44097012281417847,
+    "maximum": 2.3235342502593994
+  },
+  "stage_stratified_summary": {
+    "0": {
+      "discovery_selected_validation_gain": {
+        "n": 1,
+        "mean": -0.7711370720825391,
+        "SE": null,
+        "CI95": null
+      },
+      "critic_selected_validation_gain": {
+        "n": 1,
+        "mean": 0.21572401452256196,
+        "SE": null,
+        "CI95": null
+      },
+      "transferred_router_validation_gain": {
+        "n": 1,
+        "mean": 0.03271110170547875,
+        "SE": null,
+        "CI95": null
+      }
+    },
+    "9": {
+      "discovery_selected_validation_gain": {
+        "n": 8,
+        "mean": -0.013417395053328784,
+        "SE": 0.013299275743988174,
+        "CI95": [
+          -0.04486518500618289,
+          0.01803039489952532
+        ]
+      },
+      "critic_selected_validation_gain": {
+        "n": 8,
+        "mean": -0.015478809407752994,
+        "SE": 0.063670348644324,
+        "CI95": [
+          -0.16603525991948925,
+          0.1350776411039833
+        ]
+      },
+      "transferred_router_validation_gain": {
+        "n": 8,
+        "mean": 0.02568937034992723,
+        "SE": 0.019626731627140286,
+        "CI95": [
+          -0.020720475235111793,
+          0.07209921593496625
+        ]
+      }
+    },
+    "19": {
+      "discovery_selected_validation_gain": {
+        "n": 8,
+        "mean": -0.01637884906001827,
+        "SE": 0.04133931366610556,
+        "CI95": [
+          -0.11413079269909249,
+          0.08137309457905595
+        ]
+      },
+      "critic_selected_validation_gain": {
+        "n": 8,
+        "mean": -0.028347654938918457,
+        "SE": 0.055513132446181834,
+        "CI95": [
+          -0.1596153542030423,
+          0.10292004432520536
+        ]
+      },
+      "transferred_router_validation_gain": {
+        "n": 8,
+        "mean": -0.04936415225652849,
+        "SE": 0.06774839200119473,
+        "CI95": [
+          -0.20956364298896812,
+          0.11083533847591115
+        ]
+      }
+    },
+    "29": {
+      "discovery_selected_validation_gain": {
+        "n": 7,
+        "mean": 0.06494027066736405,
+        "SE": 0.04117593228046575,
+        "CI95": [
+          -0.03581360601165069,
+          0.16569414734637877
+        ]
+      },
+      "critic_selected_validation_gain": {
+        "n": 7,
+        "mean": 0.03656588283508249,
+        "SE": 0.04286839086642968,
+        "CI95": [
+          -0.06832929081549943,
+          0.14146105648566443
+        ]
+      },
+      "transferred_router_validation_gain": {
+        "n": 7,
+        "mean": 0.0031369797813956624,
+        "SE": 0.012456610020222782,
+        "CI95": [
+          -0.027343246902178753,
+          0.03361720646497008
+        ]
+      }
+    }
+  },
+  "resources": {
+    "wall_seconds": 142.25056290393695,
+    "cpu_user_seconds": 103.181959,
+    "cpu_system_seconds": 39.15731400000001,
+    "process_peak_rss_kb": 1520840,
+    "gpu_exclusive_wall_seconds": 142.25056290393695,
+    "sampled_gpu_busy_seconds_estimate": 124.3854450295819,
+    "gpu_utilization_mean_percent": 88.72413793103448,
+    "gpu_peak_sampled_memory_mib": 1895.0,
+    "torch_peak_allocated_bytes": 1059517440,
+    "torch_peak_reserved_bytes": 1344274432,
+    "sampling": "5-second nvidia-smi/process samples;busy estimate is not exact kernel time;GPU wall includes CPU/scorer/serialization gaps"
+  },
+  "conclusions": {
+    "structural_weight_bypass": "Not supported:actions change under fixed-history gate interventions.",
+    "useful_routing_headroom": "Not demonstrated by held-out selected-weight gains;does not establish zero headroom.",
+    "critic_credit_assignment": "Observed rankings weak/noisy;credible hypothesis,not a confirmed causal failure.",
+    "router_optimization": "Not established:no router learning performed in this frozen diagnostic.",
+    "expert_complementarity": "Cannot infer insufficient complementarity merely from absence of a measurable routing gain."
+  },
+  "limitations": [
+    "Conditional theta draws use approximate finite-pool self-normalized importance resampling;ESS thresholds are diagnostic,not a proof of posterior accuracy.",
+    "Held-out suffix validation limits candidate-selection optimism;shared prior contrast-bank uncertainty and posterior approximation error are excluded from reported CIs.",
+    "Transferred router comes from the separately learned101 checkpoint and different learned expert representations;transfer failure alone does not prove a router-learning bug.",
+    "One-step intervention then uniform continuation;not unrestricted sequence-level routing optimization.",
+    "This is a fresh diagnostic bank,not the2000-case/1M-contrast primary benchmark. Do not report these conditional EIGs as final method EIG.",
+    "Only7 complete source-trajectory clusters;one late-stage posterior ESS23.69 failed64 threshold,excluding its cluster from complete-case pooled inference. Selection of complete cases can affect generalization.",
+    "The exploratory raw report pools23 noninitial histories as though independent. Use this clustered summary instead;histories at three stages share original trajectories.",
+    "Estimator ceiling saturation remains in some conditional cases despite1M contrasts;this can hide weight differences.",
+    "Native critic estimates the variational actor-critic return,while this diagnostic scores the benchmark prior-contrast EIG estimator. Ranking disagreement can include bound/estimator mismatch;it is not automatically a critic implementation bug.",
+    "No independently trained seed101 continuation pair is complete in this new trial. Earlier benchmark results remain unchanged."
+  ]
+}

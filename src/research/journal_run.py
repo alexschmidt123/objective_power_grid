@@ -1,11 +1,15 @@
 """Validation-based journal path, entered exclusively through the root launcher."""
 import copy,hashlib,json,math,sys,time,traceback
-from datetime import datetime
 from pathlib import Path
 import torch
 from src.research.journal_validation import StoppingRule,CommonValidation,ValidationObserver
 
-METHODS=('random','fixed','dad','rl_sboed','vsoed','scorebed','sum_single','moe','resmoe','switchmoe','switchresmoe')
+METHODS=('random','fixed','dad','rl_sboed','vsoed','scorebed')
+
+def fresh_native_sir_dad(horizon,seed):
+    from src.research.sir_dad import SIRSumDAD
+    torch.manual_seed(seed)
+    return SIRSumDAD(horizon)
 
 def main(args,raw,root):
     from src.research.runner import DEFAULTS,FAMILY_METHODS,write_json,freeze_source,evaluate,plot_results,Tee
@@ -33,14 +37,22 @@ def main(args,raw,root):
         validation_cfg=dict(validation_cfg,systems=4,contrasts=8,batch_size=2,chunk=4)
         rule_cfg=dict(rule_cfg,minimum_episodes=8,minimum_checkpoints=2,validation_every_episodes=4,patience=2,maximum_episodes=8,maximum_training_seconds=120)
         settings.update(batch_size=4,contrasts=8,validate_every=1,eval_systems=2,eval_contrasts=8,evaluation_population_systems=2,evaluation_batch_size=2,evaluation_contrast_chunk=4,updates=2)
-    out=Path(args.output).resolve() if args.output else root/'experiments'/datetime.now().strftime('%m%d%Y')/(datetime.now().strftime('%m%d%Y_%H%M%S')+'_journal_'+raw['system']['name']+f'_T{h}_seed{seed}')
-    rel=out.relative_to(root/'experiments')
-    if len(rel.parts)<2 or len(rel.parts[0])!=8 or not rel.parts[1].startswith(rel.parts[0]+'_'):raise ValueError('Use dated experiment hierarchy')
-    out.mkdir(parents=True,exist_ok=False)
+    from src.results.run_directory import allocate_run
+    storage_root = root / ('scratch_runs' if root.name == 'objective_power_grid_temp' else 'experiments')
+    if args.output:
+        out = Path(args.output).resolve()
+        rel=out.relative_to(storage_root);parts=rel.parts
+        if parts and parts[0] in {'sir_ode','location_finding'}:parts=parts[1:]
+        dated_parent=len(parts)>=2 and len(parts[0])==8 and parts[0].isdigit() and parts[1].startswith(parts[0]+'_')
+        dated_campaign=bool(parts) and len(parts[0])>9 and parts[0][:8].isdigit() and parts[0][8]=='_'
+        if not(dated_parent or dated_campaign):raise ValueError('Use a unique dated campaign under the prescribed STABLE benchmark or TEMP scratch root')
+        out.mkdir(parents=True,exist_ok=False)
+    else:
+        out = allocate_run(storage_root, Path(args.config).stem, h, methods)
     for name in ['models','eval','logs']:(out/name).mkdir()
     handle=(out/'logs/run_log.log').open('w');sys.stdout=Tee(sys.stdout,handle);sys.stderr=Tee(sys.stderr,handle)
     raw=copy.deepcopy(raw);raw['experiment'].update(step_number=h,methods=methods)
-    metadata=dict(protocol='journal_validation_convergence_v1',phase=phase,smoke=args.smoke,workability_only=args.smoke,train_seed=seed,eval_seeds=evaluation_seeds,horizon=h,methods=methods,settings=settings,benchmark=raw,hardware=hardware_info(),checkpoint_selection='final_predeclared_fixed_budget' if protocol.get('checkpoint_selection_mode')=='final_fixed_budget' else 'best_predeclared_validation_EIG',untouched_final_evaluation=False,parameter_inference_enabled=False)
+    metadata=dict(protocol='journal_validation_convergence_v1',phase=phase,smoke=args.smoke,workability_only=args.smoke,train_seed=seed,eval_seeds=evaluation_seeds,horizon=h,methods=methods,settings=settings,benchmark=raw,hardware=hardware_info(),checkpoint_selection='latest_budget_eligible_checkpoint' if protocol.get('compute_budget') else 'final_predeclared_fixed_budget' if protocol.get('checkpoint_selection_mode')=='final_fixed_budget' else 'best_predeclared_validation_EIG',untouched_final_evaluation=False,parameter_inference_enabled=False)
     if args.evaluation_cases or args.evaluation_bank:
         if not args.evaluation_cases or not args.evaluation_bank:raise ValueError('Both paired evaluation files are required')
         metadata['paired_evaluation_files']={key:dict(path=str(Path(path).resolve()),sha256=hashlib.sha256(Path(path).read_bytes()).hexdigest()) for key,path in [('cases',args.evaluation_cases),('contrasts',args.evaluation_bank)]}
@@ -70,7 +82,8 @@ def main(args,raw,root):
             if credited_work is None:raise ValueError('Residual base model work is missing; time credit alone is insufficient')
             credited_updates=next((p.get('resource_ledger',{}).get('optimizer_updates') for p in base_records if p.get('compute_budget') is not None),None)
             if credited_updates is None:raise ValueError('Residual base optimizer-work counters missing')
-        compute_clock=ComputeClock(out/'models/compute_clock.json',float(compute_cfg['seconds']),credit_seconds=credit,hardware=compute_cfg['hardware'],start=float(os.environ.get('BOED_TRAINING_START_MONOTONIC',time.monotonic())))
+        if compute_cfg.get('require_prelaunch_start',False) and 'BOED_TRAINING_START_MONOTONIC' not in os.environ:raise ValueError('Whole-method accounting requires a timestamp set before launching the Python process')
+        compute_clock=ComputeClock(out/'models/compute_clock.json',float(compute_cfg['seconds']),credit_seconds=credit,hardware=compute_cfg['hardware'],start=float(os.environ.get('BOED_TRAINING_START_MONOTONIC',time.monotonic())),finalization_reserve_seconds=compute_cfg.get('finalization_reserve_seconds',0.))
     try:
         validation_device=validation_cfg.get('device','cpu')
         if validation_device=='cuda_if_available':validation_device='cuda:0' if torch.cuda.is_available() else 'cpu'
@@ -92,6 +105,9 @@ def main(args,raw,root):
                 if 'reference_schedule_episodes' not in s:raise ValueError('Matched-compute mode requires an explicit reference schedule, separate from episode safety guard')
                 reference_episodes=int(s['reference_schedule_episodes'])
                 cap=effective_episode_limit(rule.maximum_episodes,reference_episodes)
+                if method in {'dad','fixed'}:
+                    from src.research.compute_budget import primary_reference_schedule
+                    cap=primary_reference_schedule(s,rule.maximum_episodes)
             if method in {'resmoe','switchresmoe'} and not args.base_checkpoint:raise ValueError('Provide the same benchmark/seed-specific base checkpoint for residual variants')
             if method in {'resmoe','switchresmoe'} and not args.smoke:
                 base_run=json.loads((Path(args.base_checkpoint).resolve().parent.parent/'run_config.json').read_text())
@@ -135,7 +151,7 @@ def main(args,raw,root):
                     native=None
                     if method=='dad' and b.name=='sir_ode':
                         from src.research.sir_dad import SIRSumDAD
-                        native=SIRSumDAD(h)
+                        native=fresh_native_sir_dad(h,seed)
                     p,t=train_spce(b,method,h,s,seed,out/'models',final_checkpoint=True,trajectory_budget=cap,policy=native,observer=observer)
             if protocol.get('checkpoint_selection_mode')=='final_fixed_budget' and method!='random' and t.get('generated_training_trajectories')!=cap:
                 raise RuntimeError('Fixed-budget training did not complete the exact episode allocation')
@@ -170,7 +186,17 @@ def main(args,raw,root):
                 ledger['cpu_process_seconds']=usage.ru_utime+usage.ru_stime
                 ledger['waited_child_cpu_seconds_including_validation']=children.ru_utime+children.ru_stime
                 t['comparison_budget_unit']='exclusive_device_training_seconds';t['primary_episode_safety_cap']=cap
+                # The final native export is performed by each trainer above.
+                # Only a fully serialized, budget-eligible artifact is primary.
+                checkpoint=out/'models'/f'{method}.pt'
+                if not checkpoint.is_file():raise RuntimeError('Native trainer returned without a complete serialized checkpoint')
+                t['checkpoint_sha256']=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+                final_mark=compute_clock.checkpoint(str(checkpoint))
+                t['final_checkpoint_compute_eligibility']=final_mark
                 t['compute_budget']=compute_clock.stop();ledger['compute_budget']=t['compute_budget']
+                if not final_mark['eligible']:
+                    write_json(out/'models'/f'{method}_training.json',t)
+                    raise RuntimeError('Final native checkpoint serialization exceeded the charged quota; preserve eligible progress evidence, do not register this export as primary')
                 from src.research.compute_budget import classify_stop
                 t['reference_schedule_episodes']=reference_episodes
                 t['primary_episode_safety_cap']=rule.maximum_episodes
@@ -178,7 +204,14 @@ def main(args,raw,root):
                 if t['generated_training_trajectories']>=reference_episodes:
                     t['stop_reason']='reference_schedule_completion'
                     if method=='scorebed' and t.get('actual_policy_updates',0)<s['policy_schedule_reference_steps']:t['stop_reason']='predeclared_compute_phase_schedule_completion'
+                elif t['generated_training_trajectories']>=cap and compute_cfg.get('safety_cap_is_measured_compute_limit',False):
+                    t['stop_reason']='predeclared_compute_update_limit'
+                t['native_schedule_completed']=t['generated_training_trajectories']>=reference_episodes
+                t['training_status']='NATIVE_FINITE_SCHEDULE_COMPLETE' if t['native_schedule_completed'] else 'COMPUTE_LIMITED_NATIVE_IMPLEMENTATION'
                 t['compute_budget']['overrun_seconds']=max(0.,t['compute_budget']['charged_seconds']-t['compute_budget']['budget_seconds'])
+                if t['stop_reason']=='incomplete_or_interrupted':
+                    write_json(out/'models'/f'{method}_training.json',t)
+                    raise RuntimeError('Premature native training termination: neither declared schedule, compute allowance nor episode safety guard reached')
             t['effective_training_settings']=s
             t['resume_scope']='Completed phases reusable; exact mid-phase resume not supported for all native trainers; partial runs are preserved, not silently resumed'
             t['historical_runtime_overlap']='New runs are serialized; historical timings require separate provenance'
@@ -186,6 +219,9 @@ def main(args,raw,root):
             checkpoint=out/'models'/f'{method}.pt'
             if checkpoint.exists():t['checkpoint_sha256']=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
             write_json(out/'models'/f'{method}_training.json',t)
+            if getattr(args,'train_only',False):
+                print('TRAIN_ONLY_COMPLETE',method,flush=True)
+                continue
             for es in evaluation_seeds:
                 saved_draws=None
                 if args.evaluation_cases or args.evaluation_bank:
@@ -196,7 +232,8 @@ def main(args,raw,root):
                 rows,summary=evaluate(b,p,method,h,settings,es,t,out,paper=True,infer_parameters=False,evaluation_draws=saved_draws)
                 summary.update(convergence_status=t['convergence_status'],phase=phase,workability_only=args.smoke)
                 write_json(out/'eval'/f'{method}_seed{es}.json',rows);summaries.append(summary);results[(method,es)]=rows
-        write_json(out/'summary.json',summaries);plot_results(out,results,methods,evaluation_seeds,h)
+        write_json(out/'summary.json',summaries)
+        if not getattr(args,'train_only',False):plot_results(out,results,methods,evaluation_seeds,h)
         (out/'exit_code').write_text('0\n');print('RESULT_DIR='+str(out),flush=True)
     except BaseException as exc:
         write_json(out/'failure.json',dict(type=type(exc).__name__,message=str(exc),traceback=traceback.format_exc()));(out/'exit_code').write_text('1\n');raise

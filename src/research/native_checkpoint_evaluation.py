@@ -9,7 +9,7 @@ def main(args,raw,root):
  from src.research.benchmarks import make_benchmark
  from src.research.moe_family import benchmark_signature
  from src.research.journal_checkpoints import load_checkpoint
- if not args.evaluation_cases or not args.evaluation_bank or not args.output:raise ValueError('Provide frozen cases, contrast bank and a new dated output')
+ if not args.evaluation_cases or not args.evaluation_bank:raise ValueError('Provide frozen cases and contrast bank')
  seeds=[int(x) for x in (args.eval_seeds or '').split(',') if x]
  if seeds!=[1001]:raise ValueError('This development reevaluation accepts only seed1001; confirmation requires a separately frozen protocol')
  path=Path(args.native_evaluate_from).resolve();source=path if args.methods=='random' else path.parent.parent
@@ -33,9 +33,13 @@ def main(args,raw,root):
   if method not in {'moe','resmoe','switchmoe','switchresmoe'}:raise ValueError('Relaxed routing is a family-only diagnostic')
   p.set_routing(relaxed=True)
  before=None if method=='random' else hashlib.sha256(path.read_bytes()).hexdigest()
- out=Path(args.output).resolve();rel=out.relative_to(root/'experiments')
- if len(rel.parts)<2 or len(rel.parts[0])!=8 or not rel.parts[1].startswith(rel.parts[0]+'_'):raise ValueError('Use the dated campaign hierarchy')
- out.mkdir(parents=True,exist_ok=False)
+ if args.output:
+  out=Path(args.output).resolve();rel=out.relative_to(root/'experiments')
+  if len(rel.parts)<2 or len(rel.parts[0])!=8 or not rel.parts[1].startswith(rel.parts[0]+'_'):raise ValueError('Use the dated campaign hierarchy')
+  out.mkdir(parents=True,exist_ok=False)
+ else:
+  from src.results.run_directory import allocate_run
+  out=allocate_run(root/'experiments',Path(args.config).stem,h,[method])
  for name in ['models','logs','eval']:(out/name).mkdir()
  metadata=copy.deepcopy(cfg);metadata.update(evaluation_only=True,settings=settings,eval_seeds=[1001],workability_only=args.smoke,source_training_run=str(source),source_checkpoint_sha256=before,new_training_episodes=0,routing_diagnostic=('relaxed' if getattr(args,'evaluation_relaxed_routing',False) else 'hard'),evaluation_cases_sha256=hashlib.sha256(cases_path.read_bytes()).hexdigest(),evaluation_bank_sha256=hashlib.sha256(bank_path.read_bytes()).hexdigest())
  write_json(out/'run_config.json',metadata);freeze_source(root,out)

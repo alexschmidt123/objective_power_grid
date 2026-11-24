@@ -1,0 +1,111 @@
+{
+  "status": "PASS",
+  "paired_initialization_exact": true,
+  "initial_actions_equal_to_previous_V5": true,
+  "refresh": {
+    "continuation_update": 0,
+    "native_update": 16001,
+    "old_belief_digest": "36a4d358209f619a50c7a34b1eb05ed8f137b0b818268167876b3514eb580512",
+    "new_belief_digest": "d23780ee07ed4989f7a5830e5b8bb1c429bfd643ca112a62a808edabf104fb52",
+    "only_belief_buffers_changed": true,
+    "target_belief_identical": true,
+    "optimizer_parameter_identities_preserved": true,
+    "new_actor_optimizer_updates": 0,
+    "new_posterior_optimizer_updates": 0,
+    "new_simulator_episodes": 0
+  },
+  "gradient_norms": {
+    "query.offset": 0.3163169805551975,
+    "query.history": 0.4188937478354618,
+    "query.commander": 0.9830186353364705,
+    "experts.0": 2.498942477865385,
+    "experts.1": 2.188500767058357,
+    "experts.2": 2.2705464315975528,
+    "experts.3": 2.2647474129140575,
+    "router.0": 0.0,
+    "router.2": 0.320638002760317,
+    "action_head.0": 3.08581449046208,
+    "action_head.2": 2.9799022611168517,
+    "shared_small.0": 0.25135370085326014,
+    "shared_small.2": 0.1387207774451116,
+    "history_context.token": 0.0,
+    "history_context.combine": 0.0
+  },
+  "parameter_counts": {
+    "query": {
+      "total": 42796,
+      "trainable": 0,
+      "buffer_elements": 14736632
+    },
+    "E1": {
+      "total": 62340,
+      "trainable": 0,
+      "buffer_elements": 4800
+    },
+    "E2": {
+      "total": 69498,
+      "trainable": 0,
+      "buffer_elements": 0
+    },
+    "E3": {
+      "total": 65766,
+      "trainable": 0,
+      "buffer_elements": 7648
+    },
+    "E4": {
+      "total": 70584,
+      "trainable": 0,
+      "buffer_elements": 162561
+    },
+    "router": {
+      "total": 41540,
+      "trainable": 0,
+      "buffer_elements": 0
+    },
+    "action_head": {
+      "total": 4194,
+      "trainable": 0,
+      "buffer_elements": 0
+    },
+    "shared_small": {
+      "total": 1922,
+      "trainable": 0,
+      "buffer_elements": 0
+    },
+    "ALL": {
+      "total": 371136,
+      "trainable": 0,
+      "buffer_elements": 14911641
+    }
+  },
+  "deployment": {
+    "status": "PASS",
+    "fixed_actor_state_unchanged": true,
+    "all_actor_parameters_frozen": true,
+    "gradient_optimizer_construction_and_random_search_traps": true,
+    "actions_bitwise_equal": true,
+    "static_forward_methods": [
+      "<class 'belief_policy.V5Actor'>.compute",
+      "<class 'belief_policy.V5Actor'>.decode",
+      "<class 'belief_policy.V5Actor'>.forward",
+      "<class 'belief_policy.V5Actor'>.packets",
+      "<class 'hec_policy.Belief'>.nodes",
+      "<class 'history_policy.HistoryExpert'>.forward",
+      "<class 'history_policy.OrderedHistory'>.forward",
+      "<class 'policy.QueryContext'>.forward",
+      "<class 'specialist_queries.SpecialistFeatures'>.forward",
+      "<class 'src.research.vendor.vsoed.post_approx.GMM_NET'>.forward",
+      "<class 'src.research.vendor.vsoed.utils.Net'>.forward"
+    ],
+    "deployed_source_sha256": {
+      "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/moe_sboed_v4_20261116/policy.py": "e7ae0560725e262758bc1e1f45496501ef06904cd424a9ea7bdc0d91730dc321",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/moe_sboed_v5_history_20261119/history_policy.py": "2c610072e633cb4e86129db9d43d09cc879c4a72e62d365c0483ff9e4bbbcd51",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/_legacy_archive/temp_research_20261115/scratch_runs/moe_hec_v2_icml_20261109/source/hec_policy.py": "b7e962a4a67a49405e065dc64b4107639b96c3b8b3eeb51d0459edcc761930f8",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/_legacy_archive/temp_research_20261115/scratch_runs/moe_development_migration_20261105/imported_ubuntu_tree/scratch_runs/20261104T161647Z_direct_head_moe_vsoed_seed101/source/src/research/vendor/vsoed/post_approx.py": "5e63ee1690dead869b68a7d26a1e7abd2baa7aed382fb8abb56e280062db36e7",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/src/research/moe_sboed_v4_20261116/specialist_queries.py": "8f17b326db9839681c1d0d9ed0990cccbac1e47bb2eca37dcc720959728faa24",
+      "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/_legacy_archive/temp_research_20261115/scratch_runs/moe_development_migration_20261105/imported_ubuntu_tree/scratch_runs/20261104T161647Z_direct_head_moe_vsoed_seed101/source/src/research/vendor/vsoed/utils.py": "c99d31e206a30b7911324bd1dfd92bfb2d7fb956f3b6b0e7afa0853cdae7b657"
+    },
+    "scope": "Runtime tests plus source inspection for this frozen implementation;fixed NN/sigma-point/probe loops remain,not iterative design optimization",
+    "offline_reference_and_suffix_code_not_in_deployed_path": true
+  }
+}

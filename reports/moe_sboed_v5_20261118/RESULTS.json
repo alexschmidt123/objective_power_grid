@@ -1,0 +1,134 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "method": "MoE-sBOED V5",
+      "EIG": 12.835763916681005,
+      "MCSE": 0.03721079698179087,
+      "score_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v5_20261118/learned/evaluation/scores.npy"
+    },
+    {
+      "method": "MoE-sBOED V5-uniform",
+      "EIG": 12.864790456550704,
+      "MCSE": 0.03594348715865619,
+      "score_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v5_20261118/uniform/evaluation/scores.npy"
+    },
+    {
+      "method": "Original V4 learned",
+      "EIG": 12.8781209779006,
+      "MCSE": 0.036882478994535214,
+      "score_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v5_20261118/previous_learned/evaluation/scores.npy"
+    },
+    {
+      "method": "Original V4-uniform",
+      "EIG": 12.786476112706234,
+      "MCSE": 0.03710143862767969,
+      "score_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v5_20261118/previous_uniform/evaluation/scores.npy"
+    },
+    {
+      "method": "vsOED",
+      "EIG": 12.417328282299462,
+      "MCSE": 0.04208798053265332,
+      "score_path": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/location_finding/moe_sboed_v5_20261118/vsoed/evaluation/scores.npy"
+    }
+  ],
+  "comparisons": {
+    "V5_minus_V4": {
+      "n": 2000,
+      "mean": -0.04235706121959585,
+      "MCSE": 0.02975527605515132,
+      "CI95": [
+        -0.10071166311272296,
+        0.015997540673531263
+      ]
+    },
+    "learned_minus_uniform": {
+      "n": 2000,
+      "mean": -0.029026539869699247,
+      "MCSE": 0.02690663595754947,
+      "CI95": [
+        -0.08179452718985968,
+        0.02374144745046118
+      ]
+    },
+    "V5_minus_vsOED": {
+      "n": 2000,
+      "mean": 0.41843563438154374,
+      "MCSE": 0.048829194843429735,
+      "CI95": [
+        0.32267418956856647,
+        0.514197079194521
+      ]
+    },
+    "uniform_V5_minus_V4": {
+      "n": 2000,
+      "mean": 0.07831434384447035,
+      "MCSE": 0.029595604257039325,
+      "CI95": [
+        0.020272882524971766,
+        0.13635580516396895
+      ]
+    },
+    "original_routing_gap": {
+      "n": 2000,
+      "mean": 0.09164486519436695,
+      "MCSE": 0.029372982850063723,
+      "CI95": [
+        0.03403999816331893,
+        0.14924973222541496
+      ]
+    },
+    "gap_improvement": {
+      "n": 2000,
+      "mean": -0.12067140506406619,
+      "MCSE": 0.042200200809303534,
+      "CI95": [
+        -0.2034323888127147,
+        -0.03791042131541769
+      ]
+    }
+  },
+  "decision": {
+    "primary_credible": false,
+    "secondary_credible": false,
+    "uniform_change": {
+      "n": 2000,
+      "mean": 0.07831434384447035,
+      "MCSE": 0.029595604257039325,
+      "CI95": [
+        0.020272882524971766,
+        0.13635580516396895
+      ]
+    },
+    "automatic_expansion": false,
+    "recommend_five_seeds": false,
+    "scope": "One continuation seed,case MC uncertainty;not seed robustness. Slot preservation and head capacity confounded."
+  },
+  "bank_identity": {
+    "sha256": "643921b3b7c2039fa84ccb90915e0413b13f64b47b38e8eb76e72c0f692c06fc",
+    "evaluation": {
+      "seed": 202611185501,
+      "cases": 2000,
+      "contrasts": 1000000,
+      "T": 30,
+      "sigma": 0.5,
+      "chunk": 16384,
+      "bounds": [
+        [
+          -4,
+          4
+        ],
+        [
+          -4,
+          4
+        ]
+      ],
+      "prior": "N(0,I4)",
+      "scorer_sha256": "64c67b6547c77f4823b487493ed0703efbd3f04d7308019e875d145505695f2f",
+      "bank": "ONE NEW fixed V5 development-validation bank,all five policies;canonical bank untouched",
+      "checkpoint_selection": "Fixed terminal2000 only;no evaluation-based tuning or checkpoint selection."
+    },
+    "purpose": "Separate held-out V4 development-validation bank;original test bank untouched"
+  },
+  "limitation": "Finite-contrast EIG lower bounds;MCSE does not include contrast bias. Shared inherited pretraining;one continuation seed."
+}

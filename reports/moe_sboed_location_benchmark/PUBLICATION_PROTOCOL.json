@@ -1,0 +1,42 @@
+{
+  "status": "LOCKED_PUBLICATION_CANDIDATE",
+  "methods": [
+    "MoE-sBOED",
+    "MoE-sBOED-uniform"
+  ],
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "per_run_budget": {
+    "actor_updates": 2000,
+    "critic_updates": 10000,
+    "posterior_optimizer_updates": 300000,
+    "new_simulator_episodes": 2000000,
+    "simulator_observations": 60000000,
+    "replay_batch": 10000,
+    "new_episodes_per_update": 1000,
+    "hard_total_seconds": 14400
+  },
+  "stop_rule": "Complete the fixed2000-update native schedule or stop at predeclared resource cap. Four hours is a maximum,not permission for selective test-EIG extensions. Capped/incomplete runs retain that status.",
+  "paired_initialization": "Same actor weights,critic,posterior,replay and new-module seed within each101-105 learned/uniform pair. Seed101 actor digests verified identical.",
+  "objectives": "Only native full-horizon variational EIG for both MoE methods;discount1,use_PCE=False;no balancing/diversity/cost rewards.",
+  "uniform": "Same four-expert architecture,private encoders,fusion/action head;weights fixed[.25,.25,.25,.25] throughout train/target/evaluation;router parameters unused and frozen.",
+  "evaluation": {
+    "seed": 202611099206,
+    "trajectories": 2000,
+    "contrasts": 1000000,
+    "T": 30,
+    "bank_sha256": "52c0c614c4ee3b63d58ccda60714b38b00a2c0ca35564a428fe8cc2ce8d727c5",
+    "selection": "Terminal checkpoint only;no test-bank selection or tuning."
+  },
+  "extracted_experts": "Four independently executable current-expert policies with common context,from each completed learned checkpoint. No extra training. They inherit pretraining and mixture training;not independently optimized single experts.",
+  "pretraining_scope": "Shared pretrained initialization:continuation-seed robustness,not independent from-scratch variability. Known inherited actor lineage16001 updates/16,021,000 episodes. Report inherited/offline costs separately.",
+  "baseline_policy": "Reuse valid existing DAD,vsOED,RL-sBOED,ScoreBED training/checkpoints and compatible EIG vectors. Reevaluate only where bank/scorer/checkpoint differs. No baseline retraining queued. Historical resource departures remain explicit.",
+  "statistics": "Five-seed mean/SD and paired seed-level intervals;case MCSE separate. Holm family protection for uniform/four experts/four externals;strongest-expert selection protected by simultaneous expert comparisons. Hypotheses may fail.",
+  "publication_decision": "Formal protocol does not certify convergence or scientific success. Complete all five seed pairs,evaluation identities,resource audit and independent-path checks before promoting results.",
+  "source_protocol_sha256": "25f4c9e190d90edc390183c6f16d0b69ff6ce8ea007b5fcdc05b2732f084d2b8"
+}

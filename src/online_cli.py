@@ -11,6 +11,13 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def main():
     argv=sys.argv[1:]
+    help_requested = any(arg in ('-h', '--help') for arg in argv)
+    config_options = ('--config', '--configs') if '--sweep' in argv else ('--config',)
+    if not help_requested and not any(arg.split('=')[0] in config_options for arg in argv):
+        raise SystemExit("Supply an explicit experiment config with " + " or ".join(config_options))
+    from tools.storage_policy import enforce_storage_policy
+    argv = enforce_storage_policy(ROOT, argv)
+    sys.argv = [sys.argv[0], *argv]
     for arg in argv:
         flag=arg.split('=',1)[0].replace('_','-')
         if flag.startswith(('--reuse','--resume','--checkpoint','--load-checkpoint','--skip-training')):
@@ -34,7 +41,7 @@ def main():
     argv.remove('--sweep')
     p=argparse.ArgumentParser(description='Explicit Cartesian sweep; each cell starts a fresh run.sh experiment with its own training and evaluations.')
     p.add_argument('--configs','--config',default='ieee9_research_eig')
-    p.add_argument('--T',default='3')
+    p.add_argument('--T',default=None)
     p.add_argument('--N_obs','--N-obs',default='0')
     p.add_argument('--noise_sigma','--noise-sigma',default=None)
     p.add_argument('--seed',default='101')
@@ -43,10 +50,11 @@ def main():
     p.add_argument('--campaign-root',help='Date-grouped parent for sweep cells; never reused')
     args,other=p.parse_known_args(argv)
     if '--output' in other:p.error('Each sweep cell allocates its own output; do not pass --output')
-    axes=[args.configs.split(','),args.T.split(','),args.N_obs.split(','),args.noise_sigma.split(',') if args.noise_sigma else [None],args.seed.split(','),args.coverage.split(',') if args.coverage else [None]]
+    axes=[args.configs.split(','),args.T.split(',') if args.T else [None],args.N_obs.split(','),args.noise_sigma.split(',') if args.noise_sigma else [None],args.seed.split(','),args.coverage.split(',') if args.coverage else [None]]
     for config,T,nobs,sigma,seed,coverage in itertools.product(*axes):
-        cmd=['bash',str(ROOT/'run.sh'),'--config',config,'--T',T,'--N_obs',nobs,
+        cmd=['bash',str(ROOT/'run.sh'),'--config',config,'--N_obs',nobs,
              '--seed',seed,'--eval-seeds',args.eval_seeds,*other]
+        if T is not None:cmd+=['--T',T]
         if args.campaign_root:
             from pathlib import Path
             parent=Path(args.campaign_root)

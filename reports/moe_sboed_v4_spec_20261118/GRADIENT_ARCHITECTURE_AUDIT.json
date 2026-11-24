@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "initial_actor_digest": "c3c0858a13947ca0f06e17779ea744080a19df89aefc28ac55cd2f80bd3c2ccb",
+  "architecture_state_keys_and_parameter_count_equal": true,
+  "forward_action_max_error": 0,
+  "actor_scalar_loss_max_error": 0,
+  "shared_gradient_max_error": 0.0,
+  "expert_gradient_max_errors": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "allzero_exposure_yields_exact_zero_expert_gradients": true,
+  "allone_exposure_matches_native_gradients": true,
+  "all_four_executed": true,
+  "expert_execution_counts": [
+    4,
+    4,
+    4,
+    4
+  ],
+  "uniform_forward": true,
+  "no_future_information": true,
+  "native_update": {
+    "status": "COMPLETE",
+    "updates": 1,
+    "counts": {
+      "actor": 1,
+      "critic": 5,
+      "posterior": 150
+    },
+    "seconds": 4.891424163244665,
+    "trainable_parameters": 240152,
+    "new_episodes": 1000,
+    "simulator_observations": 30000,
+    "frozen_state_preserved": true,
+    "objective": "Unmodified native variational actor-critic EIG;use_PCE=False"
+  },
+  "native_gradient_norms": {
+    "query.offset": 0.0457044799921717,
+    "query.commander": 0.2521927459021911,
+    "experts.0": 0.7382311507539008,
+    "experts.1": 0.633047707416402,
+    "experts.2": 0.5492091494858293,
+    "experts.3": 0.4386725500625533,
+    "action_head.0": 1.6149233342137779,
+    "action_head.2": 1.6625551193106174,
+    "shared_small.0": 0.09516969521251059,
+    "shared_small.2": 0.07553430723431338
+  },
+  "actor_history_positions": 300000,
+  "regime_exposure_counts": [
+    151718.0,
+    149914.0,
+    151325.0,
+    79150.0
+  ],
+  "discarded_new_simulator_episodes": 1000,
+  "seconds": 11.415842689108104,
+  "vsOED_checkpoint": "/home/grads/g/g.lin/Documents/objective_power_grid/experiments/_legacy_archive/temp_research_20261115/scratch_runs/moe_hec_v2_icml_20261109/inputs/vsoed.pt",
+  "vsOED_checkpoint_sha256": "68035f5da5b4bef7597d7434ed2db9ce95b56d4f6f39371f4acd23f3752b05bb",
+  "objective_note": "Native actor loss/critic/trajectory credit unchanged;expert gradient allocation is deliberately regime-conditioned,not an unbiased full-batch expert gradient."
+}

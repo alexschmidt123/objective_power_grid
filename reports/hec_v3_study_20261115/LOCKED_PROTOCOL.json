@@ -1,0 +1,180 @@
+{
+  "version": "hec_v3_study_20261115",
+  "status": "LOCKED_BEFORE_NEW_RESULTS",
+  "parent_update": 16001,
+  "updates": 2000,
+  "warmup_updates": 200,
+  "joint_updates": 1800,
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "arms": [
+    "learned",
+    "uniform",
+    "v2_control",
+    "router_only",
+    "encoders_only"
+  ],
+  "seed_scope": "Five independent continuation RNGs and new-module initializations,conditional on the same frozen pretrained V2 parent/providers/replay;not five independently pretrained lineages.",
+  "objective": "Only original native full-horizon variational actor-critic EIG,discount1,use_PCE=False;no balancing,diversity or cost reward.",
+  "initialization": "Same frozen V2 runtime16001 per run;pair-specific new encoder/router seed;zero output layers;one fresh Adam at inherited terminal LR;online target copy;same native critic/posterior/replay.",
+  "native": {
+    "batch": 10000,
+    "new_episodes_per_update": 1000,
+    "critic_updates_per_actor": 5,
+    "posterior_updates_per_actor": 150,
+    "replay_capacity": 1000000,
+    "horizon": 30
+  },
+  "timing": {
+    "hard_total_seconds": 14400,
+    "term_seconds": 14340,
+    "training_soft_seconds": 12600,
+    "evaluation_deadline_seconds": 14100
+  },
+  "evaluation": {
+    "trajectories": 2000,
+    "contrasts": 1000000,
+    "T": 30,
+    "chunk": 16384,
+    "bank_sha256": "52c0c614c4ee3b63d58ccda60714b38b00a2c0ca35564a428fe8cc2ce8d727c5",
+    "uniforms_sha256": "6e56f0a08fe4deeefd7f0977967dba9d2910a4a383f1acfbd1736db3f358033c",
+    "scorer_sha256": "64c67b6547c77f4823b487493ed0703efbd3f04d7308019e875d145505695f2f"
+  },
+  "inference_ablations": [
+    "learned",
+    "uniform",
+    "no_correction",
+    "no_encoders",
+    "no_correction_no_encoders",
+    "stage_only",
+    "observation_swapped_gates",
+    "remove_feature_1",
+    "remove_feature_2",
+    "remove_feature_3",
+    "remove_feature_4"
+  ],
+  "diagnosis_bank": {
+    "seed": 202611151910,
+    "cases": 1024,
+    "purpose": "Fresh diagnostic simulations for stage-average routing and feature summaries,not model/checkpoint selection;primary EIG always canonical bank."
+  },
+  "comparison": {
+    "primary": [
+      "learned_minus_trained_uniform",
+      "learned_minus_v2_continuation"
+    ],
+    "seed_inference": "Paired t intervals/tests across five seed EIG means;Holm correction for two primary hypotheses;case CIs separately conditional on contrast bank.",
+    "attribution": "Five-seed 2x2 trained factorial:full,router_only,encoders_only,V2-control. Secondary interaction full-router_only-encoders_only+V2-control. Frozen-checkpoint interventions are functional attribution only.",
+    "control": "V2 control is functionally V2 in the same wrapper with zero frozen new branches;validate action and gradient equivalence;extra2000 continuation updates,not rerunning original V2 training.",
+    "test_bank": "Previously observed reference benchmark,not an untouched test. Terminal2000 only,no model selection or adaptive extension from test EIG.",
+    "completion": "All seeds and arms required for campaign-complete claim;incomplete runs preserved and never silently replaced;no automatic retries."
+  },
+  "resources": "Sequential LabPC GPU runs;locks and active-process checks;CPU/process and GPU utilization samples,peak memory,offline/online/scorer timing and simulator/model-derived calls. Costs are measurements,not rewards.",
+  "queue": [
+    {
+      "seed": 101,
+      "arm": "uniform"
+    },
+    {
+      "seed": 101,
+      "arm": "v2_control"
+    },
+    {
+      "seed": 101,
+      "arm": "router_only"
+    },
+    {
+      "seed": 101,
+      "arm": "learned"
+    },
+    {
+      "seed": 101,
+      "arm": "encoders_only"
+    },
+    {
+      "seed": 102,
+      "arm": "encoders_only"
+    },
+    {
+      "seed": 102,
+      "arm": "router_only"
+    },
+    {
+      "seed": 102,
+      "arm": "v2_control"
+    },
+    {
+      "seed": 102,
+      "arm": "learned"
+    },
+    {
+      "seed": 102,
+      "arm": "uniform"
+    },
+    {
+      "seed": 103,
+      "arm": "learned"
+    },
+    {
+      "seed": 103,
+      "arm": "encoders_only"
+    },
+    {
+      "seed": 103,
+      "arm": "v2_control"
+    },
+    {
+      "seed": 103,
+      "arm": "router_only"
+    },
+    {
+      "seed": 103,
+      "arm": "uniform"
+    },
+    {
+      "seed": 104,
+      "arm": "encoders_only"
+    },
+    {
+      "seed": 104,
+      "arm": "learned"
+    },
+    {
+      "seed": 104,
+      "arm": "router_only"
+    },
+    {
+      "seed": 104,
+      "arm": "v2_control"
+    },
+    {
+      "seed": 104,
+      "arm": "uniform"
+    },
+    {
+      "seed": 105,
+      "arm": "encoders_only"
+    },
+    {
+      "seed": 105,
+      "arm": "learned"
+    },
+    {
+      "seed": 105,
+      "arm": "router_only"
+    },
+    {
+      "seed": 105,
+      "arm": "v2_control"
+    },
+    {
+      "seed": 105,
+      "arm": "uniform"
+    }
+  ]
+}

@@ -11,7 +11,7 @@
 #SBATCH --time=24:00:00
 set -euo pipefail
 SOURCE=${1:?Provide an absolute source snapshot directory}
-ENTRY=${2:?Choose run, sweep, generate, train, evaluate, visualize, or continuous-eig}
+ENTRY=${2:?Choose run or sweep}
 shift 2
 [[ "$SOURCE" = /* && -d "$SOURCE" ]] || { echo "Invalid source directory" >&2; exit 2; }
 cd "$SOURCE"
@@ -19,11 +19,5 @@ source hprc/environment.sh
 case "$ENTRY" in
   run) exec bash run.sh "$@" ;;
   sweep) exec bash sweep_run.sh "$@" ;;
-  generate) exec bash scripts/data_generation.sh "$@" ;;
-  train) exec bash scripts/training.sh "$@" ;;
-  evaluate) exec bash scripts/evaluation.sh "$@" ;;
-  visualize) exec bash scripts/visualization.sh "$@" ;;
-  continuous) exec bash scripts/continuous.sh "$@" ;;
-  continuous-eig) exec bash scripts/continuous_eig.sh "$@" ;;
   *) echo "Unsupported entrypoint: $ENTRY" >&2; exit 2 ;;
 esac

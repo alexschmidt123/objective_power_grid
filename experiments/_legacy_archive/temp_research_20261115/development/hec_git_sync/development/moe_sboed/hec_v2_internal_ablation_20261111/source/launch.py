@@ -1,0 +1,4 @@
+import os,sys,pathlib,json,subprocess,time,fcntl
+O=pathlib.Path(__file__).resolve().parents[1];guard=(O/'.launch.lock').open('a+');fcntl.flock(guard,fcntl.LOCK_EX|fcntl.LOCK_NB);assert not (O/'LAUNCH_RECEIPT.json').exists(),'One evaluation already launched';m=json.loads((O/'PRE_EVALUATION_MANIFEST.json').read_text());assert m['git_commit'];assert json.loads((O/'evidence/VALIDATION.json').read_text())['status']=='PASS'
+with (O/'run.log').open('xb') as log:p=subprocess.Popen([sys.executable,'-u',str(O/'source/audit.py')],stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True,env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1','OPENBLAS_NUM_THREADS':'1'})
+r=dict(pid=p.pid,time=time.time(),git_commit=m['git_commit'],status_file=str(O/'STATUS.json'));(O/'LAUNCH_RECEIPT.json').write_text(json.dumps(r,indent=2));print(json.dumps(r,indent=2))

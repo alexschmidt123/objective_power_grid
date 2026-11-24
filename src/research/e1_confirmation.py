@@ -46,9 +46,13 @@ def main(args,raw,root):
  draws=dict(truth=torch.from_numpy(cases['truth']).double(),noise=torch.from_numpy(cases['noise']).double(),contrasts=torch.from_numpy(bank).double())
  settings=DEFAULTS|raw['research'].get('settings',{})
  settings.update(eval_systems=g['systems'],eval_contrasts=g['contrasts'],evaluation_population_systems=g['systems'],evaluation_batch_size=16,evaluation_contrast_chunk=16384,threads=2)
- out=Path(args.output).resolve();rel=out.relative_to(root/'experiments')
- if len(rel.parts)<2 or not rel.parts[1].startswith(rel.parts[0]+'_'):raise ValueError('Dated campaign required')
- out.mkdir(parents=True,exist_ok=False)
+ if args.output:
+  out=Path(args.output).resolve();rel=out.relative_to(root/'experiments')
+  if len(rel.parts)<2 or not rel.parts[1].startswith(rel.parts[0]+'_'):raise ValueError('Dated campaign required')
+  out.mkdir(parents=True,exist_ok=False)
+ else:
+  from src.results.run_directory import allocate_run
+  out=allocate_run(root/'experiments',Path(args.config).stem,g['horizon'],[method])
  for d in ['models','logs','eval']:(out/d).mkdir()
  torch.set_num_threads(2);freeze_source(root,out)
  write_json(out/'run_config.json',dict(evaluation_only=True,confirmation=True,benchmark=raw,horizon=g['horizon'],train_seed=args.seed,eval_seed=g['evaluation_seed'],source_training_run=str(source),source_checkpoint_sha256=e.get('checkpoint_sha256'),gate_sha256=sha(args.e1_confirmation_gate),cases_sha256=sha(g['cases']),bank_sha256=sha(g['bank']),new_training_episodes=0))
