@@ -152,6 +152,14 @@ for _scope_arg in "$@"; do
     fi
 done
 for _scope_arg in "${_scope_args[@]}"; do
+    if [[ "$_scope_arg" == "--moe-sboed-v6" ]]; then
+        for arg in "${_scope_args[@]}"; do
+            if [[ "$arg" == "--evaluate" ]]; then
+                exec python3 -m src.research.moe_sboed.v6.evaluate "${_scope_args[@]}"
+            fi
+        done
+        exec python3 -m src.research.moe_sboed.v6.train "${_scope_args[@]}"
+    fi
     if [[ "$_scope_arg" == "--deepseek-sboed" ]]; then
         exec python3 -m src.research.deepseek_sboed_experiment "${_scope_args[@]}"
     fi

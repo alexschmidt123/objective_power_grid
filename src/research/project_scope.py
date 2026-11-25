@@ -35,6 +35,12 @@ def guard(argv):
  if cfgpath and Path(cfgpath).is_file():
   cfg=yaml.safe_load(Path(cfgpath).read_text()) or {}
   if cfg.get('project_scope')=='LEGACY_EXCLUDED_FROM_CURRENT_PROJECT':raise LegacyExcluded('Historical configuration is archived, not an active project workflow: '+cfgpath)
+ if '--moe-sboed-v6' in argv:
+  if cfg.get('implementation')!='moe_sboed_v6' or cfg.get('system')!='location_finding':
+   raise ValueError('V6 requires its explicit location configuration')
+  if value(argv,'--method') not in ('moe-sboed','moe-sboed-uniform','moe-sboed-e1','moe-sboed-e2','moe-sboed-e3','moe-sboed-e4'):
+   raise ValueError('Select one independent V6 policy')
+  return True
  requested=value(argv,'--methods') or value(argv,'--method')
  if requested:
   for m in requested.split(','):
