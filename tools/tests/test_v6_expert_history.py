@@ -101,3 +101,22 @@ def test_importance_corrected_bound_against_distribution_api_and_finite_differen
         minus=bound().mean()
         v.copy_(original)
     torch.testing.assert_close(grad,(plus-minus)/(2*h),rtol=2e-5,atol=2e-5)
+
+
+def test_router_floor_limits_concentration_and_leaves_the_uniform_ablation_fixed():
+    cfg = {"horizon": 5, "architecture": "expert_history", "router_uniform_fraction": 0.2}
+    bench = LocationFinding(cfg)
+    full = build_policy(METHODS[0], cfg, bench)
+    uniform = build_policy(METHODS[1], cfg, bench)
+    with torch.no_grad():
+        full.router[-1].bias.copy_(torch.tensor([100., -100., -100., -100.]))
+    x = torch.zeros(3, 4, dtype=torch.float64)
+    features, w = full.mixture(full.start_history(x), 0)
+    torch.testing.assert_close(w[0], x.new_tensor([.85, .05, .05, .05]))
+    torch.testing.assert_close(w.sum(-1), x.new_ones(3))
+    (features * w.unsqueeze(-1)).sum(1)[:, 0].mean().backward()
+    assert all(any(p.grad is not None and p.grad.abs().sum() > 0 for p in e.parameters()) for e in full.experts)
+    _, u = uniform.mixture(uniform.start_history(x), 0)
+    torch.testing.assert_close(u, torch.full_like(u, .25))
+    with pytest.raises(ValueError, match="router_uniform_fraction"):
+        build_policy(METHODS[0], dict(cfg, router_uniform_fraction=1.1), bench)

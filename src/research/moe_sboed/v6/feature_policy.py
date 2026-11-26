@@ -11,10 +11,13 @@ from src.research.moe_sboed.v6.policy import METHODS
 class FeaturePolicy(nn.Module):
     kind = "independent_feature_v6"
 
-    def __init__(self, method, horizon, action_dim, observation_dim, *, expert_history=False):
+    def __init__(self, method, horizon, action_dim, observation_dim, *, expert_history=False, router_uniform_fraction=0.0):
         super().__init__()
         if method not in METHODS or min(horizon, action_dim, observation_dim) < 1:
             raise ValueError("Invalid independent feature policy configuration")
+        if not 0 <= router_uniform_fraction < 1:
+            raise ValueError("router_uniform_fraction must be in [0, 1)")
+        self.router_uniform_fraction = router_uniform_fraction
         self.horizon = horizon
         self.action_dim = action_dim
         self.width = action_dim + observation_dim
@@ -95,6 +98,8 @@ class FeaturePolicy(nn.Module):
             weights = ctx.new_full((len(ctx), len(self.experts)), 1 / len(self.experts))
         else:
             weights = self.router(torch.cat((ctx, features.flatten(1)), -1)).softmax(-1)
+            if self.router_uniform_fraction:
+                weights = (1 - self.router_uniform_fraction) * weights + self.router_uniform_fraction / len(self.experts)
         return features, weights
 
     def design_logits(self, state, stage):

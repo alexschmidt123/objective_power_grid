@@ -55,7 +55,10 @@ def build_policy(method, cfg, benchmark):
         return LocationMoE(method, cfg["horizon"])
     if architecture == "expert_history":
         from src.research.moe_sboed.v6.feature_policy import FeaturePolicy
-        return FeaturePolicy(method, cfg["horizon"], benchmark.action_dim, benchmark.obs_dim, expert_history=True)
+        return FeaturePolicy(
+            method, cfg["horizon"], benchmark.action_dim, benchmark.obs_dim, expert_history=True,
+            router_uniform_fraction=cfg.get("router_uniform_fraction", 0.0),
+        )
     if architecture == "independent_feature":
         from src.research.moe_sboed.v6.feature_policy import FeaturePolicy
         if cfg.get("training", {}).get("objective") == "vsoed_gmm_i":
