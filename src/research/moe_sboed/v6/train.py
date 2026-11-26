@@ -35,13 +35,13 @@ def train(args, cfg, out):
     if cfg["training"]["objective"] == "vsoed_gmm_i":
         from src.research.moe_sboed.v6.variational import train_native
         return train_native(args, cfg, out, START)
-    if not torch.cuda.is_available():
+    if not torch.cuda.is_available() and not args.smoke:
         raise RuntimeError("Training requires a Slurm GPU allocation with CUDA")
-    device = torch.device("cuda")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     settings = cfg["training"]
     horizon, seed = cfg["horizon"], cfg["seed"]
-    if settings["initialization"] != "from_scratch" or settings["objective"] != "terminal_spce":
-        raise ValueError("Expected fresh full-horizon sPCE training")
+    if settings["initialization"] != "from_scratch" or settings["objective"] not in ("terminal_spce", "terminal_sace"):
+        raise ValueError("Expected fresh full-horizon contrastive training")
     batch, micro, contrasts = (settings[k] for k in ("batch_size", "microbatch_size", "contrasts"))
     if batch % micro:
         raise ValueError("Effective batch must be divisible by microbatch size")
@@ -53,15 +53,20 @@ def train(args, cfg, out):
     model = build_policy(args.method, cfg, bench).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=settings["learning_rate"], betas=tuple(settings["adam_betas"]))
     rng = torch.Generator(device=device).manual_seed(seed)
-    props = torch.cuda.get_device_properties(device)
+    adaptive = settings["objective"] == "terminal_sace"
+    if adaptive:
+        from src.research.moe_sboed.v6.adaptive_contrast import adaptive_scores
+        proposal = settings["proposal"]
+        proposal_rng = torch.Generator(device=device).manual_seed(seed + 1000003)
+    props = torch.cuda.get_device_properties(device) if device.type == "cuda" else None
     manifest = dict(method=args.method, implementation="moe_sboed_v6", seed=seed,
                     horizon=horizon, experts=len(model.experts), initialization="from_scratch",
                     architecture=cfg.get("architecture", "residual_sum"), parameters=sum(p.numel() for p in model.parameters()), train_contrasts=contrasts,
                     effective_batch=batch, microbatch=micro, target_updates=target,
-                    dtype="float64", config_sha256=sha(args.config), smoke=args.smoke,
+                    objective=settings["objective"], device=str(device), dtype="float64", config_sha256=sha(args.config), smoke=args.smoke,
                     git_revision=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
                     torch_version=str(torch.__version__), cuda_version=torch.version.cuda,
-                    gpu=props.name, gpu_memory_bytes=props.total_memory, job_id=os.getenv("SLURM_JOB_ID"),
+                    gpu=props.name if props else None, gpu_memory_bytes=props.total_memory if props else None, job_id=os.getenv("SLURM_JOB_ID"),
                     array_task=os.getenv("SLURM_ARRAY_TASK_ID"), node=os.uname().nodename)
     put_json(out/"manifest.json", manifest)
     print(json.dumps(manifest), flush=True)
@@ -79,23 +84,31 @@ def train(args, cfg, out):
                 truth = torch.randn(micro, 4, generator=rng, dtype=torch.float64, device=device)
                 negatives = torch.randn(micro, contrasts, 4, generator=rng, dtype=torch.float64, device=device)
                 noise = torch.randn(micro, horizon, generator=rng, dtype=torch.float64, device=device)
-                loss = -scores(bench, model, truth, negatives, noise, likelihood).sum() / batch
+                if adaptive:
+                    choose_prior = torch.rand(micro, contrasts, 2, device=device, generator=proposal_rng) < proposal["prior_fraction"]
+                    values = adaptive_scores(bench, model, truth, negatives, noise, choose_prior,
+                                             proposal["prior_fraction"], proposal["min_scale"], likelihood)
+                else:
+                    values = scores(bench, model, truth, negatives, noise, likelihood)
+                loss = -values.sum() / batch
                 loss.backward()
                 loss_sum += loss.detach()
             terminal_loss = loss_sum.item()
             norm = torch.nn.utils.clip_grad_norm_(model.parameters(), math.inf, error_if_nonfinite=True)
             if not math.isfinite(terminal_loss):
-                raise FloatingPointError("Nonfinite terminal sPCE")
+                raise FloatingPointError("Nonfinite terminal contrastive bound")
             optimizer.step()
             update += 1
             if update % settings["decay_every"] == 0:
                 for group in optimizer.param_groups:
                     group["lr"] *= settings["lr_decay"]
-            torch.cuda.synchronize()
+            if device.type == "cuda":
+                torch.cuda.synchronize()
             update_seconds = time.monotonic() - tick
             if update <= 2 or update % 25 == 0:
-                row = dict(update=update, spce=-terminal_loss, gradient_norm=norm.item(),
+                row = dict(update=update, gradient_norm=norm.item(),
                            update_seconds=update_seconds, elapsed_seconds=time.monotonic()-START)
+                row["sace" if adaptive else "spce"] = -terminal_loss
                 print(json.dumps(row), file=log)
                 if update <= 2 or update % 250 == 0:
                     print(json.dumps(row), flush=True)
@@ -109,7 +122,7 @@ def train(args, cfg, out):
     put_json(out/"budget.json", dict(updates=update, fresh_training_episodes=update*batch,
              simulated_observations=update*batch*horizon, contrast_stage_likelihoods=update*batch*horizon*contrasts,
              inherited_episodes=0, elapsed_seconds=time.monotonic()-START, cpu_seconds=cpu.ru_utime+cpu.ru_stime,
-             peak_rss_kib=cpu.ru_maxrss, peak_gpu_allocated_bytes=torch.cuda.max_memory_allocated()))
+             peak_rss_kib=cpu.ru_maxrss, peak_gpu_allocated_bytes=torch.cuda.max_memory_allocated() if device.type == "cuda" else None))
     put_json(out/"status.json", dict(status=status, completed_updates=update, target_updates=target,
              evaluation="pending_original_bank" if not args.smoke else "smoke_only"))
     print(out, status, update, flush=True)

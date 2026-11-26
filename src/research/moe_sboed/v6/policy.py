@@ -53,6 +53,9 @@ def build_policy(method, cfg, benchmark):
     architecture = cfg.get("architecture", "residual_sum")
     if architecture == "residual_sum":
         return LocationMoE(method, cfg["horizon"])
+    if architecture == "expert_history":
+        from src.research.moe_sboed.v6.feature_policy import FeaturePolicy
+        return FeaturePolicy(method, cfg["horizon"], benchmark.action_dim, benchmark.obs_dim, expert_history=True)
     if architecture == "independent_feature":
         from src.research.moe_sboed.v6.feature_policy import FeaturePolicy
         if cfg.get("training", {}).get("objective") == "vsoed_gmm_i":

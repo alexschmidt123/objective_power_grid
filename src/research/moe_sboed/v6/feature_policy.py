@@ -11,7 +11,7 @@ from src.research.moe_sboed.v6.policy import METHODS
 class FeaturePolicy(nn.Module):
     kind = "independent_feature_v6"
 
-    def __init__(self, method, horizon, action_dim, observation_dim):
+    def __init__(self, method, horizon, action_dim, observation_dim, *, expert_history=False):
         super().__init__()
         if method not in METHODS or min(horizon, action_dim, observation_dim) < 1:
             raise ValueError("Invalid independent feature policy configuration")
@@ -23,9 +23,17 @@ class FeaturePolicy(nn.Module):
         self.token = nn.Sequential(nn.Linear(token_width, 16), nn.SiLU())
         self.context = nn.Sequential(nn.Linear(128 + 4 * 16, 64), nn.SiLU())
         # All four configurations draw the same fresh seed-specific slots.
-        slots = [nn.Sequential(mlp(65, 64, 128), nn.LayerNorm(128, elementwise_affine=False))
+        view_width = 16 if expert_history else 0
+        slots = [nn.Sequential(mlp(65 + view_width, 64, 128), nn.LayerNorm(128, elementwise_affine=False))
                  for _ in range(4)]
         self.experts = nn.ModuleList(slots if method in METHODS[:2] else [slots[METHODS.index(method)-2]])
+        self.readers = None
+        if expert_history:
+            # Each identically structured reader learns a value and a log weight
+            # per observed pair. Slot draws match between routing ablations.
+            readers = [nn.Sequential(nn.Linear(self.width + 1, 16), nn.Tanh(),
+                                     nn.Linear(16, view_width + 1)) for _ in range(4)]
+            self.readers = nn.ModuleList(readers if method in METHODS[:2] else [readers[METHODS.index(method)-2]])
         self.head = nn.Sequential(nn.Linear(128, 32), nn.SiLU(), nn.Linear(32, action_dim))
         self.router = None
         if method == METHODS[0]:
@@ -42,11 +50,16 @@ class FeaturePolicy(nn.Module):
 
     def start_history(self, sample):
         batch = len(sample)
-        return (self.history.bias.expand(batch, -1), sample.new_zeros(batch, 4, 16),
-                sample.new_zeros(batch, self.width))
+        shared = (self.history.bias.expand(batch, -1), sample.new_zeros(batch, 4, 16),
+                  sample.new_zeros(batch, self.width))
+        if self.readers is None:
+            return shared
+        views = sample.new_zeros(batch, len(self.readers), 16)
+        log_mass = sample.new_full((batch, len(self.readers), 1), -torch.inf)
+        return (*shared, views, log_mass)
 
     def update_history(self, state, token, stage):
-        history, moments, previous = state
+        history, moments, previous = state[:3]
         action = token[:, :self.action_dim]
         observation = token[:, self.action_dim:].tanh()
         pair = torch.cat((action, observation), -1)
@@ -56,13 +69,28 @@ class FeaturePolicy(nn.Module):
         history = history + F.linear(pair, weight)
         # The most recent observation is one stage old when the next action is taken.
         moments = (moments + embedding.unsqueeze(1) * self.basis[stage, :, None]) * self.decay[:, None]
-        return history, moments, pair
+        if self.readers is None:
+            return history, moments, pair
+        views, log_mass = state[3:]
+        position = pair.new_full((len(pair), 1), (stage + 1) / self.horizon)
+        reader_input = torch.cat((pair, position), -1)
+        outputs = torch.stack([reader(reader_input) for reader in self.readers], dim=1)
+        values, logits = outputs.split((16, 1), dim=-1)
+        new_log_mass = torch.logaddexp(log_mass, logits)
+        # Exact softmax-weighted mean over all observations seen by this expert.
+        views = torch.lerp(views, values.tanh(), (logits - new_log_mass).exp())
+        return history, moments, pair, views, new_log_mass
 
     def mixture(self, state, stage):
-        history, moments, _ = state
+        history, moments, _ = state[:3]
         ctx = self.context(torch.cat((F.silu(history), moments.flatten(1) / max(1, stage)), -1))
         ctx = torch.cat((ctx, ctx.new_full((len(ctx), 1), (self.horizon-stage)/self.horizon)), -1)
-        features = torch.stack([expert(ctx) for expert in self.experts], 1)
+        if self.readers is None:
+            features = torch.stack([expert(ctx) for expert in self.experts], 1)
+        else:
+            views = state[3].unbind(dim=1)
+            features = torch.stack([expert(torch.cat((ctx, view), -1))
+                                    for expert, view in zip(self.experts, views)], 1)
         if self.router is None:
             weights = ctx.new_full((len(ctx), len(self.experts)), 1 / len(self.experts))
         else:
