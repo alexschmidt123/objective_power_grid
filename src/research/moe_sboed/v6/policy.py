@@ -53,6 +53,9 @@ def build_policy(method, cfg, benchmark):
     architecture = cfg.get("architecture", "residual_sum")
     if architecture == "residual_sum":
         return LocationMoE(method, cfg["horizon"])
+    if architecture == "belief_expert_history":
+        from src.research.moe_sboed.v6.belief_policy import BeliefHistoryPolicy
+        return BeliefHistoryPolicy(method, cfg, benchmark)
     if architecture == "expert_history":
         from src.research.moe_sboed.v6.feature_policy import FeaturePolicy
         return FeaturePolicy(

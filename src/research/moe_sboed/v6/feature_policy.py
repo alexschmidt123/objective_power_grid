@@ -84,9 +84,13 @@ class FeaturePolicy(nn.Module):
         views = torch.lerp(views, values.tanh(), (logits - new_log_mass).exp())
         return history, moments, pair, views, new_log_mass
 
-    def mixture(self, state, stage):
+    def shared_context(self, state, stage):
         history, moments, _ = state[:3]
         ctx = self.context(torch.cat((F.silu(history), moments.flatten(1) / max(1, stage)), -1))
+        return ctx
+
+    def mixture(self, state, stage):
+        ctx = self.shared_context(state, stage)
         ctx = torch.cat((ctx, ctx.new_full((len(ctx), 1), (self.horizon-stage)/self.horizon)), -1)
         if self.readers is None:
             features = torch.stack([expert(ctx) for expert in self.experts], 1)
