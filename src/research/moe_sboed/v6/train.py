@@ -17,7 +17,7 @@ import yaml
 
 from src.research.benchmarks import LocationFinding
 from src.research.moe_sboed.v6.objective import cumulative_likelihood, scores
-from src.research.moe_sboed.v6.policy import LocationMoE, METHODS
+from src.research.moe_sboed.v6.policy import build_policy, METHODS
 from src.results.run_directory import allocate_run
 
 
@@ -47,13 +47,13 @@ def train(args, cfg, out):
     target = 2 if args.smoke else settings["updates"]
     bench = LocationFinding(cfg)
     torch.manual_seed(seed)
-    model = LocationMoE(args.method, horizon).to(device)
+    model = build_policy(args.method, cfg, bench).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=settings["learning_rate"], betas=tuple(settings["adam_betas"]))
     rng = torch.Generator(device=device).manual_seed(seed)
     props = torch.cuda.get_device_properties(device)
     manifest = dict(method=args.method, implementation="moe_sboed_v6", seed=seed,
                     horizon=horizon, experts=len(model.experts), initialization="from_scratch",
-                    parameters=sum(p.numel() for p in model.parameters()), train_contrasts=contrasts,
+                    architecture=cfg.get("architecture", "residual_sum"), parameters=sum(p.numel() for p in model.parameters()), train_contrasts=contrasts,
                     effective_batch=batch, microbatch=micro, target_updates=target,
                     dtype="float64", config_sha256=sha(args.config), smoke=args.smoke,
                     git_revision=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),

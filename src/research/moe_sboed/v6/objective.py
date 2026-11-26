@@ -5,7 +5,7 @@ from src.research.engine import logmeanexp
 
 def trajectory(benchmark, policy, truth, noise):
     batch, horizon = noise.shape
-    encoded = truth.new_zeros((batch, 16))
+    encoded = policy.start_history(truth)
     actions, observations = [], []
     for stage in range(horizon):
         raw = policy.design_logits(encoded, stage)
@@ -16,7 +16,7 @@ def trajectory(benchmark, policy, truth, noise):
         observations.append(observation)
         if stage + 1 < horizon:
             token = torch.cat((benchmark.encode_action(action), observation / benchmark.obs_scale), -1)
-            encoded = encoded + policy.encoder(token)
+            encoded = policy.update_history(encoded, token, stage)
     return torch.stack(actions, 1), torch.stack(observations, 1)
 
 

@@ -13,7 +13,7 @@ import yaml
 
 from src.research.benchmarks import LocationFinding
 from src.research.moe_sboed.v6.objective import trajectory
-from src.research.moe_sboed.v6.policy import LocationMoE, METHODS
+from src.research.moe_sboed.v6.policy import build_policy, METHODS
 from src.research.moe_sboed.v6.train import sha
 
 ARCHIVE = Path("experiments/_legacy_archive/temp_research_20261115/scratch_runs/moe_hec_v2_icml_20261109")
@@ -83,7 +83,7 @@ def main():
     if not (complete or capped):
         raise ValueError("Expected a terminal checkpoint under the requested budget")
     files = require_originals(args.bank_dir, lock)
-    model = LocationMoE(args.method, lock["horizon"]).eval()
+    model = build_policy(args.method, cfg, LocationFinding(cfg)).eval()
     model.load_state_dict(state["state_dict"])
     if args.preflight:
         print(f"Verified checkpoint and frozen inputs for {args.method}")

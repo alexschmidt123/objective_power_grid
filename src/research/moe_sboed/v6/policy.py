@@ -26,6 +26,12 @@ class LocationMoE(nn.Module):
         self.router = nn.Linear(17, 4) if method == METHODS[0] else None
         self.double()
 
+    def start_history(self, sample):
+        return sample.new_zeros(len(sample), 16)
+
+    def update_history(self, encoded, token, stage):
+        return encoded + self.encoder(token)
+
     def weights(self, context):
         if self.router is not None:
             return self.router(context).softmax(-1)
@@ -42,3 +48,12 @@ class LocationMoE(nn.Module):
         slots = features[:, 1:].reshape(len(features), self.horizon, 4)
         encoded = self.encoder(slots[:, :stage, :3]).sum(1)
         return self.design_logits(encoded, stage)
+
+def build_policy(method, cfg, benchmark):
+    architecture = cfg.get("architecture", "residual_sum")
+    if architecture == "residual_sum":
+        return LocationMoE(method, cfg["horizon"])
+    if architecture == "independent_feature":
+        from src.research.moe_sboed.v6.feature_policy import FeaturePolicy
+        return FeaturePolicy(method, cfg["horizon"], benchmark.action_dim, benchmark.obs_dim)
+    raise ValueError(f"Unknown V6 architecture: {architecture}")
