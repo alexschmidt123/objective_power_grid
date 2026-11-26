@@ -55,5 +55,8 @@ def build_policy(method, cfg, benchmark):
         return LocationMoE(method, cfg["horizon"])
     if architecture == "independent_feature":
         from src.research.moe_sboed.v6.feature_policy import FeaturePolicy
+        if cfg.get("training", {}).get("objective") == "vsoed_gmm_i":
+            from src.research.moe_sboed.v6.variational import NativeFeaturePolicy
+            return NativeFeaturePolicy(method, cfg["horizon"], benchmark.action_dim, benchmark.obs_dim).float()
         return FeaturePolicy(method, cfg["horizon"], benchmark.action_dim, benchmark.obs_dim)
     raise ValueError(f"Unknown V6 architecture: {architecture}")

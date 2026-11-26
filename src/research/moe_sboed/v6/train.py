@@ -32,6 +32,9 @@ def sha(path):
 
 
 def train(args, cfg, out):
+    if cfg["training"]["objective"] == "vsoed_gmm_i":
+        from src.research.moe_sboed.v6.variational import train_native
+        return train_native(args, cfg, out, START)
     if not torch.cuda.is_available():
         raise RuntimeError("Training requires a Slurm GPU allocation with CUDA")
     device = torch.device("cuda")
