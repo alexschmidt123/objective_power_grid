@@ -1,0 +1,33 @@
+implementation: moe_sboed_v6
+system: location_finding
+architecture: expert_history
+horizon: 30
+seed: 101
+observation:
+  noise_sigma: 0.5
+location_finding:
+  design_bounds: [-4, 4]
+training:
+  objective: terminal_sace
+  proposal:
+    prior_fraction: 0.5
+    min_scale: 0.5
+  initialization: from_scratch
+  batch_size: 2000
+  microbatch_size: 500
+  contrasts: 2000
+  updates: 20000
+  learning_rate: 0.00005
+  adam_betas: [0.8, 0.998]
+  lr_decay: 0.98
+  decay_every: 1000
+  checkpoint_every: 100
+  limit_seconds: 14400
+evaluation:
+  bank_sha256: 52c0c614c4ee3b63d58ccda60714b38b00a2c0ca35564a428fe8cc2ce8d727c5
+  uniforms_sha256: 6e56f0a08fe4deeefd7f0977967dba9d2910a4a383f1acfbd1736db3f358033c
+  scorer_sha256: 64c67b6547c77f4823b487493ed0703efbd3f04d7308019e875d145505695f2f
+  cases: 2000
+  contrasts: 1000000
+  generation_seed: 202611099206
+  routing_seed: 202611099207
