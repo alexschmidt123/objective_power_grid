@@ -11,7 +11,7 @@ def fresh_native_sir_dad(horizon,seed):
     torch.manual_seed(seed)
     return SIRSumDAD(horizon)
 
-def main(args,raw,root):
+def main(args,raw,root,*,experiment_root=None):
     from src.research.runner import DEFAULTS,FAMILY_METHODS,write_json,freeze_source,evaluate,plot_results,Tee
     from src.research.benchmarks import make_benchmark
     from src.hardware import hardware_info
@@ -38,7 +38,7 @@ def main(args,raw,root):
         rule_cfg=dict(rule_cfg,minimum_episodes=8,minimum_checkpoints=2,validation_every_episodes=4,patience=2,maximum_episodes=8,maximum_training_seconds=120)
         settings.update(batch_size=4,contrasts=8,validate_every=1,eval_systems=2,eval_contrasts=8,evaluation_population_systems=2,evaluation_batch_size=2,evaluation_contrast_chunk=4,updates=2)
     from src.results.run_directory import allocate_run
-    storage_root = root / ('scratch_runs' if root.name == 'objective_power_grid_temp' else 'experiments')
+    storage_root = experiment_root or root / ('scratch_runs' if root.name == 'objective_power_grid_temp' else 'experiments')
     if args.output:
         out = Path(args.output).resolve()
         rel=out.relative_to(storage_root);parts=rel.parts
@@ -235,5 +235,6 @@ def main(args,raw,root):
         write_json(out/'summary.json',summaries)
         if not getattr(args,'train_only',False):plot_results(out,results,methods,evaluation_seeds,h)
         (out/'exit_code').write_text('0\n');print('RESULT_DIR='+str(out),flush=True)
+        return out
     except BaseException as exc:
         write_json(out/'failure.json',dict(type=type(exc).__name__,message=str(exc),traceback=traceback.format_exc()));(out/'exit_code').write_text('1\n');raise

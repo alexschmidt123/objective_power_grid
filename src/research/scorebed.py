@@ -57,7 +57,7 @@ def train_scorebed(b,h,s,seed,directory,trajectory_budget=None,observer=None):
     if b.name!='location_finding':
         raise ValueError('Official ScoreBED integration supports location finding only')
     root=Path(__file__).resolve().parents[2];directory=Path(directory).resolve()
-    python=root/'.venv_scorebed/bin/python'
+    python=Path(os.environ.get('BOED_SCOREBED_PYTHON', root/'.venv_scorebed/bin/python'))
     if not python.is_file():raise RuntimeError('Official ScoreBED isolated environment is missing')
     command=[str(python),str(root/'src/research/scorebed_worker.py'),'--output',str(directory),'--horizon',str(h),'--seed',str(seed),'--budget',str(int(trajectory_budget or 1000000)),'--batch-size',str(int(s.get('scorebed_batch_size',64)))]
     if s.get('scorebed_reference_sampler',False):command+=['--reference-sampler']

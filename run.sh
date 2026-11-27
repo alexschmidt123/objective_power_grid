@@ -152,6 +152,9 @@ for _scope_arg in "$@"; do
     fi
 done
 for _scope_arg in "${_scope_args[@]}"; do
+    if [[ "$_scope_arg" == "--location-baselines" ]]; then
+        exec python3 -m src.research.location_baseline_study "${_scope_args[@]}"
+    fi
     if [[ "$_scope_arg" == "--moe-sboed-v6" ]]; then
         for arg in "${_scope_args[@]}"; do
             if [[ "$arg" == "--evaluate" ]]; then
