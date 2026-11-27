@@ -122,7 +122,7 @@ def main():
         temp.flush()
         os.link(temp.name, destination)
     print(json.dumps(receipt), flush=True)
-    if cfg.get("architecture") == "belief_expert_history":
+    if cfg.get("architecture") in ("belief_expert_history", "observed_history_moe", "structured_history_moe"):
         from tools.moe_sboed.v6.belief_timing import record_design_timing
         record_design_timing(args.run_dir, model, LocationFinding(cfg), cfg["horizon"])
 

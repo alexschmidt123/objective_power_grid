@@ -58,8 +58,11 @@ class ObservedHistoryMoE(nn.Module):
 
     def mixture(self, state, stage):
         total, tokens = state
+        return self.mix_readings(total, [tokens] * len(self.experts), stage)
+
+    def mix_readings(self, total, readings, stage):
         context = torch.cat((total, total.new_full((len(total), 1), stage/self.horizon)), dim=1)
-        features = torch.stack([expert(context, tokens) for expert in self.experts], dim=1)
+        features = torch.stack([expert(context, tokens) for expert, tokens in zip(self.experts, readings)], dim=1)
         if self.router is None:
             weights = context.new_full(features.shape[:2], 1/len(self.experts))
         else:

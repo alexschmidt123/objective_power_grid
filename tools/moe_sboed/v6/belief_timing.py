@@ -9,7 +9,7 @@ from src.research.moe_sboed.v6.objective import trajectory
 
 @torch.inference_mode()
 def record_design_timing(out, model, bench, horizon):
-    device = model.belief_particles.device
+    device = next(model.parameters()).device
     rng = torch.Generator(device=device).manual_seed(98273)
     rows = {}
     for batch in (1, 16):
