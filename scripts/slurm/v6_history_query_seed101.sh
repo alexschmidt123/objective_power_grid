@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
-d=reports/v6_fresh_history_query_seed101
+d=reports/v6_fresh_history_query_seed101_pilot
+bank=experiments/location_finding/moe_sboed_v5_history_20261119
 script=scripts/slurm/v6_history_query_seed101.sh
 cfg=configs/moe_sboed/v6/fresh_history_query_seed101.yaml
 methods=(moe-sboed moe-sboed-uniform)
@@ -22,18 +23,13 @@ smoke|train)
     export PATH="$CONDA_PREFIX/bin:$PATH" PYTHONPATH=. OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 TORCHINDUCTOR_COMPILE_THREADS=2 PYTHONUNBUFFERED=1
     if [[ $1 == smoke ]]; then
         python -c 'import torch; assert torch.cuda.is_available(); print(torch.cuda.get_device_name())'
-        python - "$d" "$cfg" <<'PY'
-import hashlib,sys
+        python - "$bank" "$cfg" <<'PY'
+import sys
 from pathlib import Path
-import numpy as np
 import yaml
 from src.research.moe_sboed.v6.evaluate import ARCHIVE,sha
 cfg=yaml.safe_load(Path(sys.argv[2]).read_text())
-rng=np.random.default_rng(cfg["development"]["seed"])
 p=Path(sys.argv[1])/"development_validation_bank.npz"
-with p.open("xb") as f:
-    np.savez(f,truth=rng.standard_normal((2000,4)),noise=rng.standard_normal((2000,30)),
-             contrasts=rng.standard_normal((1000000,4)))
 assert sha(p)==cfg["development"]["bank_sha256"]
 assert sha(ARCHIVE/"source/frozen_evaluator.py")==cfg["evaluation"]["scorer_sha256"]
 PY
@@ -48,7 +44,7 @@ PY
         flags=(--moe-sboed-v6 --config "$cfg" --method "$method")
         bash run.sh "${flags[@]}" --seed 101 | tee "$d/$method.train"
         run=$(awk '/^OUTPUT /{print $2;exit}' "$d/$method.train")
-        bash run.sh "${flags[@]}" --evaluate --development --bank-dir "$d" --allow-time-limited --run-dir "$run" | tee "$d/$method.eval"
+        bash run.sh "${flags[@]}" --evaluate --development --bank-dir "$bank" --allow-time-limited --run-dir "$run" | tee "$d/$method.eval"
         test -s "$run/development_evaluation.npz"
     fi
     ;;
