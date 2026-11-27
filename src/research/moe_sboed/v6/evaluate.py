@@ -54,6 +54,7 @@ def main():
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--bank-dir", type=Path, default=ARCHIVE / "evaluation")
+    parser.add_argument("--development", action="store_true")
     parser.add_argument("--allow-time-limited", action="store_true")
     parser.add_argument("--preflight", action="store_true")
     args = parser.parse_args()
@@ -82,7 +83,17 @@ def main():
     capped = args.allow_time_limited and status["status"] == "time_limited" and 0 < update < target
     if not (complete or capped):
         raise ValueError("Expected a terminal checkpoint under the requested budget")
-    files = require_originals(args.bank_dir, lock)
+    if args.development:
+        bank = args.bank_dir / "development_validation_bank.npz"
+        scorer = ARCHIVE / "source/frozen_evaluator.py"
+        if sha(bank) != cfg["development"]["bank_sha256"] or sha(scorer) != lock["scorer_sha256"]:
+            raise ValueError("Development bank or frozen scorer digest mismatch")
+        files = {"bank_sha256": bank, "scorer_sha256": scorer}
+        lock = {k:v for k,v in lock.items() if k != "uniforms_sha256"}
+        lock.update(bank_sha256=cfg["development"]["bank_sha256"], purpose="development",
+                    generation_seed=cfg["development"]["seed"])
+    else:
+        files = require_originals(args.bank_dir, lock)
     model = build_policy(args.method, cfg, LocationFinding(cfg)).eval()
     model.load_state_dict(state["state_dict"])
     if args.preflight:
@@ -105,7 +116,7 @@ def main():
                    training_status=status["status"], completed_updates=update, target_updates=target,
                    checkpoint_sha256=sha(checkpoint), eig_nats=values.mean().item(),
                    case_mcse_nats=values.std(ddof=1).item() / math.sqrt(len(values)))
-    destination = args.run_dir / "canonical_evaluation.npz"
+    destination = args.run_dir / ("development_evaluation.npz" if args.development else "canonical_evaluation.npz")
     with tempfile.NamedTemporaryFile(dir=args.run_dir, suffix=".npz") as temp:
         np.savez(temp, scores=values, receipt=json.dumps(receipt))
         temp.flush()

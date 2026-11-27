@@ -51,7 +51,15 @@ def train(args, cfg, out):
     bench = LocationFinding(cfg)
     torch.manual_seed(seed)
     model = build_policy(args.method, cfg, bench).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=settings["learning_rate"], betas=tuple(settings["adam_betas"]))
+    joint_provider = cfg.get("architecture") == "fresh_history_query"
+    if joint_provider:
+        from src.research.moe_sboed.v6.history_query import training_prefix, update_posterior
+        from src.research.moe_sboed.v6.objective import trajectory
+        from src.research.engine import logmeanexp
+        provider_optimizer = torch.optim.Adam(model.posterior.parameters(), lr=cfg["provider"]["lr"])
+        prefix_rng = torch.Generator(device=device).manual_seed(cfg["provider"]["prefix_seed"])
+    actor_params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.Adam(actor_params, lr=settings["learning_rate"], betas=tuple(settings["adam_betas"]))
     rng = torch.Generator(device=device).manual_seed(seed)
     adaptive = settings["objective"] == "terminal_sace"
     if adaptive:
@@ -68,6 +76,10 @@ def train(args, cfg, out):
                     torch_version=str(torch.__version__), cuda_version=torch.version.cuda,
                     gpu=props.name if props else None, gpu_memory_bytes=props.total_memory if props else None, job_id=os.getenv("SLURM_JOB_ID"),
                     array_task=os.getenv("SLURM_ARRAY_TASK_ID"), node=os.uname().nodename)
+    if joint_provider:
+        manifest.update(dtype="float32 policy and posterior; float64 physical trajectories and sPCE",
+                        loaded_checkpoints=[], provider_warmup_updates=0,
+                        posterior_training="one simulator-labeled prefix per on-policy episode per update")
     put_json(out/"manifest.json", manifest)
     print(json.dumps(manifest), flush=True)
     likelihood = cumulative_likelihood if args.smoke else torch.compile(cumulative_likelihood, fullgraph=True)
@@ -80,11 +92,19 @@ def train(args, cfg, out):
             tick = time.monotonic()
             optimizer.zero_grad(set_to_none=True)
             loss_sum = torch.zeros((), dtype=torch.float64, device=device)
+            if joint_provider:
+                prefixes, labels = [], []
             for _ in range(batch // micro):
                 truth = torch.randn(micro, 4, generator=rng, dtype=torch.float64, device=device)
                 negatives = torch.randn(micro, contrasts, 4, generator=rng, dtype=torch.float64, device=device)
                 noise = torch.randn(micro, horizon, generator=rng, dtype=torch.float64, device=device)
-                if adaptive:
+                if joint_provider:
+                    actions, obs = trajectory(bench, model, truth, noise)
+                    ll = likelihood(bench, torch.cat((truth[:,None], negatives),1), actions, obs)
+                    values = ll[:,0] - logmeanexp(ll)
+                    prefixes.append(training_prefix(actions, obs, prefix_rng))
+                    labels.append(truth.float())
+                elif adaptive:
                     choose_prior = torch.rand(micro, contrasts, 2, device=device, generator=proposal_rng) < proposal["prior_fraction"]
                     values = adaptive_scores(bench, model, truth, negatives, noise, choose_prior,
                                              proposal["prior_fraction"], proposal["min_scale"], likelihood)
@@ -98,6 +118,8 @@ def train(args, cfg, out):
             if not math.isfinite(terminal_loss):
                 raise FloatingPointError("Nonfinite terminal contrastive bound")
             optimizer.step()
+            if joint_provider:
+                provider_nll = update_posterior(model.posterior, provider_optimizer, torch.cat(prefixes), torch.cat(labels))
             update += 1
             if update % settings["decay_every"] == 0:
                 for group in optimizer.param_groups:
@@ -108,6 +130,8 @@ def train(args, cfg, out):
             if update <= 2 or update % 25 == 0:
                 row = dict(update=update, gradient_norm=norm.item(),
                            update_seconds=update_seconds, elapsed_seconds=time.monotonic()-START)
+                if joint_provider:
+                    row["provider_nll"] = provider_nll
                 row["sace" if adaptive else "spce"] = -terminal_loss
                 print(json.dumps(row), file=log)
                 if update <= 2 or update % 250 == 0:
@@ -119,7 +143,9 @@ def train(args, cfg, out):
         save_model(out, model, manifest, update)
     status = "smoke_complete" if args.smoke and update==target else "complete" if update==target else "time_limited"
     cpu = resource.getrusage(resource.RUSAGE_SELF)
-    put_json(out/"budget.json", dict(updates=update, fresh_training_episodes=update*batch,
+    provider_budget = dict(provider_updates=update, provider_labeled_prefixes=update*batch,
+                           provider_pretraining_episodes=0) if joint_provider else {}
+    put_json(out/"budget.json", dict(**provider_budget, updates=update, fresh_training_episodes=update*batch,
              simulated_observations=update*batch*horizon, contrast_stage_likelihoods=update*batch*horizon*contrasts,
              inherited_episodes=0, elapsed_seconds=time.monotonic()-START, cpu_seconds=cpu.ru_utime+cpu.ru_stime,
              peak_rss_kib=cpu.ru_maxrss, peak_gpu_allocated_bytes=torch.cuda.max_memory_allocated() if device.type == "cuda" else None))
