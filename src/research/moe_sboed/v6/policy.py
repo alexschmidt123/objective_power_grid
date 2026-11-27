@@ -51,6 +51,11 @@ class LocationMoE(nn.Module):
 
 def build_policy(method, cfg, benchmark):
     architecture = cfg.get("architecture", "residual_sum")
+    if architecture == "observed_history_moe":
+        from src.research.moe_sboed.v6.observed_history import ObservedHistoryMoE
+        if benchmark.name != "location_finding" or cfg["training"]["objective"] != "terminal_spce":
+            raise ValueError("Observed-history pilot requires location finding and full-horizon sPCE")
+        return ObservedHistoryMoE(method, cfg["horizon"])
     if architecture == "residual_sum":
         return LocationMoE(method, cfg["horizon"])
     if architecture == "fresh_history_query":
