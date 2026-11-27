@@ -41,3 +41,31 @@ def test_independent_routing_and_joint_provider():
     u2 = make("moe-sboed")[1]
     u2.load_state_dict(m.state_dict())
     torch.testing.assert_close(m.design_logits(state,1),u2.design_logits(state,1))
+
+
+def test_exchangeable_belief_matches_fitted_mixture_and_preserves_query_weights():
+    cfg = {"horizon":5, "architecture":"fresh_history_query",
+           "location_finding":{"design_bounds":[-4,4]},
+           "provider":{"summary_mode":"exchangeable"}}
+    model = build_policy("moe-sboed",cfg,LocationFinding(cfg))
+    history = torch.randn(4,5,4)
+    with torch.no_grad():
+        logw,mu,sd = model.posterior(history)
+        query_w,actual_mean,summary,nodes = model.belief(history,2)
+        # Independent reference: permutations of full second-moment matrices.
+        w = logw.exp()
+        mean = (w[:,:,None]*mu).sum(1)
+        second = torch.einsum("bk,bki,bkj->bij",w,mu,mu) + torch.diag_embed(
+            (w[:,:,None]*sd.square()).sum(1))
+        mean = (mean + mean[:,[2,3,0,1]])*.5
+        perm = [2,3,0,1]
+        second = (second + second[:,perm][:,:,perm])*.5
+        cov = second - mean[:,:,None]*mean[:,None,:]
+        scale = cov.diagonal(dim1=-2,dim2=-1).sqrt()
+        corr = cov/(scale[:,:,None]*scale[:,None,:])
+        i,j = torch.triu_indices(4,4,1)
+        expected = torch.cat((mean/3,scale.log(),corr[:,i,j]),1)
+        torch.testing.assert_close(actual_mean,mean)
+        torch.testing.assert_close(summary,expected)
+        torch.testing.assert_close(query_w,w)
+        assert nodes.shape == (4,64,4)

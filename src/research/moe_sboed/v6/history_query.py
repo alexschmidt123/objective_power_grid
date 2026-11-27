@@ -46,6 +46,10 @@ class HistoryQueryPolicy(nn.Module):
         super().__init__()
         if method not in ("moe-sboed", "moe-sboed-uniform") or bench.name != "location_finding":
             raise ValueError("History-query pilot requires a full or uniform location policy")
+        # Saved configurations from the first pilot used ordered component moments.
+        self.summary_mode = cfg.get("provider", {}).get("summary_mode", "ordered")
+        if self.summary_mode not in ("ordered", "exchangeable"):
+            raise ValueError("Unknown two-source posterior summary mode")
         self.bench = bench
         self.horizon = t = cfg["horizon"]
         self.posterior = HistoryPosterior(t).requires_grad_(False)
@@ -89,6 +93,16 @@ class HistoryQueryPolicy(nn.Module):
         else:
             logw,mu,sd = self.posterior(hist)
             w = logw.exp()
+        # The likelihood is invariant to source exchange, so the unswapped
+        # cubature nodes already suffice for the model-query predictions.
+        nodes = (mu[:,:,None]+sd[:,:,None]*self.points).flatten(1,2)
+        node_weights = w
+        if self.summary_mode == "exchangeable":
+            # The fitted density is 0.5*q(theta) + 0.5*q(swap(theta)).
+            # Compute its coordinate moments under both label assignments.
+            mu = torch.cat((mu, mu.roll(2, dims=-1)), dim=1)
+            sd = torch.cat((sd, sd.roll(2, dims=-1)), dim=1)
+            w = torch.cat((w, w), dim=1) * .5
         mean = (w[:,:,None]*mu).sum(1)
         centered = mu-mean[:,None]
         scale = (w[:,:,None]*(centered.square()+sd.square())).sum(1).clamp_min(1e-6).sqrt()
@@ -96,8 +110,7 @@ class HistoryQueryPolicy(nn.Module):
         i,j = self.pairs
         corr = (w[:,:,None]*norm[:,:,i]*norm[:,:,j]).sum(1)
         summary = torch.cat((mean/3,scale.log(),corr),-1)
-        nodes = (mu[:,:,None]+sd[:,:,None]*self.points).flatten(1,2)
-        return w,mean,summary,nodes
+        return node_weights,mean,summary,nodes
 
     def mixture(self,state,stage):
         hist,mom,_ = state
