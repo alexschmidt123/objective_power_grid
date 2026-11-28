@@ -157,6 +157,9 @@ for _scope_arg in "${_scope_args[@]}"; do
     fi
     if [[ "$_scope_arg" == "--moe-sboed-v6" ]]; then
         for arg in "${_scope_args[@]}"; do
+            if [[ "$arg" == "--routing-diagnostic" ]]; then
+                exec python3 -m tools.moe_sboed.v6.routing_diagnostic "${_scope_args[@]}"
+            fi
             if [[ "$arg" == "--evaluate" ]]; then
                 exec python3 -m src.research.moe_sboed.v6.evaluate "${_scope_args[@]}"
             fi
