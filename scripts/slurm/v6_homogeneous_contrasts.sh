@@ -19,7 +19,7 @@ submit)
     diagnostic_job=$(cat "$study/diagnostic.job")
     train=$(sbatch "${gpu[@]}" -J v6-k8-train -t 04:45:00 --array=0-1 --dependency="afterok:$smoke:$diagnostic_job" -o "$study/k8000/train-%A_%a.log" "$script" train)
     echo "train $train" | tee -a "$study/k8000/jobs"
-    report=$(sbatch --parsable -A jl3lab -p batch -c 1 --mem=4G -t 00:10:00 -J v6-k8-report --dependency="afterany:$train" -o "$study/k8000/report-%j.log" "$script" report)
+    report=$(sbatch --parsable -A jl3lab -p batch --ntasks=1 -c 1 --mem=4G -t 00:10:00 -J v6-k8-report --dependency="afterany:$train" -o "$study/k8000/report-%j.log" "$script" report)
     echo "report $report" | tee -a "$study/k8000/jobs"
     ;;
 smoke|train|report)
