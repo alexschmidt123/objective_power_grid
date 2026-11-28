@@ -54,6 +54,7 @@ def main():
         parser.add_argument(flag, required=True, action="store_true")
     for flag in ("--config", "--run-dir", "--bank-dir", "--experiments"):
         parser.add_argument(flag, required=True, type=Path)
+    parser.add_argument("--method", required=True, choices=["moe-sboed"])
     args = parser.parse_args()
     cfg = yaml.safe_load(args.config.read_text())
     ckpt = args.run_dir / "checkpoint.pt"
