@@ -40,7 +40,7 @@ def train(args, cfg, out):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     settings = cfg["training"]
     horizon, seed = cfg["horizon"], cfg["seed"]
-    if settings["initialization"] != "from_scratch" or settings["objective"] not in ("terminal_spce", "terminal_sace"):
+    if settings["initialization"] != "from_scratch" or settings["objective"] not in ("terminal_spce", "terminal_sace", "terminal_spce_local_precision"):
         raise ValueError("Expected fresh full-horizon contrastive training")
     batch, micro, contrasts = (settings[k] for k in ("batch_size", "microbatch_size", "contrasts"))
     if batch % micro:
@@ -61,6 +61,12 @@ def train(args, cfg, out):
     actor_params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.Adam(actor_params, lr=settings["learning_rate"], betas=tuple(settings["adam_betas"]))
     rng = torch.Generator(device=device).manual_seed(seed)
+    precision_aux = settings["objective"] == "terminal_spce_local_precision"
+    if precision_aux:
+        from src.research.moe_sboed.v6.local_precision import training_terms
+        precision_weight = float(settings["local_precision_weight"])
+        if not math.isfinite(precision_weight) or precision_weight <= 0 or cfg["system"] != "location_finding":
+            raise ValueError("Invalid location precision auxiliary")
     adaptive = settings["objective"] == "terminal_sace"
     if adaptive:
         from src.research.moe_sboed.v6.adaptive_contrast import adaptive_scores
@@ -76,6 +82,8 @@ def train(args, cfg, out):
                     torch_version=str(torch.__version__), cuda_version=torch.version.cuda,
                     gpu=props.name if props else None, gpu_memory_bytes=props.total_memory if props else None, job_id=os.getenv("SLURM_JOB_ID"),
                     array_task=os.getenv("SLURM_ARRAY_TASK_ID"), node=os.uname().nodename)
+    if precision_aux:
+        manifest.update(local_precision_weight=precision_weight, loaded_checkpoints=[])
     if joint_provider:
         manifest.update(dtype="float32 policy and posterior; float64 physical trajectories and sPCE",
                         loaded_checkpoints=[], provider_warmup_updates=0,
@@ -92,6 +100,8 @@ def train(args, cfg, out):
             tick = time.monotonic()
             optimizer.zero_grad(set_to_none=True)
             loss_sum = torch.zeros((), dtype=torch.float64, device=device)
+            if precision_aux:
+                terms_sum = loss_sum.new_zeros(2)
             if joint_provider:
                 prefixes, labels = [], []
             for _ in range(batch // micro):
@@ -104,6 +114,10 @@ def train(args, cfg, out):
                     values = ll[:,0] - logmeanexp(ll)
                     prefixes.append(training_prefix(actions, obs, prefix_rng))
                     labels.append(truth.float())
+                elif precision_aux:
+                    contrastive, precision = training_terms(bench, model, truth, negatives, noise, likelihood)
+                    values = contrastive + precision_weight * precision
+                    terms_sum += torch.stack((contrastive.detach().sum(), precision.detach().sum())) / batch
                 elif adaptive:
                     choose_prior = torch.rand(micro, contrasts, 2, device=device, generator=proposal_rng) < proposal["prior_fraction"]
                     values = adaptive_scores(bench, model, truth, negatives, noise, choose_prior,
@@ -132,7 +146,11 @@ def train(args, cfg, out):
                            update_seconds=update_seconds, elapsed_seconds=time.monotonic()-START)
                 if joint_provider:
                     row["provider_nll"] = provider_nll
-                row["sace" if adaptive else "spce"] = -terminal_loss
+                if precision_aux:
+                    row["spce"], row["local_precision"] = terms_sum.tolist()
+                    row["training_objective"] = -terminal_loss
+                else:
+                    row["sace" if adaptive else "spce"] = -terminal_loss
                 print(json.dumps(row), file=log)
                 if update <= 2 or update % 250 == 0:
                     print(json.dumps(row), flush=True)

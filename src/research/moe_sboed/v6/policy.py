@@ -51,9 +51,17 @@ class LocationMoE(nn.Module):
 
 def build_policy(method, cfg, benchmark):
     architecture = cfg.get("architecture", "residual_sum")
+    if architecture == "relative_history_moe":
+        from src.research.moe_sboed.v6.relative_history import RelativeHistoryMoE
+        if benchmark.name != "location_finding" or benchmark.design_bounds != [-4, 4]:
+            raise ValueError("Relative-history policy requires the canonical location bounds")
+        if cfg["training"]["objective"] not in ("terminal_spce", "terminal_spce_local_precision"):
+            raise ValueError("Unexpected relative-history objective")
+        return RelativeHistoryMoE(method, cfg["horizon"])
     if architecture in ("observed_history_moe", "structured_history_moe"):
         from src.research.moe_sboed.v6.observed_history import ObservedHistoryMoE
-        if benchmark.name != "location_finding" or cfg["training"]["objective"] != "terminal_spce":
+        allowed = ("terminal_spce", "terminal_spce_local_precision") if architecture == "observed_history_moe" else ("terminal_spce",)
+        if benchmark.name != "location_finding" or cfg["training"]["objective"] not in allowed:
             raise ValueError("Observed-history pilot requires location finding and full-horizon sPCE")
         if architecture == "structured_history_moe":
             from src.research.moe_sboed.v6.structured_history import StructuredHistoryMoE
